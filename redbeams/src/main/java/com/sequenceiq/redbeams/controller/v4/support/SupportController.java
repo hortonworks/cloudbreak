@@ -40,10 +40,10 @@ public class SupportController implements SupportV4Endpoint {
         }
         Set<SslCertificateEntry> chosenCerts = new HashSet<>();
         if (request.getFirstCert()) {
-            chosenCerts.add(backup.stream().filter(c -> c.getVersion() == 0).findAny().get());
+            chosenCerts.add(backup.stream().filter(c -> c.version() == 0).findAny().get());
         }
         if (request.getSecondCert()) {
-            chosenCerts.add(backup.stream().filter(c -> c.getVersion() == 1).findAny().get());
+            chosenCerts.add(backup.stream().filter(c -> c.version() == 1).findAny().get());
         }
         databaseServerSslCertificateConfig.modifyMockProviderCertCache(REGION, chosenCerts);
 

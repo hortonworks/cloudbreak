@@ -13,6 +13,10 @@ repositories {
   mavenCentral()
 }
 
+jar {
+  archiveBaseName = 'cloud-aws-common'
+}
+
 dependencies {
   implementation project(':cloud-api')
   implementation project(':cloud-common')
@@ -60,6 +64,21 @@ dependencies {
   testImplementation group: 'org.assertj', name: 'assertj-core', version: assertjVersion
 }
 
+task testJar(type: Jar, dependsOn: testClasses) {
+  archiveBaseName = "test-${project.archivesBaseName}"
+  archiveClassifier = 'test'
+  from sourceSets.test.output
+  from sourceSets.main.output
+}
+
+configurations {
+  tests
+}
+
 test {
   useJUnitPlatform()
+}
+
+artifacts {
+  tests testJar
 }

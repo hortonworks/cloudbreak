@@ -6,6 +6,10 @@ public class SslContent {
 
     private String cert;
 
+    private String fingerprint;
+
+    private boolean deprecated;
+
     public String getName() {
         return name;
     }
@@ -21,4 +25,21 @@ public class SslContent {
     public void setCert(String cert) {
         this.cert = cert;
     }
+
+    public String getFingerprint() {
+        return fingerprint;
+    }
+
+    public void setFingerprint(String fingerprint) {
+        this.fingerprint = fingerprint;
+    }
+
+    public boolean isDeprecated() {
+        return deprecated;
+    }
+
+    public void setDeprecated(boolean deprecated) {
+        this.deprecated = deprecated;
+    }
+
 }

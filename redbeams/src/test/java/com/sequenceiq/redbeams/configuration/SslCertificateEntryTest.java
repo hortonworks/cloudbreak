@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.security.cert.X509Certificate;
-import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -33,6 +32,8 @@ class SslCertificateEntryTest {
 
     private static final int VERSION_123 = 123;
 
+    private static final String FINGERPRINT = "fingerprint";
+
     static Object[][] constructorTestWhenNPEDataProvider() {
         return new Object[][]{
                 // testCaseName version cloudProviderIdentifier certPem x509Cert
@@ -49,13 +50,21 @@ class SslCertificateEntryTest {
                 cloudProviderIdentifier, AWS, certPem, x509Cert));
     }
 
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("constructorTestWhenNPEDataProvider")
+    void constructorTestWhenNPEAndFingerprintAndDeprecated(String testCaseName, int version, String cloudProviderIdentifier, String certPem,
+            X509Certificate x509Cert) {
+        assertThrows(NullPointerException.class, () -> new SslCertificateEntry(version, cloudProviderIdentifier,
+                cloudProviderIdentifier, AWS, certPem, x509Cert, null, false));
+    }
+
     static Object[][] constructorTestWhenNONNPEDataProvider() {
         return new Object[][]{
-                // testCaseName version cloudProviderIdentifier certPem x509Cert
+                // testCaseName version cloudProviderIdentifier cloudKey certPem x509Cert
                 {"0, cloudProviderIdentifier, null, x509Cert", VERSION_0, CLOUD_PROVIDER_IDENTIFIER,
                         CLOUD_PROVIDER_IDENTIFIER, CERT_PEM, X_509_CERT},
                 {"0, cloudProviderIdentifier, null, x509Cert", VERSION_0, CLOUD_PROVIDER_IDENTIFIER_DEFAULT,
-                        CLOUD_PROVIDER_IDENTIFIER, CERT_PEM, X_509_CERT},
+                        CLOUD_PROVIDER_IDENTIFIER_DEFAULT, CERT_PEM, X_509_CERT},
                 {"0, cloudProviderIdentifier, null, x509Cert", VERSION_0, CLOUD_PROVIDER_IDENTIFIER_EUWEST1,
                         CLOUD_PROVIDER_IDENTIFIER_EUWEST1, CERT_PEM, X_509_CERT},
         };
@@ -64,24 +73,28 @@ class SslCertificateEntryTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("constructorTestWhenNONNPEDataProvider")
     void constructorTestWhenNONNPE(String testCaseName, int version, String cloudProviderIdentifier, String cloudKey,
-        String certPem, X509Certificate x509Cert) {
+            String certPem, X509Certificate x509Cert) {
         SslCertificateEntry sslCertificateEntry = new SslCertificateEntry(version, cloudProviderIdentifier,
-                cloudProviderIdentifier, AWS, certPem, x509Cert);
+                cloudProviderIdentifier, AWS, certPem, x509Cert, null, false);
 
-        assertThat(sslCertificateEntry.getCertPem()).isEqualTo(certPem);
-        assertThat(sslCertificateEntry.getCloudProviderIdentifier()).isEqualTo(cloudProviderIdentifier);
-        assertThat(sslCertificateEntry.getCloudKey()).isEqualTo(cloudKey.toLowerCase(Locale.ROOT));
-        assertThat(sslCertificateEntry.getX509Cert()).isEqualTo(x509Cert);
+        assertThat(sslCertificateEntry.certPem()).isEqualTo(certPem);
+        assertThat(sslCertificateEntry.cloudProviderIdentifier()).isEqualTo(cloudProviderIdentifier);
+        assertThat(sslCertificateEntry.cloudKey()).isEqualTo(cloudKey);
+        assertThat(sslCertificateEntry.x509Cert()).isEqualTo(x509Cert);
+        assertThat(sslCertificateEntry.fingerprint()).isNull();
+        assertThat(sslCertificateEntry.deprecated()).isFalse();
     }
 
     @Test
     void constructorTestWhenSuccess() {
         SslCertificateEntry sslCertificateEntry = new SslCertificateEntry(VERSION_123, CLOUD_PROVIDER_IDENTIFIER,
-                CLOUD_PROVIDER_IDENTIFIER, AWS, CERT_PEM, X_509_CERT);
+                CLOUD_PROVIDER_IDENTIFIER, AWS, CERT_PEM, X_509_CERT, FINGERPRINT, true);
 
-        assertThat(sslCertificateEntry.getVersion()).isEqualTo(VERSION_123);
-        assertThat(sslCertificateEntry.getCertPem()).isEqualTo(CERT_PEM);
-        assertThat(sslCertificateEntry.getX509Cert()).isSameAs(X_509_CERT);
+        assertThat(sslCertificateEntry.version()).isEqualTo(VERSION_123);
+        assertThat(sslCertificateEntry.certPem()).isEqualTo(CERT_PEM);
+        assertThat(sslCertificateEntry.x509Cert()).isSameAs(X_509_CERT);
+        assertThat(sslCertificateEntry.fingerprint()).isEqualTo(FINGERPRINT);
+        assertThat(sslCertificateEntry.deprecated()).isTrue();
     }
 
     private static SslCertificateEntry createSslCertificateEntry(int version) {
@@ -89,7 +102,7 @@ class SslCertificateEntryTest {
     }
 
     private static SslCertificateEntry createSslCertificateEntry(int version, String certPem) {
-        return new SslCertificateEntry(version, CLOUD_PROVIDER_IDENTIFIER, CLOUD_PROVIDER_IDENTIFIER, AWS, certPem, X_509_CERT);
+        return new SslCertificateEntry(version, CLOUD_PROVIDER_IDENTIFIER, CLOUD_PROVIDER_IDENTIFIER, AWS, certPem, X_509_CERT, null, false);
     }
 
     static Object[][] equalsDataProvider() {

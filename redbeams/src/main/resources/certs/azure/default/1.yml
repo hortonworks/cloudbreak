@@ -22,3 +22,5 @@ cert: |-
   pLiaWN0bfVKfjllDiIGknibVb63dDcY3fe0Dkhvld1927jyNxF1WW6LZZm6zNTfl
   MrY=
   -----END CERTIFICATE-----
+fingerprint: df3c24f9bfd666761b268073fe06d1cc8d4f82a4
+deprecated: false

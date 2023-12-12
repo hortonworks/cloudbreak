@@ -42,14 +42,14 @@ public class DBStackUpdater {
                 String region = dbStack.getRegion();
                 SslConfig sslConf = sslConfig.get();
                 Set<SslCertificateEntry> allCertificates = databaseServerSslCertificateConfig.getCertsByCloudPlatformAndRegion(cloudPlatform, region);
-                sslConf.setSslCertificates(allCertificates.stream().map(SslCertificateEntry::getCertPem).collect(Collectors.toSet()));
+                sslConf.setSslCertificates(allCertificates.stream().map(SslCertificateEntry::certPem).collect(Collectors.toSet()));
                 int activeVersion = databaseServerSslCertificateConfig.getMaxVersionByCloudPlatformAndRegion(cloudPlatform, region);
                 SslCertificateEntry activeSslCert = allCertificates.stream()
-                        .filter(sslCert -> sslCert.getVersion() == activeVersion)
+                        .filter(sslCert -> sslCert.version() == activeVersion)
                         .findFirst()
                         .orElseThrow(NotFoundException.notFound(String.format("Active SSL cert cannot be found for %s", dbStack.getName())));
                 sslConf.setSslCertificateActiveVersion(activeVersion);
-                sslConf.setSslCertificateActiveCloudProviderIdentifier(activeSslCert.getCloudProviderIdentifier());
+                sslConf.setSslCertificateActiveCloudProviderIdentifier(activeSslCert.cloudProviderIdentifier());
                 sslConfigService.save(sslConf);
             } else {
                 String sslNullPrefix = "";

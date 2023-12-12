@@ -22,3 +22,5 @@ cert: |-
   YSEY1QSteDwsOoBrp+uvFRTp2InBuThs4pFsiv9kuXclVzDAGySj4dzp30d8tbQk
   CAUw7C29C79Fv1C5qfPrmAESrciIxpg0X40KPMbp1ZWVbd4=
   -----END CERTIFICATE-----
+fingerprint: a8985d3a65e5e5c4b2d7d66d40c6dd2fb19c5436
+deprecated: false

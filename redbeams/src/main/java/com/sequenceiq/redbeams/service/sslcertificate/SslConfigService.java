@@ -60,11 +60,11 @@ public class SslConfigService {
                 }
                 Set<String> certs = certsTemp
                         .stream()
-                        .map(SslCertificateEntry::getCertPem)
+                        .map(SslCertificateEntry::certPem)
                         .collect(Collectors.toSet());
                 validateUniqueCertsCount(cloudPlatform, region, numberOfCerts, certs);
                 sslConfig.setSslCertificates(certs);
-                String cloudProviderIdentifier = findAndValidateCertByVersion(cloudPlatform, region, maxVersion, certsTemp).getCloudProviderIdentifier();
+                String cloudProviderIdentifier = findAndValidateCertByVersion(cloudPlatform, region, maxVersion, certsTemp).cloudProviderIdentifier();
                 sslConfig.setSslCertificateActiveCloudProviderIdentifier(cloudProviderIdentifier);
             } else {
                 sslConfig.setSslCertificates(Collections.emptySet());
@@ -105,7 +105,7 @@ public class SslConfigService {
 
     private SslCertificateEntry findAndValidateCertByVersion(String cloudPlatform, String region, int version, Set<SslCertificateEntry> certs) {
         SslCertificateEntry result = certs.stream()
-                .filter(c -> c.getVersion() == version)
+                .filter(c -> c.version() == version)
                 .findFirst()
                 .orElse(null);
         validateCert(cloudPlatform, region, version, result);
@@ -130,13 +130,13 @@ public class SslConfigService {
                             region));
         }
 
-        if (Strings.isNullOrEmpty(cert.getCloudProviderIdentifier())) {
+        if (Strings.isNullOrEmpty(cert.cloudProviderIdentifier())) {
             throw new IllegalStateException(
                     String.format("Blank CloudProviderIdentifier in SSL certificate version %d for cloud platform \"%s\" and region \"%s\"", versionExpected,
                             cloudPlatform, region));
         }
 
-        if (Strings.isNullOrEmpty(cert.getCertPem())) {
+        if (Strings.isNullOrEmpty(cert.certPem())) {
             throw new IllegalStateException(String.format("Blank PEM in SSL certificate version %d for cloud platform \"%s\" and region \"%s\"", versionExpected,
                     cloudPlatform, region));
         }

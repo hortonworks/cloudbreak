@@ -3,57 +3,47 @@ package com.sequenceiq.redbeams.configuration;
 import static java.util.Objects.requireNonNull;
 
 import java.security.cert.X509Certificate;
-import java.util.Locale;
 import java.util.Objects;
 
-public class SslCertificateEntry {
+public record SslCertificateEntry(
+        int version,
+        String cloudKey,
+        String cloudProviderIdentifier,
+        String cloudPlatform,
+        String certPem,
+        X509Certificate x509Cert,
+        String fingerprint,
+        boolean deprecated
+) {
 
-    private static final String DEFAULT = ".default";
+    public SslCertificateEntry(int version,
+            String cloudKey,
+            String cloudProviderIdentifier,
+            String cloudPlatform,
+            String certPem,
+            X509Certificate x509Cert) {
+        this(version, cloudKey, cloudProviderIdentifier, cloudPlatform, certPem, x509Cert, null, false);
+    }
 
-    private final int version;
-
-    private final String cloudProviderIdentifier;
-
-    private final String cloudPlatform;
-
-    private final String certPem;
-
-    private final String cloudKey;
-
-    private final X509Certificate x509Cert;
-
-    public SslCertificateEntry(int version, String cloudKey, String cloudProviderIdentifier, String cloudPlatform, String certPem, X509Certificate x509Cert) {
+    //CHECKSTYLE_CHECK:OFF ExecutableStatementCount
+    public SslCertificateEntry(int version,
+            String cloudKey,
+            String cloudProviderIdentifier,
+            String cloudPlatform,
+            String certPem,
+            X509Certificate x509Cert,
+            String fingerprint,
+            boolean deprecated) {
         this.version = version;
-        this.cloudKey = requireNonNull(cloudKey.toLowerCase(Locale.ROOT).replace(DEFAULT, ""));
+        this.cloudKey = requireNonNull(cloudKey);
         this.cloudProviderIdentifier = requireNonNull(cloudProviderIdentifier);
         this.certPem = requireNonNull(certPem);
         this.x509Cert = requireNonNull(x509Cert);
         this.cloudPlatform = requireNonNull(cloudPlatform);
+        this.fingerprint = fingerprint;
+        this.deprecated = deprecated;
     }
-
-    public int getVersion() {
-        return version;
-    }
-
-    public String getCloudProviderIdentifier() {
-        return cloudProviderIdentifier;
-    }
-
-    public String getCertPem() {
-        return certPem;
-    }
-
-    public X509Certificate getX509Cert() {
-        return x509Cert;
-    }
-
-    public String getCloudPlatform() {
-        return cloudPlatform;
-    }
-
-    public String getCloudKey() {
-        return cloudKey;
-    }
+    //CHECKSTYLE_CHECK:ON ExecutableStatementCount
 
     /**
      * An implementation of {@link Object#equals(Object)} that decides equality only based on {@code version}.
@@ -87,11 +77,13 @@ public class SslCertificateEntry {
     public String toString() {
         return "SslCertificateEntry{" +
                 "version=" + version +
+                ", cloudKey='" + cloudKey + '\'' +
                 ", cloudProviderIdentifier='" + cloudProviderIdentifier + '\'' +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
                 ", certPem='" + certPem + '\'' +
                 ", x509Cert=" + x509Cert +
-                ", cloudPlatform=" + cloudPlatform +
-                ", cloudKey=" + cloudKey +
+                ", fingerprint='" + fingerprint + '\'' +
+                ", deprecated=" + deprecated +
                 '}';
     }
 

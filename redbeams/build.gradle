@@ -83,6 +83,7 @@ dependencies {
   testImplementation group: 'org.mockito',               name: 'mockito-core'
   testImplementation project(path: ':common', configuration: 'tests')
   testImplementation project(path: ':flow', configuration: 'tests')
+  testImplementation project(path: ':cloud-aws-common', configuration: 'tests')
 
   constraints {
     implementation     group: 'org.yaml',                  name: 'snakeyaml',                      version: snakeYamlVersion

@@ -10,7 +10,7 @@ import static java.util.Objects.requireNonNull;
 public record CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType certificateType, String certificateIdentifier, String certificate) {
 
     /**
-     * Creates a new {@code CloudDatabaseServerSslCertificate} instance using the given arguments.
+     * Creates a new {@code CloudDatabaseServerSslCertificate} instance using the given arguments, and assuming {@code certificate = null}.
      *
      * @param certificateType       {@link CloudDatabaseServerSslCertificateType} instance representing SSL certificate type; must not be {@code null}
      * @param certificateIdentifier cloud provider specific identifier of the SSL certificate; must not be {@code null}

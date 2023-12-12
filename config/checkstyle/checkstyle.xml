@@ -241,6 +241,11 @@
             <property name="offCommentFormat" value="CHECKSTYLE:OFF"/>
             <property name="onCommentFormat" value="CHECKSTYLE:ON"/>
         </module>
+        <module name="SuppressionCommentFilter">
+            <property name="offCommentFormat" value="CHECKSTYLE_CHECK:OFF (\w+)"/>
+            <property name="onCommentFormat" value="CHECKSTYLE_CHECK:ON (\w+)"/>
+            <property name="checkFormat" value="$1"/>
+        </module>
 
     </module>
 

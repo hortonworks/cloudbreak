@@ -101,22 +101,22 @@ public class DatabaseServerSslCertificateSyncService {
                                 "database stack {}. Updating database server registration with the version & PEM of the actual CloudProviderIdentifier.",
                         cloudPlatform, desiredSslCertificateIdentifier, activeSslCertificateIdentifier, cloudContext);
                 validateCert(cloudPlatform, activeSslCertificateIdentifier, activeSslCertificateEntry);
-                sslConfig.setSslCertificateActiveVersion(activeSslCertificateEntry.getVersion());
-                sslConfig.setSslCertificates(Collections.singleton(activeSslCertificateEntry.getCertPem()));
+                sslConfig.setSslCertificateActiveVersion(activeSslCertificateEntry.version());
+                sslConfig.setSslCertificates(Collections.singleton(activeSslCertificateEntry.certPem()));
             }
             sslConfigService.save(sslConfig);
         }
     }
 
     private void validateCert(String cloudPlatform, String cloudProviderIdentifierExpected, SslCertificateEntry cert) {
-        String cloudProviderIdentifier = cert.getCloudProviderIdentifier();
+        String cloudProviderIdentifier = cert.cloudProviderIdentifier();
         if (!cloudProviderIdentifierExpected.equals(cloudProviderIdentifier)) {
             throw new IllegalStateException(
                     String.format("SSL certificate CloudProviderIdentifier mismatch for cloud platform \"%s\": expected=\"%s\", actual=\"%s\"", cloudPlatform,
                             cloudProviderIdentifierExpected, cloudProviderIdentifier));
         }
 
-        if (Strings.isNullOrEmpty(cert.getCertPem())) {
+        if (Strings.isNullOrEmpty(cert.certPem())) {
             throw new IllegalStateException(String.format("Blank PEM in SSL certificate with CloudProviderIdentifier \"%s\" for cloud platform \"%s\"",
                     cloudProviderIdentifierExpected, cloudPlatform));
         }

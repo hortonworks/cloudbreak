@@ -4,12 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
-import java.security.cert.X509Certificate;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.security.auth.x500.X500Principal;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,6 +71,11 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getCertsByCloudPlatformAndRegion("", null)).isEmpty();
         assertThat(underTest.getCertsByCloudPlatformAndRegion("cloud", null)).isEmpty();
         assertThat(underTest.getCertsByCloudPlatformAndRegion(null, null)).isEmpty();
+
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AZURE.name(), null)).isFalse();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), null)).isFalse();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), REGION_1)).isFalse();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), REGION_2)).isFalse();
     }
 
     @Test
@@ -101,6 +102,11 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getCertsByCloudPlatformAndRegion("", null)).isEmpty();
         assertThat(underTest.getCertsByCloudPlatformAndRegion("cloud", null)).isEmpty();
         assertThat(underTest.getCertsByCloudPlatformAndRegion(null, null)).isEmpty();
+
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AZURE.name(), null)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), null)).isFalse();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), REGION_1)).isFalse();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), REGION_2)).isFalse();
     }
 
     private void initCerts(String certPath) {
@@ -113,25 +119,6 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getNumberOfCertsByCloudPlatformAndRegion(cloudPlatform, region)).isEqualTo(numCerts);
         assertThat(underTest.getMinVersionByCloudPlatformAndRegion(cloudPlatform, region)).isEqualTo(minVersion);
         assertThat(underTest.getMaxVersionByCloudPlatformAndRegion(cloudPlatform, region)).isEqualTo(maxVersion);
-    }
-
-    private void verifyCertEntry(Set<SslCertificateEntry> certs, int version, String cloudProviderIdentifierExpected, String certPemExpected,
-            String certIssuerExpected) {
-        Optional<SslCertificateEntry> match = certs.stream()
-                .filter(e -> e.getVersion() == version)
-                .findFirst();
-        assertThat(match).overridingErrorMessage("No cert found for version %d", version).isPresent();
-
-        SslCertificateEntry sslCertificateEntry = match.get();
-        assertThat(sslCertificateEntry.getCloudProviderIdentifier()).isEqualTo(cloudProviderIdentifierExpected);
-        assertThat(sslCertificateEntry.getCertPem()).isEqualTo(certPemExpected);
-
-        X509Certificate x509Certificate = sslCertificateEntry.getX509Cert();
-        assertThat(x509Certificate).isNotNull();
-
-        X500Principal issuerX500Principal = x509Certificate.getIssuerX500Principal();
-        assertThat(issuerX500Principal).isNotNull();
-        assertThat(issuerX500Principal.getName()).isEqualTo(certIssuerExpected);
     }
 
     @Test
@@ -158,6 +145,11 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getCertsByCloudPlatformAndRegion("", null)).isEmpty();
         assertThat(underTest.getCertsByCloudPlatformAndRegion("cloud", null)).isEmpty();
         assertThat(underTest.getCertsByCloudPlatformAndRegion(null, null)).isEmpty();
+
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AZURE.name(), null)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), null)).isFalse();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), REGION_1)).isFalse();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), REGION_2)).isFalse();
     }
 
     @Test
@@ -198,12 +190,21 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getCertsByCloudPlatformAndRegion("", null)).isEmpty();
         assertThat(underTest.getCertsByCloudPlatformAndRegion("cloud", null)).isEmpty();
         assertThat(underTest.getCertsByCloudPlatformAndRegion(null, null)).isEmpty();
+
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AZURE.name(), null)).isFalse();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), null)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), REGION_1)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), REGION_2)).isTrue();
     }
 
     @Test
     void configReadTestWhenAwsHasTwoGlobalCertsAndOneRegionalCertShouldReturnThreeCerts() {
         initCerts("/test_certs/configReadTestWhenAwsHasTwoGlobalCertsAndOneRegionalCertShouldReturnThreeCerts");
 
+        configReadTestWhenAwsHasTwoGlobalCertsAndOneRegionalCertShouldReturnThreeCertsVerifyInternal();
+    }
+
+    private void configReadTestWhenAwsHasTwoGlobalCertsAndOneRegionalCertShouldReturnThreeCertsVerifyInternal() {
         assertThat(underTest.getCerts().isEmpty()).isEqualTo(false);
         assertThat(underTest.getSupportedPlatformsForCerts()).isEqualTo(Set.of("aws", "aws." + REGION_1.toLowerCase()));
         assertThat(underTest.getNumberOfCertsTotal()).isEqualTo(3);
@@ -238,6 +239,18 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getCertsByCloudPlatformAndRegion("", null)).isEmpty();
         assertThat(underTest.getCertsByCloudPlatformAndRegion("cloud", null)).isEmpty();
         assertThat(underTest.getCertsByCloudPlatformAndRegion(null, null)).isEmpty();
+
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AZURE.name(), null)).isFalse();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), null)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), REGION_1)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), REGION_2)).isTrue();
+    }
+
+    @Test
+    void configReadTestWhenAwsHasTwoGlobalCertsAndThreeRegionalCertButTwoDeprecatedShouldReturnThreeCerts() {
+        initCerts("/test_certs/configReadTestWhenAwsHasTwoGlobalCertsAndThreeRegionalCertButTwoDeprecatedShouldReturnThreeCerts");
+
+        configReadTestWhenAwsHasTwoGlobalCertsAndOneRegionalCertShouldReturnThreeCertsVerifyInternal();
     }
 
     @Test
@@ -266,6 +279,11 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getCertsByCloudPlatformAndRegion("", null)).isEmpty();
         assertThat(underTest.getCertsByCloudPlatformAndRegion("cloud", null)).isEmpty();
         assertThat(underTest.getCertsByCloudPlatformAndRegion(null, null)).isEmpty();
+
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AZURE.name(), null)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), null)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), REGION_1)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), REGION_2)).isTrue();
     }
 
     @Test
@@ -294,6 +312,11 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getCertsByCloudPlatformAndRegion("", null)).isEmpty();
         assertThat(underTest.getCertsByCloudPlatformAndRegion("cloud", null)).isEmpty();
         assertThat(underTest.getCertsByCloudPlatformAndRegion(null, null)).isEmpty();
+
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AZURE.name(), null)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), null)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), REGION_1)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), REGION_2)).isTrue();
     }
 
     @Test
@@ -330,6 +353,11 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getCertsByCloudPlatformAndRegion("", null)).isEmpty();
         assertThat(underTest.getCertsByCloudPlatformAndRegion("cloud", null)).isEmpty();
         assertThat(underTest.getCertsByCloudPlatformAndRegion(null, null)).isEmpty();
+
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AZURE.name(), null)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), null)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), REGION_1)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), REGION_2)).isTrue();
     }
 
     @Test
@@ -358,6 +386,11 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getCertsByCloudPlatformAndRegion("", null)).isEmpty();
         assertThat(underTest.getCertsByCloudPlatformAndRegion("cloud", null)).isEmpty();
         assertThat(underTest.getCertsByCloudPlatformAndRegion(null, null)).isEmpty();
+
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AZURE.name(), null)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), null)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), REGION_1)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), REGION_2)).isTrue();
     }
 
     @Test
@@ -386,6 +419,11 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getCertsByCloudPlatformAndRegion("", null)).isEmpty();
         assertThat(underTest.getCertsByCloudPlatformAndRegion("cloud", null)).isEmpty();
         assertThat(underTest.getCertsByCloudPlatformAndRegion(null, null)).isEmpty();
+
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AZURE.name(), null)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), null)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), REGION_1)).isTrue();
+        assertThat(underTest.isCloudPlatformAndRegionSupportedForCerts(CloudPlatform.AWS.name(), REGION_2)).isTrue();
     }
 
     @Test
@@ -417,6 +455,13 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(illegalArgumentException).hasMessage("SSL certificate versions are not contiguous for cloud platform \"aws (global)\"");
     }
 
+    @Test
+    void setupCertsCacheTestWhenErrorBadVersionRangeAndDeprecated() {
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+                () -> initCerts("/test_certs/setupCertsCacheTestWhenErrorBadVersionRangeAndDeprecated"));
+        assertThat(illegalArgumentException).hasMessage("SSL certificate versions are not contiguous for cloud platform \"aws (global)\"");
+    }
+
     static Object[][] getLegacyMaxVersionByCloudPlatformAndRegionDataProvider() {
         return new Object[][]{
                 // testCaseName cloudPlatform region legacyMaxVersionExpected
@@ -428,8 +473,8 @@ class DatabaseServerSslCertificateConfigTest {
                 {"AWS, me-south-1", CloudPlatform.AWS.name(), "me-south-1", 0},
                 {"AWS, ap-east-1", CloudPlatform.AWS.name(), "ap-east-1", 0},
                 {"AWS, ap-southeast-3", CloudPlatform.AWS.name(), "ap-southeast-3", 0},
-                {"AWS, us-gov-west-1", CloudPlatform.AWS.name(), "us-gov-west-1", 3},
-                {"AWS, us-gov-east-1", CloudPlatform.AWS.name(), "us-gov-east-1", 3},
+                {"AWS, us-gov-west-1", CloudPlatform.AWS.name(), "us-gov-west-1", 0},
+                {"AWS, us-gov-east-1", CloudPlatform.AWS.name(), "us-gov-east-1", 0},
                 {"aws, null", "aws", null, 0},
                 {"Aws, null", "Aws", null, 0},
                 {"AZURE, null", CloudPlatform.AZURE.name(), null, 1},
@@ -458,8 +503,8 @@ class DatabaseServerSslCertificateConfigTest {
                 {"AWS, me-south-1", CloudPlatform.AWS.name(), "me-south-1", "rds-ca-2019-me-south-1"},
                 {"AWS, ap-east-1", CloudPlatform.AWS.name(), "ap-east-1", "rds-ca-rsa2048-g1"},
                 {"AWS, ap-southeast-3", CloudPlatform.AWS.name(), "ap-southeast-3", "rds-ca-rsa2048-g1"},
-                {"AWS, us-gov-west-1", CloudPlatform.AWS.name(), "us-gov-west-1", "rds-ca-rsa4096-g1"},
-                {"AWS, us-gov-east-1", CloudPlatform.AWS.name(), "us-gov-east-1", "rds-ca-rsa4096-g1"},
+                {"AWS, us-gov-west-1", CloudPlatform.AWS.name(), "us-gov-west-1", RDS_CA_2019},
+                {"AWS, us-gov-east-1", CloudPlatform.AWS.name(), "us-gov-east-1", RDS_CA_2019},
                 {"aws, null", "aws", null, RDS_CA_2019},
                 {"Aws, null", "Aws", null, RDS_CA_2019},
                 {"AZURE, null", CloudPlatform.AZURE.name(), null, DIGI_CERT_GLOBAL_ROOT_G_2},
@@ -480,115 +525,171 @@ class DatabaseServerSslCertificateConfigTest {
 
     @Test
     void getSupportedPlatformsForLegacyMaxVersionTest() {
-        assertThat(underTest.getSupportedPlatformsForLegacyMaxVersion())
-                .isEqualTo(Set.of("aws", "aws.eu-south-1", "aws.af-south-1", "aws.me-south-1", "aws.ap-east-1", "aws.ap-southeast-3", "aws.us-gov-west-1",
-                        "aws.us-gov-east-1", "azure"));
+        assertThat(underTest.getSupportedPlatformsForLegacyMaxVersion()).isEqualTo(Set.of("aws", "azure"));
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("formatCheckInput")
-    void formatCheckForCertificates(String filePath, String identifier, String issuer) throws IOException {
+    void formatCheckForCertificates(String filePath, String cloudProviderIdentifierExpected, String issuerExpected, String cloudKeyExpected,
+            String cloudPlatformExpected, int versionExpected) throws IOException {
         String fileContent = FileReaderUtils.readFileFromClasspath(filePath);
 
-        if (issuer == null) {
+        if (issuerExpected == null) {
             IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
                     () ->  underTest.parseCertEntry(filePath, fileContent));
             assertThat(illegalArgumentException.getMessage().contains("Error parsing SSL certificate PEM for cloud platform"))
                     .isEqualTo(true);
         } else {
             SslCertificateEntry sslCertificateEntry = underTest.parseCertEntry(filePath, fileContent);
-            assertThat(sslCertificateEntry.getCloudProviderIdentifier()).isEqualTo(identifier);
-            assertThat(sslCertificateEntry.getX509Cert().getIssuerDN().getName()).isEqualTo(issuer);
+            assertThat(sslCertificateEntry.cloudProviderIdentifier()).isEqualTo(cloudProviderIdentifierExpected);
+            assertThat(sslCertificateEntry.x509Cert().getIssuerDN().getName()).isEqualTo(issuerExpected);
+            assertThat(sslCertificateEntry.certPem()).isNotBlank();
+            assertThat(sslCertificateEntry.cloudKey()).isEqualTo(cloudKeyExpected);
+            assertThat(sslCertificateEntry.cloudPlatform()).isEqualTo(cloudPlatformExpected);
+            assertThat(sslCertificateEntry.version()).isEqualTo(versionExpected);
+            assertThat(sslCertificateEntry.fingerprint()).isNull();
+            assertThat(sslCertificateEntry.deprecated()).isFalse();
         }
-
     }
 
     static Object[][] formatCheckInput() {
         return new Object[][]{
+                // filePath, cloudProviderIdentifierExpected, issuerExpected, cloudKeyExpected, cloudPlatformExpected, versionExpected
                 {
                     "/test_certs/formatCheck/aws/af-south-1/0.yml",
                     "rds-ca-2019-af-south-1",
-                    "CN=Amazon RDS af-south-1 Root CA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", ST=Washington, L=Seattle, C=US"
+                    "CN=Amazon RDS af-south-1 Root CA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", ST=Washington, L=Seattle, C=US",
+                    "aws.af-south-1",
+                    "aws",
+                    0
                 },
                 {
                     "/test_certs/formatCheck/aws/ap-east-1/0.yml",
                     "rds-ca-rsa2048-g1",
-                    "L=Seattle, CN=Amazon RDS ap-east-1 Root CA RSA2048 G1, ST=WA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", C=US"
+                    "L=Seattle, CN=Amazon RDS ap-east-1 Root CA RSA2048 G1, ST=WA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", C=US",
+                    "aws.ap-east-1",
+                    "aws",
+                    0
                 },
                 {
                     "/test_certs/formatCheck/aws/ap-southeast-3/0.yml",
                     "rds-ca-rsa2048-g1",
-                    "L=Seattle, CN=Amazon RDS ap-southeast-3 Root CA RSA2048 G1, ST=WA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", C=US"
+                    "L=Seattle, CN=Amazon RDS ap-southeast-3 Root CA RSA2048 G1, ST=WA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", C=US",
+                    "aws.ap-southeast-3",
+                    "aws",
+                    0
                 },
                 {
                     "/test_certs/formatCheck/aws/default/0.yml",
                     "rds-ca-2019",
-                    "CN=Amazon RDS Root 2019 CA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", ST=Washington, L=Seattle, C=US"
+                    "CN=Amazon RDS Root 2019 CA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", ST=Washington, L=Seattle, C=US",
+                    "aws",
+                    "aws",
+                    0
                 },
                 {
                     "/test_certs/formatCheck/aws/eu-south-1/0.yml",
                     "rds-ca-2019-eu-south-1",
-                    "CN=Amazon RDS eu-south-1 Root CA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", ST=Washington, L=Seattle, C=US"
+                    "CN=Amazon RDS eu-south-1 Root CA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", ST=Washington, L=Seattle, C=US",
+                    "aws.eu-south-1",
+                    "aws",
+                    0
                 },
                 {
                     "/test_certs/formatCheck/aws/eu-south-2/0.yml",
                     "rds-ca-rsa2048-g1",
-                    "L=Seattle, CN=Amazon RDS eu-south-2 Root CA RSA2048 G1, ST=WA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", C=US"
+                    "L=Seattle, CN=Amazon RDS eu-south-2 Root CA RSA2048 G1, ST=WA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", C=US",
+                    "aws.eu-south-2",
+                    "aws",
+                    0
                 },
                 {
                     "/test_certs/formatCheck/aws/me-south-1/0.yml",
                     "rds-ca-2019-me-south-1",
-                    "CN=Amazon RDS me-south-1 Root CA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", ST=Washington, L=Seattle, C=US"
+                    "CN=Amazon RDS me-south-1 Root CA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", ST=Washington, L=Seattle, C=US",
+                    "aws.me-south-1",
+                    "aws",
+                    0
                 },
                 {
                     "/test_certs/formatCheck/aws/us-gov-east-1/0.yml",
                     "rds-ca-2019-us-gov-east-1",
-                    "CN=Amazon RDS CN Root CA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", ST=Washington, L=Seattle, C=US"
+                    "CN=Amazon RDS CN Root CA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", ST=Washington, L=Seattle, C=US",
+                    "aws.us-gov-east-1",
+                    "aws",
+                    0
                 },
                 {
                     "/test_certs/formatCheck/aws/us-gov-east-1/1.yml",
                     "rds-ca-ecc384-g1",
-                    "L=Seattle, CN=Amazon RDS us-gov-east-1 Root CA ECC384 G1, ST=WA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", C=US"
+                    "L=Seattle, CN=Amazon RDS us-gov-east-1 Root CA ECC384 G1, ST=WA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", C=US",
+                    "aws.us-gov-east-1",
+                    "aws",
+                    1
                 },
                 {
                     "/test_certs/formatCheck/aws/us-gov-east-1/2.yml",
                     "rds-ca-rsa2048-g1",
-                    "L=Seattle, CN=Amazon RDS us-gov-east-1 Root CA RSA2048 G1, ST=WA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", C=US"
+                    "L=Seattle, CN=Amazon RDS us-gov-east-1 Root CA RSA2048 G1, ST=WA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", C=US",
+                    "aws.us-gov-east-1",
+                    "aws",
+                    2
                 },
                 {
                     "/test_certs/formatCheck/aws/us-gov-east-1/3.yml",
                     "rds-ca-rsa4096-g1",
-                    "L=Seattle, CN=Amazon RDS us-gov-east-1 Root CA RSA4096 G1, ST=WA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", C=US"
+                    "L=Seattle, CN=Amazon RDS us-gov-east-1 Root CA RSA4096 G1, ST=WA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", C=US",
+                    "aws.us-gov-east-1",
+                    "aws",
+                    3
                 },
                 {
                     "/test_certs/formatCheck/aws/us-gov-west-1/0.yml",
                     "rds-ca-2019-us-gov-west-1",
-                    "CN=Amazon RDS GovCloud Root CA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", ST=Washington, L=Seattle, C=US"
+                    "CN=Amazon RDS GovCloud Root CA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", ST=Washington, L=Seattle, C=US",
+                    "aws.us-gov-west-1",
+                    "aws",
+                    0
                 },
                 {
                     "/test_certs/formatCheck/aws/us-gov-west-1/1.yml",
                     "rds-ca-ecc384-g1",
-                    "L=Seattle, CN=Amazon RDS us-gov-west-1 Root CA ECC384 G1, ST=WA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", C=US"
+                    "L=Seattle, CN=Amazon RDS us-gov-west-1 Root CA ECC384 G1, ST=WA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", C=US",
+                    "aws.us-gov-west-1",
+                    "aws",
+                    1
                 },
                 {
                     "/test_certs/formatCheck/aws/us-gov-west-1/2.yml",
                     "rds-ca-rsa2048-g1",
-                    "L=Seattle, CN=Amazon RDS us-gov-west-1 Root CA RSA2048 G1, ST=WA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", C=US"
+                    "L=Seattle, CN=Amazon RDS us-gov-west-1 Root CA RSA2048 G1, ST=WA, OU=Amazon RDS, O=\"Amazon Web Services, Inc.\", C=US",
+                    "aws.us-gov-west-1",
+                    "aws",
+                    2
                 },
                 {
                     "/test_certs/formatCheck/azure/default/0.yml",
                     "BaltimoreCyberTrustRoot",
-                    "CN=Baltimore CyberTrust Root, OU=CyberTrust, O=Baltimore, C=IE"
+                    "CN=Baltimore CyberTrust Root, OU=CyberTrust, O=Baltimore, C=IE",
+                    "azure",
+                    "azure",
+                    0
                 },
                 {
                     "/test_certs/formatCheck/azure/default/1.yml",
                     "DigiCertGlobalRootG2",
-                    "CN=DigiCert Global Root G2, OU=www.digicert.com, O=DigiCert Inc, C=US"
+                    "CN=DigiCert Global Root G2, OU=www.digicert.com, O=DigiCert Inc, C=US",
+                    "azure",
+                    "azure",
+                    1
                 },
                 {
                     "/test_certs/formatCheck/aws/error/0.yml",
                     "DigiCertGlobalRootG2",
-                    null
+                    null,
+                    "aws",
+                    "aws",
+                    0
                 },
         };
     }
@@ -596,8 +697,7 @@ class DatabaseServerSslCertificateConfigTest {
     @Test
     void getSupportedPlatformsForLegacyCloudProviderIdentifierTest() {
         assertThat(underTest.getSupportedPlatformsForLegacyCloudProviderIdentifier())
-                .isEqualTo(Set.of("aws", "aws.eu-south-1", "aws.af-south-1", "aws.me-south-1", "aws.ap-east-1", "aws.ap-southeast-3", "aws.us-gov-west-1",
-                        "aws.us-gov-east-1", "azure"));
+                .isEqualTo(Set.of("aws", "aws.eu-south-1", "aws.af-south-1", "aws.me-south-1", "aws.ap-east-1", "aws.ap-southeast-3", "azure"));
     }
 
     static Object[][] getCertByCloudPlatformAndRegionAndVersionDataProvider() {
@@ -627,7 +727,7 @@ class DatabaseServerSslCertificateConfigTest {
         SslCertificateEntry result = underTest.getCertByCloudPlatformAndRegionAndVersion(cloudPlatform, region, version);
         if (certFoundExpected) {
             assertThat(result).isNotNull();
-            assertThat(result.getVersion()).isEqualTo(version);
+            assertThat(result.version()).isEqualTo(version);
         } else {
             assertThat(result).isNull();
         }
@@ -683,7 +783,7 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(result).isNotNull();
         assertThat(result).doesNotContainNull();
         Set<Integer> versionsFound = result.stream()
-                .map(SslCertificateEntry::getVersion)
+                .map(SslCertificateEntry::version)
                 .collect(Collectors.toSet());
         assertThat(versionsFound).containsExactlyInAnyOrderElementsOf(versionsExpected);
     }
@@ -721,7 +821,7 @@ class DatabaseServerSslCertificateConfigTest {
         SslCertificateEntry result = underTest.getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(cloudPlatform, region, cloudProviderIdentifier);
         if (certFoundExpected) {
             assertThat(result).isNotNull();
-            assertThat(result.getCloudProviderIdentifier()).isEqualTo(cloudProviderIdentifier);
+            assertThat(result.cloudProviderIdentifier()).isEqualTo(cloudProviderIdentifier);
         } else {
             assertThat(result).isNull();
         }
