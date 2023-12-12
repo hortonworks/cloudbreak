@@ -55,7 +55,7 @@ public class AzureEnvironmentParametersConverter extends BaseEnvironmentParamete
         azureParameters.setEnableHostEncryption(azureParametersDto
                 .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
                 .map(AzureResourceEncryptionParametersDto::getEnableHostEncryption)
-                .orElse(null));
+                .orElse(false));
     }
 
     @Override
