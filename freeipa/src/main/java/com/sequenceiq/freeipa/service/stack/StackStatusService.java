@@ -2,10 +2,14 @@ package com.sequenceiq.freeipa.service.stack;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.quartz.metric.statusmetric.StackCountByStatusView;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.repository.StackStatusRepository;
 
@@ -17,6 +21,14 @@ public class StackStatusService {
 
     public StackStatus findFirstByStackIdOrderByCreatedDesc(long stackId) {
         return repository.findFirstByStackIdOrderByCreatedDesc(stackId).orElseThrow(notFound("stackStatus", stackId));
+    }
+
+    public List<StackCountByStatusView> countStacksByStatusAndCloudPlatform(String cloudPlatform) {
+        return repository.countStacksByStatusAndCloudPlatform(cloudPlatform);
+    }
+
+    public List<StackCountByStatusView> countStacksByStatusAndTunnel(Tunnel tunnel) {
+        return repository.countStacksByStatusAndTunnel(tunnel);
     }
 
 }

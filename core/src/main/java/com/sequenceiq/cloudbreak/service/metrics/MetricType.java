@@ -16,6 +16,8 @@ public enum MetricType implements Metric {
     STACK_TERMINATION_FAILED("stack.termination.failed"),
     STACK_RECOVERY_TEARDOWN_SUCCESSFUL("stack.recovery.teardown.successful"),
     STACK_RECOVERY_TEARDOWN_FAILED("stack.recovery.teardown.failed"),
+    STACK_STATUS_CLOUDPLATFORM_COUNT("stack.status.cloudplatform.count"),
+    STACK_STATUS_TUNNEL_COUNT("stack.status.tunnel.count"),
 
     STACK_IMAGE_COPY("stack.image.copy"),
 

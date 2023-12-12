@@ -8,7 +8,9 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.quartz.metric.statusmetric.StackCountByStatusView;
 import com.sequenceiq.cloudbreak.repository.StackStatusRepository;
+import com.sequenceiq.common.api.type.Tunnel;
 
 @Service
 public class StackStatusService {
@@ -26,6 +28,14 @@ public class StackStatusService {
 
     public List<StackStatus> findAllStackStatusesById(long stackId, long createdAfter) {
         return repository.findAllByStackIdAndCreatedGreaterThanEqualOrderByCreatedDesc(stackId, createdAfter);
+    }
+
+    public List<StackCountByStatusView> countStacksByStatusAndCloudPlatform(String cloudPlatform) {
+        return repository.countStacksByStatusAndCloudPlatform(cloudPlatform);
+    }
+
+    public List<StackCountByStatusView> countStacksByStatusAndTunnel(Tunnel tunnel) {
+        return repository.countStacksByStatusAndTunnel(tunnel);
     }
 
 }
