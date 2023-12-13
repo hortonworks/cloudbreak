@@ -27,9 +27,6 @@
             }
           },
           "instanceType": "Standard_D16_v3",
-          "rootVolume": {
-            "size": 150
-          },
           "attachedVolumes": [
             {
               "size": 150,
@@ -50,9 +47,6 @@
         "template": {
           "azure": {},
           "instanceType": "Standard_D16_v3",
-          "rootVolume": {
-            "size": 150
-          },
           "attachedVolumes": [
             {
               "size": 150,
@@ -79,9 +73,6 @@
             }
           },
           "instanceType": "Standard_D16_v3",
-          "rootVolume": {
-            "size": 150
-          },
           "attachedVolumes": [
             {
               "size": 500,
@@ -108,9 +99,6 @@
             }
           },
           "instanceType": "Standard_D16_v3",
-          "rootVolume": {
-            "size": 150
-          },
           "attachedVolumes": [
             {
               "size": 150,
@@ -136,9 +124,6 @@
             }
           },
           "instanceType": "Standard_D16_v3",
-          "rootVolume": {
-            "size": 150
-          },
           "attachedVolumes": [
             {
               "size": 150,
@@ -165,9 +150,6 @@
             }
           },
           "instanceType": "Standard_D16_v3",
-          "rootVolume": {
-            "size": 150
-          },
           "attachedVolumes": [
             {
               "size": 150,
