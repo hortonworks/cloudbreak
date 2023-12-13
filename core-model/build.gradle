@@ -23,7 +23,7 @@ dependencies {
     implementation group: 'org.springframework.data',          name: 'spring-data-envers',     version: springDataJpaFrameworkVersion
     implementation group: 'org.apache.commons',                name: 'commons-lang3',          version: apacheCommonsLangVersion
     implementation group: 'net.jcip',                          name: 'jcip-annotations',       version: '1.0'
-    implementation group: 'com.github.spotbugs',               name: 'spotbugs-annotations',   version: '4.7.3'
+    implementation group: 'com.github.spotbugs',               name: 'spotbugs-annotations',   version: '4.8.3'
     testImplementation group: 'org.hamcrest',                  name: 'hamcrest',               version: hamcrestVersion
     testImplementation group: 'org.reflections',               name: 'reflections',            version: '0.10.2'
     testImplementation group: 'org.assertj',                   name: 'assertj-core',           version: assertjVersion
