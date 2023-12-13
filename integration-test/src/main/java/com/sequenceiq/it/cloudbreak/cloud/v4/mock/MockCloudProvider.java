@@ -315,12 +315,12 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public RootVolumeV4TestDto rootVolume(RootVolumeV4TestDto rootVolume) {
-        return rootVolume.withSize(100);
+        return rootVolume.withSize(200);
     }
 
     @Override
     public DistroXRootVolumeTestDto distroXRootVolume(DistroXRootVolumeTestDto distroXRootVolume) {
-        return distroXRootVolume.withSize(100);
+        return distroXRootVolume.withSize(200);
     }
 
     @Override
