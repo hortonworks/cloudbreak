@@ -33,6 +33,7 @@ public class NetworkDtoToResponseConverter {
 
         return EnvironmentNetworkResponse.builder()
                 .withCrn(network.getResourceCrn())
+                .withName(network.getName())
                 .withSubnetIds(network.getSubnetIds())
                 .withNetworkCidr(network.getNetworkCidr())
                 .withNetworkCidrs(network.getNetworkCidrs())

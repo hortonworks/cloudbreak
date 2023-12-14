@@ -131,6 +131,7 @@ public class NetworkDtoToResponseConverterTest {
     private void assertCommonFields(NetworkDto network, EnvironmentNetworkResponse actual) {
         verify(subnetIdProvider).subnets(network, TUNNEL, network.getCloudPlatform(), true);
         assertEquals(network.getResourceCrn(), actual.getCrn());
+        assertEquals(network.getName(), actual.getName());
         assertEquals(network.getSubnetIds(), actual.getSubnetIds());
         assertEquals(network.getNetworkCidr(), actual.getNetworkCidr());
         assertEquals(network.getSubnetMetas(), actual.getSubnetMetas());
@@ -146,6 +147,7 @@ public class NetworkDtoToResponseConverterTest {
     private NetworkDto.Builder createNetworkDto() {
         return NetworkDto.builder()
                 .withResourceCrn("resource crn")
+                .withName("network-name")
                 .withSubnetMetas(Map.of("subnet-id", new CloudSubnet()))
                 .withNetworkCidr("10.0.0.0/16")
                 .withCbSubnets(Map.of("cb-subnetId", new CloudSubnet()))
