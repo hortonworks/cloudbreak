@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.rotation.executor;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_LDAP_BIND_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -32,8 +33,6 @@ class FreeIpaPollerRotationExecutorTest {
 
     private static final String ENVIRONMENT_CRN = "environmentCrn";
 
-    private static final String CLUSTER_NAME = "clusterName";
-
     @Mock
     private StackDtoService stackDtoService;
 
@@ -51,13 +50,12 @@ class FreeIpaPollerRotationExecutorTest {
         StackDto stackDto = mock(StackDto.class);
         when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stackDto);
         when(stackDto.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
-        when(stackDto.getName()).thenReturn(CLUSTER_NAME);
 
         underTest.executeRotate(new PollerRotationContext(RESOURCE_CRN, FREEIPA_LDAP_BIND_PASSWORD), null);
 
         verify(stackDtoService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(freeipaService, times(1)).rotateFreeIpaSecret(eq(ENVIRONMENT_CRN),
-                eq(CLUSTER_NAME), eq(FREEIPA_LDAP_BIND_PASSWORD), eq(RotationFlowExecutionType.ROTATE));
+                eq(FREEIPA_LDAP_BIND_PASSWORD), eq(RotationFlowExecutionType.ROTATE), any());
     }
 
     @Test
@@ -65,13 +63,12 @@ class FreeIpaPollerRotationExecutorTest {
         StackDto stackDto = mock(StackDto.class);
         when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stackDto);
         when(stackDto.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
-        when(stackDto.getName()).thenReturn(CLUSTER_NAME);
 
         underTest.executeRollback(new PollerRotationContext(RESOURCE_CRN, FREEIPA_LDAP_BIND_PASSWORD), null);
 
         verify(stackDtoService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(freeipaService, times(1)).rotateFreeIpaSecret(eq(ENVIRONMENT_CRN),
-                eq(CLUSTER_NAME), eq(FREEIPA_LDAP_BIND_PASSWORD), eq(RotationFlowExecutionType.ROLLBACK));
+                eq(FREEIPA_LDAP_BIND_PASSWORD), eq(RotationFlowExecutionType.ROLLBACK), any());
     }
 
     @Test
@@ -79,13 +76,12 @@ class FreeIpaPollerRotationExecutorTest {
         StackDto stackDto = mock(StackDto.class);
         when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stackDto);
         when(stackDto.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
-        when(stackDto.getName()).thenReturn(CLUSTER_NAME);
 
         underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, FREEIPA_LDAP_BIND_PASSWORD), null);
 
         verify(stackDtoService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(freeipaService, times(1)).rotateFreeIpaSecret(eq(ENVIRONMENT_CRN),
-                eq(CLUSTER_NAME), eq(FREEIPA_LDAP_BIND_PASSWORD), eq(RotationFlowExecutionType.FINALIZE));
+                eq(FREEIPA_LDAP_BIND_PASSWORD), eq(RotationFlowExecutionType.FINALIZE), any());
     }
 
     @Test
@@ -93,7 +89,6 @@ class FreeIpaPollerRotationExecutorTest {
         StackDto stackDto = mock(StackDto.class);
         when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stackDto);
         when(stackDto.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
-        when(stackDto.getName()).thenReturn(CLUSTER_NAME);
 
         underTest.preValidate(new PollerRotationContext(RESOURCE_CRN, FREEIPA_LDAP_BIND_PASSWORD));
         verify(stackDtoService, times(1)).getByCrn(eq(RESOURCE_CRN));
@@ -105,10 +100,8 @@ class FreeIpaPollerRotationExecutorTest {
         StackDto stackDto = mock(StackDto.class);
         when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stackDto);
         when(stackDto.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
-        when(stackDto.getName()).thenReturn(CLUSTER_NAME);
         doThrow(new RuntimeException("error")).when(freeipaService)
-                .rotateFreeIpaSecret(eq(ENVIRONMENT_CRN), eq(CLUSTER_NAME),
-                        eq(FREEIPA_LDAP_BIND_PASSWORD), eq(RotationFlowExecutionType.ROTATE));
+                .rotateFreeIpaSecret(eq(ENVIRONMENT_CRN), eq(FREEIPA_LDAP_BIND_PASSWORD), eq(RotationFlowExecutionType.ROTATE), any());
 
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRotate(new PollerRotationContext(RESOURCE_CRN, FREEIPA_LDAP_BIND_PASSWORD),
@@ -123,10 +116,8 @@ class FreeIpaPollerRotationExecutorTest {
         StackDto stackDto = mock(StackDto.class);
         when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stackDto);
         when(stackDto.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
-        when(stackDto.getName()).thenReturn(CLUSTER_NAME);
         doThrow(new RuntimeException("error")).when(freeipaService)
-                .rotateFreeIpaSecret(eq(ENVIRONMENT_CRN), eq(CLUSTER_NAME),
-                        eq(FREEIPA_LDAP_BIND_PASSWORD), eq(RotationFlowExecutionType.ROLLBACK));
+                .rotateFreeIpaSecret(eq(ENVIRONMENT_CRN), eq(FREEIPA_LDAP_BIND_PASSWORD), eq(RotationFlowExecutionType.ROLLBACK), any());
 
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRollback(new PollerRotationContext(RESOURCE_CRN, FREEIPA_LDAP_BIND_PASSWORD),
@@ -141,10 +132,8 @@ class FreeIpaPollerRotationExecutorTest {
         StackDto stackDto = mock(StackDto.class);
         when(stackDtoService.getByCrn(RESOURCE_CRN)).thenReturn(stackDto);
         when(stackDto.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
-        when(stackDto.getName()).thenReturn(CLUSTER_NAME);
         doThrow(new RuntimeException("error")).when(freeipaService)
-                .rotateFreeIpaSecret(eq(ENVIRONMENT_CRN), eq(CLUSTER_NAME),
-                        eq(FREEIPA_LDAP_BIND_PASSWORD), eq(RotationFlowExecutionType.FINALIZE));
+                .rotateFreeIpaSecret(eq(ENVIRONMENT_CRN), eq(FREEIPA_LDAP_BIND_PASSWORD), eq(RotationFlowExecutionType.FINALIZE), any());
 
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeFinalize(new PollerRotationContext(RESOURCE_CRN, FREEIPA_LDAP_BIND_PASSWORD),

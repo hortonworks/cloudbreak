@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @ExtendWith(MockitoExtension.class)
-class DatahubLdapBindPasswordContextProviderTest {
+class ClusterLdapBindPasswordContextProviderTest {
 
     private static final String RESOURCE_CRN = "resourceCrn";
 
@@ -41,7 +41,7 @@ class DatahubLdapBindPasswordContextProviderTest {
     private ExitCriteriaProvider exitCriteriaProvider;
 
     @InjectMocks
-    private DatahubLdapBindPasswordContextProvider underTest;
+    private ClusterLdapBindPasswordContextProvider underTest;
 
     @Mock
     private StackDto stackDto;
@@ -53,6 +53,7 @@ class DatahubLdapBindPasswordContextProviderTest {
     void testGetContext() {
         when(stackDtoService.getByCrn(any())).thenReturn(stackDto);
         when(stackDto.getResourceCrn()).thenReturn(RESOURCE_CRN);
+        when(stackDto.getName()).thenReturn(RESOURCE_CRN);
         when(gatewayConfigService.getPrimaryGatewayConfig(stackDto)).thenReturn(gatewayConfig);
         when(gatewayConfig.getHostname()).thenReturn("hostName");
 

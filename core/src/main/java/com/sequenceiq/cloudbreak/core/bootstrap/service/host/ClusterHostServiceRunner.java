@@ -934,7 +934,7 @@ public class ClusterHostServiceRunner {
         return gateway;
     }
 
-    private Map<String, List<String>> getServiceLocations(StackDto stackDto) {
+    public Map<String, List<String>> getServiceLocations(StackDto stackDto) {
         Set<String> serviceNames = exposedServiceCollector.getAllServiceNames();
         Map<String, List<String>> componentLocation = componentLocator.getComponentLocation(stackDto, serviceNames);
         ExposedService impalaService = exposedServiceCollector.getImpalaService();

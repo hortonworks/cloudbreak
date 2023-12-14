@@ -33,21 +33,21 @@ public class FreeIpaPollerRotationExecutor extends AbstractRotationExecutor<Poll
     protected void rotate(PollerRotationContext rotationContext) {
         LOGGER.info("Rotate FreeIpa secret: {}", rotationContext.getSecretType());
         StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
-        freeipaService.rotateFreeIpaSecret(stackDto.getEnvironmentCrn(), stackDto.getName(), rotationContext.getSecretType(), ROTATE);
+        freeipaService.rotateFreeIpaSecret(stackDto.getEnvironmentCrn(), rotationContext.getSecretType(), ROTATE, rotationContext.getAdditionalProperties());
     }
 
     @Override
     protected void rollback(PollerRotationContext rotationContext) {
         LOGGER.info("Rollback FreeIpa secret: {}", rotationContext.getSecretType());
         StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
-        freeipaService.rotateFreeIpaSecret(stackDto.getEnvironmentCrn(), stackDto.getName(), rotationContext.getSecretType(), ROLLBACK);
+        freeipaService.rotateFreeIpaSecret(stackDto.getEnvironmentCrn(), rotationContext.getSecretType(), ROLLBACK, rotationContext.getAdditionalProperties());
     }
 
     @Override
     protected void finalize(PollerRotationContext rotationContext) {
         LOGGER.info("Finalize FreeIpa secret: {}", rotationContext.getSecretType());
         StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
-        freeipaService.rotateFreeIpaSecret(stackDto.getEnvironmentCrn(), stackDto.getName(), rotationContext.getSecretType(), FINALIZE);
+        freeipaService.rotateFreeIpaSecret(stackDto.getEnvironmentCrn(), rotationContext.getSecretType(), FINALIZE, rotationContext.getAdditionalProperties());
     }
 
     @Override
@@ -55,7 +55,8 @@ public class FreeIpaPollerRotationExecutor extends AbstractRotationExecutor<Poll
         LOGGER.info("Pre validate FreeIpa secret rotation: {}", rotationContext.getSecretType());
         StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
         freeipaService.preValidateFreeIpaSecretRotation(stackDto.getEnvironmentCrn());
-        freeipaService.rotateFreeIpaSecret(stackDto.getEnvironmentCrn(), stackDto.getName(), rotationContext.getSecretType(), PREVALIDATE);
+        freeipaService.rotateFreeIpaSecret(stackDto.getEnvironmentCrn(), rotationContext.getSecretType(), PREVALIDATE,
+                rotationContext.getAdditionalProperties());
     }
 
     @Override

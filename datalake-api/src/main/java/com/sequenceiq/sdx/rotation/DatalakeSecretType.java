@@ -1,6 +1,7 @@
 package com.sequenceiq.sdx.rotation;
 
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.FREEIPA_ROTATE_POLLING;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
 import static com.sequenceiq.cloudbreak.rotation.MultiSecretType.CM_SERVICE_SHARED_DB;
 import static com.sequenceiq.cloudbreak.rotation.MultiSecretType.DEMO_MULTI_SECRET;
@@ -31,7 +32,8 @@ public enum DatalakeSecretType implements SecretType {
     DATALAKE_DEMO_SECRET(List.of(CLOUDBREAK_ROTATE_POLLING), DEMO_MULTI_SECRET, Set.of(SKIP_SALT_UPDATE, INTERNAL)),
     DATALAKE_SALT_BOOT_SECRETS(List.of(CLOUDBREAK_ROTATE_POLLING)),
     DATALAKE_CM_INTERMEDIATE_CA_CERT(List.of(CLOUDBREAK_ROTATE_POLLING), Set.of(POST_FLOW)),
-    DATALAKE_LDAP_BIND_PASSWORD(List.of(CLOUDBREAK_ROTATE_POLLING));
+    DATALAKE_LDAP_BIND_PASSWORD(List.of(CLOUDBREAK_ROTATE_POLLING)),
+    DATALAKE_SSSD_IPA_PASSWORD(List.of(FREEIPA_ROTATE_POLLING, CLOUDBREAK_ROTATE_POLLING), Set.of(SKIP_SALT_UPDATE));
 
     private final List<SecretRotationStep> steps;
 

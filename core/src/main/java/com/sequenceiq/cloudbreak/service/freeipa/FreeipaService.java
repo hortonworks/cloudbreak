@@ -31,7 +31,6 @@ import com.sequenceiq.flow.api.model.StateStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
-import com.sequenceiq.freeipa.rotation.FreeIpaRotationAdditionalParameters;
 
 @Service
 public class FreeipaService {
@@ -68,12 +67,13 @@ public class FreeipaService {
         return false;
     }
 
-    public void rotateFreeIpaSecret(String environmentCrn, String clusterName, SecretType secretType, RotationFlowExecutionType executionType) {
+    public void rotateFreeIpaSecret(String environmentCrn, SecretType secretType, RotationFlowExecutionType executionType,
+            Map<String, String> additionalProperties) {
         LOGGER.info("Rotating FreeIpa secret: {} for environment {}", secretType, environmentCrn);
         FreeIpaSecretRotationRequest request = new FreeIpaSecretRotationRequest();
         request.setSecrets(List.of(secretType.value()));
         request.setExecutionType(executionType);
-        request.setAdditionalProperties(Map.of(FreeIpaRotationAdditionalParameters.CLUSTER_NAME.name(), clusterName));
+        request.setAdditionalProperties(additionalProperties);
         FlowIdentifier flowIdentifier = freeipaClientService.rotateSecret(environmentCrn, request);
         if (flowIdentifier == null) {
             handleUnsuccessfulFlow(environmentCrn, flowIdentifier, null);

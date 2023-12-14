@@ -37,14 +37,18 @@ import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
+import com.sequenceiq.datalake.service.sdx.FreeipaPoller;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.RedbeamsPoller;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
+import com.sequenceiq.datalake.service.sdx.flowcheck.FreeipaFlowService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.RedbeamsFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.StateStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaRotationV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
 
@@ -70,6 +74,9 @@ public class SdxRotationService {
     private DatabaseServerV4Endpoint databaseServerV4Endpoint;
 
     @Inject
+    private FreeIpaRotationV1Endpoint freeIpaRotationV1Endpoint;
+
+    @Inject
     private SdxReactorFlowManager sdxReactorFlowManager;
 
     @Inject
@@ -79,6 +86,9 @@ public class SdxRotationService {
     private RedbeamsPoller redbeamsPoller;
 
     @Inject
+    private FreeipaPoller freeipaPoller;
+
+    @Inject
     private EntitlementService entitlementService;
 
     @Inject
@@ -86,6 +96,9 @@ public class SdxRotationService {
 
     @Inject
     private CloudbreakFlowService cloudbreakFlowService;
+
+    @Inject
+    private FreeipaFlowService freeipaFlowService;
 
     @Inject
     private MultiClusterRotationValidationService multiClusterRotationValidationService;
@@ -199,4 +212,33 @@ public class SdxRotationService {
                 Crn.safeFromString(parentCrn).getAccountId(), parentCrn).stream().map(SdxCluster::getCrn).collect(Collectors.toSet());
     }
 
+    public void rotateFreeipaSecret(String datalakeCrn, SecretType secretType, RotationFlowExecutionType executionType,
+            Map<String, String> additionalProperties) {
+        SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn)
+                .orElseThrow(notFound("SdxCluster", datalakeCrn));
+
+        FreeIpaSecretRotationRequest request = new FreeIpaSecretRotationRequest();
+        request.setSecrets(List.of(secretType.value()));
+        request.setExecutionType(executionType);
+        request.setAdditionalProperties(additionalProperties);
+
+        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                initiatorUserCrn -> freeIpaRotationV1Endpoint.rotateSecretsByCrn(sdxCluster.getEnvCrn(), request)
+        );
+
+        PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES)
+                .withStopPollingIfExceptionOccurred(true);
+        freeipaPoller.pollFlowStateByFlowIdentifierUntilComplete("Secret rotation", flowIdentifier, sdxCluster.getId(), pollingConfig);
+    }
+
+    public void preValidateFreeipaRotation(String datalakeCrn) {
+        SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn)
+                .orElseThrow(notFound("SdxCluster", datalakeCrn));
+        FlowLogResponse lastFlow = freeipaFlowService.getLastFlowId(sdxCluster.getEnvCrn());
+        if (lastFlow != null && lastFlow.getStateStatus() == StateStatus.PENDING) {
+            String message = String.format("Polling in Freeipa is not possible since last known state of flow for FMS is %s", lastFlow.getCurrentState());
+            throw new SecretRotationException(message, null);
+        }
+    }
 }
