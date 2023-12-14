@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model.generic;
 
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.AbstractMap.SimpleEntry;
@@ -9,6 +10,8 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 class DynamicModelTest {
 
@@ -80,7 +83,7 @@ class DynamicModelTest {
     void getParameterTestWhenKeyAndClassAndCastFailure() {
         underTest.putParameter("key", "value");
 
-        assertThrows(ClassCastException.class, () -> underTest.getParameter("key", Integer.class));
+        assertThrows(CloudbreakServiceException.class, () -> underTest.getParameter("key", Integer.class));
     }
 
     @Test
@@ -101,7 +104,7 @@ class DynamicModelTest {
     void getParameterTestWhenClassAndCastFailure() {
         underTest.putParameter("java.lang.Integer", "value");
 
-        assertThrows(ClassCastException.class, () -> underTest.getParameter(Integer.class));
+        assertThrows(CloudbreakServiceException.class, () -> underTest.getParameter(Integer.class));
     }
 
     @Test
@@ -122,7 +125,7 @@ class DynamicModelTest {
     void getStringParameterTestWhenCastFailure() {
         underTest.putParameter("key", 12);
 
-        assertThrows(ClassCastException.class, () -> underTest.getStringParameter("key"));
+        assertEquals("12", underTest.getParameter("key", String.class));
     }
 
     @Test

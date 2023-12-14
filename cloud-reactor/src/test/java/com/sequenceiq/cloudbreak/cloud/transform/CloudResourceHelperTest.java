@@ -93,7 +93,7 @@ class CloudResourceHelperTest {
     void updateDeleteOnTerminationFlagAndHasVolumeSetTest() {
         CloudResource cloudResource = mock(CloudResource.class);
         when(cloudResource.hasParameter(CloudResource.ATTRIBUTES)).thenReturn(true);
-        when(cloudResource.getParameterWithFallback(CloudResource.ATTRIBUTES, VolumeSetAttributes.class)).thenReturn(mock(VolumeSetAttributes.class));
+        when(cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class)).thenReturn(mock(VolumeSetAttributes.class));
         List<CloudResource> reattachableVolumeSets = List.of(cloudResource);
         underTest.updateDeleteOnTerminationFlag(reattachableVolumeSets, false, mock(CloudContext.class));
         ArgumentCaptor<List> listArgumentCaptor = ArgumentCaptor.forClass(List.class);

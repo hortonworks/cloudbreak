@@ -438,7 +438,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     private Collection<AttachedDisk> getAttachedDisks(List<CloudResource> resources, String projectId) {
         Collection<AttachedDisk> listOfDisks = new ArrayList<>();
         for (CloudResource resource : filterResourcesByType(resources, ResourceType.GCP_ATTACHED_DISKSET)) {
-            VolumeSetAttributes volumeSetAttributes = resource.getParameterWithFallback(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+            VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
             for (Volume volume : volumeSetAttributes.getVolumes()) {
                 if (!GcpDiskType.LOCAL_SSD.value().equals(volume.getType())) {
                     listOfDisks.add(createDisk(

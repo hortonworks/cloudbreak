@@ -36,7 +36,7 @@ class VolumeResourceCollectorTest {
                 .build();
         List<CloudResource> cloudResources = List.of(cloudResource);
         Pair<List<String>, List<CloudResource>> volumeIdsByVolumeResources = underTest.getVolumeIdsByVolumeResources(cloudResources, AWS_VOLUMESET,
-                resource -> resource.getParameterWithFallback(ATTRIBUTES, VolumeSetAttributes.class));
+                resource -> resource.getParameter(ATTRIBUTES, VolumeSetAttributes.class));
 
         assertThat(volumeIdsByVolumeResources.getFirst()).containsExactly("id1");
         assertThat(volumeIdsByVolumeResources.getSecond()).containsExactly(cloudResource);

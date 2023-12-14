@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model.generic;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 /**
@@ -49,20 +51,20 @@ public class DynamicModel {
      * @param <T> expected type of the parameter value
      * @return parameter value, or {@code null} if the requested parameter is absent
      * @throws NullPointerException if {@code clazz == null}
-     * @throws ClassCastException if the requested parameter exists but its value has a type incompatible with {@code T}
      */
     public <T> T getParameter(String key, Class<T> clazz) {
-        return clazz.cast(parameters.get(key));
-    }
-
-    public <T> T getParameterWithFallback(String key, Class<T> clazz) {
         try {
-            return getParameter(key, clazz);
+            return clazz.cast(parameters.get(key));
         } catch (ClassCastException e) {
             LOGGER.error("Can't cast to {}, trying to read it as an Object, then write it to json and try to read it to {}", clazz, clazz);
-            Object object = getParameter(key, Object.class);
+            Object object = parameters.get(key);
             String objectAsJson = JsonUtil.writeValueAsStringSilent(object);
-            return JsonUtil.readValueUnchecked(objectAsJson, clazz);
+            try {
+                return JsonUtil.readValue(objectAsJson, clazz);
+            } catch (IOException ex) {
+                LOGGER.info("Can't read json as class: " + clazz, ex);
+                throw new CloudbreakServiceException(ex);
+            }
         }
     }
 

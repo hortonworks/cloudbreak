@@ -126,7 +126,7 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
     }
 
     private VolumeSetAttributes getVolumeSetAttributes(CloudResource volumeSet) {
-        return volumeSet.getParameterWithFallback(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+        return volumeSet.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
     }
 
     private AzureClient getAzureClient(AuthenticatedContext auth) {

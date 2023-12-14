@@ -132,7 +132,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
 
         List<CloudResource> result = new ArrayList<>();
         for (CloudResource volumeSetResource : buildableResource) {
-            VolumeSetAttributes volumeSetAttributes = volumeSetResource.getParameterWithFallback(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+            VolumeSetAttributes volumeSetAttributes = volumeSetResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
 
             for (VolumeSetAttributes.Volume volume : volumeSetAttributes.getVolumes()) {
                 if (GcpDiskType.LOCAL_SSD.value().equals(volume.getType())) {
@@ -178,7 +178,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
 
     @Override
     public CloudResource delete(GcpContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
-        VolumeSetAttributes volumeSetAttributes = resource.getParameterWithFallback(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+        VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
 
         if (!volumeSetAttributes.getDeleteOnTermination()) {
             resource.setStatus(CommonStatus.DETACHED);

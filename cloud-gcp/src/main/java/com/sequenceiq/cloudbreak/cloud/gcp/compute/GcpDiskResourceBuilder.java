@@ -98,7 +98,7 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
     @Override
     public CloudResource delete(GcpContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
         String resourceName = resource.getName();
-        VolumeSetAttributes volumeSetAttributes = resource.getParameterWithFallback(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+        VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
 
         String zone;
         if (volumeSetAttributes != null && volumeSetAttributes.getAvailabilityZone() != null) {

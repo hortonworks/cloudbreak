@@ -45,7 +45,7 @@ public class CloudResourceHelper {
             reattachableVolumeSets.forEach(cloudResource -> {
                 if (cloudResource.hasParameter(CloudResource.ATTRIBUTES)) {
                     try {
-                        VolumeSetAttributes volumeSetAttributes = cloudResource.getParameterWithFallback(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+                        VolumeSetAttributes volumeSetAttributes = cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
                         volumeSetAttributes.setDeleteOnTermination(deleteOnTermination);
                         cloudResource.putParameter(CloudResource.ATTRIBUTES, volumeSetAttributes);
                         updatableVolumeSets.add(cloudResource);

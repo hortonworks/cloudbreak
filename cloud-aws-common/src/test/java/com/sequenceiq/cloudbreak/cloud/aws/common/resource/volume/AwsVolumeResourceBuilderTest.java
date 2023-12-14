@@ -392,7 +392,7 @@ class AwsVolumeResourceBuilderTest {
         when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
                 .thenReturn(Pair.of(List.of(VOLUME_ID), List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2))))));
         when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult(VolumeState.IN_USE));
-        when(cloudResource.getParameterWithFallback(any(), any())).thenReturn(volumeSetAttributes);
+        when(cloudResource.getParameter(any(), any())).thenReturn(volumeSetAttributes);
         when(cloudResource.getInstanceId()).thenReturn(INSTANCE_ID);
         when(volumeSetAttributes.getDeleteOnTermination()).thenReturn(Boolean.TRUE);
 
@@ -413,7 +413,7 @@ class AwsVolumeResourceBuilderTest {
         when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
                 .thenReturn(Pair.of(List.of(VOLUME_ID), List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2))))));
         when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult(VolumeState.AVAILABLE));
-        when(cloudResource.getParameterWithFallback(any(), any())).thenReturn(volumeSetAttributes);
+        when(cloudResource.getParameter(any(), any())).thenReturn(volumeSetAttributes);
         when(cloudResource.getInstanceId()).thenReturn(INSTANCE_ID);
         when(volumeSetAttributes.getDeleteOnTermination()).thenReturn(Boolean.TRUE);
 
@@ -438,7 +438,7 @@ class AwsVolumeResourceBuilderTest {
                 .awsErrorDetails(AwsErrorDetails.builder().errorCode("InvalidVolume.NotFound").build())
                 .build();
         when(amazonEC2Client.describeVolumes(any())).thenThrow(deleted);
-        when(cloudResource.getParameterWithFallback(any(), any())).thenReturn(volumeSetAttributes);
+        when(cloudResource.getParameter(any(), any())).thenReturn(volumeSetAttributes);
         when(cloudResource.getInstanceId()).thenReturn(INSTANCE_ID);
         when(volumeSetAttributes.getDeleteOnTermination()).thenReturn(Boolean.TRUE);
 
@@ -458,7 +458,7 @@ class AwsVolumeResourceBuilderTest {
         when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
                 .thenReturn(Pair.of(List.of(VOLUME_ID), List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2))))));
         when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult(VolumeState.IN_USE));
-        when(cloudResource.getParameterWithFallback(any(), any())).thenReturn(volumeSetAttributes);
+        when(cloudResource.getParameter(any(), any())).thenReturn(volumeSetAttributes);
         when(cloudResource.getInstanceId()).thenReturn(INSTANCE_ID);
         when(volumeSetAttributes.getDeleteOnTermination()).thenReturn(Boolean.FALSE);
 
@@ -478,7 +478,7 @@ class AwsVolumeResourceBuilderTest {
         when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
                 .thenReturn(Pair.of(List.of(VOLUME_ID), List.of()));
         when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult(VolumeState.IN_USE));
-        when(cloudResource.getParameterWithFallback(any(), any())).thenReturn(volumeSetAttributes);
+        when(cloudResource.getParameter(any(), any())).thenReturn(volumeSetAttributes);
         when(cloudResource.getInstanceId()).thenReturn(INSTANCE_ID);
         when(volumeSetAttributes.getDeleteOnTermination()).thenReturn(Boolean.FALSE);
 
@@ -609,7 +609,7 @@ class AwsVolumeResourceBuilderTest {
         assertThat(result).hasSize(1);
         CloudResource cloudResource = result.get(0);
         assertThat(cloudResource.getStatus()).isEqualTo(CommonStatus.CREATED);
-        VolumeSetAttributes volumeSet = cloudResource.getParameterWithFallback(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+        VolumeSetAttributes volumeSet = cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
         assertThat(volumeSet).isNotNull();
         List<VolumeSetAttributes.Volume> volumes = volumeSet.getVolumes();
         assertThat(volumes).isNotNull();
