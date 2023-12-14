@@ -141,7 +141,7 @@ class CentOSToRedHatUpgradeImageFilterTest {
 
         ImageFilterResult result = testImageFiltering(imageFilterParams, centOSImage1, redhatImage, centOSImage2);
 
-        assertEquals(List.of(redhatImage), result.getImages());
+        assertEquals(List.of(centOSImage1, redhatImage, centOSImage2), result.getImages());
     }
 
     private ImageFilterResult testImageFiltering(ImageFilterParams imageFilterParams, Image... images) {
