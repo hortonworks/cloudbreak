@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.common.api.type.InstanceGroupName;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
@@ -126,8 +127,8 @@ public class DataLakeMultiAzCalculatorServiceTest {
         dataLakeMultiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, stack);
 
         List<Set<InstanceMetaData>> instanceMetaData = stack.getInstanceGroups().stream()
-                .filter(instanceGroup -> (instanceGroup.getGroupName().equalsIgnoreCase("auxiliary") ||
-                        instanceGroup.getGroupName().equalsIgnoreCase("gateway")))
+                .filter(instanceGroup -> (instanceGroup.getGroupName().equalsIgnoreCase(InstanceGroupName.AUXILIARY.getName()) ||
+                        instanceGroup.getGroupName().equalsIgnoreCase(InstanceGroupName.MASTER.getName())))
                 .collect(Collectors.toList())
                 .stream().map(InstanceGroup::getInstanceMetaData)
                 .collect(Collectors.toList());
@@ -158,35 +159,35 @@ public class DataLakeMultiAzCalculatorServiceTest {
                 .collect(Collectors.toList()).containsAll(List.of("/az-1", "/az-2", "/az-3")));
 
         verify(multiAzCalculatorService, times(4)).calculateByRoundRobin(anyMap(), any(InstanceGroupNetwork.class), anySet());
-        verify(dataLakeMultiAzCalculatorService, times(1)).calculateByRoundRobinTreatingAuxiliaryAndGatewayAsOne(any(), any(), any(), any());
+        verify(dataLakeMultiAzCalculatorService, times(1)).calculateByRoundRobinTreatingAuxiliaryAndMasterAsOne(any(), any(), any(), any());
         reset(dataLakeMultiAzCalculatorService);
         reset(multiAzCalculatorService);
 
         stack.setInstanceGroups(Set.of(auxiliaryGroup, gatewayGroup));
         dataLakeMultiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, stack);
         ArgumentCaptor<Set<InstanceMetaData>> capture = ArgumentCaptor.forClass(Set.class);
-        verify(multiAzCalculatorService, times(1)).calculateByRoundRobin(anyMap(), any(InstanceGroupNetwork.class), capture.capture());
-        Assert.assertEquals(3, capture.getValue().size());
+        verify(multiAzCalculatorService, times(2)).calculateByRoundRobin(anyMap(), any(InstanceGroupNetwork.class), capture.capture());
+        Assert.assertEquals(1, capture.getValue().size());
         capture.getValue().stream().allMatch(metaData -> metaData.getId() == 1L);
         reset(dataLakeMultiAzCalculatorService);
         reset(multiAzCalculatorService);
 
         stack.setInstanceGroups(Set.of(masterGroup, coreGroup, idbrokerGroup, gatewayGroup));
-        dataLakeMultiAzCalculatorService.calculateByRoundRobinTreatingAuxiliaryAndGatewayAsOne(stack, subnetAzPairs, "sub1", "az-1");
+        dataLakeMultiAzCalculatorService.calculateByRoundRobinTreatingAuxiliaryAndMasterAsOne(stack, subnetAzPairs, "sub1", "az-1");
         capture = ArgumentCaptor.forClass(Set.class);
         verify(multiAzCalculatorService, times(4)).calculateByRoundRobin(anyMap(), any(InstanceGroupNetwork.class), capture.capture());
         reset(dataLakeMultiAzCalculatorService);
         reset(multiAzCalculatorService);
 
         stack.setInstanceGroups(Set.of(masterGroup, coreGroup, idbrokerGroup, auxiliaryGroup));
-        dataLakeMultiAzCalculatorService.calculateByRoundRobinTreatingAuxiliaryAndGatewayAsOne(stack, subnetAzPairs, "sub1", "az-1");
+        dataLakeMultiAzCalculatorService.calculateByRoundRobinTreatingAuxiliaryAndMasterAsOne(stack, subnetAzPairs, "sub1", "az-1");
         capture = ArgumentCaptor.forClass(Set.class);
-        verify(multiAzCalculatorService, times(4)).calculateByRoundRobin(anyMap(), any(InstanceGroupNetwork.class), capture.capture());
+        verify(multiAzCalculatorService, times(3)).calculateByRoundRobin(anyMap(), any(InstanceGroupNetwork.class), capture.capture());
         reset(dataLakeMultiAzCalculatorService);
         reset(multiAzCalculatorService);
 
         stack.setInstanceGroups(Set.of(masterGroup, coreGroup, idbrokerGroup));
-        dataLakeMultiAzCalculatorService.calculateByRoundRobinTreatingAuxiliaryAndGatewayAsOne(stack, subnetAzPairs, "sub1", "az-1");
+        dataLakeMultiAzCalculatorService.calculateByRoundRobinTreatingAuxiliaryAndMasterAsOne(stack, subnetAzPairs, "sub1", "az-1");
         capture = ArgumentCaptor.forClass(Set.class);
         verify(multiAzCalculatorService, times(3)).calculateByRoundRobin(anyMap(), any(InstanceGroupNetwork.class), capture.capture());
 
@@ -226,8 +227,8 @@ public class DataLakeMultiAzCalculatorServiceTest {
         dataLakeMultiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, stack);
 
         List<Set<InstanceMetaData>> instanceMetaData = stack.getInstanceGroups().stream()
-                .filter(instanceGroup -> (instanceGroup.getGroupName().equalsIgnoreCase("auxiliary") ||
-                        instanceGroup.getGroupName().equalsIgnoreCase("gateway")))
+                .filter(instanceGroup -> (instanceGroup.getGroupName().equalsIgnoreCase(InstanceGroupName.AUXILIARY.getName()) ||
+                        instanceGroup.getGroupName().equalsIgnoreCase(InstanceGroupName.MASTER.getName())))
                 .collect(Collectors.toList())
                 .stream().map(InstanceGroup::getInstanceMetaData)
                 .collect(Collectors.toList());
@@ -265,13 +266,13 @@ public class DataLakeMultiAzCalculatorServiceTest {
         InstanceGroupNetwork network = new InstanceGroupNetwork();
         network.setCloudPlatform("aws");
         network.setAttributes(Json.silent(Map.of(SUBNET_IDS, List.of("subnet-1", "subnet-2", "subnet-3"))));
-        InstanceGroup masterGroup = getARequestGroup("master", 2, InstanceGroupType.CORE);
+        InstanceGroup masterGroup = getARequestGroup(InstanceGroupName.MASTER.getName(), 2, InstanceGroupType.CORE);
         masterGroup.setInstanceGroupNetwork(network);
-        InstanceGroup auxiliaryGroup = getARequestGroup("auxiliary", 1, InstanceGroupType.CORE);
+        InstanceGroup auxiliaryGroup = getARequestGroup(InstanceGroupName.AUXILIARY.getName(), 1, InstanceGroupType.CORE);
         auxiliaryGroup.setInstanceGroupNetwork(network);
-        InstanceGroup coreGroup = getARequestGroup("core", 3, InstanceGroupType.CORE);
+        InstanceGroup coreGroup = getARequestGroup(InstanceGroupName.CORE.getName(), 3, InstanceGroupType.CORE);
         coreGroup.setInstanceGroupNetwork(network);
-        InstanceGroup idbrokerGroup = getARequestGroup("idbroker", 2, InstanceGroupType.CORE);
+        InstanceGroup idbrokerGroup = getARequestGroup(InstanceGroupName.IDBROKER.getName(), 2, InstanceGroupType.CORE);
         idbrokerGroup.setInstanceGroupNetwork(network);
         stack.setInstanceGroups(Set.of(masterGroup, coreGroup, idbrokerGroup, auxiliaryGroup));
         when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroupNetwork.class))).thenReturn(true);
@@ -282,8 +283,8 @@ public class DataLakeMultiAzCalculatorServiceTest {
         dataLakeMultiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, stack);
 
         List<Set<InstanceMetaData>> instanceMetaData = stack.getInstanceGroups().stream()
-                .filter(instanceGroup -> (instanceGroup.getGroupName().equalsIgnoreCase("auxiliary") ||
-                        instanceGroup.getGroupName().equalsIgnoreCase("gateway")))
+                .filter(instanceGroup -> (instanceGroup.getGroupName().equalsIgnoreCase(InstanceGroupName.AUXILIARY.getName()) ||
+                        instanceGroup.getGroupName().equalsIgnoreCase(InstanceGroupName.MASTER.getName())))
                 .collect(Collectors.toList())
                 .stream().map(InstanceGroup::getInstanceMetaData)
                 .collect(Collectors.toList());
@@ -292,13 +293,13 @@ public class DataLakeMultiAzCalculatorServiceTest {
         instanceMetaData.forEach(data -> {
             instanceMetaDataList.addAll(data);
         });
-        Assert.assertEquals(1, instanceMetaDataList.stream().map(InstanceMetaData::getAvailabilityZone)
+        Assert.assertEquals(3, instanceMetaDataList.stream().map(InstanceMetaData::getAvailabilityZone)
                 .distinct()
                 .collect(Collectors.toList()).size());
-        Assert.assertEquals(1, instanceMetaDataList.stream().map(InstanceMetaData::getSubnetId)
+        Assert.assertEquals(3, instanceMetaDataList.stream().map(InstanceMetaData::getSubnetId)
                 .distinct()
                 .collect(Collectors.toList()).size());
-        Assert.assertEquals(1, instanceMetaDataList.stream().map(InstanceMetaData::getRackId)
+        Assert.assertEquals(3, instanceMetaDataList.stream().map(InstanceMetaData::getRackId)
                 .distinct()
                 .collect(Collectors.toList()).size());
     }
@@ -321,9 +322,9 @@ public class DataLakeMultiAzCalculatorServiceTest {
         InstanceGroupNetwork network = new InstanceGroupNetwork();
         network.setCloudPlatform("aws");
         network.setAttributes(Json.silent(Map.of(SUBNET_IDS, List.of("subnet-1", "subnet-2", "subnet-3"))));
-        InstanceGroup masterGroup = getARequestGroup("master", 2, InstanceGroupType.CORE);
+        InstanceGroup masterGroup = getARequestGroup(InstanceGroupName.MASTER.getName(), 2, InstanceGroupType.CORE);
         masterGroup.setInstanceGroupNetwork(network);
-        InstanceGroup idbrokerGroup = getARequestGroup("idbroker", 2, InstanceGroupType.CORE);
+        InstanceGroup idbrokerGroup = getARequestGroup(InstanceGroupName.IDBROKER.getName(), 2, InstanceGroupType.CORE);
         idbrokerGroup.setInstanceGroupNetwork(network);
         stack.setInstanceGroups(Set.of(masterGroup, idbrokerGroup));
         when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroupNetwork.class))).thenReturn(true);
@@ -331,7 +332,7 @@ public class DataLakeMultiAzCalculatorServiceTest {
 
         Map<String, String> subnetAzPairs = multiAzCalculatorService.prepareSubnetAzMap(detailedEnvironmentResponse);
         dataLakeMultiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, stack);
-        verify(dataLakeMultiAzCalculatorService, times(0)).calculateByRoundRobinTreatingAuxiliaryAndGatewayAsOne(any(), any(), anyString(), any());
+        verify(dataLakeMultiAzCalculatorService, times(0)).calculateByRoundRobinTreatingAuxiliaryAndMasterAsOne(any(), any(), anyString(), any());
         verify(multiAzCalculatorService, times(2)).calculateByRoundRobin(any(), any(InstanceGroupNetwork.class), any(Set.class));
         stack.getInstanceGroupsAsList().stream().forEach(instanceGroup -> {
             Assert.assertTrue(instanceGroup.getInstanceMetaData().iterator().next().getRackId() != null);
@@ -367,7 +368,7 @@ public class DataLakeMultiAzCalculatorServiceTest {
         when(blueprintUtils.isEnterpriseDatalake(any(Stack.class))).thenReturn(false);
         Map<String, String> subnetAzPairs = multiAzCalculatorService.prepareSubnetAzMap(detailedEnvironmentResponse);
         dataLakeMultiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, stack);
-        verify(dataLakeMultiAzCalculatorService, times(0)).calculateByRoundRobinTreatingAuxiliaryAndGatewayAsOne(any(), any(), anyString(), any());
+        verify(dataLakeMultiAzCalculatorService, times(0)).calculateByRoundRobinTreatingAuxiliaryAndMasterAsOne(any(), any(), anyString(), any());
         verify(multiAzCalculatorService, times(2)).calculateByRoundRobin(any(), any(InstanceGroupNetwork.class), any(Set.class));
         stack.getInstanceGroupsAsList().stream().forEach(instanceGroup -> {
             instanceGroup.getInstanceMetaData().stream().forEach(entry -> {

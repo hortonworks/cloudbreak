@@ -145,7 +145,7 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
     }
 
     @Test
-    void testPopulateWhenMultiAzEnabledEnterpriseDataLakeHasOnlyGatewayGroup() {
+    void testPopulateWhenMultiAzEnabledEnterpriseDataLakeHasOnlyMasterGroup() {
         Set<String> environmentAvailabilityZones = Set.of("1", "2", "3");
         Stack stack = TestUtil.stack(Status.REQUESTED, TestUtil.azureCredential());
         stack.setMultiAz(Boolean.TRUE);
@@ -155,7 +155,7 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
                     ig.setInstanceMetaData(TestUtil.generateInstanceMetaDatas(environmentAvailabilityZones.size(), ig.getId(), ig));
                     ig.setAvailabilityZones(getAvailabilityZoneSet(environmentAvailabilityZones, ig));
                 });
-        stack.getInstanceGroups().add(getInstanceGroup(environmentAvailabilityZones, 4L, InstanceGroupName.GATEWAY, stack));
+        stack.getInstanceGroups().add(getInstanceGroup(environmentAvailabilityZones, 4L, InstanceGroupName.MASTER, stack));
         when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
         when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
         when(blueprintUtils.isEnterpriseDatalake(stack)).thenReturn(Boolean.TRUE);
@@ -167,7 +167,7 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
         verify(underTest, times(0)).populate(stack);
         for (String expectedZone : environmentAvailabilityZones) {
             stack.getInstanceGroups().stream()
-                    .filter(ig -> InstanceGroupName.GATEWAY.getName().equals(ig.getGroupName()))
+                    .filter(ig -> InstanceGroupName.MASTER.getName().equals(ig.getGroupName()))
                     .forEach(ig -> {
                         long actualInstanceCountByAz = ig.getNotDeletedInstanceMetaDataSet().stream()
                                 .filter(im -> expectedZone.equals(im.getAvailabilityZone()))
@@ -203,7 +203,7 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
         verify(underTest, times(0)).populate(stack);
         for (String expectedZone : environmentAvailabilityZones) {
             stack.getInstanceGroups().stream()
-                    .filter(ig -> InstanceGroupName.GATEWAY.getName().equals(ig.getGroupName()))
+                    .filter(ig -> InstanceGroupName.MASTER.getName().equals(ig.getGroupName()))
                     .forEach(ig -> {
                         long actualInstanceCountByAz = ig.getNotDeletedInstanceMetaDataSet().stream()
                                 .filter(im -> expectedZone.equals(im.getAvailabilityZone()))
@@ -220,7 +220,7 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
     // CHECKSTYLE:OFF
     static Object[][] testAvailabilityZoneDistributionForWholeInstanceGroupData() {
         return new Object[][]{
-                //gatewayInstanceCount, auxiliaryInstanceCount, expectedZonesForGroups, expectedInstanceCountByAz
+                //masterInstanceCount, auxiliaryInstanceCount, expectedZonesForGroups, expectedInstanceCountByAz
                 {11,                    6,                      Set.of("1"),           Map.of("1", 17, "2", 0, "3", 0)},
                 {11,                    6,                      Set.of("1", "2"),      Map.of("1", 9, "2", 8, "3", 0)},
                 {11,                    6,                      Set.of("1", "2", "3"), Map.of("1", 6, "2", 6, "3", 5)},
@@ -236,10 +236,10 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
     // CHECKSTYLE:ON
     // @formatter:on
 
-    @ParameterizedTest(name = "testPopulateShouldDistributeNodesAcrossInstancesOfTheGatewayAndAuxiliaryGroups settings " +
-            "when {0} gateway instances and {1} auxiliary instances and {2} expected zones for groups should result in {3} instance count by availability zone")
+    @ParameterizedTest(name = "testPopulateShouldDistributeNodesAcrossInstancesOfTheMasterAndAuxiliaryGroups settings " +
+            "when {0} master instances and {1} auxiliary instances and {2} expected zones for groups should result in {3} instance count by availability zone")
     @MethodSource("testAvailabilityZoneDistributionForWholeInstanceGroupData")
-    void testPopulateShouldDistributeNodesAcrossInstancesOfTheGatewayAndAuxiliaryGroups(int gatewayInstanceCount, int auxiliaryInstanceCount,
+    void testPopulateShouldDistributeNodesAcrossInstancesOfTheMasterAndAuxiliaryGroups(int masterInstanceCount, int auxiliaryInstanceCount,
             Set<String> expectedZonesForGroups, Map<String, Integer> expectedInstanceCountByAz) {
         Stack stack = TestUtil.stack(Status.REQUESTED, TestUtil.azureCredential());
         stack.setMultiAz(Boolean.TRUE);
@@ -249,8 +249,8 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
                     ig.setInstanceMetaData(TestUtil.generateInstanceMetaDatas(expectedZonesForGroups.size(), ig.getId(), ig));
                     ig.setAvailabilityZones(getAvailabilityZoneSet(expectedZonesForGroups, ig));
                 });
-        if (gatewayInstanceCount > 0) {
-            stack.getInstanceGroups().add(getInstanceGroup(expectedZonesForGroups, 4L, InstanceGroupName.GATEWAY, stack, gatewayInstanceCount));
+        if (masterInstanceCount > 0) {
+            stack.getInstanceGroups().add(getInstanceGroup(expectedZonesForGroups, 4L, InstanceGroupName.MASTER, stack, masterInstanceCount));
         }
         if (auxiliaryInstanceCount > 0) {
             stack.getInstanceGroups().add(getInstanceGroup(expectedZonesForGroups, 5L, InstanceGroupName.AUXILIARY, stack, auxiliaryInstanceCount));
@@ -268,7 +268,7 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
             String expectedZone = expectedCountByAzEntry.getKey();
             Integer expectedCountByZone = expectedCountByAzEntry.getValue();
             long actualCount = stack.getInstanceGroups().stream()
-                    .filter(ig -> InstanceGroupName.GATEWAY.getName().equals(ig.getGroupName())
+                    .filter(ig -> InstanceGroupName.MASTER.getName().equals(ig.getGroupName())
                             || InstanceGroupName.AUXILIARY.getName().equals(ig.getGroupName()))
                     .flatMap(ig -> ig.getNotTerminatedInstanceMetaDataSet().stream())
                     .filter(im -> expectedZone.equals(im.getAvailabilityZone()))
