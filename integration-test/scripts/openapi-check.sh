@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
-DOCKER_SSC_IMAGE=docker-private.infra.cloudera.com/cloudera_base/swagger-spec-compatibility:1.2.4
+DOCKER_SSC_IMAGE=docker-private.infra.cloudera.com/cloudera_thirdparty/openapitools/openapi-diff:2.0.0
 INCOMPATIBLE_CHANGES=()
 
 date
@@ -29,40 +29,32 @@ compatible() {
   echo Downloading ${service} ${previous_build} OpenAPI definition, if possible https://${service}-swagger.s3.${zone[$service]}.amazonaws.com/openapi-${previous_build}.json
   STATUSCODE=$(curl -kfSs --write-out "%{http_code}" https://${service}-swagger.s3.${zone[$service]}.amazonaws.com/openapi-${previous_build}.json -o ./apidefinitions/${service}-openapi-${previous_build}.json)
   if [ $STATUSCODE -ne 200 ]; then
-    echo download failed $STATUSCODE
+    echo download failed probably no available openapi definition for the previous version
     rm ./apidefinitions/${service}-openapi-${previous_build}.json
-    compat_exit_code=1
+    compat_exit_code=0
   else
-    from_file=${PWD}/apidefinitions/${service}-openapi-${previous_build}.json
-    docker_from_file=/from/$(basename "$from_file")
-    to_file=${PWD}/apidefinitions/${service}.json
-    docker_to_file=/to/$(basename "$to_file")
-#    compat_results=$(docker run --rm -v "${from_file}:${docker_from_file}" \
-#          -v "${to_file}:${docker_to_file}" \
-#          "${DOCKER_SSC_IMAGE}" \
-#          run "${docker_from_file}" "${docker_to_file}" \
-#          -r MIS-E001 \
-#          -r MIS-E002 \
-#          -r REQ-E001 \
-#          -r REQ-E002 \
-#          -r REQ-E003 \
-#          -r REQ-E004 \
-#          -r RES-E001 \
-#          -r RES-E002 2>&1)
-#    compat_exit_code=$?
-#    if (( compat_exit_code != 0 )); then
-#      echo
-#      echo "================ COMPATIBILITY BREAKS in ${service} ================"
-#      echo "$compat_results"
-#      echo "==============================================================================="
-#      echo
-#    else
-#      echo "change is compatible"
-#    fi
-#    return $compat_exit_code
-    echo "==== COMPATIBILITY CHECK IS TEMPORARILY TURNED OFF BECAUSE OF OPENAPI MIGRATION ===="
-    return 0
+    compat_results=$(docker run --rm -t \
+      -v ${PWD}/apidefinitions:/apidefinitions:rw \
+      "${DOCKER_SSC_IMAGE}" \
+      "/apidefinitions/${service}-openapi-${previous_build}.json" \
+      "/apidefinitions/${service}.json" \
+      --markdown /apidefinitions/result.markdown \
+      --html /apidefinitions/result.html \
+      --fail-on-incompatible)
+
+    if [[ ${compat_results} != *"No differences. Specifications are equivalents"* ]]; then
+      echo
+      echo "================ COMPATIBILITY BREAKS in ${service} ================"
+      echo "$compat_results"
+      echo "==============================================================================="
+      echo
+      compat_exit_code=1
+    else
+      echo "change is compatible"
+      compat_exit_code=0
+    fi
   fi
+  return $compat_exit_code
 }
 
 if [[ ! $CB_VERSION =~ ^([0-9]+\.)?([0-9]+\.)?(\*|[0-9]+)(\-b[0-9]+)?$ ]]; then

@@ -89,7 +89,7 @@ schema-migration:
 	./scripts/schema-migration.sh
 
 swagger-compare:
-	CB_VERSION=$(CB_VERSION) CB_TARGET_BRANCH=$(CB_TARGET_BRANCH) ./scripts/swagger-check.sh
+	CB_VERSION=$(CB_VERSION) CB_TARGET_BRANCH=$(CB_TARGET_BRANCH) ./scripts/openapi-check.sh
 
 upload-s3:
 	aws s3 cp ./apidefinitions/cb.json s3://cloudbreak-swagger/swagger-$(VERSION).json --acl public-read
