@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.rotation.pillar.context;
+package com.sequenceiq.freeipa.service.rotation.context;
 
 import java.util.Map;
 import java.util.function.Function;

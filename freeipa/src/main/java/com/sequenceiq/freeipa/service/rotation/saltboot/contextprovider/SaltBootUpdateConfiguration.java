@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.rotation.context.saltboot;
+package com.sequenceiq.freeipa.service.rotation.saltboot.contextprovider;
 
 import java.util.List;
 import java.util.Set;

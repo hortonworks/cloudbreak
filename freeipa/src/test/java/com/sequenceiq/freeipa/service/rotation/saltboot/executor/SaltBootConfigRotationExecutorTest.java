@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.rotation.executor;
+package com.sequenceiq.freeipa.service.rotation.saltboot.executor;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -29,8 +29,8 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
-import com.sequenceiq.freeipa.service.rotation.context.saltboot.SaltBootConfigRotationContext;
-import com.sequenceiq.freeipa.service.rotation.context.saltboot.SaltBootUpdateConfiguration;
+import com.sequenceiq.freeipa.service.rotation.saltboot.context.SaltBootConfigRotationContext;
+import com.sequenceiq.freeipa.service.rotation.saltboot.contextprovider.SaltBootUpdateConfiguration;
 
 @ExtendWith(MockitoExtension.class)
 class SaltBootConfigRotationExecutorTest {

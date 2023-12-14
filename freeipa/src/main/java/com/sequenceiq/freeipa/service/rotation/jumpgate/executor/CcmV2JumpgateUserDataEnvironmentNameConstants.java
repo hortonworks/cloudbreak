@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.rotation.executor;
+package com.sequenceiq.freeipa.service.rotation.jumpgate.executor;
 
 public class CcmV2JumpgateUserDataEnvironmentNameConstants {
 

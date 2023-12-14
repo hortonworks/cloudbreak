@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.rotation.executor;
+package com.sequenceiq.freeipa.service.rotation.jumpgate.executor;
 
 import static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;

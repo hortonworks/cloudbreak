@@ -1,11 +1,11 @@
-package com.sequenceiq.freeipa.service.rotation.executor;
+package com.sequenceiq.freeipa.service.rotation.jumpgate.executor;
 
 import static com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent;
-import static com.sequenceiq.freeipa.service.rotation.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V2_AGENT_ACCESS_KEY_ID;
-import static com.sequenceiq.freeipa.service.rotation.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V2_AGENT_ENCIPHERED_ACCESS_KEY;
-import static com.sequenceiq.freeipa.service.rotation.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V_2_AGENT_HMAC_FOR_PRIVATE_KEY;
-import static com.sequenceiq.freeipa.service.rotation.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V_2_AGENT_HMAC_KEY;
-import static com.sequenceiq.freeipa.service.rotation.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V_2_IV;
+import static com.sequenceiq.freeipa.service.rotation.jumpgate.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V2_AGENT_ACCESS_KEY_ID;
+import static com.sequenceiq.freeipa.service.rotation.jumpgate.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V2_AGENT_ENCIPHERED_ACCESS_KEY;
+import static com.sequenceiq.freeipa.service.rotation.jumpgate.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V_2_AGENT_HMAC_FOR_PRIVATE_KEY;
+import static com.sequenceiq.freeipa.service.rotation.jumpgate.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V_2_AGENT_HMAC_KEY;
+import static com.sequenceiq.freeipa.service.rotation.jumpgate.executor.CcmV2JumpgateUserDataEnvironmentNameConstants.CCM_V_2_IV;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 import java.util.Optional;

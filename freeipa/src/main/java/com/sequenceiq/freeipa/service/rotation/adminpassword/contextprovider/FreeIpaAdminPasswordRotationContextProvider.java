@@ -24,7 +24,7 @@ import com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.rotation.FreeIpaDefaultPillarGenerator;
 import com.sequenceiq.freeipa.service.rotation.adminpassword.context.FreeIpaAdminPasswordRotationContext;
-import com.sequenceiq.freeipa.service.rotation.pillar.context.SaltPillarUpdateRotationContext;
+import com.sequenceiq.freeipa.service.rotation.context.SaltPillarUpdateRotationContext;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Component

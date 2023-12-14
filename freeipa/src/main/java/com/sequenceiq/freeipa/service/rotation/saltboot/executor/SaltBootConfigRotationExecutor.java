@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.rotation.executor;
+package com.sequenceiq.freeipa.service.rotation.saltboot.executor;
 
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.SALTBOOT_CONFIG;
 
@@ -19,8 +19,8 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
-import com.sequenceiq.freeipa.service.rotation.context.saltboot.SaltBootConfigRotationContext;
-import com.sequenceiq.freeipa.service.rotation.context.saltboot.SaltBootUpdateConfiguration;
+import com.sequenceiq.freeipa.service.rotation.saltboot.context.SaltBootConfigRotationContext;
+import com.sequenceiq.freeipa.service.rotation.saltboot.contextprovider.SaltBootUpdateConfiguration;
 
 @Component
 public class SaltBootConfigRotationExecutor extends AbstractRotationExecutor<SaltBootConfigRotationContext> {

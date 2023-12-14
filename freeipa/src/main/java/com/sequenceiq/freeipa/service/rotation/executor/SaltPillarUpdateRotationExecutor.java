@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.rotation.pillar.executor;
+package com.sequenceiq.freeipa.service.rotation.executor;
 
 import java.util.Map;
 import java.util.Set;
@@ -28,7 +28,7 @@ import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaNodeUtilService;
 import com.sequenceiq.freeipa.service.orchestrator.FreeIpaSaltPingService;
 import com.sequenceiq.freeipa.service.orchestrator.SaltPingFailedException;
-import com.sequenceiq.freeipa.service.rotation.pillar.context.SaltPillarUpdateRotationContext;
+import com.sequenceiq.freeipa.service.rotation.context.SaltPillarUpdateRotationContext;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Component

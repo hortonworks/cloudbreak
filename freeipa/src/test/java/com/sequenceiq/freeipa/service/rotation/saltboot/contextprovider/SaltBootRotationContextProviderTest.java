@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.rotation.context.provider;
+package com.sequenceiq.freeipa.service.rotation.saltboot.contextprovider;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -34,8 +34,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.rotation.ExitCriteriaProvider;
-import com.sequenceiq.freeipa.service.rotation.context.saltboot.SaltBootConfigRotationContext;
-import com.sequenceiq.freeipa.service.rotation.context.saltboot.SaltBootUpdateConfiguration;
+import com.sequenceiq.freeipa.service.rotation.saltboot.context.SaltBootConfigRotationContext;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)

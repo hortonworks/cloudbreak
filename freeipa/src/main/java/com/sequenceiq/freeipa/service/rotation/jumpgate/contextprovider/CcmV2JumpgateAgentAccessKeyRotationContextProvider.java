@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.rotation.context.provider;
+package com.sequenceiq.freeipa.service.rotation.jumpgate.contextprovider;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,8 +26,8 @@ import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaNodeUtilService;
 import com.sequenceiq.freeipa.service.freeipa.flow.SaltConfigProvider;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.rotation.ExitCriteriaProvider;
+import com.sequenceiq.freeipa.service.rotation.context.SaltPillarUpdateRotationContext;
 import com.sequenceiq.freeipa.service.rotation.context.SaltStateApplyRotationContext;
-import com.sequenceiq.freeipa.service.rotation.pillar.context.SaltPillarUpdateRotationContext;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Component

@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.rotation.pillar.executor;
+package com.sequenceiq.freeipa.service.rotation.executor;
 
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,7 +35,7 @@ import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigView;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaNodeUtilService;
 import com.sequenceiq.freeipa.service.orchestrator.FreeIpaSaltPingService;
 import com.sequenceiq.freeipa.service.rotation.FreeIpaDefaultPillarGenerator;
-import com.sequenceiq.freeipa.service.rotation.pillar.context.SaltPillarUpdateRotationContext;
+import com.sequenceiq.freeipa.service.rotation.context.SaltPillarUpdateRotationContext;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)

@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.rotation.context.provider;
+package com.sequenceiq.freeipa.service.rotation.saltboot.contextprovider;
 
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.SALTBOOT_CONFIG;
@@ -40,8 +40,7 @@ import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.rotation.ExitCriteriaProvider;
-import com.sequenceiq.freeipa.service.rotation.context.saltboot.SaltBootConfigRotationContext;
-import com.sequenceiq.freeipa.service.rotation.context.saltboot.SaltBootUpdateConfiguration;
+import com.sequenceiq.freeipa.service.rotation.saltboot.context.SaltBootConfigRotationContext;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Component
