@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
-import com.sequenceiq.distrox.api.v1.distrox.validation.volume.RootVolumeSizeProvider;
 
 /**
  * This class reads the environment properties of default root volume size configurations for each cloud provider platform.
@@ -27,7 +26,7 @@ import com.sequenceiq.distrox.api.v1.distrox.validation.volume.RootVolumeSizePro
  * etc.
  */
 @Service
-public class DefaultRootVolumeSizeProvider implements RootVolumeSizeProvider {
+public class DefaultRootVolumeSizeProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultRootVolumeSizeProvider.class);
 
