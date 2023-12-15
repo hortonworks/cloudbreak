@@ -9,8 +9,8 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 
 public enum TargetPlatform {
 
-    SAAS(CrnResourceDescriptor.SDX_SAAS_INSTANCE),
-    PAAS(CrnResourceDescriptor.DATALAKE);
+    PAAS(CrnResourceDescriptor.DATALAKE),
+    CDL(CrnResourceDescriptor.SDX_SAAS_INSTANCE);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TargetPlatform.class);
 
