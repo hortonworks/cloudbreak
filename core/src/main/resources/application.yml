@@ -461,6 +461,8 @@ cb:
           7.2.18 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming-small;
           7.2.18 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry, Schema Registry=cdp-flow-management-small;
           7.2.18 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry, Schema Registry=cdp-flow-management;
+          7.2.18 - NiFi 2 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry, Schema Registry=cdp-flow-management-small-nifi-2;
+          7.2.18 - NiFi 2 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry, Schema Registry=cdp-flow-management-nifi-2;
           7.2.18 - Data Discovery and Exploration for Spark3=cdp-dde-spark3;
           7.2.18 - Search Analytics=cdp-search-analytics;
           7.2.18 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light;
