@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DeregisterTargetsRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.InvalidTargetException;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetDescription;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.TargetGroupNotFoundException;
 
 @Component
 public class LoadBalancerService {
@@ -54,6 +55,8 @@ public class LoadBalancerService {
                             .targets(targetsToRemove)
                             .build());
                     LOGGER.debug("Targets deregistered: {}", targetsToRemove);
+                } catch (TargetGroupNotFoundException targetGroupNotFoundException) {
+                    LOGGER.debug("Couldn't find the specified target group with ARN {}", targetGroupArn, targetGroupNotFoundException);
                 } catch (InvalidTargetException ignored) {
                     LOGGER.debug("no-op - we tried to remove a target that wasn't in the target group, which is fine");
                 }
