@@ -48,6 +48,9 @@ public class MonitoringConfigService implements TelemetryPillarConfigGenerator<M
         builder.withWalTruncateFrequency(monitoringConfiguration.getAgent().getWalTruncateFrequency());
         builder.withMinBackoff(monitoringConfiguration.getAgent().getMinBackoff());
         builder.withMaxBackoff(monitoringConfiguration.getAgent().getMaxBackoff());
+        builder.withMaxShards(monitoringConfiguration.getAgent().getMaxShards());
+        builder.withMaxSamplesPerSend(monitoringConfiguration.getAgent().getMaxSamplesPerSend());
+        builder.withCapacity(monitoringConfiguration.getAgent().getCapacity());
         if (monitoringContext.getCredential() != null) {
             String accessKeyType = StringUtils.defaultIfBlank(monitoringContext.getCredential().getAccessKeyType(), DEFAULT_ACCESS_KEY_TYPE);
             builder.withAccessKeyId(monitoringContext.getCredential().getAccessKey())

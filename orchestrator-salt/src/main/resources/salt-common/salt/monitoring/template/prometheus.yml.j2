@@ -50,6 +50,11 @@ remote_write:
     queue_config:
       min_backoff: {{ monitoring.minBackoff }}
       max_backoff: {{ monitoring.maxBackoff }}
+      max_shards: {{ monitoring.maxShards }}
+      max_samples_per_send: {{ monitoring.maxSamplesPerSend }}
+      capacity: {{ monitoring.capacity }}
+    metadata_config:
+      max_samples_per_send: {{ monitoring.maxSamplesPerSend }}
     tls_config:
       insecure_skip_verify: true
 {%- endif %}

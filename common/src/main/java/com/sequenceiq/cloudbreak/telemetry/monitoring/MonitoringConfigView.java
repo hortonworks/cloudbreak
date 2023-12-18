@@ -20,9 +20,15 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
     private static final String RETENTION_MAX_TIME = "4h";
 
-    private static final String MIN_BACKOFF = "1s";
+    private static final String MIN_BACKOFF = "1m";
 
-    private static final String MAX_BACKOFF = "20m";
+    private static final String MAX_BACKOFF = "15m";
+
+    private static final String MAX_SHARDS = "50";
+
+    private static final String MAX_SAMPLES_PER_SEND = "2000";
+
+    private static final String CAPACITY = "10000";
 
     private static final String WAL_TRUNCATE_FREQUENCY = "2h";
 
@@ -71,6 +77,12 @@ public class MonitoringConfigView implements TelemetryConfigView {
     private final String minBackoff;
 
     private final String maxBackoff;
+
+    private String maxShards;
+
+    private String maxSamplesPerSend;
+
+    private String capacity;
 
     private final String walTruncateFrequency;
 
@@ -123,6 +135,9 @@ public class MonitoringConfigView implements TelemetryConfigView {
         this.retentionMaxTime = builder.retentionMaxTime;
         this.minBackoff = builder.minBackoff;
         this.maxBackoff = builder.maxBackoff;
+        this.maxShards = builder.maxShards;
+        this.maxSamplesPerSend = builder.maxSamplesPerSend;
+        this.capacity = builder.capacity;
         this.walTruncateFrequency = builder.walTruncateFrequency;
         this.accessKeyId = builder.accessKeyId;
         this.privateKey = builder.privateKey;
@@ -269,6 +284,9 @@ public class MonitoringConfigView implements TelemetryConfigView {
         map.put("retentionMaxTime", defaultIfNull(this.retentionMaxTime, RETENTION_MAX_TIME));
         map.put("minBackoff", defaultIfNull(this.minBackoff, MIN_BACKOFF));
         map.put("maxBackoff", defaultIfNull(this.maxBackoff, MAX_BACKOFF));
+        map.put("maxShards", defaultIfNull(this.maxShards, MAX_SHARDS));
+        map.put("maxSamplesPerSend", defaultIfNull(this.maxSamplesPerSend, MAX_SAMPLES_PER_SEND));
+        map.put("capacity", defaultIfNull(this.capacity, CAPACITY));
         map.put("walTruncateFrequency", defaultIfNull(this.walTruncateFrequency, WAL_TRUNCATE_FREQUENCY));
         map.put("username", defaultIfNull(this.username, EMPTY_CONFIG_DEFAULT));
         map.put("password", this.password != null ? this.password : EMPTY_CONFIG_DEFAULT);
@@ -340,6 +358,12 @@ public class MonitoringConfigView implements TelemetryConfigView {
         private String minBackoff;
 
         private String maxBackoff;
+
+        private String maxShards;
+
+        private String maxSamplesPerSend;
+
+        private String capacity;
 
         private String walTruncateFrequency;
 
@@ -499,6 +523,21 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
         public Builder withMaxBackoff(String maxBackoff) {
             this.maxBackoff = maxBackoff;
+            return this;
+        }
+
+        public Builder withMaxShards(String maxShards) {
+            this.maxShards = maxShards;
+            return this;
+        }
+
+        public Builder withMaxSamplesPerSend(String maxSamplesPerSend) {
+            this.maxSamplesPerSend = maxSamplesPerSend;
+            return this;
+        }
+
+        public Builder withCapacity(String capacity) {
+            this.capacity = capacity;
             return this;
         }
 

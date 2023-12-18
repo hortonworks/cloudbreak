@@ -18,6 +18,12 @@ public class MonitoringAgentConfiguration {
 
     private String maxBackoff;
 
+    private String maxShards;
+
+    private String maxSamplesPerSend;
+
+    private String capacity;
+
     public Integer getPort() {
         return port;
     }
@@ -80,5 +86,29 @@ public class MonitoringAgentConfiguration {
 
     public void setMaxBackoff(String maxBackoff) {
         this.maxBackoff = maxBackoff;
+    }
+
+    public String getMaxShards() {
+        return maxShards;
+    }
+
+    public void setMaxShards(String maxShards) {
+        this.maxShards = maxShards;
+    }
+
+    public String getMaxSamplesPerSend() {
+        return maxSamplesPerSend;
+    }
+
+    public void setMaxSamplesPerSend(String maxSamplesPerSend) {
+        this.maxSamplesPerSend = maxSamplesPerSend;
+    }
+
+    public String getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(String capacity) {
+        this.capacity = capacity;
     }
 }

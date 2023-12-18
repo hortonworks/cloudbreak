@@ -25,8 +25,11 @@
 {% set agent_max_disk_usage = salt['pillar.get']('monitoring:agentMaxDiskUsage', '4GB') %}
 {% set retention_min_time = salt['pillar.get']('monitoring:retentionMinTime', '5m') %}
 {% set retention_max_time = salt['pillar.get']('monitoring:retentionMaxTime', '4h') %}
-{% set min_backoff = salt['pillar.get']('monitoring:minBackoff', '1s') %}
-{% set max_backoff = salt['pillar.get']('monitoring:maxBackoff', '20m') %}
+{% set min_backoff = salt['pillar.get']('monitoring:minBackoff', '1m') %}
+{% set max_backoff = salt['pillar.get']('monitoring:maxBackoff', '15m') %}
+{% set max_shards = salt['pillar.get']('monitoring:maxShards', '50') %}
+{% set max_samples_per_send = salt['pillar.get']('monitoring:maxSamplesPerSend', '2000') %}
+{% set capacity = salt['pillar.get']('monitoring:capacity', '10000') %}
 {% set wal_truncate_frequency = salt['pillar.get']('monitoring:walTruncateFrequency', '2h') %}
 {% set node_exporter_user = salt['pillar.get']('monitoring:nodeExporterUser', 'nodeuser') %}
 {% set node_exporter_port = salt['pillar.get']('monitoring:nodeExporterPort', 9100) %}
@@ -83,6 +86,9 @@
     "retentionMaxTime": retention_max_time,
     "minBackoff": min_backoff,
     "maxBackoff": max_backoff,
+    "maxShards": max_shards,
+    "maxSamplesPerSend": max_samples_per_send,
+    "capacity": capacity,
     "walTruncateFrequency": wal_truncate_frequency,
     "nodeExporterUser": node_exporter_user,
     "nodeExporterPort": node_exporter_port,
