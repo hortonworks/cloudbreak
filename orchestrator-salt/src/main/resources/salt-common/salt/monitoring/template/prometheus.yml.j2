@@ -59,6 +59,28 @@ remote_write:
       insecure_skip_verify: true
 {%- endif %}
 scrape_configs:
+{%- if cdp_prometheus_installed %}
+  - job_name: prometheus
+    scheme: 'https'
+    static_configs:
+     - targets: ['localhost:{{ monitoring.agentPort }}']
+       labels:
+         resource_crn: {{ telemetry.clusterCrn }}
+         platform: {{ telemetry.platform }}
+{%- if hostgroup %}
+         hostgroup: {{ hostgroup }}
+{%- endif %}
+    relabel_configs:
+      - target_label: instance
+        replacement: {{ instance_name }}:{{ monitoring.agentPort }}
+{%- if monitoring.localPassword %}
+    basic_auth:
+      username: {{ monitoring.agentUser }}
+      password: {{ monitoring.localPassword }}
+{%- endif %}
+    tls_config:
+       insecure_skip_verify: true
+{%- endif %}
   - job_name: node_exporter
     scheme: 'https'
     static_configs:
