@@ -9,8 +9,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageFallbackRequiredResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudImageFallbackException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -43,11 +45,16 @@ public class PrepareImageHandler implements CloudPlatformEventHandler<PrepareIma
             AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             Image image = request.getImage();
             CloudStack stack = request.getStack();
-            connector.setup().prepareImage(auth, stack, image);
+            connector.setup().prepareImage(auth, stack, image, request.getPrepareImageType(), request.getImageFallbackTarget());
             PrepareImageResult result = new PrepareImageResult(request.getResourceId());
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
             LOGGER.debug("Prepare image finished for {}", cloudContext);
+        } catch (CloudImageFallbackException e) {
+            LOGGER.info("Image fallback requested for {}", cloudContext.getName());
+            PrepareImageFallbackRequiredResult result = new PrepareImageFallbackRequiredResult(request.getResourceId());
+            request.getResult().onNext(result);
+            eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
         } catch (RuntimeException e) {
             PrepareImageResult failure = new PrepareImageResult(e, request.getResourceId());
             request.getResult().onNext(failure);

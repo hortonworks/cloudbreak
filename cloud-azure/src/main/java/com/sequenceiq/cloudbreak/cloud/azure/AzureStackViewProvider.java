@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.service.Retry;
 
 @Component
-class AzureStackViewProvider {
+public class AzureStackViewProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureStackViewProvider.class);
 
@@ -56,7 +56,7 @@ class AzureStackViewProvider {
     @Qualifier("DefaultRetryService")
     private Retry retryService;
 
-    AzureStackView getAzureStack(AzureCredentialView azureCredentialView, CloudStack cloudStack, AzureClient client, AuthenticatedContext ac) {
+    public AzureStackView getAzureStack(AzureCredentialView azureCredentialView, CloudStack cloudStack, AzureClient client, AuthenticatedContext ac) {
         Map<String, String> customImageNamePerInstance = getCustomImageNamePerInstance(ac, cloudStack);
         Network network = cloudStack.getNetwork();
         Map<String, Long> availableIPs = getNumberOfAvailableIPsInSubnets(client, network);

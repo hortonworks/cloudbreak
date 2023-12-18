@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 
@@ -24,11 +25,13 @@ public interface Setup {
      * @param authenticatedContext the context which already contains the authenticated client
      * @param stack                stack the definition of infrastructure that needs to be launched
      * @param image                the image to be copied
+     * @param prepareImageType     the caller flow, can be either during creation or image change
+     * @param fallbackTargetImage  the name of the image to be used in case of Marketplace -> VHD fallback
      */
-    void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image);
+    void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image, PrepareImageType prepareImageType, String fallbackTargetImage);
 
     /**
-     * Invoked by Cloudbreak to check the whether the image copy is finished
+     * Invoked by Cloudbreak to check whether the image copy is finished
      *
      * @param authenticatedContext the context which already contains the authenticated client
      * @param stack                stack the definition of infrastructure that needs to be launched

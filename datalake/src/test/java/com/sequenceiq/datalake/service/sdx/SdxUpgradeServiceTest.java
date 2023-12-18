@@ -205,7 +205,7 @@ public class SdxUpgradeServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_USER_CRN);
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Set.of()), anyString())).thenReturn(stackV4Response);
-        when(orderedOSUpgradeRequestProvider.createDatalakeOrderedOSUpgradeSetRequest(stackV4Response, TARGET_IMAGE_ID))
+        when(orderedOSUpgradeRequestProvider.createDatalakeOrderedOSUpgradeSetRequest(stackV4Response, TARGET_IMAGE_ID, sdxCluster.getClusterShape()))
                 .thenReturn(orderedOSUpgradeSetRequest);
         when(stackV4Endpoint.upgradeOsByUpgradeSetsInternal(0L, sdxCluster.getCrn(), orderedOSUpgradeSetRequest)).thenReturn(flowIdentifier);
 
@@ -228,7 +228,7 @@ public class SdxUpgradeServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_USER_CRN);
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Set.of()), anyString())).thenReturn(stackV4Response);
-        when(orderedOSUpgradeRequestProvider.createDatalakeOrderedOSUpgradeSetRequest(stackV4Response, TARGET_IMAGE_ID))
+        when(orderedOSUpgradeRequestProvider.createDatalakeOrderedOSUpgradeSetRequest(stackV4Response, TARGET_IMAGE_ID, sdxCluster.getClusterShape()))
                 .thenReturn(orderedOSUpgradeSetRequest);
         when(stackV4Endpoint.upgradeOsByUpgradeSetsInternal(0L, sdxCluster.getCrn(), orderedOSUpgradeSetRequest)).thenReturn(flowIdentifier);
 

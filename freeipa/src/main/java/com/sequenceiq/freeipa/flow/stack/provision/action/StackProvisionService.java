@@ -173,7 +173,7 @@ public class StackProvisionService {
         if (results.size() == 1 && (results.get(0).isFailed() || results.get(0).isDeleted())) {
             throw new OperationException(format("Failed to %s the stack for %s due to: %s", action, cloudContext, results.get(0).getStatusReason()));
         }
-        List<CloudResourceStatus> failedResources = results.stream().filter(r -> r.isFailed() || r.isDeleted()).collect(Collectors.toList());
+        List<CloudResourceStatus> failedResources = results.stream().filter(r -> r.isFailed() || r.isDeleted()).toList();
         if (!failedResources.isEmpty()) {
             throw new OperationException(format("Failed to %s the stack for %s due to: %s", action, cloudContext, failedResources));
         }

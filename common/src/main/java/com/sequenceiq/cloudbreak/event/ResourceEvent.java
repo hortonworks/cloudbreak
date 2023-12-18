@@ -305,6 +305,8 @@ public enum ResourceEvent {
     CLUSTER_CHANGED_CREDENTIAL("cluster.changed.credential"),
     CLUSTER_VERTICALSCALING("cluster.changing.verticalscale"),
     CLUSTER_VERTICALSCALED("cluster.changed.verticalscale"),
+    CLUSTER_ROOT_VOLUME_INCREASING("cluster.increasing.rootvolume"),
+    CLUSTER_ROOT_VOLUME_INCREASED("cluster.increased.rootvolume"),
     CLUSTER_VERTICALSCALED_FAILED("cluster.change.verticalscale.failed"),
     CLUSTER_CREATE_FAILED("cluster.create.failed"),
     CLUSTER_STARTING("cluster.starting"),

@@ -37,15 +37,15 @@ public class DataLakeMultiAzCalculatorService {
         } else {
             String stackSubnetId = multiAzCalculatorService.getStackSubnetIdIfExists(stack);
             String stackAz = stackSubnetId == null ? null : subnetAzPairs.get(stackSubnetId);
-            calculateByRoundRobinTreatingAuxiliaryAndGatewayAsOne(stack, subnetAzPairs, stackSubnetId, stackAz);
+            calculateByRoundRobinTreatingAuxiliaryAndMasterAsOne(stack, subnetAzPairs, stackSubnetId, stackAz);
         }
     }
 
-    public void calculateByRoundRobinTreatingAuxiliaryAndGatewayAsOne(Stack stack, Map<String, String> subnetAzPairs, String stackSubnetId, String stackAz) {
+    public void calculateByRoundRobinTreatingAuxiliaryAndMasterAsOne(Stack stack, Map<String, String> subnetAzPairs, String stackSubnetId, String stackAz) {
         LOGGER.info("Setup multiAZ network for {}", stack);
         for (InstanceGroup instanceGroup : multiAzCalculatorService.sortInstanceGroups(stack)) {
             if (!instanceGroup.getGroupName().equals(InstanceGroupName.AUXILIARY.getName())
-                    && !instanceGroup.getGroupName().equals(InstanceGroupName.GATEWAY.getName())) {
+                    && !instanceGroup.getGroupName().equals(InstanceGroupName.MASTER.getName())) {
                 LOGGER.info("Calculating multiAZ to {}", instanceGroup.getGroupName());
                 multiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, instanceGroup.getInstanceGroupNetwork(),
                         instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet());
@@ -53,23 +53,21 @@ public class DataLakeMultiAzCalculatorService {
             }
         }
         Optional<InstanceGroup> auxiliaryHostGroup = getInstanceGroupByInstanceGroupName(stack, InstanceGroupName.AUXILIARY);
-        Optional<InstanceGroup> gatewayHostGroup = getInstanceGroupByInstanceGroupName(stack, InstanceGroupName.GATEWAY);
-        if (auxiliaryHostGroup.isPresent() || gatewayHostGroup.isPresent()) {
+        Optional<InstanceGroup> masterHostGroup = getInstanceGroupByInstanceGroupName(stack, InstanceGroupName.MASTER);
+        if (auxiliaryHostGroup.isPresent() || masterHostGroup.isPresent()) {
             Set<InstanceMetaData> mergedInstanceMetaData = new HashSet<>();
-            mergedInstanceMetaData.addAll(getInstanceMetadata(stack, InstanceGroupName.GATEWAY));
+            mergedInstanceMetaData.addAll(getInstanceMetadata(stack, InstanceGroupName.MASTER));
             mergedInstanceMetaData.addAll(getInstanceMetadata(stack, InstanceGroupName.AUXILIARY));
             AtomicReference<InstanceGroupNetwork> instanceGroupNetwork = new AtomicReference<>(new InstanceGroupNetwork());
             auxiliaryHostGroup.ifPresentOrElse(hostgroup -> instanceGroupNetwork.set(auxiliaryHostGroup.get().getInstanceGroupNetwork()),
-                    () -> instanceGroupNetwork.set(gatewayHostGroup.get().getInstanceGroupNetwork()));
-            LOGGER.info("Auxiliary/Gateway hostgroup's Metadata: {}", mergedInstanceMetaData);
-            LOGGER.info("Calculation being done for Auxiliary/Gateway");
+                    () -> instanceGroupNetwork.set(masterHostGroup.get().getInstanceGroupNetwork()));
+            LOGGER.info("Auxiliary/Master hostgroup's Metadata: {}", mergedInstanceMetaData);
+            LOGGER.info("Calculation being done for Auxiliary/Master");
             multiAzCalculatorService.calculateByRoundRobin(subnetAzPairs, instanceGroupNetwork.get(), mergedInstanceMetaData);
-            if (auxiliaryHostGroup.isPresent()) {
-                multiAzCalculatorService.prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, auxiliaryHostGroup.get());
-            }
-            if (gatewayHostGroup.isPresent()) {
-                multiAzCalculatorService.prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, gatewayHostGroup.get());
-            }
+            auxiliaryHostGroup.ifPresent(instanceGroup ->
+                    multiAzCalculatorService.prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, instanceGroup));
+            masterHostGroup.ifPresent(instanceGroup ->
+                    multiAzCalculatorService.prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(stackSubnetId, stackAz, instanceGroup));
         }
     }
 

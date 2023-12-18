@@ -11,9 +11,6 @@
       {
         "name": "master",
         "template": {
-          "rootVolume": {
-            "size": 50
-          },
           "yarn": {
             "cpus": 4,
             "memory": 32768
@@ -26,9 +23,6 @@
       {
         "name": "coordinator",
         "template": {
-          "rootVolume": {
-            "size": 50
-          },
           "yarn": {
             "cpus": 4,
             "memory": 8192
@@ -41,9 +35,6 @@
       {
         "name": "executor",
         "template": {
-          "rootVolume": {
-            "size": 50
-          },
           "yarn": {
             "cpus": 4,
             "memory": 8192

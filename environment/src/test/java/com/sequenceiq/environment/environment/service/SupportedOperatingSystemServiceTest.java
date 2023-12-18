@@ -117,7 +117,6 @@ class SupportedOperatingSystemServiceTest {
         when(providerPreferencesService.isGovCloudDeployment()).thenReturn(false);
         when(entitlementService.isRhel8ImageSupportEnabled((any()))).thenReturn(true);
         when(entitlementService.isRhel8ImagePreferred((any()))).thenReturn(false);
-        when(entitlementService.internalTenant((any()))).thenReturn(true);
 
         SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", "Azure");
 

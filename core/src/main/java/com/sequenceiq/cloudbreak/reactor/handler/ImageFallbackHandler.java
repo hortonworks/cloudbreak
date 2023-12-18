@@ -41,7 +41,8 @@ public class ImageFallbackHandler extends ExceptionCatcherEventHandler<ImageFall
 
     @Override
     protected Selectable doAccept(HandlerEvent<ImageFallbackRequest> event) {
-        Long stackId = event.getData().getResourceId();
+        ImageFallbackRequest request = event.getData();
+        Long stackId = request.getResourceId();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         if (entitlementService.azureOnlyMarketplaceImagesEnabled(accountId)) {
             return new ImageFallbackFailed(stackId, new CloudbreakServiceException("Cannot fallback to VHD image. Only Azure Marketplace images allowed."));

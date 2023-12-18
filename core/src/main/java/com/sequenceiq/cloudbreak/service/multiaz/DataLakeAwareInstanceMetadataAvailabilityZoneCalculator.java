@@ -42,30 +42,30 @@ public class DataLakeAwareInstanceMetadataAvailabilityZoneCalculator extends Ins
         LOGGER.info("Populating availability zones for Enterprise Data Lake");
         Set<InstanceMetaData> updatedInstancesMetaData = new HashSet<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            if (notGatewayAndNotAuxiliaryGroup(instanceGroup)) {
+            if (notMasterAndNotAuxiliaryGroup(instanceGroup)) {
                 updatedInstancesMetaData.addAll(populateAvailabilityZonesOnGroup(instanceGroup));
             }
         }
-        Optional<InstanceGroup> gatewayInstanceGroup = getInstanceGroupByInstanceGroupName(stack, InstanceGroupName.GATEWAY);
+        Optional<InstanceGroup> masterInstanceGroup = getInstanceGroupByInstanceGroupName(stack, InstanceGroupName.MASTER);
         Optional<InstanceGroup> auxiliaryInstanceGroup = getInstanceGroupByInstanceGroupName(stack, InstanceGroupName.AUXILIARY);
-        if (gatewayInstanceGroup.isPresent() || auxiliaryInstanceGroup.isPresent()) {
+        if (masterInstanceGroup.isPresent() || auxiliaryInstanceGroup.isPresent()) {
             Set<InstanceMetaData> mergedInstanceMetaData = new HashSet<>();
-            gatewayInstanceGroup.ifPresent(ig -> mergedInstanceMetaData.addAll(ig.getNotTerminatedInstanceMetaDataSet()));
+            masterInstanceGroup.ifPresent(ig -> mergedInstanceMetaData.addAll(ig.getNotTerminatedInstanceMetaDataSet()));
             auxiliaryInstanceGroup.ifPresent(ig -> mergedInstanceMetaData.addAll(ig.getNotTerminatedInstanceMetaDataSet()));
-            LOGGER.info("Auxiliary/Gateway instance group's meta data: {}", mergedInstanceMetaData);
-            Set<String> availabilityZones = gatewayInstanceGroup.or(() -> auxiliaryInstanceGroup).get().getAvailabilityZones();
-            updatedInstancesMetaData.addAll(populateAvailabilityZoneOfInstances(availabilityZones, mergedInstanceMetaData, "Gateway/Auxiliary"));
+            LOGGER.info("Auxiliary/Master instance group's meta data: {}", mergedInstanceMetaData);
+            Set<String> availabilityZones = masterInstanceGroup.or(() -> auxiliaryInstanceGroup).get().getAvailabilityZones();
+            updatedInstancesMetaData.addAll(populateAvailabilityZoneOfInstances(availabilityZones, mergedInstanceMetaData, "Master/Auxiliary"));
             updateInstancesMetaData(updatedInstancesMetaData);
         } else {
-            LOGGER.info("{} and {} instance groups are not present, nothing to do", InstanceGroupName.GATEWAY.getName(),
+            LOGGER.info("{} and {} instance groups are not present, nothing to do", InstanceGroupName.MASTER.getName(),
                     InstanceGroupName.AUXILIARY.getName());
         }
     }
 
-    private static boolean notGatewayAndNotAuxiliaryGroup(InstanceGroup instanceGroup) {
+    private static boolean notMasterAndNotAuxiliaryGroup(InstanceGroup instanceGroup) {
         String instanceGroupName = instanceGroup.getGroupName();
         return !InstanceGroupName.AUXILIARY.getName().equals(instanceGroupName)
-                && !InstanceGroupName.GATEWAY.getName().equals(instanceGroupName);
+                && !InstanceGroupName.MASTER.getName().equals(instanceGroupName);
     }
 
     private Optional<InstanceGroup> getInstanceGroupByInstanceGroupName(Stack stack, InstanceGroupName groupName) {

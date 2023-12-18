@@ -180,7 +180,7 @@ public class SdxUpgradeService {
 
     private OrderedOSUpgradeSetRequest createOrderedOSUpgradeSetRequest(SdxCluster cluster, String targetImageId) {
         StackV4Response stackV4Response = retrieveStack(cluster);
-        return orderedOSUpgradeRequestProvider.createDatalakeOrderedOSUpgradeSetRequest(stackV4Response, targetImageId);
+        return orderedOSUpgradeRequestProvider.createDatalakeOrderedOSUpgradeSetRequest(stackV4Response, targetImageId, cluster.getClusterShape());
     }
 
     private void sendOsUpgradeNotification(boolean rollingUpgradeEnabled, SdxCluster cluster) {

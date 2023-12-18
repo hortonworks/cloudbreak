@@ -61,7 +61,6 @@ public class AzureImageTermsSignerService {
     }
 
     /**
-     * Should not yet be used.
      *
      * @param subscriptionId        Azure subscription id
      * @param azureMarketplaceImage The marketplace image to be signed

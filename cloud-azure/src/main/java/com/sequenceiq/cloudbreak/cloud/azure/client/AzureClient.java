@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.Region;
+import com.azure.core.management.exception.ManagementError;
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.authorization.fluent.models.RoleAssignmentInner;
@@ -83,11 +84,14 @@ import com.azure.resourcemanager.privatedns.PrivateDnsZoneManager;
 import com.azure.resourcemanager.privatedns.fluent.models.VirtualNetworkLinkInner;
 import com.azure.resourcemanager.privatedns.models.PrivateDnsZone;
 import com.azure.resourcemanager.privatedns.models.VirtualNetworkLinkState;
+import com.azure.resourcemanager.resources.fluent.models.WhatIfOperationResultInner;
 import com.azure.resourcemanager.resources.fluentcore.arm.AvailabilityZoneId;
 import com.azure.resourcemanager.resources.fluentcore.model.HasInnerModel;
 import com.azure.resourcemanager.resources.models.Deployment;
 import com.azure.resourcemanager.resources.models.DeploymentMode;
 import com.azure.resourcemanager.resources.models.DeploymentOperations;
+import com.azure.resourcemanager.resources.models.DeploymentWhatIf;
+import com.azure.resourcemanager.resources.models.DeploymentWhatIfProperties;
 import com.azure.resourcemanager.resources.models.GenericResource;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.azure.resourcemanager.resources.models.ResourceGroups;
@@ -106,6 +110,8 @@ import com.azure.storage.blob.models.BlobProperties;
 import com.azure.storage.blob.models.BlobStorageException;
 import com.azure.storage.blob.options.BlobBeginCopyOptions;
 import com.azure.storage.common.StorageSharedKeyCredential;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
@@ -119,6 +125,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.azure.util.RegionUtil;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
@@ -453,7 +460,7 @@ public class AzureClient {
                     .getCopyId();
             LOGGER.debug("Image copy started, copy id: {}", copyId);
         } catch (BlobStorageException e) {
-            throw new CloudConnectorException("can't copy image blob, storage service error occurred", e);
+            throw new CloudConnectorException("Can't copy image blob, storage service error occurred.", e);
         }
     }
 
@@ -689,17 +696,14 @@ public class AzureClient {
      * @return Frontends (frontend name + IP addresses)
      */
     public List<AzureLoadBalancerFrontend> getLoadBalancerFrontends(String resourceGroupName, String loadBalancerName, LoadBalancerType loadBalancerType) {
-        switch (loadBalancerType) {
-            case PRIVATE:
-            case GATEWAY_PRIVATE:
-                return getLoadBalancerPrivateFrontends(resourceGroupName, loadBalancerName);
-            case PUBLIC:
-                return getLoadBalancerFrontends(resourceGroupName, loadBalancerName);
-            default:
+        return switch (loadBalancerType) {
+            case PRIVATE, GATEWAY_PRIVATE -> getLoadBalancerPrivateFrontends(resourceGroupName, loadBalancerName);
+            case PUBLIC -> getLoadBalancerFrontends(resourceGroupName, loadBalancerName);
+            default -> {
                 LOGGER.warn("Cannot get IPs for load balancer {}, it has an unknown type {}. Using an empty list instead.", loadBalancerName, loadBalancerType);
-                return List.of();
-
-        }
+                yield List.of();
+            }
+        };
     }
 
     private List<AzureLoadBalancerFrontend> getLoadBalancerFrontends(String resourceGroupName, String loadBalancerName) {
@@ -1103,5 +1107,38 @@ public class AzureClient {
 
     public AzureFlexibleServerClient getFlexibleServerClient() {
         return new AzureFlexibleServerClient(postgreSqlFlexibleManager, azureExceptionHandler);
+    }
+
+    public Optional<ManagementError> runWhatIfAnalysis(String resourceGroupName, String deploymentName, String template) {
+        try {
+            LOGGER.debug("Calling what-if analysis for deployment {} in resource group {}", deploymentName, resourceGroupName);
+            JsonNode jsonNode = JsonUtil.readTree(template);
+            WhatIfOperationResultInner operation = azure.genericResources()
+                    .manager()
+                    .serviceClient()
+                    .getDeployments()
+                    .whatIf(
+                            resourceGroupName,
+                            deploymentName,
+                            new DeploymentWhatIf()
+                                    .withProperties(
+                                            new DeploymentWhatIfProperties()
+                                                    .withTemplate(jsonNode)
+                                                    .withParameters(Map.of())
+                                                    .withMode(DeploymentMode.COMPLETE)),
+                            com.azure.core.util.Context.NONE);
+
+            if (operation.status().equals("Failed")) {
+                ManagementError error = operation.error();
+                LOGGER.warn("What-if analysis has failed with the following error: {}", error);
+                return Optional.of(error);
+            } else {
+                LOGGER.debug("What-if analysis has been completed with the following status: {}", operation.status());
+                return Optional.empty();
+            }
+        } catch (JsonProcessingException e) {
+            LOGGER.info("Template is not a valid json, this should not happen, omitting what if analysis");
+            return Optional.empty();
+        }
     }
 }

@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.type.ImageStatus;
@@ -69,7 +70,8 @@ public class GcpProvisionSetup implements Setup {
     private GcpImageAttemptMakerFactory gcpImageAttemptMakerFactory;
 
     @Override
-    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, com.sequenceiq.cloudbreak.cloud.model.Image image) {
+    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, com.sequenceiq.cloudbreak.cloud.model.Image image,
+            PrepareImageType prepareImageType, String fallbackTargetImage) {
         CloudCredential credential = authenticatedContext.getCloudCredential();
         CloudContext cloudContext = authenticatedContext.getCloudContext();
         String finalImageName = null;

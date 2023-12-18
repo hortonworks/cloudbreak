@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -26,8 +27,10 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudImageFallbackException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
 import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 
@@ -59,6 +62,9 @@ public class AzureImageSetupService {
 
     @Inject
     private AzureImageFormatValidator azureImageFormatValidator;
+
+    @Inject
+    private AzureMarketplaceValidatorService azureMarketplaceValidatorService;
 
     public ImageStatusResult checkImageStatus(AuthenticatedContext ac, CloudStack stack, Image image) {
 
@@ -113,39 +119,58 @@ public class AzureImageSetupService {
         return CopyStatusType.ABORTED.equals(copyState) || CopyStatusType.FAILED.equals(copyState);
     }
 
-    public void copyVhdImageIfNecessary(AuthenticatedContext ac, CloudStack stack, Image image, String region, AzureClient client) {
-        if (azureImageFormatValidator.isMarketplaceImageFormat(image)) {
-            LOGGER.info("Skipping image copy as target image ({}) is an Azure Marketplace image!", image.getImageName());
-            return;
-        }
+    public void copyVhdImageIfNecessary(AuthenticatedContext ac, CloudStack stack, Image image, String region, AzureClient client,
+            PrepareImageType prepareType, String imageFallbackTarget) {
         CloudContext cloudContext = ac.getCloudContext();
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
-        String imageStorageName = armStorage.getImageStorageName(new AzureCredentialView(ac.getCloudCredential()), cloudContext, stack);
-        String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(cloudContext, stack);
-
-        AzureImageInfo azureImageInfo = azureImageInfoService.getImageInfo(imageResourceGroupName, image.getImageName(), ac, client);
-        Optional<AzureImage> foundImage = azureImageService.findImage(azureImageInfo, client, ac);
-        if (foundImage.isPresent()) {
-            LOGGER.info("Custom image with id {} already exists in the target resource group {}, bypassing VHD check!",
-                    foundImage.get().getId(), imageResourceGroupName);
-            return;
+        MarketplaceValidationResult validationResult = azureMarketplaceValidatorService.validateMarketplaceImage(
+                image, prepareType, imageFallbackTarget, client, stack, ac);
+        boolean fallbackRequired = validationResult.isFallbackRequired();
+        boolean skipVhdCopy = validationResult.isSkipVhdCopy();
+        if (fallbackRequired) {
+            image.setImageName(imageFallbackTarget);
         }
+        if (!skipVhdCopy) {
+            String imageStorageName = armStorage.getImageStorageName(new AzureCredentialView(ac.getCloudCredential()), cloudContext, stack);
+            String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(cloudContext, stack);
 
-        createResourceGroupIfNotExists(client, resourceGroupName, region, stack);
-        createResourceGroupIfNotExists(client, imageResourceGroupName, region, stack);
-        azureStorageAccountService.createStorageAccount(ac, client, imageResourceGroupName, imageStorageName, region, stack);
-        azureStorageAccountService.createContainerInStorage(client, imageResourceGroupName, imageStorageName);
-        if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, azureImageInfo.getImageName())) {
-            try {
-                LOGGER.info("Starting to copy image: {}, into storage account: {}", image.getImageName(), imageStorageName);
-                client.copyImageBlobInStorageContainer(
-                        imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName(), azureImageInfo.getImageName());
-            } catch (CloudConnectorException e) {
-                LOGGER.warn("Something happened during start image copy.", e);
-                throw e;
+            AzureImageInfo azureImageInfo = azureImageInfoService.getImageInfo(imageResourceGroupName, image.getImageName(), ac, client);
+            Optional<AzureImage> foundImage = azureImageService.findImage(azureImageInfo, client, ac);
+            if (foundImage.isEmpty()) {
+                LOGGER.info("Custom image with name {} does not exist in the target resource group {}, checking VHD!",
+                        azureImageInfo.getImageName(), imageResourceGroupName);
+
+                createResourceGroupIfNotExists(client, resourceGroupName, region, stack);
+                createResourceGroupIfNotExists(client, imageResourceGroupName, region, stack);
+                azureStorageAccountService.createStorageAccount(ac, client, imageResourceGroupName, imageStorageName, region, stack);
+                azureStorageAccountService.createContainerInStorage(client, imageResourceGroupName, imageStorageName);
+                if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, azureImageInfo.getImageName())) {
+                    try {
+                        LOGGER.info("Starting to copy image: {}, into storage account: {}", image.getImageName(), imageStorageName);
+                        client.copyImageBlobInStorageContainer(
+                                imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName(), azureImageInfo.getImageName());
+                    } catch (CloudConnectorException e) {
+                        LOGGER.warn("Something happened during start image copy.", e);
+                        if (StringUtils.isNotBlank(validationResult.getValidationErrorMessage())) {
+                            String errorMessage = String.format(" VHD is copied over as a fallback mechanism as you seem to have Azure Marketplace image " +
+                                            "but its terms are not yet accepted and CDP_AZURE_IMAGE_MARKETPLACE_ONLY is not granted " +
+                                            "so we tried to pre-validate the deployment, " +
+                                            "but it failed with the following error, please correct it and try again: %s",
+                                    validationResult.getValidationErrorMessage());
+                            throw new CloudConnectorException(e.getMessage() + errorMessage);
+                        }
+                        throw e;
+                    }
+                } else {
+                    LOGGER.info("The image already exists in the storage account.");
+                }
+                if (fallbackRequired) {
+                    throw new CloudImageFallbackException("Fallback required");
+                }
+            } else {
+                LOGGER.info("Custom image with id {} already exists in the target resource group {}, bypassing VHD check!",
+                        foundImage.get().getId(), imageResourceGroupName);
             }
-        } else {
-            LOGGER.info("The image already exists in the storage account.");
         }
     }
 

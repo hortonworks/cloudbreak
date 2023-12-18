@@ -4,6 +4,9 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImage
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.CHECK_PACKAGE_VERSIONS_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.IMAGE_COPY_CHECK_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.IMAGE_COPY_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.IMAGE_FALLBACK_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.IMAGE_FALLBACK_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.IMAGE_FALLBACK_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.IMAGE_PREPARATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.IMAGE_PREPARATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.SET_IMAGE_FAILED_EVENT;
@@ -19,6 +22,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImage
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.IMAGE_CHECK_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.IMAGE_PREPARE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.INIT_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.SET_IMAGE_FALLBACK_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.SET_IMAGE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.STACK_IMAGE_UPDATE_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.STACK_IMAGE_UPDATE_FINISHED;
@@ -42,6 +46,10 @@ public class StackImageUpdateFlowConfig extends StackStatusFinalizerAbstractFlow
                     .from(CHECK_PACKAGE_VERSIONS_STATE).to(UPDATE_IMAGE_STATE).event(CHECK_PACKAGE_VERSIONS_FINISHED_EVENT).defaultFailureEvent()
                     .from(UPDATE_IMAGE_STATE).to(IMAGE_PREPARE_STATE).event(UPDATE_IMAGE_FINESHED_EVENT).defaultFailureEvent()
                     .from(IMAGE_PREPARE_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_PREPARATION_FINISHED_EVENT).failureEvent(IMAGE_PREPARATION_FAILED_EVENT)
+
+                    .from(IMAGE_PREPARE_STATE).to(SET_IMAGE_FALLBACK_STATE).event(IMAGE_FALLBACK_EVENT).failureEvent(IMAGE_PREPARATION_FAILED_EVENT)
+                    .from(SET_IMAGE_FALLBACK_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_FALLBACK_FINISHED_EVENT).failureEvent(IMAGE_FALLBACK_FAILED_EVENT)
+
                     .from(IMAGE_CHECK_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_COPY_CHECK_EVENT).defaultFailureEvent()
                     .from(IMAGE_CHECK_STATE).to(SET_IMAGE_STATE).event(IMAGE_COPY_FINISHED_EVENT).defaultFailureEvent()
                     .from(SET_IMAGE_STATE).to(STACK_IMAGE_UPDATE_FINISHED).event(SET_IMAGE_FINISHED_EVENT).failureEvent(SET_IMAGE_FAILED_EVENT)

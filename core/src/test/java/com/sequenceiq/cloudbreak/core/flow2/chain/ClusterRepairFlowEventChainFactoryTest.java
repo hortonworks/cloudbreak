@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.chain;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,8 +38,10 @@ import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.event.AwsVariantMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.CoreVerticalScalingTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -46,12 +49,14 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -120,6 +125,9 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Mock
     private ScalingHardLimitsService scalingHardLimitsService;
+
+    @Mock
+    private DefaultRootVolumeSizeProvider rootVolumeSizeProvider;
 
     @InjectMocks
     private ClusterRepairFlowEventChainFactory underTest;
@@ -571,6 +579,36 @@ public class ClusterRepairFlowEventChainFactoryTest {
         Assertions.assertFalse(flowTriggers.isEmpty());
         AwsVariantMigrationTriggerEvent actual = (AwsVariantMigrationTriggerEvent) flowTriggers.peek();
         Assertions.assertEquals(groupName, actual.getHostGroupName());
+    }
+
+    @Test
+    public void testRootDiskMigration() {
+        ReflectionTestUtils.setField(underTest, "rootDiskRepairMigrationEnabled", true);
+        when(rootVolumeSizeProvider.getForPlatform(any())).thenReturn(200);
+        Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
+        when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of(ATTACHED_WORKLOAD));
+        setupHostGroup(false);
+        InstanceGroupDto instanceGroupDto = mock(InstanceGroupDto.class);
+        com.sequenceiq.cloudbreak.view.InstanceGroupView instanceGroupView = mock(com.sequenceiq.cloudbreak.view.InstanceGroupView.class);
+        when(instanceGroupView.getGroupName()).thenReturn("core");
+        Template template = mock(Template.class);
+        when(template.getRootVolumeSize()).thenReturn(100);
+        when(instanceGroupView.getTemplate()).thenReturn(template);
+        when(instanceGroupDto.getInstanceGroup()).thenReturn(instanceGroupView);
+        when(stackDto.getInstanceGroupDtos()).thenReturn(List.of(instanceGroupDto));
+
+        FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
+        List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
+        assertEquals(List.of("FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "STACK_VERTICAL_SCALE_TRIGGER_EVENT",
+                "FULL_DOWNSCALE_TRIGGER_EVENT",
+                "FULL_UPSCALE_TRIGGER_EVENT",
+                "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
+                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"), triggeredOperations);
+
+        eventQueues.getQueue().remove();
+        CoreVerticalScalingTriggerEvent coreVerticalScalingTriggerEvent = (CoreVerticalScalingTriggerEvent) eventQueues.getQueue().poll();
+        assertEquals(200, coreVerticalScalingTriggerEvent.getRequest().getTemplate().getRootVolume().getSize().intValue());
     }
 
     private void setupHostGroup(boolean gatewayInstanceGroup) {

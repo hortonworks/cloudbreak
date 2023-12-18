@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.setup;
 
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType.EXECUTED_DURING_PROVISIONING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -241,7 +242,7 @@ public class GcpProvisionSetupTest {
         when(imagesGet.execute()).thenThrow(googleError);
 
         CloudConnectorException actual = assertThrows(CloudConnectorException.class,
-                () -> underTest.prepareImage(authenticatedContext, cloudStack, image));
+                () -> underTest.prepareImage(authenticatedContext, cloudStack, image, EXECUTED_DURING_PROVISIONING, null));
 
         assertTrue(actual.getMessage().contains("Google error"));
 
@@ -267,7 +268,7 @@ public class GcpProvisionSetupTest {
         when(imagesGet.execute()).thenReturn(imageGoogle);
         when(gcpStackUtil.getImageName(anyString())).thenReturn("super-image");
 
-        underTest.prepareImage(authenticatedContext, cloudStack, image);
+        underTest.prepareImage(authenticatedContext, cloudStack, image, EXECUTED_DURING_PROVISIONING, null);
     }
 
     @Test
@@ -310,7 +311,7 @@ public class GcpProvisionSetupTest {
                 .thenReturn(gcpImageAttemptMaker);
         when(gcpImageAttemptMaker.process()).thenReturn(AttemptResults.justFinish());
 
-        underTest.prepareImage(authenticatedContext, cloudStack, image);
+        underTest.prepareImage(authenticatedContext, cloudStack, image, EXECUTED_DURING_PROVISIONING, null);
 
         verify(gcpImageAttemptMakerFactory, times(1))
                 .create(anyString(), anyString(), anyString(), anyString(), anyString(), any(Storage.class));
@@ -356,7 +357,7 @@ public class GcpProvisionSetupTest {
         when(gcpImageAttemptMaker.process()).thenThrow(PollerStoppedException.class);
 
         CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
-                () -> underTest.prepareImage(authenticatedContext, cloudStack, image));
+                () -> underTest.prepareImage(authenticatedContext, cloudStack, image, EXECUTED_DURING_PROVISIONING, null));
 
         verify(gcpImageAttemptMakerFactory, times(1))
                 .create(anyString(), anyString(), anyString(), anyString(), anyString(), any(Storage.class));
@@ -403,7 +404,7 @@ public class GcpProvisionSetupTest {
         when(gcpImageAttemptMaker.process()).thenThrow(InterruptedException.class);
 
         CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
-                () -> underTest.prepareImage(authenticatedContext, cloudStack, image));
+                () -> underTest.prepareImage(authenticatedContext, cloudStack, image, EXECUTED_DURING_PROVISIONING, null));
 
         verify(gcpImageAttemptMakerFactory, times(1))
                 .create(anyString(), anyString(), anyString(), anyString(), anyString(), any(Storage.class));
@@ -444,7 +445,7 @@ public class GcpProvisionSetupTest {
         when(storageObjectsRewrite.execute()).thenThrow(IOException.class);
 
         CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
-                () -> underTest.prepareImage(authenticatedContext, cloudStack, image));
+                () -> underTest.prepareImage(authenticatedContext, cloudStack, image, EXECUTED_DURING_PROVISIONING, null));
 
         assertTrue(cloudConnectorException.getMessage().contains("Copying the image could not be started, " +
                 "please check whether you have given access to CDP for storage API."));

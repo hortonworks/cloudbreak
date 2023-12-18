@@ -54,6 +54,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
@@ -1109,7 +1110,7 @@ class SdxServiceTest {
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyBoolean())).thenReturn(imageCatalogPlatform);
         ImageV4Response imageV4Response = new ImageV4Response();
         when(imageCatalogService.getImageResponseFromImageRequest(any(), any())).thenReturn(imageV4Response);
-        assertThrows(BadRequestException.class,
+        assertThrows(IllegalArgumentException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "name", sdxClusterRequest, null)));
     }
 
@@ -1121,28 +1122,17 @@ class SdxServiceTest {
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyBoolean())).thenReturn(imageCatalogPlatform);
         SdxDatabase sdxDatabase = new SdxDatabase();
-        when(externalDatabaseConfigurer.configure(eq(environmentResponse), eq("os"), any(), any(), any())).thenReturn(sdxDatabase);
         ImageV4Response imageV4Response = new ImageV4Response();
         when(imageCatalogService.getImageResponseFromImageRequest(any(), any())).thenReturn(imageV4Response);
         String enterpriseJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
         StackV4Request stackV4Request = JsonUtil.readValue(enterpriseJson, StackV4Request.class);
-        when(cdpConfigService.getConfigForKey(any())).thenReturn(stackV4Request);
-        when(transactionService.required(any(Supplier.class))).thenThrow(TransactionExecutionException.class);
         SdxClusterRequest sdxClusterRequest = getSdxClusterRequest();
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            assertThrows(TransactionService.TransactionRuntimeExecutionException.class, () -> underTest.createSdx(USER_CRN, "name", sdxClusterRequest, null));
+            assertThrows(IllegalArgumentException.class, () -> underTest.createSdx(USER_CRN, "name", sdxClusterRequest, null));
         });
         verify(virtualMachineConfiguration, times(1)).getSupportedJavaVersions();
         verify(imageCatalogService, times(1)).getImageResponseFromImageRequest(any(), any());
-        verify(environmentClientService, times(2)).getByName(anyString());
-        verify(cdpConfigService, times(1)).getConfigForKey(any());
-        verify(externalDatabaseConfigurer, times(1)).configure(any(), anyString(), any(), any(), any());
-        verify(sdxReactorFlowManager, times(0)).triggerSdxCreation(any());
-        verify(transactionService, times(1)).required(any(Supplier.class));
-        verify(sdxClusterRepository, times(0)).save(any(SdxCluster.class));
-        verify(sdxStatusService, times(0)).setStatusForDatalakeAndNotify(eq(DatalakeStatusEnum.REQUESTED), anyString(), any(SdxCluster.class));
-        verify(ownerAssignmentService, times(1)).assignResourceOwnerRoleIfEntitled(anyString(), any());
-        verify(ownerAssignmentService, times(1)).notifyResourceDeleted(any());
+        verify(environmentClientService, times(1)).getByName(anyString());
     }
 
     @Test
@@ -1152,9 +1142,10 @@ class SdxServiceTest {
         when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(Set.of(11, 13, 17, 18));
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyBoolean())).thenReturn(imageCatalogPlatform);
-        SdxDatabase sdxDatabase = new SdxDatabase();
-        when(externalDatabaseConfigurer.configure(eq(environmentResponse), eq("os"), any(), any(), any())).thenReturn(sdxDatabase);
+        BaseStackDetailsV4Response baseStackDetailsV4Response = new BaseStackDetailsV4Response();
+        baseStackDetailsV4Response.setVersion("7.2.18");
         ImageV4Response imageV4Response = new ImageV4Response();
+        imageV4Response.setStackDetails(baseStackDetailsV4Response);
         when(imageCatalogService.getImageResponseFromImageRequest(any(), any())).thenReturn(imageV4Response);
         String enterpriseJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
         StackV4Request stackV4Request = JsonUtil.readValue(enterpriseJson, StackV4Request.class);
