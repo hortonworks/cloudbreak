@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -143,7 +144,8 @@ public class StackProvisionActions {
             protected Selectable createRequest(StackContext context) {
                 CloudStack cloudStack = cloudStackConverter.convert(context.getStack());
                 Image image = imageConverter.convert(imageService.getByStack(context.getStack()));
-                return new PrepareImageRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudStack, image);
+                return new PrepareImageRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudStack, image,
+                        PrepareImageType.EXECUTED_DURING_PROVISIONING);
             }
 
             @Override

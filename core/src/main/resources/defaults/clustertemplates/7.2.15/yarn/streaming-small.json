@@ -15,9 +15,6 @@
           "yarn": {
             "cpus": 4,
             "memory": 32768
-          },
-          "rootVolume": {
-            "size": 50
           }
         },
         "nodeCount": 1,
@@ -31,9 +28,6 @@
           "yarn": {
             "cpus": 4,
             "memory": 16384
-          },
-          "rootVolume": {
-            "size": 50
           }
         },
         "nodeCount": 3,
@@ -47,9 +41,6 @@
           "yarn": {
             "cpus": 4,
             "memory": 16384
-          },
-          "rootVolume": {
-            "size": 50
           }
         },
         "nodeCount": 0,

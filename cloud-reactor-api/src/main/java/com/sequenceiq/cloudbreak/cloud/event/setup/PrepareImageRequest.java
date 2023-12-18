@@ -5,6 +5,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
 
 public class PrepareImageRequest<T> extends CloudPlatformRequest<PrepareImageResult> {
 
@@ -12,10 +13,25 @@ public class PrepareImageRequest<T> extends CloudPlatformRequest<PrepareImageRes
 
     private final CloudStack stack;
 
-    public PrepareImageRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack stack, Image image) {
+    private final PrepareImageType prepareImageType;
+
+    private final String imageFallbackTarget;
+
+    public PrepareImageRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack stack, Image image, PrepareImageType prepareImageType) {
         super(cloudContext, cloudCredential);
         this.image = image;
         this.stack = stack;
+        this.prepareImageType = prepareImageType;
+        this.imageFallbackTarget = null;
+    }
+
+    public PrepareImageRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack stack, Image image, PrepareImageType prepareImageType,
+            String imageFallbackTarget) {
+        super(cloudContext, cloudCredential);
+        this.image = image;
+        this.stack = stack;
+        this.prepareImageType = prepareImageType;
+        this.imageFallbackTarget = imageFallbackTarget;
     }
 
     public Image getImage() {
@@ -26,11 +42,21 @@ public class PrepareImageRequest<T> extends CloudPlatformRequest<PrepareImageRes
         return stack;
     }
 
+    public PrepareImageType getPrepareImageType() {
+        return prepareImageType;
+    }
+
+    public String getImageFallbackTarget() {
+        return imageFallbackTarget;
+    }
+
     @Override
     public String toString() {
         return "PrepareImageRequest{" +
                 "image=" + image +
                 ", stack=" + stack +
-                '}';
+                ", prepareImageType=" + prepareImageType +
+                ", imageFallbackTarget='" + imageFallbackTarget + '\'' +
+                "} " + super.toString();
     }
 }

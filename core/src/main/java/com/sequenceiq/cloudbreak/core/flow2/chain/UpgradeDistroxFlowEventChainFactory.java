@@ -119,7 +119,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         }
     }
 
-    private static Optional<ClusterUpgradeTriggerEvent> createClusterUpgradeTriggerEvent(DistroXUpgradeTriggerEvent event) {
+    private Optional<ClusterUpgradeTriggerEvent> createClusterUpgradeTriggerEvent(DistroXUpgradeTriggerEvent event) {
         if (event.isLockComponents()) {
             LOGGER.debug("Skip runtime upgrade because the component versions are not changing.");
             return Optional.empty();

@@ -24,9 +24,6 @@
           }
         },
         "instanceType": "m5.4xlarge",
-        "rootVolume": {
-          "size": 150
-        },
         "attachedVolumes": [{
           "size": 150,
           "count": 1,
@@ -44,9 +41,6 @@
         "template": {
           "aws": {},
           "instanceType": "r5d.4xlarge",
-          "rootVolume": {
-            "size": 150
-          },
           "attachedVolumes": [{
             "size": 300,
             "count": 2,
@@ -64,9 +58,6 @@
         "template": {
           "aws": {},
           "instanceType": "m5.4xlarge",
-          "rootVolume": {
-            "size": 150
-          },
           "attachedVolumes": [{
             "size": 150,
             "count": 1,
@@ -88,9 +79,6 @@
             }
           },
           "instanceType": "r5d.4xlarge",
-          "rootVolume": {
-            "size": 150
-          },
           "attachedVolumes": [{
             "size": 500,
             "count": 1,
@@ -113,9 +101,6 @@
             }
           },
           "instanceType": "m5.4xlarge",
-          "rootVolume": {
-            "size": 150
-          },
           "attachedVolumes": [{
             "size": 150,
             "count": 1,
@@ -138,9 +123,6 @@
             }
           },
           "instanceType": "m5.4xlarge",
-          "rootVolume": {
-            "size": 150
-          },
           "attachedVolumes": [{
             "size": 150,
             "count": 1,

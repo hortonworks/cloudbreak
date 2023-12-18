@@ -34,9 +34,6 @@
         "recoveryMode": "MANUAL",
         "template": {
           "instanceType": "Standard_F16s_v2",
-          "rootVolume": {
-            "size": 150
-          },
           "attachedVolumes": [
             {
               "size": 1000,
@@ -53,9 +50,6 @@
         "recoveryMode": "MANUAL",
         "template": {
           "instanceType": "Standard_E4a_v4",
-          "rootVolume": {
-            "size": 100
-          },
           "attachedVolumes": [
             {
               "size": 100,

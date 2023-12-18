@@ -35,9 +35,6 @@
         "recoveryMode": "MANUAL",
         "template": {
           "instanceType": "e2-standard-8",
-          "rootVolume": {
-            "size": 150
-          },
           "attachedVolumes": [
             {
               "size": 1000,
@@ -54,9 +51,6 @@
         "recoveryMode": "MANUAL",
         "template": {
           "instanceType": "e2-standard-4",
-          "rootVolume": {
-            "size": 100
-          },
           "attachedVolumes": [
             {
               "size": 100,

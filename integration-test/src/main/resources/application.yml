@@ -143,13 +143,13 @@ integrationtest:
       secretKey:
     instance:
       type: m5.2xlarge
-      rootVolumeSize: 100
+      rootVolumeSize: 200
       volumeSize: 100
       volumeCount: 1
       volumeType: gp3
     storageOptimizedInstance:
       type: m5d.2xlarge
-      rootVolumeSize: 100
+      rootVolumeSize: 200
       volumeSize: 100
       volumeCount: 1
       volumeType: gp3
@@ -204,13 +204,13 @@ integrationtest:
       tenantId:
     instance:
       type: Standard_D16_v3
-      rootVolumeSize: 100
+      rootVolumeSize: 200
       volumeSize: 100
       volumeCount: 1
       volumeType: StandardSSD_LRS
     storageOptimizedInstance:
       type: Standard_L8s_v2
-      rootVolumeSize: 100
+      rootVolumeSize: 200
       volumeSize: 100
       volumeCount: 1
       volumeType: StandardSSD_LRS
@@ -286,13 +286,13 @@ integrationtest:
         projectId:
     instance:
       type: n1-standard-8
-      rootVolumeSize: 100
+      rootVolumeSize: 200
       volumeSize: 100
       volumeCount: 1
       volumeType: pd-standard
     storageOptimizedInstance:
       type: n2-highmem-8
-      rootVolumeSize: 100
+      rootVolumeSize: 200
       volumeSize: 375
       volumeCount: 2
       volumeType: local-ssd
@@ -325,7 +325,7 @@ integrationtest:
     instance:
       cpuCount: 4
       memory: 8192
-      rootVolumeSize: 100
+      rootVolumeSize: 200
       volumeSize: 0
       volumeCount: 0
     queue: infrastructure-services

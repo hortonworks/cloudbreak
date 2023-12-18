@@ -460,7 +460,7 @@ public class StackCreatorServiceTest {
         underTestSpy.fillInstanceMetadata(environmentResponse, stack);
         verify(multiAzCalculatorService, times(1)).calculateByRoundRobin(
                 multiAzCalculatorService.prepareSubnetAzMap(environmentResponse), stack);
-        verify(dataLakeMultiAzCalculatorService, times(0)).calculateByRoundRobinTreatingAuxiliaryAndGatewayAsOne(any(), any(), anyString(), any());
+        verify(dataLakeMultiAzCalculatorService, times(0)).calculateByRoundRobinTreatingAuxiliaryAndMasterAsOne(any(), any(), anyString(), any());
     }
 
     @Test
@@ -483,7 +483,7 @@ public class StackCreatorServiceTest {
 
         underTestSpy.fillInstanceMetadata(environmentResponse, stack);
         verify(multiAzCalculatorService, times(1)).calculateByRoundRobin(anyMap(), any(Stack.class));
-        verify(dataLakeMultiAzCalculatorService, times(0)).calculateByRoundRobinTreatingAuxiliaryAndGatewayAsOne(any(), any(), anyString(), any());
+        verify(dataLakeMultiAzCalculatorService, times(0)).calculateByRoundRobinTreatingAuxiliaryAndMasterAsOne(any(), any(), anyString(), any());
     }
 
     @Test
@@ -502,7 +502,7 @@ public class StackCreatorServiceTest {
         doReturn(subnetAzPairs(2)).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
         underTestSpy.fillInstanceMetadata(environmentResponse, stack);
         verify(dataLakeMultiAzCalculatorService, times(1)).calculateByRoundRobin(anyMap(), any(Stack.class));
-        verify(dataLakeMultiAzCalculatorService, times(0)).calculateByRoundRobinTreatingAuxiliaryAndGatewayAsOne(any(), any(), anyString(), any());
+        verify(dataLakeMultiAzCalculatorService, times(0)).calculateByRoundRobinTreatingAuxiliaryAndMasterAsOne(any(), any(), anyString(), any());
     }
 
     @Test
@@ -521,7 +521,7 @@ public class StackCreatorServiceTest {
         doReturn(subnetAzPairs(2)).when(multiAzCalculatorService).prepareSubnetAzMap(environmentResponse);
         underTestSpy.fillInstanceMetadata(environmentResponse, stack);
         verify(dataLakeMultiAzCalculatorService, times(1)).calculateByRoundRobin(anyMap(), any(Stack.class));
-        verify(dataLakeMultiAzCalculatorService, times(0)).calculateByRoundRobinTreatingAuxiliaryAndGatewayAsOne(any(), any(), anyString(), any());
+        verify(dataLakeMultiAzCalculatorService, times(0)).calculateByRoundRobinTreatingAuxiliaryAndMasterAsOne(any(), any(), anyString(), any());
     }
 
     private Map<String, String> subnetAzPairs(int subnetCount) {

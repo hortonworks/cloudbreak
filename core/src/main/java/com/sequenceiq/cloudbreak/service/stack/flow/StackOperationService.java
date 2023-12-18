@@ -210,20 +210,14 @@ public class StackOperationService {
     }
 
     public FlowIdentifier updateStatus(StackDto stackDto, StatusRequest status, boolean updateCluster) {
-        switch (status) {
-            case SYNC:
-                return sync(stackDto.getStack(), false);
-            case FULL_SYNC:
-                return sync(stackDto.getStack(), true);
-            case REPAIR_FAILED_NODES:
-                return repairFailedNodes(stackDto.getId());
-            case STOPPED:
-                return stop(stackDto, updateCluster);
-            case STARTED:
-                return start(stackDto.getStack());
-            default:
-                throw new BadRequestException("Cannot update the status of stack because status request not valid.");
-        }
+        return switch (status) {
+            case SYNC -> sync(stackDto.getStack(), false);
+            case FULL_SYNC -> sync(stackDto.getStack(), true);
+            case REPAIR_FAILED_NODES -> repairFailedNodes(stackDto.getId());
+            case STOPPED -> stop(stackDto, updateCluster);
+            case STARTED -> start(stackDto.getStack());
+            default -> throw new BadRequestException("Cannot update the status of stack because status request not valid.");
+        };
     }
 
     @VisibleForTesting

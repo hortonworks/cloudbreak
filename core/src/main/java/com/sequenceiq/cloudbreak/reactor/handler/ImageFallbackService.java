@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.reactor.handler;
 
-import static com.sequenceiq.common.model.OsType.RHEL8;
-
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -11,9 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
@@ -34,7 +33,7 @@ public class ImageFallbackService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageFallbackService.class);
 
     @Inject
-    private StackDtoService stackDtoService;
+    private StackDtoService stackService;
 
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
@@ -54,39 +53,62 @@ public class ImageFallbackService {
     @Inject
     private AzureImageFormatValidator azureImageFormatValidator;
 
-    public void fallbackToVhd(Long stackId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException, IOException {
-        StackView stackView = stackDtoService.getStackViewById(stackId);
-        if (!CloudPlatform.AZURE.name().equals(stackView.getCloudPlatform())) {
-            LOGGER.warn("Image fallback is only supported on the Azure cloud platform");
-            return;
-        }
+    @Inject
+    private EntitlementService entitlementService;
 
+    public void fallbackToVhd(Long stackId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException, IOException {
+        StackView stackView = stackService.getStackViewById(stackId);
         com.sequenceiq.cloudbreak.domain.stack.Component component = componentConfigProviderService.getImageComponent(stackId);
         Image currentImage = component.getAttributes().get(Image.class);
-
-        if (RHEL8.getOs().equalsIgnoreCase(currentImage.getOsType()) && azureImageFormatValidator.isVhdImageFormat(currentImage)) {
-            throw new CloudbreakServiceException("No valid fallback path from redhat8 VHD image.");
+        if (imageFallbackPermitted(currentImage, stackView)) {
+            String fallbackImageName = getFallbackImageName(stackView, currentImage);
+            LOGGER.debug("Replacing current image {} with fallback image {}", currentImage.getImageName(), fallbackImageName);
+            userDataService.makeSureUserDataIsMigrated(stackView.getId());
+            component.setAttributes(new Json(new Image(fallbackImageName,
+                    new HashMap<>(),
+                    currentImage.getOs(),
+                    currentImage.getOsType(),
+                    currentImage.getImageCatalogUrl(),
+                    currentImage.getImageCatalogName(),
+                    currentImage.getImageId(),
+                    currentImage.getPackageVersions(),
+                    currentImage.getDate(),
+                    currentImage.getCreated())));
+            componentConfigProviderService.store(component);
         }
+    }
 
-        ImageCatalogPlatform platformString = platformStringTransformer.getPlatformStringForImageCatalog(
-                stackView.getCloudPlatform(),
-                stackView.getPlatformVariant());
-        StatedImage image = imageCatalogService.getImage(stackView.getWorkspaceId(), currentImage.getImageCatalogUrl(),
-                currentImage.getImageCatalogName(), currentImage.getImageId());
-        String imageName = imageService.determineImageNameByRegion(stackView.getCloudPlatform(), platformString, stackView.getRegion(), image.getImage());
-        userDataService.makeSureUserDataIsMigrated(stackView.getId());
+    public String getFallbackImageName(StackView stack, Image currentImage) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        if (!imageFallbackPermitted(currentImage, stack)) {
+            return null;
+        } else {
 
-        component.setAttributes(new Json(new Image(imageName,
-                new HashMap<>(),
-                currentImage.getOs(),
-                currentImage.getOsType(),
-                currentImage.getImageCatalogUrl(),
-                currentImage.getImageCatalogName(),
-                currentImage.getImageId(),
-                currentImage.getPackageVersions(),
-                currentImage.getDate(),
-                currentImage.getCreated())));
+            ImageCatalogPlatform platformString = platformStringTransformer.getPlatformStringForImageCatalog(stack.getCloudPlatform(),
+                    stack.getPlatformVariant());
+            StatedImage image = imageCatalogService.getImage(stack.getWorkspaceId(), currentImage.getImageCatalogUrl(),
+                    currentImage.getImageCatalogName(), currentImage.getImageId());
+            String fallbackImageName = imageService.determineImageNameByRegion(stack.getCloudPlatform(), platformString, stack.getRegion(), image.getImage());
+            LOGGER.debug("Determined fallback image name is {}", fallbackImageName);
+            return fallbackImageName;
+        }
+    }
 
-        componentConfigProviderService.store(component);
+    private boolean imageFallbackPermitted(Image currentImage, StackView stack) {
+        String accountId = Crn.fromString(stack.getResourceCrn()).getAccountId();
+        boolean hasAzurePlatform = CloudPlatform.AZURE.equalsIgnoreCase(stack.getCloudPlatform());
+        boolean hasMarketplaceImageFormat = azureImageFormatValidator.isMarketplaceImageFormat(currentImage.getImageName());
+        boolean onlyMarketplaceImagesEnabled = entitlementService.azureOnlyMarketplaceImagesEnabled(accountId);
+
+        if (hasAzurePlatform && hasMarketplaceImageFormat && !onlyMarketplaceImagesEnabled) {
+            return true;
+        } else {
+            String msg = String.format("Image fallback for image %s is not permitted! Cloud platform: %s, Marketplace image: %s,  MP only entitlement: %b",
+                    currentImage.getImageName(),
+                    stack.getCloudPlatform(),
+                    hasMarketplaceImageFormat,
+                    onlyMarketplaceImagesEnabled);
+            LOGGER.warn(msg);
+            return false;
+        }
     }
 }

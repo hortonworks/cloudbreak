@@ -5,14 +5,14 @@ import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescr
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.common.model.JsonEntity;
+import com.sequenceiq.common.RootVolumeRequest;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class RootVolumeV4Request implements JsonEntity {
+public class RootVolumeV4Request implements RootVolumeRequest {
 
     @Schema(description = ROOT_VOLUME_SIZE, required = true)
     private Integer size;

@@ -15,9 +15,6 @@
           "yarn": {
             "cpus": 8,
             "memory": 65536
-          },
-          "rootVolume": {
-            "size": 100
           }
         },
         "nodeCount": 1,
@@ -30,9 +27,6 @@
           "yarn": {
             "cpus": 4,
             "memory": 16384
-          },
-          "rootVolume": {
-            "size": 50
           }
         },
         "nodeCount": 3,
@@ -46,9 +40,6 @@
           "yarn": {
             "cpus": 4,
             "memory": 16384
-          },
-          "rootVolume": {
-            "size": 50
           }
         },
         "nodeCount": 3,
@@ -62,9 +53,6 @@
           "yarn": {
             "cpus": 4,
             "memory": 16384
-          },
-          "rootVolume": {
-            "size": 50
           }
         },
         "nodeCount": 0,
@@ -78,9 +66,6 @@
           "yarn": {
             "cpus": 4,
             "memory": 16384
-          },
-          "rootVolume": {
-            "size": 50
           }
         },
         "nodeCount": 0,
@@ -93,9 +78,6 @@
           "yarn": {
             "cpus": 4,
             "memory": 16384
-          },
-          "rootVolume": {
-            "size": 50
           }
         },
         "nodeCount": 0,
@@ -108,9 +90,6 @@
           "yarn": {
             "cpus": 4,
             "memory": 16384
-          },
-          "rootVolume": {
-            "size": 50
           }
         },
         "nodeCount": 0,

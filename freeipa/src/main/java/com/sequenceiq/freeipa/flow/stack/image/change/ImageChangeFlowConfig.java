@@ -7,12 +7,16 @@ import static com.sequenceiq.freeipa.flow.stack.image.change.ImageChangeState.IM
 import static com.sequenceiq.freeipa.flow.stack.image.change.ImageChangeState.IMAGE_CHANGE_FINISHED_STATE;
 import static com.sequenceiq.freeipa.flow.stack.image.change.ImageChangeState.INIT_STATE;
 import static com.sequenceiq.freeipa.flow.stack.image.change.ImageChangeState.PREPARE_IMAGE_STATE;
+import static com.sequenceiq.freeipa.flow.stack.image.change.ImageChangeState.SET_FALLBACK_IMAGE_STATE;
 import static com.sequenceiq.freeipa.flow.stack.image.change.ImageChangeState.SET_IMAGE_ON_PROVIDER_STATE;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGED_IN_DB_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGE_NOT_REQUIRED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_COPY_CHECK_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_COPY_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_FALLBACK_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_FALLBACK_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_FALLBACK_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_PREPARATION_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_PREPARATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.SET_IMAGE_ON_PROVIDER_FAILED_EVENT;
@@ -50,6 +54,16 @@ public class ImageChangeFlowConfig extends AbstractFlowConfiguration<ImageChange
             .to(CHECK_IMAGE_STATE)
             .event(IMAGE_PREPARATION_FINISHED_EVENT)
             .failureEvent(IMAGE_PREPARATION_FAILED_EVENT)
+
+            .from(PREPARE_IMAGE_STATE)
+            .to(SET_FALLBACK_IMAGE_STATE)
+            .event(IMAGE_FALLBACK_EVENT)
+            .failureEvent(IMAGE_PREPARATION_FAILED_EVENT)
+
+            .from(SET_FALLBACK_IMAGE_STATE)
+            .to(CHECK_IMAGE_STATE)
+            .event(IMAGE_FALLBACK_FINISHED_EVENT)
+            .failureEvent(IMAGE_FALLBACK_FAILED_EVENT)
 
             .from(CHECK_IMAGE_STATE)
             .to(CHECK_IMAGE_STATE)

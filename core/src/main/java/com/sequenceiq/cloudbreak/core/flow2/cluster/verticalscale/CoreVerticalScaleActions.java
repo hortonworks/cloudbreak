@@ -88,7 +88,11 @@ public class CoreVerticalScaleActions {
                         instanceGroupService.findInstanceGroupViewByStackIdAndGroupName(payload.getRequest().getStackId(), payload.getRequest().getGroup());
                 String previousInstanceType = optionalGroup.map(InstanceGroupView::getTemplate).map(Template::getInstanceType).orElse("unknown");
                 variables.put(PREVIOUS_INSTANCE_TYPE, previousInstanceType);
-                variables.put(TARGET_INSTANCE_TYPE, payload.getRequest().getTemplate().getInstanceType());
+                if (payload.getRequest().getTemplate().getInstanceType() != null) {
+                    variables.put(TARGET_INSTANCE_TYPE, payload.getRequest().getTemplate().getInstanceType());
+                } else {
+                    variables.put(TARGET_INSTANCE_TYPE, previousInstanceType);
+                }
                 variables.put(GROUP_BEING_SCALED, payload.getRequest().getGroup());
             }
 

@@ -32,10 +32,9 @@ public class ImageCatalogPlatform {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ImageCatalogPlatform)) {
+        if (!(o instanceof ImageCatalogPlatform that)) {
             return false;
         }
-        ImageCatalogPlatform that = (ImageCatalogPlatform) o;
         return Objects.equals(platform, that.platform);
     }
 

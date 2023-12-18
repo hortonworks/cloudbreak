@@ -19,7 +19,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Image {
 
-    private final String imageName;
+    private String imageName;
 
     @Deprecated
     private Map<InstanceGroupType, String> userdata;
@@ -110,6 +110,10 @@ public class Image {
 
     public Long getCreated() {
         return created;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
     }
 
     @SuppressWarnings("checkstyle:CyclomaticComplexity")

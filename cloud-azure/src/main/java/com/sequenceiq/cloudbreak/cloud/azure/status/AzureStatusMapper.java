@@ -27,22 +27,11 @@ public class AzureStatusMapper {
     }
 
     public static CommonStatus mapCommonStatus(String status) {
-        CommonStatus mappedStatus;
-        switch (status) {
-            case "Accepted":
-                mappedStatus = CommonStatus.REQUESTED;
-                break;
-            case "Ready":
-            case "Succeeded":
-                mappedStatus = CommonStatus.CREATED;
-                break;
-            case "Canceled":
-            case "Deleted":
-            case "Failed":
-            default:
-                mappedStatus = CommonStatus.FAILED;
-                break;
-        }
+        CommonStatus mappedStatus = switch (status) {
+            case "Accepted" -> CommonStatus.REQUESTED;
+            case "Ready", "Succeeded" -> CommonStatus.CREATED;
+            default -> CommonStatus.FAILED;
+        };
         LOGGER.debug("Mapped status {} to common status {}", status, mappedStatus);
         return mappedStatus;
     }

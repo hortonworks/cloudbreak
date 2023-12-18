@@ -241,7 +241,7 @@ public class StackUpscaleActions {
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new ImageFallbackRequest(context.getStackId());
+                return new ImageFallbackRequest(context.getStackId(), context.getCloudContext());
             }
 
             @Override

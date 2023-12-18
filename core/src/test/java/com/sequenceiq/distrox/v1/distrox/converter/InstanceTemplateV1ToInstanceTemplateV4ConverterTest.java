@@ -74,8 +74,9 @@ class InstanceTemplateV1ToInstanceTemplateV4ConverterTest {
         source.setAzure(azureInstanceTemplateV1Parameters);
         source.setInstanceType(INSTANCE_TYPE);
 
+        environment.setCloudPlatform("AZURE");
         RootVolumeV4Request rootVolumeV4Request = new RootVolumeV4Request();
-        when(volumeConverter.convert(rootVolumeV1Request)).thenReturn(rootVolumeV4Request);
+        when(volumeConverter.convert(rootVolumeV1Request, "AZURE")).thenReturn(rootVolumeV4Request);
 
         AzureInstanceTemplateV4Parameters azureInstanceTemplateV4Parameters = new AzureInstanceTemplateV4Parameters();
         when(instanceTemplateParameterConverter.convert(any(AwsInstanceTemplateV1Parameters.class), eq(environment))).thenReturn(null);
@@ -114,8 +115,9 @@ class InstanceTemplateV1ToInstanceTemplateV4ConverterTest {
         source.setAzure(azureInstanceTemplateV4Parameters);
         source.setInstanceType(INSTANCE_TYPE);
 
+        environment.setCloudPlatform("AZURE");
         RootVolumeV1Request rootVolumeV1Request = new RootVolumeV1Request();
-        when(volumeConverter.convert(rootVolumeV4Request)).thenReturn(rootVolumeV1Request);
+        when(volumeConverter.convert(rootVolumeV4Request, "AZURE")).thenReturn(rootVolumeV1Request);
 
         AzureInstanceTemplateV1Parameters azureInstanceTemplateV1Parameters = new AzureInstanceTemplateV1Parameters();
         when(instanceTemplateParameterConverter.convert(azureInstanceTemplateV4Parameters)).thenReturn(azureInstanceTemplateV1Parameters);
@@ -138,8 +140,9 @@ class InstanceTemplateV1ToInstanceTemplateV4ConverterTest {
         source.setAws(awsParameters);
         source.setInstanceType(INSTANCE_TYPE);
 
+        environment.setCloudPlatform("AWS");
         RootVolumeV4Request rootVolumeV4Request = new RootVolumeV4Request();
-        when(volumeConverter.convert(rootVolumeV1Request)).thenReturn(rootVolumeV4Request);
+        when(volumeConverter.convert(rootVolumeV1Request, "AWS")).thenReturn(rootVolumeV4Request);
 
         AwsInstanceTemplateV4Parameters awsInstanceTemplateV4Parameters = new AwsInstanceTemplateV4Parameters();
         when(instanceTemplateParameterConverter.convert(awsParameters, environment)).thenReturn(awsInstanceTemplateV4Parameters);
@@ -181,8 +184,9 @@ class InstanceTemplateV1ToInstanceTemplateV4ConverterTest {
         source.setAws(awsInstanceTemplateV4Parameters);
         source.setInstanceType(INSTANCE_TYPE);
 
+        environment.setCloudPlatform("AWS");
         RootVolumeV1Request rootVolumeV1Request = new RootVolumeV1Request();
-        when(volumeConverter.convert(rootVolumeV4Request)).thenReturn(rootVolumeV1Request);
+        when(volumeConverter.convert(rootVolumeV4Request, "AWS")).thenReturn(rootVolumeV1Request);
 
         AwsInstanceTemplateV1Parameters awsInstanceTemplateV1Parameters = new AwsInstanceTemplateV1Parameters();
         when(instanceTemplateParameterConverter.convert(awsInstanceTemplateV4Parameters, environment)).thenReturn(awsInstanceTemplateV1Parameters);

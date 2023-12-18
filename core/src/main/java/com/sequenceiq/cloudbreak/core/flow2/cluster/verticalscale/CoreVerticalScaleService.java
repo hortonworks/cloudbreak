@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_ROOT_VOLUME_INCREASED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_ROOT_VOLUME_INCREASING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALING;
 
@@ -39,22 +41,40 @@ public class CoreVerticalScaleService {
     private CloudbreakFlowMessageService flowMessageService;
 
     public void verticalScale(Long stackId, StackVerticalScaleV4Request payload, String previousInstanceType) {
-        flowMessageService.fireEventAndLog(stackId,
-                Status.UPDATE_IN_PROGRESS.name(),
-                CLUSTER_VERTICALSCALING,
-                payload.getGroup(),
-                previousInstanceType,
-                payload.getTemplate().getInstanceType());
+        if (payload.getTemplate().getInstanceType() != null) {
+            flowMessageService.fireEventAndLog(stackId,
+                    Status.UPDATE_IN_PROGRESS.name(),
+                    CLUSTER_VERTICALSCALING,
+                    payload.getGroup(),
+                    previousInstanceType,
+                    payload.getTemplate().getInstanceType());
+        }
+        if (payload.getTemplate().getRootVolume() != null && payload.getTemplate().getRootVolume().getSize() != null) {
+            flowMessageService.fireEventAndLog(stackId,
+                    Status.UPDATE_IN_PROGRESS.name(),
+                    CLUSTER_ROOT_VOLUME_INCREASING,
+                    payload.getTemplate().getRootVolume().getSize().toString(),
+                    payload.getGroup());
+        }
     }
 
     public void finishVerticalScale(Long stackId, StackVerticalScaleV4Request payload, String previousInstanceType) {
         clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.STOPPED);
-        flowMessageService.fireEventAndLog(stackId,
-                Status.STOPPED.name(),
-                CLUSTER_VERTICALSCALED,
-                payload.getGroup(),
-                previousInstanceType,
-                payload.getTemplate().getInstanceType());
+        if (payload.getTemplate().getInstanceType() != null) {
+            flowMessageService.fireEventAndLog(stackId,
+                    Status.STOPPED.name(),
+                    CLUSTER_VERTICALSCALED,
+                    payload.getGroup(),
+                    previousInstanceType,
+                    payload.getTemplate().getInstanceType());
+        }
+        if (payload.getTemplate().getRootVolume() != null && payload.getTemplate().getRootVolume().getSize() != null) {
+            flowMessageService.fireEventAndLog(stackId,
+                    Status.UPDATE_IN_PROGRESS.name(),
+                    CLUSTER_ROOT_VOLUME_INCREASED,
+                    payload.getTemplate().getRootVolume().getSize().toString(),
+                    payload.getGroup());
+        }
     }
 
     public void updateTemplateWithVerticalScaleInformation(Long stackId, StackVerticalScaleV4Request stackVerticalScaleV4Request) {

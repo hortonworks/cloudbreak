@@ -37,6 +37,8 @@ abstract class AbstractStackImageUpdateAction<P extends Payload> extends Abstrac
 
     public static final String ORIGINAL_IMAGE = "ORIGINAL_IMAGE";
 
+    public static final String FALLBACK_IMAGE = "FALLBACK_IMAGE";
+
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
 

@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 @ExtendWith(MockitoExtension.class)
 public class SkuTypeResolverTest {
 
-    private SkuTypeResolver underTest = new SkuTypeResolver();
+    private final SkuTypeResolver underTest = new SkuTypeResolver();
 
     @ParameterizedTest(name = "{index}: ({0})={1}")
     @MethodSource("data")
@@ -38,9 +38,9 @@ public class SkuTypeResolverTest {
 
         PREMIUM_LOCALLY_REDUNDANT(AzureDiskType.PREMIUM_LOCALLY_REDUNDANT, StorageAccountSkuType.PREMIUM_LRS);
 
-        private AzureDiskType azureDiskType;
+        private final AzureDiskType azureDiskType;
 
-        private StorageAccountSkuType expectedStorageAccountSkuType;
+        private final StorageAccountSkuType expectedStorageAccountSkuType;
 
         DiskTypeSkuPair(AzureDiskType azureDiskType, StorageAccountSkuType storageAccountSkuType) {
             this.azureDiskType = azureDiskType;

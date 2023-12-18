@@ -690,7 +690,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     private SdxCluster validateAndCreateNewSdxCluster(SdxCluster sdxCluster, SdxClusterShape shape, boolean enableMultiAz,
             String clusterName, String userCrn, DetailedEnvironmentResponse environmentResponse) {
-
         validateShape(shape, sdxCluster.getRuntime(), environmentResponse);
         validateRazEnablement(sdxCluster.getRuntime(), sdxCluster.isRangerRazEnabled(), environmentResponse);
         validateRmsEnablement(sdxCluster.getRuntime(), sdxCluster.isRangerRazEnabled(), sdxCluster.isRangerRmsEnabled(),
@@ -716,7 +715,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             DetailedEnvironmentResponse environmentResponse) {
         validateShape(cluster.getClusterShape(), version, environmentResponse);
         validateRazEnablement(version, cluster.isEnableRangerRaz(), environmentResponse);
-        validateRmsEnablement(cluster.getRuntime(), cluster.isEnableRangerRaz(), cluster.isEnableRangerRms(),
+        validateRmsEnablement(version, cluster.isEnableRangerRaz(), cluster.isEnableRangerRms(),
                 environmentResponse.getCloudPlatform(), environmentResponse.getAccountId());
         validateMultiAz(cluster.isEnableMultiAz(), environmentResponse, cluster.getClusterShape());
         SdxCluster newSdxCluster = new SdxCluster();

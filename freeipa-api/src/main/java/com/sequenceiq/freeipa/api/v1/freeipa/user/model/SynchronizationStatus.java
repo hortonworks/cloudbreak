@@ -6,21 +6,14 @@ public enum SynchronizationStatus {
     REQUESTED, RUNNING, COMPLETED, FAILED, REJECTED, TIMEDOUT;
 
     public static SynchronizationStatus fromOperationState(OperationState operationState) {
-        switch (operationState) {
-            case REQUESTED:
-                return REQUESTED;
-            case RUNNING:
-                return RUNNING;
-            case COMPLETED:
-                return COMPLETED;
-            case FAILED:
-                return FAILED;
-            case REJECTED:
-                return REJECTED;
-            case TIMEDOUT:
-                return TIMEDOUT;
-            default:
-                throw new UnsupportedOperationException("OperationState not mapped: " + operationState);
-        }
+        return switch (operationState) {
+            case REQUESTED -> REQUESTED;
+            case RUNNING -> RUNNING;
+            case COMPLETED -> COMPLETED;
+            case FAILED -> FAILED;
+            case REJECTED -> REJECTED;
+            case TIMEDOUT -> TIMEDOUT;
+            default -> throw new UnsupportedOperationException("OperationState not mapped: " + operationState);
+        };
     }
 }
