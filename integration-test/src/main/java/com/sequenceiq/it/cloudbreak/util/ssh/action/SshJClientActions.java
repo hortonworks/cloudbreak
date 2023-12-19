@@ -93,7 +93,7 @@ public class SshJClientActions extends SshJClient {
                 .collect(Collectors.toList());
     }
 
-    private List<String> getPrimaryGatewayIps(List<InstanceGroupV4Response> instanceGroups, boolean publicIp) {
+    private List<String> getPrimaryGatewayIps(Collection<InstanceGroupV4Response> instanceGroups, boolean publicIp) {
         return instanceGroups.stream()
                 .filter(ig -> com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY == ig.getType())
                 .map(InstanceGroupV4Response::getMetadata)
@@ -261,7 +261,7 @@ public class SshJClientActions extends SshJClient {
                 .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, sshCommand)));
     }
 
-    public Map<String, Pair<Integer, String>> executeSshCommandOnPrimaryGateways(List<InstanceGroupV4Response> instanceGroups, String sshCommand,
+    public Map<String, Pair<Integer, String>> executeSshCommandOnPrimaryGateways(Collection<InstanceGroupV4Response> instanceGroups, String sshCommand,
             boolean publicIp) {
         return getPrimaryGatewayIps(instanceGroups, publicIp).stream()
                 .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, sshCommand)));

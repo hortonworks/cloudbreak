@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.client;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -148,11 +149,20 @@ public class DistroXTestClient {
     }
 
     public Action<DistroXTestDto, CloudbreakClient> rotateSecret(Set<CloudbreakSecretType> secretTypes) {
-        return rotateSecret(secretTypes, null);
+        return rotateSecret(secretTypes, null, Collections.emptyMap());
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> rotateSecret(Set<CloudbreakSecretType> secretTypes, Map<String, String> additionalParameters) {
+        return rotateSecret(secretTypes, null, additionalParameters);
     }
 
     public Action<DistroXTestDto, CloudbreakClient> rotateSecret(Set<CloudbreakSecretType> secretTypes, RotationFlowExecutionType rotationFlowExecutionType) {
-        return new DistroXRotateSecretAction(secretTypes, rotationFlowExecutionType);
+        return rotateSecret(secretTypes, rotationFlowExecutionType, Collections.emptyMap());
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> rotateSecret(Set<CloudbreakSecretType> secretTypes,
+            RotationFlowExecutionType rotationFlowExecutionType, Map<String, String> additionalParameters) {
+        return new DistroXRotateSecretAction(secretTypes, rotationFlowExecutionType, additionalParameters);
     }
 
     public Action<DistroXTestDto, CloudbreakClient> rotateSecretInternal(Collection<CloudbreakSecretType> secretTypes) {

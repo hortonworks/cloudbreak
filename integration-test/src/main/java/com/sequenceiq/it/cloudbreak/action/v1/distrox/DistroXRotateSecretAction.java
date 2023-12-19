@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.action.v1.distrox;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -22,9 +23,13 @@ public class DistroXRotateSecretAction implements Action<DistroXTestDto, Cloudbr
 
     private final RotationFlowExecutionType rotationFlowExecutionType;
 
-    public DistroXRotateSecretAction(Set<CloudbreakSecretType> secretTypes, RotationFlowExecutionType rotationFlowExecutionType) {
+    private Map<String, String> additionalParameters;
+
+    public DistroXRotateSecretAction(Set<CloudbreakSecretType> secretTypes, RotationFlowExecutionType rotationFlowExecutionType,
+            Map<String, String> additionalParameters) {
         this.secretTypes = secretTypes;
         this.rotationFlowExecutionType = rotationFlowExecutionType;
+        this.additionalParameters = additionalParameters;
     }
 
     @Override

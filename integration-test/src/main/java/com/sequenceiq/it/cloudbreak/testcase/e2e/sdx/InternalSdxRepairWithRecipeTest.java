@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLOUDERA_MANAGER_START;
+import static com.sequenceiq.freeipa.rotation.FreeIpaRotationAdditionalParameters.CLUSTER_NAME;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
@@ -11,11 +12,13 @@ import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_SERVICE
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_DATABASE_ROOT_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_GATEWAY_CERT;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_IDBROKER_CERT;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_LDAP_BIND_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_MGMT_CM_ADMIN_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_SALT_BOOT_SECRETS;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_USER_KEYPAIR;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -43,6 +46,7 @@ import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
+import com.sequenceiq.it.cloudbreak.util.SecretRotationCheckUtil;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
@@ -82,6 +86,9 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
     @Inject
     private RecipeUtil recipeUtil;
 
+    @Inject
+    private SecretRotationCheckUtil secretRotationCheckUtil;
+
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is an environment with SDX in available state",
@@ -119,39 +126,39 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
 
         testContext
                 .given(imageSettings, ImageSettingsTestDto.class)
-                    .withImageCatalog(commonCloudProperties().getImageCatalogName())
-                    .withImageId(selectedImageID)
+                .withImageCatalog(commonCloudProperties().getImageCatalogName())
+                .withImageId(selectedImageID)
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
-                    .withBlueprintName(getDefaultSDXBlueprintName())
-                    .withValidateBlueprint(Boolean.FALSE)
-                    .withClouderaManager(clouderaManager)
+                .withBlueprintName(getDefaultSDXBlueprintName())
+                .withValidateBlueprint(Boolean.FALSE)
+                .withClouderaManager(clouderaManager)
                 .given(RecipeTestDto.class)
-                    .withName(recipeName)
-                    .withContent(recipeUtil.generatePostCmStartRecipeContent(applicationContext))
-                    .withRecipeType(POST_CLOUDERA_MANAGER_START)
+                .withName(recipeName)
+                .withContent(recipeUtil.generatePostCmStartRecipeContent(applicationContext))
+                .withRecipeType(POST_CLOUDERA_MANAGER_START)
                 .when(recipeTestClient.createV4())
                 .given(MASTER_INSTANCEGROUP, InstanceGroupTestDto.class)
-                    .withHostGroup(MASTER)
-                    .withNodeCount(1)
-                    .withRecipes(recipeName)
-                    .given(IDBROKER_INSTANCEGROUP, InstanceGroupTestDto.class)
-                    .withHostGroup(IDBROKER)
-                    .withNodeCount(1)
-                    .withRecipes(recipeName)
+                .withHostGroup(MASTER)
+                .withNodeCount(1)
+                .withRecipes(recipeName)
+                .given(IDBROKER_INSTANCEGROUP, InstanceGroupTestDto.class)
+                .withHostGroup(IDBROKER)
+                .withNodeCount(1)
+                .withRecipes(recipeName)
                 .given(stack, StackTestDto.class)
-                    .withCluster(cluster)
-                    .withInstanceGroups(MASTER_INSTANCEGROUP, IDBROKER_INSTANCEGROUP)
-                    .withImageSettings(imageSettings)
+                .withCluster(cluster)
+                .withInstanceGroups(MASTER_INSTANCEGROUP, IDBROKER_INSTANCEGROUP)
+                .withImageSettings(imageSettings)
                 .given(TELEMETRY, TelemetryTestDto.class)
-                    .withLogging()
-                    .withReportClusterLogs()
+                .withLogging()
+                .withReportClusterLogs()
                 .given(sdxInternal, SdxInternalTestDto.class)
-                    .withCloudStorage(getCloudStorageRequest(testContext))
-                    .withDatabase(sdxDatabaseRequest)
-                    .withAutoTls()
-                    .withStackRequest(key(cluster), key(stack))
-                    .withTelemetry(TELEMETRY)
+                .withCloudStorage(getCloudStorageRequest(testContext))
+                .withDatabase(sdxDatabaseRequest)
+                .withAutoTls()
+                .withStackRequest(key(cluster), key(stack))
+                .withTelemetry(TELEMETRY)
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .awaitForHealthyInstances()
@@ -166,6 +173,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
     }
 
     private void secretRotation(TestContext testContext) {
+        String clusterName = testContext.given(SdxInternalTestDto.class).getResponse().getName();
         testContext
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .when(sdxTestClient.describeInternal(), key(sdxInternal))
@@ -180,7 +188,15 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                         DATALAKE_CM_DB_PASSWORD,
                         DATALAKE_CM_SERVICE_DB_PASSWORD,
                         DATALAKE_CM_INTERMEDIATE_CA_CERT)))
-                .awaitForFlow();
+                .awaitForFlow()
+                .when(sdxTestClient.rotateSecret(Set.of(DATALAKE_LDAP_BIND_PASSWORD),
+                        Map.of(CLUSTER_NAME.name(), clusterName)))
+                .awaitForFlow()
+                .then((tc, testDto, client) -> {
+                    secretRotationCheckUtil.checkLdapLogin(testDto.getCrn(), client);
+                    secretRotationCheckUtil.checkSSHLoginWithNewKeys(testDto.getCrn(), client);
+                    return testDto;
+                });
     }
 
     private void multiRepairThenValidate(TestContext testContext) {

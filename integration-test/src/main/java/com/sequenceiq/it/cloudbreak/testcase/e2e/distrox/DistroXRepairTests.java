@@ -3,15 +3,18 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CB_CM_ADMIN_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CM_DB_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CM_SERVICES_DB_PASSWORD;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_LDAP_BIND_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_MGMT_CM_ADMIN_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.GATEWAY_CERT;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_BOOT_SECRETS;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.USER_KEYPAIR;
+import static com.sequenceiq.freeipa.rotation.FreeIpaRotationAdditionalParameters.CLUSTER_NAME;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -30,6 +33,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
+import com.sequenceiq.it.cloudbreak.util.SecretRotationCheckUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 
@@ -41,6 +45,9 @@ public class DistroXRepairTests extends AbstractE2ETest {
 
     @Inject
     private DistroxUtil distroxUtil;
+
+    @Inject
+    private SecretRotationCheckUtil secretRotationCheckUtil;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -73,6 +80,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
     }
 
     private void secretRotation(TestContext testContext) {
+        String clusterName = testContext.given(DistroXTestDto.class).getResponse().getName();
         testContext
                 .given(DistroXTestDto.class)
                 .when(distroXTestClient.rotateSecret(Set.of(
@@ -84,7 +92,15 @@ public class DistroXRepairTests extends AbstractE2ETest {
                         CLUSTER_CM_DB_PASSWORD,
                         CLUSTER_CM_SERVICES_DB_PASSWORD,
                         DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD)))
-                .awaitForFlow();
+                .awaitForFlow()
+                .when(distroXTestClient.rotateSecret(Set.of(CLUSTER_LDAP_BIND_PASSWORD),
+                        Map.of(CLUSTER_NAME.name(), clusterName)))
+                .awaitForFlow()
+                .then((tc, testDto, client) -> {
+                    secretRotationCheckUtil.checkLdapLogin(tc, testDto, client);
+                    secretRotationCheckUtil.checkSSHLoginWithNewKeys(tc, testDto, client);
+                    return testDto;
+                });
     }
 
     private void masterRepairValidate(TestContext testContext) {
