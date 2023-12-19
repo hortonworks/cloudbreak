@@ -112,7 +112,7 @@ public class SubnetListerService {
                 .flatMap(Collection::stream)
                 .map(CloudNetwork::getSubnetsMeta)
                 .flatMap(Collection::stream)
-                .filter(subnet -> subnetIds.contains(subnet.getId()))
+                .filter(subnet -> subnetIds.contains(subnet.getId()) || subnetIds.stream().anyMatch(subnetId -> subnetId.endsWith("/" + subnet.getId())))
                 .collect(Collectors.toSet());
         LOGGER.debug("Subnets: {}", cloudSubnets);
         return cloudSubnets;

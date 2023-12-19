@@ -1,28 +1,42 @@
 package com.sequenceiq.redbeams.service.network;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
+import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
+import com.sequenceiq.redbeams.converter.cloud.CredentialToExtendedCloudCredentialConverter;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.dto.Credential;
 import com.sequenceiq.redbeams.service.CredentialService;
 
+@ExtendWith(MockitoExtension.class)
 public class SubnetListerServiceTest {
 
     private static final String ENVIRONMENT_CRN = "envCrn";
@@ -49,38 +63,36 @@ public class SubnetListerServiceTest {
     @Mock
     private DetailedEnvironmentResponse detailedEnvironmentResponse;
 
+    @Mock
+    private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
+
+    @Mock
+    private CloudParameterService cloudParameterService;
+
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private EnvironmentNetworkResponse environmentNetworkResponse;
 
-    private CloudSubnet subnet1;
+    private final CloudSubnet subnet1 = new CloudSubnet(SUBNET_ID_1, "name1");
 
-    private CloudSubnet subnet2;
+    private final CloudSubnet subnet2 = new CloudSubnet(SUBNET_ID_2, "name2");
 
-    private Map<String, CloudSubnet> subnets;
+    private final Map<String, CloudSubnet> subnets = Map.of(SUBNET_ID_1, subnet1, SUBNET_ID_2, subnet2);
 
-    private Credential credential;
+    private final Credential credential = new Credential(CREDENTIAL_CRN, CREDENTIAL_NAME, CREDENTIAL_ATTRIBUTES, "acc");
 
     @InjectMocks
     private SubnetListerService underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-
-        when(detailedEnvironmentResponse.getCrn()).thenReturn(ENVIRONMENT_CRN);
-        when(detailedEnvironmentResponse.getNetwork()).thenReturn(environmentNetworkResponse);
-
-        subnet1 = new CloudSubnet(SUBNET_ID_1, "name1");
-        subnet2 = new CloudSubnet(SUBNET_ID_2, "name2");
-        subnets = Map.of(SUBNET_ID_1, subnet1, SUBNET_ID_2, subnet2);
+        lenient().when(detailedEnvironmentResponse.getCrn()).thenReturn(ENVIRONMENT_CRN);
+        lenient().when(detailedEnvironmentResponse.getNetwork()).thenReturn(environmentNetworkResponse);
     }
 
     @Test
     public void testListSubnetsAws() {
         when(environmentNetworkResponse.getSubnetMetas()).thenReturn(subnets);
         when(environmentNetworkResponse.getCbSubnets()).thenReturn(subnets);
-        credential = new Credential(CREDENTIAL_CRN, CREDENTIAL_NAME, CREDENTIAL_ATTRIBUTES, "acc");
-        when(credentialService.getCredentialByEnvCrn(ENVIRONMENT_CRN)).thenReturn(credential);
 
         List<CloudSubnet> subnets = underTest.listSubnets(detailedEnvironmentResponse, CloudPlatform.AWS);
 
@@ -95,8 +107,8 @@ public class SubnetListerServiceTest {
         when(environmentNetworkResponse.getAzure().getResourceGroupName()).thenReturn(RESOURCE_GROUP);
         when(environmentNetworkResponse.getAzure().getNetworkId()).thenReturn(NETWORK_ID);
         Credential.AzureParameters azure = new Credential.AzureParameters(SUBSCRIPTION_ID);
-        credential = new Credential(CREDENTIAL_CRN, CREDENTIAL_NAME, CREDENTIAL_ATTRIBUTES, azure, "acc");
-        when(credentialService.getCredentialByEnvCrn(ENVIRONMENT_CRN)).thenReturn(credential);
+        Credential azureCredential = new Credential(CREDENTIAL_CRN, CREDENTIAL_NAME, CREDENTIAL_ATTRIBUTES, azure, "acc");
+        when(credentialService.getCredentialByEnvCrn(ENVIRONMENT_CRN)).thenReturn(azureCredential);
 
         List<CloudSubnet> subnets = underTest.listSubnets(detailedEnvironmentResponse, CloudPlatform.AZURE);
 
@@ -119,15 +131,63 @@ public class SubnetListerServiceTest {
 
     @Test
     public void testExpandAzureResourceIdWithResourceId() {
-        when(environmentNetworkResponse.getAzure().getResourceGroupName()).thenReturn(RESOURCE_GROUP);
-        when(environmentNetworkResponse.getAzure().getNetworkId()).thenReturn(NETWORK_ID);
-
         String subnetResourceId = formatAzureResourceId(SUBSCRIPTION_ID, RESOURCE_GROUP, NETWORK_ID, SUBNET_ID_1);
         CloudSubnet cloudSubnet = new CloudSubnet(subnetResourceId, "name1");
 
         CloudSubnet expandedSubnet = underTest.expandAzureResourceId(cloudSubnet, detailedEnvironmentResponse, SUBSCRIPTION_ID);
 
         assertEquals(subnetResourceId, expandedSubnet.getId());
+    }
+
+    @Test
+    void testFetchNetworksFilteredShortId() {
+        DBStack dbStack = new DBStack();
+        dbStack.setEnvironmentId(ENVIRONMENT_CRN);
+        dbStack.setCloudPlatform("AZURE");
+        dbStack.setRegion("sampleRegion");
+        dbStack.setPlatformVariant("AZURE");
+
+        when(credentialService.getCredentialByEnvCrn(ENVIRONMENT_CRN)).thenReturn(credential);
+
+        ExtendedCloudCredential extendedCloudCredential = mock(ExtendedCloudCredential.class);
+        when(extendedCloudCredentialConverter.convert(credential, dbStack.getCloudPlatform())).thenReturn(extendedCloudCredential);
+
+        CloudNetworks cloudNetworks = new CloudNetworks();
+        cloudNetworks.setCloudNetworkResponses(Map.of("asdf", Set.of(new CloudNetwork("asdf", "asdf", Set.of(subnet1, subnet2), Map.of()))));
+        when(cloudParameterService.getCloudNetworks(eq(extendedCloudCredential), eq(dbStack.getRegion()), anyString(), anyMap()))
+                .thenReturn(cloudNetworks);
+
+        List<String> subnetIds = Arrays.asList(SUBNET_ID_1, SUBNET_ID_2);
+
+        Set<CloudSubnet> result = underTest.fetchNetworksFiltered(dbStack, subnetIds);
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void testFetchNetworksFilteredLongId() {
+        DBStack dbStack = new DBStack();
+        dbStack.setEnvironmentId(ENVIRONMENT_CRN);
+        dbStack.setCloudPlatform("AZURE");
+        dbStack.setRegion("sampleRegion");
+        dbStack.setPlatformVariant("AZURE");
+
+        when(credentialService.getCredentialByEnvCrn(ENVIRONMENT_CRN)).thenReturn(credential);
+
+        ExtendedCloudCredential extendedCloudCredential = mock(ExtendedCloudCredential.class);
+        when(extendedCloudCredentialConverter.convert(credential, dbStack.getCloudPlatform())).thenReturn(extendedCloudCredential);
+
+        CloudNetworks cloudNetworks = new CloudNetworks();
+        cloudNetworks.setCloudNetworkResponses(Map.of("asdf", Set.of(new CloudNetwork("asdf", "asdf", Set.of(subnet1, subnet2), Map.of()))));
+        when(cloudParameterService.getCloudNetworks(eq(extendedCloudCredential), eq(dbStack.getRegion()), anyString(), anyMap()))
+                .thenReturn(cloudNetworks);
+
+        List<String> subnetIds = Arrays.asList("Microsoft/VPC/NETWORK/WHATEVER/" + SUBNET_ID_1, "2");
+
+        Set<CloudSubnet> result = underTest.fetchNetworksFiltered(dbStack, subnetIds);
+
+        assertEquals(1, result.size());
+        assertTrue(result.stream().allMatch(cloudSubnet -> cloudSubnet.getId().equals(SUBNET_ID_1)));
     }
 
     private String formatAzureResourceId(String subscription, String resourceGroup, String networkId, String subnetId) {
