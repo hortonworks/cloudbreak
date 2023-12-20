@@ -142,6 +142,7 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
     )
     public void testEphemeralDistroXMasterRepairWithTerminatedEC2Instances(TestContext testContext) {
         Assert.assertNotNull(classContext, "Class level test context object should not be null. All methods should use the same");
+        classContext.setShutdown(false);
 
         List<String> actualVolumeIds = new ArrayList<>();
         List<String> expectedVolumeIds = new ArrayList<>();
@@ -185,6 +186,8 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
             when = "upgrade called on the DistroX cluster", then = "DistroX upgrade should be successful, the cluster should be up and running")
     public void testDistroXEphemeralUpgrade(TestContext testContext) {
         Assert.assertNotNull(classContext, "Class level test context object should not be null. All methods should use the same");
+        classContext.setShutdown(false);
+
         String targetRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeTargetVersion();
         classContext
                 .given(DistroXUpgradeTestDto.class)

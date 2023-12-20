@@ -52,6 +52,14 @@ class DatabaseDefaultVersionProviderTest {
                         CloudPlatform.AZURE, false, true},
                 {"Version not set, runtime newer, os redhat8, Azure external, flexible enabled", "7.2.14", "redhat8", null, "7.2.12", "14", "14",
                         CloudPlatform.AZURE, true, true},
+                {"Version not set, runtime null, os centos7, Azure external, flexible disabled", null, "centos7", null, "7.2.12", "14", "11",
+                        CloudPlatform.AZURE, true, false},
+                {"Version not set, runtime null, os centos7, Azure external, flexible enabled", null, "centos7", null, "7.2.12", "14", null,
+                        CloudPlatform.AZURE, true, true},
+                {"Version not set, runtime older, os centos7, Azure external, flexible disabled", "7.2.10", "centos7", null, "7.2.12", "11", "11",
+                        CloudPlatform.AZURE, true, false},
+                {"Version not set, runtime older, os centos7, Azure external, flexible enabled", "7.2.10", "centos7", null, "7.2.12", "11", null,
+                        CloudPlatform.AZURE, true, true},
         };
     }
 
