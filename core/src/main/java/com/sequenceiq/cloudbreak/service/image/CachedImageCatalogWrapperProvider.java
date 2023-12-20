@@ -64,7 +64,7 @@ public class CachedImageCatalogWrapperProvider {
                 long started = System.currentTimeMillis();
                 String content;
                 if (catalogUrl.startsWith("http")) {
-                    Client client = restClientFactory.getOrCreateDefault();
+                    Client client = restClientFactory.getOrCreateWithFollowRedirects();
                     WebTarget target = client.target(catalogUrl);
                     Response response = target.request().get();
                     content = readResponse(target, response);

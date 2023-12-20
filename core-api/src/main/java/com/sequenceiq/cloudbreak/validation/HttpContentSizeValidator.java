@@ -29,7 +29,8 @@ public class HttpContentSizeValidator implements ConstraintValidator<ValidHttpCo
     @Inject
     private ContentSizeProvider contentSizeProvider;
 
-    private HttpHelper httpHelper = HttpHelper.getInstance();
+    @Inject
+    private HttpHelper httpHelper;
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {

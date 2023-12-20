@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.api.helper;
 
-import javax.ws.rs.client.Client;
+import javax.inject.Inject;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
@@ -8,31 +8,25 @@ import javax.ws.rs.core.Response.StatusType;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.client.RestClientFactory;
 
+@Component
 public class HttpHelper {
 
-    private static final HttpHelper INSTANCE = new HttpHelper();
-
-    private final Client client = RestClientUtil.get();
-
-    private HttpHelper() {
-    }
-
-    public static HttpHelper getInstance() {
-        return INSTANCE;
-    }
+    @Inject
+    private RestClientFactory restClientFactory;
 
     public Pair<StatusType, Integer> getContentLength(String url) {
-        WebTarget target = client.target(url);
+        WebTarget target = restClientFactory.getOrCreateWithFollowRedirects().target(url);
         try (Response response = target.request().head()) {
             return new ImmutablePair<>(response.getStatusInfo(), response.getLength());
         }
     }
 
     public Pair<StatusType, String> getContent(String url) {
-        WebTarget target = client.target(url);
+        WebTarget target = restClientFactory.getOrCreateWithFollowRedirects().target(url);
         try (Response response = target.request().get()) {
             StatusType responseStatusInfo = response.getStatusInfo();
             return responseStatusInfo.getFamily().equals(Family.SUCCESSFUL)

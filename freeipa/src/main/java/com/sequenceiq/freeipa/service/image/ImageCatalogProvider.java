@@ -28,7 +28,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.FreeIpaVersions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
@@ -52,6 +52,9 @@ public class ImageCatalogProvider {
 
     @Inject
     private ObjectMapper objectMapper;
+
+    @Inject
+    private RestClientFactory restClientFactory;
 
     @Cacheable(cacheNames = "imageCatalogCache", key = "#catalogUrl")
     public ImageCatalog getImageCatalog(String catalogUrl)  {
@@ -86,7 +89,7 @@ public class ImageCatalogProvider {
 
     private String readCatalogContent(String catalogUrl) throws IOException {
         if (catalogUrl.startsWith("http")) {
-            Client client = RestClientUtil.get();
+            Client client = restClientFactory.getOrCreateWithFollowRedirects();
             WebTarget target = client.target(catalogUrl);
             Response response = target.request().get();
             return readResponse(target, response);

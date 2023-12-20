@@ -18,11 +18,14 @@ public class ConfigKey {
 
     private final Optional<Integer> timeout;
 
+    private final boolean followRedirects;
+
     private ConfigKey(ConfigKey.Builder builder) {
         this.secure = builder.secure;
         this.debug = builder.debug;
         this.ignorePreValidation = builder.ignorePreValidation;
         this.timeout = builder.timeout;
+        this.followRedirects = builder.followRedirects;
     }
 
     public ConfigKey(boolean secure, boolean debug, boolean ignorePreValidation) {
@@ -30,6 +33,7 @@ public class ConfigKey {
         this.debug = debug;
         this.ignorePreValidation = ignorePreValidation;
         this.timeout = Optional.empty();
+        this.followRedirects = false;
     }
 
     public ConfigKey(boolean secure, boolean debug, boolean ignorePreValidation, int timeout) {
@@ -37,6 +41,15 @@ public class ConfigKey {
         this.debug = debug;
         this.ignorePreValidation = ignorePreValidation;
         this.timeout = Optional.of(timeout);
+        this.followRedirects = false;
+    }
+
+    public ConfigKey(boolean secure, boolean debug, boolean ignorePreValidation, int timeout, boolean followRedirects) {
+        this.secure = secure;
+        this.debug = debug;
+        this.ignorePreValidation = ignorePreValidation;
+        this.timeout = Optional.of(timeout);
+        this.followRedirects = followRedirects;
     }
 
     public boolean isSecure() {
@@ -55,6 +68,10 @@ public class ConfigKey {
         return timeout;
     }
 
+    public boolean isFollowRedirects() {
+        return followRedirects;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || !Objects.equals(getClass(), o.getClass())) {
@@ -70,6 +87,7 @@ public class ConfigKey {
                 .append(debug, configKey.debug)
                 .append(ignorePreValidation, configKey.ignorePreValidation)
                 .append(timeout, configKey.timeout)
+                .append(followRedirects, configKey.followRedirects)
                 .isEquals();
     }
 
@@ -80,6 +98,7 @@ public class ConfigKey {
                 .append(debug)
                 .append(ignorePreValidation)
                 .append(timeout.orElse(null))
+                .append(followRedirects)
                 .toHashCode();
     }
 
@@ -90,6 +109,7 @@ public class ConfigKey {
                 .append("debug", debug)
                 .append("ignorePreValidation", ignorePreValidation)
                 .append("timeout", timeout)
+                .append("followRedirects", followRedirects)
                 .build();
     }
 
@@ -106,6 +126,8 @@ public class ConfigKey {
         private boolean ignorePreValidation;
 
         private Optional<Integer> timeout = Optional.empty();
+
+        private boolean followRedirects;
 
         public ConfigKey build() {
 
@@ -129,6 +151,11 @@ public class ConfigKey {
 
         public Builder withTimeOut(Integer timeout) {
             this.timeout = Optional.of(timeout);
+            return this;
+        }
+
+        public Builder withFollowRedirects(boolean followRedirects) {
+            this.followRedirects = followRedirects;
             return this;
         }
     }

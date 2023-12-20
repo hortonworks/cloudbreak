@@ -9,12 +9,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.validation.ConstraintValidatorContext;
@@ -30,12 +24,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.base.ImageCatalogV4Base;
 import com.sequenceiq.cloudbreak.api.helper.HttpHelper;
 import com.sequenceiq.cloudbreak.validation.HttpContentSizeValidator;
-import com.sequenceiq.cloudbreak.validation.ImageCatalogValidator;
 
 @ExtendWith(MockitoExtension.class)
 public class ImageCatalogV4BaseTest extends ValidatorTestHelper {
@@ -47,36 +39,14 @@ public class ImageCatalogV4BaseTest extends ValidatorTestHelper {
     @Mock
     private StatusType statusType;
 
-    @Mock
+    @MockBean
     private HttpHelper httpHelper;
 
     @MockBean
     private HttpContentSizeValidator httpContentSizeValidator;
 
     @BeforeEach
-    public void setUp() throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        // TODO: rewrite it!!!
-        // It is an ugly and fragile hack and it needs opening Java internal modules with
-        // --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED
-        // --add-opens java.base/java.util.concurrent=ALL-UNNAMED
-        Method getDeclaredFields0 = Class.class.getDeclaredMethod("getDeclaredFields0", boolean.class);
-        getDeclaredFields0.setAccessible(true);
-        Field[] fields = (Field[]) getDeclaredFields0.invoke(Field.class, false);
-        Field modifiersField = null;
-        for (Field each : fields) {
-            if ("modifiers".equals(each.getName())) {
-                modifiersField = each;
-                break;
-            }
-        }
-        modifiersField.setAccessible(true);
-        for (Entry<String, HttpHelper> entry : Map.of("HTTP_HELPER", httpHelper).entrySet()) {
-            Field field = ReflectionUtils.findField(ImageCatalogValidator.class, entry.getKey());
-            field.setAccessible(true);
-            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-            field.set(null, entry.getValue());
-        }
-
+    public void setUp() {
         when(httpContentSizeValidator.isValid(anyString(), any(ConstraintValidatorContext.class))).thenReturn(true);
     }
 

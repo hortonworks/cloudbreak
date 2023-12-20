@@ -94,7 +94,7 @@ public class RestClientUtil {
     private static Client createClient(ConfigKey configKey) {
         LOGGER.debug("Constructing jax rs client: {}", configKey);
         ClientConfig config = new ClientConfig();
-        config.property(ClientProperties.FOLLOW_REDIRECTS, "false");
+        config.property(ClientProperties.FOLLOW_REDIRECTS, configKey.isFollowRedirects());
         config.property(ClientProperties.CONNECT_TIMEOUT, configKey.getTimeout().orElse(CONNECT_TIMEOUT_MS));
         config.property(ClientProperties.READ_TIMEOUT, configKey.getTimeout().orElse(READ_TIMEOUT_MS));
         config.register(MultiPartFeature.class);
