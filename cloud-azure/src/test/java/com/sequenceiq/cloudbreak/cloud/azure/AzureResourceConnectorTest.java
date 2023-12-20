@@ -264,7 +264,8 @@ public class AzureResourceConnectorTest {
         verify(azureUtils, times(1)).getCustomNetworkId(network);
         verify(azureUtils, times(1)).getCustomSubnetIds(network);
         verify(azureMarketplaceImageProviderService, times(0)).get(imageModel);
-        verify(azureMarketplaceImageProviderService).getSourceImage(eq(imageModel));
+        verify(azureMarketplaceImageProviderService, times(2)).getSourceImage(eq(imageModel));
+        verify(azureImageTermsSignerService).signImageTermsIfAllowed(any(), any(), eq(azureMarketplaceImage), any());
         verify(azureTemplateBuilder).build(eq(STACK_NAME), any(), any(), any(), any(), eq(stack), eq(AzureInstanceTemplateOperation.PROVISION),
                 eq(azureMarketplaceImage));
     }

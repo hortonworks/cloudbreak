@@ -130,11 +130,12 @@ public class AzureResourceConnector extends AbstractResourceConnector {
                 azureCloudResourceService.saveCloudResources(notifier, ac.getCloudContext(), List.of(imageCloudResource));
             }
             String customImageId = image.getId();
+            boolean hasSourceImagePlan = azureImageFormatValidator.hasSourceImagePlan(stackImage);
+            signSourceImageIfExists(stack, azureCredentialView, client, stackImage, hasSourceImagePlan);
             template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView,
-                    cloudContext, stack, AzureInstanceTemplateOperation.PROVISION, azureImageFormatValidator.hasSourceImagePlan(stackImage) ?
+                    cloudContext, stack, AzureInstanceTemplateOperation.PROVISION, hasSourceImagePlan ?
                             azureMarketplaceImageProviderService.getSourceImage(stackImage) : null);
         }
-
 
         String parameters = azureTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stackImage);
 
@@ -178,6 +179,15 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         List<CloudResourceStatus> resources = check(ac, Collections.singletonList(cloudResource));
         LOGGER.debug("Launched resources: {}", resources);
         return resources;
+    }
+
+    private void signSourceImageIfExists(CloudStack stack, AzureCredentialView azureCredentialView, AzureClient client, Image stackImage,
+            boolean hasSourceImagePlan) {
+        if (hasSourceImagePlan) {
+            AzureMarketplaceImage sourceImage = azureMarketplaceImageProviderService.getSourceImage(stackImage);
+            LOGGER.debug("Image has a source image plan, attempting to sign source image: {}", sourceImage.toString());
+            azureImageTermsSignerService.signImageTermsIfAllowed(stack, client, sourceImage, azureCredentialView.getSubscriptionId());
+        }
     }
 
     @Override
