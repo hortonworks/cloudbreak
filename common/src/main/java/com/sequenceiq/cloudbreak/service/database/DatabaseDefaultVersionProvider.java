@@ -35,14 +35,14 @@ public class DatabaseDefaultVersionProvider {
                 return choosePg11InCaseOfAzureExternalDb(dbEngineVersion, cloudPlatform, externalDb, flexibleEnabled);
             } else {
                 LOGGER.debug("Setting DB engine version to 'null' for runtime [{}]", runtime);
-                return null;
+                return choosePg11InCaseOfAzureExternalDb(null, cloudPlatform, externalDb, flexibleEnabled);
             }
         } else if (RHEL8.getOs().equalsIgnoreCase(os)) {
             LOGGER.debug("Setting DB engine version to [{}] for os [{}]", dbEngineVersion, os);
             return choosePg11InCaseOfAzureExternalDb(dbEngineVersion, cloudPlatform, externalDb, flexibleEnabled);
         } else {
             LOGGER.warn("Setting DB engine version to 'null' for runtime [{}] and os [{}]", runtime, os);
-            return null;
+            return choosePg11InCaseOfAzureExternalDb(null, cloudPlatform, externalDb, flexibleEnabled);
         }
     }
 
