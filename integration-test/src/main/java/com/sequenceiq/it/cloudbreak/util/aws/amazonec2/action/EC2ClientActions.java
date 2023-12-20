@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
@@ -311,5 +312,22 @@ public class EC2ClientActions extends EC2Client {
 
     public List<Stack> listCfStacksByEnvironment(String crn) {
         return cfClientActions.listCfStacksByTagsEnvironmentCrn(crn);
+    }
+
+    public List<com.sequenceiq.cloudbreak.cloud.model.Volume> describeVolumes(List<String> volumeIds) {
+        if (volumeIds.isEmpty()) {
+            LOGGER.info("Unable to get volumes from AWS for IDs {}", volumeIds);
+            return Collections.emptyList();
+        } else {
+            DescribeVolumesResponse describeVolumesResponse;
+            try (Ec2Client ec2Client = buildEC2Client()) {
+                LOGGER.info("Describing volumes {}", volumeIds);
+                describeVolumesResponse = ec2Client.describeVolumes(DescribeVolumesRequest.builder().volumeIds(volumeIds).build());
+            }
+            return describeVolumesResponse.volumes()
+                    .stream()
+                    .map(vol -> new com.sequenceiq.cloudbreak.cloud.model.Volume("",
+                                vol.volumeType().name(), vol.size(), CloudVolumeUsageType.GENERAL)).toList();
+        }
     }
 }

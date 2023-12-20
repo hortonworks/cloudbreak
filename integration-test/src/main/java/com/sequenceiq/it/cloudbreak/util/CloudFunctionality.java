@@ -177,4 +177,12 @@ public interface CloudFunctionality {
     default Map<String, Set<String>> listAvailabilityZonesForVms(String clusterName, List<String> instanceIds) {
         return Map.of();
     }
+
+    @Retryable(
+            maxAttempts = ATTEMPTS,
+            backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
+    )
+    default List<com.sequenceiq.cloudbreak.cloud.model.Volume> describeVolumes(List<String> volumeIds) {
+        return List.of();
+    }
 }

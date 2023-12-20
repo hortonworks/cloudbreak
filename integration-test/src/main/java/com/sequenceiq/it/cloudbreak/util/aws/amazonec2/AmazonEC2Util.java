@@ -68,4 +68,8 @@ public class AmazonEC2Util {
         return ec2ClientActions.listCfStacksByEnvironment(crn);
     }
 
+    public List<com.sequenceiq.cloudbreak.cloud.model.Volume> describeVolumes(List<String> volumeIds) {
+        return ec2ClientActions.describeVolumes(volumeIds);
+    }
+
 }

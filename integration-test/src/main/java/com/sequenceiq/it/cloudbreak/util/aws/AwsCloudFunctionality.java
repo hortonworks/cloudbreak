@@ -150,4 +150,9 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     public Boolean isFreeipaCfStackExistForEnvironment(String environmentCrn) {
         return !amazonEC2Util.listStacksByEnvironmentCrn(environmentCrn).isEmpty();
     }
+
+    @Override
+    public List<com.sequenceiq.cloudbreak.cloud.model.Volume> describeVolumes(List<String> volumeIds) {
+        return amazonEC2Util.describeVolumes(volumeIds);
+    }
 }
