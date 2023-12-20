@@ -94,8 +94,8 @@ public class ClouderaManagerPollingServiceProvider {
 
     public ExtendedPollingResult checkCmStatus(StackDtoDelegate stack, ApiClient apiClient) {
         LOGGER.debug("Check Cloudera Manager status. [Server address: {}]", stack.getClusterManagerIp());
-            return pollApiWithAttemptListener(stack, apiClient, 0,
-                    new ClouderaManagerStatusListenerTask(clouderaManagerApiPojoFactory, clusterEventService));
+        return pollApiWithAttemptListener(stack, apiClient, 0,
+                new ClouderaManagerStatusListenerTask(clouderaManagerApiPojoFactory, clusterEventService));
     }
 
     public ExtendedPollingResult startPollingCmHostStatusHealthy(StackDtoDelegate stack, ApiClient apiClient, Set<InstanceMetadataView> hostsToWaitFor) {
@@ -267,7 +267,8 @@ public class ClouderaManagerPollingServiceProvider {
     public ExtendedPollingResult startPollingCdpRuntimeParcelDistribute(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId,
             ParcelResource parcelResource) {
         LOGGER.debug("Waiting for Cloudera Manager to distribute CDP Runtime Parcel. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
+        return pollCommandWithTimeListener(stack, apiClient, commandId,
+                ClouderaManagerPollingTimeoutProvider.getParcelDownloadTimeout(stack.getCloudPlatform()),
                 new ClouderaManagerUpgradeParcelDistributeListenerTask(clouderaManagerApiPojoFactory, clusterEventService, parcelResource));
     }
 
