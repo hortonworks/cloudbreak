@@ -17,6 +17,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceAwareResourceService;
@@ -41,6 +42,9 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     @Inject
     private UserService userService;
 
+    @Inject
+    private TransactionService transactionService;
+
     @Override
     public T createForLoggedInUser(T resource, @Nonnull Long workspaceId) {
         User user = getLoggedInUser();
@@ -48,8 +52,24 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     }
 
     @Override
+    public T createForLoggedInUserInTransaction(T resource, @Nonnull Long workspaceId) {
+        try {
+            return transactionService.required(() -> createForLoggedInUser(resource, workspaceId));
+        } catch (TransactionService.TransactionExecutionException e) {
+            RuntimeException cause = e.getCause();
+            if (cause instanceof BadRequestException) {
+                throw cause;
+            }
+            if (cause instanceof DataIntegrityViolationException || cause instanceof ConstraintViolationException) {
+                throw alreadyExistsException(resource, cause);
+            }
+            throw new TransactionService.TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    @Override
     public T create(T resource, @Nonnull Long workspaceId, User user) {
-        Workspace workspace = workspaceService.get(workspaceId, user);
+        Workspace workspace = getWorkspaceService().get(workspaceId, user);
         return create(resource, workspace, user);
     }
 
@@ -85,10 +105,14 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
             setWorkspace(resource, user, workspace);
             return repository().save(resource);
         } catch (DataIntegrityViolationException | ConstraintViolationException e) {
-            String message = String.format("%s already exists with name '%s' in workspace %s",
-                    resource.getResourceName(), resource.getName(), resource.getWorkspace().getName());
-            throw new BadRequestException(message, e);
+            throw alreadyExistsException(resource, e);
         }
+    }
+
+    private BadRequestException alreadyExistsException(T resource, RuntimeException e) throws BadRequestException {
+        String message = String.format("%s already exists with name '%s' in workspace %s",
+                resource.getResourceName(), resource.getName(), resource.getWorkspace().getName());
+        return new BadRequestException(message, e);
     }
 
     @Override

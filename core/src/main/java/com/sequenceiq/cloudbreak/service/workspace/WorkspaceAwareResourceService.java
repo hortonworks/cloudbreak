@@ -10,6 +10,8 @@ public interface WorkspaceAwareResourceService<T extends WorkspaceAwareResource>
 
     T createForLoggedInUser(T resource, Long workspaceId);
 
+    T createForLoggedInUserInTransaction(T resource, Long workspaceId);
+
     T create(T resource, Long workspaceId, User user);
 
     T createWithMdcContextRestore(T resource, Workspace workspace, User user);

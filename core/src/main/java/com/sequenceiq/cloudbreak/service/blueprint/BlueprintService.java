@@ -149,10 +149,10 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         decorateWithCrn(blueprint, accountId);
         ownerAssignmentService.assignResourceOwnerRoleIfEntitled(creator, blueprint.getResourceCrn());
         try {
-            return transactionService.required(() -> super.createForLoggedInUser(blueprint, workspaceId));
-        } catch (TransactionService.TransactionExecutionException e) {
+            return super.createForLoggedInUserInTransaction(blueprint, workspaceId);
+        } catch (RuntimeException e) {
             ownerAssignmentService.notifyResourceDeleted(blueprint.getResourceCrn());
-            throw new TransactionService.TransactionRuntimeExecutionException(e);
+            throw e;
         }
     }
 

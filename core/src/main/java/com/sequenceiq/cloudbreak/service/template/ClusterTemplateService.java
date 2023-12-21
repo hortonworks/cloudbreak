@@ -175,13 +175,10 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         resource.setResourceCrn(createCRN(accountId));
         ownerAssignmentService.assignResourceOwnerRoleIfEntitled(creator, resource.getResourceCrn());
         try {
-            return transactionService.required(() -> super.createForLoggedInUser(resource, workspaceId));
-        } catch (TransactionExecutionException e) {
+            return super.createForLoggedInUserInTransaction(resource, workspaceId);
+        } catch (RuntimeException e) {
             ownerAssignmentService.notifyResourceDeleted(resource.getResourceCrn());
-            if (e.getCause() instanceof BadRequestException) {
-                throw e.getCause();
-            }
-            throw new TransactionService.TransactionRuntimeExecutionException(e);
+            throw e;
         }
     }
 

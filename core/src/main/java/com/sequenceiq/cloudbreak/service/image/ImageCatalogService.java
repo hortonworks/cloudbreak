@@ -57,8 +57,6 @@ import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.CustomImage;
@@ -211,10 +209,10 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         imageCatalog.setCreator(creator);
         ownerAssignmentService.assignResourceOwnerRoleIfEntitled(creator, resourceCrn);
         try {
-            return transactionService.required(() -> super.createForLoggedInUser(imageCatalog, workspaceId));
-        } catch (TransactionExecutionException e) {
+            return super.createForLoggedInUserInTransaction(imageCatalog, workspaceId);
+        } catch (RuntimeException e) {
             ownerAssignmentService.notifyResourceDeleted(resourceCrn);
-            throw new TransactionRuntimeExecutionException(e);
+            throw e;
         }
     }
 

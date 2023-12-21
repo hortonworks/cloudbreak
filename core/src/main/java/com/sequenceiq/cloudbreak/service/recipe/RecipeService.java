@@ -169,14 +169,12 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements C
         recipe.setCreator(creator);
         ownerAssignmentService.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(), resourceCrn);
         try {
-            return transactionService.required(() -> {
-                Recipe created = super.createForLoggedInUser(recipe, workspaceId);
-                recipeUsageService.sendCreatedUsageReport(created.getName(), resourceCrn, created.getRecipeTypeString());
-                return created;
-            });
-        } catch (TransactionService.TransactionExecutionException e) {
+            Recipe created = super.createForLoggedInUserInTransaction(recipe, workspaceId);
+            recipeUsageService.sendCreatedUsageReport(created.getName(), resourceCrn, created.getRecipeTypeString());
+            return created;
+        } catch (RuntimeException e) {
             ownerAssignmentService.notifyResourceDeleted(resourceCrn);
-            throw new TransactionService.TransactionRuntimeExecutionException(e);
+            throw e;
         }
     }
 
