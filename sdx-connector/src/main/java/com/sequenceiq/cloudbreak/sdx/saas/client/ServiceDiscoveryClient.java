@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.sdx.cdl;
+package com.sequenceiq.cloudbreak.sdx.saas.client;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.sdx.cdl.config.ServiceDiscoveryChannelConfig;
+import com.sequenceiq.cloudbreak.sdx.saas.client.config.ServiceDiscoveryChannelConfig;
 
 import io.grpc.ManagedChannel;
 

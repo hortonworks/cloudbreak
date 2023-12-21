@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto;
+import com.cloudera.thunderhead.service.kubedatalake.KubeDataLakeProto;
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
@@ -41,24 +41,8 @@ public class GrpcSdxCdlClient {
 
     public String createDatalake(String datalakeName, String environmentCrn, String type) {
         SdxCdlClient sdxCdlClient = makeClient();
-        CdlCrudProto.CreateDatalakeResponse datalake = sdxCdlClient.createDatalake(datalakeName, environmentCrn, type);
+        KubeDataLakeProto.CreateDatalakeResponse datalake = sdxCdlClient.createDatalake(datalakeName, environmentCrn, type);
         LOGGER.debug("CDL created: {}", datalake);
         return datalake.getCrn();
-    }
-
-    public String deleteDatalake(String datalakeNameOrCrn) {
-        SdxCdlClient sdxCdlClient = makeClient();
-        CdlCrudProto.DeleteDatalakeResponse response = sdxCdlClient.deleteDatalake(datalakeNameOrCrn);
-        return response.getCrn();
-    }
-
-    public CdlCrudProto.DatalakeResponse findDatalake(String environmentNameOrCrn, String datalakeNameOrCrn) {
-        SdxCdlClient sdxCdlClient = makeClient();
-        return sdxCdlClient.findDatalake(environmentNameOrCrn, datalakeNameOrCrn);
-    }
-
-    public CdlCrudProto.DescribeDatalakeResponse describeDatalake(String datalakeNameOrCrn) {
-        SdxCdlClient sdxCdlClient = makeClient();
-        return sdxCdlClient.describeDatalake(datalakeNameOrCrn);
     }
 }
