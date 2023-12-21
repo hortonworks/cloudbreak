@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.rotation.context.provider;
 
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_PILLAR;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_STATE_APPLY;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 
 import java.io.ByteArrayInputStream;
 import java.security.cert.CertificateException;
@@ -23,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
@@ -30,18 +33,24 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
+import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 public abstract class AbstractCMIntermediateCacertRotationContextProvider implements RotationContextProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCMIntermediateCacertRotationContextProvider.class);
 
     private static final Integer SALT_STATE_MAX_RETRY = 5;
+
+    @Inject
+    private ClusterHostServiceRunner clusterHostServiceRunner;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -61,8 +70,24 @@ public abstract class AbstractCMIntermediateCacertRotationContextProvider implem
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         StackDto stackDto = stackService.getByCrn(resourceCrn);
-        return Map.of(SALT_STATE_APPLY, getSaltStateRotationContext(stackDto),
+        return Map.of(VAULT, getVaultRotationContext(stackDto),
+                SALT_STATE_APPLY, getSaltStateRotationContext(stackDto),
+                SALT_PILLAR, getSaltPillarRotationContext(stackDto),
                 CUSTOM_JOB, getCustomJobRotationContext(stackDto));
+    }
+
+    private SaltPillarRotationContext getSaltPillarRotationContext(StackDto stackDto) {
+        return new SaltPillarRotationContext(stackDto.getResourceCrn(), stackDtoParam ->
+                Map.of("cloudera-manager-autotls", clusterHostServiceRunner.getClouderaManagerAutoTlsPillarProperties(stackDtoParam.getCluster())));
+    }
+
+    private VaultRotationContext getVaultRotationContext(StackDto stackDto) {
+        return VaultRotationContext.builder()
+                .withResourceCrn(stackDto.getResourceCrn())
+                .withVaultPathSecretMap(Map.of(
+                        stackDto.getCluster().getKeyStorePwdSecret().getSecret(), PasswordUtil.generatePassword(),
+                        stackDto.getCluster().getTrustStorePwdSecret().getSecret(), PasswordUtil.generatePassword()))
+                .build();
     }
 
     private SaltStateApplyRotationContext getSaltStateRotationContext(StackDto stack) {
@@ -76,6 +101,7 @@ public abstract class AbstractCMIntermediateCacertRotationContextProvider implem
         return SaltStateApplyRotationContext.builder()
                 .withResourceCrn(stack.getResourceCrn())
                 .withStates(states)
+                .withRollbackStates(states)
                 .withCleanupStates(cleanupStates)
                 .withGatewayConfig(primaryGatewayConfig)
                 .withTargets(Set.of(primaryGatewayConfig.getHostname()))

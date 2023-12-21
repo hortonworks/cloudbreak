@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -60,7 +61,7 @@ public class AbstractCMIntermediateCacertRotationContextProviderTest {
 
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts("crn");
 
-        assertEquals(2, contexts.size());
+        assertEquals(4, contexts.size());
     }
 
     @Test
@@ -103,6 +104,8 @@ public class AbstractCMIntermediateCacertRotationContextProviderTest {
         when(stackDto.getCluster()).thenReturn(clusterView);
         lenient().when(stackDto.getResourceName()).thenReturn("examplestack");
         when(clusterView.getAutoTlsEnabled()).thenReturn(Boolean.TRUE);
+        when(clusterView.getKeyStorePwdSecret()).thenReturn(new Secret("raw", "secret1"));
+        when(clusterView.getTrustStorePwdSecret()).thenReturn(new Secret("raw", "secret2"));
         when(stackService.getByCrn(any())).thenReturn(stackDto);
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         when(gatewayConfig.getHostname()).thenReturn("host");

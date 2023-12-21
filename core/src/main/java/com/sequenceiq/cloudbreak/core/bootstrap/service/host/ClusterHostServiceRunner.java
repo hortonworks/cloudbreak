@@ -682,12 +682,15 @@ public class ClusterHostServiceRunner {
 
     private void decoratePillarWithClouderaManagerAutoTls(ClusterView cluster, Map<String, SaltPillarProperties> servicePillar) {
         if (cluster.getAutoTlsEnabled()) {
-            Map<String, Object> autoTls = new HashMap<>();
-            autoTls.put("keystore_password", cluster.getKeyStorePwd());
-            autoTls.put("truststore_password", cluster.getTrustStorePwd());
-            servicePillar.put("cloudera-manager-autotls", new SaltPillarProperties("/cloudera-manager/autotls.sls",
-                    singletonMap("cloudera-manager", singletonMap("autotls", autoTls))));
+            servicePillar.put("cloudera-manager-autotls", getClouderaManagerAutoTlsPillarProperties(cluster));
         }
+    }
+
+    public SaltPillarProperties getClouderaManagerAutoTlsPillarProperties(ClusterView cluster) {
+        Map<String, Object> autoTls = new HashMap<>();
+        autoTls.put("keystore_password", cluster.getKeyStorePwd());
+        autoTls.put("truststore_password", cluster.getTrustStorePwd());
+        return new SaltPillarProperties("/cloudera-manager/autotls.sls", singletonMap("cloudera-manager", singletonMap("autotls", autoTls)));
     }
 
     public Optional<String> decoratePillarWithClouderaManagerLicense(StackView stack, Map<String, SaltPillarProperties> servicePillar) {
