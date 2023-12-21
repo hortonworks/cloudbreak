@@ -234,7 +234,8 @@
         "kms:TagResource",
         "kms:DeleteAlias",
         "kms:PutKeyPolicy",
-        "kms:ScheduleKeyDeletion"
+        "kms:ScheduleKeyDeletion",
+        "kms:ReEncrypt*"
       ],
       "Effect": "Allow",
       "Resource": [
