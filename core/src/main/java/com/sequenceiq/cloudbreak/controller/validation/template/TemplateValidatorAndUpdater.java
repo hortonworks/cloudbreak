@@ -306,7 +306,7 @@ public class TemplateValidatorAndUpdater {
     }
 
     private boolean needToCheckVolume(VolumeParameterType volumeParameterType, Object value) {
-        return volumeParameterType != VolumeParameterType.EPHEMERAL || value != null;
+        return volumeParameterType != null && volumeParameterType != VolumeParameterType.EPHEMERAL || value != null;
     }
 
     private String getInvalidVmTypeErrorMessage(String instanceType, String platform, String region) {
