@@ -81,6 +81,7 @@ telemetry:
         - loadavg
         - meminfo
         - netstat
+        - netdev
         - pressure
         - processes
         - stat
