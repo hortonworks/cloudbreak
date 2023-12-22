@@ -14,11 +14,13 @@ public class LaunchTemplateBlockDeviceMappingToRequestConverter {
     private LaunchTemplateEbsBlockDeviceToRequestConverter ebsBlockDeviceConverter;
 
     public LaunchTemplateBlockDeviceMappingRequest convert(LaunchTemplateBlockDeviceMapping source) {
-        return LaunchTemplateBlockDeviceMappingRequest.builder()
+        LaunchTemplateBlockDeviceMappingRequest.Builder builder = LaunchTemplateBlockDeviceMappingRequest.builder()
                 .deviceName(source.deviceName())
                 .noDevice(source.noDevice())
-                .virtualName(source.virtualName())
-                .ebs(ebsBlockDeviceConverter.convert(source.ebs()))
-                .build();
+                .virtualName(source.virtualName());
+        if (source.ebs() != null) {
+            builder.ebs(ebsBlockDeviceConverter.convert(source.ebs()));
+        }
+        return builder.build();
     }
 }
