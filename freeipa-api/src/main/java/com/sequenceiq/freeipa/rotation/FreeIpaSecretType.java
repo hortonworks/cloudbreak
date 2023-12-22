@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_UPDATE
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.CCMV2_JUMPGATE;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.FREEIPA_ADMIN_USER_PASSWORD;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.FREEIPA_DIRECTORY_MANAGER_PASSWORD;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.FREEIPA_USER_PASSWORD;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.LAUNCH_TEMPLATE;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.SALT_PILLAR_UPDATE;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.SALT_STATE_APPLY;
@@ -24,11 +25,14 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeFlag;
 
 public enum FreeIpaSecretType implements SecretType {
-    FREEIPA_ADMIN_PASSWORD(List.of(VAULT, FREEIPA_ADMIN_USER_PASSWORD, FREEIPA_DIRECTORY_MANAGER_PASSWORD, SALT_PILLAR_UPDATE)),
-    FREEIPA_LDAP_BIND_PASSWORD(List.of(VAULT, FreeIpaSecretRotationStep.FREEIPA_LDAP_BIND_PASSWORD), Set.of(SKIP_SALT_UPDATE)),
+
+    FREEIPA_ADMIN_PASSWORD(List.of(VAULT, FREEIPA_ADMIN_USER_PASSWORD, FREEIPA_DIRECTORY_MANAGER_PASSWORD, SALT_PILLAR_UPDATE), Set.of(SKIP_SALT_UPDATE)),
+    FREEIPA_LDAP_BIND_PASSWORD(List.of(VAULT, FREEIPA_USER_PASSWORD), Set.of(SKIP_SALT_UPDATE, INTERNAL)),
+    FREEIPA_USERSYNC_USER_PASSWORD(List.of(VAULT, FREEIPA_USER_PASSWORD), Set.of(SKIP_SALT_UPDATE)),
     FREEIPA_SALT_BOOT_SECRETS(List.of(VAULT, CUSTOM_JOB, SALTBOOT_CONFIG, USER_DATA, LAUNCH_TEMPLATE)),
     CCMV2_JUMPGATE_AGENT_ACCESS_KEY(List.of(CCMV2_JUMPGATE, LAUNCH_TEMPLATE, SALT_PILLAR_UPDATE, SALT_STATE_APPLY)),
-    FREEIPA_DEMO_SECRET(List.of(CUSTOM_JOB), DEMO_MULTI_SECRET, Set.of(SKIP_SALT_UPDATE, INTERNAL));
+    FREEIPA_DEMO_SECRET(List.of(CUSTOM_JOB), DEMO_MULTI_SECRET, Set.of(SKIP_SALT_UPDATE, INTERNAL)),
+    FREEIPA_KERBEROS_BIND_USER(List.of(VAULT, FREEIPA_USER_PASSWORD), Set.of(SKIP_SALT_UPDATE, INTERNAL));
 
     private final List<SecretRotationStep> steps;
 

@@ -100,29 +100,47 @@ public class KerberosConfigV1Service {
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public DescribeKerberosConfigResponse getForCluster(String environmentCrn, String accountId, String clusterName) throws FreeIpaClientException {
+    public DescribeKerberosConfigResponse getResponseForCluster(String environmentCrn, String accountId, String clusterName) throws FreeIpaClientException {
         Optional<Stack> stack = stackService.findByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         if (stack.isPresent()) {
-            return getKerberosConfigIfFreeIPAExists(environmentCrn, accountId, clusterName, stack.get());
+            return getKerberosConfigIfFreeIPAExistsResponse(environmentCrn, accountId, clusterName, stack.get());
         } else {
             LOGGER.debug("No FreeIPA found for env, try to look for manually registered Kerberos configuration");
             return describe(environmentCrn);
         }
     }
 
-    private DescribeKerberosConfigResponse getKerberosConfigIfFreeIPAExists(String environmentCrn, String accountId, String clusterName, Stack stack)
+    @Retryable(value = RetryableFreeIpaClientException.class,
+            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
+            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
+                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
+    public KerberosConfig getForCluster(String environmentCrn, String accountId, String clusterName) throws FreeIpaClientException {
+        Optional<Stack> stack = stackService.findByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+        if (stack.isPresent()) {
+            return getKerberosConfigIfFreeIPAExists(environmentCrn, accountId, clusterName, stack.get());
+        } else {
+            LOGGER.debug("No FreeIPA found for env, try to look for manually registered Kerberos configuration");
+            return kerberosConfigService.get(environmentCrn);
+        }
+    }
+
+    private DescribeKerberosConfigResponse getKerberosConfigIfFreeIPAExistsResponse(String environmentCrn, String accountId, String clusterName, Stack stack)
+            throws FreeIpaClientException {
+        KerberosConfig kerberosConfig = getKerberosConfigIfFreeIPAExists(environmentCrn, accountId, clusterName, stack);
+        return convertKerberosConfigToDescribeKerberosConfigResponse(kerberosConfig);
+    }
+
+    private KerberosConfig getKerberosConfigIfFreeIPAExists(String environmentCrn, String accountId, String clusterName, Stack stack)
             throws FreeIpaClientException {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Get kerberos config when FreeIPA exists for env");
         Optional<KerberosConfig> existingKerberosConfig = kerberosConfigService.find(environmentCrn, accountId, clusterName);
-        KerberosConfig kerberosConfig;
         if (existingKerberosConfig.isPresent()) {
             LOGGER.debug("Kerberos config already exists");
-            kerberosConfig = existingKerberosConfig.get();
+            return existingKerberosConfig.get();
         } else {
-            kerberosConfig = createNewKerberosConfig(environmentCrn, clusterName, stack, false);
+            return createNewKerberosConfig(environmentCrn, clusterName, stack, false);
         }
-        return convertKerberosConfigToDescribeKerberosConfigResponse(kerberosConfig);
     }
 
     @Retryable(value = RetryableFreeIpaClientException.class,

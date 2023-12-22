@@ -12,6 +12,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,8 +41,6 @@ class FreeipaServiceTest {
 
     private static final String ENV_CRN =
             "crn:cdp:environments:us-west-1:460c0d8f-ae8e-4dce-9cd7-2351762eb9ac:environment:6b2b1600-8ac6-4c26-aa34-dab36f4bd243";
-
-    private static final String CLUSTER_NAME = "clusterName";
 
     private static final String FREEIPA_CRN = "freeIpaCRN";
 
@@ -115,7 +115,7 @@ class FreeipaServiceTest {
     void rotateFreeIpaSecretsShouldFailIfRedbeamsFlowChainIsNotTriggered() {
         when(freeipaClientService.rotateSecret(any(), any())).thenReturn(new FlowIdentifier(FlowType.NOT_TRIGGERED, null));
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.rotateFreeIpaSecret(ENV_CRN, CLUSTER_NAME, FREEIPA_LDAP_BIND_PASSWORD, ROTATE));
+                () -> underTest.rotateFreeIpaSecret(ENV_CRN, FREEIPA_LDAP_BIND_PASSWORD, ROTATE, Map.of()));
         String expected = String.format("FreeIpa flow failed with error: 'Flow null not triggered'. "
                         + "Environment crn: %s, flow: FlowIdentifier{type=%s, pollableId='%s'}",
                 ENV_CRN, FlowType.NOT_TRIGGERED, null);
@@ -126,7 +126,7 @@ class FreeipaServiceTest {
     void rotateFreeIpaSecretsShouldFailIfReturnedFlowInformationIsNull() {
         when(freeipaClientService.rotateSecret(any(), any())).thenReturn(null);
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.rotateFreeIpaSecret(ENV_CRN, CLUSTER_NAME, FREEIPA_LDAP_BIND_PASSWORD, ROTATE));
+                () -> underTest.rotateFreeIpaSecret(ENV_CRN, FREEIPA_LDAP_BIND_PASSWORD, ROTATE, Map.of()));
         String expected = String.format("FreeIpa flow failed with error: 'unknown'. Environment crn: %s, flow: null", ENV_CRN);
         assertEquals(expected, cloudbreakServiceException.getMessage());
     }
@@ -141,7 +141,7 @@ class FreeipaServiceTest {
         when(freeipaClientService.getByEnvironmentCrn(ENV_CRN)).thenReturn(freeIpaResponse);
 
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.rotateFreeIpaSecret(ENV_CRN, CLUSTER_NAME, FREEIPA_LDAP_BIND_PASSWORD, ROTATE));
+                () -> underTest.rotateFreeIpaSecret(ENV_CRN, FREEIPA_LDAP_BIND_PASSWORD, ROTATE, Map.of()));
 
         String expected = String.format("FreeIpa flow failed with error: '%s'. Environment crn: %s, "
                         + "flow: FlowIdentifier{type=%s, pollableId='%s'}",
@@ -154,7 +154,7 @@ class FreeipaServiceTest {
         when(freeipaClientService.rotateSecret(any(), any())).thenReturn(new FlowIdentifier(FlowType.FLOW_CHAIN, FREEIPA_FLOW_ID));
         when(freeipaClientService.hasFlowChainRunningByFlowChainId(FREEIPA_FLOW_ID)).thenReturn(createFlowCheckResponse(Boolean.FALSE, Boolean.FALSE));
 
-        underTest.rotateFreeIpaSecret(ENV_CRN, CLUSTER_NAME, FREEIPA_LDAP_BIND_PASSWORD, ROTATE);
+        underTest.rotateFreeIpaSecret(ENV_CRN, FREEIPA_LDAP_BIND_PASSWORD, ROTATE, Map.of());
 
         ArgumentCaptor<String> envCrnCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<FreeIpaSecretRotationRequest> requestCaptor = ArgumentCaptor.forClass(FreeIpaSecretRotationRequest.class);

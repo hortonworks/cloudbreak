@@ -157,7 +157,9 @@ public class FreeipaClientService {
     }
 
     public FlowIdentifier rotateSecret(String envirionmentCrn, FreeIpaSecretRotationRequest request) {
-        return freeIpaRotationV1Endpoint.rotateSecretsByCrn(envirionmentCrn, request);
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> freeIpaRotationV1Endpoint.rotateSecretsByCrn(envirionmentCrn, request));
     }
 
     public FlowCheckResponse hasFlowRunningByFlowId(String flowId) {

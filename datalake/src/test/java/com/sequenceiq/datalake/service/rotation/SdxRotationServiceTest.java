@@ -39,14 +39,18 @@ import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
+import com.sequenceiq.datalake.service.sdx.FreeipaPoller;
 import com.sequenceiq.datalake.service.sdx.RedbeamsPoller;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
+import com.sequenceiq.datalake.service.sdx.flowcheck.FreeipaFlowService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.RedbeamsFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.api.model.StateStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaRotationV1Endpoint;
+import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
 
@@ -61,6 +65,8 @@ class SdxRotationServiceTest {
 
     private static final String DATABASE_CRN = "databaseCrn";
 
+    private static final String ENV_CRN = "crn:cdp:environments:us-west-1:tenant:environment:envCrn1";
+
     @Mock
     private SdxClusterRepository sdxClusterRepository;
 
@@ -74,6 +80,9 @@ class SdxRotationServiceTest {
     private DatabaseServerV4Endpoint databaseServerV4Endpoint;
 
     @Mock
+    private FreeIpaRotationV1Endpoint freeIpaRotationV1Endpoint;
+
+    @Mock
     private SdxReactorFlowManager sdxReactorFlowManager;
 
     @Mock
@@ -83,10 +92,16 @@ class SdxRotationServiceTest {
     private RedbeamsPoller redbeamsPoller;
 
     @Mock
+    private FreeipaPoller freeipaPoller;
+
+    @Mock
     private RedbeamsFlowService redbeamsFlowService;
 
     @Mock
     private CloudbreakFlowService cloudbreakFlowService;
+
+    @Mock
+    private FreeipaFlowService freeipaFlowService;
 
     @Mock
     private SecretRotationValidationService secretRotationValidationService;
@@ -137,10 +152,38 @@ class SdxRotationServiceTest {
     }
 
     @Test
+    void rotateFreeipaSecretShouldSucceed() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setId(SDX_CLUSTER_ID);
+        sdxCluster.setEnvCrn(ENV_CRN);
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.of(sdxCluster));
+        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internalCrn");
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_CHAIN_ID);
+        when(freeIpaRotationV1Endpoint.rotateSecretsByCrn(any(), any())).thenReturn(flowIdentifier);
+        underTest.rotateFreeipaSecret(RESOURCE_CRN, FreeIpaSecretType.FREEIPA_KERBEROS_BIND_USER, ROTATE, null);
+        verify(sdxClusterRepository, times(1)).findByCrnAndDeletedIsNull(eq(RESOURCE_CRN));
+        verify(regionAwareInternalCrnGeneratorFactory, times(1)).iam();
+        verify(freeIpaRotationV1Endpoint, times(1)).rotateSecretsByCrn(any(), any());
+        verify(freeipaPoller, times(1))
+                .pollFlowStateByFlowIdentifierUntilComplete(eq("Secret rotation"), eq(flowIdentifier), eq(SDX_CLUSTER_ID), any());
+    }
+
+    @Test
     void rotateRedbeamsSecretShouldFailIfSdxClusterNotFound() {
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.empty());
         NotFoundException notFoundException = assertThrows(NotFoundException.class,
                 () -> underTest.rotateRedbeamsSecret(RESOURCE_CRN, RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD, ROTATE, null));
+        verify(sdxClusterRepository, times(1)).findByCrnAndDeletedIsNull(eq(RESOURCE_CRN));
+        assertEquals("SdxCluster '" + RESOURCE_CRN + "' not found.", notFoundException.getMessage());
+    }
+
+    @Test
+    void rotateFreeipaSecretShouldFailIfSdxClusterNotFound() {
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.empty());
+        NotFoundException notFoundException = assertThrows(NotFoundException.class,
+                () -> underTest.rotateFreeipaSecret(RESOURCE_CRN, FreeIpaSecretType.FREEIPA_KERBEROS_BIND_USER, ROTATE, null));
         verify(sdxClusterRepository, times(1)).findByCrnAndDeletedIsNull(eq(RESOURCE_CRN));
         assertEquals("SdxCluster '" + RESOURCE_CRN + "' not found.", notFoundException.getMessage());
     }
@@ -200,6 +243,15 @@ class SdxRotationServiceTest {
     }
 
     @Test
+    void preValidateFreeipaRotationShouldFailIfSdxClusterNotFound() {
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(RESOURCE_CRN))).thenReturn(Optional.empty());
+        NotFoundException notFoundException = assertThrows(NotFoundException.class,
+                () -> underTest.preValidateRedbeamsRotation(RESOURCE_CRN));
+        assertEquals("SdxCluster 'crn:cdp:datalake:us-west-1:1234:datalake:1' not found.", notFoundException.getMessage());
+        verify(freeipaFlowService, never()).getLastFlowId(anyString());
+    }
+
+    @Test
     void preValidateRedbeamsRotationShouldFailDatabaseCrnIsEmpty() {
         SdxCluster sdxCluster = new SdxCluster();
         SdxDatabase sdxDatabase = new SdxDatabase();
@@ -230,6 +282,22 @@ class SdxRotationServiceTest {
     }
 
     @Test
+    void preValidateFreeipaRotationShouldFailIfRedbeamsFlowIsRunning() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setEnvCrn(ENV_CRN);
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(sdxCluster));
+        FlowLogResponse lastFlow = new FlowLogResponse();
+        lastFlow.setStateStatus(StateStatus.PENDING);
+        lastFlow.setCurrentState("currentState");
+        when(freeipaFlowService.getLastFlowId(eq(ENV_CRN))).thenReturn(lastFlow);
+        SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
+                () -> underTest.preValidateFreeipaRotation(RESOURCE_CRN));
+        assertEquals("Polling in Freeipa is not possible since last known state of flow for FMS is currentState",
+                secretRotationException.getMessage());
+        verify(freeipaFlowService, times(1)).getLastFlowId(eq(ENV_CRN));
+    }
+
+    @Test
     void preValidateRedbeamsRotationShouldSucceedIfRedbeamsFlowIsNotRunning() {
         SdxCluster sdxCluster = new SdxCluster();
         SdxDatabase sdxDatabase = new SdxDatabase();
@@ -241,6 +309,18 @@ class SdxRotationServiceTest {
         when(redbeamsFlowService.getLastFlowId(eq(DATABASE_CRN))).thenReturn(lastFlow);
         underTest.preValidateRedbeamsRotation(RESOURCE_CRN);
         verify(redbeamsFlowService, times(1)).getLastFlowId(eq(DATABASE_CRN));
+    }
+
+    @Test
+    void preValidateFreeipaRotationShouldSucceedIfRedbeamsFlowIsNotRunning() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setEnvCrn(ENV_CRN);
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(sdxCluster));
+        FlowLogResponse lastFlow = new FlowLogResponse();
+        lastFlow.setStateStatus(StateStatus.SUCCESSFUL);
+        when(freeipaFlowService.getLastFlowId(eq(ENV_CRN))).thenReturn(lastFlow);
+        underTest.preValidateFreeipaRotation(RESOURCE_CRN);
+        verify(freeipaFlowService, times(1)).getLastFlowId(eq(ENV_CRN));
     }
 
     @Test

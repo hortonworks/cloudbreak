@@ -17,6 +17,7 @@ import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 @Component
 public class DatalakeLdapBindPasswordRotationContextProvider implements RotationContextProvider {
+
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         Map<SecretRotationStep, RotationContext> context = new HashMap<>();

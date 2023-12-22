@@ -46,7 +46,7 @@ public class KerberosConfigV1Controller extends NotificationController implement
             @NotEmpty String clusterName) {
         String accountId = crnService.getCurrentAccountId();
         try {
-            return kerberosConfigV1Service.getForCluster(environmentCrn, accountId, clusterName);
+            return kerberosConfigV1Service.getResponseForCluster(environmentCrn, accountId, clusterName);
         } catch (FreeIpaClientException e) {
             throw new FreeIpaClientExceptionWrapper(e);
         }
