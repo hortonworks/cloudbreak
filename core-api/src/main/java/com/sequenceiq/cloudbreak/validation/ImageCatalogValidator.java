@@ -36,10 +36,11 @@ public class ImageCatalogValidator implements ConstraintValidator<ValidImageCata
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    private static final HttpHelper HTTP_HELPER = HttpHelper.getInstance();
-
     @Inject
     private HttpContentSizeValidator httpContentSizeValidator;
+
+    @Inject
+    private HttpHelper httpHelper;
 
     @Override
     public void initialize(ValidImageCatalog constraintAnnotation) {
@@ -52,7 +53,7 @@ public class ImageCatalogValidator implements ConstraintValidator<ValidImageCata
             if (value == null || !httpContentSizeValidator.isValid(value, context)) {
                 return false;
             }
-            Pair<StatusType, String> content = HTTP_HELPER.getContent(value);
+            Pair<StatusType, String> content = httpHelper.getContent(value);
             if (content.getKey().getFamily().equals(Family.SUCCESSFUL)) {
                 return imageCatalogParsable(context, content.getValue());
             }

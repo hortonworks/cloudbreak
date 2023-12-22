@@ -15,6 +15,7 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.stubbing.OngoingStubbing;
@@ -73,67 +74,65 @@ public class ParcelServiceIntTest {
     @MockBean
     private Client client;
 
+    @BeforeEach
+    void setUp() {
+        when(restClientFactory.getOrCreateWithFollowRedirects()).thenReturn(client);
+    }
+
     @Test
     void testGetHeadResponseForParcelShouldReturnResponseForNonRetryableStatus() {
-        when(restClientFactory.getOrCreateDefault()).thenReturn(client);
         setUpMocks(0, null, List.of(200));
         Optional<Response> actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
         assertEquals(actual.get().getStatus(), 200);
-        verify(restClientFactory, times(1)).getOrCreateDefault();
+        verify(restClientFactory, times(1)).getOrCreateWithFollowRedirects();
     }
 
     @Test
     void testGetHeadResponseForParcelShouldReturnResponseAfterRetryWithRetryableStatus() {
-        when(restClientFactory.getOrCreateDefault()).thenReturn(client);
         setUpMocks(0, null, List.of(403, 403, 200));
         Optional<Response> actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
         assertEquals(actual.get().getStatus(), 200);
-        verify(restClientFactory, times(3)).getOrCreateDefault();
+        verify(restClientFactory, times(3)).getOrCreateWithFollowRedirects();
     }
 
     @Test
     void testGetHeadResponseForParcelShouldReturnResponseAfterRetryWithRetryableAndNonTryableStatus() {
-        when(restClientFactory.getOrCreateDefault()).thenReturn(client);
         setUpMocks(0, null, List.of(403, 403, 404, 200));
         Optional<Response> actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
         assertEquals(actual.get().getStatus(), 404);
-        verify(restClientFactory, times(3)).getOrCreateDefault();
+        verify(restClientFactory, times(3)).getOrCreateWithFollowRedirects();
     }
 
     @Test
     void testGetHeadResponseForParcelShouldReturnResponseAfterMaxRetryWithRetryableStatus() {
-        when(restClientFactory.getOrCreateDefault()).thenReturn(client);
         setUpMocks(0, null, List.of(403, 403, 403, 403, 200));
         Optional<Response> actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
         assertEquals(actual.get().getStatus(), 200);
-        verify(restClientFactory, times(5)).getOrCreateDefault();
+        verify(restClientFactory, times(5)).getOrCreateWithFollowRedirects();
     }
 
     @Test
     void testGetHeadResponseForParcelShouldThrowExceptionAfterRetryExhaustedWithRetryableStatus() {
-        when(restClientFactory.getOrCreateDefault()).thenReturn(client);
         setUpMocks(0, null, List.of(403, 403, 403, 403, 403, 200));
         Optional<Response> actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
         assertEquals(actual.get().getStatus(), 403);
-        verify(restClientFactory, times(5)).getOrCreateDefault();
+        verify(restClientFactory, times(5)).getOrCreateWithFollowRedirects();
     }
 
     @Test
     void testGetHeadResponseForParcelShouldReturnResponseAfterRetryWithException() {
-        when(restClientFactory.getOrCreateDefault()).thenReturn(client);
         setUpMocks(4, new RuntimeException(ERROR_MESSAGE), List.of(200));
         Optional<Response> actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
         assertEquals(actual.get().getStatus(), 200);
-        verify(restClientFactory, times(5)).getOrCreateDefault();
+        verify(restClientFactory, times(5)).getOrCreateWithFollowRedirects();
     }
 
     @Test
     void testGetHeadResponseForParcelThrowsExceptionAfterRetryExhaustedWithException() {
-        when(restClientFactory.getOrCreateDefault()).thenReturn(client);
         setUpMocks(5, new RuntimeException(ERROR_MESSAGE), List.of(200));
         RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> underTest.getHeadResponseForParcel(ARCHIVE_PARCEL));
         assertEquals(runtimeException.getMessage(), ERROR_MESSAGE);
-        verify(restClientFactory, times(5)).getOrCreateDefault();
+        verify(restClientFactory, times(5)).getOrCreateWithFollowRedirects();
     }
 
     private void setUpMocks(int exceptionCount, Exception e, List<Integer> statuses) {

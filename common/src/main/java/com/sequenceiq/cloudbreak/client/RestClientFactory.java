@@ -10,4 +10,12 @@ public class RestClientFactory {
     public Client getOrCreateDefault() {
         return RestClientUtil.get();
     }
+
+    public Client getOrCreate(ConfigKey configKey) {
+        return RestClientUtil.get(configKey);
+    }
+
+    public Client getOrCreateWithFollowRedirects() {
+        return getOrCreate(ConfigKey.builder().withFollowRedirects(true).build());
+    }
 }
