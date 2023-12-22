@@ -84,12 +84,16 @@ public class EnvDeleteActions {
         return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
-                EnvironmentDto envDto = environmentStatusUpdateService
-                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_IN_PROGRESS,
-                                ResourceEvent.ENVIRONMENT_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED,
-                                EnvDeleteState.STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED_STATE);
-                sendEvent(context, UNSCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT.selector(), createEnvironmentDeletionDto(envDto, payload.isForceDelete(),
-                        payload.getResourceId()));
+                environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
+                    EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
+                    sendEvent(context, UNSCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT.selector(),
+                            createEnvironmentDeletionDto(environmentDto, payload.isForceDelete(), payload.getResourceId()));
+                }, () -> {
+                    EnvDeleteFailedEvent failureEvent = new EnvDeleteFailedEvent(payload.getResourceId(), payload.getResourceName(), null,
+                            payload.getResourceCrn());
+                    LOGGER.warn("No environment found with id '{}'.", payload.getResourceId());
+                    sendEvent(context, failureEvent);
+                });
             }
         };
     }

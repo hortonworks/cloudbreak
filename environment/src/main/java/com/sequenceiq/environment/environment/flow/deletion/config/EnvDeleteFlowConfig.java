@@ -56,10 +56,15 @@ public class EnvDeleteFlowConfig extends AbstractFlowConfiguration<EnvDeleteStat
             .from(INIT_STATE).to(FREEIPA_DELETE_STARTED_STATE)
             .event(START_FREEIPA_DELETE_EVENT).defaultFailureEvent()
 
+            // Deprecated, can be deleted from 2.81
             .from(FREEIPA_DELETE_STARTED_STATE).to(STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED_STATE)
             .event(START_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_EVENT).defaultFailureEvent()
 
+            // Deprecated, can be deleted from 2.81
             .from(STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED_STATE).to(RDBMS_DELETE_STARTED_STATE)
+            .event(START_RDBMS_DELETE_EVENT).defaultFailureEvent()
+
+            .from(FREEIPA_DELETE_STARTED_STATE).to(RDBMS_DELETE_STARTED_STATE)
             .event(START_RDBMS_DELETE_EVENT).defaultFailureEvent()
 
             .from(RDBMS_DELETE_STARTED_STATE).to(ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_STARTED_STATE)
