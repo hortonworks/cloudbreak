@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupd
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateFailedEvent;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -26,6 +28,7 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.datalake.DiskUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -33,6 +36,9 @@ import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 public class DistroXDiskUpdateValidationHandler extends EventSenderAwareHandler<DistroXDiskUpdateEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXDiskUpdateValidationHandler.class);
+
+    private static final Map<String, ResourceType> CLOUD_RESOURCE_TYPE_CONSTANTS = Map.of(CloudPlatform.AZURE.name(), ResourceType.AZURE_VOLUMESET,
+            CloudPlatform.AWS.name(), ResourceType.AWS_VOLUMESET);
 
     @Inject
     private StackDtoService stackDtoService;
@@ -97,8 +103,10 @@ public class DistroXDiskUpdateValidationHandler extends EventSenderAwareHandler<
 
     private List<VolumeSetAttributes.Volume> getAttachedVolumesList(StackDto stack, DiskUpdateRequest diskUpdateRequest) throws IOException {
         List<Resource> resources = stack.getResources().stream()
-                .filter(res -> null != res.getInstanceId() && res.getInstanceGroup().equals(diskUpdateRequest.getGroup())
-                        && res.getResourceType().toString().contains("VOLUMESET")).toList();
+                .filter(res -> null != res.getInstanceId() && null != res.getInstanceGroup() && res.getInstanceGroup().equals(diskUpdateRequest.getGroup())
+                        && null != CLOUD_RESOURCE_TYPE_CONSTANTS.get(stack.getCloudPlatform())
+                        && CLOUD_RESOURCE_TYPE_CONSTANTS.get(stack.getCloudPlatform()).equals(res.getResourceType())
+                ).toList();
         List<VolumeSetAttributes.Volume> attachedVolumes = new ArrayList<>();
         for (Resource resource : resources) {
             LOGGER.debug("Checking if the attached volumes have size less than the requested volumes.");
