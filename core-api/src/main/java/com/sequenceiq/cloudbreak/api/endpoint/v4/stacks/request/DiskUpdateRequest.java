@@ -13,8 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DiskUpdateRequest implements JsonEntity {
 
-    @NotNull
-    @Schema(description = "Volume Type of disks", required = true)
+    @Schema(description = "Volume Type of disks")
     @OneOfEnum(enumClass = SupportedVolumeType.class)
     private String volumeType;
 
