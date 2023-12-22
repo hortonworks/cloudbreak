@@ -12,20 +12,21 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.request.AddVolumesCMConfigFinishedEvent;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.request.AddVolumesCMConfigHandlerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.request.AddVolumesFailedEvent;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesCMConfigFinishedEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesCMConfigHandlerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesFailedEvent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.ConfigUpdateUtilService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
-import com.sequenceiq.flow.reactor.api.event.EventSender;
-import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
-public class AddVolumesCMConfigHandler extends EventSenderAwareHandler<AddVolumesCMConfigHandlerEvent> {
+public class AddVolumesCMConfigHandler extends ExceptionCatcherEventHandler<AddVolumesCMConfigHandlerEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AddVolumesCMConfigHandler.class);
 
@@ -42,21 +43,18 @@ public class AddVolumesCMConfigHandler extends EventSenderAwareHandler<AddVolume
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
-    protected AddVolumesCMConfigHandler(EventSender eventSender) {
-        super(eventSender);
-    }
-
     @Override
     public String selector() {
         return EventSelectorUtil.selector(AddVolumesCMConfigHandlerEvent.class);
     }
 
     @Override
-    public void accept(Event<AddVolumesCMConfigHandlerEvent> addVolumesCMConfigHandlerEvent) {
+    public Selectable doAccept(HandlerEvent<AddVolumesCMConfigHandlerEvent> addVolumesCMConfigHandlerEvent) {
         AddVolumesCMConfigHandlerEvent payload = addVolumesCMConfigHandlerEvent.getData();
         Long stackId = payload.getResourceId();
         String requestGroup = payload.getInstanceGroup();
         LOGGER.debug("Starting to update CM config after orchestration on group {}", payload.getInstanceGroup());
+        Selectable response;
         try {
             StackDto stack = stackDtoService.getById(stackId);
             LOGGER.debug("Updating CM config!");
@@ -69,12 +67,13 @@ public class AddVolumesCMConfigHandler extends EventSenderAwareHandler<AddVolume
                 configUpdateUtilService.updateCMConfigsForComputeAndStartServices(stack, hostTemplateServiceComponents,
                         hostTemplateRoleGroupNames, requestGroup);
             }
-            eventSender().sendEvent(new AddVolumesCMConfigFinishedEvent(stackId, requestGroup, payload.getNumberOfDisks(), payload.getType(),
-                    payload.getSize(), payload.getCloudVolumeUsageType()), addVolumesCMConfigHandlerEvent.getHeaders());
+            response = new AddVolumesCMConfigFinishedEvent(stackId, requestGroup, payload.getNumberOfDisks(), payload.getType(),
+                    payload.getSize(), payload.getCloudVolumeUsageType());
         } catch (Exception e) {
             LOGGER.error("Failed to add disks", e);
-            eventSender().sendEvent(new AddVolumesFailedEvent(stackId, null, null, e), addVolumesCMConfigHandlerEvent.getHeaders());
+            response = new AddVolumesFailedEvent(stackId, e);
         }
+        return response;
     }
 
     private boolean checkConfigChangeRequired(Set<String> hostTemplateComponents) {
@@ -84,5 +83,10 @@ public class AddVolumesCMConfigHandler extends EventSenderAwareHandler<AddVolume
             }
         }
         return true;
+    }
+
+    @Override
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<AddVolumesCMConfigHandlerEvent> event) {
+        return new AddVolumesFailedEvent(resourceId, e);
     }
 }
