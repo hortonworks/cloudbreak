@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.request;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_CM_CONFIGURATION_FINISHED_EVENT;
 
@@ -9,9 +9,10 @@ import javax.annotation.Nonnull;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 
-public class AddVolumesCMConfigFinishedEvent extends StackEvent {
+public class AddVolumesCMConfigFinishedEvent extends BaseFlowEvent implements Selectable {
 
     private final String instanceGroup;
 
@@ -32,7 +33,7 @@ public class AddVolumesCMConfigFinishedEvent extends StackEvent {
             @JsonProperty("type") String type,
             @JsonProperty("size") Long size,
             @JsonProperty("cloudVolumeUsageType") CloudVolumeUsageType cloudVolumeUsageType) {
-        super(ADD_VOLUMES_CM_CONFIGURATION_FINISHED_EVENT.event(), stackId);
+        super(ADD_VOLUMES_CM_CONFIGURATION_FINISHED_EVENT.event(), stackId, null);
         this.instanceGroup = instanceGroup;
         this.numberOfDisks = numberOfDisks;
         this.type = type;

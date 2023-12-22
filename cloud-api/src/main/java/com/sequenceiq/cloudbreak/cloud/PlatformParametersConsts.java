@@ -46,8 +46,6 @@ public class PlatformParametersConsts {
 
     public static final String DISK_TYPE_CHANGE_SUPPORTED = "diskTypeChangeSupported";
 
-    public static final String ADD_VOLUMES_SUPPORTED = "addVolumesSupported";
-
     private PlatformParametersConsts() {
 
     }

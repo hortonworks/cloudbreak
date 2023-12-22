@@ -655,13 +655,7 @@ public enum ResourceEvent {
     CLUSTER_DELETE_VOLUMES_FINISHED("cluster.changed.deletevolumes"),
     CLUSTER_DELETE_VOLUMES_CM_CONFIG_START("cluster.changing.deletevolumes.cmconfig.start"),
     CLUSTER_DELETE_VOLUMES_FAILED("cluster.change.deletevolumes.failed"),
-    DELETE_VOLUMES_FAILED("cluster.change.deletevolumes.delete.failed"),
-    CLUSTER_MOUNTING_VOLUMES("cluster.changing.mount.volumes"),
-    CLUSTER_CM_CONFIG_CHANGE("cluster.change.cm.config"),
-    CLUSTER_ADDING_VOLUMES("cluster.changing.add.volumes"),
-    CLUSTER_ADDED_VOLUMES("cluster.changed.add.volumes"),
-    CLUSTER_ATTACHING_VOLUMES("cluster.changing.attach.volumes"),
-    ADDING_VOLUMES_FAILED("cluster.add.volumes.failed");
+    DELETE_VOLUMES_FAILED("cluster.change.deletevolumes.delete.failed");
 
     private final String message;
 

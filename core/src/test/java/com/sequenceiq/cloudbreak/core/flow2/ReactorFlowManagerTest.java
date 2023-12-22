@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_EVENT;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,19 +36,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGrou
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
-import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesRequest;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
@@ -195,9 +191,6 @@ public class ReactorFlowManagerTest {
         underTest.triggerDeleteVolumes(STACK_ID, new StackDeleteVolumesRequest());
         underTest.triggerStackUpdateDisks(stackDto, new DiskUpdateRequest());
         underTest.triggerSecretRotation(STACK_ID, "CRN", Lists.newArrayList(), RotationFlowExecutionType.ROTATE, null);
-        StackAddVolumesRequest stackAddVolumesRequest = mock(StackAddVolumesRequest.class);
-        doReturn(CloudVolumeUsageType.GENERAL.toString()).when(stackAddVolumesRequest).getCloudVolumeUsageType();
-        underTest.triggerAddVolumes(STACK_ID, stackAddVolumesRequest);
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {
@@ -361,24 +354,6 @@ public class ReactorFlowManagerTest {
         ArgumentCaptor<DistroXDiskUpdateEvent> eventCaptor = ArgumentCaptor.forClass(DistroXDiskUpdateEvent.class);
         verify(reactorNotifier).notify(eq(1L), eq(DistroXDiskUpdateStateSelectors.DATAHUB_DISK_UPDATE_VALIDATION_EVENT.event()), eventCaptor.capture());
         assertEquals(stackDto.getId(), eventCaptor.getValue().getStackId());
-    }
-
-    @Test
-    public void testTriggerAddVolumes() {
-        long stackId = 1L;
-        StackAddVolumesRequest stackAddVolumesRequest = new StackAddVolumesRequest();
-        stackAddVolumesRequest.setInstanceGroup("COMPUTE");
-        stackAddVolumesRequest.setCloudVolumeUsageType("GENERAL");
-        stackAddVolumesRequest.setSize(200L);
-        stackAddVolumesRequest.setType("gp2");
-        stackAddVolumesRequest.setNumberOfDisks(2L);
-        underTest.triggerAddVolumes(stackId, stackAddVolumesRequest);
-        ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
-        verify(reactorNotifier).notify(eq(stackId), eq(ADD_VOLUMES_TRIGGER_EVENT.event()), captor.capture());
-        AddVolumesRequest event = (AddVolumesRequest) captor.getValue();
-        assertEquals(ADD_VOLUMES_TRIGGER_EVENT.event(), event.selector());
-        assertEquals(stack.getId(), event.getResourceId());
-        assertEquals(stackId, event.getResourceId().longValue());
     }
 
     private static class TestAcceptable implements Acceptable {

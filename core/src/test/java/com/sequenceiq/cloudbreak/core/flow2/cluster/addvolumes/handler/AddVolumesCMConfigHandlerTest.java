@@ -19,16 +19,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesCMConfigHandlerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.request.AddVolumesCMConfigHandlerEvent;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -36,7 +35,8 @@ import com.sequenceiq.cloudbreak.service.ConfigUpdateUtilService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.flow.reactor.api.event.BaseFailedFlowEvent;
-import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
+import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
+import com.sequenceiq.flow.reactor.api.event.EventSender;
 
 @ExtendWith(MockitoExtension.class)
 class AddVolumesCMConfigHandlerTest {
@@ -52,10 +52,12 @@ class AddVolumesCMConfigHandlerTest {
     @Mock
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
-    @InjectMocks
     private AddVolumesCMConfigHandler underTest;
 
     private AddVolumesCMConfigHandlerEvent handlerRequest;
+
+    @Mock
+    private EventSender eventSender;
 
     @Mock
     private CmTemplateProcessor cmTemplateProcessor;
@@ -64,10 +66,17 @@ class AddVolumesCMConfigHandlerTest {
     private StackDto stackDto;
 
     @Captor
+    private ArgumentCaptor<BaseFlowEvent> captor;
+
+    @Captor
     private ArgumentCaptor<BaseFailedFlowEvent> failedCaptor;
 
     @BeforeEach
     void setUp() {
+        underTest = new AddVolumesCMConfigHandler(eventSender);
+        ReflectionTestUtils.setField(underTest, null, stackDtoService, StackDtoService.class);
+        ReflectionTestUtils.setField(underTest, null, cmTemplateProcessorFactory, CmTemplateProcessorFactory.class);
+        ReflectionTestUtils.setField(underTest, null, configUpdateUtilService, ConfigUpdateUtilService.class);
         handlerRequest = new AddVolumesCMConfigHandlerEvent(STACK_ID, "test", 2L, "gp2", 400L, CloudVolumeUsageType.GENERAL);
         doReturn(stackDto).when(stackDtoService).getById(eq(STACK_ID));
         Blueprint bp = mock(Blueprint.class);
@@ -81,16 +90,18 @@ class AddVolumesCMConfigHandlerTest {
     @Test
     void testAddVolumesCMConfigTest() throws Exception {
         doReturn(Set.of("IMPALAD")).when(cmTemplateProcessor).getComponentsInHostGroup("test");
-        Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(handlerRequest)));
-        assertEquals(ADD_VOLUMES_CM_CONFIGURATION_FINISHED_EVENT.event(), response.getSelector());
+        underTest.accept(new Event<>(handlerRequest));
+        verify(eventSender).sendEvent(captor.capture(), any());
+        assertEquals(ADD_VOLUMES_CM_CONFIGURATION_FINISHED_EVENT.event(), captor.getValue().getSelector());
         verify(configUpdateUtilService).updateCMConfigsForComputeAndStartServices(eq(stackDto), any(), any(), eq("test"));
     }
 
     @Test
     void testAddVolumesCMConfigBlacklistedServiceTest() throws Exception {
         doReturn(Set.of("KUDU_MASTER")).when(cmTemplateProcessor).getComponentsInHostGroup("test");
-        Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(handlerRequest)));
-        assertEquals(ADD_VOLUMES_CM_CONFIGURATION_FINISHED_EVENT.event(), response.getSelector());
+        underTest.accept(new Event<>(handlerRequest));
+        verify(eventSender).sendEvent(captor.capture(), any());
+        assertEquals(ADD_VOLUMES_CM_CONFIGURATION_FINISHED_EVENT.event(), captor.getValue().getSelector());
         verify(configUpdateUtilService, times(0)).updateCMConfigsForComputeAndStartServices(eq(stackDto), any(), any(), eq("test"));
     }
 
@@ -99,8 +110,9 @@ class AddVolumesCMConfigHandlerTest {
         doReturn(Set.of("IMPALAD")).when(cmTemplateProcessor).getComponentsInHostGroup("test");
         doThrow(new CloudbreakServiceException("TEST")).when(configUpdateUtilService).updateCMConfigsForComputeAndStartServices(eq(stackDto), any(),
                 any(), eq("test"));
-        Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(handlerRequest)));
-        assertEquals(FAILURE_EVENT.event(), response.getSelector());
+        underTest.accept(new Event<>(handlerRequest));
+        verify(eventSender).sendEvent(failedCaptor.capture(), any());
+        assertEquals(FAILURE_EVENT.event(), failedCaptor.getValue().getSelector());
         verify(configUpdateUtilService).updateCMConfigsForComputeAndStartServices(eq(stackDto), any(), any(), eq("test"));
     }
 }
