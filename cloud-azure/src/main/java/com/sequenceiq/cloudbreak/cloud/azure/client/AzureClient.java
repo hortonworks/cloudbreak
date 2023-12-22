@@ -47,8 +47,10 @@ import com.azure.resourcemanager.compute.models.CachingTypes;
 import com.azure.resourcemanager.compute.models.Disk;
 import com.azure.resourcemanager.compute.models.DiskEncryptionSetIdentityType;
 import com.azure.resourcemanager.compute.models.DiskEncryptionSetType;
+import com.azure.resourcemanager.compute.models.DiskSku;
 import com.azure.resourcemanager.compute.models.DiskSkuTypes;
 import com.azure.resourcemanager.compute.models.DiskStorageAccountTypes;
+import com.azure.resourcemanager.compute.models.DiskUpdate;
 import com.azure.resourcemanager.compute.models.Encryption;
 import com.azure.resourcemanager.compute.models.EncryptionSetIdentity;
 import com.azure.resourcemanager.compute.models.KeyForDiskEncryptionSet;
@@ -1139,6 +1141,27 @@ public class AzureClient {
         } catch (JsonProcessingException e) {
             LOGGER.info("Template is not a valid json, this should not happen, omitting what if analysis");
             return Optional.empty();
+        }
+    }
+
+    public void modifyDisk(String volumeName, String resourceGroupName, int size, String diskType) {
+        handleException(() -> {
+            LOGGER.info("Updating disk {} in {} resourcegroup to {} size and {} type",
+                    volumeName, resourceGroupName, size, diskType);
+            azure.virtualMachines()
+                    .manager()
+                    .serviceClient()
+                    .getDisks()
+                    .update(resourceGroupName, volumeName, getDiskUpdateRequest(size, diskType));
+        });
+    }
+
+    private DiskUpdate getDiskUpdateRequest(int size, String diskType) {
+        if (StringUtils.isNotEmpty(diskType)) {
+            return new DiskUpdate().withDiskSizeGB(size)
+                    .withSku(new DiskSku().withName(DiskStorageAccountTypes.fromString(diskType)));
+        } else {
+            return new DiskUpdate().withDiskSizeGB(size);
         }
     }
 }

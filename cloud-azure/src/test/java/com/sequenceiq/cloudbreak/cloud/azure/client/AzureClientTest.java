@@ -46,6 +46,7 @@ import com.azure.core.management.exception.ManagementError;
 import com.azure.resourcemanager.AzureResourceManager;
 import com.azure.resourcemanager.compute.ComputeManager;
 import com.azure.resourcemanager.compute.fluent.ComputeManagementClient;
+import com.azure.resourcemanager.compute.fluent.DisksClient;
 import com.azure.resourcemanager.compute.fluent.ResourceSkusClient;
 import com.azure.resourcemanager.compute.fluent.models.DiskInner;
 import com.azure.resourcemanager.compute.fluent.models.ResourceSkuInner;
@@ -63,6 +64,8 @@ import com.azure.resourcemanager.compute.models.Disk.DefinitionStages.WithHibern
 import com.azure.resourcemanager.compute.models.Disk.DefinitionStages.WithLogicalSectorSize;
 import com.azure.resourcemanager.compute.models.Disk.DefinitionStages.WithSku;
 import com.azure.resourcemanager.compute.models.DiskSkuTypes;
+import com.azure.resourcemanager.compute.models.DiskStorageAccountTypes;
+import com.azure.resourcemanager.compute.models.DiskUpdate;
 import com.azure.resourcemanager.compute.models.Disks;
 import com.azure.resourcemanager.compute.models.Encryption;
 import com.azure.resourcemanager.compute.models.NetworkAccessPolicy;
@@ -563,5 +566,24 @@ class AzureClientTest {
         DeploymentsClient deploymentsClient = mock(DeploymentsClient.class);
         when(resourceManagementClient.getDeployments()).thenReturn(deploymentsClient);
         return deploymentsClient;
+    }
+
+    @Test
+    void testModifyDisk() {
+        VirtualMachines virtualMachines = mock(VirtualMachines.class);
+        when(azureResourceManager.virtualMachines()).thenReturn(virtualMachines);
+        ComputeManager computeManager = mock(ComputeManager.class);
+        when(virtualMachines.manager()).thenReturn(computeManager);
+        ComputeManagementClient computeManagementClient = mock(ComputeManagementClient.class);
+        when(computeManager.serviceClient()).thenReturn(computeManagementClient);
+        DisksClient disksClient = mock(DisksClient.class);
+        when(computeManagementClient.getDisks()).thenReturn(disksClient);
+        underTest.modifyDisk("test-vol-name", "test-resource-group-name", 100, "Standard_LRS");
+        verify(azureResourceManager, times(1)).virtualMachines();
+        ArgumentCaptor<DiskUpdate> diskUpdateArgumentCaptor = ArgumentCaptor.forClass(DiskUpdate.class);
+        verify(disksClient, times(1)).update(eq("test-resource-group-name"), eq("test-vol-name"),
+                diskUpdateArgumentCaptor.capture());
+        assertEquals(100, diskUpdateArgumentCaptor.getValue().diskSizeGB());
+        assertEquals(DiskStorageAccountTypes.STANDARD_LRS, diskUpdateArgumentCaptor.getValue().sku().name());
     }
 }

@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.ResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
 import com.sequenceiq.cloudbreak.cloud.ValidatorType;
+import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.util.RegionUtil;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureFileSystemValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
@@ -97,6 +98,9 @@ public class AzureConnector implements CloudConnector {
 
     @Inject
     private AzureAvailabilityZoneConnector azureAvailabilityZoneConnector;
+
+    @Inject
+    private AzureResourceVolumeConnector azureResourceVolumeConnector;
 
     @Override
     public Authenticator authentication() {
@@ -193,7 +197,7 @@ public class AzureConnector implements CloudConnector {
 
     @Override
     public ResourceVolumeConnector volumeConnector() {
-        throw new UnsupportedOperationException("This connector is not implemented for Azure!");
+        return azureResourceVolumeConnector;
     }
 
     @Override

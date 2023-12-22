@@ -18,6 +18,7 @@ import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -367,6 +368,16 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         return volumeResources.stream()
                 .map(resource -> new CloudResourceStatus(resource, volumeSetStatus))
                 .collect(toList());
+    }
+
+    protected void modifyVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) {
+        AzureClient client = getAzureClient(authenticatedContext);
+        for (String volumeId : volumeIds) {
+            // AZURE VOL IDs are always a combination of subscription, resource group and disk name in that order
+            String resourceGroupName = StringUtils.substringBetween(volumeId, "resourceGroups/", "/providers");
+            String diskName = volumeId.substring(volumeId.lastIndexOf("/") + 1);
+            client.modifyDisk(diskName, resourceGroupName, size, diskType);
+        }
     }
 
     private ResourceStatus getResourceStatus(List<Disk> existingDisks, List<CloudResource> volumeResources) {

@@ -503,4 +503,20 @@ public class AzureVolumeResourceBuilderTest {
             return future;
         });
     }
+
+    @Test
+    void testModifyVolumes() {
+        when(auth.getParameter(AzureClient.class)).thenReturn(azureClient);
+        List<String> volumeIds = List.of("/subscriptions/test-subscription/resourceGroups/test-res-group/providers/Microsoft.Compute/disks/test-vol");
+        underTest.modifyVolumes(auth, volumeIds, "test-disk", 100);
+        verify(azureClient).modifyDisk("test-vol", "test-res-group", 100, "test-disk");
+    }
+
+    @Test
+    void testModifyVolumesEmptyVolumeIds() {
+        when(auth.getParameter(AzureClient.class)).thenReturn(azureClient);
+        List<String> volumeIds = List.of();
+        underTest.modifyVolumes(auth, volumeIds, "test-disk", 100);
+        verify(azureClient, times(0)).modifyDisk(any(), any(), eq(100), eq("test-disk"));
+    }
 }

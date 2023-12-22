@@ -14,7 +14,9 @@ public interface ResourceVolumeConnector {
      * @param cloudResources       contains the list of cloud resources being modified
      * @throws Exception in case of any error
      */
-    void detachVolumes(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources) throws Exception;
+    default void detachVolumes(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources) throws Exception {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
 
     /**
      * Deletes all detached volumes on an instance.
@@ -23,7 +25,9 @@ public interface ResourceVolumeConnector {
      * @param cloudResources       contains the list of cloud resources being modified
      * @throws Exception in case of any error
      */
-    void deleteVolumes(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources) throws Exception;
+    default void deleteVolumes(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources) throws Exception {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
 
     /**
      * Updates the type & size of the given disk volumes to the specified new values.
@@ -34,5 +38,7 @@ public interface ResourceVolumeConnector {
      * @param size desired disk size of EBS volumes being modified
      * @throws Exception in case of any error
      */
-    void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception;
+    default void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
 }
