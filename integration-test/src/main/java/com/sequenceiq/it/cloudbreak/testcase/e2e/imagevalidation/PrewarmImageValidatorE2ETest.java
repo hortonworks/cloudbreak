@@ -12,6 +12,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
@@ -72,6 +73,15 @@ public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements Ima
                 })
                 .when(distroXTestClient.get())
                 .validate();
+        testContext.given(SdxInternalTestDto.class)
+                .when(sdxTestClient.describeInternal())
+                .then(((context, sdx, client) -> {
+                    SdxClusterStatusResponse clusterStatus = sdx.getResponse().getStatus();
+                    if (!clusterStatus.isRunning()) {
+                        throw new TestFailException("SDX status is not running at the end of the validation. Current status is: " + clusterStatus);
+                    }
+                    return sdx;
+                }));
     }
 
     @Override
