@@ -723,7 +723,7 @@ class SaltStateServiceTest {
                 eq("cmd.run"),
                 eq(LOCAL),
                 eq(Map.class),
-                eq("cat /etc/default/cloudera-scm-server | grep CMF_JAVA_OPTS"));
+                eq("cat /etc/default/cloudera-scm-server | grep '^export CMF_JAVA_OPTS' | tail -n1"));
         assertEquals("host.master0.site", captor.getValue().getTarget());
     }
 }
