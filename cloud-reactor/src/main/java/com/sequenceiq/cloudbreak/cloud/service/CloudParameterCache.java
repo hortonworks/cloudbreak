@@ -96,4 +96,9 @@ public class CloudParameterCache {
         Boolean result = getSpecialParameters(platform).get(PlatformParametersConsts.DISK_TYPE_CHANGE_SUPPORTED);
         return result == null || result;
     }
+
+    public boolean isAddVolumesSupported(String platform) {
+        Boolean result = getSpecialParameters(Platform.platform(platform)).get(PlatformParametersConsts.ADD_VOLUMES_SUPPORTED);
+        return result == null || result;
+    }
 }
