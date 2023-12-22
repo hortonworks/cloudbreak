@@ -4,6 +4,7 @@ import static com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.Datala
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,8 +21,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resource.Resour
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateEvent;
 import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateFailedEvent;
@@ -36,6 +39,9 @@ public class DatalakeDiskUpdateValidationHandler extends EventSenderAwareHandler
     private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeDiskUpdateValidationHandler.class);
 
     private static final long WORKSPACE_ID = 0L;
+
+    private static final Map<CloudPlatform, ResourceType> CLOUD_RESOURCE_TYPE_CONSTANTS = Map.of(CloudPlatform.AZURE, ResourceType.AZURE_VOLUMESET,
+            CloudPlatform.AWS, ResourceType.AWS_VOLUMESET);
 
     @Inject
     private StackV4Endpoint stackV4Endpoint;
@@ -60,8 +66,10 @@ public class DatalakeDiskUpdateValidationHandler extends EventSenderAwareHandler
             StackV4Response stackV4Response = stackV4Endpoint.getWithResources(WORKSPACE_ID, payload.getClusterName(), Set.of(), payload.getAccountId());
             DiskUpdateRequest diskUpdateRequest = payload.getDatalakeDiskUpdateRequest();
             List<ResourceV4Response> resources = stackV4Response.getResources().stream()
-                    .filter(res -> null != res.getInstanceId() && res.getInstanceGroup().equals(diskUpdateRequest.getGroup())
-                            && res.getResourceType().toString().contains("VOLUMESET")).toList();
+                    .filter(res -> null != res.getInstanceId() && null != res.getInstanceGroup() && res.getInstanceGroup().equals(diskUpdateRequest.getGroup())
+                            && null != CLOUD_RESOURCE_TYPE_CONSTANTS.get(stackV4Response.getCloudPlatform())
+                            && CLOUD_RESOURCE_TYPE_CONSTANTS.get(stackV4Response.getCloudPlatform()).equals(res.getResourceType())
+                    ).toList();
             List<VolumeSetAttributes.Volume> attachedVolumes = new ArrayList<>();
             for (ResourceV4Response resource : resources) {
                 LOGGER.debug("Checking if the attached volumes have size less than the requested volumes.");
