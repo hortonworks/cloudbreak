@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.service.sslcertificate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -14,7 +15,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -93,7 +96,7 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
     }
 
     @Test
-    void prescribeSslCertificateIfNeededTestWhenNoSsl() {
+    void prescribeSslCertificateIfNeededTestWhenNoSsl() throws Exception {
         initDBStack();
 
         underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
@@ -103,23 +106,15 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
         verify(cloudConnector, never()).platformResources();
     }
 
-    static Object[][] prescribeSslCertificateIfNeededTestWhenSslBadSslCertificateTypeDataProvider() {
-        return new Object[][]{
-                // testCaseName sslCertificateType
-                {"sslCertificateType=null", null},
-                {"SslCertificateType.NONE", SslCertificateType.NONE},
-                {"SslCertificateType.BRING_YOUR_OWN", SslCertificateType.BRING_YOUR_OWN},
-        };
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("prescribeSslCertificateIfNeededTestWhenSslBadSslCertificateTypeDataProvider")
-    void prescribeSslCertificateIfNeededTestWhenSslBadSslCertificateType(String testCaseName, SslCertificateType sslCertificateType) {
+    @ParameterizedTest(name = "sslCertificateType={0}")
+    @NullSource
+    @EnumSource(value = SslCertificateType.class, names = {"NONE", "BRING_YOUR_OWN"})
+    void prescribeSslCertificateIfNeededTestWhenSslBadSslCertificateType(SslCertificateType sslCertificateType) throws Exception {
         prescribeSslCertificateIfNeededTestWhenSslBadSslCertificateTypeOrBadCloudPlatformInternal(sslCertificateType, CloudPlatform.AWS.name());
     }
 
     private void prescribeSslCertificateIfNeededTestWhenSslBadSslCertificateTypeOrBadCloudPlatformInternal(SslCertificateType sslCertificateType,
-            String cloudPlatform) {
+            String cloudPlatform) throws Exception {
         initDBStack(cloudPlatform, createSslConfig(sslCertificateType, CERT_ID_1));
 
         underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
@@ -129,14 +124,15 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
         verify(cloudConnector, never()).platformResources();
     }
 
-    @Test
-    void prescribeSslCertificateIfNeededTestWhenSslBadCloudPlatform() {
+    @ParameterizedTest(name = "{0}")
+    @EnumSource(value = CloudPlatform.class, names = "AWS", mode = EnumSource.Mode.EXCLUDE)
+    void prescribeSslCertificateIfNeededTestWhenSslBadCloudPlatform(CloudPlatform cloudPlatform) throws Exception {
         prescribeSslCertificateIfNeededTestWhenSslBadSslCertificateTypeOrBadCloudPlatformInternal(SslCertificateType.CLOUD_PROVIDER_OWNED,
-                CloudPlatform.AZURE.name());
+                cloudPlatform.name());
     }
 
     @Test
-    void prescribeSslCertificateIfNeededTestWhenSslAwsCloudProviderOwnedNullCertId() {
+    void prescribeSslCertificateIfNeededTestWhenSslAwsCloudProviderOwnedNullCertId() throws Exception {
         initDBStack(CloudPlatform.AWS.name(), createSslConfig(SslCertificateType.CLOUD_PROVIDER_OWNED, null));
 
         underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
@@ -159,7 +155,7 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("prescribeSslCertificateIfNeededTestWhenSslAwsCloudProviderOwnedUnsupportedCertIdDataProvider")
     void prescribeSslCertificateIfNeededTestWhenSslAwsCloudProviderOwnedUnsupportedCertId(String testCaseName,
-            Set<CloudDatabaseServerSslCertificate> sslCertificates) {
+            Set<CloudDatabaseServerSslCertificate> sslCertificates) throws Exception {
         initDBStack(CloudPlatform.AWS.name(), createSslConfig(SslCertificateType.CLOUD_PROVIDER_OWNED, CERT_ID_1));
 
         when(cloudPlatformConnectors.get(cloudPlatformVariant)).thenReturn(cloudConnector);
@@ -176,7 +172,27 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
     }
 
     @Test
-    void prescribeSslCertificateIfNeededTestWhenSslAwsCloudProviderOwnedDefaultCertId() {
+    void prescribeSslCertificateIfNeededTestWhenFailureSslAwsCloudProviderOwnedAvailableSslCertificatesQueryError() throws Exception {
+        initDBStack(CloudPlatform.AWS.name(), createSslConfig(SslCertificateType.CLOUD_PROVIDER_OWNED, CERT_ID_1));
+
+        when(cloudPlatformConnectors.get(cloudPlatformVariant)).thenReturn(cloudConnector);
+        when(cloudConnector.platformResources()).thenReturn(platformResources);
+        Exception e = new Exception("Foo");
+        when(platformResources.databaseServerGeneralSslRootCertificates(cloudCredential, region)).thenThrow(e);
+        when(cloudContext.getPlatformVariant()).thenReturn(cloudPlatformVariant);
+        when(cloudContext.getLocation()).thenReturn(location);
+
+        Exception exceptionResult =
+                assertThrows(Exception.class, () -> underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack));
+
+        assertThat(exceptionResult).isSameAs(e);
+
+        assertThat(databaseServer.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER)).isNull();
+        verify(cloudConnector).platformResources();
+    }
+
+    @Test
+    void prescribeSslCertificateIfNeededTestWhenSslAwsCloudProviderOwnedDefaultCertId() throws Exception {
         initDBStack(CloudPlatform.AWS.name(), createSslConfig(SslCertificateType.CLOUD_PROVIDER_OWNED, CERT_ID_1));
 
         when(cloudPlatformConnectors.get(cloudPlatformVariant)).thenReturn(cloudConnector);
@@ -195,7 +211,7 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
     }
 
     @Test
-    void prescribeSslCertificateIfNeededTestWhenSslAwsCloudProviderOwnedCertIdPrescribed() {
+    void prescribeSslCertificateIfNeededTestWhenSslAwsCloudProviderOwnedCertIdPrescribed() throws Exception {
         initDBStack(CloudPlatform.AWS.name(), createSslConfig(SslCertificateType.CLOUD_PROVIDER_OWNED, CERT_ID_1));
 
         when(cloudPlatformConnectors.get(cloudPlatformVariant)).thenReturn(cloudConnector);
@@ -211,6 +227,46 @@ class DatabaseServerSslCertificatePrescriptionServiceTest {
         underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
 
         assertThat(databaseServer.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER)).isEqualTo(CERT_ID_1);
+        verify(cloudConnector).platformResources();
+    }
+
+    @Test
+    void prescribeSslCertificateIfNeededTestWhenSslAwsCloudProviderOwnedOverriddenMatchingCertId() throws Exception {
+        initDBStack(CloudPlatform.AWS.name(), createSslConfig(SslCertificateType.CLOUD_PROVIDER_OWNED, CERT_ID_1));
+
+        when(cloudPlatformConnectors.get(cloudPlatformVariant)).thenReturn(cloudConnector);
+        when(cloudConnector.platformResources()).thenReturn(platformResources);
+        Set<CloudDatabaseServerSslCertificate> sslCertificates = Set.of(
+                new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, CERT_ID_1, true),
+                new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, CERT_ID_2));
+        when(platformResources.databaseServerGeneralSslRootCertificates(cloudCredential, region))
+                .thenReturn(new CloudDatabaseServerSslCertificates(sslCertificates));
+        when(cloudContext.getPlatformVariant()).thenReturn(cloudPlatformVariant);
+        when(cloudContext.getLocation()).thenReturn(location);
+
+        underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+
+        assertThat(databaseServer.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER)).isNull();
+        verify(cloudConnector).platformResources();
+    }
+
+    @Test
+    void prescribeSslCertificateIfNeededTestWhenSslAwsCloudProviderOwnedOverriddenDifferentCertId() throws Exception {
+        initDBStack(CloudPlatform.AWS.name(), createSslConfig(SslCertificateType.CLOUD_PROVIDER_OWNED, CERT_ID_3));
+
+        when(cloudPlatformConnectors.get(cloudPlatformVariant)).thenReturn(cloudConnector);
+        when(cloudConnector.platformResources()).thenReturn(platformResources);
+        Set<CloudDatabaseServerSslCertificate> sslCertificates = Set.of(
+                new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, CERT_ID_1, true),
+                new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, CERT_ID_2));
+        when(platformResources.databaseServerGeneralSslRootCertificates(cloudCredential, region))
+                .thenReturn(new CloudDatabaseServerSslCertificates(sslCertificates));
+        when(cloudContext.getPlatformVariant()).thenReturn(cloudPlatformVariant);
+        when(cloudContext.getLocation()).thenReturn(location);
+
+        underTest.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+
+        assertThat(databaseServer.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER)).isNull();
         verify(cloudConnector).platformResources();
     }
 

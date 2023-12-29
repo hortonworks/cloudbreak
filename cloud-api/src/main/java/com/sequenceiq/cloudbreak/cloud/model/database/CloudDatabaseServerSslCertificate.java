@@ -2,72 +2,72 @@ package com.sequenceiq.cloudbreak.cloud.model.database;
 
 import static java.util.Objects.requireNonNull;
 
+import org.apache.commons.lang3.StringUtils;
 
 /**
- * Represents an SSL certificate for a cloud provider database server. Overrides both {@link #equals(Object)} and {@link #hashCode()}, thus instances of
- * this class can be also used as collection elements.
+ * Represents an SSL certificate for a cloud provider managed database server.
  */
-public record CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType certificateType, String certificateIdentifier, String certificate) {
+public record CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType certificateType, String certificateIdentifier, String certificate,
+        boolean overridden) {
 
     /**
-     * Creates a new {@code CloudDatabaseServerSslCertificate} instance using the given arguments, and assuming {@code certificate = null}.
+     * Creates a new {@code CloudDatabaseServerSslCertificate} instance using the given arguments, and assuming {@code certificate = null} and
+     * {@code overridden = false}.
      *
      * @param certificateType       {@link CloudDatabaseServerSslCertificateType} instance representing SSL certificate type; must not be {@code null}
-     * @param certificateIdentifier cloud provider specific identifier of the SSL certificate; must not be {@code null}
+     * @param certificateIdentifier cloud provider specific identifier of the SSL certificate; must not be {@code null} or blank
      * @throws NullPointerException if either argument is {@code null}
+     * @throws IllegalArgumentException if {@code certificateIdentifier} is blank
      */
     public CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType certificateType, String certificateIdentifier) {
         this(certificateType, certificateIdentifier, null);
     }
 
     /**
+     * Creates a new {@code CloudDatabaseServerSslCertificate} instance using the given arguments, and assuming {@code overridden = false}.
+     *
+     * @param certificateType       {@link CloudDatabaseServerSslCertificateType} instance representing SSL certificate type; must not be {@code null}
+     * @param certificateIdentifier cloud provider specific identifier of the SSL certificate; must not be {@code null} or blank
+     * @param certificate           the certificate PEM payload itself, it can be empty or {@code null}
+     * @throws NullPointerException if either {@code certificateType} or {@code certificateIdentifier} is {@code null}
+     * @throws IllegalArgumentException if {@code certificateIdentifier} is blank
+     */
+    public CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType certificateType, String certificateIdentifier, String certificate) {
+        this(certificateType, certificateIdentifier, certificate, false);
+    }
+
+    /**
+     * Creates a new {@code CloudDatabaseServerSslCertificate} instance using the given arguments, and assuming {@code certificate = null}.
+     *
+     * @param certificateType       {@link CloudDatabaseServerSslCertificateType} instance representing SSL certificate type; must not be {@code null}
+     * @param certificateIdentifier cloud provider specific identifier of the SSL certificate; must not be {@code null} or blank
+     * @param overridden            {@code true} if this certificate has been marked as preferred by the user, thus overriding the system default setting
+     * @throws NullPointerException if either {@code certificateType} or {@code certificateIdentifier} is {@code null}
+     * @throws IllegalArgumentException if {@code certificateIdentifier} is blank
+     */
+    public CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType certificateType, String certificateIdentifier, boolean overridden) {
+        this(certificateType, certificateIdentifier, null, overridden);
+    }
+
+    /**
      * Creates a new {@code CloudDatabaseServerSslCertificate} instance using the given arguments.
      *
      * @param certificateType       {@link CloudDatabaseServerSslCertificateType} instance representing SSL certificate type; must not be {@code null}
-     * @param certificateIdentifier cloud provider specific identifier of the SSL certificate; must not be {@code null}
-     * @param certificate           the certificate itself, it can be empty or null
-     * @throws NullPointerException if either argument is {@code null}
+     * @param certificateIdentifier cloud provider specific identifier of the SSL certificate; must not be {@code null} or blank
+     * @param certificate           the certificate PEM payload itself, it can be empty or {@code null}
+     * @param overridden            {@code true} if this certificate has been marked as preferred by the user, thus overriding the system default setting
+     * @throws NullPointerException if either {@code certificateType} or {@code certificateIdentifier} is {@code null}
+     * @throws IllegalArgumentException if {@code certificateIdentifier} is blank
      */
-    public CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType certificateType, String certificateIdentifier, String certificate) {
+    public CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType certificateType, String certificateIdentifier, String certificate,
+            boolean overridden) {
         this.certificateType = requireNonNull(certificateType);
         this.certificateIdentifier = requireNonNull(certificateIdentifier);
+        if (StringUtils.isBlank(certificateIdentifier)) {
+            throw new IllegalArgumentException("certificateIdentifier must not be blank");
+        }
         this.certificate = certificate;
-    }
-
-    /**
-     * Retrieves the SSL certificate type.
-     *
-     * @return {@link CloudDatabaseServerSslCertificateType} instance; never {@code null}
-     */
-    @Override
-    public CloudDatabaseServerSslCertificateType certificateType() {
-        return certificateType;
-    }
-
-    /**
-     * Retrieves the cloud provider specific identifier of the SSL certificate.
-     *
-     * @return cloud provider specific identifier; never {@code null}
-     */
-    @Override
-    public String certificateIdentifier() {
-        return certificateIdentifier;
-    }
-
-    /**
-     * @return the certificate or null if it's absent
-     */
-    @Override
-    public String certificate() {
-        return certificate;
-    }
-
-    @Override
-    public String toString() {
-        return "DatabaseSslCertificate{" +
-                "certificateType=" + certificateType +
-                ", certificateIdentifier='" + certificateIdentifier + '\'' +
-                '}';
+        this.overridden = overridden;
     }
 
 }

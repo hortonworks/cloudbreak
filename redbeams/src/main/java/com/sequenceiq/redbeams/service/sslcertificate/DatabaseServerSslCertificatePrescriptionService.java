@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
-import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificates;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
@@ -36,7 +35,8 @@ public class DatabaseServerSslCertificatePrescriptionService {
     @Inject
     private SslConfigService sslConfigService;
 
-    public void prescribeSslCertificateIfNeeded(CloudContext cloudContext, CloudCredential cloudCredential, DBStack dbStack, DatabaseStack databaseStack) {
+    public void prescribeSslCertificateIfNeeded(CloudContext cloudContext, CloudCredential cloudCredential, DBStack dbStack, DatabaseStack databaseStack)
+            throws Exception {
         Optional<SslConfig> sslConfig = sslConfigService.fetchById(dbStack.getSslConfig());
         String cloudPlatform = dbStack.getCloudPlatform();
         if (sslConfig.isPresent() && CLOUD_PROVIDER_OWNED.equals(sslConfig.get().getSslCertificateType())
@@ -52,7 +52,7 @@ public class DatabaseServerSslCertificatePrescriptionService {
     }
 
     private void prescribeSslCertificateIfNeededAws(CloudContext cloudContext, CloudCredential cloudCredential, String cloudPlatform,
-            String desiredSslCertificateIdentifier, DatabaseServer databaseServer) {
+            String desiredSslCertificateIdentifier, DatabaseServer databaseServer) throws Exception {
         if (desiredSslCertificateIdentifier != null) {
             prescribeSslCertificateAws(cloudContext, cloudCredential, cloudPlatform, desiredSslCertificateIdentifier, databaseServer);
         } else {
@@ -62,11 +62,22 @@ public class DatabaseServerSslCertificatePrescriptionService {
     }
 
     private void prescribeSslCertificateAws(CloudContext cloudContext, CloudCredential cloudCredential, String cloudPlatform,
-            String desiredSslCertificateIdentifier, DatabaseServer databaseServer) {
-        Set<String> availableSslCertificateIdentifiers = getAvailableSslCertificateIdentifiers(cloudContext, cloudCredential, cloudPlatform);
-        if (availableSslCertificateIdentifiers.contains(desiredSslCertificateIdentifier)) {
-            // A more proper condition would be to check if desiredSslCertificateIdentifier was the default among availableSslCertificateIdentifiers,
-            // but this cannot be directly decided without launching a DB server and inspecting its associated SSL root cert.
+            String desiredSslCertificateIdentifier, DatabaseServer databaseServer) throws Exception {
+        Set<CloudDatabaseServerSslCertificate> availableSslCertificates = getAvailableSslCertificates(cloudContext, cloudCredential, cloudPlatform);
+        Optional<String> overriddenSslCertificateIdentifierOpt = getOverriddenSslCertificateIdentifier(cloudContext, cloudPlatform, availableSslCertificates);
+        Set<String> availableSslCertificateIdentifiers = getAvailableSslCertificateIdentifiers(cloudContext, cloudPlatform, availableSslCertificates);
+        if (overriddenSslCertificateIdentifierOpt.isPresent()) {
+            String overriddenSslCertificateIdentifier = overriddenSslCertificateIdentifierOpt.get();
+            LOGGER.info("Found overridden SSL certificate CloudProviderIdentifier for cloud platform \"{}\": \"{}\". " +
+                    "Skipping prescription for database stack {}.", cloudPlatform, overriddenSslCertificateIdentifier, cloudContext);
+            if (overriddenSslCertificateIdentifier.equals(desiredSslCertificateIdentifier)) {
+                LOGGER.info("Desired SSL certificate CloudProviderIdentifier matches the overridden one.");
+            } else {
+                LOGGER.info("Ignoring desired SSL certificate CloudProviderIdentifier that is different from the overridden one: \"{}\". " +
+                                "The latter will be later synced back to SslConfig in DatabaseServerSslCertificateSyncService.syncSslCertificateAws().",
+                        desiredSslCertificateIdentifier);
+            }
+        } else if (availableSslCertificateIdentifiers.contains(desiredSslCertificateIdentifier)) {
             if (availableSslCertificateIdentifiers.size() == 1) {
                 LOGGER.info("Desired SSL certificate CloudProviderIdentifier is the default for cloud platform \"{}\": \"{}\". " +
                         "Skipping prescription for database stack {}.", cloudPlatform, desiredSslCertificateIdentifier, cloudContext);
@@ -76,17 +87,37 @@ public class DatabaseServerSslCertificatePrescriptionService {
                         desiredSslCertificateIdentifier, cloudContext);
             }
         } else {
-            // desiredSslCertificateIdentifier is not available at the cloud provider side, so provision DB server using the default SSL cert
             LOGGER.warn("Unsupported SSL certificate CloudProviderIdentifier for cloud platform \"{}\": \"{}\". " +
-                    "Using default setting for database stack {}.", cloudPlatform, desiredSslCertificateIdentifier, cloudContext);
+                            "Using default certificate setting for database stack {}. The details of the actual SSL certificate will be later synced back to " +
+                            "SslConfig in DatabaseServerSslCertificateSyncService.syncSslCertificateAws().", cloudPlatform, desiredSslCertificateIdentifier,
+                    cloudContext);
         }
     }
 
-    private Set<String> getAvailableSslCertificateIdentifiers(CloudContext cloudContext, CloudCredential cloudCredential, String cloudPlatform) {
+    private Set<CloudDatabaseServerSslCertificate> getAvailableSslCertificates(CloudContext cloudContext, CloudCredential cloudCredential,
+            String cloudPlatform) throws Exception {
         CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
-        CloudDatabaseServerSslCertificates availableSslCertificates =
-                connector.platformResources().databaseServerGeneralSslRootCertificates(cloudCredential, cloudContext.getLocation().getRegion());
-        Set<String> availableSslCertificateIdentifiers = availableSslCertificates.getSslCertificates().stream()
+        Set<CloudDatabaseServerSslCertificate> availableSslCertificates = connector.platformResources()
+                .databaseServerGeneralSslRootCertificates(cloudCredential, cloudContext.getLocation().getRegion())
+                .sslCertificates();
+        LOGGER.info("Available SSL certificates for cloud platform \"{}\": \"{}\", database stack {}", cloudPlatform, availableSslCertificates, cloudContext);
+        return availableSslCertificates;
+    }
+
+    private Optional<String> getOverriddenSslCertificateIdentifier(CloudContext cloudContext, String cloudPlatform,
+            Set<CloudDatabaseServerSslCertificate> availableSslCertificates) {
+        Optional<String> overriddenSslCertificateIdentifier = availableSslCertificates.stream()
+                .filter(CloudDatabaseServerSslCertificate::overridden)
+                .map(CloudDatabaseServerSslCertificate::certificateIdentifier)
+                .findFirst();
+        LOGGER.info("Overridden SSL certificate CloudProviderIdentifier for cloud platform \"{}\": \"{}\", database stack {}", cloudPlatform,
+                overriddenSslCertificateIdentifier, cloudContext);
+        return overriddenSslCertificateIdentifier;
+    }
+
+    private Set<String> getAvailableSslCertificateIdentifiers(CloudContext cloudContext, String cloudPlatform,
+            Set<CloudDatabaseServerSslCertificate> availableSslCertificates) {
+        Set<String> availableSslCertificateIdentifiers = availableSslCertificates.stream()
                 .map(CloudDatabaseServerSslCertificate::certificateIdentifier)
                 .collect(Collectors.toSet());
         LOGGER.info("Available SSL certificate CloudProviderIdentifiers for cloud platform \"{}\": \"{}\", database stack {}", cloudPlatform,

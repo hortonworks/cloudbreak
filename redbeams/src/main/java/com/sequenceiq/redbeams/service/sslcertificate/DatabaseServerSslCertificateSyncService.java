@@ -1,7 +1,9 @@
 package com.sequenceiq.redbeams.service.sslcertificate;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -75,37 +77,43 @@ public class DatabaseServerSslCertificateSyncService {
         String cloudPlatform = dbStack.getCloudPlatform();
         String desiredSslCertificateIdentifier = sslConfig.getSslCertificateActiveCloudProviderIdentifier();
         String activeSslCertificateIdentifier = activeSslRootCertificate.certificateIdentifier();
-        // Note that while activeSslCertificateIdentifier can never be null, desiredSslCertificateIdentifier == null is indeed possible for legacy DB servers.
-        // The latter case is not, however, handled specially, so that the DBStack of the legacy DB server can be also updated to get rid of legacy null values.
         if (activeSslCertificateIdentifier.equals(desiredSslCertificateIdentifier)) {
             LOGGER.info("Active SSL certificate CloudProviderIdentifier for cloud platform \"{}\" matches the desired one: \"{}\", database stack {}",
                     cloudPlatform, activeSslCertificateIdentifier, cloudContext);
         } else {
-            // Always sync CloudProviderIdentifier; this may result in an "SSL certificate outdated" status for the DB server registration.
+            LOGGER.info("Mismatching SSL certificate CloudProviderIdentifier for cloud platform \"{}\": desired=\"{}\", actual=\"{}\", " +
+                            "database stack {}. Syncing it to the actual value; this may result in an \"SSL certificate outdated\" status for the DBStack.",
+                    cloudPlatform, Optional.ofNullable(desiredSslCertificateIdentifier).orElse("undefined (legacy DBStack)"), activeSslCertificateIdentifier,
+                    cloudContext);
             sslConfig.setSslCertificateActiveCloudProviderIdentifier(activeSslCertificateIdentifier);
             SslCertificateEntry activeSslCertificateEntry =
                     databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(cloudPlatform, dbStack.getRegion(),
                             activeSslCertificateIdentifier);
             if (activeSslCertificateEntry == null) {
-                // This is only possible if the newly launched DB server uses a super-recent SSL root certificate that is yet unknown to CB,
-                // or if the DB server SSL root certificate is too old and has already been removed from CB.
-                // Neither is a typical scenario, but they will always result in an "SSL certificate outdated" status for the DB server registration.
-                LOGGER.warn("Mismatching SSL certificate CloudProviderIdentifier for cloud platform \"{}\": desired=\"{}\", actual=\"{}\", " +
-                        "database stack {}. Unable to determine version & PEM for the actual CloudProviderIdentifier, leaving database server " +
-                        "registration unchanged.", cloudPlatform, desiredSslCertificateIdentifier, activeSslCertificateIdentifier, cloudContext);
+                LOGGER.warn("Unable to determine version & PEM for the actual CloudProviderIdentifier, leaving database server registration unchanged. " +
+                        "The DBStack uses an SSL root certificate that is unknown to redbeams, because it is either super-recent, " +
+                        "or too old so that it is treated as deprecated. This will result in an \"SSL certificate outdated\" status for the DBStack.");
             } else {
-                // This makes the DB server registration in sync with the cloud provider DB server instance,
-                // but it may also result in an "SSL certificate outdated" status for the DB server registration
-                // if the cloud provider side SSL certificate lags behind the highest version supported by CB.
-                LOGGER.info("Mismatching SSL certificate CloudProviderIdentifier for cloud platform \"{}\": desired=\"{}\", actual=\"{}\", " +
-                                "database stack {}. Updating database server registration with the version & PEM of the actual CloudProviderIdentifier.",
-                        cloudPlatform, desiredSslCertificateIdentifier, activeSslCertificateIdentifier, cloudContext);
+                LOGGER.info("Updating database server registration with the version & PEM of the actual CloudProviderIdentifier. " +
+                        "Associated SslCertificateEntry: {}. This may still result in an \"SSL certificate outdated\" status for the DBStack if the AWS side " +
+                        "SSL certificate lags behind the highest version supported by redbeams.", activeSslCertificateEntry);
                 validateCert(cloudPlatform, activeSslCertificateIdentifier, activeSslCertificateEntry);
-                sslConfig.setSslCertificateActiveVersion(activeSslCertificateEntry.version());
-                sslConfig.setSslCertificates(Collections.singleton(activeSslCertificateEntry.certPem()));
+                updateSslConfigWithActiveSslCertificateEntry(sslConfig, activeSslCertificateEntry);
             }
             sslConfigService.save(sslConfig);
         }
+    }
+
+    private void updateSslConfigWithActiveSslCertificateEntry(SslConfig sslConfig, SslCertificateEntry activeSslCertificateEntry) {
+        sslConfig.setSslCertificateActiveVersion(activeSslCertificateEntry.version());
+
+        String activeSslCertificatePem = activeSslCertificateEntry.certPem();
+        Set<String> sslCertificates = Optional.ofNullable(sslConfig.getSslCertificates()).orElse(new HashSet<>());
+        if (!sslCertificates.contains(activeSslCertificatePem)) {
+            sslCertificates = new HashSet<>(sslCertificates);
+            sslCertificates.add(activeSslCertificatePem);
+        }
+        sslConfig.setSslCertificates(sslCertificates);
     }
 
     private void validateCert(String cloudPlatform, String cloudProviderIdentifierExpected, SslCertificateEntry cert) {

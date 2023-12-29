@@ -485,7 +485,7 @@ public class AwsPlatformResources implements PlatformResources {
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
             CloudRegions regions = regions(cloudCredential, region, new HashMap<>(), true);
             for (Region actualRegion : regions.getCloudRegions().keySet()) {
-                // If region is provided then should filter for those region
+                // If region is provided then should filter for that region
                 if (regionMatch(actualRegion, region)) {
                     Set<CloudSshKey> cloudSshKeys = new HashSet<>();
                     AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential), actualRegion.value());
@@ -983,8 +983,8 @@ public class AwsPlatformResources implements PlatformResources {
         AmazonRdsClient rdsClient = getAmazonRdsClient(cloudCredential, region);
         List<Certificate> certificates = rdsClient.describeCertificates(DescribeCertificatesRequest.builder().build());
         Set<CloudDatabaseServerSslCertificate> sslCertificates = certificates.stream()
-                .map(Certificate::certificateIdentifier)
-                .map(id -> new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, id))
+                .map(cert -> new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, cert.certificateIdentifier(),
+                        Boolean.TRUE.equals(cert.customerOverride())))
                 .collect(Collectors.toSet());
         return new CloudDatabaseServerSslCertificates(sslCertificates);
     }

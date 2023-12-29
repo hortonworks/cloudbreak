@@ -215,7 +215,7 @@ public class AwsPlatformResourcesTest {
     }
 
     @Test
-    public void collectAccessConfigsWhenUserIsUnathorizedToGetInfoThenItShouldReturnEmptyList() {
+    public void collectAccessConfigsWhenUserIsUnauthorizedToGetInfoThenItShouldReturnEmptyList() {
         AwsServiceException amazonServiceException = AwsServiceException.builder().message("unauthorized.").statusCode(403).build();
 
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonCFClient);
@@ -385,8 +385,8 @@ public class AwsPlatformResourcesTest {
         return InstanceProfile.builder()
                 .arn(String.format("arn-%s", i))
                 .createDate(Instant.now())
-                .instanceProfileId(String.format("profilId-%s", i))
-                .instanceProfileName(String.format("profilName-%s", i))
+                .instanceProfileId(String.format("profileId-%s", i))
+                .instanceProfileName(String.format("profileName-%s", i))
                 .build();
     }
 
@@ -528,7 +528,7 @@ public class AwsPlatformResourcesTest {
     @Test
     public void testEncryptionWhenEncryptionSupportedWithNotSupportedValuePresentedShouldReturnFalse() {
         InstanceTypeInfo instanceTypeInfo = InstanceTypeInfo.builder()
-                .ebsInfo(EbsInfo.builder().encryptionSupport("nonsupported").build()).build();
+                .ebsInfo(EbsInfo.builder().encryptionSupport("unsupported").build()).build();
         boolean encryptionSupported = underTest.getEncryptionSupported(instanceTypeInfo);
         assertFalse(encryptionSupported);
     }
@@ -546,7 +546,7 @@ public class AwsPlatformResourcesTest {
     @Test
     void databaseServerGeneralSslRootCertificatesTestWhenSuccess() {
         Certificate certificate1 = Certificate.builder().certificateIdentifier("cert1").build();
-        Certificate certificate2 = Certificate.builder().certificateIdentifier("cert2").build();
+        Certificate certificate2 = Certificate.builder().certificateIdentifier("cert2").customerOverride(true).build();
 
         AmazonRdsClient amazonRdsClient = mock(AmazonRdsClient.class);
         when(amazonRdsClient.describeCertificates(any(DescribeCertificatesRequest.class))).thenReturn(List.of(certificate1, certificate2));
@@ -556,14 +556,14 @@ public class AwsPlatformResourcesTest {
 
         assertThat(cloudDatabaseServerSslCertificates).isNotNull();
 
-        Set<CloudDatabaseServerSslCertificate> sslCertificates = cloudDatabaseServerSslCertificates.getSslCertificates();
+        Set<CloudDatabaseServerSslCertificate> sslCertificates = cloudDatabaseServerSslCertificates.sslCertificates();
         assertThat(sslCertificates).isNotNull();
         assertThat(sslCertificates).hasSize(2);
-        verifySslRootCertificate(sslCertificates, "cert1");
-        verifySslRootCertificate(sslCertificates, "cert2");
+        verifySslRootCertificate(sslCertificates, "cert1", false);
+        verifySslRootCertificate(sslCertificates, "cert2", true);
     }
 
-    private void verifySslRootCertificate(Set<CloudDatabaseServerSslCertificate> sslCertificates, String certificateIdentifier) {
+    private void verifySslRootCertificate(Set<CloudDatabaseServerSslCertificate> sslCertificates, String certificateIdentifier, boolean overriddenExpected) {
         Optional<CloudDatabaseServerSslCertificate> match = sslCertificates.stream()
                 .filter(c -> certificateIdentifier.equals(c.certificateIdentifier()))
                 .findFirst();
@@ -571,6 +571,7 @@ public class AwsPlatformResourcesTest {
 
         CloudDatabaseServerSslCertificate sslCertificate = match.get();
         assertThat(sslCertificate.certificateType()).isEqualTo(CloudDatabaseServerSslCertificateType.ROOT);
+        assertThat(sslCertificate.overridden()).isEqualTo(overriddenExpected);
     }
 
     @Test

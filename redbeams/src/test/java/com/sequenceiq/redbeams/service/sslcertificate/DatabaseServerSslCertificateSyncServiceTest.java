@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.security.cert.X509Certificate;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -17,7 +18,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -57,7 +60,11 @@ class DatabaseServerSslCertificateSyncServiceTest {
 
     private static final int CERT_VERSION = 789;
 
+    private static final int CERT_VERSION_OTHER = 456;
+
     private static final String CERT_PEM = "cert-PEM";
+
+    private static final String CERT_PEM_OTHER = "cert-PEM-other";
 
     private static final Long SSL_CONF_ID = 16L;
 
@@ -117,18 +124,10 @@ class DatabaseServerSslCertificateSyncServiceTest {
         assertThat(dbStack.getSslConfig()).isNull();
     }
 
-    static Object[][] syncSslCertificateIfNeededTestWhenSuccessSslBadSslCertificateTypeDataProvider() {
-        return new Object[][]{
-                // testCaseName sslCertificateType
-                {"sslCertificateType=null", null},
-                {"SslCertificateType.NONE", SslCertificateType.NONE},
-                {"SslCertificateType.BRING_YOUR_OWN", SslCertificateType.BRING_YOUR_OWN},
-        };
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("syncSslCertificateIfNeededTestWhenSuccessSslBadSslCertificateTypeDataProvider")
-    void syncSslCertificateIfNeededTestWhenSuccessSslBadSslCertificateType(String testCaseName, SslCertificateType sslCertificateType) throws Exception {
+    @ParameterizedTest(name = "sslCertificateType={0}")
+    @NullSource
+    @EnumSource(value = SslCertificateType.class, names = {"NONE", "BRING_YOUR_OWN"})
+    void syncSslCertificateIfNeededTestWhenSuccessSslBadSslCertificateType(SslCertificateType sslCertificateType) throws Exception {
         syncSslCertificateIfNeededTestWhenSuccessSslBadSslCertificateTypeOrBadCloudPlatformInternal(sslCertificateType, CloudPlatform.AWS.name());
     }
 
@@ -145,10 +144,11 @@ class DatabaseServerSslCertificateSyncServiceTest {
         verify(sslConfigService, never()).save(any(SslConfig.class));
     }
 
-    @Test
-    void syncSslCertificateIfNeededTestWhenSuccessSslBadCloudPlatform() throws Exception {
+    @ParameterizedTest(name = "{0}")
+    @EnumSource(value = CloudPlatform.class, names = {"AWS", "GCP"}, mode = EnumSource.Mode.EXCLUDE)
+    void syncSslCertificateIfNeededTestWhenSuccessSslBadCloudPlatform(CloudPlatform cloudPlatform) throws Exception {
         syncSslCertificateIfNeededTestWhenSuccessSslBadSslCertificateTypeOrBadCloudPlatformInternal(SslCertificateType.CLOUD_PROVIDER_OWNED,
-                CloudPlatform.AZURE.name());
+                cloudPlatform.name());
     }
 
     @Test
@@ -158,7 +158,7 @@ class DatabaseServerSslCertificateSyncServiceTest {
         when(sslConfigService.fetchById(SSL_CONF_ID)).thenReturn(createSslConfig(SslCertificateType.CLOUD_PROVIDER_OWNED, CERT_ID_1));
 
         setupCloudConnectorMock();
-        Exception e = new Exception();
+        Exception e = new Exception("Foo");
         when(resourceConnector.getDatabaseServerActiveSslRootCertificate(authenticatedContext, databaseStack)).thenThrow(e);
 
         Exception exceptionResult =
@@ -225,17 +225,10 @@ class DatabaseServerSslCertificateSyncServiceTest {
         verify(sslConfigService, never()).save(any(SslConfig.class));
     }
 
-    static Object[][] syncSslCertificateIfNeededTestWhenSuccessSslAwsCloudProviderOwnedMismatchingActiveSslRootCertificateDataProvider() {
-        return new Object[][]{
-                // testCaseName sslCertificateActiveCloudProviderIdentifier
-                {"null", null},
-                {"CERT_ID_1", CERT_ID_1},
-        };
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("syncSslCertificateIfNeededTestWhenSuccessSslAwsCloudProviderOwnedMismatchingActiveSslRootCertificateDataProvider")
-    void syncSslCertificateIfNeededTestWhenSuccessSslAwsCloudProviderOwnedMismatchingActiveSslRootCertificateUnknown(String testCaseName,
+    @ParameterizedTest(name = "sslCertificateActiveCloudProviderIdentifier={0}")
+    @NullSource
+    @ValueSource(strings = CERT_ID_1)
+    void syncSslCertificateIfNeededTestWhenSuccessSslAwsCloudProviderOwnedMismatchingActiveSslRootCertificateUnknown(
             String sslCertificateActiveCloudProviderIdentifier) throws Exception {
         DBStack dbStack = getDBStack(SSL_CONF_ID);
         dbStack.setCloudPlatform(CloudPlatform.AWS.name());
@@ -255,13 +248,37 @@ class DatabaseServerSslCertificateSyncServiceTest {
         verifySslConfigCaptured(null, Set.of());
     }
 
-    private void verifySslConfigCaptured(Integer sslCertificateVersionExpected, Set<Object> sslCertificatesExpected) {
+    private void verifySslConfigCaptured(Integer sslCertificateVersionExpected, Set<String> sslCertificatesExpected) {
         SslConfig sslConfigCaptured = sslConfigArgumentCaptor.getValue();
         assertThat(sslConfigCaptured).isNotNull();
         assertThat(sslConfigCaptured.getSslCertificateType()).isEqualTo(SslCertificateType.CLOUD_PROVIDER_OWNED);
         assertThat(sslConfigCaptured.getSslCertificateActiveCloudProviderIdentifier()).isEqualTo(CERT_ID_2);
         assertThat(sslConfigCaptured.getSslCertificateActiveVersion()).isEqualTo(sslCertificateVersionExpected);
         assertThat(sslConfigCaptured.getSslCertificates()).isEqualTo(sslCertificatesExpected);
+    }
+
+    @ParameterizedTest(name = "sslCertificateActiveCloudProviderIdentifier={0}")
+    @NullSource
+    @ValueSource(strings = CERT_ID_1)
+    void syncSslCertificateIfNeededTestWhenSuccessSslAwsCloudProviderOwnedMismatchingActiveSslRootCertificateUnknownBogusDesiredVersionAndPem(
+            String sslCertificateActiveCloudProviderIdentifier) throws Exception {
+        DBStack dbStack = getDBStack(SSL_CONF_ID);
+        dbStack.setCloudPlatform(CloudPlatform.AWS.name());
+        when(sslConfigService.fetchById(SSL_CONF_ID))
+                .thenReturn(createSslConfig(SslCertificateType.CLOUD_PROVIDER_OWNED, sslCertificateActiveCloudProviderIdentifier, Set.of(CERT_PEM_OTHER),
+                        CERT_VERSION_OTHER));
+
+        setupCloudConnectorMock();
+        when(resourceConnector.getDatabaseServerActiveSslRootCertificate(authenticatedContext, databaseStack))
+                .thenReturn(new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, CERT_ID_2));
+
+        when(databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(CloudPlatform.AWS.name(), REGION, CERT_ID_2))
+                .thenReturn(null);
+
+        underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+
+        verify(sslConfigService).save(sslConfigArgumentCaptor.capture());
+        verifySslConfigCaptured(CERT_VERSION_OTHER, Set.of(CERT_PEM_OTHER));
     }
 
     @Test
@@ -314,15 +331,15 @@ class DatabaseServerSslCertificateSyncServiceTest {
         verify(sslConfigService, never()).save(any(SslConfig.class));
     }
 
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("syncSslCertificateIfNeededTestWhenSuccessSslAwsCloudProviderOwnedMismatchingActiveSslRootCertificateDataProvider")
-    void syncSslCertificateIfNeededTestWhenSuccessSslAwsCloudProviderOwnedMismatchingActiveSslRootCertificateFound(String testCaseName,
+    @ParameterizedTest(name = "sslCertificateActiveCloudProviderIdentifier={0}")
+    @NullSource
+    @ValueSource(strings = CERT_ID_1)
+    void syncSslCertificateIfNeededTestWhenSuccessSslAwsCloudProviderOwnedMismatchingActiveSslRootCertificateFound(
             String sslCertificateActiveCloudProviderIdentifier) throws Exception {
         DBStack dbStack = getDBStack(SSL_CONF_ID);
         dbStack.setCloudPlatform(CloudPlatform.AWS.name());
         when(sslConfigService.fetchById(SSL_CONF_ID))
                 .thenReturn(createSslConfig(SslCertificateType.CLOUD_PROVIDER_OWNED, sslCertificateActiveCloudProviderIdentifier));
-
 
         setupCloudConnectorMock();
         when(resourceConnector.getDatabaseServerActiveSslRootCertificate(authenticatedContext, databaseStack))
@@ -338,6 +355,103 @@ class DatabaseServerSslCertificateSyncServiceTest {
         verifySslConfigCaptured(CERT_VERSION, Set.of(CERT_PEM));
     }
 
+    @ParameterizedTest(name = "sslCertificateActiveCloudProviderIdentifier={0}")
+    @NullSource
+    @ValueSource(strings = CERT_ID_1)
+    void syncSslCertificateIfNeededTestWhenSuccessSslAwsCloudProviderOwnedMismatchingActiveSslRootCertificateFoundNullDesiredCerts(
+            String sslCertificateActiveCloudProviderIdentifier) throws Exception {
+        DBStack dbStack = getDBStack(SSL_CONF_ID);
+        dbStack.setCloudPlatform(CloudPlatform.AWS.name());
+        when(sslConfigService.fetchById(SSL_CONF_ID))
+                .thenReturn(createSslConfig(SslCertificateType.CLOUD_PROVIDER_OWNED, sslCertificateActiveCloudProviderIdentifier, null));
+
+        setupCloudConnectorMock();
+        when(resourceConnector.getDatabaseServerActiveSslRootCertificate(authenticatedContext, databaseStack))
+                .thenReturn(new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, CERT_ID_2));
+
+        SslCertificateEntry cert = new SslCertificateEntry(CERT_VERSION, CERT_ID_2, CERT_ID_2, AWS, CERT_PEM, x509Cert);
+        when(databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(CloudPlatform.AWS.name(), REGION, CERT_ID_2))
+                .thenReturn(cert);
+
+        underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+
+        verify(sslConfigService).save(sslConfigArgumentCaptor.capture());
+        verifySslConfigCaptured(CERT_VERSION, Set.of(CERT_PEM));
+    }
+
+    @ParameterizedTest(name = "sslCertificateActiveCloudProviderIdentifier={0}")
+    @NullSource
+    @ValueSource(strings = CERT_ID_1)
+    void syncSslCertificateIfNeededTestWhenSuccessSslAwsCloudProviderOwnedMismatchingActiveSslRootCertificateFoundDesiredCertsWithActivePemOnly(
+            String sslCertificateActiveCloudProviderIdentifier) throws Exception {
+        DBStack dbStack = getDBStack(SSL_CONF_ID);
+        dbStack.setCloudPlatform(CloudPlatform.AWS.name());
+        when(sslConfigService.fetchById(SSL_CONF_ID))
+                .thenReturn(createSslConfig(SslCertificateType.CLOUD_PROVIDER_OWNED, sslCertificateActiveCloudProviderIdentifier, Set.of(CERT_PEM)));
+
+        setupCloudConnectorMock();
+        when(resourceConnector.getDatabaseServerActiveSslRootCertificate(authenticatedContext, databaseStack))
+                .thenReturn(new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, CERT_ID_2));
+
+        SslCertificateEntry cert = new SslCertificateEntry(CERT_VERSION, CERT_ID_2, CERT_ID_2, AWS, CERT_PEM, x509Cert);
+        when(databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(CloudPlatform.AWS.name(), REGION, CERT_ID_2))
+                .thenReturn(cert);
+
+        underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+
+        verify(sslConfigService).save(sslConfigArgumentCaptor.capture());
+        verifySslConfigCaptured(CERT_VERSION, Set.of(CERT_PEM));
+    }
+
+    @ParameterizedTest(name = "sslCertificateActiveCloudProviderIdentifier={0}")
+    @NullSource
+    @ValueSource(strings = CERT_ID_1)
+    void syncSslCertificateIfNeededTestWhenSuccessSslAwsCloudProviderOwnedMismatchingActiveSslRootCertificateFoundDesiredCertsWithActiveAndOtherPems(
+            String sslCertificateActiveCloudProviderIdentifier) throws Exception {
+        DBStack dbStack = getDBStack(SSL_CONF_ID);
+        dbStack.setCloudPlatform(CloudPlatform.AWS.name());
+        when(sslConfigService.fetchById(SSL_CONF_ID))
+                .thenReturn(createSslConfig(SslCertificateType.CLOUD_PROVIDER_OWNED, sslCertificateActiveCloudProviderIdentifier,
+                        Set.of(CERT_PEM, CERT_PEM_OTHER)));
+
+        setupCloudConnectorMock();
+        when(resourceConnector.getDatabaseServerActiveSslRootCertificate(authenticatedContext, databaseStack))
+                .thenReturn(new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, CERT_ID_2));
+
+        SslCertificateEntry cert = new SslCertificateEntry(CERT_VERSION, CERT_ID_2, CERT_ID_2, AWS, CERT_PEM, x509Cert);
+        when(databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(CloudPlatform.AWS.name(), REGION, CERT_ID_2))
+                .thenReturn(cert);
+
+        underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+
+        verify(sslConfigService).save(sslConfigArgumentCaptor.capture());
+        verifySslConfigCaptured(CERT_VERSION, Set.of(CERT_PEM, CERT_PEM_OTHER));
+    }
+
+    @ParameterizedTest(name = "sslCertificateActiveCloudProviderIdentifier={0}")
+    @NullSource
+    @ValueSource(strings = CERT_ID_1)
+    void syncSslCertificateIfNeededTestWhenSuccessSslAwsCloudProviderOwnedMismatchingActiveSslRootCertificateFoundDesiredCertsWithOtherPemOnly(
+            String sslCertificateActiveCloudProviderIdentifier) throws Exception {
+        DBStack dbStack = getDBStack(SSL_CONF_ID);
+        dbStack.setCloudPlatform(CloudPlatform.AWS.name());
+        when(sslConfigService.fetchById(SSL_CONF_ID))
+                .thenReturn(createSslConfig(SslCertificateType.CLOUD_PROVIDER_OWNED, sslCertificateActiveCloudProviderIdentifier, Set.of(CERT_PEM_OTHER)));
+
+        setupCloudConnectorMock();
+        when(resourceConnector.getDatabaseServerActiveSslRootCertificate(authenticatedContext, databaseStack))
+                .thenReturn(new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, CERT_ID_2));
+
+        SslCertificateEntry cert = new SslCertificateEntry(CERT_VERSION, CERT_ID_2, CERT_ID_2, AWS, CERT_PEM, x509Cert);
+        when(databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(CloudPlatform.AWS.name(), REGION, CERT_ID_2))
+                .thenReturn(cert);
+
+        underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
+
+        verify(sslConfigService).save(sslConfigArgumentCaptor.capture());
+        verifySslConfigCaptured(CERT_VERSION, Set.of(CERT_PEM, CERT_PEM_OTHER));
+    }
+
     private DBStack getDBStack() {
         return getDBStack(null);
     }
@@ -350,9 +464,21 @@ class DatabaseServerSslCertificateSyncServiceTest {
     }
 
     private Optional<SslConfig> createSslConfig(SslCertificateType sslCertificateType, String sslCertificateActiveCloudProviderIdentifier) {
+        return createSslConfig(sslCertificateType, sslCertificateActiveCloudProviderIdentifier, new HashSet<>());
+    }
+
+    private Optional<SslConfig> createSslConfig(SslCertificateType sslCertificateType, String sslCertificateActiveCloudProviderIdentifier,
+            Set<String> sslCertificates) {
+        return createSslConfig(sslCertificateType, sslCertificateActiveCloudProviderIdentifier, sslCertificates, null);
+    }
+
+    private Optional<SslConfig> createSslConfig(SslCertificateType sslCertificateType, String sslCertificateActiveCloudProviderIdentifier,
+            Set<String> sslCertificates, Integer sslCertificateActiveVersion) {
         SslConfig sslConfig = new SslConfig();
         sslConfig.setSslCertificateType(sslCertificateType);
         sslConfig.setSslCertificateActiveCloudProviderIdentifier(sslCertificateActiveCloudProviderIdentifier);
+        sslConfig.setSslCertificates(sslCertificates);
+        sslConfig.setSslCertificateActiveVersion(sslCertificateActiveVersion);
         return Optional.of(sslConfig);
     }
 

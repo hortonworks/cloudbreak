@@ -160,10 +160,11 @@ public interface PlatformResources {
      * @param cloudCredential credentials to connect to the cloud provider; must not be {@code null}
      * @param region region of the resources; must not be {@code null}
      * @return the {@link CloudDatabaseServerSslCertificates} instance containing every SSL certificate for the specified region; never {@code null};
-     *         the set returned by {@link CloudDatabaseServerSslCertificates#getSslCertificates()} may be empty
+     *         the set returned by {@link CloudDatabaseServerSslCertificates#sslCertificates()} may be empty
      * @throws NullPointerException if either argument is {@code null}
+     * @throws Exception in case of any error
      */
-    default CloudDatabaseServerSslCertificates databaseServerGeneralSslRootCertificates(CloudCredential cloudCredential, Region region) {
+    default CloudDatabaseServerSslCertificates databaseServerGeneralSslRootCertificates(CloudCredential cloudCredential, Region region) throws Exception {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 

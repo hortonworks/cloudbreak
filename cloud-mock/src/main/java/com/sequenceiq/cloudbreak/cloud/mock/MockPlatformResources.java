@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
@@ -316,7 +317,7 @@ public class MockPlatformResources implements PlatformResources {
     @Override
     public CloudDatabaseServerSslCertificates databaseServerGeneralSslRootCertificates(CloudCredential cloudCredential, Region region) {
         String[] certificates = mockUrlFactory.get("/db/certificates").get(String[].class);
-        Set<CloudDatabaseServerSslCertificate> setOfCertificates = List.of(certificates).stream().map(
+        Set<CloudDatabaseServerSslCertificate> setOfCertificates = Stream.of(certificates).map(
                 certificate -> new CloudDatabaseServerSslCertificate(ROOT, certificate)).collect(Collectors.toSet());
 
         return new CloudDatabaseServerSslCertificates(setOfCertificates);

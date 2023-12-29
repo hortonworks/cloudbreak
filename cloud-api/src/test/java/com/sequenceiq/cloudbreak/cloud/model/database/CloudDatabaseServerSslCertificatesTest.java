@@ -22,7 +22,7 @@ class CloudDatabaseServerSslCertificatesTest {
 
         CloudDatabaseServerSslCertificates underTest = new CloudDatabaseServerSslCertificates(sslCertificates);
 
-        assertThat(underTest.getSslCertificates()).isSameAs(sslCertificates);
+        assertThat(underTest.sslCertificates()).isSameAs(sslCertificates);
     }
 
 }
