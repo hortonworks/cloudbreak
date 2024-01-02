@@ -15,6 +15,8 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
+import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
+import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
@@ -26,14 +28,22 @@ public class PublicKeyDeleteHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final HandlerExceptionProcessor exceptionProcessor;
 
+    private final EnvironmentResourceService environmentResourceService;
+
+    private final EnvironmentService environmentService;
+
     private final EventSenderService eventSenderService;
 
     protected PublicKeyDeleteHandler(EventSender eventSender,
             HandlerExceptionProcessor exceptionProcessor,
+            EnvironmentResourceService environmentResourceService,
+            EnvironmentService environmentService,
             EventSenderService eventSenderService) {
         super(eventSender);
         this.exceptionProcessor = exceptionProcessor;
         this.eventSenderService = eventSenderService;
+        this.environmentResourceService = environmentResourceService;
+        this.environmentService = environmentService;
     }
 
     @Override
@@ -60,7 +70,8 @@ public class PublicKeyDeleteHandler extends EventSenderAwareHandler<EnvironmentD
         if (environmentDto.getAuthentication().isManagedKey() && publicKeyId != null) {
             LOGGER.warn("Environment {} has managed public key. Skipping key deletion: '{}'", environmentDto.getName(), publicKeyId);
             String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-            eventSenderService.sendEventAndNotification(environmentDto, userCrn, ResourceEvent.ENVIRONMENT_SSH_DELETION_SKIPPED, List.of(publicKeyId));
+            environmentResourceService.deletePublicKey(environmentService.findEnvironmentByIdOrThrow(environmentDto.getId()));
+            eventSenderService.sendEventAndNotification(environmentDto, userCrn, ResourceEvent.ENVIRONMENT_SSH_DELETION_APPLIED, List.of(publicKeyId));
         } else {
             LOGGER.debug("Environment {} had no managed public key", environmentDto.getName());
         }

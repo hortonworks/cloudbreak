@@ -5,10 +5,12 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
@@ -27,10 +29,13 @@ import org.slf4j.Logger;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
+import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
+import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
@@ -59,6 +64,12 @@ class PublicKeyDeleteHandlerTest {
 
     @Mock
     private EventSenderService eventSenderService;
+
+    @Mock
+    private EnvironmentResourceService environmentResourceService;
+
+    @Mock
+    private EnvironmentService environmentService;
 
     @Mock
     private Event.Headers headers;
@@ -128,8 +139,10 @@ class PublicKeyDeleteHandlerTest {
                 .withManagedKey(true)
                 .build();
         environmentDto.setAuthentication(authenticationDto);
+        doNothing().when(environmentResourceService).deletePublicKey(any());
+        when(environmentService.findEnvironmentByIdOrThrow(any())).thenReturn(new Environment());
         doThrow(error).when(eventSenderService)
-                .sendEventAndNotification(environmentDto, USER_CRN, ResourceEvent.ENVIRONMENT_SSH_DELETION_SKIPPED, List.of(PUBLIC_KEY_ID));
+                .sendEventAndNotification(environmentDto, USER_CRN, ResourceEvent.ENVIRONMENT_SSH_DELETION_APPLIED, List.of(PUBLIC_KEY_ID));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.accept(environmentDtoEvent));
 
