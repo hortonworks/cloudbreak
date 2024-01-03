@@ -37,7 +37,8 @@ public class DBStackUpdater {
         Optional<DBStack> dbStackOpt = dbStackService.findById(id);
         dbStackOpt.ifPresent(dbStack -> {
             Optional<SslConfig> sslConfig = sslConfigService.fetchById(dbStack.getSslConfig());
-            if (sslConfig.isPresent() && sslConfig.get().getSslCertificateType() == SslCertificateType.CLOUD_PROVIDER_OWNED) {
+            if (sslConfig.isPresent() && sslConfig.get().getSslCertificateType() == SslCertificateType.CLOUD_PROVIDER_OWNED
+                    && databaseServerSslCertificateConfig.isCloudPlatformAndRegionSupportedForCerts(dbStack.getCloudPlatform(), dbStack.getRegion())) {
                 String cloudPlatform = dbStack.getCloudPlatform();
                 String region = dbStack.getRegion();
                 SslConfig sslConf = sslConfig.get();

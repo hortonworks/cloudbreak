@@ -2,6 +2,7 @@ package com.sequenceiq.redbeams.service.stack;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -74,6 +75,7 @@ public class DBStackUpdaterTest {
         when(sslConfigService.fetchById(1L)).thenReturn(Optional.of(sslConfig));
         when(dbStack.getCloudPlatform()).thenReturn("cloudPlatform");
         when(dbStack.getRegion()).thenReturn("region");
+        when(databaseServerSslCertificateConfig.isCloudPlatformAndRegionSupportedForCerts(any(), any())).thenReturn(true);
         when(databaseServerSslCertificateConfig.getCertsByCloudPlatformAndRegion("cloudPlatform", "region")).thenReturn(certificateEntries);
         when(databaseServerSslCertificateConfig.getMaxVersionByCloudPlatformAndRegion("cloudPlatform", "region")).thenReturn(1);
 
@@ -103,6 +105,7 @@ public class DBStackUpdaterTest {
         when(dbStack.getCloudPlatform()).thenReturn("cloudPlatform");
         when(dbStack.getRegion()).thenReturn("region");
         when(dbStack.getName()).thenReturn("name");
+        when(databaseServerSslCertificateConfig.isCloudPlatformAndRegionSupportedForCerts(any(), any())).thenReturn(true);
         when(databaseServerSslCertificateConfig.getCertsByCloudPlatformAndRegion("cloudPlatform", "region")).thenReturn(certificateEntries);
         when(databaseServerSslCertificateConfig.getMaxVersionByCloudPlatformAndRegion("cloudPlatform", "region")).thenReturn(1);
 
@@ -110,6 +113,22 @@ public class DBStackUpdaterTest {
         Assertions.assertEquals("Active SSL cert cannot be found for name", actual.getMessage());
 
         verify(sslConfigService, never()).save(any(SslConfig.class));
+    }
+
+    @Test
+    public void testUpdateSslConfigWhenDBStackExistsButCloudProviderNotSupported() {
+        SslConfig sslConfig = new SslConfig();
+        sslConfig.setSslCertificateType(SslCertificateType.CLOUD_PROVIDER_OWNED);
+        when(dbStackService.findById(STACK_ID)).thenReturn(Optional.of(dbStack));
+        when(dbStack.getSslConfig()).thenReturn(1L);
+        when(sslConfigService.fetchById(1L)).thenReturn(Optional.of(sslConfig));
+        when(dbStack.getCloudPlatform()).thenReturn("cloudPlatform");
+        when(dbStack.getRegion()).thenReturn("region");
+        when(databaseServerSslCertificateConfig.isCloudPlatformAndRegionSupportedForCerts(any(), any())).thenReturn(false);
+
+        underTest.updateSslConfig(STACK_ID);
+
+        verify(sslConfigService, times(0)).save(any(SslConfig.class));
     }
 
     @Test
