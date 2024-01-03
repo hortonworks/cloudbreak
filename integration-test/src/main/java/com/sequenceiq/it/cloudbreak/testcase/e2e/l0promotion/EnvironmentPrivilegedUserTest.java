@@ -113,12 +113,8 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
         String workloadUsernameEnvCreator = testContext.getTestUsers().getUserByLabel(L0UserKeys.USER_ENV_CREATOR).getWorkloadUserName();
         testContext.as(L0UserKeys.USER_ENV_CREATOR);
 
+        setWorkloadPassword(testContext);
         testContext
-                .given(UmsTestDto.class).assignTarget(EnvironmentTestDto.class.getSimpleName())
-                .when(umsTestClient.setWorkloadPassword(testContext.getWorkloadPassword()))
-                .given(FreeIpaUserSyncTestDto.class)
-                .when(freeIpaTestClient.syncAll())
-                .await(OperationState.COMPLETED)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .thenException((tc, testDto, client) -> {

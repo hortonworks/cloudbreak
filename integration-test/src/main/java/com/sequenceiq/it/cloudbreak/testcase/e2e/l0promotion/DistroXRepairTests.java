@@ -12,7 +12,6 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
@@ -20,10 +19,6 @@ import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
@@ -80,21 +75,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
         List<String> actualVolumeIds = new ArrayList<>();
         List<String> expectedVolumeIds = new ArrayList<>();
 
-        testContext
-                .given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.describe())
-                .given(FreeIpaUserSyncTestDto.class)
-                .when(freeIpaTestClient.getLastSyncOperationStatus())
-                .await(OperationState.COMPLETED)
-                .given(UmsTestDto.class)
-                    .assignTarget(EnvironmentTestDto.class.getSimpleName())
-                .when(umsTestClient.setWorkloadPassword(testContext.getWorkloadPassword()))
-                .given(FreeIpaUserSyncTestDto.class)
-                .when(freeIpaTestClient.syncAll())
-                .await(OperationState.COMPLETED)
-                .given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.describe())
-                .validate();
+        setWorkloadPassword(testContext);
 
         testContext
                 .given(DistroXTestDto.class)

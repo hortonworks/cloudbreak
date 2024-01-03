@@ -26,6 +26,7 @@ public class YarnImageValidatorE2ETest extends HybridCloudE2ETest implements Ima
     protected void setupTest(TestContext testContext) {
         imageValidatorE2ETestUtil.setupTest(testContext, this);
         super.setupTest(testContext);
+        setWorkloadPassword(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)

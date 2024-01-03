@@ -67,7 +67,7 @@ public class HybridCloudAssertions {
         try (SSHClient client = getSshClient(host)) {
             client.authPassword(testContext.getWorkloadUserName(), testContext.getWorkloadPassword());
         } catch (IOException e) {
-            throw new TestFailException(String.format("Failed to ssh into host %s", host), e);
+            throw new TestFailException(String.format("Failed to ssh into host %s with workload user %s", host, testContext.getWorkloadUserName()), e);
         }
     }
 

@@ -8,17 +8,12 @@ import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.assertion.datalake.RecipeTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.PreconditionSdxE2ETest;
 import com.sequenceiq.it.cloudbreak.util.clouderamanager.ClouderaManagerUtil;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
@@ -44,6 +39,7 @@ public class InternalSdxSshAndCmAccessTest extends PreconditionSdxE2ETest {
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
         createDefaultDatalake(testContext);
+        setWorkloadPassword(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -60,16 +56,6 @@ public class InternalSdxSshAndCmAccessTest extends PreconditionSdxE2ETest {
         String fileName = "uuid";
 
         testContext
-                .given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.describe())
-                .given(FreeIpaUserSyncTestDto.class)
-                .when(freeIpaTestClient.getLastSyncOperationStatus())
-                .await(OperationState.COMPLETED)
-                .given(UmsTestDto.class).assignTarget(EnvironmentTestDto.class.getSimpleName())
-                .when(umsTestClient.setWorkloadPassword(testContext.getWorkloadPassword()))
-                .given(FreeIpaUserSyncTestDto.class)
-                .when(freeIpaTestClient.syncAll())
-                .await(OperationState.COMPLETED)
                 .given(SdxInternalTestDto.class)
                 .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName()), filePath, fileName, 1, sshJUtil))
                 .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerKnoxIDBrokerRoleConfigGroups(testDto, tc))

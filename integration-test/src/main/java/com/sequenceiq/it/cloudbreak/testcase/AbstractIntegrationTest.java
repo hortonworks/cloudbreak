@@ -26,6 +26,7 @@ import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
 import com.sequenceiq.it.cloudbreak.config.user.TestUserSelectors;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.TermsPolicyDto;
@@ -44,6 +45,7 @@ import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.util.EnvironmentUtil;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -83,6 +85,9 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     @Inject
     private ProxyTestClient proxyTestClient;
+
+    @Inject
+    private UmsTestClient umsTestClient;
 
     @Inject
     private AzureMarketplaceTermsClient azureMarketplaceTermsClient;
@@ -304,6 +309,23 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         testContext.given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.getLastSyncOperationStatus())
                 .await(OperationState.COMPLETED)
+                .validate();
+    }
+
+    protected void setWorkloadPassword(TestContext testContext) {
+        testContext
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
+                .validate();
+        waitForUserSync(testContext);
+        testContext
+                .given(UmsTestDto.class).assignTarget(EnvironmentTestDto.class.getSimpleName())
+                .when(umsTestClient.setWorkloadPassword(testContext.getWorkloadPassword()))
+                .given(FreeIpaUserSyncTestDto.class)
+                .when(freeIpaTestClient.syncAll())
+                .await(OperationState.COMPLETED)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
                 .validate();
     }
 
