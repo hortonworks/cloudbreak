@@ -276,7 +276,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
             try (Connection conn = driver.connect(databaseServerConfig)) {
                 databaseCommon.executeUpdates(conn, sqlStrings, createDatabaseInsideTransaction);
             } catch (SQLException e) {
-                throw new RedbeamsException("Failed to create database " + databaseName, e);
+                throw new ConflictException("Failed to create database " + databaseName, e);
             }
         });
 
