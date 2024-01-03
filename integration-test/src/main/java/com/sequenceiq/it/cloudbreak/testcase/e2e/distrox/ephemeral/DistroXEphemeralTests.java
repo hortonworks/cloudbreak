@@ -10,7 +10,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -35,7 +34,6 @@ import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.util.TestParameter;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-@Test(singleThreaded = true)
 public class DistroXEphemeralTests extends AbstractE2ETest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXEphemeralTests.class);
@@ -58,15 +56,8 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
     @Inject
     private SdxTestClient sdxTestClient;
 
-    private TestContext classContext;
-
     @Override
     protected void setupTest(TestContext testContext) {
-        LOGGER.debug("Nothing to do in before method setup");
-    }
-
-    private TestContext prepareEnvironment(TestContext testContext) {
-        LOGGER.debug("Creating test environment with data lake and datahub");
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
@@ -77,7 +68,6 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
         createAndWaitDatalakeWithRuntime(testContext, currentRuntimeVersion);
         createDataHubWithStorageOptimizedInstancesAndWithRuntime(testContext, currentRuntimeVersion);
         waitForDefaultDatahubCreation(testContext);
-        return testContext;
     }
 
     private void createAndWaitDatalakeWithRuntime(TestContext testContext, String currentRuntimeVersion) {
@@ -103,16 +93,14 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT, priority = 0)
+    @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
             given = "a valid DistroX with ephemeral temporary storage",
             when = "stopping and starting the cluster",
             then = "clusters is available, device mount point are checked, and after stopping and starting the cluster ephemeral store handling checked again")
     public void testStopStartDistroXWithEphemeralTemporaryStorage(TestContext testContext) {
-        classContext = prepareEnvironment(testContext);
-
-        classContext
+        testContext
                 .given(DistroXTestDto.class)
                 .await(STACK_AVAILABLE)
                 .then(this::verifyMountedDisks)
@@ -137,7 +125,7 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
         return testDto;
     }
 
-    @Test(dataProvider = TEST_CONTEXT, priority = 1, dependsOnMethods = "testStopStartDistroXWithEphemeralTemporaryStorage")
+    @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
             given = "there is a running Cloudbreak, and an environment with SDX and DistroX cluster in available state",
@@ -145,12 +133,10 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
             then = "DistroX recovery should be successful, the cluster should be up and running"
     )
     public void testEphemeralDistroXMasterRepairWithTerminatedEC2Instances(TestContext testContext) {
-        Assert.assertNotNull(classContext, "Class level test context object should not be null. All methods should use the same");
-
         List<String> actualVolumeIds = new ArrayList<>();
         List<String> expectedVolumeIds = new ArrayList<>();
 
-        classContext
+        testContext
                 .given(DistroXTestDto.class)
                 .then(this::verifyMountedDisks)
                 .then((tc, testDto, client) -> {
@@ -183,14 +169,13 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
         return testDto;
     }
 
-    @Test(dataProvider = TEST_CONTEXT, priority = 2, dependsOnMethods = "testEphemeralDistroXMasterRepairWithTerminatedEC2Instances")
+    @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(given = "there is a running Cloudbreak, and an environment with SDX and DistroX cluster in available state",
             when = "upgrade called on the DistroX cluster", then = "DistroX upgrade should be successful, the cluster should be up and running")
     public void testDistroXEphemeralUpgrade(TestContext testContext) {
-        Assert.assertNotNull(classContext, "Class level test context object should not be null. All methods should use the same");
         String targetRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeTargetVersion();
-        classContext
+        testContext
                 .given(DistroXUpgradeTestDto.class)
                 .withRuntime(targetRuntimeVersion)
                 .given(DistroXTestDto.class)
