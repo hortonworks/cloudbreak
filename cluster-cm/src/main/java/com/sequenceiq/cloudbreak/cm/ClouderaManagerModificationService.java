@@ -611,7 +611,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         deployConfigAndRefreshCMStaleServices(clustersResourceApi, forced);
     }
 
-    private void restartMgmtServices() throws ApiException, CloudbreakException {
+    @Override
+    public void restartMgmtServices() throws ApiException, CloudbreakException {
         MgmtServiceResourceApi mgmtServiceResourceApi = clouderaManagerApiFactory.getMgmtServiceResourceApi(v31Client);
         restartClouderaManagementServices(mgmtServiceResourceApi);
     }

@@ -196,11 +196,7 @@ public class AltusMachineUserService {
      */
     public DataBusCredential storeDataBusCredential(Optional<AltusCredential> altusCredential, StackView stack, CdpAccessKeyType cdpAccessKeyType) {
         if (altusCredential.isPresent()) {
-            DataBusCredential dataBusCredential = new DataBusCredential();
-            dataBusCredential.setMachineUserName(getFluentDatabusMachineUserName(stack));
-            dataBusCredential.setAccessKey(altusCredential.get().getAccessKey());
-            dataBusCredential.setPrivateKey(altusCredential.get().getPrivateKey() != null ? new String(altusCredential.get().getPrivateKey()) : null);
-            dataBusCredential.setAccessKeyType(cdpAccessKeyType.getValue());
+            DataBusCredential dataBusCredential = getDataBusCredential(altusCredential.get(), stack, cdpAccessKeyType);
             String databusCredentialJsonString = new Json(dataBusCredential).getValue();
             if (stack.getClusterId() != null) {
                 clusterService.updateDatabusCredentialByClusterId(stack.getClusterId(), databusCredentialJsonString);
@@ -208,6 +204,15 @@ public class AltusMachineUserService {
             return dataBusCredential;
         }
         return null;
+    }
+
+    public DataBusCredential getDataBusCredential(AltusCredential altusCredential, StackView stack, CdpAccessKeyType cdpAccessKeyType) {
+        DataBusCredential dataBusCredential = new DataBusCredential();
+        dataBusCredential.setMachineUserName(getFluentDatabusMachineUserName(stack));
+        dataBusCredential.setAccessKey(altusCredential.getAccessKey());
+        dataBusCredential.setPrivateKey(altusCredential.getPrivateKey() != null ? new String(altusCredential.getPrivateKey()) : null);
+        dataBusCredential.setAccessKeyType(cdpAccessKeyType.getValue());
+        return dataBusCredential;
     }
 
     public MonitoringCredential storeMonitoringCredential(Optional<AltusCredential> altusCredential, StackView stack, CdpAccessKeyType cdpAccessKeyType) {

@@ -8,9 +8,9 @@ import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.context.SaltRunOrchestratorStateRotationContext;
 
@@ -18,35 +18,35 @@ import com.sequenceiq.cloudbreak.rotation.context.SaltRunOrchestratorStateRotati
 public class SaltRunOrchestratorStateRotationExecutor extends AbstractRotationExecutor<SaltRunOrchestratorStateRotationContext> {
 
     @Inject
-    private HostOrchestrator hostOrchestrator;
+    private SecretRotationSaltService saltService;
 
     @Override
     protected void rotate(SaltRunOrchestratorStateRotationContext context) throws Exception {
         if (context.stateRunNeeded()) {
-            hostOrchestrator.runOrchestratorState(getStateParams(Optional.of(context.getRotateParams()), Optional.of(context.getStates()), context));
+            saltService.executeSaltRun(getStateParams(Optional.of(context.getRotateParams()), Optional.of(context.getStates()), context));
         }
     }
 
     @Override
     protected void rollback(SaltRunOrchestratorStateRotationContext context) throws Exception {
         if (context.stateRunNeeded() && context.rollbackStateExists()) {
-            hostOrchestrator.runOrchestratorState(getStateParams(context.getRollbackParams(), context.getRollBackStates(), context));
+            saltService.executeSaltRun(getStateParams(context.getRollbackParams(), context.getRollBackStates(), context));
         }
     }
 
     @Override
     protected void finalize(SaltRunOrchestratorStateRotationContext context) throws Exception {
         if (context.stateRunNeeded() && context.cleanupStateExists()) {
-            hostOrchestrator.runOrchestratorState(getStateParams(context.getCleanupParams(), context.getCleanupStates(), context));
+            saltService.executeSaltRun(getStateParams(context.getCleanupParams(), context.getCleanupStates(), context));
         }
     }
 
     @Override
     protected void preValidate(SaltRunOrchestratorStateRotationContext context) throws Exception {
         if (context.stateRunNeeded()) {
-            hostOrchestrator.ping(context.getTargets(), context.getGatewayConfig());
+            saltService.validateSalt(context.getTargets(), context.getGatewayConfig());
             if (context.preValidateStateExists()) {
-                hostOrchestrator.runOrchestratorState(getStateParams(context.getPrevalidateParams(), context.getPreValidateStates(), context));
+                saltService.executeSaltRun(getStateParams(context.getPrevalidateParams(), context.getPreValidateStates(), context));
             }
         }
     }
@@ -54,7 +54,7 @@ public class SaltRunOrchestratorStateRotationExecutor extends AbstractRotationEx
     @Override
     protected void postValidate(SaltRunOrchestratorStateRotationContext context) throws Exception {
         if (context.stateRunNeeded() && context.postValidateStateExists()) {
-            hostOrchestrator.runOrchestratorState(getStateParams(context.getPostValidateParams(), context.getPostValidateStates(), context));
+            saltService.executeSaltRun(getStateParams(context.getPostValidateParams(), context.getPostValidateStates(), context));
         }
     }
 

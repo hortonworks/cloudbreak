@@ -22,18 +22,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.rotation.RotationMetadataTestUtil;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.SaltRunOrchestratorStateRotationContext;
-import com.sequenceiq.cloudbreak.rotation.context.SaltRunOrchestratorStateRotationContext.SaltRunOrchestratorStateRotationContextBuilder;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 
 @ExtendWith(MockitoExtension.class)
 class SaltRunOrchestratorStateRotationExecutorTest {
     @Mock
-    private HostOrchestrator hostOrchestrator;
+    private SecretRotationSaltService saltService;
 
     @Mock
     private SecretRotationNotificationService secretRotationNotificationService;
@@ -46,107 +45,107 @@ class SaltRunOrchestratorStateRotationExecutorTest {
 
     @Test
     public void testPreValidation() throws CloudbreakOrchestratorFailedException {
-        doNothing().when(hostOrchestrator).ping(any(), any());
-        doNothing().when(hostOrchestrator).runOrchestratorState(any());
+        doNothing().when(saltService).validateSalt(any(), any());
+        doNothing().when(saltService).executeSaltRun(any());
 
         underTest.executePreValidation(createContext(List.of("state"), Optional.empty(), Optional.empty()), null);
 
-        verify(hostOrchestrator).ping(any(), any());
-        verify(hostOrchestrator).runOrchestratorState(orchestratorStateParamsArgumentCaptor.capture());
+        verify(saltService).validateSalt(any(), any());
+        verify(saltService).executeSaltRun(orchestratorStateParamsArgumentCaptor.capture());
         OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsArgumentCaptor.getValue();
         assertEquals("preValidate", orchestratorStateParams.getState());
     }
 
     @Test
-    public void testPreValidationIfPingFails() throws CloudbreakOrchestratorFailedException {
-        doThrow(new CloudbreakOrchestratorFailedException("pingpong")).when(hostOrchestrator).ping(any(), any());
+    public void testPreValidationIfvalidateSaltFails() throws CloudbreakOrchestratorFailedException {
+        doThrow(new CloudbreakOrchestratorFailedException("validateSaltpong")).when(saltService).validateSalt(any(), any());
 
         assertThrows(SecretRotationException.class, () ->
                 underTest.executePreValidation(createContext(List.of("state"), Optional.empty(), Optional.empty()), null));
 
-        verify(hostOrchestrator).ping(any(), any());
-        verifyNoMoreInteractions(hostOrchestrator);
+        verify(saltService).validateSalt(any(), any());
+        verifyNoMoreInteractions(saltService);
     }
 
     @Test
     public void testPostValidation() throws CloudbreakOrchestratorFailedException {
-        doNothing().when(hostOrchestrator).runOrchestratorState(any());
+        doNothing().when(saltService).executeSaltRun(any());
 
         underTest.executePostValidation(createContext(List.of("state"), Optional.empty(), Optional.empty()), null);
 
-        verify(hostOrchestrator).runOrchestratorState(orchestratorStateParamsArgumentCaptor.capture());
+        verify(saltService).executeSaltRun(orchestratorStateParamsArgumentCaptor.capture());
         OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsArgumentCaptor.getValue();
         assertEquals("postValidate", orchestratorStateParams.getState());
     }
 
     @Test
     public void testRotation() throws Exception {
-        doNothing().when(hostOrchestrator).runOrchestratorState(any());
+        doNothing().when(saltService).executeSaltRun(any());
 
         underTest.executeRotate(createContext(List.of("state"), Optional.empty(), Optional.empty()), null);
 
-        verify(hostOrchestrator).runOrchestratorState(orchestratorStateParamsArgumentCaptor.capture());
+        verify(saltService).executeSaltRun(orchestratorStateParamsArgumentCaptor.capture());
         OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsArgumentCaptor.getValue();
         assertEquals("state", orchestratorStateParams.getState());
     }
 
     @Test
     public void testRotationFailure() throws CloudbreakOrchestratorFailedException {
-        doThrow(new CloudbreakOrchestratorFailedException("something")).when(hostOrchestrator).runOrchestratorState(any());
+        doThrow(new CloudbreakOrchestratorFailedException("something")).when(saltService).executeSaltRun(any());
 
         assertThrows(SecretRotationException.class, () ->
                 underTest.executeRotate(createContext(List.of("state"), Optional.empty(), Optional.empty()),
                         RotationMetadataTestUtil.metadataForRotation("resource", null)));
 
-        verify(hostOrchestrator).runOrchestratorState(orchestratorStateParamsArgumentCaptor.capture());
+        verify(saltService).executeSaltRun(orchestratorStateParamsArgumentCaptor.capture());
         OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsArgumentCaptor.getValue();
         assertEquals("state", orchestratorStateParams.getState());
     }
 
     @Test
     public void testRollbackFailure() throws CloudbreakOrchestratorFailedException {
-        doThrow(new CloudbreakOrchestratorFailedException("something")).when(hostOrchestrator).runOrchestratorState(any());
+        doThrow(new CloudbreakOrchestratorFailedException("something")).when(saltService).executeSaltRun(any());
 
         assertThrows(SecretRotationException.class, () ->
                 underTest.executeRollback(createContext(List.of("state"), Optional.of(List.of("rollback")), Optional.empty()),
                         RotationMetadataTestUtil.metadataForRollback("resource", null)));
 
-        verify(hostOrchestrator).runOrchestratorState(orchestratorStateParamsArgumentCaptor.capture());
+        verify(saltService).executeSaltRun(orchestratorStateParamsArgumentCaptor.capture());
         OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsArgumentCaptor.getValue();
         assertEquals("rollback", orchestratorStateParams.getState());
     }
 
     @Test
     public void testRollbackWithOwnStates() throws Exception {
-        doNothing().when(hostOrchestrator).runOrchestratorState(any());
+        doNothing().when(saltService).executeSaltRun(any());
 
         underTest.executeRollback(createContext(List.of("state"), Optional.of(List.of("rollback")), Optional.empty()), null);
 
-        verify(hostOrchestrator).runOrchestratorState(orchestratorStateParamsArgumentCaptor.capture());
+        verify(saltService).executeSaltRun(orchestratorStateParamsArgumentCaptor.capture());
         OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsArgumentCaptor.getValue();
         assertEquals("rollback", orchestratorStateParams.getState());
     }
 
     @Test
     public void testFinalization() throws Exception {
-        doNothing().when(hostOrchestrator).runOrchestratorState(any());
+        doNothing().when(saltService).executeSaltRun(any());
 
         underTest.executeFinalize(createContext(List.of("state"), Optional.empty(), Optional.of(List.of("finalize"))), null);
 
-        verify(hostOrchestrator).runOrchestratorState(orchestratorStateParamsArgumentCaptor.capture());
+        verify(saltService).executeSaltRun(orchestratorStateParamsArgumentCaptor.capture());
         OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsArgumentCaptor.getValue();
         assertEquals("finalize", orchestratorStateParams.getState());
     }
 
     @Test
     public void testFinalizationFailure() throws CloudbreakOrchestratorFailedException {
-        doThrow(new CloudbreakOrchestratorFailedException("something")).when(hostOrchestrator).runOrchestratorState(any());
+        doThrow(new CloudbreakOrchestratorFailedException("something")).when(saltService).executeSaltRun(any());
 
         assertThrows(SecretRotationException.class, () ->
                 underTest.executeFinalize(createContext(List.of("state"), Optional.empty(), Optional.of(List.of("finalize"))),
                         RotationMetadataTestUtil.metadataForFinalize("resource", null)));
 
-        verify(hostOrchestrator).runOrchestratorState(orchestratorStateParamsArgumentCaptor.capture());
+        verify(saltService).executeSaltRun(orchestratorStateParamsArgumentCaptor.capture());
         OrchestratorStateParams orchestratorStateParams = orchestratorStateParamsArgumentCaptor.getValue();
         assertEquals("finalize", orchestratorStateParams.getState());
     }
@@ -155,13 +154,14 @@ class SaltRunOrchestratorStateRotationExecutorTest {
     public void testFinalizationIfNotNeeded() throws Exception {
         underTest.executeFinalize(createContext(List.of("state"), Optional.empty(), Optional.empty()), null);
 
-        verifyNoInteractions(hostOrchestrator);
+        verifyNoInteractions(saltService);
     }
 
     private SaltRunOrchestratorStateRotationContext createContext(List<String> states, Optional<List<String>> rollbackStates,
             Optional<List<String>> finalizeStates) {
-        SaltRunOrchestratorStateRotationContextBuilder saltStateApplyRotationContextBuilder = new SaltRunOrchestratorStateRotationContextBuilder()
-                .withStates(states).withRotateParams(Map.of());
+        SaltRunOrchestratorStateRotationContext.SaltRunOrchestratorStateRotationContextBuilder saltStateApplyRotationContextBuilder =
+                new SaltRunOrchestratorStateRotationContext.SaltRunOrchestratorStateRotationContextBuilder()
+                        .withStates(states).withRotateParams(Map.of());
         rollbackStates.ifPresent(strings -> saltStateApplyRotationContextBuilder.withRollbackStates(strings)
                 .withRollbackParams(Map.of()).withRollbackParams(Map.of()));
         finalizeStates.ifPresent(strings -> saltStateApplyRotationContextBuilder.withCleanupStates(strings)

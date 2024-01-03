@@ -895,6 +895,13 @@ public class UmsClient {
         });
     }
 
+    UserManagementProto.GetAccessKeyResponse getAccessKey(String accessKeyId, String accountId) {
+        return newStub().getAccessKey(UserManagementProto.GetAccessKeyRequest.newBuilder()
+                .setAccountId(accountId)
+                .setAccessKeyIdOrCrn(accessKeyId)
+                .build());
+    }
+
     /**
      * Retrieves event generation ids for an account
      *

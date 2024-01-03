@@ -10,15 +10,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
-import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep;
-import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
-import com.sequenceiq.cloudbreak.service.salt.SaltStateParamsService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @Component
@@ -26,21 +22,11 @@ public class SaltPillarRotationExecutor extends AbstractRotationExecutor<SaltPil
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltPillarRotationExecutor.class);
 
-    private static final int MAX_RETRY_ON_ERROR = 3;
-
-    private static final int MAX_RETRY = 100;
-
     @Inject
     private StackDtoService stackDtoService;
 
     @Inject
-    private HostOrchestrator hostOrchestrator;
-
-    @Inject
-    private SaltStateParamsService saltStateParamsService;
-
-    @Inject
-    private ExitCriteriaProvider exitCriteriaProvider;
+    private SecretRotationSaltService saltService;
 
     @Override
     protected void rotate(SaltPillarRotationContext rotationContext) throws Exception {
@@ -55,9 +41,7 @@ public class SaltPillarRotationExecutor extends AbstractRotationExecutor<SaltPil
     private void updateSaltPillar(SaltPillarRotationContext rotationContext, String rotationState) throws CloudbreakOrchestratorFailedException {
         StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
         Map<String, SaltPillarProperties> servicePillar = rotationContext.getServicePillarGenerator().apply(stackDto);
-        LOGGER.info("Salt pillar {}, keys: {}", rotationState, servicePillar.keySet());
-        hostOrchestrator.saveCustomPillars(new SaltConfig(servicePillar), exitCriteriaProvider.get(stackDto),
-                saltStateParamsService.createStateParams(stackDto, null, true, MAX_RETRY, MAX_RETRY_ON_ERROR));
+        saltService.updateSaltPillar(stackDto, servicePillar, rotationState);
     }
 
     @Override
@@ -68,9 +52,7 @@ public class SaltPillarRotationExecutor extends AbstractRotationExecutor<SaltPil
     @Override
     protected void preValidate(SaltPillarRotationContext rotationContext) throws Exception {
         StackDto stackDto = stackDtoService.getByCrn(rotationContext.getResourceCrn());
-        OrchestratorStateParams stateParams =
-                saltStateParamsService.createStateParams(stackDto, null, true, MAX_RETRY, MAX_RETRY_ON_ERROR);
-        hostOrchestrator.ping(stateParams.getTargetHostNames(), stateParams.getPrimaryGatewayConfig());
+        saltService.validateSalt(stackDto);
     }
 
     @Override

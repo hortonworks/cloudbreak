@@ -404,6 +404,10 @@ public class GrpcUmsClient {
         makeClient().deleteMachineUser(accountId, machineUserName);
     }
 
+    public void deleteAccessKey(String accessKeyId, String accountId) {
+        makeClient().deleteAccessKeys(List.of(accessKeyId), accountId);
+    }
+
     /**
      * Retrieves list of service principal cloud identities for an environment from UMS.
      *

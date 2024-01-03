@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.CM
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_PILLAR;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_STATE_APPLY;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.SALT_STATE_RUN;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.UMS_DATABUS_CREDENTIAL;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM_JOB;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.FREEIPA_ROTATE_POLLING;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
@@ -45,7 +46,8 @@ public enum CloudbreakSecretType implements SecretType {
     DATAHUB_CM_INTERMEDIATE_CA_CERT(List.of(VAULT, SALT_PILLAR, SALT_STATE_APPLY, CUSTOM_JOB), Set.of(POST_FLOW)),
     CLUSTER_LDAP_BIND_PASSWORD(List.of(FREEIPA_ROTATE_POLLING, CUSTOM_JOB, SALT_STATE_APPLY)),
     DATAHUB_SSSD_IPA_PASSWORD(List.of(FREEIPA_ROTATE_POLLING, SALT_PILLAR), Set.of(SKIP_SALT_UPDATE)),
-    INTERNAL_DATALAKE_SSSD_IPA_PASSWORD(List.of(SALT_PILLAR), Set.of(SKIP_SALT_UPDATE, INTERNAL));
+    INTERNAL_DATALAKE_SSSD_IPA_PASSWORD(List.of(SALT_PILLAR), Set.of(SKIP_SALT_UPDATE, INTERNAL)),
+    DATAHUB_DBUS_UMS_ACCESS_KEY(List.of(UMS_DATABUS_CREDENTIAL, CUSTOM_JOB));
 
     private final List<SecretRotationStep> steps;
 

@@ -9,7 +9,8 @@ public enum CloudbreakSecretRotationStep implements SecretRotationStep {
     CLUSTER_PROXY_REREGISTER,
     CLUSTER_PROXY_UPDATE,
     CM_SERVICE_ROLE_RESTART,
-    CM_SERVICE;
+    CM_SERVICE,
+    UMS_DATABUS_CREDENTIAL;
 
     @Override
     public Class<? extends Enum<?>> getClazz() {

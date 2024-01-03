@@ -111,4 +111,5 @@ public interface ClusterModificationService {
 
     void updateServiceConfig(String serviceType, Map<String, String> config, List<String> roleGroupNames) throws CloudbreakException;
 
+    void restartMgmtServices() throws Exception;
 }

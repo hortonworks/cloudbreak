@@ -3,10 +3,7 @@ package com.sequenceiq.cloudbreak.rotation.executor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
@@ -19,7 +16,6 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.function.Function;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,18 +23,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
-import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
 import com.sequenceiq.cloudbreak.rotation.RotationMetadataTestUtil;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
-import com.sequenceiq.cloudbreak.service.salt.SaltStateParamsService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,13 +44,7 @@ class SaltPillarRotationExecutorTest {
     private StackDtoService stackDtoService;
 
     @Mock
-    private HostOrchestrator hostOrchestrator;
-
-    @Mock
-    private SaltStateParamsService saltStateParamsService;
-
-    @Mock
-    private ExitCriteriaProvider exitCriteriaProvider;
+    private SecretRotationSaltService saltService;
 
     @Mock
     private SecretRotationNotificationService secretRotationNotificationService;
@@ -66,32 +52,25 @@ class SaltPillarRotationExecutorTest {
     @InjectMocks
     private SaltPillarRotationExecutor underTest;
 
-    @BeforeEach
-    void setup() {
-        lenient().when(exitCriteriaProvider.get(any())).thenReturn(ClusterDeletionBasedExitCriteriaModel.nonCancellableModel());
-    }
-
     @Test
     void validationShouldSucceed() throws CloudbreakOrchestratorFailedException {
-        when(saltStateParamsService.createStateParams(any(), any(), anyBoolean(), anyInt(), anyInt())).thenReturn(new OrchestratorStateParams());
-        StackDto stackDto = mockStackDto();
-        doNothing().when(hostOrchestrator).ping(any(), any());
+        mockStackDto();
+        doNothing().when(saltService).validateSalt(any());
 
         underTest.executePreValidation(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()), null);
 
-        verify(hostOrchestrator).ping(any(), any());
+        verify(saltService).validateSalt(any());
     }
 
     @Test
     void validationShouldFailIfSaltPingFails() throws CloudbreakOrchestratorFailedException {
-        when(saltStateParamsService.createStateParams(any(), any(), anyBoolean(), anyInt(), anyInt())).thenReturn(new OrchestratorStateParams());
-        StackDto stackDto = mockStackDto();
-        doThrow(new CloudbreakOrchestratorFailedException("pingpong")).when(hostOrchestrator).ping(any(), any());
+        mockStackDto();
+        doThrow(new CloudbreakOrchestratorFailedException("pingpong")).when(saltService).validateSalt(any());
 
         assertThrows(SecretRotationException.class, () ->
                 underTest.executePreValidation(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()), null));
 
-        verify(hostOrchestrator).ping(any(), any());
+        verify(saltService).validateSalt(any());
     }
 
     @Test
@@ -106,42 +85,36 @@ class SaltPillarRotationExecutorTest {
 
     @Test
     void rotateShouldThrowSecretRotationExceptionIfSaltFails() throws CloudbreakOrchestratorFailedException {
-        when(saltStateParamsService.createStateParams(any(), any(), anyBoolean(), anyInt(), anyInt())).thenReturn(new OrchestratorStateParams());
-        StackDto stackDto = mockStackDto();
-        doThrow(new RuntimeException("error")).when(hostOrchestrator)
-                .saveCustomPillars(any(), any(), any());
+        mockStackDto();
+        doThrow(new RuntimeException("error")).when(saltService).updateSaltPillar(any(), any(), any());
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRotate(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()),
                         RotationMetadataTestUtil.metadataForRotation(RESOURCE_CRN, null)));
         assertEquals("Execution of rotation failed at SALT_PILLAR step for resourceCrn regarding secret null, reason: error",
                 secretRotationException.getMessage());
-        verify(hostOrchestrator, times(1)).saveCustomPillars(any(), any(), any());
-        verify(saltStateParamsService, times(1)).createStateParams(eq(stackDto), isNull(), eq(true), anyInt(), anyInt());
+        verify(saltService, times(1)).updateSaltPillar(any(), any(), any());
     }
 
     @Test
     void rotateShouldSucceed() throws Exception {
-        when(saltStateParamsService.createStateParams(any(), any(), anyBoolean(), anyInt(), anyInt())).thenReturn(new OrchestratorStateParams());
-        StackDto stackDto = mockStackDto();
+        doNothing().when(saltService).updateSaltPillar(any(), any(), any());
+        mockStackDto();
         underTest.executeRotate(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()), null);
-        verify(hostOrchestrator, times(1)).saveCustomPillars(any(), any(), any());
-        verify(saltStateParamsService, times(1)).createStateParams(eq(stackDto), isNull(), eq(true), anyInt(), anyInt());
+        verify(saltService, times(1)).updateSaltPillar(any(), any(), any());
     }
 
     @Test
     void rollbackShouldSucceed() throws Exception {
-        when(saltStateParamsService.createStateParams(any(), any(), anyBoolean(), anyInt(), anyInt())).thenReturn(new OrchestratorStateParams());
-        StackDto stackDto = mockStackDto();
+        doNothing().when(saltService).updateSaltPillar(any(), any(), any());
+        mockStackDto();
         underTest.executeRollback(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()), null);
-        verify(hostOrchestrator, times(1)).saveCustomPillars(any(), any(), any());
-        verify(saltStateParamsService, times(1)).createStateParams(eq(stackDto), isNull(), eq(true), anyInt(), anyInt());
+        verify(saltService, times(1)).updateSaltPillar(any(), any(), any());
     }
 
     @Test
     void finalizeShouldDoNothing() throws CloudbreakOrchestratorFailedException {
         underTest.executeFinalize(new SaltPillarRotationContext(RESOURCE_CRN, getSaltPillarGenerator()), null);
-        verify(hostOrchestrator, never()).saveCustomPillars(any(), any(), any());
-        verify(saltStateParamsService, never()).createStateParams(any(), any(), anyBoolean(), anyInt(), anyInt());
+        verify(saltService, never()).updateSaltPillar(any(), any(), any());
     }
 
     private StackDto mockStackDto() {
