@@ -26,13 +26,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.environment.credential.exception.CredentialVerificationException;
+import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE, classes = TestExceptionMapperConfiguration.class)
 public class SearchCauseExceptionMapperTest {
 
     @Inject
-    private CredentialVerificationExceptionMapper underTest;
+    private GetCloudParameterExceptionMapper underTest;
 
     @MockBean
     private InjectionManager injectionManager;
@@ -54,43 +54,43 @@ public class SearchCauseExceptionMapperTest {
 
     @Test
     public void testGetResponseStatusWhenNoCause() {
-        Response.StatusType actual = underTest.getResponseStatus(new CredentialVerificationException(""));
+        Response.StatusType actual = underTest.getResponseStatus(new GetCloudParameterException(""));
         assertEquals(Response.Status.BAD_REQUEST, actual);
     }
 
     @Test
     public void testGetResponseStatusWhenHasOnlyOneCause() {
-        Response.StatusType actual = underTest.getResponseStatus(new CredentialVerificationException("", new NotFoundException()));
+        Response.StatusType actual = underTest.getResponseStatus(new GetCloudParameterException("", new NotFoundException()));
         assertEquals(Response.Status.NOT_FOUND, actual);
     }
 
     @Test
     public void testGetResponseStatusWhenHasTwoDepthsCause() {
-        Response.StatusType actual = underTest.getResponseStatus(new CredentialVerificationException("", new RuntimeException(new NotFoundException())));
+        Response.StatusType actual = underTest.getResponseStatus(new GetCloudParameterException("", new RuntimeException(new NotFoundException())));
         assertEquals(Response.Status.NOT_FOUND, actual);
     }
 
     @Test
     public void testGetResponseStatusWhenHasTwoDepthsCauseWithDefaultMapper() {
-        Response.StatusType actual = underTest.getResponseStatus(new CredentialVerificationException("", new Exception(new Exception())));
+        Response.StatusType actual = underTest.getResponseStatus(new GetCloudParameterException("", new Exception(new Exception())));
         assertEquals(Response.Status.BAD_REQUEST, actual);
     }
 
     @Test
     public void testGetResponseStatusWhenHasOneDepthsCauseWithDefaultMapper() {
-        Response.StatusType actual = underTest.getResponseStatus(new CredentialVerificationException("", new Exception()));
+        Response.StatusType actual = underTest.getResponseStatus(new GetCloudParameterException("", new Exception()));
         assertEquals(Response.Status.BAD_REQUEST, actual);
     }
 
     @Test
     public void testGetResponseStatusWhenTheExceptionIsTheFirstCause() {
-        Response.StatusType actual = underTest.getResponseStatus(new CredentialVerificationException("", new Exception(new NotFoundException())));
+        Response.StatusType actual = underTest.getResponseStatus(new GetCloudParameterException("", new Exception(new NotFoundException())));
         assertEquals(Response.Status.NOT_FOUND, actual);
     }
 
     @Test
     public void testGetResponseStatusWhenTheCauseIsTheRealException() {
-        Response.StatusType actual = underTest.getResponseStatus(new CredentialVerificationException("", new NotFoundException(new Exception())));
+        Response.StatusType actual = underTest.getResponseStatus(new GetCloudParameterException("", new NotFoundException(new Exception())));
         assertEquals(Response.Status.NOT_FOUND, actual);
     }
 }
