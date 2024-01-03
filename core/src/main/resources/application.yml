@@ -654,6 +654,7 @@ cb:
     validation:
       distrox:
         enabled: true
+        maxNumberOfInstancesForRollingUpgrade: 20
       sdx:
         enabled: true
       cm:
