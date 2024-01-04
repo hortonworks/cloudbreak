@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.quartz.metric.statusmetric;
+package com.sequenceiq.cloudbreak.common.metrics.status;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 

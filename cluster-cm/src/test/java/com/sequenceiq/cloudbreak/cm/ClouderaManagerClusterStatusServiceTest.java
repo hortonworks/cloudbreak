@@ -530,7 +530,7 @@ public class ClouderaManagerClusterStatusServiceTest {
         assertFalse(result);
         verify(clouderaManagerApiFactory, times(1)).getClouderaManagerResourceApi(any());
         verify(clouderaManagerResourceApi, times(1)).getVersion();
-        verify(metricService, times(1)).incrementMetricCounter(eq("STACK_SYNC_CM_UNREACHABLE"), any(String[].class));
+        verify(metricService, times(1)).incrementMetricCounter(eq("stack_sync_cm_unreachable"), any(String[].class));
     }
 
     private ApiRoleRef roleRef(String serviceName, ApiHealthSummary apiHealthSummary) {
