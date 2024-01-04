@@ -7,8 +7,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.metrics.status.StackCountByStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
-import com.sequenceiq.cloudbreak.quartz.metric.statusmetric.StackCountByStatusView;
 import com.sequenceiq.cloudbreak.repository.StackStatusRepository;
 import com.sequenceiq.common.api.type.Tunnel;
 

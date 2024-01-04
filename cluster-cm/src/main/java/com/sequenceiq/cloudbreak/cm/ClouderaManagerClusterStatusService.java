@@ -97,7 +97,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
 
     private static final String CODE = "code";
 
-    private static final String STACK_SYNC_CM_UNREACHABLE = "STACK_SYNC_CM_UNREACHABLE";
+    private static final String STACK_SYNC_CM_UNREACHABLE = "stack_sync_cm_unreachable";
 
     private static final String STATUS_CODE = "STATUS_CODE";
 

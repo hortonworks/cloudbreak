@@ -31,5 +31,5 @@ public class JobCountMetricConfigurator {
     public void init() {
         jobSchedulerServices.forEach(jobSchedulerService -> metricService.registerGaugeMetric(QuartzMetricType.JOB_COUNT, jobSchedulerService.getJobGroup(),
                         groupNameToJobCountFunction, Map.of(JOB_GROUP.name(), jobSchedulerService.getJobGroup())));
-}
+    }
 }
