@@ -1,16 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Information about the number of nodes using which product features. &lt;p&gt; Usage information is provided for individual clusters, as well as totals across all clusters.
@@ -110,7 +111,7 @@ public class ApiLicensedFeatureUsage   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiLicensedFeatureUsage {\n");
-    
+
     sb.append("    totals: ").append(toIndentedString(totals)).append("\n");
     sb.append("    clusters: ").append(toIndentedString(clusters)).append("\n");
     sb.append("}");

@@ -1,6 +1,6 @@
 package com.sequenceiq.mock.clouderamanager.v31.controller;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;

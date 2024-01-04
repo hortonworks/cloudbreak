@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;

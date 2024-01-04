@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.template.views;
 import java.util.Locale;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;

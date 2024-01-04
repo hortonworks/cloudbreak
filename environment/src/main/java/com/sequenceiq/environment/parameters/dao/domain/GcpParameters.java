@@ -2,10 +2,10 @@ package com.sequenceiq.environment.parameters.dao.domain;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;

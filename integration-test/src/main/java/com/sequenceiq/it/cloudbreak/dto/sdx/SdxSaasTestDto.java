@@ -2,8 +2,8 @@ package com.sequenceiq.it.cloudbreak.dto.sdx;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 
-import javax.inject.Inject;
-import javax.ws.rs.NotFoundException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
 
 import com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto;
 import com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto;

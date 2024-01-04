@@ -1,13 +1,13 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * A serviceRef references a service. It is identified by the \&quot;serviceName\&quot;, \&quot;clusterName\&quot; (name of the cluster which the service belongs to) and an optional \&quot;peerName\&quot; (to reference a remote service i.e. services managed by other CM instances). To operate on the service object, use the API with those fields as parameters.
@@ -101,7 +101,7 @@ public class ApiServiceRef   {
   }
 
   /**
-   * 
+   *
    * @return serviceDisplayName
   **/
   @ApiModelProperty(value = "")
@@ -161,7 +161,7 @@ public class ApiServiceRef   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiServiceRef {\n");
-    
+
     sb.append("    peerName: ").append(toIndentedString(peerName)).append("\n");
     sb.append("    clusterName: ").append(toIndentedString(clusterName)).append("\n");
     sb.append("    serviceName: ").append(toIndentedString(serviceName)).append("\n");

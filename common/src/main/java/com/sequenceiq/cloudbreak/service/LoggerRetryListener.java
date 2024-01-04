@@ -4,11 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
-import org.springframework.retry.listener.RetryListenerSupport;
+import org.springframework.retry.RetryListener;
 import org.springframework.stereotype.Component;
 
 @Component
-public class LoggerRetryListener extends RetryListenerSupport {
+public class LoggerRetryListener implements RetryListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoggerRetryListener.class);
 

@@ -4,7 +4,7 @@ import static com.sequenceiq.redbeams.doc.ModelDescriptions.SupportModelDescript
 import static com.sequenceiq.redbeams.doc.ModelDescriptions.SupportModelDescriptions.SECOND_CERTIFICATE;
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;

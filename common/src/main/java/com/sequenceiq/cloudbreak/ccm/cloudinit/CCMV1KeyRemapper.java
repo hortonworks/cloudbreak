@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.ccm.cloudinit;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import com.sequenceiq.cloudbreak.ccm.exception.CcmException;
 

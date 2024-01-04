@@ -1,13 +1,13 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Basic arguments used for Rolling Restart Cluster commands.
@@ -113,7 +113,7 @@ public class ApiSimpleRollingRestartClusterArgs   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiSimpleRollingRestartClusterArgs {\n");
-    
+
     sb.append("    slaveBatchSize: ").append(toIndentedString(slaveBatchSize)).append("\n");
     sb.append("    sleepSeconds: ").append(toIndentedString(sleepSeconds)).append("\n");
     sb.append("    slaveFailCountThreshold: ").append(toIndentedString(slaveFailCountThreshold)).append("\n");

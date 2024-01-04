@@ -2,7 +2,7 @@ package com.sequenceiq.redbeams.flow.redbeams.stop.actions;
 
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

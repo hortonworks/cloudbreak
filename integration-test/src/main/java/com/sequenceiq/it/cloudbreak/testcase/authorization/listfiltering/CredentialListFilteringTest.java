@@ -3,7 +3,7 @@ package com.sequenceiq.it.cloudbreak.testcase.authorization.listfiltering;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;

@@ -1,18 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiHBaseSnapshotPolicyArguments;
-import com.sequenceiq.mock.swagger.model.ApiHdfsSnapshotPolicyArguments;
-import com.sequenceiq.mock.swagger.model.ApiSnapshotCommand;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * A snapshot policy. &lt;p/&gt; Snapshot policies have service specific arguments. This object has methods to retrieve arguments for all supported types of snapshots, but only one argument type is allowed to be set; the backend will check that the provided argument matches the type of the service with which the snapshot policy is associated.
@@ -587,7 +586,7 @@ public class ApiSnapshotPolicy   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiSnapshotPolicy {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    hourlySnapshots: ").append(toIndentedString(hourlySnapshots)).append("\n");

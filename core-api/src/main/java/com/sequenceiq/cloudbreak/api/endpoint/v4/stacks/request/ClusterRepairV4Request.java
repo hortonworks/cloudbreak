@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request;
 import java.util.List;
 import java.util.StringJoiner;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RepairClusterRequest;
 import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull;

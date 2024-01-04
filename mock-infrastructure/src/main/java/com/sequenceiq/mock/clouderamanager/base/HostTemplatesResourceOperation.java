@@ -2,7 +2,7 @@ package com.sequenceiq.mock.clouderamanager.base;
 
 import java.util.Locale;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;

@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.auth.altus.config;
 import static org.glassfish.jersey.internal.guava.Preconditions.checkArgument;
 import static org.glassfish.jersey.internal.guava.Preconditions.checkNotNull;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

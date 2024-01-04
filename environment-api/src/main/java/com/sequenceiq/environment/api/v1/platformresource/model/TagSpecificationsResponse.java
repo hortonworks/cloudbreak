@@ -2,7 +2,7 @@ package com.sequenceiq.environment.api.v1.platformresource.model;
 
 import java.util.Map;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceModelDescription;

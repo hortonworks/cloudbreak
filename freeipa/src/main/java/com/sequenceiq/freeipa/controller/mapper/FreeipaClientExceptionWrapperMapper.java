@@ -2,7 +2,7 @@ package com.sequenceiq.freeipa.controller.mapper;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-import javax.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;

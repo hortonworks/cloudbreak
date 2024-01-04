@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.yarn.client;
 
 import java.net.MalformedURLException;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

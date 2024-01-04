@@ -1,13 +1,13 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Version information of Cloudera Manager itself.
@@ -161,7 +161,7 @@ public class ApiVersionInfo   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiVersionInfo {\n");
-    
+
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    snapshot: ").append(toIndentedString(snapshot)).append("\n");
     sb.append("    buildUser: ").append(toIndentedString(buildUser)).append("\n");

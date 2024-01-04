@@ -8,7 +8,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import java.util.List;
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 

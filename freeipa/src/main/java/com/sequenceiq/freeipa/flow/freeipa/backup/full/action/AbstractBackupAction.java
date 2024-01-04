@@ -4,7 +4,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.backup.full.FullBackupEvent.FU
 
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.statemachine.StateContext;
 

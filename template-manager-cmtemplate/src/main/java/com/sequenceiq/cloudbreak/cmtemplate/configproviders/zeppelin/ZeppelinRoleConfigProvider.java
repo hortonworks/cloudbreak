@@ -6,7 +6,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.zeppelin.Zepp
 
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

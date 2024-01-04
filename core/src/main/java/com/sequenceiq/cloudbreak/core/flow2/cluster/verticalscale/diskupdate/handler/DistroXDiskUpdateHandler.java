@@ -6,7 +6,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupd
 
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

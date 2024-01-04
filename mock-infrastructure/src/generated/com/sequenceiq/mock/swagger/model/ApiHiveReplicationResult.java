@@ -1,20 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiHdfsReplicationResult;
-import com.sequenceiq.mock.swagger.model.ApiHiveReplicationError;
-import com.sequenceiq.mock.swagger.model.ApiHiveTable;
-import com.sequenceiq.mock.swagger.model.ApiHiveUDF;
-import com.sequenceiq.mock.swagger.model.ApiImpalaUDF;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Detailed information about a Hive replication job.
@@ -761,7 +758,7 @@ public class ApiHiveReplicationResult   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHiveReplicationResult {\n");
-    
+
     sb.append("    phase: ").append(toIndentedString(phase)).append("\n");
     sb.append("    tableCount: ").append(toIndentedString(tableCount)).append("\n");
     sb.append("    tables: ").append(toIndentedString(tables)).append("\n");

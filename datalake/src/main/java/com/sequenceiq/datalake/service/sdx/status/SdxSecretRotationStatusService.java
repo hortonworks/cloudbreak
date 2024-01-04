@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.service.sdx.status;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;

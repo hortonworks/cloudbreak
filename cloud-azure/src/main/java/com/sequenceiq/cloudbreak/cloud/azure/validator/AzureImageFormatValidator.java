@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANC
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

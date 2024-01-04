@@ -1,8 +1,8 @@
 package com.sequenceiq.datalake.service;
 
-import javax.inject.Inject;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.ServiceUnavailableException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.ServiceUnavailableException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.job.metering;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Qualifier;

@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CHANGED_CREDENTIAL;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CHANGING_CREDENTIAL;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 

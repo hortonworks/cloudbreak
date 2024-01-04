@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.dto.proxy;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;

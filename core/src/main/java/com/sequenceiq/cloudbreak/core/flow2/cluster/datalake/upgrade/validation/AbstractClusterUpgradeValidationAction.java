@@ -6,7 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
 import java.util.Collections;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.statemachine.StateContext;
 

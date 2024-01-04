@@ -2,8 +2,9 @@ package com.sequenceiq.cloudbreak.quartz.configuration;
 
 import java.util.concurrent.ExecutorService;
 
-import javax.inject.Inject;
 import javax.sql.DataSource;
+
+import jakarta.inject.Inject;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;

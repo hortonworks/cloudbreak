@@ -1,6 +1,6 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.database.request;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.base.DatabaseV4Base;

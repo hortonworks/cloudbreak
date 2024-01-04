@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.recipe;
 
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.controller.mapper;
 
-import javax.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;

@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.converter;
 
 import java.util.Optional;
 
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

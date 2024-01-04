@@ -1,19 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiAuthRoleRef;
-import com.sequenceiq.mock.swagger.model.ApiClusterRef;
-import com.sequenceiq.mock.swagger.model.ApiExternalUserMappingRef;
-import com.sequenceiq.mock.swagger.model.ApiUser2Ref;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * This is the model for user role scope in the API since v18. This is used to support granular permissions.
@@ -59,7 +57,7 @@ public class ApiAuthRole   {
   }
 
   /**
-   * 
+   *
    * @return displayName
   **/
   @ApiModelProperty(value = "")
@@ -79,7 +77,7 @@ public class ApiAuthRole   {
   }
 
   /**
-   * 
+   *
    * @return name
   **/
   @ApiModelProperty(value = "")
@@ -107,7 +105,7 @@ public class ApiAuthRole   {
   }
 
   /**
-   * 
+   *
    * @return clusters
   **/
   @ApiModelProperty(value = "")
@@ -136,7 +134,7 @@ public class ApiAuthRole   {
   }
 
   /**
-   * 
+   *
    * @return users
   **/
   @ApiModelProperty(value = "")
@@ -165,7 +163,7 @@ public class ApiAuthRole   {
   }
 
   /**
-   * 
+   *
    * @return externalUserMappings
   **/
   @ApiModelProperty(value = "")
@@ -227,7 +225,7 @@ public class ApiAuthRole   {
   }
 
   /**
-   * 
+   *
    * @return isCustom
   **/
   @ApiModelProperty(value = "")
@@ -270,7 +268,7 @@ public class ApiAuthRole   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiAuthRole {\n");
-    
+
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    clusters: ").append(toIndentedString(clusters)).append("\n");

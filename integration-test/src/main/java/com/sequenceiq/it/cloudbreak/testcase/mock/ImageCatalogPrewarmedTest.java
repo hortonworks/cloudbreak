@@ -3,7 +3,7 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static java.lang.String.format;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 

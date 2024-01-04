@@ -1,17 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiParcelUsageParcel;
-import com.sequenceiq.mock.swagger.model.ApiParcelUsageRack;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * This object provides a complete view of the usage of parcels in a given cluster - particularly which parcels are in use for which roles.
@@ -113,7 +113,7 @@ public class ApiParcelUsage   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiParcelUsage {\n");
-    
+
     sb.append("    racks: ").append(toIndentedString(racks)).append("\n");
     sb.append("    parcels: ").append(toIndentedString(parcels)).append("\n");
     sb.append("}");

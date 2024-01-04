@@ -1,13 +1,13 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Arguments used as part of ApiEnableNnHaArguments to specify JournalNodes.
@@ -113,7 +113,7 @@ public class ApiJournalNodeArguments   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiJournalNodeArguments {\n");
-    
+
     sb.append("    jnName: ").append(toIndentedString(jnName)).append("\n");
     sb.append("    jnHostId: ").append(toIndentedString(jnHostId)).append("\n");
     sb.append("    jnEditsDir: ").append(toIndentedString(jnEditsDir)).append("\n");

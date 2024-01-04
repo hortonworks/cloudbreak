@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.common.service;
 
 import java.util.function.Supplier;
 
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
+import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

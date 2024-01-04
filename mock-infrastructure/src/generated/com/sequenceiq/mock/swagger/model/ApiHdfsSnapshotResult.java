@@ -1,17 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiHdfsSnapshot;
-import com.sequenceiq.mock.swagger.model.ApiHdfsSnapshotError;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Detailed information about an HDFS snapshot command.
@@ -391,7 +391,7 @@ public class ApiHdfsSnapshotResult   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHdfsSnapshotResult {\n");
-    
+
     sb.append("    processedPathCount: ").append(toIndentedString(processedPathCount)).append("\n");
     sb.append("    processedPaths: ").append(toIndentedString(processedPaths)).append("\n");
     sb.append("    unprocessedPathCount: ").append(toIndentedString(unprocessedPathCount)).append("\n");

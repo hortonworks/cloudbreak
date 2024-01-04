@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade;
 
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.event.Payload;

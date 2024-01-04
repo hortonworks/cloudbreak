@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.job.stackpatcher.ExistingStackPatcherJob
 
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;

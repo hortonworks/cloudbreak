@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.resource.group;
 import static com.sequenceiq.cloudbreak.cloud.aws.resource.AwsNativeResourceBuilderOrderConstants.NATIVE_SECURITY_GROUP_RESOURCE_BUILDER_ORDER;
 import static org.slf4j.LoggerFactory.getLogger;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;

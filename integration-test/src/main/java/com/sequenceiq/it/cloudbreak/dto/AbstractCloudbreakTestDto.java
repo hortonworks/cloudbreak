@@ -5,7 +5,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.BadRequestException;
+import jakarta.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.NotImplementedException;
 

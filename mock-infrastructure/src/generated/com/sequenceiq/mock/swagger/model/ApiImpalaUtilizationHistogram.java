@@ -1,14 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiImpalaUtilizationHistogramBinList;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Histogram of Impala utilization.
@@ -67,7 +68,7 @@ public class ApiImpalaUtilizationHistogram   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiImpalaUtilizationHistogram {\n");
-    
+
     sb.append("    bins: ").append(toIndentedString(bins)).append("\n");
     sb.append("}");
     return sb.toString();

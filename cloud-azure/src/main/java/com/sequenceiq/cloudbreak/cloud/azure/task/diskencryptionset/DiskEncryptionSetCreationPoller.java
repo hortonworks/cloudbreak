@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.task.diskencryptionset;
 
 import static java.util.Objects.requireNonNull;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

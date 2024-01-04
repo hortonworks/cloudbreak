@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

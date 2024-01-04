@@ -1,14 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiConfigList;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Represents an instantiation of an external account type, referencing a supported external account type, via the typeName field, along with suitable configuration to access an external resource of the provided type.  The typeName field must match the name of an external account type.
@@ -187,7 +188,7 @@ public class ApiExternalAccount   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiExternalAccount {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");

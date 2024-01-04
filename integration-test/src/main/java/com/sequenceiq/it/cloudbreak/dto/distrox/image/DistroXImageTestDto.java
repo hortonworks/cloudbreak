@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.dto.distrox.image;
 
 import java.util.UUID;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import com.sequenceiq.distrox.api.v1.distrox.model.image.DistroXImageV1Request;
 import com.sequenceiq.it.cloudbreak.Prototype;

@@ -1,14 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiScheduleInterval;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Base class for commands that can be scheduled in Cloudera Manager. &lt;p/&gt; Note that schedule IDs are not preserved upon import. &lt;p/&gt;
@@ -355,7 +356,7 @@ public class ApiSchedule   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiSchedule {\n");
-    
+
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");

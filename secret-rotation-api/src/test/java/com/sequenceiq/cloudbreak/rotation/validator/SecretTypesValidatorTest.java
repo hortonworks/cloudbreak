@@ -9,8 +9,8 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.UUID;
 
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.Payload;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.Payload;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

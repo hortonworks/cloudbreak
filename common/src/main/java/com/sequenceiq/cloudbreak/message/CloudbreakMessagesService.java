@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.message;
 import java.util.Collection;
 import java.util.Locale;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;

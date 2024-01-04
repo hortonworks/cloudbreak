@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.service.sdx.flowcheck;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 

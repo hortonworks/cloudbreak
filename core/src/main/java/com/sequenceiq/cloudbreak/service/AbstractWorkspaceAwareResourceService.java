@@ -6,8 +6,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
+import jakarta.annotation.Nonnull;
+import jakarta.inject.Inject;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;

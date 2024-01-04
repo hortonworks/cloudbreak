@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.auth.altus.exception;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status.Family;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status.Family;
 
 import org.springframework.stereotype.Component;
 

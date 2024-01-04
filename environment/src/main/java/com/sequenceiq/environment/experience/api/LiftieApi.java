@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.experience.api;
 
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
+import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 
 import com.sequenceiq.environment.experience.liftie.responses.DeleteClusterResponse;
 import com.sequenceiq.environment.experience.liftie.responses.ListClustersResponse;

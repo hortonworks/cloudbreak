@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.network.dao.domain;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
 import org.apache.commons.lang3.StringUtils;
 

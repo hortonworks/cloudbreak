@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.setup;
 import java.io.IOException;
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;

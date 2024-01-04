@@ -5,8 +5,8 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil.datalakePattern;
 import static com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil.environmentDatalakePattern;
 
-import javax.inject.Inject;
-import javax.ws.rs.ForbiddenException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.testng.annotations.Test;
 

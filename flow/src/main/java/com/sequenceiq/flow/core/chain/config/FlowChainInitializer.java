@@ -2,9 +2,9 @@ package com.sequenceiq.flow.core.chain.config;
 
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

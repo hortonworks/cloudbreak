@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ws.rs.BadRequestException;
+import jakarta.ws.rs.BadRequestException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

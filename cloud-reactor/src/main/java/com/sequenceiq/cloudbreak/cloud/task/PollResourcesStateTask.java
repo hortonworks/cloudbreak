@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.task;
 
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

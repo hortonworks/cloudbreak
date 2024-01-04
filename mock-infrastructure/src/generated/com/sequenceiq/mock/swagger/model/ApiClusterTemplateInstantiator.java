@@ -1,20 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiClusterTemplateClusterSpec;
-import com.sequenceiq.mock.swagger.model.ApiClusterTemplateHostInfo;
-import com.sequenceiq.mock.swagger.model.ApiClusterTemplateRoleConfigGroupInfo;
-import com.sequenceiq.mock.swagger.model.ApiClusterTemplateVariable;
-import com.sequenceiq.mock.swagger.model.ApiConfigureForKerberosArguments;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Details of cluster template
@@ -272,7 +269,7 @@ public class ApiClusterTemplateInstantiator   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiClusterTemplateInstantiator {\n");
-    
+
     sb.append("    clusterName: ").append(toIndentedString(clusterName)).append("\n");
     sb.append("    hosts: ").append(toIndentedString(hosts)).append("\n");
     sb.append("    variables: ").append(toIndentedString(variables)).append("\n");

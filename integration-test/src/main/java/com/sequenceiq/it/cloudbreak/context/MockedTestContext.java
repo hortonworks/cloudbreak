@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.context;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;

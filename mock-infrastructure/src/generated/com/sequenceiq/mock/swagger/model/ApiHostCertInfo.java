@@ -1,15 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Associates a hostname with its corresponding certificate and private key
@@ -148,7 +150,7 @@ public class ApiHostCertInfo   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHostCertInfo {\n");
-    
+
     sb.append("    hostname: ").append(toIndentedString(hostname)).append("\n");
     sb.append("    certificate: ").append(toIndentedString(certificate)).append("\n");
     sb.append("    key: ").append(toIndentedString(key)).append("\n");

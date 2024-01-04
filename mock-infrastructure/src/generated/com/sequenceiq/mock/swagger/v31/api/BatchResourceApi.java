@@ -5,30 +5,31 @@
  */
 package com.sequenceiq.mock.swagger.v31.api;
 
-import com.sequenceiq.mock.swagger.model.ApiBatchRequest;
-import com.sequenceiq.mock.swagger.model.ApiBatchResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.*;
+import java.io.IOException;
+import java.util.Optional;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.mock.swagger.model.ApiBatchRequest;
+import com.sequenceiq.mock.swagger.model.ApiBatchResponse;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T20:16:58.188+01:00")
 
 @Api(value = "BatchResource", description = "the BatchResource API")
@@ -52,10 +53,10 @@ public interface BatchResourceApi {
     @ApiOperation(value = "Executes a batch of API requests in one database transaction.", nickname = "execute", notes = "Executes a batch of API requests in one database transaction. If any request fails, execution halts and the transaction is rolled back.", response = ApiBatchResponse.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "BatchResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiBatchResponse.class) })
     @RequestMapping(value = "/batch",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiBatchResponse> execute(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Batch of request to execute."  )  @Valid @RequestBody ApiBatchRequest body) {

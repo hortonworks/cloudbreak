@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.repair;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

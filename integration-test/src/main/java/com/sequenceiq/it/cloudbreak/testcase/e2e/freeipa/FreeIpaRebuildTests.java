@@ -3,7 +3,7 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 

@@ -3,7 +3,7 @@ package com.sequenceiq.environment.api.v1.environment.validator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidatorContext;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;

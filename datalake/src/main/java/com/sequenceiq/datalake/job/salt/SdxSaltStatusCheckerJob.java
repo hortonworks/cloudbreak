@@ -2,8 +2,8 @@ package com.sequenceiq.datalake.job.salt;
 
 import java.util.Optional;
 
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;

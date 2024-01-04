@@ -1,15 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * This contains information about the host or host range on which provided host template will be applied.
@@ -172,7 +174,7 @@ public class ApiClusterTemplateHostInfo   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiClusterTemplateHostInfo {\n");
-    
+
     sb.append("    hostName: ").append(toIndentedString(hostName)).append("\n");
     sb.append("    hostNameRange: ").append(toIndentedString(hostNameRange)).append("\n");
     sb.append("    rackId: ").append(toIndentedString(rackId)).append("\n");

@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.ws.rs.BadRequestException;
+import jakarta.ws.rs.BadRequestException;
 
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;

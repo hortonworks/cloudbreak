@@ -2,7 +2,7 @@ package com.sequenceiq.environment.events;
 
 import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.FLOW;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;

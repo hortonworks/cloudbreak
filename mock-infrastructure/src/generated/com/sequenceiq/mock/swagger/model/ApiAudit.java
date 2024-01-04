@@ -1,16 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Models audit events from both CM and CM managed services like HDFS, HBase and Hive. Audits for CM managed services are retrieved from Cloudera Navigator server.
@@ -248,7 +249,7 @@ public class ApiAudit   {
   }
 
   /**
-   * 
+   *
    * @return serviceValues
   **/
   @ApiModelProperty(value = "")
@@ -293,7 +294,7 @@ public class ApiAudit   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiAudit {\n");
-    
+
     sb.append("    timestamp: ").append(toIndentedString(timestamp)).append("\n");
     sb.append("    service: ").append(toIndentedString(service)).append("\n");
     sb.append("    username: ").append(toIndentedString(username)).append("\n");

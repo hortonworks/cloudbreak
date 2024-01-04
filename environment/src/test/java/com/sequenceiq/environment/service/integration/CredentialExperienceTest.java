@@ -8,8 +8,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.ws.rs.client.Client;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.client.Client;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

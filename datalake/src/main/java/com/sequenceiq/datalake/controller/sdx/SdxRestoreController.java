@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.controller.sdx;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Controller;
 

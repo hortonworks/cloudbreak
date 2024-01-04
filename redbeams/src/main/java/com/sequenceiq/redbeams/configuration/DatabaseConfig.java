@@ -5,9 +5,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.sql.SQLException;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.persistence.EntityManagerFactory;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.persistence.EntityManagerFactory;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +23,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.sequenceiq.cloudbreak.common.database.BatchProperties;
-import com.sequenceiq.cloudbreak.common.database.JpaPropertiesFacory;
+import com.sequenceiq.cloudbreak.common.database.JpaPropertiesFactory;
 import com.sequenceiq.cloudbreak.common.tx.CircuitBreakerType;
 import com.sequenceiq.cloudbreak.database.MultiDataSourceConfig;
 import com.sequenceiq.cloudbreak.util.DatabaseUtil;
@@ -109,7 +109,7 @@ public class DatabaseConfig extends MultiDataSourceConfig {
     }
 
     @Bean
-    public PlatformTransactionManager transactionManager() throws SQLException {
+    public PlatformTransactionManager transactionManager() {
         JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
         jpaTransactionManager.setEntityManagerFactory(entityManagerFactory());
         jpaTransactionManager.afterPropertiesSet();
@@ -118,7 +118,7 @@ public class DatabaseConfig extends MultiDataSourceConfig {
 
     @Bean
     @DependsOn("databaseUpMigration")
-    public EntityManagerFactory entityManagerFactory() throws SQLException {
+    public EntityManagerFactory entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
 
         entityManagerFactory.setPackagesToScan("com.sequenceiq.redbeams", "com.sequenceiq.flow", "com.sequenceiq.cloudbreak.ha",
@@ -126,7 +126,7 @@ public class DatabaseConfig extends MultiDataSourceConfig {
         entityManagerFactory.setDataSource(dataSource());
 
         entityManagerFactory.setJpaVendorAdapter(jpaVendorAdapter());
-        entityManagerFactory.setJpaProperties(JpaPropertiesFacory.create(hbm2ddlStrategy, debug, dbSchemaName, circuitBreakerType, createBatchProperties(),
+        entityManagerFactory.setJpaProperties(JpaPropertiesFactory.create(hbm2ddlStrategy, debug, dbSchemaName, circuitBreakerType, createBatchProperties(),
                 enableTransactionInterceptor));
         entityManagerFactory.afterPropertiesSet();
         return entityManagerFactory.getObject();

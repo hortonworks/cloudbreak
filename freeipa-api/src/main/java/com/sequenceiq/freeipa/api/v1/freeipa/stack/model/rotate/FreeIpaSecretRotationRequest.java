@@ -2,7 +2,7 @@ package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate;
 
 import java.util.List;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

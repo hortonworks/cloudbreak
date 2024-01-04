@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.service;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 

@@ -6,7 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.azure.AzureDeploymentMarketplaceEr
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;

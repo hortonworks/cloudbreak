@@ -2,7 +2,7 @@ package com.sequenceiq.environment.environment.dto.telemetry;
 
 import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.sequenceiq.common.model.FileSystemAwareCloudStorage;
 import com.sequenceiq.common.model.FileSystemType;

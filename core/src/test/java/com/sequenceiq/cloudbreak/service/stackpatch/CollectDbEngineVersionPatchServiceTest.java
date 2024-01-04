@@ -14,7 +14,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ws.rs.NotFoundException;
+import jakarta.ws.rs.NotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;

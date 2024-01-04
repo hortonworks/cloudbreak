@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.action.freeipa;
 
-import javax.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.InternalServerErrorException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

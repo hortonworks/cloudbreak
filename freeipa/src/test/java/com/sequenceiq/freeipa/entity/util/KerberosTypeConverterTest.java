@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.entity.util;
 
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverterBaseTest;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.KerberosType;

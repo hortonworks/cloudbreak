@@ -4,8 +4,8 @@ import static com.sequenceiq.freeipa.flow.stack.stop.StackStopEvent.STACK_STOP_E
 
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

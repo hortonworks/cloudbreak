@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.generator;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;

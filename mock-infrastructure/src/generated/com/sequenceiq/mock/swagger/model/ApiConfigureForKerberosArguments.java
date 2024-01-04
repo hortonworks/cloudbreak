@@ -1,13 +1,13 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Arguments used to configure a cluster for Kerberos.
@@ -89,7 +89,7 @@ public class ApiConfigureForKerberosArguments   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiConfigureForKerberosArguments {\n");
-    
+
     sb.append("    datanodeTransceiverPort: ").append(toIndentedString(datanodeTransceiverPort)).append("\n");
     sb.append("    datanodeWebPort: ").append(toIndentedString(datanodeWebPort)).append("\n");
     sb.append("}");

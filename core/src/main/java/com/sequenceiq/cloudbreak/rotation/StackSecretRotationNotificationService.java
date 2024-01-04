@@ -4,7 +4,7 @@ import static com.sequenceiq.redbeams.api.model.common.Status.UPDATE_IN_PROGRESS
 
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;

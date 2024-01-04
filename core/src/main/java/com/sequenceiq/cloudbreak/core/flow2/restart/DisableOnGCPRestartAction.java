@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.restart;
 
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

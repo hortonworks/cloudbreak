@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.controller.v4;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
+import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 

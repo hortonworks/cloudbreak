@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFo
 
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 

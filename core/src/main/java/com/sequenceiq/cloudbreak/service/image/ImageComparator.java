@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.service.image;
 import java.io.Serializable;
 import java.util.Comparator;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

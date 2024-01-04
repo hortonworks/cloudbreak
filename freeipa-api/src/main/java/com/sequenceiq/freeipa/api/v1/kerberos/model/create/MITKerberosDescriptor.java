@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.api.v1.kerberos.model.create;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import com.sequenceiq.freeipa.api.v1.kerberos.doc.KerberosConfigModelDescription;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.KerberosType;

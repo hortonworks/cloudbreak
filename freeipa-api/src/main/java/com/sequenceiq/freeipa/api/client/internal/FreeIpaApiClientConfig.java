@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.api.client.internal;
 
-import javax.inject.Inject;
-import javax.ws.rs.client.WebTarget;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.client.WebTarget;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;

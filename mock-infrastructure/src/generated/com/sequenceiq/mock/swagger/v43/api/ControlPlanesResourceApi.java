@@ -5,6 +5,23 @@
  */
 package com.sequenceiq.mock.swagger.v43.api;
 
+import java.io.IOException;
+import java.util.Optional;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.mock.swagger.model.ApiCommand;
 import com.sequenceiq.mock.swagger.model.ApiControlPlane;
 import com.sequenceiq.mock.swagger.model.ApiControlPlaneList;
@@ -15,29 +32,13 @@ import com.sequenceiq.mock.swagger.model.ApiRemoteRepoUrl;
 import com.sequenceiq.mock.swagger.model.ApiUninstallControlPlaneArgs;
 import com.sequenceiq.mock.swagger.model.ApiUpdateControlPlaneValuesYamlArgs;
 import com.sequenceiq.mock.swagger.model.ApiUpgradeControlPlaneArgs;
-import org.springframework.core.io.Resource;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-04-23T12:05:48.864+02:00")
 
 @Api(value = "ControlPlanesResource", description = "the ControlPlanesResource API")
@@ -61,10 +62,10 @@ public interface ControlPlanesResourceApi {
     @ApiOperation(value = "Launches the Generate Copy Docker Script Command.", nickname = "generateCopyDocker", notes = "Launches the Generate Copy Docker Script Command", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ControlPlanesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "The command that generates the script", response = ApiCommand.class) })
     @RequestMapping(value = "/controlPlanes/commands/generateCopyDocker",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> generateCopyDocker(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Arguments for the Command"  )  @Valid @RequestBody ApiGenerateCopyDockerArgs body) {
@@ -87,10 +88,10 @@ public interface ControlPlanesResourceApi {
     @ApiOperation(value = "Launches the Generate Vault Setup Command command.", nickname = "generateExternalVaultSetup", notes = "Launches the Generate Vault Setup Command command", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ControlPlanesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "The command that generates and downloads the script", response = ApiCommand.class) })
     @RequestMapping(value = "/controlPlanes/commands/generateExternalVaultSetup",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> generateExternalVaultSetup(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Arguments for the Command"  )  @Valid @RequestBody ApiGenerateExternalVaultSetupArgs body) {
@@ -113,10 +114,10 @@ public interface ControlPlanesResourceApi {
     @ApiOperation(value = "Current Control Planes.", nickname = "getControlPlanes", notes = "Current Control Planes", response = ApiControlPlaneList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ControlPlanesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Detailed description of the current control planes.", response = ApiControlPlaneList.class) })
     @RequestMapping(value = "/controlPlanes",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiControlPlaneList> getControlPlanes(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -138,10 +139,10 @@ public interface ControlPlanesResourceApi {
     @ApiOperation(value = "Fetches the log content for the specific command.", nickname = "getLogContent", notes = "Fetches the log content for the specific command.", response = Resource.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ControlPlanesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "the log content.", response = Resource.class) })
     @RequestMapping(value = "/controlPlanes/fetchResources/{commandId}/logContent",
-        produces = { "text/plain" }, 
+        produces = { "text/plain" },
         method = RequestMethod.POST)
     default ResponseEntity<Resource> getLogContent(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "the command id",required=true) @PathVariable("commandId") Integer commandId) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -163,10 +164,10 @@ public interface ControlPlanesResourceApi {
     @ApiOperation(value = "Fetches the manifest.", nickname = "getManifestJson", notes = "Fetches the manifest.json under the specified remote repo.", response = Resource.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ControlPlanesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "the content of the manifest.json", response = Resource.class) })
     @RequestMapping(value = "/controlPlanes/fetchResources/manifest.json",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<Resource> getManifestJson(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "the remote repo url."  )  @Valid @RequestBody ApiRemoteRepoUrl body) {
@@ -189,10 +190,10 @@ public interface ControlPlanesResourceApi {
     @ApiOperation(value = "Launches the install control plane command.", nickname = "installControlPlane", notes = "Launches the install control plane command.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ControlPlanesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "The command that install a control plane.", response = ApiCommand.class) })
     @RequestMapping(value = "/controlPlanes/commands/installControlPlane",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> installControlPlane(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Arguments for the Command"  )  @Valid @RequestBody ApiInstallControlPlaneArgs body) {
@@ -215,10 +216,10 @@ public interface ControlPlanesResourceApi {
     @ApiOperation(value = "The control plane with the given id.", nickname = "readControlPlaneByUuid", notes = "The control plane with the given id", response = ApiControlPlane.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ControlPlanesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Detailed description of the control plane.", response = ApiControlPlane.class) })
     @RequestMapping(value = "/controlPlanes/{controlPlaneUuid}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiControlPlane> readControlPlaneByUuid(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The universally unique id of the control plane",required=true) @PathVariable("controlPlaneUuid") String controlPlaneUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -240,10 +241,10 @@ public interface ControlPlanesResourceApi {
     @ApiOperation(value = "Launches Uninstall Command on the control plane with the given uuid.", nickname = "uninstallControlPlane", notes = "Launches Uninstall Command on the control plane with the given uuid", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ControlPlanesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "The command that uninstalls the control plane.", response = ApiCommand.class) })
     @RequestMapping(value = "/controlPlanes/{controlPlaneUuid}/commands/uninstallControlPlane",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> uninstallControlPlane(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The universally unique id of the control plane",required=true) @PathVariable("controlPlaneUuid") String controlPlaneUuid,@ApiParam(value = "Arguments for the Command"  )  @Valid @RequestBody ApiUninstallControlPlaneArgs body) {
@@ -266,10 +267,10 @@ public interface ControlPlanesResourceApi {
     @ApiOperation(value = "Launches update the values.", nickname = "updateValuesYaml", notes = "Launches update the values.yaml from the control plane with the given uuid This updates the content of values.yaml.merged in the CM database.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ControlPlanesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "The command that updates the current values.yaml.merged from the control plane.", response = ApiCommand.class) })
     @RequestMapping(value = "/controlPlanes/{controlPlaneUuid}/commands/updateControlPlaneValuesYaml",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> updateValuesYaml(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The universally unique id of the control plane",required=true) @PathVariable("controlPlaneUuid") String controlPlaneUuid,@ApiParam(value = "Arguments for the Command"  )  @Valid @RequestBody ApiUpdateControlPlaneValuesYamlArgs body) {
@@ -292,10 +293,10 @@ public interface ControlPlanesResourceApi {
     @ApiOperation(value = "Launches the Upgrade Command on the control plane with the given uuid.", nickname = "upgradeControlPlane", notes = "Launches the Upgrade Command on the control plane with the given uuid", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ControlPlanesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "The command that upgrades the control plane.", response = ApiCommand.class) })
     @RequestMapping(value = "/controlPlanes/{controlPlaneUuid}/commands/upgradeControlPlane",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> upgradeControlPlane(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The universally unique id of the control plane",required=true) @PathVariable("controlPlaneUuid") String controlPlaneUuid,@ApiParam(value = "Arguments for the Command"  )  @Valid @RequestBody ApiUpgradeControlPlaneArgs body) {

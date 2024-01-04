@@ -1,17 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiHostRef;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Represents an Impala Query.
@@ -367,7 +367,7 @@ public class ApiImpalaQuery   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiImpalaQuery {\n");
-    
+
     sb.append("    queryId: ").append(toIndentedString(queryId)).append("\n");
     sb.append("    statement: ").append(toIndentedString(statement)).append("\n");
     sb.append("    queryType: ").append(toIndentedString(queryType)).append("\n");

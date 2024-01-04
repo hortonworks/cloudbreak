@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.common.json;
 
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 
 public class JsonToString implements AttributeConverter<Json, String> {
     @Override

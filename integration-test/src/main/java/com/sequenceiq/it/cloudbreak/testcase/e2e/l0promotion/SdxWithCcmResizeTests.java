@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 

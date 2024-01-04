@@ -5,9 +5,9 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NA
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.validation.Valid;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 

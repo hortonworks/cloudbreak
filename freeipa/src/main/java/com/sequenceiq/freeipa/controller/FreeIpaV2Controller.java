@@ -3,7 +3,7 @@ package com.sequenceiq.freeipa.controller;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.REPAIR_FREEIPA;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 

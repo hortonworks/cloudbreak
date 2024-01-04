@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.dto.freeipa;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.it.cloudbreak.Prototype;

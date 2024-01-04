@@ -25,7 +25,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;

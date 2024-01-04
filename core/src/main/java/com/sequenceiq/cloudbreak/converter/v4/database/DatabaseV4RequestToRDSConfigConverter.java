@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.database;
 
 import java.util.Date;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

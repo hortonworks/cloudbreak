@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.container;
 
 import java.util.Map;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

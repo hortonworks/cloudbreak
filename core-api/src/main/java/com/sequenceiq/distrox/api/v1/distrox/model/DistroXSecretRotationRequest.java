@@ -2,7 +2,7 @@ package com.sequenceiq.distrox.api.v1.distrox.model;
 
 import java.util.List;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;

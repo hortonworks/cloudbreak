@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.handler;
 import static com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.ExternalDatabaseTerminationEvent.EXTERNAL_DATABASE_TERMINATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.ExternalDatabaseTerminationEvent.EXTERNAL_DATABASE_WAIT_TERMINATION_SUCCESS_EVENT;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;

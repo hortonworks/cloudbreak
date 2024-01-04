@@ -21,9 +21,9 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
+import jakarta.annotation.Resource;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

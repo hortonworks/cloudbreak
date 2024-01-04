@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;

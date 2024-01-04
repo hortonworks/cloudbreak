@@ -6,8 +6,8 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;

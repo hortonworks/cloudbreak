@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.backup.Da
 import java.util.Map;
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

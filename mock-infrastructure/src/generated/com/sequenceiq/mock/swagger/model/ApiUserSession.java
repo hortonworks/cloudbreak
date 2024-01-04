@@ -1,13 +1,13 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * This is the model for interactive user session information in the API. &lt;p&gt; A user may have more than one active session. Each such session will have its own session object.
@@ -113,7 +113,7 @@ public class ApiUserSession   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiUserSession {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    remoteAddr: ").append(toIndentedString(remoteAddr)).append("\n");
     sb.append("    lastRequest: ").append(toIndentedString(lastRequest)).append("\n");

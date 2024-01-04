@@ -2,12 +2,12 @@ package com.sequenceiq.environment.experience.liftie;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static com.sequenceiq.environment.experience.ResponseReaderUtility.logInputResponseContentIfPossible;
-import static javax.ws.rs.core.Response.Status.Family.SUCCESSFUL;
+import static jakarta.ws.rs.core.Response.Status.Family.SUCCESSFUL;
 
 import java.util.Optional;
 
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

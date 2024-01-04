@@ -2,7 +2,7 @@ package com.sequenceiq.distrox.v1.distrox.controller;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATAHUB;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Controller;
 

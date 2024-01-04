@@ -5,7 +5,7 @@ import static org.apache.commons.codec.binary.Base64.decodeBase64;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm;
 
 import java.util.List;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

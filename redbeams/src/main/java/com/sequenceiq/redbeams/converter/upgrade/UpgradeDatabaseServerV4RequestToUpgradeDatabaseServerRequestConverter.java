@@ -1,6 +1,6 @@
 package com.sequenceiq.redbeams.converter.upgrade;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

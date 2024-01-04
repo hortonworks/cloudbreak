@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cli;
 import static com.sequenceiq.cloudbreak.util.MapUtil.cleanMap;
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

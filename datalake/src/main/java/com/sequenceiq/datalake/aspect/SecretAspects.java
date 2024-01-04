@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.aspect;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;

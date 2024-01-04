@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.sdx.common;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 

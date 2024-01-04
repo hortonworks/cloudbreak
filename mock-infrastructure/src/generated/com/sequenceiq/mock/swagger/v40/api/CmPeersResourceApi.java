@@ -5,31 +5,33 @@
  */
 package com.sequenceiq.mock.swagger.v40.api;
 
-import com.sequenceiq.mock.swagger.model.ApiCmPeer;
-import com.sequenceiq.mock.swagger.model.ApiCmPeerList;
-import com.sequenceiq.mock.swagger.model.ApiCommand;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.*;
+import java.io.IOException;
+import java.util.Optional;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.mock.swagger.model.ApiCmPeer;
+import com.sequenceiq.mock.swagger.model.ApiCmPeerList;
+import com.sequenceiq.mock.swagger.model.ApiCommand;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T21:48:33.802+01:00")
 
 @Api(value = "CmPeersResource", description = "the CmPeersResource API")
@@ -53,10 +55,10 @@ public interface CmPeersResourceApi {
     @ApiOperation(value = "Create a new Cloudera Manager peer.", nickname = "createPeer", notes = "Create a new Cloudera Manager peer. <p> The remote server will be contacted so that a user can be created for use by the new peer. The <i>username</i> and <i>password</i> properties of the provided peer object should contain credentials of a valid admin user on the remote server. A timeout of 10 seconds is enforced when contacting the remote server. <p> It is recommended to run the remote server with TLS enabled, since creating and using peers involve transferring credentials over the network. <p> Available since API v3. Only available with Cloudera Manager Enterprise Edition. <p> Type field in ApiCmPeer is available since API v11. if not specified when making createPeer() call, 'REPLICATION' type peer will be created.", response = ApiCmPeer.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "CmPeersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCmPeer.class) })
     @RequestMapping(value = "/cm/peers",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCmPeer> createPeer(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Peer to create (see above)."  )  @Valid @RequestBody ApiCmPeer body) {
@@ -79,10 +81,10 @@ public interface CmPeersResourceApi {
     @ApiOperation(value = "Delete Cloudera Manager peer.", nickname = "deletePeer", notes = "Delete Cloudera Manager peer. <p> An attempt will be made to contact the peer server, so that the configured user can be deleted.. Errors while contacting the remote server are non-fatal. <p> Available since API v11. Only available with Cloudera Manager Enterprise Edition.", response = ApiCmPeer.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "CmPeersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success", response = ApiCmPeer.class) })
     @RequestMapping(value = "/cm/peers/{peerName}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.DELETE)
     default ResponseEntity<ApiCmPeer> deletePeer(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Name of peer to delete.",required=true) @PathVariable("peerName") String peerName,@ApiParam(value = "Type of peer to delete. If null, REPLICATION peer type will be deleted.", allowableValues = "REPLICATION, STATUS_AGGREGATION") @Valid @RequestParam(value = "type", required = false) String type) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -104,10 +106,10 @@ public interface CmPeersResourceApi {
     @ApiOperation(value = "Retrieves all configured Cloudera Manager peers.", nickname = "listPeers", notes = "Retrieves all configured Cloudera Manager peers. <p> Available since API v3. Only available with Cloudera Manager Enterprise Edition. <p> When accessed via API version before v11, only REPLICATION type peers will be returned.", response = ApiCmPeerList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "CmPeersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiCmPeerList.class) })
     @RequestMapping(value = "/cm/peers",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiCmPeerList> listPeers(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -129,10 +131,10 @@ public interface CmPeersResourceApi {
     @ApiOperation(value = "Fetch information about an existing Cloudera Manager peer.", nickname = "readPeer", notes = "Fetch information about an existing Cloudera Manager peer. <p> Available since API v11. Only available with Cloudera Manager Enterprise Edition.", response = ApiCmPeer.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "CmPeersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiCmPeer.class) })
     @RequestMapping(value = "/cm/peers/{peerName}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiCmPeer> readPeer(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Name of peer to retrieve.",required=true) @PathVariable("peerName") String peerName,@ApiParam(value = "Type of peer to retrieve. If null, REPLICATION peer type will be returned.", allowableValues = "REPLICATION, STATUS_AGGREGATION") @Valid @RequestParam(value = "type", required = false) String type) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -154,10 +156,10 @@ public interface CmPeersResourceApi {
     @ApiOperation(value = "Test the connectivity of a peer.", nickname = "testPeer", notes = "Test the connectivity of a peer. <p> Available since API v11. Only available with Cloudera Manager Enterprise Edition.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "CmPeersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/cm/peers/{peerName}/commands/test",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> testPeer(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Name of peer to test.",required=true) @PathVariable("peerName") String peerName,@ApiParam(value = "Type of peer to test. If null, REPLICATION peer type will be tested.", allowableValues = "REPLICATION, STATUS_AGGREGATION") @Valid @RequestParam(value = "type", required = false) String type) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -179,10 +181,10 @@ public interface CmPeersResourceApi {
     @ApiOperation(value = "Update information for a Cloudera Manager peer.", nickname = "updatePeer", notes = "Update information for a Cloudera Manager peer. <p> In administrator credentials are provided in the peer information, they will be used to establish new credentials with the remote server. This can be used in case the old credentials are not working anymore. An attempt will be made to delete the old credentials if new ones are successfully created. <p> If changing the peer's URL, an attempt will be made to contact the old Cloudera Manager to delete the existing credentials. <p> Available since API v3. Only available with Cloudera Manager Enterprise Edition.", response = ApiCmPeer.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "CmPeersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success", response = ApiCmPeer.class) })
     @RequestMapping(value = "/cm/peers/{peerName}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.PUT)
     default ResponseEntity<ApiCmPeer> updatePeer(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Name of peer to update.",required=true) @PathVariable("peerName") String peerName,@ApiParam(value = "Updated peer information."  )  @Valid @RequestBody ApiCmPeer body) {

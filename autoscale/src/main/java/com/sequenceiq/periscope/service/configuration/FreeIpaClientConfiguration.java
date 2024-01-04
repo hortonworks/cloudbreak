@@ -1,8 +1,8 @@
 package com.sequenceiq.periscope.service.configuration;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.client.WebTarget;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.ws.rs.client.WebTarget;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;

@@ -4,8 +4,8 @@ import static com.sequenceiq.it.cloudbreak.config.user.DefaultUserConfig.DEFAULT
 
 import java.util.Base64;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

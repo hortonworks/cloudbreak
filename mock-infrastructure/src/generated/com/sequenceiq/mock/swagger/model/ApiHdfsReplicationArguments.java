@@ -1,17 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiServiceRef;
-import com.sequenceiq.mock.swagger.model.ReplicationStrategy;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Replication arguments for HDFS.
@@ -632,7 +632,7 @@ public class ApiHdfsReplicationArguments   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHdfsReplicationArguments {\n");
-    
+
     sb.append("    sourceService: ").append(toIndentedString(sourceService)).append("\n");
     sb.append("    sourcePath: ").append(toIndentedString(sourcePath)).append("\n");
     sb.append("    destinationPath: ").append(toIndentedString(destinationPath)).append("\n");

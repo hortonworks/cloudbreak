@@ -4,7 +4,7 @@ import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.COMPL
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 

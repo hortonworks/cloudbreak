@@ -1,29 +1,23 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import io.swagger.annotations.ApiModel;
-import com.fasterxml.jackson.annotation.JsonValue;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Represents the unit for the repeat interval for schedules.
  */
 public enum ApiScheduleInterval {
-  
+
   MINUTE("MINUTE"),
-  
+
   HOUR("HOUR"),
-  
+
   DAY("DAY"),
-  
+
   WEEK("WEEK"),
-  
+
   MONTH("MONTH"),
-  
+
   YEAR("YEAR");
 
   private String value;

@@ -13,7 +13,7 @@ import static org.mockito.Mockito.when;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import javax.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.InternalServerErrorException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

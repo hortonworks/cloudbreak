@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.ldap.model.create;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.freeipa.api.v1.ldap.doc.LdapConfigModelDescription;

@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.quartz.configuration;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 
 import org.quartz.SchedulerException;
 import org.springframework.context.annotation.Configuration;

@@ -1,15 +1,16 @@
 package com.sequenceiq.mock.swagger.model;
 
+import java.math.BigDecimal;
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiTimeSeriesAggregateStatistics;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * A single data point of time series data.
@@ -141,7 +142,7 @@ public class ApiTimeSeriesData   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiTimeSeriesData {\n");
-    
+
     sb.append("    timestamp: ").append(toIndentedString(timestamp)).append("\n");
     sb.append("    value: ").append(toIndentedString(value)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");

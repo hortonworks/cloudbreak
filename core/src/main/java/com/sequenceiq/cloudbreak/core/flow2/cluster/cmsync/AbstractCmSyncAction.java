@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.cmsync;
 
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.statemachine.StateContext;
 

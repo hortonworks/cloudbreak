@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.sdx.saas.client.config;
 
-
 import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 
 import org.springframework.beans.factory.annotation.Value;

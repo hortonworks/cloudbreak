@@ -4,7 +4,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;

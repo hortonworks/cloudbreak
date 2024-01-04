@@ -5,7 +5,7 @@ import static com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern
 
 import java.util.Objects;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

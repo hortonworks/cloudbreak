@@ -12,7 +12,7 @@ import static org.mockito.Mockito.when;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

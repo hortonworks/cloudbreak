@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.sdx.saas.client;
 
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;

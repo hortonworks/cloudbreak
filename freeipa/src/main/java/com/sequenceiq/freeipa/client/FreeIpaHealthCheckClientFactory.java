@@ -4,8 +4,8 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ws.rs.NotSupportedException;
-import javax.ws.rs.client.Client;
+import jakarta.ws.rs.NotSupportedException;
+import jakarta.ws.rs.client.Client;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

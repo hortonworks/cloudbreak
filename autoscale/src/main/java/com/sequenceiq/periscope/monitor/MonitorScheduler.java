@@ -5,7 +5,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
 
 import java.util.List;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobDataMap;

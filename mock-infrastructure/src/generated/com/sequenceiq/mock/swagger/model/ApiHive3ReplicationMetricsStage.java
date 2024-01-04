@@ -1,20 +1,20 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiHive3ReplicationMetric;
-import com.sequenceiq.mock.swagger.model.ApiHive3ReplicationMetricsStatus;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
- * 
+ *
  */
 @ApiModel(description = "")
 @Validated
@@ -49,7 +49,7 @@ public class ApiHive3ReplicationMetricsStage   {
   }
 
   /**
-   * 
+   *
    * @return name
   **/
   @ApiModelProperty(value = "")
@@ -69,7 +69,7 @@ public class ApiHive3ReplicationMetricsStage   {
   }
 
   /**
-   * 
+   *
    * @return status
   **/
   @ApiModelProperty(value = "")
@@ -90,7 +90,7 @@ public class ApiHive3ReplicationMetricsStage   {
   }
 
   /**
-   * 
+   *
    * @return startDate
   **/
   @ApiModelProperty(value = "")
@@ -110,7 +110,7 @@ public class ApiHive3ReplicationMetricsStage   {
   }
 
   /**
-   * 
+   *
    * @return endDate
   **/
   @ApiModelProperty(value = "")
@@ -138,7 +138,7 @@ public class ApiHive3ReplicationMetricsStage   {
   }
 
   /**
-   * 
+   *
    * @return metrics
   **/
   @ApiModelProperty(value = "")
@@ -159,7 +159,7 @@ public class ApiHive3ReplicationMetricsStage   {
   }
 
   /**
-   * 
+   *
    * @return errorLogPath
   **/
   @ApiModelProperty(value = "")
@@ -200,7 +200,7 @@ public class ApiHive3ReplicationMetricsStage   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHive3ReplicationMetricsStage {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    startDate: ").append(toIndentedString(startDate)).append("\n");

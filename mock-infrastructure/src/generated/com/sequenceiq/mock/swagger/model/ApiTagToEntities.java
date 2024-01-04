@@ -1,19 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiClusterRef;
-import com.sequenceiq.mock.swagger.model.ApiHostRef;
-import com.sequenceiq.mock.swagger.model.ApiRoleRef;
-import com.sequenceiq.mock.swagger.model.ApiServiceRef;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * API object which groups types of entities as per the associated tag
@@ -54,7 +52,7 @@ public class ApiTagToEntities   {
   }
 
   /**
-   * 
+   *
    * @return name
   **/
   @ApiModelProperty(value = "")
@@ -74,7 +72,7 @@ public class ApiTagToEntities   {
   }
 
   /**
-   * 
+   *
    * @return value
   **/
   @ApiModelProperty(value = "")
@@ -102,7 +100,7 @@ public class ApiTagToEntities   {
   }
 
   /**
-   * 
+   *
    * @return apiClusterRefs
   **/
   @ApiModelProperty(value = "")
@@ -131,7 +129,7 @@ public class ApiTagToEntities   {
   }
 
   /**
-   * 
+   *
    * @return apiServiceRefs
   **/
   @ApiModelProperty(value = "")
@@ -160,7 +158,7 @@ public class ApiTagToEntities   {
   }
 
   /**
-   * 
+   *
    * @return apiRoleRefs
   **/
   @ApiModelProperty(value = "")
@@ -189,7 +187,7 @@ public class ApiTagToEntities   {
   }
 
   /**
-   * 
+   *
    * @return apiHostRefs
   **/
   @ApiModelProperty(value = "")
@@ -231,7 +229,7 @@ public class ApiTagToEntities   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiTagToEntities {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    value: ").append(toIndentedString(value)).append("\n");
     sb.append("    apiClusterRefs: ").append(toIndentedString(apiClusterRefs)).append("\n");

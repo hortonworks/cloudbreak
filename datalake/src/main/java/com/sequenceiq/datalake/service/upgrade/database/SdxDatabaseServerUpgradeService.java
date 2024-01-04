@@ -7,7 +7,7 @@ import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.RUNNING;
 import java.util.Collections;
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;

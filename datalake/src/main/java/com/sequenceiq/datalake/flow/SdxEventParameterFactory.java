@@ -3,7 +3,7 @@ package com.sequenceiq.datalake.flow;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.InternalServerErrorException;
 
 import org.springframework.stereotype.Component;
 

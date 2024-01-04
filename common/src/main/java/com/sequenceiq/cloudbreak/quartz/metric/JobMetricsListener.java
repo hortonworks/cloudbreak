@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.quartz.metric.QuartzMetricTag.PROVIDER;
 
 import java.time.Duration;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;

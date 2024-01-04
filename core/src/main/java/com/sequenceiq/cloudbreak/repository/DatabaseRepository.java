@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

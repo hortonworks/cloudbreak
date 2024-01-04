@@ -2,7 +2,7 @@ package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.springframework.validation.annotation.Validated;
 
@@ -429,7 +429,7 @@ public class ApiActivity   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiActivity {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    parent: ").append(toIndentedString(parent)).append("\n");

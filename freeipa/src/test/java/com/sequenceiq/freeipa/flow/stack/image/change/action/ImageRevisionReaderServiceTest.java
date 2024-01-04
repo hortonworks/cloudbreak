@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.function.Supplier;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.AuditReaderFactory;

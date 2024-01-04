@@ -1,21 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiClusterRef;
-import com.sequenceiq.mock.swagger.model.ApiCommand;
-import com.sequenceiq.mock.swagger.model.ApiCommandList;
-import com.sequenceiq.mock.swagger.model.ApiHBaseSnapshotResult;
-import com.sequenceiq.mock.swagger.model.ApiHdfsSnapshotResult;
-import com.sequenceiq.mock.swagger.model.ApiHostRef;
-import com.sequenceiq.mock.swagger.model.ApiRoleRef;
-import com.sequenceiq.mock.swagger.model.ApiServiceRef;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Information about snapshot commands. &lt;p/&gt; This object holds all the information a regular ApiCommand object provides, and adds specific information about the results of a snapshot command. &lt;p/&gt; Depending on the type of the service where the snapshot command was run, a different result property will be populated.

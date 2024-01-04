@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.beans.factory.annotation.Value;

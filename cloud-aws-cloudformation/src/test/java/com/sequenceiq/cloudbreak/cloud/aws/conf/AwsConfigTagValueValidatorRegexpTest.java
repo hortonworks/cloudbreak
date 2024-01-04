@@ -4,7 +4,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.conf;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

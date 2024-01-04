@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.converter.instance;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;

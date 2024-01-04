@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.repository;
 
 import java.util.Set;
 
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
+import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 
 import org.springframework.data.repository.CrudRepository;
 

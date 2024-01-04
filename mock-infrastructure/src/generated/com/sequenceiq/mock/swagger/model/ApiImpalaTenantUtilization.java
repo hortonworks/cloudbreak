@@ -1,15 +1,16 @@
 package com.sequenceiq.mock.swagger.model;
 
+import java.math.BigDecimal;
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiImpalaUtilizationHistogram;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Utilization report information of a tenant of Impala application.
@@ -565,7 +566,7 @@ public class ApiImpalaTenantUtilization   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiImpalaTenantUtilization {\n");
-    
+
     sb.append("    tenantName: ").append(toIndentedString(tenantName)).append("\n");
     sb.append("    totalQueries: ").append(toIndentedString(totalQueries)).append("\n");
     sb.append("    successfulQueries: ").append(toIndentedString(successfulQueries)).append("\n");

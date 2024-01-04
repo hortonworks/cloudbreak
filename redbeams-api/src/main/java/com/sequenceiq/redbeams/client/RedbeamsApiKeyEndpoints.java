@@ -1,6 +1,6 @@
 package com.sequenceiq.redbeams.client;
 
-import javax.ws.rs.client.WebTarget;
+import jakarta.ws.rs.client.WebTarget;
 
 import com.sequenceiq.cloudbreak.client.AbstractKeyBasedServiceEndpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;

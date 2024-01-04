@@ -3,7 +3,7 @@ package com.sequenceiq.it.cloudbreak.action.v4.clustertemplate;
 import java.time.Duration;
 import java.util.Collection;
 
-import javax.ws.rs.ServerErrorException;
+import jakarta.ws.rs.ServerErrorException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

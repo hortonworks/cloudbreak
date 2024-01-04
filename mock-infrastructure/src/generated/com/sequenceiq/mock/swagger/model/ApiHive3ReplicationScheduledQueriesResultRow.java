@@ -1,16 +1,16 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
- * 
+ *
  */
 @ApiModel(description = "")
 @Validated
@@ -53,7 +53,7 @@ public class ApiHive3ReplicationScheduledQueriesResultRow   {
   }
 
   /**
-   * 
+   *
    * @return queryId
   **/
   @ApiModelProperty(value = "")
@@ -73,7 +73,7 @@ public class ApiHive3ReplicationScheduledQueriesResultRow   {
   }
 
   /**
-   * 
+   *
    * @return name
   **/
   @ApiModelProperty(value = "")
@@ -93,7 +93,7 @@ public class ApiHive3ReplicationScheduledQueriesResultRow   {
   }
 
   /**
-   * 
+   *
    * @return enabled
   **/
   @ApiModelProperty(value = "")
@@ -113,7 +113,7 @@ public class ApiHive3ReplicationScheduledQueriesResultRow   {
   }
 
   /**
-   * 
+   *
    * @return nameSpace
   **/
   @ApiModelProperty(value = "")
@@ -133,7 +133,7 @@ public class ApiHive3ReplicationScheduledQueriesResultRow   {
   }
 
   /**
-   * 
+   *
    * @return schedule
   **/
   @ApiModelProperty(value = "")
@@ -153,7 +153,7 @@ public class ApiHive3ReplicationScheduledQueriesResultRow   {
   }
 
   /**
-   * 
+   *
    * @return user
   **/
   @ApiModelProperty(value = "")
@@ -173,7 +173,7 @@ public class ApiHive3ReplicationScheduledQueriesResultRow   {
   }
 
   /**
-   * 
+   *
    * @return query
   **/
   @ApiModelProperty(value = "")
@@ -193,7 +193,7 @@ public class ApiHive3ReplicationScheduledQueriesResultRow   {
   }
 
   /**
-   * 
+   *
    * @return nextExecution
   **/
   @ApiModelProperty(value = "")
@@ -213,7 +213,7 @@ public class ApiHive3ReplicationScheduledQueriesResultRow   {
   }
 
   /**
-   * 
+   *
    * @return executionId
   **/
   @ApiModelProperty(value = "")
@@ -257,7 +257,7 @@ public class ApiHive3ReplicationScheduledQueriesResultRow   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHive3ReplicationScheduledQueriesResultRow {\n");
-    
+
     sb.append("    queryId: ").append(toIndentedString(queryId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    enabled: ").append(toIndentedString(enabled)).append("\n");

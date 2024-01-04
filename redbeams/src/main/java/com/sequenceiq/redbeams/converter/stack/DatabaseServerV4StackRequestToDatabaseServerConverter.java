@@ -6,7 +6,7 @@ import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityG
 import java.util.Map;
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

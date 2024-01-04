@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.util.MapUtil.cleanMap;
 
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;

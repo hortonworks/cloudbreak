@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

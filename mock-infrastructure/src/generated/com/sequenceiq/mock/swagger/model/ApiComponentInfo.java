@@ -1,16 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * This is the model for a component in the host.
@@ -245,7 +246,7 @@ public class ApiComponentInfo   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiComponentInfo {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    cdhVersion: ").append(toIndentedString(cdhVersion)).append("\n");
     sb.append("    cdhRelease: ").append(toIndentedString(cdhRelease)).append("\n");

@@ -3,7 +3,7 @@ package com.sequenceiq.periscope.service.configuration;
 import static com.sequenceiq.periscope.cache.LimitsConfigurationCache.LIMITS_CONFIGURATION_CACHE;
 import static com.sequenceiq.periscope.monitor.evaluator.ScalingConstants.DEFAULT_CLUSTER_MAX_SIZE;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -31,8 +31,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
+import jakarta.annotation.Nonnull;
+import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.http.conn.util.InetAddressUtils;

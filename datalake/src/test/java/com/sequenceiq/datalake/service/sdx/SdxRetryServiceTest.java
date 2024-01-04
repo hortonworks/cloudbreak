@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.function.Consumer;
 
-import javax.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.InternalServerErrorException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;

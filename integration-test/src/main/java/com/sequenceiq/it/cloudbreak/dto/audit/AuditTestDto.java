@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.dto.audit;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Response;
 import com.sequenceiq.it.cloudbreak.Prototype;
@@ -10,7 +10,7 @@ import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 @Prototype
 public class AuditTestDto extends AbstractCloudbreakTestDto<Object, AuditEventV4Response, AuditTestDto> {
 
-    private javax.ws.rs.core.Response zipResponse;
+    private jakarta.ws.rs.core.Response zipResponse;
 
     private String resourceType;
 

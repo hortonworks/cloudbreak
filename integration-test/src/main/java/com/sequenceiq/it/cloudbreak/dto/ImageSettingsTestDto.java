@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.dto;
 
 import java.util.UUID;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.it.cloudbreak.Prototype;

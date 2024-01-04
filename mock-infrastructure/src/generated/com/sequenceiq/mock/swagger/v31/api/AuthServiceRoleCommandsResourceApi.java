@@ -8,8 +8,8 @@ package com.sequenceiq.mock.swagger.v31.api;
 import java.io.IOException;
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,10 +53,10 @@ public interface AuthServiceRoleCommandsResourceApi {
     @ApiOperation(value = "Restart a set of Authentication Service roles.", nickname = "restartCommand", notes = "Restart a set of Authentication Service roles.", response = ApiBulkCommandList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthServiceRoleCommandsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiBulkCommandList.class) })
     @RequestMapping(value = "/cm/authService/roleCommands/restart",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiBulkCommandList> restartCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The roles to restart."  )  @Valid @RequestBody ApiRoleNameList body) {
@@ -79,10 +79,10 @@ public interface AuthServiceRoleCommandsResourceApi {
     @ApiOperation(value = "Start a set of Authentication Service roles.", nickname = "startCommand", notes = "Start a set of Authentication Service roles.", response = ApiBulkCommandList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthServiceRoleCommandsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiBulkCommandList.class) })
     @RequestMapping(value = "/cm/authService/roleCommands/start",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiBulkCommandList> startCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The roles to start."  )  @Valid @RequestBody ApiRoleNameList body) {
@@ -105,10 +105,10 @@ public interface AuthServiceRoleCommandsResourceApi {
     @ApiOperation(value = "Stop a set of Authentication Service roles.", nickname = "stopCommand", notes = "Stop a set of Authentication Service roles.", response = ApiBulkCommandList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthServiceRoleCommandsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiBulkCommandList.class) })
     @RequestMapping(value = "/cm/authService/roleCommands/stop",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiBulkCommandList> stopCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The roles to stop."  )  @Valid @RequestBody ApiRoleNameList body) {

@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.service.upgrade.validation;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

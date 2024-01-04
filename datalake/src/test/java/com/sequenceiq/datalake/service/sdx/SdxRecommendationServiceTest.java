@@ -139,7 +139,7 @@ class SdxRecommendationServiceTest {
     public void testGetRecommendationFailed() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
         when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any()))
-                .thenThrow(new javax.ws.rs.BadRequestException("The provided client secret keys for app 1234."));
+                .thenThrow(new jakarta.ws.rs.BadRequestException("The provided client secret keys for app 1234."));
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.getRecommendation("cred", LIGHT_DUTY, "7.2.14", "AWS", "ec-central-1", null));

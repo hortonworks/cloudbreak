@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

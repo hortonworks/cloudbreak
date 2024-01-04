@@ -5,7 +5,7 @@ import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.FREEIPA_
 
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -11,8 +11,8 @@ import static com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil.environmen
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.ws.rs.ForbiddenException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.testng.annotations.Test;
 

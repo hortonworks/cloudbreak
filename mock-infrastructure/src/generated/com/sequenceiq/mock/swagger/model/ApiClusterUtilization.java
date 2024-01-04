@@ -1,15 +1,16 @@
 package com.sequenceiq.mock.swagger.model;
 
+import java.math.BigDecimal;
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiTenantUtilizationList;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Utilization report information of a Cluster.
@@ -538,7 +539,7 @@ public class ApiClusterUtilization   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiClusterUtilization {\n");
-    
+
     sb.append("    totalCpuCores: ").append(toIndentedString(totalCpuCores)).append("\n");
     sb.append("    avgCpuUtilization: ").append(toIndentedString(avgCpuUtilization)).append("\n");
     sb.append("    maxCpuUtilization: ").append(toIndentedString(maxCpuUtilization)).append("\n");

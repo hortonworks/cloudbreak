@@ -1,28 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiClusterRef;
-import com.sequenceiq.mock.swagger.model.ApiConfigStalenessStatus;
-import com.sequenceiq.mock.swagger.model.ApiEntityStatus;
-import com.sequenceiq.mock.swagger.model.ApiEntityTag;
-import com.sequenceiq.mock.swagger.model.ApiEntityType;
-import com.sequenceiq.mock.swagger.model.ApiHealthCheck;
-import com.sequenceiq.mock.swagger.model.ApiHealthSummary;
-import com.sequenceiq.mock.swagger.model.ApiReplicationSchedule;
-import com.sequenceiq.mock.swagger.model.ApiRole;
-import com.sequenceiq.mock.swagger.model.ApiRoleConfigGroup;
-import com.sequenceiq.mock.swagger.model.ApiServiceConfig;
-import com.sequenceiq.mock.swagger.model.ApiServiceState;
-import com.sequenceiq.mock.swagger.model.ApiSnapshotPolicy;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * A service (such as HDFS, MapReduce, HBase) runs in a cluster. It has roles, which are the actual entities (NameNode, DataNodes, etc.) that perform the service&#39;s functions.  &lt;h3&gt;HDFS services and health checks&lt;/h3&gt;  In CDH4, HDFS services may not present any health checks. This will happen if the service has more than one nameservice configured. In those cases, the health information will be available by fetching information about the nameservices instead. &lt;p&gt; The health summary is still available, and reflects a service-wide summary.
@@ -661,7 +650,7 @@ public class ApiService   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiService {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    clusterRef: ").append(toIndentedString(clusterRef)).append("\n");

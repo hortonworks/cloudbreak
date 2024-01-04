@@ -6,8 +6,8 @@ import static org.hamcrest.Matchers.not;
 
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
+import jakarta.annotation.Nonnull;
+import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;

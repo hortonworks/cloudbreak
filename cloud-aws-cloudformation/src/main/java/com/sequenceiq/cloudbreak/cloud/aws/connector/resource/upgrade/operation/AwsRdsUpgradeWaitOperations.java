@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation
 
 import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager;
 
 import java.util.List;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.cm.ClouderaManagerV1Request;
 import com.sequenceiq.it.cloudbreak.Prototype;

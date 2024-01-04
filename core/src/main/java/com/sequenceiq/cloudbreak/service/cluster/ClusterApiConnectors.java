@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster;
 
 import static com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService.BEAN_POST_TAG;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;

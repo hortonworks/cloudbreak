@@ -3,7 +3,7 @@ package com.sequenceiq.freeipa.controller;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.UPGRADE_FREEIPA;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Controller;
 

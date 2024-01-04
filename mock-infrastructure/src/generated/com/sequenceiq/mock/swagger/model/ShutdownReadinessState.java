@@ -1,21 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import io.swagger.annotations.ApiModel;
-import com.fasterxml.jackson.annotation.JsonValue;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Enum for Cloudera Manager shutdown readiness state.
  */
 public enum ShutdownReadinessState {
-  
+
   READY("READY"),
-  
+
   NOT_READY("NOT_READY");
 
   private String value;

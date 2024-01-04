@@ -1,14 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.HTTPMethod;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * A single element of a batch request, often part of a list with other elements.
@@ -163,7 +164,7 @@ public class ApiBatchRequestElement   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiBatchRequestElement {\n");
-    
+
     sb.append("    method: ").append(toIndentedString(method)).append("\n");
     sb.append("    url: ").append(toIndentedString(url)).append("\n");
     sb.append("    body: ").append(toIndentedString(body)).append("\n");

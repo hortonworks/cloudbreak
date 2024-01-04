@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster;
 
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;

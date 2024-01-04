@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.service.stackpatch;
 
 import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.CLUSTER_PUBLIC_ENDPOINT;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 

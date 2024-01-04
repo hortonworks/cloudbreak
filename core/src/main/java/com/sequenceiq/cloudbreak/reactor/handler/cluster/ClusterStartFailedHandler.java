@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_FAILED;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 

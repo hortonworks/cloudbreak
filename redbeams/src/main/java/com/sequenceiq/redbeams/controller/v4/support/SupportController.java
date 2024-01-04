@@ -3,8 +3,8 @@ package com.sequenceiq.redbeams.controller.v4.support;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 import org.springframework.stereotype.Controller;
 

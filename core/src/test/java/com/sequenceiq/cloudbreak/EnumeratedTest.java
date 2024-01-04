@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.Enumerated;
+import jakarta.persistence.Enumerated;
 
 import org.junit.Assert;
 import org.junit.Test;

@@ -5,6 +5,26 @@
  */
 package com.sequenceiq.mock.swagger.v40.api;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.mock.swagger.model.ApiCdhUpgradeArgs;
 import com.sequenceiq.mock.swagger.model.ApiCluster;
 import com.sequenceiq.mock.swagger.model.ApiClusterList;
@@ -24,31 +44,13 @@ import com.sequenceiq.mock.swagger.model.ApiRollingRestartClusterArgs;
 import com.sequenceiq.mock.swagger.model.ApiRollingUpgradeServicesArgs;
 import com.sequenceiq.mock.swagger.model.ApiServiceList;
 import com.sequenceiq.mock.swagger.model.ApiServiceTypeList;
-import java.math.BigDecimal;
-import java.util.List;
-import org.springframework.core.io.Resource;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T21:48:33.802+01:00")
 
 @Api(value = "ClustersResource", description = "the ClustersResource API")
@@ -72,10 +74,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "", nickname = "addHosts", notes = "", response = ApiHostRefList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiHostRefList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/hosts",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiHostRefList> addHosts(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = ""  )  @Valid @RequestBody ApiHostRefList body) {
@@ -98,10 +100,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Attach tags to the cluster.", nickname = "addTags", notes = "Attach tags to the cluster", response = ApiEntityTag.class, responseContainer = "List", authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success", response = ApiEntityTag.class, responseContainer = "List") })
     @RequestMapping(value = "/clusters/{clusterName}/tags",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.PUT)
     default ResponseEntity<List<ApiEntityTag>> addTags(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Name of the cluster",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "list of tags to add"  )  @Valid @RequestBody List<ApiEntityTag> body) {
@@ -124,7 +126,7 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Automatically assign roles to hosts and create the roles for all the services in a cluster.", nickname = "autoAssignRoles", notes = "Automatically assign roles to hosts and create the roles for all the services in a cluster. <p> Assignments are done based on services and hosts in the cluster, and hardware specifications. If no hosts are added to the cluster, an exception will be thrown preventing any role assignments. Existing roles will be taken into account and their assignments will be not be modified. <p> Available since API v6.", authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success") })
     @RequestMapping(value = "/clusters/{clusterName}/autoAssignRoles",
         method = RequestMethod.PUT)
@@ -140,7 +142,7 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Automatically configures roles and services in a cluster.", nickname = "autoConfigure", notes = "Automatically configures roles and services in a cluster. <p> Overwrites some existing configurations. Might create new role config groups. Only default role config groups must exist before calling this endpoint. Other role config groups must not exist. If they do, an exception will be thrown preventing any configuration. Ignores the Cloudera Management Service even if colocated with roles of this cluster. To avoid over-committing the heap on hosts, assign hosts to this cluster that are not being used by the Cloudera Management Service. <p> Available since API v6.", authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success") })
     @RequestMapping(value = "/clusters/{clusterName}/autoConfigure",
         method = RequestMethod.PUT)
@@ -156,10 +158,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Configures all services in a cluster to use Auto-TLS.", nickname = "configureAutoTlsServicesCommand", notes = "Configures all services in a cluster to use Auto-TLS", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/configureAutoTlsServices",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> configureAutoTlsServicesCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster.",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -181,10 +183,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Command to configure the cluster to use Kerberos for authentication.", nickname = "configureForKerberos", notes = "Command to configure the cluster to use Kerberos for authentication.  This command will configure all relevant services on a cluster for Kerberos usage.  This command will trigger a GenerateCredentials command to create Kerberos keytabs for all roles in the cluster.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/configureForKerberos",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> configureForKerberos(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster.",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Arguments for the configure for kerberos command."  )  @Valid @RequestBody ApiConfigureForKerberosArguments body) {
@@ -207,10 +209,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Creates a collection of clusters.", nickname = "createClusters", notes = "Creates a collection of clusters.", response = ApiClusterList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiClusterList.class) })
     @RequestMapping(value = "/clusters",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiClusterList> createClusters(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "List of clusters to created."  )  @Valid @RequestBody ApiClusterList body) {
@@ -233,10 +235,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Deletes a cluster.", nickname = "deleteCluster", notes = "Deletes a cluster.", response = ApiCluster.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success", response = ApiCluster.class) })
     @RequestMapping(value = "/clusters/{clusterName}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.DELETE)
     default ResponseEntity<ApiCluster> deleteCluster(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Name of cluster to delete.",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -258,10 +260,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Delete existing Kerberos credentials for the cluster.", nickname = "deleteClusterCredentialsCommand", notes = "Delete existing Kerberos credentials for the cluster. <p> This command will affect all services that have been configured to use Kerberos, and have existing credentials.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/deleteCredentials",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> deleteClusterCredentialsCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "cluster name",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -283,10 +285,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Remove the tags associated with the cluster.", nickname = "deleteTags", notes = "Remove the tags associated with the cluster", response = ApiEntityTag.class, responseContainer = "List", authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success", response = ApiEntityTag.class, responseContainer = "List") })
     @RequestMapping(value = "/clusters/{clusterName}/tags",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.DELETE)
     default ResponseEntity<List<ApiEntityTag>> deleteTags(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Name of the cluster to remove tags from",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = ""  )  @Valid @RequestBody List<ApiEntityTag> body) {
@@ -309,10 +311,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Deploy the cluster-wide client configuration.", nickname = "deployClientConfig", notes = "Deploy the cluster-wide client configuration.  <p>For each service in the cluster, deploy the service's client configuration to all the hosts that the service runs on.</p>  <p>Available since API v2.</p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/deployClientConfig",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> deployClientConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -334,10 +336,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Performs a command with the 2 steps - deploy cc - cluster refresh  This orchestration is needed for the staleness wizard, so it can invoke a single command at wizard finish.", nickname = "deployClientConfigsAndRefresh", notes = "Performs a command with the 2 steps - deploy cc - cluster refresh  This orchestration is needed for the staleness wizard, so it can invoke a single command at wizard finish.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/deployClientConfigsAndRefresh",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> deployClientConfigsAndRefresh(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster.",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -359,10 +361,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Deploy the Cluster's Kerberos client configuration.", nickname = "deployClusterClientConfig", notes = "Deploy the Cluster's Kerberos client configuration.  <p> Deploy krb5.conf to hosts in a cluster. Does not deploy to decommissioned hosts or hosts with active processes. </p>  <p> Available since API v7. </p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/deployClusterClientConfig",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> deployClusterClientConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Hosts in cluster to deploy to. If empty, will target all eligible hosts in the cluster."  )  @Valid @RequestBody ApiHostRefList body) {
@@ -385,10 +387,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Put the cluster into maintenance mode.", nickname = "enterMaintenanceMode", notes = "Put the cluster into maintenance mode. This is a synchronous command. The result is known immediately upon return.  <p>Available since API v2.</p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/enterMaintenanceMode",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> enterMaintenanceMode(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -410,10 +412,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Take the cluster out of maintenance mode.", nickname = "exitMaintenanceMode", notes = "Take the cluster out of maintenance mode. This is a synchronous command. The result is known immediately upon return.  <p>Available since API v2.</p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/exitMaintenanceMode",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> exitMaintenanceMode(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -435,10 +437,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Remove backup and disaster related log files in hdfs.", nickname = "expireLogs", notes = "Remove backup and disaster related log files in hdfs. <p> Available since API v31.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/expireLogs",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> expireLogs(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "logs more than these many days old are purged. -2 to use the existing setting") @Valid @RequestParam(value = "days", required = false) BigDecimal days) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -460,10 +462,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Export the cluster template for the given cluster.", nickname = "export", notes = "Export the cluster template for the given cluster. If cluster does not have host templates defined it will export host templates based on roles assignment.", response = ApiClusterTemplate.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiClusterTemplate.class) })
     @RequestMapping(value = "/clusters/{clusterName}/export",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiClusterTemplate> export(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "cluster name",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "export configs set by the auto configuration", defaultValue = "false") @Valid @RequestParam(value = "exportAutoConfig", required = false, defaultValue="false") Boolean exportAutoConfig) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -485,10 +487,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Prepare and start services in a cluster.", nickname = "firstRun", notes = "Prepare and start services in a cluster.  <p> Perform all the steps needed to prepare each service in a cluster and start the services in order. </p>  <p> Available since API v7. </p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/firstRun",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> firstRun(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster.",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -510,10 +512,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Download a zip-compressed archive of the client configuration, of a specific cluster.", nickname = "getClientConfig", notes = "Download a zip-compressed archive of the client configuration, of a specific cluster. Currently, this only includes Kerberos Client Configuration (krb5.conf). For client configuration of services, use the clientConfig endpoint of the services resource. This resource does not require any authentication.", response = Resource.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = Resource.class) })
     @RequestMapping(value = "/clusters/{clusterName}/clientConfig",
-        produces = { "application/octet-stream" }, 
+        produces = { "application/octet-stream" },
         method = RequestMethod.GET)
     default ResponseEntity<Resource> getClientConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The cluster name.",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -535,10 +537,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Provides Cluster Kerberos information.", nickname = "getKerberosInfo", notes = "Provides Cluster Kerberos information", response = ApiKerberosInfo.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiKerberosInfo.class) })
     @RequestMapping(value = "/clusters/{clusterName}/kerberosInfo",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiKerberosInfo> getKerberosInfo(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The cluster name.",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -560,10 +562,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Provides the resource utilization of the entire cluster as well as the resource utilization per tenant.", nickname = "getUtilizationReport", notes = "Provides the resource utilization of the entire cluster as well as the resource utilization per tenant. Only available with Cloudera Manager Enterprise Edition.", response = ApiClusterUtilization.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiClusterUtilization.class) })
     @RequestMapping(value = "/clusters/{clusterName}/utilization",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiClusterUtilization> getUtilizationReport(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "cluster name",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The days of the week for which the user wants to report utilization. Days is a list of number between 1 to 7, where 1 corresponds to Monday, and 7 corrensponds to Sunday. All 7 days are included if this is not specified.") @Valid @RequestParam(value = "daysOfWeek", required = false) List<String> daysOfWeek,@ApiParam(value = "The end hour of a day for which the user wants to report utilization. The hour is a number between [0-23]. Default value is 23 if this is not specified.", defaultValue = "23") @Valid @RequestParam(value = "endHourOfDay", required = false, defaultValue="23") Integer endHourOfDay,@ApiParam(value = "Start of the time range to report utilization in ISO 8601 format.") @Valid @RequestParam(value = "from", required = false) String from,@ApiParam(value = "The start hour of a day for which the user wants to report utilization. The hour is a number between [0-23]. Default value is 0 if this is not specified.", defaultValue = "0") @Valid @RequestParam(value = "startHourOfDay", required = false, defaultValue="0") Integer startHourOfDay,@ApiParam(value = "The type of the tenant (POOL or USER).", defaultValue = "POOL") @Valid @RequestParam(value = "tenantType", required = false, defaultValue="POOL") String tenantType,@ApiParam(value = "End of the the time range to report utilization in ISO 8601 format (defaults to now).", defaultValue = "now") @Valid @RequestParam(value = "to", required = false, defaultValue="now") String to) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -585,10 +587,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Runs the host inspector on the configured hosts in the specified cluster.", nickname = "inspectHostsCommand", notes = "Runs the host inspector on the configured hosts in the specified cluster.  Available since V8.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/inspectHosts",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> inspectHostsCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -610,10 +612,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "List active cluster commands.", nickname = "listActiveCommands", notes = "List active cluster commands.", response = ApiCommandList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiCommandList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiCommandList> listActiveCommands(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster.",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -635,10 +637,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "List the services that can provide distributed file system (DFS) capabilities in this cluster.", nickname = "listDfsServices", notes = "List the services that can provide distributed file system (DFS) capabilities in this cluster.", response = ApiServiceList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiServiceList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/dfsServices",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiServiceList> listDfsServices(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "cluster name",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "data view required for matching services", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -660,10 +662,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Returns the hosts associated with the cluster filtered by optional host configuration parameter, if specified.", nickname = "listHosts", notes = "Returns the hosts associated with the cluster filtered by optional host configuration parameter, if specified.", response = ApiHostRefList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiHostRefList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/hosts",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiHostRefList> listHosts(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Optional host config name to filter hosts by. Available from v40.") @Valid @RequestParam(value = "configName", required = false) String configName,@ApiParam(value = "host config value associated with config name. Available from v40.") @Valid @RequestParam(value = "configValue", required = false) String configValue) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -685,10 +687,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "List the supported service types for a cluster.", nickname = "listServiceTypes", notes = "List the supported service types for a cluster.", response = ApiServiceTypeList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiServiceTypeList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/serviceTypes",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiServiceTypeList> listServiceTypes(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The cluster.",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -710,10 +712,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Returns the Upgrade Domains associated with the cluster and the host names that belong to each Upgrade Domain.", nickname = "listUpgradeDomains", notes = "Returns the Upgrade Domains associated with the cluster and the host names that belong to each Upgrade Domain. Hosts without an Upgrade Domain set will default to using the rack assignment of the host.", response = ApiHdfsUpgradeDomainList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiHdfsUpgradeDomainList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/upgradeDomains",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiHdfsUpgradeDomainList> listUpgradeDomains(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster.",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -735,10 +737,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Run cluster performance diagnostics test.", nickname = "perfInspectorCommand", notes = "Run cluster performance diagnostics test.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/perfInspector",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> perfInspectorCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster.",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Optional arguments for the command. See ApiClusterPerfInspectorArgs."  )  @Valid @RequestBody ApiClusterPerfInspectorArgs body) {
@@ -761,10 +763,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Updates all refreshable configuration files for services with Dynamic Resource Pools.", nickname = "poolsRefresh", notes = "Updates all refreshable configuration files for services with Dynamic Resource Pools. <p> Available since API v6.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/poolsRefresh",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> poolsRefresh(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -786,10 +788,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Run cluster pre-upgrade check(s) when upgrading from specified version of CDH to the other.", nickname = "preUpgradeCheckCommand", notes = "Run cluster pre-upgrade check(s) when upgrading from specified version of CDH to the other. <p> Allows the following upgrade checks: <ul> <li>Minor upgrades from any CDH 5 to any CDH 5</li> <li>Major upgrades from any CDH 5 to any CDH 6</li> <li>Minor upgrades from any CDH 6 to any CDH 6</li> <li>Maintenance upgrades or downgrades (a.b.x to a.b.y)</li> </ul>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/preUpgradeCheck",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> preUpgradeCheckCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster.",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Arguments for the command. See ApiCdhUpgradeArgs."  )  @Valid @RequestBody ApiCdhUpgradeArgs body) {
@@ -812,10 +814,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Reads information about a cluster.", nickname = "readCluster", notes = "Reads information about a cluster.", response = ApiCluster.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiCluster.class) })
     @RequestMapping(value = "/clusters/{clusterName}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiCluster> readCluster(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Name of cluster to look up.",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -837,10 +839,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "List all known clusters.", nickname = "readClusters", notes = "List all known clusters.", response = ApiClusterList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiClusterList.class) })
     @RequestMapping(value = "/clusters",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiClusterList> readClusters(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Type of cluster, either \"any\", \"base\" or \"compute\". Default is \"base\".", allowableValues = "ANY, BASE, COMPUTE", defaultValue = "base") @Valid @RequestParam(value = "clusterType", required = false, defaultValue="base") String clusterType,@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -862,10 +864,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Returns the tags associated with this cluster.", nickname = "readTags", notes = "Returns the tags associated with this cluster.", response = ApiEntityTag.class, responseContainer = "List", authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiEntityTag.class, responseContainer = "List") })
     @RequestMapping(value = "/clusters/{clusterName}/tags",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<List<ApiEntityTag>> readTags(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Number of tags", defaultValue = "10") @Valid @RequestParam(value = "limit", required = false, defaultValue="10") Integer limit,@ApiParam(value = "Index of the first tag to retrieve", defaultValue = "0") @Valid @RequestParam(value = "offset", required = false, defaultValue="0") Integer offset) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -887,10 +889,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Updates all refreshable configuration files in the cluster.", nickname = "refresh", notes = "Updates all refreshable configuration files in the cluster. Will not restart any roles. <p> Available since API v6.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/refresh",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> refresh(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -912,10 +914,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "", nickname = "removeAllHosts", notes = "", response = ApiHostRefList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success", response = ApiHostRefList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/hosts",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.DELETE)
     default ResponseEntity<ApiHostRefList> removeAllHosts(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -937,10 +939,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "", nickname = "removeHost", notes = "", response = ApiHostRef.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success", response = ApiHostRef.class) })
     @RequestMapping(value = "/clusters/{clusterName}/hosts/{hostId}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.DELETE)
     default ResponseEntity<ApiHostRef> removeHost(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("hostId") String hostId) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -962,10 +964,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Restart all services in the cluster.", nickname = "restartCommand", notes = "Restart all services in the cluster. <p> Services are stopped then started in the appropriate order given their dependencies. The command can optionally restart only stale services and their dependencies as well as redeploy client configuration on all services in the cluster.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/restart",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> restartCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster.",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "arguments for the restart command."  )  @Valid @RequestBody ApiRestartClusterArgs body) {
@@ -988,10 +990,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Command to do a \"best-effort\" rolling restart of the given cluster, i.", nickname = "rollingRestart", notes = "Command to do a \"best-effort\" rolling restart of the given cluster, i.e. it does plain restart of services that cannot be rolling restarted, followed by first rolling restarting non-slaves and then rolling restarting the slave roles of services that can be rolling restarted. The slave restarts are done host-by-host. <p> Available since API v4. Only available with Cloudera Manager Enterprise Edition.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/rollingRestart",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> rollingRestart(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster.",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Arguments for the rolling restart command."  )  @Valid @RequestBody ApiRollingRestartClusterArgs body) {
@@ -1014,10 +1016,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Command to do a rolling upgrade of specific services in the given cluster  This command does not handle any services that don't support rolling upgrades.", nickname = "rollingUpgrade", notes = "Command to do a rolling upgrade of specific services in the given cluster  This command does not handle any services that don't support rolling upgrades. The command will throw an error and not start if upgrade of any such service is requested.  This command does not upgrade the full CDH Cluster. You should normally use the upgradeCDH Command for upgrading the cluster. This is primarily helpful if you need to need to recover from an upgrade failure or for advanced users to script an alternative to the upgradeCdhCommand.  This command expects the binaries to be available on hosts and activated. It does not change any binaries on the hosts.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/rollingUpgrade",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> rollingUpgrade(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster.",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Arguments for the rolling upgrade command."  )  @Valid @RequestBody ApiRollingUpgradeServicesArgs body) {
@@ -1040,10 +1042,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Start all services in the cluster.", nickname = "startCommand", notes = "Start all services in the cluster. <p> Services are started in the appropriate order given their dependencies.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/start",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> startCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster.",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1065,10 +1067,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Stop all services in the cluster.", nickname = "stopCommand", notes = "Stop all services in the cluster. <p> Services are stopped in the appropriate order given their dependencies.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/stop",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> stopCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster.",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1090,10 +1092,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Update an existing cluster.", nickname = "updateCluster", notes = "Update an existing cluster. <p> To update the CDH version, provide the new value in the \"fullVersion\" property. Setting a correct version that matches the actual installed software will ensure the correct version-specific features, such as services, roles, commands, and configurations. This need not be manually set for clusters using parcels. In general this action is only necessary after the CDH packages have been manually updated. Note that a downgrade may be rejected if it would render existing services or roles unusable. For major upgrade, the \"upgradeService\" cluster command should be used instead.</p> <p> To rename the cluster, provide the new name in the \"displayName\" property for API >= 6, or in the \"name\" property for API <=5. <p> Available since API v2.", response = ApiCluster.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success", response = ApiCluster.class) })
     @RequestMapping(value = "/clusters/{clusterName}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.PUT)
     default ResponseEntity<ApiCluster> updateCluster(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster.",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = ""  )  @Valid @RequestBody ApiCluster body) {
@@ -1116,10 +1118,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Perform CDH upgrade to the specified version.", nickname = "upgradeCdhCommand", notes = "Perform CDH upgrade to the specified version. <p> Allows the following upgrades: <ul> <li>Major upgrades from any CDH 4 to any CDH 5</li> <li>Minor upgrades from any CDH 5 to any CDH 5</li> <li>Maintenance upgrades or downgrades (a.b.x to a.b.y)</li> </ul> <p> If using packages, CDH packages on all hosts of the cluster must be manually upgraded before this command is issued. <p> The command will upgrade the services and their configuration to the version available in the CDH5 distribution. <p> Unless rolling upgrade options are provided, the entire cluster will experience downtime. If rolling upgrade options are provided, command will do a \"best-effort\" rolling upgrade of the given cluster, i.e. it does plain upgrade of services that cannot be rolling upgraded, followed by first rolling upgrading non-slaves and then rolling restarting the slave roles of services that can be rolling restarted. The slave restarts are done host-by-host. <p> Available since v9. Rolling upgrade is only available with Cloudera Manager Enterprise Edition. A more limited upgrade variant available since v6.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/upgradeCdh",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> upgradeCdhCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster.",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Arguments for the command. See ApiCdhUpgradeArgs."  )  @Valid @RequestBody ApiCdhUpgradeArgs body) {
@@ -1142,10 +1144,10 @@ public interface ClustersResourceApi {
     @ApiOperation(value = "Upgrades the services in the cluster to the CDH5 version.", nickname = "upgradeServicesCommand", notes = "Upgrades the services in the cluster to the CDH5 version. <p> This command requires that the CDH packages in the hosts used by the cluster be upgraded to CDH5 before this command is issued. Once issued, this command will stop all running services before proceeding. <p> If parcels are used instead of CDH system packages then the following steps need to happen in order: <ol> <li>Stop all services manually</li> <li>Activate parcel</li> <li>Run this upgrade command</li> </ol> The command will upgrade the services and their configuration to the version available in the CDH5 distribution.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ClustersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/commands/upgradeServices",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> upgradeServicesCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the cluster.",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {

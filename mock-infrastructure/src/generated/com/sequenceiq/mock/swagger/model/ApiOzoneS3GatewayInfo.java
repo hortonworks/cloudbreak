@@ -1,13 +1,13 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Encapsulates information needed to utilize the s3 Gateway API- namely, the AWS credentials, the rest url of the s3 Gateway and the S3 bucket.
@@ -137,7 +137,7 @@ public class ApiOzoneS3GatewayInfo   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiOzoneS3GatewayInfo {\n");
-    
+
     sb.append("    awsAccessKey: ").append(toIndentedString(awsAccessKey)).append("\n");
     sb.append("    awsSecret: ").append(toIndentedString(awsSecret)).append("\n");
     sb.append("    restUrl: ").append(toIndentedString(restUrl)).append("\n");

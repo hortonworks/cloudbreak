@@ -5,7 +5,7 @@ import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ws.rs.BadRequestException;
+import jakarta.ws.rs.BadRequestException;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;

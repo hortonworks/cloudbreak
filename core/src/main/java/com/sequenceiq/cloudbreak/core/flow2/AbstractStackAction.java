@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;

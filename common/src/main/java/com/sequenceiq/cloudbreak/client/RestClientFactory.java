@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.client;
 
-import javax.ws.rs.client.Client;
+import jakarta.ws.rs.client.Client;
 
 import org.springframework.stereotype.Component;
 

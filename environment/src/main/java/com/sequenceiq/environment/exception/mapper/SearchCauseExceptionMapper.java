@@ -1,8 +1,8 @@
 package com.sequenceiq.environment.exception.mapper;
 
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.Providers;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.Providers;
 
 import org.apache.commons.lang3.tuple.Pair;
 

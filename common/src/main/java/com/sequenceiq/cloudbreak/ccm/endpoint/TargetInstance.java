@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.ccm.endpoint;
 
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * Represents a target instance where a service is running.

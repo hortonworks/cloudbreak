@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.externaldatabase;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Component;
 

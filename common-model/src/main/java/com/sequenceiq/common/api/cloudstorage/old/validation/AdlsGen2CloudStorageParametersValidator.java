@@ -3,8 +3,8 @@ package com.sequenceiq.common.api.cloudstorage.old.validation;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.StringUtils;
 

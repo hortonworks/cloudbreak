@@ -8,8 +8,8 @@ package com.sequenceiq.mock.swagger.v31.api;
 import java.io.IOException;
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,10 +55,10 @@ public interface UsersResourceApi {
     @ApiOperation(value = "Creates a list of users.", nickname = "createUsers2", notes = "Creates a list of users. <p> When creating new users, the <i>password</i> property of each user should be their plain text password. The returned user information will not contain any password information. <p/>", response = ApiUser2List.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "UsersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiUser2List.class) })
     @RequestMapping(value = "/users",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiUser2List> createUsers2(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "List of users to create."  )  @Valid @RequestBody ApiUser2List body) {
@@ -81,10 +81,10 @@ public interface UsersResourceApi {
     @ApiOperation(value = "Deletes a user from the system.", nickname = "deleteUser2", notes = "Deletes a user from the system. <p/>", response = ApiUser2.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "UsersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success", response = ApiUser2.class) })
     @RequestMapping(value = "/users/{userName}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.DELETE)
     default ResponseEntity<ApiUser2> deleteUser2(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the user to delete.",required=true) @PathVariable("userName") String userName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -106,7 +106,7 @@ public interface UsersResourceApi {
     @ApiOperation(value = "Expires the sessions associated with interactive authenticated user in Cloudera Manager.", nickname = "expireSessions", notes = "Expires the sessions associated with interactive authenticated user in Cloudera Manager. This can be used by Full Admin/User Admin users only. <p> Note that these sessions are only associated with a user who log into the web interface. Sessions of an API user will not be affected.", authorizations = {
         @Authorization(value = "basic")
     }, tags={ "UsersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success") })
     @RequestMapping(value = "/users/expireSessions/{userName}",
         method = RequestMethod.POST)
@@ -122,10 +122,10 @@ public interface UsersResourceApi {
     @ApiOperation(value = "Return a list of the sessions associated with interactive authenticated users in Cloudera Manager.", nickname = "getSessions", notes = "Return a list of the sessions associated with interactive authenticated users in Cloudera Manager. <p> Note that these sessions are only associated with users who log into the web interface. API users will not appear.", response = ApiUserSessionList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "UsersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiUserSessionList.class) })
     @RequestMapping(value = "/users/sessions",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiUserSessionList> getSessions(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -147,10 +147,10 @@ public interface UsersResourceApi {
     @ApiOperation(value = "Returns detailed information about a user.", nickname = "readUser2", notes = "Returns detailed information about a user.", response = ApiUser2.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "UsersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiUser2.class) })
     @RequestMapping(value = "/users/{userName}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiUser2> readUser2(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The user to read.",required=true) @PathVariable("userName") String userName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -172,10 +172,10 @@ public interface UsersResourceApi {
     @ApiOperation(value = "Returns a list of the user names configured in the system.", nickname = "readUsers2", notes = "Returns a list of the user names configured in the system.", response = ApiUser2List.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "UsersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiUser2List.class) })
     @RequestMapping(value = "/users",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiUser2List> readUsers2(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -197,10 +197,10 @@ public interface UsersResourceApi {
     @ApiOperation(value = "Updates the given user's information.", nickname = "updateUser2", notes = "Updates the given user's information. Note that the user's name cannot be changed.", response = ApiUser2.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "UsersResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success", response = ApiUser2.class) })
     @RequestMapping(value = "/users/{userName}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.PUT)
     default ResponseEntity<ApiUser2> updateUser2(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "User name being updated.",required=true) @PathVariable("userName") String userName,@ApiParam(value = "The user information."  )  @Valid @RequestBody ApiUser2 body) {

@@ -1,15 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiHealthSummary;
-import com.sequenceiq.mock.swagger.model.ApiRoleState;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * A roleRef references a role. Each role is identified by its \&quot;roleName\&quot;, the \&quot;serviceName\&quot; for the service it belongs to, and the \&quot;clusterName\&quot; in which the service resides. To operate on the role object, use the API with the those fields as parameters.
@@ -43,7 +43,7 @@ public class ApiRoleRef   {
   }
 
   /**
-   * 
+   *
    * @return clusterName
   **/
   @ApiModelProperty(value = "")
@@ -63,7 +63,7 @@ public class ApiRoleRef   {
   }
 
   /**
-   * 
+   *
    * @return serviceName
   **/
   @ApiModelProperty(value = "")
@@ -83,7 +83,7 @@ public class ApiRoleRef   {
   }
 
   /**
-   * 
+   *
    * @return roleName
   **/
   @ApiModelProperty(value = "")
@@ -165,7 +165,7 @@ public class ApiRoleRef   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiRoleRef {\n");
-    
+
     sb.append("    clusterName: ").append(toIndentedString(clusterName)).append("\n");
     sb.append("    serviceName: ").append(toIndentedString(serviceName)).append("\n");
     sb.append("    roleName: ").append(toIndentedString(roleName)).append("\n");

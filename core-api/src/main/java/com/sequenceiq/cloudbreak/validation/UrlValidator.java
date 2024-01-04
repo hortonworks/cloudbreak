@@ -4,8 +4,8 @@ import static org.apache.commons.validator.routines.UrlValidator.ALLOW_ALL_SCHEM
 import static org.apache.commons.validator.routines.UrlValidator.ALLOW_LOCAL_URLS;
 import static org.apache.commons.validator.routines.UrlValidator.NO_FRAGMENTS;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 import com.sequenceiq.common.api.util.ValidatorUtil;
 

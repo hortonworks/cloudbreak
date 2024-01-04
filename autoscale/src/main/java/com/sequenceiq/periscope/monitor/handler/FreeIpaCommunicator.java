@@ -3,7 +3,7 @@ package com.sequenceiq.periscope.monitor.handler;
 import static com.sequenceiq.periscope.domain.MetricType.IPA_USER_SYNC_FAILED;
 import static com.sequenceiq.periscope.domain.MetricType.IPA_USER_SYNC_INVOCATION;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

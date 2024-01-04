@@ -1,13 +1,13 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * HBase Replication Security Tool Management
@@ -32,7 +32,7 @@ public class ApiHBaseReplicationSecurityTool   {
   }
 
   /**
-   * 
+   *
    * @return password
   **/
   @ApiModelProperty(value = "")
@@ -52,7 +52,7 @@ public class ApiHBaseReplicationSecurityTool   {
   }
 
   /**
-   * 
+   *
    * @return keystoreFilePath
   **/
   @ApiModelProperty(value = "")
@@ -89,7 +89,7 @@ public class ApiHBaseReplicationSecurityTool   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHBaseReplicationSecurityTool {\n");
-    
+
     sb.append("    password: ").append(toIndentedString(password)).append("\n");
     sb.append("    keystoreFilePath: ").append(toIndentedString(keystoreFilePath)).append("\n");
     sb.append("}");

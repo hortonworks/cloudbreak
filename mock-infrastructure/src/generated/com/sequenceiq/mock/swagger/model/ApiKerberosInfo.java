@@ -1,15 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Kerberos information of a Cluster or Cloudera Manager.
@@ -47,7 +49,7 @@ public class ApiKerberosInfo   {
   }
 
   /**
-   * 
+   *
    * @return kerberized
   **/
   @ApiModelProperty(value = "")
@@ -67,7 +69,7 @@ public class ApiKerberosInfo   {
   }
 
   /**
-   * 
+   *
    * @return kdcType
   **/
   @ApiModelProperty(value = "")
@@ -87,7 +89,7 @@ public class ApiKerberosInfo   {
   }
 
   /**
-   * 
+   *
    * @return kerberosRealm
   **/
   @ApiModelProperty(value = "")
@@ -107,7 +109,7 @@ public class ApiKerberosInfo   {
   }
 
   /**
-   * 
+   *
    * @return kdcHost
   **/
   @ApiModelProperty(value = "")
@@ -127,7 +129,7 @@ public class ApiKerberosInfo   {
   }
 
   /**
-   * 
+   *
    * @return adminHost
   **/
   @ApiModelProperty(value = "")
@@ -155,7 +157,7 @@ public class ApiKerberosInfo   {
   }
 
   /**
-   * 
+   *
    * @return domain
   **/
   @ApiModelProperty(value = "")
@@ -196,7 +198,7 @@ public class ApiKerberosInfo   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiKerberosInfo {\n");
-    
+
     sb.append("    kerberized: ").append(toIndentedString(kerberized)).append("\n");
     sb.append("    kdcType: ").append(toIndentedString(kdcType)).append("\n");
     sb.append("    kerberosRealm: ").append(toIndentedString(kerberosRealm)).append("\n");

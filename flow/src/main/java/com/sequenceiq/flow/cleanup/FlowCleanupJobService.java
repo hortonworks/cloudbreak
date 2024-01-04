@@ -4,7 +4,7 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;

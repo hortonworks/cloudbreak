@@ -1,13 +1,13 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * A dashboard definition. Dashboards are composed of tsquery-based charts.
@@ -89,7 +89,7 @@ public class ApiDashboard   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiDashboard {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    json: ").append(toIndentedString(json)).append("\n");
     sb.append("}");

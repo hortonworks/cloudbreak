@@ -2,8 +2,8 @@ package com.sequenceiq.environment.api.v1.environment.validator.cidr;
 
 import static com.sequenceiq.cloudbreak.validation.CidrValidatorHelper.isCidrPatternMatched;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 import com.google.common.base.CharMatcher;
 

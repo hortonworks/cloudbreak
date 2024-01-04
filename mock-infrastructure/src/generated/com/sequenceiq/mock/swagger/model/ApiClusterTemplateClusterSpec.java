@@ -1,16 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiDataContextRef;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Specify type of cluster to create. If one or more ApiDataContextRef are specified, the created cluster upon import will be a cluster with clusterType \&quot;COMPUTE\&quot;.
@@ -41,7 +42,7 @@ public class ApiClusterTemplateClusterSpec   {
   }
 
   /**
-   * 
+   *
    * @return dataContextRefs
   **/
   @ApiModelProperty(value = "")
@@ -78,7 +79,7 @@ public class ApiClusterTemplateClusterSpec   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiClusterTemplateClusterSpec {\n");
-    
+
     sb.append("    dataContextRefs: ").append(toIndentedString(dataContextRefs)).append("\n");
     sb.append("}");
     return sb.toString();

@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup;
 import java.util.Locale;
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;

@@ -2,7 +2,7 @@ package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security;
 
 import java.util.List;
 
-import javax.validation.constraints.Pattern;
+import jakarta.validation.constraints.Pattern;
 
 import com.sequenceiq.cloudbreak.validation.SubnetType;
 import com.sequenceiq.cloudbreak.validation.ValidSubnet;

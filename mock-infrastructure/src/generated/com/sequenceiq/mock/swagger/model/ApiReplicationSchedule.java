@@ -1,24 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiHBaseReplicationArguments;
-import com.sequenceiq.mock.swagger.model.ApiHdfsCloudReplicationArguments;
-import com.sequenceiq.mock.swagger.model.ApiHdfsReplicationArguments;
-import com.sequenceiq.mock.swagger.model.ApiHive3ReplicationArguments;
-import com.sequenceiq.mock.swagger.model.ApiHiveCloudReplicationArguments;
-import com.sequenceiq.mock.swagger.model.ApiHiveReplicationArguments;
-import com.sequenceiq.mock.swagger.model.ApiReplicationCommand;
-import com.sequenceiq.mock.swagger.model.ApiSchedule;
-import com.sequenceiq.mock.swagger.model.ApiScheduleInterval;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * A replication job schedule. &lt;p/&gt; Replication jobs have service-specific arguments. This object has methods to retrieve arguments for all supported types of replication, but only one argument type is allowed to be set; the backend will check that the provided argument matches the service type where the replication is being scheduled. &lt;p/&gt; The replication job&#39;s arguments should match the underlying service. Refer to each property&#39;s documentation to find out which properties correspond to which services.

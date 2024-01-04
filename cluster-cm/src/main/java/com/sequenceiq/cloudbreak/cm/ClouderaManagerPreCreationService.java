@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService.BEAN_POS
 
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 

@@ -6,7 +6,7 @@ import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.util.Objects;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

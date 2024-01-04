@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_DELETE_COMPLET
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_FORCED_DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_DELETE_FAILED;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

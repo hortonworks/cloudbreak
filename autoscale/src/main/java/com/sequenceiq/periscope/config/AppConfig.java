@@ -2,8 +2,8 @@ package com.sequenceiq.periscope.config;
 
 import java.util.concurrent.Executor;
 
-import javax.inject.Inject;
-import javax.ws.rs.client.Client;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.client.Client;
 
 import org.quartz.simpl.SimpleJobFactory;
 import org.slf4j.Logger;

@@ -7,8 +7,8 @@ import static com.sequenceiq.it.cloudbreak.testcase.authorization.AuthUserKeys.E
 import static com.sequenceiq.it.cloudbreak.testcase.authorization.AuthUserKeys.ZERO_RIGHTS;
 import static com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil.datahubRecipePattern;
 
-import javax.inject.Inject;
-import javax.ws.rs.ForbiddenException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;

@@ -1,7 +1,7 @@
 package com.sequenceiq.periscope.api.model;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.periscope.api.endpoint.validator.ValidScalingConfiguration;

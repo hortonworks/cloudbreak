@@ -1,19 +1,20 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiMr2AppInformation;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Represents a Yarn application
@@ -397,7 +398,7 @@ public class ApiYarnApplication   {
   }
 
   /**
-   * 
+   *
    * @return mr2AppInformation
   **/
   @ApiModelProperty(value = "")
@@ -418,7 +419,7 @@ public class ApiYarnApplication   {
   }
 
   /**
-   * 
+   *
    * @return state
   **/
   @ApiModelProperty(value = "")
@@ -601,7 +602,7 @@ public class ApiYarnApplication   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiYarnApplication {\n");
-    
+
     sb.append("    allocatedMB: ").append(toIndentedString(allocatedMB)).append("\n");
     sb.append("    allocatedVCores: ").append(toIndentedString(allocatedVCores)).append("\n");
     sb.append("    runningContainers: ").append(toIndentedString(runningContainers)).append("\n");

@@ -3,7 +3,7 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

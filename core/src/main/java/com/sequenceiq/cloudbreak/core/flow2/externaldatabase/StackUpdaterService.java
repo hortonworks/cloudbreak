@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.externaldatabase;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 

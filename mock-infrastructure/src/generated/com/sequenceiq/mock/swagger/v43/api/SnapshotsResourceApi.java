@@ -5,33 +5,35 @@
  */
 package com.sequenceiq.mock.swagger.v43.api;
 
+import java.io.IOException;
+import java.util.Optional;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.mock.swagger.model.ApiAdhocSnapshot;
 import com.sequenceiq.mock.swagger.model.ApiCommand;
 import com.sequenceiq.mock.swagger.model.ApiSnapshotCommandList;
 import com.sequenceiq.mock.swagger.model.ApiSnapshotPolicy;
 import com.sequenceiq.mock.swagger.model.ApiSnapshotPolicyList;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-04-23T12:05:48.864+02:00")
 
 @Api(value = "SnapshotsResource", description = "the SnapshotsResource API")
@@ -55,10 +57,10 @@ public interface SnapshotsResourceApi {
     @ApiOperation(value = "Creates one or more snapshot policies.", nickname = "adhocSnapshot", notes = "Creates one or more snapshot policies.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "SnapshotsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "List of newly added policies.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/snapshots",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> adhocSnapshot(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = ""  )  @Valid @RequestBody ApiAdhocSnapshot body) {
@@ -81,10 +83,10 @@ public interface SnapshotsResourceApi {
     @ApiOperation(value = "Creates one or more snapshot policies.", nickname = "createPolicies", notes = "Creates one or more snapshot policies.", response = ApiSnapshotPolicyList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "SnapshotsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "List of newly added policies.", response = ApiSnapshotPolicyList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/snapshots/policies",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiSnapshotPolicyList> createPolicies(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "List of the snapshot policies to create."  )  @Valid @RequestBody ApiSnapshotPolicyList body) {
@@ -107,10 +109,10 @@ public interface SnapshotsResourceApi {
     @ApiOperation(value = "Deletes an existing snapshot policy.", nickname = "deletePolicy", notes = "Deletes an existing snapshot policy.", response = ApiSnapshotPolicy.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "SnapshotsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "The deleted snapshot policy.", response = ApiSnapshotPolicy.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/snapshots/policies/{policyName}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.DELETE)
     default ResponseEntity<ApiSnapshotPolicy> deletePolicy(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of an existing snapshot policy.",required=true) @PathVariable("policyName") String policyName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -132,10 +134,10 @@ public interface SnapshotsResourceApi {
     @ApiOperation(value = "Returns a list of commands triggered by a snapshot policy.", nickname = "readHistory", notes = "Returns a list of commands triggered by a snapshot policy.", response = ApiSnapshotCommandList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "SnapshotsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "List of commands for the policy.", response = ApiSnapshotCommandList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/snapshots/policies/{policyName}/history",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiSnapshotCommandList> readHistory(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of an existing snapshot policy.",required=true) @PathVariable("policyName") String policyName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Maximum number of commands to retrieve.", defaultValue = "20") @Valid @RequestParam(value = "limit", required = false, defaultValue="20") Integer limit,@ApiParam(value = "Index of first command to retrieve.", defaultValue = "0") @Valid @RequestParam(value = "offset", required = false, defaultValue="0") Integer offset,@ApiParam(value = "The view to materialize.", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -157,10 +159,10 @@ public interface SnapshotsResourceApi {
     @ApiOperation(value = "Returns information for all snapshot policies.", nickname = "readPolicies", notes = "Returns information for all snapshot policies.", response = ApiSnapshotPolicyList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "SnapshotsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "List of snapshot policies.", response = ApiSnapshotPolicyList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/snapshots/policies",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiSnapshotPolicyList> readPolicies(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The view to materialize.", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -182,10 +184,10 @@ public interface SnapshotsResourceApi {
     @ApiOperation(value = "Returns information for a specific snapshot policy.", nickname = "readPolicy", notes = "Returns information for a specific snapshot policy.", response = ApiSnapshotPolicy.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "SnapshotsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Snapshot policy.", response = ApiSnapshotPolicy.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/snapshots/policies/{policyName}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiSnapshotPolicy> readPolicy(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of an existing snapshot policy.",required=true) @PathVariable("policyName") String policyName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The view to materialize.", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -207,10 +209,10 @@ public interface SnapshotsResourceApi {
     @ApiOperation(value = "Updates an existing snapshot policy.", nickname = "updatePolicy", notes = "Updates an existing snapshot policy.", response = ApiSnapshotPolicy.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "SnapshotsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "The snapshot policy after the update.", response = ApiSnapshotPolicy.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/snapshots/policies/{policyName}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.PUT)
     default ResponseEntity<ApiSnapshotPolicy> updatePolicy(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of an existing snapshot policy.",required=true) @PathVariable("policyName") String policyName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Modified policy."  )  @Valid @RequestBody ApiSnapshotPolicy body) {

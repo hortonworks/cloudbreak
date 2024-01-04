@@ -1,14 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiCommandList;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Optional arguments for diagnostics collection.
@@ -139,7 +140,7 @@ public class ApiReplicationDiagnosticsCollectionArgs   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiReplicationDiagnosticsCollectionArgs {\n");
-    
+
     sb.append("    commands: ").append(toIndentedString(commands)).append("\n");
     sb.append("    ticketNumber: ").append(toIndentedString(ticketNumber)).append("\n");
     sb.append("    comments: ").append(toIndentedString(comments)).append("\n");

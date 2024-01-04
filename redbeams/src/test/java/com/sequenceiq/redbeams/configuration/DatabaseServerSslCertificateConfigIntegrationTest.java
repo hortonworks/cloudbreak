@@ -10,8 +10,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
 import javax.security.auth.x500.X500Principal;
+
+import jakarta.inject.Inject;
 
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;

@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.handler;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

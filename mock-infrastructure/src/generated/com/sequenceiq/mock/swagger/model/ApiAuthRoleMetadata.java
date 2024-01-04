@@ -1,16 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiAuthRoleAuthority;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * This is the model for auth role metadata
@@ -46,7 +47,7 @@ public class ApiAuthRoleMetadata   {
   }
 
   /**
-   * 
+   *
    * @return displayName
   **/
   @ApiModelProperty(value = "")
@@ -66,7 +67,7 @@ public class ApiAuthRoleMetadata   {
   }
 
   /**
-   * 
+   *
    * @return uuid
   **/
   @ApiModelProperty(value = "")
@@ -86,7 +87,7 @@ public class ApiAuthRoleMetadata   {
   }
 
   /**
-   * 
+   *
    * @return role
   **/
   @ApiModelProperty(value = "")
@@ -114,7 +115,7 @@ public class ApiAuthRoleMetadata   {
   }
 
   /**
-   * 
+   *
    * @return authorities
   **/
   @ApiModelProperty(value = "")
@@ -143,7 +144,7 @@ public class ApiAuthRoleMetadata   {
   }
 
   /**
-   * 
+   *
    * @return allowedScopes
   **/
   @ApiModelProperty(value = "")
@@ -183,7 +184,7 @@ public class ApiAuthRoleMetadata   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiAuthRoleMetadata {\n");
-    
+
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");
     sb.append("    role: ").append(toIndentedString(role)).append("\n");

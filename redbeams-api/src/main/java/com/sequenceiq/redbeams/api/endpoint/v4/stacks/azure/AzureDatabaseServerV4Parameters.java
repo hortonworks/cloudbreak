@@ -2,8 +2,8 @@ package com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure;
 
 import java.util.Map;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.Pattern;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

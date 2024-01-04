@@ -1,15 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiClusterRef;
-import com.sequenceiq.mock.swagger.model.ApiParcelState;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * A Parcel encapsulate a specific product and version. For example, (CDH 4.1). A parcel is downloaded, distributed to all the machines of a cluster and then allowed to be activated. &lt;p&gt;&gt; The available parcels are determined by which cluster they will be running on. For example, a SLES parcel won&#39;t show up for a RHEL cluster. &lt;/p&gt;
@@ -213,7 +213,7 @@ public class ApiParcel   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiParcel {\n");
-    
+
     sb.append("    product: ").append(toIndentedString(product)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    stage: ").append(toIndentedString(stage)).append("\n");

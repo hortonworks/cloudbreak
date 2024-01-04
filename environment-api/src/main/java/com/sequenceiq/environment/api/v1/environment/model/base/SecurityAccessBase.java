@@ -3,7 +3,7 @@ package com.sequenceiq.environment.api.v1.environment.model.base;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull;

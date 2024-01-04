@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.rotation.entity;
 
 import java.io.IOException;
 
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 
 import com.sequenceiq.cloudbreak.rotation.SerializableRotationEnum;
 import com.sequenceiq.cloudbreak.rotation.serialization.SecretRotationEnumSerializationUtil;

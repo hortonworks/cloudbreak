@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.springframework.validation.annotation.Validated;
 
@@ -357,7 +357,7 @@ public class ApiCluster   {
   }
 
   /**
-   * 
+   *
    * @return dataContextRefs
   **/
   @ApiModelProperty(value = "")
@@ -457,7 +457,7 @@ public class ApiCluster   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiCluster {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");

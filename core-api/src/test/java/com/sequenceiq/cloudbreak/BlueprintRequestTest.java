@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak;
 import java.util.Arrays;
 import java.util.Set;
 
-import javax.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolation;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.HibernateValidator;

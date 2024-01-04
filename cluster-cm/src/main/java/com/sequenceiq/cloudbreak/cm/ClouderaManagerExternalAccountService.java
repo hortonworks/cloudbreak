@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.cm.util.ConfigUtils.makeApiConfigList;
 
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 

@@ -5,7 +5,7 @@ import static com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminat
 import java.util.Collections;
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

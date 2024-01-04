@@ -1,16 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiTimeSeries;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * The time series response for a time series query.
@@ -135,7 +136,7 @@ public class ApiTimeSeriesResponse   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiTimeSeriesResponse {\n");
-    
+
     sb.append("    timeSeries: ").append(toIndentedString(timeSeries)).append("\n");
     sb.append("    warnings: ").append(toIndentedString(warnings)).append("\n");
     sb.append("    timeSeriesQuery: ").append(toIndentedString(timeSeriesQuery)).append("\n");

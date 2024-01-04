@@ -9,7 +9,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_
 import java.util.List;
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.quartz.model.JobInitializer;

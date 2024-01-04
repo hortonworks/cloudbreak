@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.assertion.proxy;
 
 import static com.sequenceiq.it.cloudbreak.assertion.CBAssertion.multiAssert;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

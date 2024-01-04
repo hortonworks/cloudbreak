@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.storage
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

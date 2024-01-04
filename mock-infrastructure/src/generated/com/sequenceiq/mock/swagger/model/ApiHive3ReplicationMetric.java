@@ -1,16 +1,16 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
- * 
+ *
  */
 @ApiModel(description = "")
 @Validated
@@ -35,7 +35,7 @@ public class ApiHive3ReplicationMetric   {
   }
 
   /**
-   * 
+   *
    * @return name
   **/
   @ApiModelProperty(value = "")
@@ -55,7 +55,7 @@ public class ApiHive3ReplicationMetric   {
   }
 
   /**
-   * 
+   *
    * @return currentCount
   **/
   @ApiModelProperty(value = "")
@@ -75,7 +75,7 @@ public class ApiHive3ReplicationMetric   {
   }
 
   /**
-   * 
+   *
    * @return totalCount
   **/
   @ApiModelProperty(value = "")
@@ -113,7 +113,7 @@ public class ApiHive3ReplicationMetric   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHive3ReplicationMetric {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    currentCount: ").append(toIndentedString(currentCount)).append("\n");
     sb.append("    totalCount: ").append(toIndentedString(totalCount)).append("\n");

@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.rotation.validator;
 import java.util.Collections;
 import java.util.List;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;

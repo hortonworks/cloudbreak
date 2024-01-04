@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.statemachine.StateContext;
 

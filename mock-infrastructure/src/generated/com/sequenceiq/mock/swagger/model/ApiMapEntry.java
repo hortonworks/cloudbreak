@@ -1,13 +1,13 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Models a map entry, with a key and a value. By forming a list of these entries you can have the equivalent of Map&amp;lt;String, String&amp;gt; (since JAX-B doesn&#39;t support maps).
@@ -32,7 +32,7 @@ public class ApiMapEntry   {
   }
 
   /**
-   * 
+   *
    * @return key
   **/
   @ApiModelProperty(value = "")
@@ -52,7 +52,7 @@ public class ApiMapEntry   {
   }
 
   /**
-   * 
+   *
    * @return value
   **/
   @ApiModelProperty(value = "")
@@ -89,7 +89,7 @@ public class ApiMapEntry   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiMapEntry {\n");
-    
+
     sb.append("    key: ").append(toIndentedString(key)).append("\n");
     sb.append("    value: ").append(toIndentedString(value)).append("\n");
     sb.append("}");

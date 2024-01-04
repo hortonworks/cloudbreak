@@ -1,25 +1,19 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import io.swagger.annotations.ApiModel;
-import com.fasterxml.jackson.annotation.JsonValue;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * 
+ *
  */
 public enum ApiHive3ReplicationMetricsStatus {
-  
+
   SUCCESS("SUCCESS"),
-  
+
   FAILED("FAILED"),
-  
+
   IN_PROGRESS("IN_PROGRESS"),
-  
+
   FAILED_ADMIN("FAILED_ADMIN");
 
   private String value;

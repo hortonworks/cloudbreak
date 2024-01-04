@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.network;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 

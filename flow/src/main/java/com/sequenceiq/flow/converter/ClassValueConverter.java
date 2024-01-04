@@ -1,6 +1,6 @@
 package com.sequenceiq.flow.converter;
 
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

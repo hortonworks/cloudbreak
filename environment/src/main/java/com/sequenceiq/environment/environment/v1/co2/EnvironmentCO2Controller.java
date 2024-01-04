@@ -6,8 +6,8 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CR
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Controller;

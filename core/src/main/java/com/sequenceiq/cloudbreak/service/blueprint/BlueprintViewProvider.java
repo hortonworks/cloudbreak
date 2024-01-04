@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
+import jakarta.annotation.Nonnull;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

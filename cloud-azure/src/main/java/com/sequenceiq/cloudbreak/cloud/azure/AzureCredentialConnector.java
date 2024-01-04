@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;

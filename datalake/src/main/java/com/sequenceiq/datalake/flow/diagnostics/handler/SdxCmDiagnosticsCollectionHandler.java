@@ -3,7 +3,7 @@ package com.sequenceiq.datalake.flow.diagnostics.handler;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

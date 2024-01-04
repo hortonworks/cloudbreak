@@ -3,7 +3,7 @@ package com.sequenceiq.freeipa.audit.flow;
 import java.util.List;
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

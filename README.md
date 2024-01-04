@@ -243,7 +243,7 @@ Import static all other imports
 <blank line>
 import java.*
 <blank line>
-import javax.*
+import jakarta.*
 <blank line>
 import org.*
 <blank line>

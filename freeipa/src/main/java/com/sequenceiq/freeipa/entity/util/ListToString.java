@@ -3,7 +3,7 @@ package com.sequenceiq.freeipa.entity.util;
 import java.io.IOException;
 import java.util.List;
 
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.common.json.Json;

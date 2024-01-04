@@ -5,7 +5,7 @@ import static org.apache.commons.collections4.MapUtils.isEmpty;
 
 import java.util.Map;
 
-import javax.ws.rs.client.WebTarget;
+import jakarta.ws.rs.client.WebTarget;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

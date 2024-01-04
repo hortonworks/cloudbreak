@@ -10,7 +10,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

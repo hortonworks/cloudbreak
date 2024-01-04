@@ -9,7 +9,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.Clus
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

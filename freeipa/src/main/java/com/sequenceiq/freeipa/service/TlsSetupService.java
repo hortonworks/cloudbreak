@@ -1,16 +1,16 @@
 package com.sequenceiq.freeipa.service;
 
-
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 
-import javax.inject.Inject;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
+
+import jakarta.inject.Inject;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.WebTarget;
 
 import org.glassfish.jersey.SslConfigurator;
 import org.slf4j.Logger;

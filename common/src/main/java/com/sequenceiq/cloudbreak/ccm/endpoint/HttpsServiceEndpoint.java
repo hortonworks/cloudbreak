@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.ccm.endpoint;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * HTTPS endpoint.

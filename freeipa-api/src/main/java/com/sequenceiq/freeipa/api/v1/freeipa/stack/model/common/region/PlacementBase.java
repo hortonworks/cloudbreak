@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions;
 

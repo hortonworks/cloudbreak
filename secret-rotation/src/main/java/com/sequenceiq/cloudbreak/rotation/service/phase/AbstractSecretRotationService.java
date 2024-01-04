@@ -7,7 +7,7 @@ import static com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgre
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;

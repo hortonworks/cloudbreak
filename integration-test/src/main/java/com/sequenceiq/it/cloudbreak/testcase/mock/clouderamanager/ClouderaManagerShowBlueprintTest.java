@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager;
 
 import java.io.IOException;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 

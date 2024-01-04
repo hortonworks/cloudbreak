@@ -6,7 +6,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.event.CmDiagnos
 import java.util.HashSet;
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

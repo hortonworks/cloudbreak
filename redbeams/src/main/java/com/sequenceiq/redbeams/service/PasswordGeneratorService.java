@@ -3,7 +3,7 @@ package com.sequenceiq.redbeams.service;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;

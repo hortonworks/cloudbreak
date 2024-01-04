@@ -7,9 +7,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.persistence.EntityManagerFactory;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.persistence.EntityManagerFactory;
 
 import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +28,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.sequenceiq.cloudbreak.common.database.BatchProperties;
-import com.sequenceiq.cloudbreak.common.database.JpaPropertiesFacory;
+import com.sequenceiq.cloudbreak.common.database.JpaPropertiesFactory;
 import com.sequenceiq.cloudbreak.common.tx.CircuitBreakerType;
 import com.sequenceiq.cloudbreak.database.MultiDataSourceConfig;
 import com.sequenceiq.flow.ha.NodeConfig;
@@ -132,7 +132,7 @@ public class DatabaseConfig extends MultiDataSourceConfig {
         entityManagerFactory.setDataSource(dataSource());
 
         entityManagerFactory.setJpaVendorAdapter(jpaVendorAdapter());
-        entityManagerFactory.setJpaProperties(JpaPropertiesFacory.create(hbm2ddlStrategy, debug, dbSchemaName, circuitBreakerType, createBatchProperties(),
+        entityManagerFactory.setJpaProperties(JpaPropertiesFactory.create(hbm2ddlStrategy, debug, dbSchemaName, circuitBreakerType, createBatchProperties(),
                 enableTransactionInterceptor));
         entityManagerFactory.afterPropertiesSet();
         return entityManagerFactory.getObject();

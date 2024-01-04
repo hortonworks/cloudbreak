@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.sync;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -3,8 +3,8 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.converter.v4.blueprint;
 import java.io.IOException;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-import javax.inject.Inject;
+import jakarta.annotation.Nullable;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

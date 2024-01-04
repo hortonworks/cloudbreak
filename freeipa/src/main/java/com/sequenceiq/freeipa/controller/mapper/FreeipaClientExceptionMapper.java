@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.controller.mapper;
 
-import javax.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 

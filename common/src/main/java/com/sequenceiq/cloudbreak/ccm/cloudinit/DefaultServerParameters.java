@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.ccm.cloudinit;
 import java.io.Serializable;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpoint;
 

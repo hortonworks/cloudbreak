@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.yarn.handler;
 
 import java.net.MalformedURLException;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 

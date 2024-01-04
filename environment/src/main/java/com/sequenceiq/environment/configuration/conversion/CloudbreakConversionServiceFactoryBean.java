@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.configuration.conversion;
 
-import javax.ws.rs.BadRequestException;
+import jakarta.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

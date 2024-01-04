@@ -2,7 +2,7 @@ package com.sequenceiq.environment.api;
 
 import java.util.Set;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

@@ -1,15 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Arguments used for Disable NameNode High Availability command.
@@ -148,7 +150,7 @@ public class ApiDisableNnHaArguments   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiDisableNnHaArguments {\n");
-    
+
     sb.append("    activeNnName: ").append(toIndentedString(activeNnName)).append("\n");
     sb.append("    snnHostId: ").append(toIndentedString(snnHostId)).append("\n");
     sb.append("    snnCheckpointDirList: ").append(toIndentedString(snnCheckpointDirList)).append("\n");

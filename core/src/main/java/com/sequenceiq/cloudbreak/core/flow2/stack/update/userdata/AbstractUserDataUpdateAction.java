@@ -7,7 +7,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.update.userdata.UpdateU
 
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

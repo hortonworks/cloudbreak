@@ -4,7 +4,7 @@ import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEv
 
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -7,7 +7,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_DELETE_IN_PROG
 
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

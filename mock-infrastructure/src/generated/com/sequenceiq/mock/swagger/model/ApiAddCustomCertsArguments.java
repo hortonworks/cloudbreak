@@ -1,16 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiHostCertInfo;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Arguments to add custom certificates to the Auto-TLS certificate database
@@ -126,7 +127,7 @@ public class ApiAddCustomCertsArguments   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiAddCustomCertsArguments {\n");
-    
+
     sb.append("    location: ").append(toIndentedString(location)).append("\n");
     sb.append("    interpretAsFilenames: ").append(toIndentedString(interpretAsFilenames)).append("\n");
     sb.append("    hostCerts: ").append(toIndentedString(hostCerts)).append("\n");

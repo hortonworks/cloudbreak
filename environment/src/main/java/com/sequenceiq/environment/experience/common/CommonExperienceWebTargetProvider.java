@@ -4,8 +4,8 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 
 import java.util.Map;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.WebTarget;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

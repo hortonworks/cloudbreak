@@ -9,8 +9,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
-import javax.servlet.ServletException;
+import jakarta.annotation.Nullable;
+import jakarta.servlet.ServletException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

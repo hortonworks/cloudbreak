@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.configuration;
 
 import java.util.function.Consumer;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

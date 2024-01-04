@@ -4,7 +4,7 @@ import static ch.qos.logback.classic.Level.INFO;
 
 import java.util.Locale;
 
-import javax.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 

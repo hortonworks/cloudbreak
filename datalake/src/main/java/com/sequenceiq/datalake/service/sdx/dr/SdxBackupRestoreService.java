@@ -17,8 +17,8 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -311,7 +311,7 @@ public class SdxBackupRestoreService {
                     return getStackResponseAttemptResult(sdxCluster, pollingMessage, flowState);
                 }
             }
-        } catch (javax.ws.rs.NotFoundException e) {
+        } catch (jakarta.ws.rs.NotFoundException e) {
             LOGGER.debug("Stack not found on CB side " + sdxCluster.getClusterName(), e);
             return AttemptResults.breakFor("Stack not found on CB side " + sdxCluster.getClusterName());
         }

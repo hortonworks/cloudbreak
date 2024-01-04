@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATALAKE_E
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

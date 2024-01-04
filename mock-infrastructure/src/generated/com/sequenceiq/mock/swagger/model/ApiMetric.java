@@ -1,16 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiMetricData;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * A metric represents a specific metric monitored by the Cloudera Management Services, and a list of values matching a user query. &lt;p&gt; These fields are available only in the \&quot;full\&quot; view: &lt;ul&gt; &lt;li&gt;displayName&lt;/li&gt; &lt;li&gt;description&lt;/li&gt; &lt;/ul&gt;
@@ -198,7 +199,7 @@ public class ApiMetric   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiMetric {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    unit: ").append(toIndentedString(unit)).append("\n");

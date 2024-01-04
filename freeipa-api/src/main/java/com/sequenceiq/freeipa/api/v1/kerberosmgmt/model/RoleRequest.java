@@ -2,7 +2,7 @@ package com.sequenceiq.freeipa.api.v1.kerberosmgmt.model;
 
 import java.util.Set;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.doc.KeytabModelDescription;

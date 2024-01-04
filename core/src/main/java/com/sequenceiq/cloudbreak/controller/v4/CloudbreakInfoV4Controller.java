@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.boot.actuate.info.InfoEndpoint;
 import org.springframework.stereotype.Controller;

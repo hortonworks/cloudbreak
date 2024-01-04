@@ -1,14 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiConfigList;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * A supported external account type. An external account type represents an external authentication source that is used by Cloudera Manager in its APIs to take suitable actions that require authentication to an external service.  An external account type is uniquely identified by a server-generated ID and identifies with a category identifier: e.g. The \&quot;AWS\&quot; category has an account type \&quot;AWS_Access_Key_Authorization\&quot;
@@ -187,7 +188,7 @@ public class ApiExternalAccountType   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiExternalAccountType {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    categoryName: ").append(toIndentedString(categoryName)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");

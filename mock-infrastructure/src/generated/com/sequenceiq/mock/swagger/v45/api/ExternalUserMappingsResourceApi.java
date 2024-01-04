@@ -5,30 +5,32 @@
  */
 package com.sequenceiq.mock.swagger.v45.api;
 
-import com.sequenceiq.mock.swagger.model.ApiExternalUserMapping;
-import com.sequenceiq.mock.swagger.model.ApiExternalUserMappingList;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.*;
+import java.io.IOException;
+import java.util.Optional;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.mock.swagger.model.ApiExternalUserMapping;
+import com.sequenceiq.mock.swagger.model.ApiExternalUserMappingList;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 @Api(value = "ExternalUserMappingsResource", description = "the ExternalUserMappingsResource API")
@@ -52,10 +54,10 @@ public interface ExternalUserMappingsResourceApi {
     @ApiOperation(value = "Creates a list of external user mappings.", nickname = "createExternalUserMappings", notes = "Creates a list of external user mappings", response = ApiExternalUserMappingList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ExternalUserMappingsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about created external user mappings.", response = ApiExternalUserMappingList.class) })
     @RequestMapping(value = "/externalUserMappings",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiExternalUserMappingList> createExternalUserMappings(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "List of external user mappings to create."  )  @Valid @RequestBody ApiExternalUserMappingList body) {
@@ -78,10 +80,10 @@ public interface ExternalUserMappingsResourceApi {
     @ApiOperation(value = "Deletes an external user mapping from the system.", nickname = "deleteExternalUserMapping", notes = "Deletes an external user mapping from the system. <p/>", response = ApiExternalUserMapping.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ExternalUserMappingsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "The details of the deleted external user mapping role.", response = ApiExternalUserMapping.class) })
     @RequestMapping(value = "/externalUserMappings/{uuid}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.DELETE)
     default ResponseEntity<ApiExternalUserMapping> deleteExternalUserMapping(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The uuid of the external user mapping to delete.",required=true) @PathVariable("uuid") String uuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -103,10 +105,10 @@ public interface ExternalUserMappingsResourceApi {
     @ApiOperation(value = "Returns detailed information about an external user mapping.", nickname = "readExternalUserMapping", notes = "Returns detailed information about an external user mapping.", response = ApiExternalUserMapping.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ExternalUserMappingsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "The external user mapping's information.", response = ApiExternalUserMapping.class) })
     @RequestMapping(value = "/externalUserMappings/{uuid}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiExternalUserMapping> readExternalUserMapping(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The external user mapping to read.",required=true) @PathVariable("uuid") String uuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -128,10 +130,10 @@ public interface ExternalUserMappingsResourceApi {
     @ApiOperation(value = "Returns a list of the external user mappings configured in the system.", nickname = "readExternalUserMappings", notes = "Returns a list of the external user mappings configured in the system.", response = ApiExternalUserMappingList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ExternalUserMappingsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "A list of external user mappings.", response = ApiExternalUserMappingList.class) })
     @RequestMapping(value = "/externalUserMappings",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiExternalUserMappingList> readExternalUserMappings(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -153,10 +155,10 @@ public interface ExternalUserMappingsResourceApi {
     @ApiOperation(value = "Updates the given external user mapping's information.", nickname = "updateExternalUserMapping", notes = "Updates the given external user mapping's information.", response = ApiExternalUserMapping.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ExternalUserMappingsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "", response = ApiExternalUserMapping.class) })
     @RequestMapping(value = "/externalUserMappings/{uuid}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.PUT)
     default ResponseEntity<ApiExternalUserMapping> updateExternalUserMapping(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Uuid of the external user mapping being updated.",required=true) @PathVariable("uuid") String uuid,@ApiParam(value = "The external user mapping information."  )  @Valid @RequestBody ApiExternalUserMapping body) {

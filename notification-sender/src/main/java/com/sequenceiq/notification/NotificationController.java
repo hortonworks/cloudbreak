@@ -3,7 +3,7 @@ package com.sequenceiq.notification;
 import java.util.Collection;
 import java.util.Collections;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 

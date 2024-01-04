@@ -3,7 +3,7 @@ package com.sequenceiq.periscope.modul.rejected;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;

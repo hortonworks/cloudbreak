@@ -5,8 +5,8 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 
 import org.testng.ITestContext;
 import org.testng.annotations.Test;
@@ -198,3 +198,4 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
         return blueprintTestClient;
     }
 }
+

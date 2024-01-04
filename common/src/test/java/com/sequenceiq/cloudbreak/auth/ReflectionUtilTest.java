@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;

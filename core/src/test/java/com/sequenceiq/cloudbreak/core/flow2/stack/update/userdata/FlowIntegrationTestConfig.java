@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.update.userdata;
 
-import javax.ws.rs.client.Client;
+import jakarta.ws.rs.client.Client;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;

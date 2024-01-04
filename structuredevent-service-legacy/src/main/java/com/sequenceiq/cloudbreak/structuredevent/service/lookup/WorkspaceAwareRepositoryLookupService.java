@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.structuredevent.service.lookup;
 
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 

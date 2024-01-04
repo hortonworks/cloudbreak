@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

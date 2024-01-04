@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.util.azure.azurevm.client;
 
 import static com.azure.core.http.policy.HttpLogDetailLevel.BODY_AND_HEADERS;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidatorContext;
 
 import org.junit.Assert;
 import org.junit.Before;

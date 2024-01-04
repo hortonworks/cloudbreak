@@ -1,13 +1,13 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * A parcelRef references a parcel. Each parcel is identified by its \&quot;parcelName\&quot; and \&quot;parcelVersion\&quot;, and the \&quot;clusterName\&quot; of the cluster that is using it. To operate on the parcel object, use the API with the those fields as parameters.
@@ -137,7 +137,7 @@ public class ApiParcelRef   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiParcelRef {\n");
-    
+
     sb.append("    clusterName: ").append(toIndentedString(clusterName)).append("\n");
     sb.append("    parcelName: ").append(toIndentedString(parcelName)).append("\n");
     sb.append("    parcelVersion: ").append(toIndentedString(parcelVersion)).append("\n");

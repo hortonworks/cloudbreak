@@ -5,30 +5,29 @@
  */
 package com.sequenceiq.mock.swagger.v45.api;
 
-import com.sequenceiq.mock.swagger.model.ApiCommand;
-import com.sequenceiq.mock.swagger.model.ApiParcel;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.*;
+import java.io.IOException;
+import java.util.Optional;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.mock.swagger.model.ApiCommand;
+import com.sequenceiq.mock.swagger.model.ApiParcel;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 @Api(value = "ParcelResource", description = "the ParcelResource API")
@@ -52,10 +51,10 @@ public interface ParcelResourceApi {
     @ApiOperation(value = "A synchronous command that activates the parcel on the cluster.", nickname = "activateCommand", notes = "A synchronous command that activates the parcel on the cluster. <p> Since it is synchronous, the result is known immediately upon return.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ParcelResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "synchronous command result", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/parcels/products/{product}/versions/{version}/commands/activate",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> activateCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -77,10 +76,10 @@ public interface ParcelResourceApi {
     @ApiOperation(value = "A synchronous command that cancels the parcel distribution.", nickname = "cancelDistributionCommand", notes = "A synchronous command that cancels the parcel distribution. <p> Since it is synchronous, the result is known immediately upon return.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ParcelResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "synchronous command result", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/parcels/products/{product}/versions/{version}/commands/cancelDistribution",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> cancelDistributionCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -102,10 +101,10 @@ public interface ParcelResourceApi {
     @ApiOperation(value = "A synchronous command that cancels the parcel download.", nickname = "cancelDownloadCommand", notes = "A synchronous command that cancels the parcel download. <p> Since it is synchronous, the result is known immediately upon return.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ParcelResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "synchronous command result", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/parcels/products/{product}/versions/{version}/commands/cancelDownload",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> cancelDownloadCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -127,10 +126,10 @@ public interface ParcelResourceApi {
     @ApiOperation(value = "A synchronous command that deactivates the parcel on the cluster.", nickname = "deactivateCommand", notes = "A synchronous command that deactivates the parcel on the cluster. <p> Since it is synchronous, the result is known immediately upon return.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ParcelResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "synchronous command result", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/parcels/products/{product}/versions/{version}/commands/deactivate",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> deactivateCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -152,10 +151,10 @@ public interface ParcelResourceApi {
     @ApiOperation(value = "Retrieves detailed information about a parcel.", nickname = "readParcel", notes = "Retrieves detailed information about a parcel.", response = ApiParcel.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ParcelResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "the parcel", response = ApiParcel.class) })
     @RequestMapping(value = "/clusters/{clusterName}/parcels/products/{product}/versions/{version}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiParcel> readParcel(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -177,10 +176,10 @@ public interface ParcelResourceApi {
     @ApiOperation(value = "A synchronous command that removes the downloaded parcel.", nickname = "removeDownloadCommand", notes = "A synchronous command that removes the downloaded parcel. <p> Since it is synchronous, the result is known immediately upon return.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ParcelResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "synchronous command result", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/parcels/products/{product}/versions/{version}/commands/removeDownload",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> removeDownloadCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -202,10 +201,10 @@ public interface ParcelResourceApi {
     @ApiOperation(value = "A synchronous command that starts the distribution of the parcel to the cluster.", nickname = "startDistributionCommand", notes = "A synchronous command that starts the distribution of the parcel to the cluster. <p> Since it is synchronous, the result is known immediately upon return. In order to see the progress of the distribution, a call to readParcel() needs to be made.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ParcelResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "synchronous command result", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/parcels/products/{product}/versions/{version}/commands/startDistribution",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> startDistributionCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -227,10 +226,10 @@ public interface ParcelResourceApi {
     @ApiOperation(value = "A synchronous command that starts the parcel download.", nickname = "startDownloadCommand", notes = "A synchronous command that starts the parcel download. <p> Since it is synchronous, the result is known immediately upon return. In order to see the progress of the download, a call to readParcel() needs to be made.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ParcelResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "synchronous command result", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/parcels/products/{product}/versions/{version}/commands/startDownload",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> startDownloadCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -252,10 +251,10 @@ public interface ParcelResourceApi {
     @ApiOperation(value = "A synchronous command that removes the distribution from the hosts in the cluster.", nickname = "startRemovalOfDistributionCommand", notes = "A synchronous command that removes the distribution from the hosts in the cluster. <p> Since it is synchronous, the result is known immediately upon return. In order to see the progress of the removal, a call to readParcel() needs to be made.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ParcelResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "synchronous command result", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/parcels/products/{product}/versions/{version}/commands/startRemovalOfDistribution",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> startRemovalOfDistributionCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {

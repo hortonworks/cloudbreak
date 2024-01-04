@@ -5,7 +5,7 @@ import static java.lang.System.lineSeparator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidatorContext;
 
 import org.hibernate.validator.constraintvalidation.HibernateConstraintValidatorContext;
 import org.reflections.Reflections;

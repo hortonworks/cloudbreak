@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.common.service.TransactionService.Transa
 
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.quartz.JobDetail;
 import org.quartz.JobKey;

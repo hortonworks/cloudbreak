@@ -1,15 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Arguments used for collecting diagnostics data for Yarn applications
@@ -124,7 +126,7 @@ public class ApiYarnApplicationDiagnosticsCollectionArgs   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiYarnApplicationDiagnosticsCollectionArgs {\n");
-    
+
     sb.append("    applicationIds: ").append(toIndentedString(applicationIds)).append("\n");
     sb.append("    ticketNumber: ").append(toIndentedString(ticketNumber)).append("\n");
     sb.append("    comments: ").append(toIndentedString(comments)).append("\n");

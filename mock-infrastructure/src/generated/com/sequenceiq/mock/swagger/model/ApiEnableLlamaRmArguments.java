@@ -1,13 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.constraints.NotNull;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Arguments used for enable Llama RM command.
@@ -186,7 +188,7 @@ public class ApiEnableLlamaRmArguments   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiEnableLlamaRmArguments {\n");
-    
+
     sb.append("    llama1HostId: ").append(toIndentedString(llama1HostId)).append("\n");
     sb.append("    llama1RoleName: ").append(toIndentedString(llama1RoleName)).append("\n");
     sb.append("    llama2HostId: ").append(toIndentedString(llama2HostId)).append("\n");

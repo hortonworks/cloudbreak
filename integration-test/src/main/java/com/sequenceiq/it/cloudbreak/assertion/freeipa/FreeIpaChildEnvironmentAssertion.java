@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.assertion.freeipa;
 
-import javax.ws.rs.NotFoundException;
+import jakarta.ws.rs.NotFoundException;
 
 import org.assertj.core.api.Assertions;
 

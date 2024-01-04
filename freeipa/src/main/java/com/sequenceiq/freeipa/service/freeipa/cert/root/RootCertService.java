@@ -2,7 +2,7 @@ package com.sequenceiq.freeipa.service.freeipa.cert.root;
 
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 

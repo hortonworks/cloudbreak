@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.network;
 
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

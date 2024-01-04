@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.jerseyclient.retry;
 
 import java.time.Duration;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

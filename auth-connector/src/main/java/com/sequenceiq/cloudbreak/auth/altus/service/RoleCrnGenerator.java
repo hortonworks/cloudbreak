@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.auth.altus.service;
 
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.ws.rs.InternalServerErrorException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.InternalServerErrorException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

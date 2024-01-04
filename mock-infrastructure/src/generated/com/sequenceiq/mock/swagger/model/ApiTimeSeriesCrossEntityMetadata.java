@@ -1,14 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
+import java.math.BigDecimal;
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * A class holding additional metadata to the ApiTimeSeriesAggregateStatistics class that applies specifically to cross-entity aggregate metrics.
@@ -164,7 +167,7 @@ public class ApiTimeSeriesCrossEntityMetadata   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiTimeSeriesCrossEntityMetadata {\n");
-    
+
     sb.append("    maxEntityDisplayName: ").append(toIndentedString(maxEntityDisplayName)).append("\n");
     sb.append("    maxEntityName: ").append(toIndentedString(maxEntityName)).append("\n");
     sb.append("    minEntityDisplayName: ").append(toIndentedString(minEntityDisplayName)).append("\n");

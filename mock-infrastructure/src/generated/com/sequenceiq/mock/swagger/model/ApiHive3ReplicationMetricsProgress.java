@@ -1,20 +1,20 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiHive3ReplicationMetricsStage;
-import com.sequenceiq.mock.swagger.model.ApiHive3ReplicationMetricsStatus;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
- * 
+ *
  */
 @ApiModel(description = "")
 @Validated
@@ -37,7 +37,7 @@ public class ApiHive3ReplicationMetricsProgress   {
   }
 
   /**
-   * 
+   *
    * @return status
   **/
   @ApiModelProperty(value = "")
@@ -66,7 +66,7 @@ public class ApiHive3ReplicationMetricsProgress   {
   }
 
   /**
-   * 
+   *
    * @return stages
   **/
   @ApiModelProperty(value = "")
@@ -104,7 +104,7 @@ public class ApiHive3ReplicationMetricsProgress   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHive3ReplicationMetricsProgress {\n");
-    
+
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    stages: ").append(toIndentedString(stages)).append("\n");
     sb.append("}");

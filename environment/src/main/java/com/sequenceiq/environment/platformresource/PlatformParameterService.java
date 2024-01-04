@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;

@@ -4,8 +4,8 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 
 import java.util.Optional;
 
-import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
+import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 

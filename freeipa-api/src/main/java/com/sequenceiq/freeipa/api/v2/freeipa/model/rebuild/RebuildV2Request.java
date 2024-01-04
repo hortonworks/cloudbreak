@@ -4,7 +4,7 @@ import static com.sequenceiq.freeipa.api.v2.freeipa.doc.FreeIpaV2ModelDescriptio
 import static com.sequenceiq.freeipa.api.v2.freeipa.doc.FreeIpaV2ModelDescriptions.FULL_BACKUP_STORAGE_PATH;
 import static com.sequenceiq.freeipa.api.v2.freeipa.doc.FreeIpaV2ModelDescriptions.INSTANCE_TO_REPAIR_FQDN;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

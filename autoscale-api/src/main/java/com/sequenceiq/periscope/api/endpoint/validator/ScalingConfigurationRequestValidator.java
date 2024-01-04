@@ -1,7 +1,7 @@
 package com.sequenceiq.periscope.api.endpoint.validator;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 import com.sequenceiq.common.api.util.ValidatorUtil;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;

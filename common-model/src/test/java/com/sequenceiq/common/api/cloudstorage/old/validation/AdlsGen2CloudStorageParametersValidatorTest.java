@@ -1,6 +1,6 @@
 package com.sequenceiq.common.api.cloudstorage.old.validation;
 
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidatorContext;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

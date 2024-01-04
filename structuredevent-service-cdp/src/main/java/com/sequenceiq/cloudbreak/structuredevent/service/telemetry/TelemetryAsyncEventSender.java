@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

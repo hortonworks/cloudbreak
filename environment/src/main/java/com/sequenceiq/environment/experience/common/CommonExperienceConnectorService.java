@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.experience.common;
 
-import static javax.ws.rs.core.Response.Status.Family.SUCCESSFUL;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static jakarta.ws.rs.core.Response.Status.Family.SUCCESSFUL;
+import static jakarta.ws.rs.core.Response.Status.NOT_FOUND;
 
 import java.net.URI;
 import java.util.Map;
@@ -9,11 +9,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

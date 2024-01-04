@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;

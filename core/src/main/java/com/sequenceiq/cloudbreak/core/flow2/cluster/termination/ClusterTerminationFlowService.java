@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAI
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_DELETE_STARTED;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

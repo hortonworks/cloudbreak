@@ -3,7 +3,7 @@ package com.sequenceiq.it.cloudbreak.dto.util;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.it.cloudbreak.Prototype;

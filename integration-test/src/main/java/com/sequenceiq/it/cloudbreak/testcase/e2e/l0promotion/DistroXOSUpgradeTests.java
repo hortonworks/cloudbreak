@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;

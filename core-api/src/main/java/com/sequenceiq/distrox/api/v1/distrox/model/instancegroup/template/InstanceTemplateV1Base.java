@@ -2,7 +2,7 @@ package com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template;
 
 import java.io.Serializable;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

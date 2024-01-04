@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.USER_DATA_CC
 import java.util.Date;
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

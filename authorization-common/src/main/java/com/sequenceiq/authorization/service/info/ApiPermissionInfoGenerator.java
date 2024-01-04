@@ -2,7 +2,7 @@ package com.sequenceiq.authorization.service.info;
 
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 

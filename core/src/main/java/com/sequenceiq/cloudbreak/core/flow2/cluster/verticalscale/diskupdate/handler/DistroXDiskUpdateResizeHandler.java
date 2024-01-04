@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.ha
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DATAHUB_DISK_UPDATE_RESIZE_FAILED;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

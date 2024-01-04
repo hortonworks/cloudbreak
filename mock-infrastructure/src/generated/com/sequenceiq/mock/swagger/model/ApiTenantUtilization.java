@@ -1,14 +1,16 @@
 package com.sequenceiq.mock.swagger.model;
 
+import java.math.BigDecimal;
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Utilization report information of a tenant.
@@ -116,7 +118,7 @@ public class ApiTenantUtilization   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiTenantUtilization {\n");
-    
+
     sb.append("    tenantName: ").append(toIndentedString(tenantName)).append("\n");
     sb.append("    cpuUtilizationPercentage: ").append(toIndentedString(cpuUtilizationPercentage)).append("\n");
     sb.append("    memoryUtilizationPercentage: ").append(toIndentedString(memoryUtilizationPercentage)).append("\n");

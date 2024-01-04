@@ -13,7 +13,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_LB_UPDATE_CM_C
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_LB_UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_LB_UPDATE_FINISHED;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

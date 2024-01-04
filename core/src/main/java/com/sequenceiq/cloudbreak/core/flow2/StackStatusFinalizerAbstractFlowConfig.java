@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowState;

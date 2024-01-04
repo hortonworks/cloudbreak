@@ -4,7 +4,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Controller;
 

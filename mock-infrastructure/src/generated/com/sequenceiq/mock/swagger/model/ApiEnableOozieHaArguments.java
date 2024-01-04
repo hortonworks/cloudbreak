@@ -1,18 +1,20 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
- * 
+ *
  */
 @ApiModel(description = "")
 @Validated
@@ -229,7 +231,7 @@ public class ApiEnableOozieHaArguments   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiEnableOozieHaArguments {\n");
-    
+
     sb.append("    newOozieServerHostIds: ").append(toIndentedString(newOozieServerHostIds)).append("\n");
     sb.append("    newOozieServerRoleNames: ").append(toIndentedString(newOozieServerRoleNames)).append("\n");
     sb.append("    zkServiceName: ").append(toIndentedString(zkServiceName)).append("\n");

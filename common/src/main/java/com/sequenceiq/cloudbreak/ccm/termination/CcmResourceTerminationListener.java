@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.ccm.termination;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * Listener for CCM resource termination events.

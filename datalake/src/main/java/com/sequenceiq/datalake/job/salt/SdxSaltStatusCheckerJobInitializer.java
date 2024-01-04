@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.job.salt;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

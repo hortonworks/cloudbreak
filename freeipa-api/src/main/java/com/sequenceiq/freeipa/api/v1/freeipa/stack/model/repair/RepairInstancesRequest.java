@@ -3,7 +3,7 @@ package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import org.apache.commons.lang3.StringUtils;
 

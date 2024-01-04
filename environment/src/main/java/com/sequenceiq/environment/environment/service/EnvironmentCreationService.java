@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import java.util.Locale;
 import java.util.Optional;
 
-import javax.ws.rs.BadRequestException;
+import jakarta.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.network.dao.repository;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import com.sequenceiq.environment.network.dao.domain.YarnNetwork;
 

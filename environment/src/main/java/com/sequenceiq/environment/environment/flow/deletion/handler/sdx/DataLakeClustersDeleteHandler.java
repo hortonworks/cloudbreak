@@ -5,7 +5,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 
 import java.util.concurrent.TimeUnit;
 
-import javax.ws.rs.ClientErrorException;
+import jakarta.ws.rs.ClientErrorException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

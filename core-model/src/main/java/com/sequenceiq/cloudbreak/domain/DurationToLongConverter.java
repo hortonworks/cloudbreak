@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.domain;
 
 import java.time.Duration;
 
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 
 import org.springframework.stereotype.Component;
 

@@ -2,7 +2,7 @@ package com.sequenceiq.environment.api.v1.environment.model.response;
 
 import java.util.Optional;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

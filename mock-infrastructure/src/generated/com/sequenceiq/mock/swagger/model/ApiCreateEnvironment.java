@@ -1,13 +1,13 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Arguments used to install CDP a Private Cloud Control Plane
@@ -41,7 +41,7 @@ public class ApiCreateEnvironment   {
   }
 
   /**
-   * 
+   *
    * @return cmUser
   **/
   @ApiModelProperty(value = "")
@@ -61,7 +61,7 @@ public class ApiCreateEnvironment   {
   }
 
   /**
-   * 
+   *
    * @return cmPass
   **/
   @ApiModelProperty(value = "")
@@ -81,7 +81,7 @@ public class ApiCreateEnvironment   {
   }
 
   /**
-   * 
+   *
    * @return cmAddress
   **/
   @ApiModelProperty(value = "")
@@ -101,7 +101,7 @@ public class ApiCreateEnvironment   {
   }
 
   /**
-   * 
+   *
    * @return clusterName
   **/
   @ApiModelProperty(value = "")
@@ -121,7 +121,7 @@ public class ApiCreateEnvironment   {
   }
 
   /**
-   * 
+   *
    * @return envName
   **/
   @ApiModelProperty(value = "")
@@ -161,7 +161,7 @@ public class ApiCreateEnvironment   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiCreateEnvironment {\n");
-    
+
     sb.append("    cmUser: ").append(toIndentedString(cmUser)).append("\n");
     sb.append("    cmPass: ").append(toIndentedString(cmPass)).append("\n");
     sb.append("    cmAddress: ").append(toIndentedString(cmAddress)).append("\n");

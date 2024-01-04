@@ -1,17 +1,19 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Metadata for a time series.
@@ -336,7 +338,7 @@ public class ApiTimeSeriesMetadata   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiTimeSeriesMetadata {\n");
-    
+
     sb.append("    metricName: ").append(toIndentedString(metricName)).append("\n");
     sb.append("    entityName: ").append(toIndentedString(entityName)).append("\n");
     sb.append("    startTime: ").append(toIndentedString(startTime)).append("\n");

@@ -4,7 +4,7 @@ import static com.sequenceiq.it.cloudbreak.testcase.AbstractMinimalTest.STACK_AV
 
 import java.io.IOException;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

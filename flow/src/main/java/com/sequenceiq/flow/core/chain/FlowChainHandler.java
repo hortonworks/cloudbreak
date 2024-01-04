@@ -9,8 +9,8 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import javax.annotation.Resource;
-import javax.inject.Inject;
+import jakarta.annotation.Resource;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

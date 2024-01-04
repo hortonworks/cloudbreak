@@ -2,7 +2,7 @@ package com.sequenceiq.common.api.cloudstorage;
 
 import java.io.Serializable;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsCloudStorageV1Parameters;

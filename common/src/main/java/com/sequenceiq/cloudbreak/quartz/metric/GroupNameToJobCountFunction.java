@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.quartz.metric;
 import java.util.Set;
 import java.util.function.ToDoubleFunction;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;

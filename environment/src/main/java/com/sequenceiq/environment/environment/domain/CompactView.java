@@ -2,8 +2,8 @@ package com.sequenceiq.environment.environment.domain;
 
 import java.io.Serializable;
 
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
 
 @MappedSuperclass
 public abstract class CompactView implements Serializable {

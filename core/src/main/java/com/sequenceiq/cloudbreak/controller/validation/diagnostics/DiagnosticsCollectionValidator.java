@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.validation.diagnostics;
 
-import javax.ws.rs.ServiceUnavailableException;
+import jakarta.ws.rs.ServiceUnavailableException;
 
 import org.springframework.stereotype.Component;
 

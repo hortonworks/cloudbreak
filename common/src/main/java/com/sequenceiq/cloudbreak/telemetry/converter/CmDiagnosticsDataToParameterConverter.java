@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.telemetry.converter;
 
 import java.nio.file.Paths;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

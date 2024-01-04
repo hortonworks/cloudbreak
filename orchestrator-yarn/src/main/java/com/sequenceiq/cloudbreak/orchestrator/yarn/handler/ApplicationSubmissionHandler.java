@@ -7,7 +7,7 @@ import static com.sequenceiq.cloudbreak.orchestrator.yarn.api.YarnResourceConsta
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

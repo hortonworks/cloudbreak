@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
+import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -40,7 +40,7 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     @Query("SELECT c FROM Cluster c WHERE c.stack IS NOT NULL AND c.stack.terminated IS NULL AND c.status IN :statuses")
     List<Cluster> findByStatuses(@Param("statuses") Collection<Status> statuses);
 
-    @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.stack WHERE c.workspace = null")
+    @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.stack WHERE c.workspace IS null")
     Set<Cluster> findAllWithNoWorkspace();
 
     Set<Cluster> findByBlueprint(Blueprint blueprint);

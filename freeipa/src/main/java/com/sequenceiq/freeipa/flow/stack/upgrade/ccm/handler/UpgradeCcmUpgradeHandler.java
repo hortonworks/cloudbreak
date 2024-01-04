@@ -6,7 +6,7 @@ import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmS
 
 import java.time.LocalDateTime;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -8,8 +8,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.ws.rs.ForbiddenException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.ForbiddenException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;

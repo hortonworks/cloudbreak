@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 
 @ExtendWith(MockitoExtension.class)
-public class AzurePricingCacheTest {
+class AzurePricingCacheTest {
 
     private static final String REGION = "region";
 

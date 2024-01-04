@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.update.loadbalancer;
 
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

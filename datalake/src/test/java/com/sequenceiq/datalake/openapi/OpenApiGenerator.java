@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.ExceptionMapper;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +27,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = EndpointConfig.class)
 @TestPropertySource(locations = "file:./build/resources/main/application.properties")
-public class OpenApiGenerator {
+class OpenApiGenerator {
 
     @MockBean
     private ExceptionMapper<?> exceptionMapper;
@@ -39,7 +39,7 @@ public class OpenApiGenerator {
     private EndpointConfig endpointConfig;
 
     @Test
-    public void generateSwaggerJson() throws Exception {
+    void generateSwaggerJson() throws Exception {
         Set<String> classes = endpointConfig.getClasses().stream()
                 .map(Class::getName)
                 .collect(Collectors.toSet());

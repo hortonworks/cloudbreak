@@ -4,7 +4,7 @@ import static com.sequenceiq.common.model.OsType.RHEL8;
 
 import java.util.Locale;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

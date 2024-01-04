@@ -1,13 +1,13 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * A counter in an HDFS replication job.
@@ -35,7 +35,7 @@ public class ApiHdfsReplicationCounter   {
   }
 
   /**
-   * 
+   *
    * @return group
   **/
   @ApiModelProperty(value = "")
@@ -55,7 +55,7 @@ public class ApiHdfsReplicationCounter   {
   }
 
   /**
-   * 
+   *
    * @return name
   **/
   @ApiModelProperty(value = "")
@@ -75,7 +75,7 @@ public class ApiHdfsReplicationCounter   {
   }
 
   /**
-   * 
+   *
    * @return value
   **/
   @ApiModelProperty(value = "")
@@ -113,7 +113,7 @@ public class ApiHdfsReplicationCounter   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHdfsReplicationCounter {\n");
-    
+
     sb.append("    group: ").append(toIndentedString(group)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    value: ").append(toIndentedString(value)).append("\n");

@@ -8,7 +8,7 @@ import static org.mockito.Mockito.lenient;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.ws.rs.BadRequestException;
+import jakarta.ws.rs.BadRequestException;
 
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.extension.ExtendWith;

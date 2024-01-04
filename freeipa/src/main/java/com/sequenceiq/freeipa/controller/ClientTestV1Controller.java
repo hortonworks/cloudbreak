@@ -4,8 +4,8 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 import static com.sequenceiq.freeipa.api.v1.freeipa.test.model.ClientTestBaseV1Response.resultOf;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 

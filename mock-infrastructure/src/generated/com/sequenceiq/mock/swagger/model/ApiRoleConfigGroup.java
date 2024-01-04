@@ -1,15 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiConfigList;
-import com.sequenceiq.mock.swagger.model.ApiServiceRef;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * A role config group contains roles of the same role type sharing the same configuration. While each role has to belong to a group, a role config group may be empty.  There exists a default role config group for each role type. Default groups cannot be removed nor created.  The name of a role config group is unique and cannot be changed.  The configuration of individual roles may be overridden on role level.
@@ -189,7 +189,7 @@ public class ApiRoleConfigGroup   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiRoleConfigGroup {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    roleType: ").append(toIndentedString(roleType)).append("\n");
     sb.append("    base: ").append(toIndentedString(base)).append("\n");

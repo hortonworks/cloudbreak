@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.service;
 import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

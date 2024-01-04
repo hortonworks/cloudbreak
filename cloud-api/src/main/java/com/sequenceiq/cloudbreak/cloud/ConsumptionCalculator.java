@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud;
 
 import java.util.Set;
 
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 
 import com.cloudera.thunderhead.service.metering.events.MeteringEventsProto;
 import com.sequenceiq.cloudbreak.cloud.model.CloudConsumption;

@@ -6,7 +6,7 @@ import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_SERVICE
 
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.testng.ITestContext;
 import org.testng.annotations.Test;

@@ -1,17 +1,18 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiHdfsReplicationCounter;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Detailed information about an HDFS replication job.
@@ -674,7 +675,7 @@ public class ApiHdfsReplicationResult   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHdfsReplicationResult {\n");
-    
+
     sb.append("    progress: ").append(toIndentedString(progress)).append("\n");
     sb.append("    throughput: ").append(toIndentedString(throughput)).append("\n");
     sb.append("    remainingTime: ").append(toIndentedString(remainingTime)).append("\n");

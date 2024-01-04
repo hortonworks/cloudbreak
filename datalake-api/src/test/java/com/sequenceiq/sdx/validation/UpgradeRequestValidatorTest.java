@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
 
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidatorContext;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,33 +1,27 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import io.swagger.annotations.ApiModel;
-import com.fasterxml.jackson.annotation.JsonValue;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * The CDH version of the cluster.
  */
 public enum ApiClusterVersion {
-  
+
   CDH3("CDH3"),
-  
+
   CDH3U4X("CDH3u4X"),
-  
+
   CDH4("CDH4"),
-  
+
   CDH5("CDH5"),
-  
+
   CDH6("CDH6"),
-  
+
   CDH7("CDH7"),
-  
+
   EXPERIENCE1("EXPERIENCE1"),
-  
+
   UNKNOWN("UNKNOWN");
 
   private String value;

@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

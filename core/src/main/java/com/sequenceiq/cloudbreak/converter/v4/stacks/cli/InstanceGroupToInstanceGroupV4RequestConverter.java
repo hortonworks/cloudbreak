@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cli;
 
 import java.util.HashSet;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

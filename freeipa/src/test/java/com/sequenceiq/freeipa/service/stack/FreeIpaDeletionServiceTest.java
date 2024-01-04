@@ -18,7 +18,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 
-import javax.ws.rs.BadRequestException;
+import jakarta.ws.rs.BadRequestException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

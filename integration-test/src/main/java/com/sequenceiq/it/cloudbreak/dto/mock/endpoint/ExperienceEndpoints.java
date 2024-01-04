@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.dto.mock.endpoint;
 
 import java.util.function.Consumer;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;

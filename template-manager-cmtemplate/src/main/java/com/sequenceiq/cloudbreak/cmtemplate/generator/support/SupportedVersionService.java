@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.generator.support;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 

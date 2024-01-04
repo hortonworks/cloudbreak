@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storag
 
 import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.storage.CloudStorageParametersV4Response;
 import com.sequenceiq.common.api.cloudstorage.old.validation.ValidAdlsGen2CloudStorageParameters;

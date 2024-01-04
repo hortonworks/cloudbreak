@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.flow.core.AbstractAction;
@@ -21,6 +21,6 @@ public abstract class AbstractStackAction<S extends FlowState, E extends FlowEve
     }
 
     protected String getErrorReason(Exception payloadException) {
-        return (payloadException == null || payloadException.getMessage() == null) ? "Unknown error" : payloadException.getMessage();
+        return payloadException == null || payloadException.getMessage() == null ? "Unknown error" : payloadException.getMessage();
     }
 }

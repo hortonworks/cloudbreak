@@ -39,7 +39,7 @@ public interface LoadBalancerResourceBuilder<C extends ResourceBuilderContext> e
      * will be provided to the {@link #build(ResourceBuilderContext, AuthenticatedContext, CloudLoadBalancer, CloudStack)} method to actually create these
      * resources on the cloud provider. In case the resource creation fails it will be rolled back using the resource name as a reference. To provide
      * resource names implement the {@link com.sequenceiq.cloudbreak.cloud.service.ResourceNameService} interface and inject it to the implementation
-     * using {@link javax.inject.Inject}.
+     * using {@link jakarta.inject.Inject}.
      *
      * @param context       Generic context object passed along with the flow to all methods. It is created by the {@link ResourceContextBuilder}.
      * @param auth          Authenticated context is provided to be able to send the requests to the cloud provider.

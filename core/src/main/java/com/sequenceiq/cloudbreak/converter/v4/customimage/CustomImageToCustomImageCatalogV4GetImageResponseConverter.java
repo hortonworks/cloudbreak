@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.converter.v4.customimage;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

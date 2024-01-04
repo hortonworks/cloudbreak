@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.usage.strategy;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.springframework.stereotype.Service;
 

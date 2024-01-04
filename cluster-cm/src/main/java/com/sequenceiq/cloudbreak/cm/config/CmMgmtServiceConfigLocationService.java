@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cm.config;
 import java.util.Arrays;
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;

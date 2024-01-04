@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.domain;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Assert;

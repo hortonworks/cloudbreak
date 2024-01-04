@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.controller.validation.loadbalancer;
 
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;

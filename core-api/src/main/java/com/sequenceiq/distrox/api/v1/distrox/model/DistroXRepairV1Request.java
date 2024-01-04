@@ -2,7 +2,7 @@ package com.sequenceiq.distrox.api.v1.distrox.model;
 
 import java.util.List;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RepairClusterRequest;
 import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull;

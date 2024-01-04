@@ -2,7 +2,7 @@ package com.sequenceiq.thunderhead.util;
 
 import java.util.concurrent.Callable;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import org.springframework.stereotype.Component;
 

@@ -3,7 +3,7 @@ package com.sequenceiq.datalake.controller.sdx;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.datalake.service.TagUtil.getTags;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

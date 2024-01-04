@@ -1,14 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.Storage;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * A HBase snapshot operation error.
@@ -163,7 +164,7 @@ public class ApiHBaseSnapshotError   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHBaseSnapshotError {\n");
-    
+
     sb.append("    tableName: ").append(toIndentedString(tableName)).append("\n");
     sb.append("    snapshotName: ").append(toIndentedString(snapshotName)).append("\n");
     sb.append("    storage: ").append(toIndentedString(storage)).append("\n");

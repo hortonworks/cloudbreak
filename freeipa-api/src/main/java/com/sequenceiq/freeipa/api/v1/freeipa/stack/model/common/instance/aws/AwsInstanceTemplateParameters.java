@@ -2,7 +2,7 @@ package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws;
 
 import java.io.Serializable;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions;
 

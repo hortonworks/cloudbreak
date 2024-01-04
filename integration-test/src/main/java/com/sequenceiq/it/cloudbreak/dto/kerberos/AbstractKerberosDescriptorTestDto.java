@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.dto.kerberos;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.KerberosDescriptorBase;
 import com.sequenceiq.it.cloudbreak.context.TestContext;

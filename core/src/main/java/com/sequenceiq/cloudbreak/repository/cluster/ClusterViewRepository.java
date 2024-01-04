@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.repository.cluster;
 
 
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
+import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 
 import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;

@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.client;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientRequestFilter;
-import javax.ws.rs.client.WebTarget;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientRequestFilter;
+import jakarta.ws.rs.client.WebTarget;
 
 import org.glassfish.jersey.client.ClientProperties;
 import org.slf4j.Logger;

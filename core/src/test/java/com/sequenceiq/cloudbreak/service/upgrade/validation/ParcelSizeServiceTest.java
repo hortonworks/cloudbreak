@@ -6,7 +6,7 @@ import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
 
 import java.util.Set;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

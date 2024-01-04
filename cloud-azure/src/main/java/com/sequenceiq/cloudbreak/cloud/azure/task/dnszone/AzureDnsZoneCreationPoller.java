@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.task.dnszone;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

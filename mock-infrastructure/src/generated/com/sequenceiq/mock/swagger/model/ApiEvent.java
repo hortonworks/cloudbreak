@@ -1,18 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiEventAttribute;
-import com.sequenceiq.mock.swagger.model.ApiEventCategory;
-import com.sequenceiq.mock.swagger.model.ApiEventSeverity;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Events model noteworthy incidents in Cloudera Manager or the managed Hadoop cluster. An event carries its event category, severity, and a string content. They also have generic attributes, which are free-form key value pairs. Important events may be promoted into alerts.
@@ -250,7 +249,7 @@ public class ApiEvent   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiEvent {\n");
-    
+
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    content: ").append(toIndentedString(content)).append("\n");
     sb.append("    timeOccurred: ").append(toIndentedString(timeOccurred)).append("\n");

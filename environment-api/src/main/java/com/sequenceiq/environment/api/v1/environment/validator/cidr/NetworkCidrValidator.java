@@ -3,8 +3,8 @@ package com.sequenceiq.environment.api.v1.environment.validator.cidr;
 import static com.sequenceiq.cloudbreak.validation.CidrValidatorHelper.isCidrPatternMatched;
 import static com.sequenceiq.cloudbreak.validation.CidrValidatorHelper.isPrefixLengthCouldBeDividedIntoSubnets;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 import org.apache.commons.lang3.StringUtils;
 

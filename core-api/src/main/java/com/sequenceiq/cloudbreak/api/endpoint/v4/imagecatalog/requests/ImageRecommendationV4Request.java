@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescript
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.IMAGE_SETTINGS;
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription.REGION;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;

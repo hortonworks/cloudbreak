@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventTyp
 
 import java.util.UUID;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;

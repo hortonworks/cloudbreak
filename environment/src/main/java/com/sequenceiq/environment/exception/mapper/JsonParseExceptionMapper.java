@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.exception.mapper;
 
-import javax.annotation.Priority;
-import javax.ws.rs.core.Response.Status;
+import jakarta.annotation.Priority;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 

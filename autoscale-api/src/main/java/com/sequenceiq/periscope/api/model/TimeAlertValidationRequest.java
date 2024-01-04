@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.api.model;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.sequenceiq.periscope.doc.ApiDescription.TimeAlertJsonProperties;
 

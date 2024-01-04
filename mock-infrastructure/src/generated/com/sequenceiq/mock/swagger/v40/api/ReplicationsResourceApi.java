@@ -5,35 +5,37 @@
  */
 package com.sequenceiq.mock.swagger.v40.api;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.Optional;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.mock.swagger.model.ApiCommand;
 import com.sequenceiq.mock.swagger.model.ApiReplicationCommandList;
 import com.sequenceiq.mock.swagger.model.ApiReplicationDiagnosticsCollectionArgs;
 import com.sequenceiq.mock.swagger.model.ApiReplicationSchedule;
 import com.sequenceiq.mock.swagger.model.ApiReplicationScheduleList;
 import com.sequenceiq.mock.swagger.model.ApiReplicationState;
-import java.math.BigDecimal;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T21:48:33.802+01:00")
 
 @Api(value = "ReplicationsResource", description = "the ReplicationsResource API")
@@ -57,10 +59,10 @@ public interface ReplicationsResourceApi {
     @ApiOperation(value = "Collect diagnostic data for a schedule, optionally for a subset of commands on that schedule, matched by schedule ID.", nickname = "collectDiagnosticData", notes = "Collect diagnostic data for a schedule, optionally for a subset of commands on that schedule, matched by schedule ID.  The returned command's resultDataUrl property, upon the commands completion, will refer to the generated diagnostic data. Available since API v11.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ReplicationsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/replications/{scheduleId}/collectDiagnosticData",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> collectDiagnosticData(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Schedule ID",required=true) @PathVariable("scheduleId") BigDecimal scheduleId,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "view to materialize", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view,@ApiParam(value = "Replication collection arguments"  )  @Valid @RequestBody ApiReplicationDiagnosticsCollectionArgs body) {
@@ -83,10 +85,10 @@ public interface ReplicationsResourceApi {
     @ApiOperation(value = "Creates one or more replication schedules.", nickname = "createSchedules", notes = "Creates one or more replication schedules. <p> Available since API v3. Only available with Cloudera Manager Enterprise Edition.", response = ApiReplicationScheduleList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ReplicationsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiReplicationScheduleList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/replications",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiReplicationScheduleList> createSchedules(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "List of the replication schedules to create."  )  @Valid @RequestBody ApiReplicationScheduleList body) {
@@ -109,10 +111,10 @@ public interface ReplicationsResourceApi {
     @ApiOperation(value = "Deletes all existing replication schedules.", nickname = "deleteAllSchedules", notes = "Deletes all existing replication schedules. <p> Available since API v3. Only available with Cloudera Manager Enterprise Edition.", response = ApiReplicationScheduleList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ReplicationsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success", response = ApiReplicationScheduleList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/replications",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.DELETE)
     default ResponseEntity<ApiReplicationScheduleList> deleteAllSchedules(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -134,10 +136,10 @@ public interface ReplicationsResourceApi {
     @ApiOperation(value = "Deletes an existing replication schedule.", nickname = "deleteSchedule", notes = "Deletes an existing replication schedule. <p> Available since API v3. Only available with Cloudera Manager Enterprise Edition.", response = ApiReplicationSchedule.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ReplicationsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success", response = ApiReplicationSchedule.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/replications/{scheduleId}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.DELETE)
     default ResponseEntity<ApiReplicationSchedule> deleteSchedule(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Id of an existing replication schedule.",required=true) @PathVariable("scheduleId") BigDecimal scheduleId,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -159,10 +161,10 @@ public interface ReplicationsResourceApi {
     @ApiOperation(value = "returns the replication state.", nickname = "getReplicationState", notes = "returns the replication state. for example if incremental export is enabled, etc", response = ApiReplicationState.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ReplicationsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiReplicationState.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/replications/replicationState",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiReplicationState> getReplicationState(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "view to materialize", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -184,10 +186,10 @@ public interface ReplicationsResourceApi {
     @ApiOperation(value = "Returns a list of commands triggered by a schedule.", nickname = "readHistory", notes = "Returns a list of commands triggered by a schedule.", response = ApiReplicationCommandList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ReplicationsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiReplicationCommandList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/replications/{scheduleId}/history",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiReplicationCommandList> readHistory(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Id of an existing replication schedule.",required=true) @PathVariable("scheduleId") BigDecimal scheduleId,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Maximum number of commands to retrieve.", defaultValue = "20") @Valid @RequestParam(value = "limit", required = false, defaultValue="20") Integer limit,@ApiParam(value = "Index of first command to retrieve.", defaultValue = "0") @Valid @RequestParam(value = "offset", required = false, defaultValue="0") Integer offset,@ApiParam(value = "The view to materialize.", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -209,10 +211,10 @@ public interface ReplicationsResourceApi {
     @ApiOperation(value = "Returns information for a specific replication schedule.", nickname = "readSchedule", notes = "Returns information for a specific replication schedule. <p> Available since API v3. Only available with Cloudera Manager Enterprise Edition.", response = ApiReplicationSchedule.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ReplicationsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiReplicationSchedule.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/replications/{scheduleId}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiReplicationSchedule> readSchedule(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Id of an existing replication schedule.",required=true) @PathVariable("scheduleId") BigDecimal scheduleId,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The view to materialize.", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -234,10 +236,10 @@ public interface ReplicationsResourceApi {
     @ApiOperation(value = "Returns information for all replication schedules.", nickname = "readSchedules", notes = "Returns information for all replication schedules. <p> Available since API v32.", response = ApiReplicationScheduleList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ReplicationsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiReplicationScheduleList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/replications",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiReplicationScheduleList> readSchedules(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "provides summary or detailed view, default is summary", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -259,10 +261,10 @@ public interface ReplicationsResourceApi {
     @ApiOperation(value = "Run the hdfs copy listing command.", nickname = "runCopyListing", notes = "Run the hdfs copy listing command <p> The copy listing command will be triggered with the provided arguments <p> Available since API v18. Only available with Cloudera Manager Enterprise Edition.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ReplicationsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/replications/hdfsCopyListing",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> runCopyListing(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = ""  )  @Valid @RequestBody String body) {
@@ -285,10 +287,10 @@ public interface ReplicationsResourceApi {
     @ApiOperation(value = "Run the schedule immediately.", nickname = "runSchedule", notes = "Run the schedule immediately. <p> The replication command will be triggered with the configured arguments, and will be recorded in the schedule's history. <p> Available since API v3. Only available with Cloudera Manager Enterprise Edition.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ReplicationsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/replications/{scheduleId}/run",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> runSchedule(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Id of an existing replication schedule.",required=true) @PathVariable("scheduleId") BigDecimal scheduleId,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Whether to execute a dry run.", defaultValue = "false") @Valid @RequestParam(value = "dryRun", required = false, defaultValue="false") Boolean dryRun) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -310,10 +312,10 @@ public interface ReplicationsResourceApi {
     @ApiOperation(value = "Updates an existing replication schedule.", nickname = "updateSchedule", notes = "Updates an existing replication schedule. <p> Available since API v3. Only available with Cloudera Manager Enterprise Edition.", response = ApiReplicationSchedule.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ReplicationsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success", response = ApiReplicationSchedule.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/replications/{scheduleId}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.PUT)
     default ResponseEntity<ApiReplicationSchedule> updateSchedule(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Id of an existing replication schedule.",required=true) @PathVariable("scheduleId") BigDecimal scheduleId,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = ""  )  @Valid @RequestBody ApiReplicationSchedule body) {

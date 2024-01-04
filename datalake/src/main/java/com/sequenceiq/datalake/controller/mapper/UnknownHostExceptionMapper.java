@@ -2,7 +2,7 @@ package com.sequenceiq.datalake.controller.mapper;
 
 import java.net.UnknownHostException;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import org.springframework.stereotype.Component;
 

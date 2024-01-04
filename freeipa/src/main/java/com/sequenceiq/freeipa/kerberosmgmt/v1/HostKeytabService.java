@@ -3,7 +3,7 @@ package com.sequenceiq.freeipa.kerberosmgmt.v1;
 import static com.sequenceiq.freeipa.kerberosmgmt.v1.KeytabCommonService.PRIVILEGE_DOES_NOT_EXIST;
 import static com.sequenceiq.freeipa.kerberosmgmt.v1.KeytabCommonService.ROLE_NOT_ALLOWED;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

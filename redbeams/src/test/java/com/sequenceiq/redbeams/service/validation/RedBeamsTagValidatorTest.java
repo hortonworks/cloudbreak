@@ -5,7 +5,7 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;

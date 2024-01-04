@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

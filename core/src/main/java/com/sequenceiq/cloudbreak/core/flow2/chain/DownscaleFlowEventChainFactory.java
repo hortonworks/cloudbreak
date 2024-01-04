@@ -10,7 +10,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscal
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

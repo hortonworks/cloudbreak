@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.orchestrator.model;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpoint;
 import com.sequenceiq.cloudbreak.util.HostUtil;

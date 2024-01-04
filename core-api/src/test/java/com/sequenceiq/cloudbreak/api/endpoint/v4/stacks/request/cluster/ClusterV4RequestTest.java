@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import java.util.Set;
 
-import javax.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolation;
 
 import org.hibernate.validator.HibernateValidator;
 import org.junit.Before;

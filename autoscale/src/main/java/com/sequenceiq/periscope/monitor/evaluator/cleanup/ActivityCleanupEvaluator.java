@@ -7,8 +7,8 @@ import static com.sequenceiq.periscope.domain.MetricType.TOTAL_SCALING_ACTIVITIE
 import java.util.Objects;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
+import jakarta.annotation.Nonnull;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

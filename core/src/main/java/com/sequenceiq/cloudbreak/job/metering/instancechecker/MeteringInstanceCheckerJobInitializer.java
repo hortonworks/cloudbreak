@@ -9,7 +9,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

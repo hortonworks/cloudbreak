@@ -1,15 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * A process represents a unix process to be managed by the Cloudera Manager agents. A process can be a daemon, e.g. if it is associated with a running role. It can also be a one-off process which is expected to start, run and finish.
@@ -76,7 +78,7 @@ public class ApiProcess   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiProcess {\n");
-    
+
     sb.append("    configFiles: ").append(toIndentedString(configFiles)).append("\n");
     sb.append("}");
     return sb.toString();

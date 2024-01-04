@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.exception.mapper;
 
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.ext.Provider;
 
 import org.springframework.stereotype.Component;
 

@@ -7,7 +7,7 @@ import static com.sequenceiq.periscope.domain.MetricType.THREADPOOL_THREADS_TOTA
 
 import java.util.concurrent.ExecutorService;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 

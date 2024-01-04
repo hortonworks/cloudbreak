@@ -1,23 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import io.swagger.annotations.ApiModel;
-import com.fasterxml.jackson.annotation.JsonValue;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * This will decide how cloud replication will take place
  */
 public enum ReplicationOption {
-  
+
   METADATA_ONLY("METADATA_ONLY"),
-  
+
   METADATA_AND_DATA("METADATA_AND_DATA"),
-  
+
   KEEP_DATA_IN_CLOUD("KEEP_DATA_IN_CLOUD");
 
   private String value;

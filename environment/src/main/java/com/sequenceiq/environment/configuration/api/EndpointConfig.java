@@ -3,8 +3,8 @@ package com.sequenceiq.environment.configuration.api;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.ext.ExceptionMapper;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.beans.factory.annotation.Value;

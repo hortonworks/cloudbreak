@@ -9,8 +9,8 @@ import static org.mockito.Mockito.doReturn;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.Payload;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.Payload;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;

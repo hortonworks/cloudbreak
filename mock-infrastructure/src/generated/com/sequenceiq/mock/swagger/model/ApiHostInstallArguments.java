@@ -1,16 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiMapEntry;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Arguments to perform installation on one or more hosts
@@ -359,7 +360,7 @@ public class ApiHostInstallArguments   {
   }
 
   /**
-   * 
+   *
    * @return subjectAltNames
   **/
   @ApiModelProperty(value = "")
@@ -408,7 +409,7 @@ public class ApiHostInstallArguments   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHostInstallArguments {\n");
-    
+
     sb.append("    hostNames: ").append(toIndentedString(hostNames)).append("\n");
     sb.append("    sshPort: ").append(toIndentedString(sshPort)).append("\n");
     sb.append("    userName: ").append(toIndentedString(userName)).append("\n");

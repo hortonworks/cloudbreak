@@ -1,14 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiServiceRef;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * An HBase snapshot descriptor.
@@ -42,7 +43,7 @@ public class ApiAdhocHBaseSnapshot   {
   }
 
   /**
-   * 
+   *
    * @return sourceAccount
   **/
   @ApiModelProperty(value = "")
@@ -62,7 +63,7 @@ public class ApiAdhocHBaseSnapshot   {
   }
 
   /**
-   * 
+   *
    * @return sourceTable
   **/
   @ApiModelProperty(value = "")
@@ -82,7 +83,7 @@ public class ApiAdhocHBaseSnapshot   {
   }
 
   /**
-   * 
+   *
    * @return sourceSchedulerPool
   **/
   @ApiModelProperty(value = "")
@@ -102,7 +103,7 @@ public class ApiAdhocHBaseSnapshot   {
   }
 
   /**
-   * 
+   *
    * @return sourceService
   **/
   @ApiModelProperty(value = "")
@@ -123,7 +124,7 @@ public class ApiAdhocHBaseSnapshot   {
   }
 
   /**
-   * 
+   *
    * @return sourceNumMappers
   **/
   @ApiModelProperty(value = "")
@@ -163,7 +164,7 @@ public class ApiAdhocHBaseSnapshot   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiAdhocHBaseSnapshot {\n");
-    
+
     sb.append("    sourceAccount: ").append(toIndentedString(sourceAccount)).append("\n");
     sb.append("    sourceTable: ").append(toIndentedString(sourceTable)).append("\n");
     sb.append("    sourceSchedulerPool: ").append(toIndentedString(sourceSchedulerPool)).append("\n");

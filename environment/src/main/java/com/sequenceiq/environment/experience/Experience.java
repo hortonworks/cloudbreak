@@ -3,7 +3,7 @@ package com.sequenceiq.environment.experience;
 import java.util.Map;
 import java.util.Set;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
 

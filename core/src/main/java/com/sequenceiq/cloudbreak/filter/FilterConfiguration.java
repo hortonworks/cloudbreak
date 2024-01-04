@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.filter;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;

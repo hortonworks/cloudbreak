@@ -6,9 +6,10 @@ import static com.sequenceiq.cloudbreak.quartz.configuration.SchedulerFactoryCon
 import java.util.Locale;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 import javax.sql.DataSource;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;

@@ -1,18 +1,18 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiHive3ReplicationMetricsMetadata;
-import com.sequenceiq.mock.swagger.model.ApiHive3ReplicationMetricsProgress;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
- * 
+ *
  */
 @ApiModel(description = "")
 @Validated
@@ -52,7 +52,7 @@ public class ApiHive3ReplicationMetricsResultRow   {
   }
 
   /**
-   * 
+   *
    * @return scheduledExecutionId
   **/
   @ApiModelProperty(value = "")
@@ -72,7 +72,7 @@ public class ApiHive3ReplicationMetricsResultRow   {
   }
 
   /**
-   * 
+   *
    * @return policy
   **/
   @ApiModelProperty(value = "")
@@ -92,7 +92,7 @@ public class ApiHive3ReplicationMetricsResultRow   {
   }
 
   /**
-   * 
+   *
    * @return dumpExecutionId
   **/
   @ApiModelProperty(value = "")
@@ -112,7 +112,7 @@ public class ApiHive3ReplicationMetricsResultRow   {
   }
 
   /**
-   * 
+   *
    * @return metadata
   **/
   @ApiModelProperty(value = "")
@@ -133,7 +133,7 @@ public class ApiHive3ReplicationMetricsResultRow   {
   }
 
   /**
-   * 
+   *
    * @return progress
   **/
   @ApiModelProperty(value = "")
@@ -154,7 +154,7 @@ public class ApiHive3ReplicationMetricsResultRow   {
   }
 
   /**
-   * 
+   *
    * @return startDate
   **/
   @ApiModelProperty(value = "")
@@ -174,7 +174,7 @@ public class ApiHive3ReplicationMetricsResultRow   {
   }
 
   /**
-   * 
+   *
    * @return endDate
   **/
   @ApiModelProperty(value = "")
@@ -194,7 +194,7 @@ public class ApiHive3ReplicationMetricsResultRow   {
   }
 
   /**
-   * 
+   *
    * @return errorMessage
   **/
   @ApiModelProperty(value = "")
@@ -237,7 +237,7 @@ public class ApiHive3ReplicationMetricsResultRow   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHive3ReplicationMetricsResultRow {\n");
-    
+
     sb.append("    scheduledExecutionId: ").append(toIndentedString(scheduledExecutionId)).append("\n");
     sb.append("    policy: ").append(toIndentedString(policy)).append("\n");
     sb.append("    dumpExecutionId: ").append(toIndentedString(dumpExecutionId)).append("\n");

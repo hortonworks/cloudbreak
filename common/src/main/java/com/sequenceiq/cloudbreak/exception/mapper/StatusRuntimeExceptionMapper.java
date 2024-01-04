@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.exception.mapper;
 
 import static io.grpc.Status.Code.DEADLINE_EXCEEDED;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

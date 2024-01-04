@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.gov;
 
 import static java.lang.String.format;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

@@ -1,29 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiCommissionState;
-import com.sequenceiq.mock.swagger.model.ApiConfigList;
-import com.sequenceiq.mock.swagger.model.ApiConfigStalenessStatus;
-import com.sequenceiq.mock.swagger.model.ApiEntityStatus;
-import com.sequenceiq.mock.swagger.model.ApiEntityTag;
-import com.sequenceiq.mock.swagger.model.ApiEntityType;
-import com.sequenceiq.mock.swagger.model.ApiHealthCheck;
-import com.sequenceiq.mock.swagger.model.ApiHealthSummary;
-import com.sequenceiq.mock.swagger.model.ApiHostRef;
-import com.sequenceiq.mock.swagger.model.ApiRoleConfigGroupRef;
-import com.sequenceiq.mock.swagger.model.ApiRoleState;
-import com.sequenceiq.mock.swagger.model.ApiServiceRef;
-import com.sequenceiq.mock.swagger.model.HaStatus;
-import com.sequenceiq.mock.swagger.model.ZooKeeperServerMode;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * A role represents a specific entity that participate in a service. Examples are JobTrackers, DataNodes, HBase Masters. Each role is assigned a host where it runs on.
@@ -554,7 +542,7 @@ public class ApiRole   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiRole {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    hostRef: ").append(toIndentedString(hostRef)).append("\n");

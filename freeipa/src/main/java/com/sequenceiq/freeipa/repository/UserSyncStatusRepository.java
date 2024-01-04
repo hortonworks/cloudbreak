@@ -2,7 +2,7 @@ package com.sequenceiq.freeipa.repository;
 
 import java.util.Optional;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.springframework.data.repository.CrudRepository;
 

@@ -5,31 +5,30 @@
  */
 package com.sequenceiq.mock.swagger.v31.api;
 
-import com.sequenceiq.mock.swagger.model.ApiCommand;
+import java.io.IOException;
 import java.math.BigDecimal;
-import org.springframework.core.io.Resource;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.*;
+import java.util.Optional;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.mock.swagger.model.ApiCommand;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T20:16:58.188+01:00")
 
 @Api(value = "CommandsResource", description = "the CommandsResource API")
@@ -53,10 +52,10 @@ public interface CommandsResourceApi {
     @ApiOperation(value = "Abort a running command.", nickname = "abortCommand", notes = "Abort a running command.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "CommandsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/commands/{commandId}/abort",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> abortCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The command id.",required=true) @PathVariable("commandId") BigDecimal commandId) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -78,10 +77,10 @@ public interface CommandsResourceApi {
     @ApiOperation(value = "Download a zip-compressed archive of standard error outputs for the command's one-off processes.", nickname = "getStandardError", notes = "Download a zip-compressed archive of standard error outputs for the command's one-off processes.  Log files are returned zipped together.", response = Resource.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "CommandsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = Resource.class) })
     @RequestMapping(value = "/commands/{commandId}/logs/stderr",
-        produces = { "application/octet-stream" }, 
+        produces = { "application/octet-stream" },
         method = RequestMethod.GET)
     default ResponseEntity<Resource> getStandardError(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The command id.",required=true) @PathVariable("commandId") BigDecimal commandId) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -103,10 +102,10 @@ public interface CommandsResourceApi {
     @ApiOperation(value = "Download a zip-compressed archive of standard outputs for the command's one-off processes.", nickname = "getStandardOutput", notes = "Download a zip-compressed archive of standard outputs for the command's one-off processes.  Log files are returned zipped together.", response = Resource.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "CommandsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = Resource.class) })
     @RequestMapping(value = "/commands/{commandId}/logs/stdout",
-        produces = { "application/octet-stream" }, 
+        produces = { "application/octet-stream" },
         method = RequestMethod.GET)
     default ResponseEntity<Resource> getStandardOutput(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The command id.",required=true) @PathVariable("commandId") BigDecimal commandId) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -128,10 +127,10 @@ public interface CommandsResourceApi {
     @ApiOperation(value = "Retrieve detailed information on an asynchronous command.", nickname = "readCommand", notes = "Retrieve detailed information on an asynchronous command.  <p>Cloudera Manager keeps the results and statuses of asynchronous commands, which have non-negative command IDs. On the other hand, synchronous commands complete immediately, and their results are passed back in the return object of the command execution API call. Outside of that return object, there is no way to check the result of a synchronous command.</p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "CommandsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/commands/{commandId}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiCommand> readCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The command id.",required=true) @PathVariable("commandId") BigDecimal commandId) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -153,10 +152,10 @@ public interface CommandsResourceApi {
     @ApiOperation(value = "Try to rerun a command.", nickname = "retry", notes = "Try to rerun a command.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "CommandsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/commands/{commandId}/retry",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> retry(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "ID of the command that needs to be run.",required=true) @PathVariable("commandId") BigDecimal commandId) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {

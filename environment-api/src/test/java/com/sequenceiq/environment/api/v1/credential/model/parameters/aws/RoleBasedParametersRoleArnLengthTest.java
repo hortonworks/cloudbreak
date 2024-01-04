@@ -2,7 +2,7 @@ package com.sequenceiq.environment.api.v1.credential.model.parameters.aws;
 
 import java.util.Set;
 
-import javax.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolation;
 
 import org.hibernate.validator.HibernateValidator;
 import org.junit.jupiter.api.Assertions;

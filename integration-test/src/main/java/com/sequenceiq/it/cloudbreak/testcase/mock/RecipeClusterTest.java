@@ -11,8 +11,8 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.pollingInter
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;

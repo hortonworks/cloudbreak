@@ -1,15 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiHostNameList;
-import com.sequenceiq.mock.swagger.model.ApiPerfInspectorPingArgs;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Arguments used for the Cloudera Manager level performance inspector. Network diagnostics will be run from every host in sourceHostList to every host in targetHostList.
@@ -118,7 +118,7 @@ public class ApiHostsPerfInspectorArgs   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHostsPerfInspectorArgs {\n");
-    
+
     sb.append("    sourceHostList: ").append(toIndentedString(sourceHostList)).append("\n");
     sb.append("    targetHostList: ").append(toIndentedString(targetHostList)).append("\n");
     sb.append("    pingArgs: ").append(toIndentedString(pingArgs)).append("\n");

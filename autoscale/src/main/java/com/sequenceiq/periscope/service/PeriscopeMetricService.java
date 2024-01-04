@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;

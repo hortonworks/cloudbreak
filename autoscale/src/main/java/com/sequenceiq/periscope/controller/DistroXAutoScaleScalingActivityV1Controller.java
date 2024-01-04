@@ -4,7 +4,7 @@ import static java.time.temporal.ChronoUnit.MINUTES;
 
 import java.time.Instant;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

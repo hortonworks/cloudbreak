@@ -7,7 +7,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MODIFY_PROXY
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MODIFY_PROXY_CONFIG_SALT_STATE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MODIFY_PROXY_CONFIG_SUCCESS;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -5,33 +5,35 @@
  */
 package com.sequenceiq.mock.swagger.v45.api;
 
+import java.io.IOException;
+import java.util.Optional;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.mock.swagger.model.ApiCommand;
 import com.sequenceiq.mock.swagger.model.ApiCommandList;
 import com.sequenceiq.mock.swagger.model.ApiRoleTypeList;
 import com.sequenceiq.mock.swagger.model.ApiService;
 import com.sequenceiq.mock.swagger.model.ApiServiceConfig;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-12-10T21:24:30.629+01:00")
 
 @Api(value = "MgmtServiceResource", description = "the MgmtServiceResource API")
@@ -55,7 +57,7 @@ public interface MgmtServiceResourceApi {
     @ApiOperation(value = "Automatically assign roles to hosts and create the roles for the Cloudera Management Service.", nickname = "autoAssignRoles", notes = "Automatically assign roles to hosts and create the roles for the Cloudera Management Service. <p> Assignments are done based on number of hosts in the deployment and hardware specifications. If no hosts are part of the deployment, an exception will be thrown preventing any role assignments. Existing roles will be taken into account and their assignments will be not be modified. The deployment should not have any clusters when calling this endpoint. If it does, an exception will be thrown preventing any role assignments. <p> Available since API v6.", authorizations = {
         @Authorization(value = "basic")
     }, tags={ "MgmtServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success") })
     @RequestMapping(value = "/cm/service/autoAssignRoles",
         method = RequestMethod.PUT)
@@ -71,7 +73,7 @@ public interface MgmtServiceResourceApi {
     @ApiOperation(value = "Automatically configures roles of the Cloudera Management Service.", nickname = "autoConfigure", notes = "Automatically configures roles of the Cloudera Management Service. <p> Overwrites some existing configurations. Only default role config groups must exist before calling this endpoint. Other role config groups must not exist. If they do, an exception will be thrown preventing any configuration. Ignores any clusters (and their services and roles) colocated with the Cloudera Management Service. To avoid over-committing the heap on hosts, place the Cloudera Management Service roles on machines not used by any of the clusters. <p> Available since API v6.", authorizations = {
         @Authorization(value = "basic")
     }, tags={ "MgmtServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success") })
     @RequestMapping(value = "/cm/service/autoConfigure",
         method = RequestMethod.PUT)
@@ -87,10 +89,10 @@ public interface MgmtServiceResourceApi {
     @ApiOperation(value = "Delete the Cloudera Management Services.", nickname = "deleteCMS", notes = "Delete the Cloudera Management Services. <p> This method will fail if a CMS instance doesn't already exist.", response = ApiService.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "MgmtServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "ApiService The deleted CMS information.", response = ApiService.class) })
     @RequestMapping(value = "/cm/service",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.DELETE)
     default ResponseEntity<ApiService> deleteCMS(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -112,10 +114,10 @@ public interface MgmtServiceResourceApi {
     @ApiOperation(value = "Put Cloudera Management Service into maintenance mode.", nickname = "enterMaintenanceMode", notes = "Put Cloudera Management Service into maintenance mode. This is a synchronous command. The result is known immediately upon return.  <p>Available since API v18.</p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "MgmtServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Synchronous command result.", response = ApiCommand.class) })
     @RequestMapping(value = "/cm/service/commands/enterMaintenanceMode",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> enterMaintenanceMode(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -137,10 +139,10 @@ public interface MgmtServiceResourceApi {
     @ApiOperation(value = "Take Cloudera Management Service out of maintenance mode.", nickname = "exitMaintenanceMode", notes = "Take Cloudera Management Service out of maintenance mode. This is a synchronous command. The result is known immediately upon return.  <p>Available since API v18.</p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "MgmtServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Synchronous command result.", response = ApiCommand.class) })
     @RequestMapping(value = "/cm/service/commands/exitMaintenanceMode",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> exitMaintenanceMode(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -162,10 +164,10 @@ public interface MgmtServiceResourceApi {
     @ApiOperation(value = "List active Cloudera Management Services commands.", nickname = "listActiveCommands", notes = "List active Cloudera Management Services commands.", response = ApiCommandList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "MgmtServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "A list of active role commands.", response = ApiCommandList.class) })
     @RequestMapping(value = "/cm/service/commands",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiCommandList> listActiveCommands(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -187,10 +189,10 @@ public interface MgmtServiceResourceApi {
     @ApiOperation(value = "List the supported role types for the Cloudera Management Services.", nickname = "listRoleTypes", notes = "List the supported role types for the Cloudera Management Services.", response = ApiRoleTypeList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "MgmtServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "List of role types the service supports.", response = ApiRoleTypeList.class) })
     @RequestMapping(value = "/cm/service/roleTypes",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiRoleTypeList> listRoleTypes(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -212,10 +214,10 @@ public interface MgmtServiceResourceApi {
     @ApiOperation(value = "Retrieve information about the Cloudera Management Services.", nickname = "readService", notes = "Retrieve information about the Cloudera Management Services.", response = ApiService.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "MgmtServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Details about the management service.", response = ApiService.class) })
     @RequestMapping(value = "/cm/service",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiService> readService(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -237,10 +239,10 @@ public interface MgmtServiceResourceApi {
     @ApiOperation(value = "Retrieve the configuration of the Cloudera Management Services.", nickname = "readServiceConfig", notes = "Retrieve the configuration of the Cloudera Management Services.", response = ApiServiceConfig.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "MgmtServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "List with configured and available configuration options.", response = ApiServiceConfig.class) })
     @RequestMapping(value = "/cm/service/config",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiServiceConfig> readServiceConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -262,10 +264,10 @@ public interface MgmtServiceResourceApi {
     @ApiOperation(value = "Restart the Cloudera Management Services.", nickname = "restartCommand", notes = "Restart the Cloudera Management Services.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "MgmtServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "A reference to the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/cm/service/commands/restart",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> restartCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -287,10 +289,10 @@ public interface MgmtServiceResourceApi {
     @ApiOperation(value = "Setup the Cloudera Management Services.", nickname = "setupCMS", notes = "Setup the Cloudera Management Services. <p> Configure the CMS instance and create all the management roles. The provided configuration data can be used to set up host mappings for each role, and required configuration such as database connection information for specific roles. <p> Regardless of the list of roles provided in the input data, all management roles are created by this call. The input is used to override any default settings for the specific roles. <p> This method needs a valid CM license to be installed beforehand. <p> This method does not start any services or roles. <p> This method will fail if a CMS instance already exists. <p> Available role types: <ul> <li>SERVICEMONITOR</li> <li>ACTIVITYMONITOR</li> <li>HOSTMONITOR</li> <li>REPORTSMANAGER</li> <li>EVENTSERVER</li> <li>ALERTPUBLISHER</li> <li>NAVIGATOR</li> <li>NAVIGATORMETASERVER</li> </ul>  <p/> REPORTSMANAGER, NAVIGATOR and NAVIGATORMETASERVER are only available with Cloudera Manager Enterprise Edition.", response = ApiService.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "MgmtServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "ApiService The CMS information.", response = ApiService.class) })
     @RequestMapping(value = "/cm/service",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.PUT)
     default ResponseEntity<ApiService> setupCMS(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Role configuration overrides."  )  @Valid @RequestBody ApiService body) {
@@ -313,10 +315,10 @@ public interface MgmtServiceResourceApi {
     @ApiOperation(value = "Start the Cloudera Management Services.", nickname = "startCommand", notes = "Start the Cloudera Management Services.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "MgmtServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "A reference to the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/cm/service/commands/start",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> startCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -338,10 +340,10 @@ public interface MgmtServiceResourceApi {
     @ApiOperation(value = "Stop the Cloudera Management Services.", nickname = "stopCommand", notes = "Stop the Cloudera Management Services.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "MgmtServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "A reference to the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/cm/service/commands/stop",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> stopCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -363,10 +365,10 @@ public interface MgmtServiceResourceApi {
     @ApiOperation(value = "Update the Cloudera Management Services configuration.", nickname = "updateServiceConfig", notes = "Update the Cloudera Management Services configuration. <p> If a value is set in the given configuration, it will be added to the service's configuration, replacing any existing entries. If a value is unset (its value is null), the existing configuration for the attribute will be erased, if any. <p> Attributes that are not listed in the input will maintain their current values in the configuration.", response = ApiServiceConfig.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "MgmtServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "The new service configuration.", response = ApiServiceConfig.class) })
     @RequestMapping(value = "/cm/service/config",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.PUT)
     default ResponseEntity<ApiServiceConfig> updateServiceConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Optional message describing the changes.") @Valid @RequestParam(value = "message", required = false) String message,@ApiParam(value = "Configuration changes."  )  @Valid @RequestBody ApiServiceConfig body) {

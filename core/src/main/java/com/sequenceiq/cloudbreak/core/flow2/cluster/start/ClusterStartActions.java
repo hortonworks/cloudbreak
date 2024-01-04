@@ -4,7 +4,7 @@ import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2Event
 
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

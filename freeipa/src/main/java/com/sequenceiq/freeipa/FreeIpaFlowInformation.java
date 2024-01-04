@@ -4,7 +4,7 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedS
 
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

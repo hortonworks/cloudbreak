@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 

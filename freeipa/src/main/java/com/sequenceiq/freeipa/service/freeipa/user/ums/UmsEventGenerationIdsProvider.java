@@ -2,7 +2,7 @@ package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

@@ -1,14 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ValidationState;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Model for a configuration parameter.  When an entry&#39;s &lt;i&gt;value&lt;/i&gt; property is not available, it means the entry is not configured. This means that the default value for the entry, if any, will be used. Setting a value to &lt;i&gt;null&lt;/i&gt; also can be used to unset any previously set value for the parameter, reverting to the default value (if any).
@@ -307,7 +308,7 @@ public class ApiConfig   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiConfig {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    value: ").append(toIndentedString(value)).append("\n");
     sb.append("    required: ").append(toIndentedString(required)).append("\n");

@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.ccm.endpoint;
 
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * An endpoint finder that returns an endpoint based on a direct connection to the target instance on the

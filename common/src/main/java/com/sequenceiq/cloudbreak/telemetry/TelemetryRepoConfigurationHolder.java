@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.telemetry;
 
 import static com.sequenceiq.common.model.OsType.RHEL8;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

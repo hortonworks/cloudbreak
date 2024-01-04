@@ -3,14 +3,14 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.operation;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.operation.docs.OperationOpDescriptions.GET_OPERATIONS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.operation.docs.OperationOpDescriptions.NOTES;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.flow.api.model.operation.OperationView;

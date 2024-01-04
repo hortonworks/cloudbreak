@@ -1,13 +1,13 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * An HDFS snapshot descriptor.
@@ -137,7 +137,7 @@ public class ApiHdfsSnapshot   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHdfsSnapshot {\n");
-    
+
     sb.append("    path: ").append(toIndentedString(path)).append("\n");
     sb.append("    snapshotName: ").append(toIndentedString(snapshotName)).append("\n");
     sb.append("    snapshotPath: ").append(toIndentedString(snapshotPath)).append("\n");

@@ -3,7 +3,7 @@ package com.sequenceiq.datalake.service.imagecatalog;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

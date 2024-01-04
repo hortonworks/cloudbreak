@@ -2,8 +2,8 @@ package com.sequenceiq.environment.network.service;
 
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;

@@ -3,7 +3,7 @@ package com.sequenceiq.freeipa.kerberosmgmt.v1;
 import java.util.Locale;
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.service.client;
 
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 
 import org.springframework.stereotype.Service;
 

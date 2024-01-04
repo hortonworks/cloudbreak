@@ -1,23 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiCluster;
-import com.sequenceiq.mock.swagger.model.ApiCmPeer;
-import com.sequenceiq.mock.swagger.model.ApiConfigList;
-import com.sequenceiq.mock.swagger.model.ApiHost;
-import com.sequenceiq.mock.swagger.model.ApiHostTemplateList;
-import com.sequenceiq.mock.swagger.model.ApiService;
-import com.sequenceiq.mock.swagger.model.ApiUser;
-import com.sequenceiq.mock.swagger.model.ApiVersionInfo;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * This objects represents a deployment including all clusters, hosts, services, roles, etc in the system.  It can be used to save and restore all settings.
@@ -336,7 +330,7 @@ public class ApiDeployment   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiDeployment {\n");
-    
+
     sb.append("    timestamp: ").append(toIndentedString(timestamp)).append("\n");
     sb.append("    clusters: ").append(toIndentedString(clusters)).append("\n");
     sb.append("    hosts: ").append(toIndentedString(hosts)).append("\n");

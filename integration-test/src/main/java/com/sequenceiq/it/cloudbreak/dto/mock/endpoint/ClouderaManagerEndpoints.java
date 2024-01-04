@@ -3,7 +3,7 @@ package com.sequenceiq.it.cloudbreak.dto.mock.endpoint;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Entity;
 
 import org.springframework.http.HttpMethod;
 

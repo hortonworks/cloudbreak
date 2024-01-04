@@ -2,7 +2,7 @@ package com.sequenceiq.freeipa.service.rotation.executor;
 
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

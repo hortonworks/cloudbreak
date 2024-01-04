@@ -5,8 +5,8 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CR
 
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 

@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.controller.mapper;
 
-import javax.persistence.EntityNotFoundException;
-import javax.ws.rs.core.Response.Status;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 

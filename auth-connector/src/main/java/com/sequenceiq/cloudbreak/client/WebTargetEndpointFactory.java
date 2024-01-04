@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.client;
 
-import javax.ws.rs.client.WebTarget;
+import jakarta.ws.rs.client.WebTarget;
 
 import org.glassfish.jersey.client.proxy.WebResourceFactory;
 

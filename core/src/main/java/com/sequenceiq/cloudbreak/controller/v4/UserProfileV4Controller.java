@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
-import javax.validation.Valid;
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
+import jakarta.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 

@@ -1,13 +1,13 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Rolling upgrade arguments used in the CDH Upgrade Command. Part of ApiCdhUpgradeArgs.
@@ -113,7 +113,7 @@ public class ApiRollingUpgradeClusterArgs   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiRollingUpgradeClusterArgs {\n");
-    
+
     sb.append("    slaveBatchSize: ").append(toIndentedString(slaveBatchSize)).append("\n");
     sb.append("    sleepSeconds: ").append(toIndentedString(sleepSeconds)).append("\n");
     sb.append("    slaveFailCountThreshold: ").append(toIndentedString(slaveFailCountThreshold)).append("\n");

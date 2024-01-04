@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 

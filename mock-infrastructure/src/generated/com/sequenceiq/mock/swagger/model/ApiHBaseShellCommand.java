@@ -1,13 +1,13 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * API request to execute generic hbase shell command  The payload (command) is passed as it is to hbase shell, so the caller needs to know the exact syntax of the supported hbase shell command, based on underlying hbase version
@@ -29,7 +29,7 @@ public class ApiHBaseShellCommand   {
   }
 
   /**
-   * 
+   *
    * @return payload
   **/
   @ApiModelProperty(value = "")
@@ -65,7 +65,7 @@ public class ApiHBaseShellCommand   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHBaseShellCommand {\n");
-    
+
     sb.append("    payload: ").append(toIndentedString(payload)).append("\n");
     sb.append("}");
     return sb.toString();

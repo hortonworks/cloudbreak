@@ -1,18 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiServiceRef;
-import com.sequenceiq.mock.swagger.model.PolicyStatus;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Replication Arguments for Hive3 schedules / policies
@@ -92,7 +91,7 @@ public class ApiHive3ReplicationArguments   {
   }
 
   /**
-   * 
+   *
    * @return sourceHiveService
   **/
   @ApiModelProperty(value = "")
@@ -113,7 +112,7 @@ public class ApiHive3ReplicationArguments   {
   }
 
   /**
-   * 
+   *
    * @return status
   **/
   @ApiModelProperty(value = "")
@@ -134,7 +133,7 @@ public class ApiHive3ReplicationArguments   {
   }
 
   /**
-   * 
+   *
    * @return rangerReplication
   **/
   @ApiModelProperty(value = "")
@@ -154,7 +153,7 @@ public class ApiHive3ReplicationArguments   {
   }
 
   /**
-   * 
+   *
    * @return atlasReplication
   **/
   @ApiModelProperty(value = "")
@@ -174,7 +173,7 @@ public class ApiHive3ReplicationArguments   {
   }
 
   /**
-   * 
+   *
    * @return externalTableReplication
   **/
   @ApiModelProperty(value = "")
@@ -194,7 +193,7 @@ public class ApiHive3ReplicationArguments   {
   }
 
   /**
-   * 
+   *
    * @return externalTableBaseDir
   **/
   @ApiModelProperty(value = "")
@@ -214,7 +213,7 @@ public class ApiHive3ReplicationArguments   {
   }
 
   /**
-   * 
+   *
    * @return distcpOnTarget
   **/
   @ApiModelProperty(value = "")
@@ -234,7 +233,7 @@ public class ApiHive3ReplicationArguments   {
   }
 
   /**
-   * 
+   *
    * @return numMaps
   **/
   @ApiModelProperty(value = "")
@@ -254,7 +253,7 @@ public class ApiHive3ReplicationArguments   {
   }
 
   /**
-   * 
+   *
    * @return bandwidthPerMap
   **/
   @ApiModelProperty(value = "")
@@ -282,7 +281,7 @@ public class ApiHive3ReplicationArguments   {
   }
 
   /**
-   * 
+   *
    * @return policyOptions
   **/
   @ApiModelProperty(value = "")
@@ -302,7 +301,7 @@ public class ApiHive3ReplicationArguments   {
   }
 
   /**
-   * 
+   *
    * @return sourceDbName
   **/
   @ApiModelProperty(value = "")
@@ -322,7 +321,7 @@ public class ApiHive3ReplicationArguments   {
   }
 
   /**
-   * 
+   *
    * @return targetDbName
   **/
   @ApiModelProperty(value = "")
@@ -342,7 +341,7 @@ public class ApiHive3ReplicationArguments   {
   }
 
   /**
-   * 
+   *
    * @return policyName
   **/
   @ApiModelProperty(value = "")
@@ -362,7 +361,7 @@ public class ApiHive3ReplicationArguments   {
   }
 
   /**
-   * 
+   *
    * @return scheduleClause
   **/
   @ApiModelProperty(value = "")
@@ -382,7 +381,7 @@ public class ApiHive3ReplicationArguments   {
   }
 
   /**
-   * 
+   *
    * @return runAs
   **/
   @ApiModelProperty(value = "")
@@ -402,7 +401,7 @@ public class ApiHive3ReplicationArguments   {
   }
 
   /**
-   * 
+   *
    * @return hiveOp
   **/
   @ApiModelProperty(value = "")
@@ -422,7 +421,7 @@ public class ApiHive3ReplicationArguments   {
   }
 
   /**
-   * 
+   *
    * @return hiveUpdateOp
   **/
   @ApiModelProperty(value = "")
@@ -442,7 +441,7 @@ public class ApiHive3ReplicationArguments   {
   }
 
   /**
-   * 
+   *
    * @return excludeSource
   **/
   @ApiModelProperty(value = "")
@@ -462,7 +461,7 @@ public class ApiHive3ReplicationArguments   {
   }
 
   /**
-   * 
+   *
    * @return excludeTarget
   **/
   @ApiModelProperty(value = "")
@@ -482,7 +481,7 @@ public class ApiHive3ReplicationArguments   {
   }
 
   /**
-   * 
+   *
    * @return failoverStatus
   **/
   @ApiModelProperty(value = "")
@@ -537,7 +536,7 @@ public class ApiHive3ReplicationArguments   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHive3ReplicationArguments {\n");
-    
+
     sb.append("    sourceHiveService: ").append(toIndentedString(sourceHiveService)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    rangerReplication: ").append(toIndentedString(rangerReplication)).append("\n");

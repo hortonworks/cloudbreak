@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.StackAuthenticationModelDescription;
 

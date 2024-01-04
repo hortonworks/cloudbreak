@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.quartz.metric;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.quartz.SchedulerException;
 import org.quartz.listeners.SchedulerListenerSupport;

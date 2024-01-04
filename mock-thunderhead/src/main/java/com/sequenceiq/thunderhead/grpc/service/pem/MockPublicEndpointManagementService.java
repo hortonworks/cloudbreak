@@ -2,7 +2,7 @@ package com.sequenceiq.thunderhead.grpc.service.pem;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

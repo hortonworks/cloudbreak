@@ -1,13 +1,13 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Arguments used for Rolling Restart commands.
@@ -93,7 +93,7 @@ public class ApiImpalaRoleDiagnosticsArgs   {
   }
 
   /**
-   * 
+   *
    * @return stacksCount
   **/
   @ApiModelProperty(value = "")
@@ -133,7 +133,7 @@ public class ApiImpalaRoleDiagnosticsArgs   {
   }
 
   /**
-   * 
+   *
    * @return jmap
   **/
   @ApiModelProperty(value = "")
@@ -153,7 +153,7 @@ public class ApiImpalaRoleDiagnosticsArgs   {
   }
 
   /**
-   * 
+   *
    * @return gcore
   **/
   @ApiModelProperty(value = "")
@@ -173,7 +173,7 @@ public class ApiImpalaRoleDiagnosticsArgs   {
   }
 
   /**
-   * 
+   *
    * @return minidumpsCount
   **/
   @ApiModelProperty(value = "")
@@ -193,7 +193,7 @@ public class ApiImpalaRoleDiagnosticsArgs   {
   }
 
   /**
-   * 
+   *
    * @return minidumpsIntervalSeconds
   **/
   @ApiModelProperty(value = "")
@@ -213,7 +213,7 @@ public class ApiImpalaRoleDiagnosticsArgs   {
   }
 
   /**
-   * 
+   *
    * @return phoneHome
   **/
   @ApiModelProperty(value = "")
@@ -257,7 +257,7 @@ public class ApiImpalaRoleDiagnosticsArgs   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiImpalaRoleDiagnosticsArgs {\n");
-    
+
     sb.append("    ticketNumber: ").append(toIndentedString(ticketNumber)).append("\n");
     sb.append("    comments: ").append(toIndentedString(comments)).append("\n");
     sb.append("    stacksCount: ").append(toIndentedString(stacksCount)).append("\n");

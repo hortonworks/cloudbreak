@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses;
 
 import java.util.Map;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ConnectorModelDescription;

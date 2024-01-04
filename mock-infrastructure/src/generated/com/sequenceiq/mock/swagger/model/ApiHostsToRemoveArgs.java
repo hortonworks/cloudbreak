@@ -1,15 +1,18 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Arguments passed to the remove hosts from cluster api, every host passed in has the roles in it deleted and the host is removed from the cluster, but is still managed by CM.  If deleteHosts is set to true hosts are also deleted from CM.
@@ -43,7 +46,7 @@ public class ApiHostsToRemoveArgs   {
   }
 
   /**
-   * 
+   *
    * @return hostsToRemove
   **/
   @ApiModelProperty(value = "")
@@ -63,7 +66,7 @@ public class ApiHostsToRemoveArgs   {
   }
 
   /**
-   * 
+   *
    * @return deleteHosts
   **/
   @ApiModelProperty(required = true, value = "")
@@ -101,7 +104,7 @@ public class ApiHostsToRemoveArgs   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHostsToRemoveArgs {\n");
-    
+
     sb.append("    hostsToRemove: ").append(toIndentedString(hostsToRemove)).append("\n");
     sb.append("    deleteHosts: ").append(toIndentedString(deleteHosts)).append("\n");
     sb.append("}");

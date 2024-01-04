@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.job.stackpatcher.config;
 
 import java.util.Map;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

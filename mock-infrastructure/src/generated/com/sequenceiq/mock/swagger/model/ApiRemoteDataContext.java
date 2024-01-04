@@ -1,17 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiEndPoint;
-import com.sequenceiq.mock.swagger.model.ApiMapEntry;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * This object contains enough information for a Workload cluster to connect to an SDX cluster. This object contains no secrets.
@@ -161,7 +161,7 @@ public class ApiRemoteDataContext   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiRemoteDataContext {\n");
-    
+
     sb.append("    endPointId: ").append(toIndentedString(endPointId)).append("\n");
     sb.append("    endPoints: ").append(toIndentedString(endPoints)).append("\n");
     sb.append("    configs: ").append(toIndentedString(configs)).append("\n");

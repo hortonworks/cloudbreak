@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.service.upgrade.image.filter;
 
 import java.util.List;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 
 import org.springframework.stereotype.Service;
 

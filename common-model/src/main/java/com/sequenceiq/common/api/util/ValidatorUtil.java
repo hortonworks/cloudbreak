@@ -1,6 +1,6 @@
 package com.sequenceiq.common.api.util;
 
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class ValidatorUtil {
 

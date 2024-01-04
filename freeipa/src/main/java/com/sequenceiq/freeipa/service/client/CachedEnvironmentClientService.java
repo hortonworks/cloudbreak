@@ -2,8 +2,8 @@ package com.sequenceiq.freeipa.service.client;
 
 import static com.sequenceiq.freeipa.cache.EnvironmentCache.FREEIPA_ENVIRONMENT_CACHE;
 
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;

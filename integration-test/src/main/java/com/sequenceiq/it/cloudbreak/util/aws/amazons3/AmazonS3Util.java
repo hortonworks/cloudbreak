@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.util.aws.amazons3;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

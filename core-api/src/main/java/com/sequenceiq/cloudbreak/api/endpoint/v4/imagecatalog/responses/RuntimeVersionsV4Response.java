@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses;
 
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

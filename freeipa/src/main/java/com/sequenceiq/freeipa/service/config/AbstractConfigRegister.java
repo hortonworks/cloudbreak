@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.service.config;
 
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.entity.InstanceGroup;

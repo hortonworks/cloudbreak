@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.service.workspace;
 
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;

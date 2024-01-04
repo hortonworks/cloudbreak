@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 import com.sequenceiq.common.api.cloudstorage.CloudStorageV1Base;
 import com.sequenceiq.common.api.cloudstorage.old.EfsCloudStorageV1Parameters;

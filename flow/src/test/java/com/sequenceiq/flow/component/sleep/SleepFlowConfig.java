@@ -2,7 +2,7 @@ package com.sequenceiq.flow.component.sleep;
 
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import com.sequenceiq.flow.component.sleep.event.SleepEvent;
 import com.sequenceiq.flow.core.FlowTriggerCondition;

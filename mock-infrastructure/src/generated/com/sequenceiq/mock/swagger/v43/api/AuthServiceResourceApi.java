@@ -5,33 +5,35 @@
  */
 package com.sequenceiq.mock.swagger.v43.api;
 
+import java.io.IOException;
+import java.util.Optional;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.mock.swagger.model.ApiCommand;
 import com.sequenceiq.mock.swagger.model.ApiCommandList;
 import com.sequenceiq.mock.swagger.model.ApiRoleTypeList;
 import com.sequenceiq.mock.swagger.model.ApiService;
 import com.sequenceiq.mock.swagger.model.ApiServiceConfig;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-04-23T12:05:48.864+02:00")
 
 @Api(value = "AuthServiceResource", description = "the AuthServiceResource API")
@@ -55,7 +57,7 @@ public interface AuthServiceResourceApi {
     @ApiOperation(value = "Automatically assign roles to hosts and create the roles for the Authentication Service.", nickname = "autoAssignRoles", notes = "Automatically assign roles to hosts and create the roles for the Authentication Service. <p> Assignments are done based on number of hosts in the deployment and hardware specifications. If no hosts are part of the deployment, an exception will be thrown preventing any role assignments. Existing roles will be taken into account and their assignments will be not be modified. The deployment should not have any clusters when calling this endpoint. If it does, an exception will be thrown preventing any role assignments.", authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success") })
     @RequestMapping(value = "/cm/authService/autoAssignRoles",
         method = RequestMethod.PUT)
@@ -71,7 +73,7 @@ public interface AuthServiceResourceApi {
     @ApiOperation(value = "Automatically configures roles of the Authentication Service.", nickname = "autoConfigure", notes = "Automatically configures roles of the Authentication Service. <p> Overwrites some existing configurations. Only default role config groups must exist before calling this endpoint. Other role config groups must not exist. If they do, an exception will be thrown preventing any configuration. Ignores any clusters (and their services and roles) colocated with the Authentication Service.", authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success") })
     @RequestMapping(value = "/cm/authService/autoConfigure",
         method = RequestMethod.PUT)
@@ -87,10 +89,10 @@ public interface AuthServiceResourceApi {
     @ApiOperation(value = "Delete the Authentication Service.", nickname = "delete", notes = "Delete the Authentication Service. <p> This method will fail if a CMS instance doesn't already exist.", response = ApiService.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "ApiService The deleted CMS information.", response = ApiService.class) })
     @RequestMapping(value = "/cm/authService",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.DELETE)
     default ResponseEntity<ApiService> delete(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -112,10 +114,10 @@ public interface AuthServiceResourceApi {
     @ApiOperation(value = "Put the Authentication Service into maintenance mode.", nickname = "enterMaintenanceMode", notes = "Put the Authentication Service into maintenance mode. This is a synchronous command. The result is known immediately upon return.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Synchronous command result.", response = ApiCommand.class) })
     @RequestMapping(value = "/cm/authService/commands/enterMaintenanceMode",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> enterMaintenanceMode(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -137,10 +139,10 @@ public interface AuthServiceResourceApi {
     @ApiOperation(value = "Take the Authentication Service out of maintenance mode.", nickname = "exitMaintenanceMode", notes = "Take the Authentication Service out of maintenance mode. This is a synchronous command. The result is known immediately upon return.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Synchronous command result.", response = ApiCommand.class) })
     @RequestMapping(value = "/cm/authService/commands/exitMaintenanceMode",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> exitMaintenanceMode(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -162,10 +164,10 @@ public interface AuthServiceResourceApi {
     @ApiOperation(value = "List active Authentication Service commands.", nickname = "listActiveCommands", notes = "List active Authentication Service commands.", response = ApiCommandList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "A list of active role commands.", response = ApiCommandList.class) })
     @RequestMapping(value = "/cm/authService/commands",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiCommandList> listActiveCommands(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -187,10 +189,10 @@ public interface AuthServiceResourceApi {
     @ApiOperation(value = "List the supported role types for the Authentication Service.", nickname = "listRoleTypes", notes = "List the supported role types for the Authentication Service.", response = ApiRoleTypeList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "List of role types the service supports.", response = ApiRoleTypeList.class) })
     @RequestMapping(value = "/cm/authService/roleTypes",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiRoleTypeList> listRoleTypes(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -212,10 +214,10 @@ public interface AuthServiceResourceApi {
     @ApiOperation(value = "Retrieve information about the Authentication Services.", nickname = "readService", notes = "Retrieve information about the Authentication Services.", response = ApiService.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Details about the management service.", response = ApiService.class) })
     @RequestMapping(value = "/cm/authService",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiService> readService(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -237,10 +239,10 @@ public interface AuthServiceResourceApi {
     @ApiOperation(value = "", nickname = "readServiceConfig", notes = "", response = ApiServiceConfig.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "", response = ApiServiceConfig.class) })
     @RequestMapping(value = "/cm/authService/config",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiServiceConfig> readServiceConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -262,10 +264,10 @@ public interface AuthServiceResourceApi {
     @ApiOperation(value = "Restart the Authentication Service.", nickname = "restartCommand", notes = "Restart the Authentication Service.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "A reference to the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/cm/authService/commands/restart",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> restartCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -287,10 +289,10 @@ public interface AuthServiceResourceApi {
     @ApiOperation(value = "Setup the Authentication Service.", nickname = "setup", notes = "Setup the Authentication Service. <p> Configure the Auth Service instance with the information given in the ApiService. The provided configuration data can be used to set up host mappings for each role, and required configuration such as database connection information for specific roles. <p> This method needs a valid CM license to be installed beforehand. <p> This method does not start any services or roles. <p> This method will fail if a Auth Service instance already exists. <p> Available role types: <ul> <li>AUTHSRV</li> </ul>", response = ApiService.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "ApiService The CMS information.", response = ApiService.class) })
     @RequestMapping(value = "/cm/authService",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.PUT)
     default ResponseEntity<ApiService> setup(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Role configuration overrides."  )  @Valid @RequestBody ApiService body) {
@@ -313,10 +315,10 @@ public interface AuthServiceResourceApi {
     @ApiOperation(value = "Start the Authentication Service.", nickname = "startCommand", notes = "Start the Authentication Service.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "A reference to the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/cm/authService/commands/start",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> startCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -338,10 +340,10 @@ public interface AuthServiceResourceApi {
     @ApiOperation(value = "Stop the Authentication Service.", nickname = "stopCommand", notes = "Stop the Authentication Service.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "A reference to the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/cm/authService/commands/stop",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> stopCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -363,10 +365,10 @@ public interface AuthServiceResourceApi {
     @ApiOperation(value = "", nickname = "updateServiceConfig", notes = "", response = ApiServiceConfig.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthServiceResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "", response = ApiServiceConfig.class) })
     @RequestMapping(value = "/cm/authService/config",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.PUT)
     default ResponseEntity<ApiServiceConfig> updateServiceConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "") @Valid @RequestParam(value = "message", required = false) String message,@ApiParam(value = ""  )  @Valid @RequestBody ApiServiceConfig body) {

@@ -1,6 +1,6 @@
 package com.sequenceiq.mock.controller;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;

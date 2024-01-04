@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.ccmimpl.ccmv2;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.TimeoutRetryPolicy;

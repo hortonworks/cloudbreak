@@ -1,7 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 
 import org.testng.annotations.Test;
 

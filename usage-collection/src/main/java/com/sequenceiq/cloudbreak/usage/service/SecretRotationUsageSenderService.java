@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.usage.service;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPSecretRotationEvent;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPSecretRotationStatus;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

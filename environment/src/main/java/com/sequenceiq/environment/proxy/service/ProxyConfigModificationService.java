@@ -3,7 +3,7 @@ package com.sequenceiq.environment.proxy.service;
 import java.util.List;
 import java.util.Objects;
 
-import javax.ws.rs.BadRequestException;
+import jakarta.ws.rs.BadRequestException;
 
 import org.springframework.stereotype.Service;
 

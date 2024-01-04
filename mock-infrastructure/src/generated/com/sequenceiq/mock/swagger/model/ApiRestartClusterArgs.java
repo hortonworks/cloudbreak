@@ -1,15 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Arguments used for Cluster Restart command.  Since V11: If both restartOnlyStaleServices and restartServiceNames are specified, a service must be specified in restartServiceNames and also be stale, in order to be restarted.
@@ -124,7 +126,7 @@ public class ApiRestartClusterArgs   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiRestartClusterArgs {\n");
-    
+
     sb.append("    restartOnlyStaleServices: ").append(toIndentedString(restartOnlyStaleServices)).append("\n");
     sb.append("    redeployClientConfiguration: ").append(toIndentedString(redeployClientConfiguration)).append("\n");
     sb.append("    restartServiceNames: ").append(toIndentedString(restartServiceNames)).append("\n");

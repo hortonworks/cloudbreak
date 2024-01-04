@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.polling.nginx;
 
-import javax.ws.rs.client.Client;
+import jakarta.ws.rs.client.Client;
 
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager.SavingX509TrustManager;
 

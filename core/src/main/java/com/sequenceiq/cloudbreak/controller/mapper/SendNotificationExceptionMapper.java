@@ -4,8 +4,8 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.COMMON_BAD_REQUEST_N
 
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

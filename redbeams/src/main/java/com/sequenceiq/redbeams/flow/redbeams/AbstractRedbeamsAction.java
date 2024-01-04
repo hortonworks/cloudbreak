@@ -1,6 +1,6 @@
 package com.sequenceiq.redbeams.flow.redbeams;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.flow.core.AbstractAction;

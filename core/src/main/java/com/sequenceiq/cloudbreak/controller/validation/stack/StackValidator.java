@@ -9,7 +9,7 @@ import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant
 
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;

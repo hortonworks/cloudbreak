@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.service.upgrade.sync.db;
 
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

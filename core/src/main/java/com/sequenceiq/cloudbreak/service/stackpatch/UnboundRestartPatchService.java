@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.UNBOUND_REST
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COM
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RECOVERY_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RECOVERY_TEARDOWN_FINISHED;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

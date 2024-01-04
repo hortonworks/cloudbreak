@@ -5,30 +5,31 @@
  */
 package com.sequenceiq.mock.swagger.v31.api;
 
-import com.sequenceiq.mock.swagger.model.ApiDashboard;
-import com.sequenceiq.mock.swagger.model.ApiDashboardList;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.*;
+import java.io.IOException;
+import java.util.Optional;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.mock.swagger.model.ApiDashboard;
+import com.sequenceiq.mock.swagger.model.ApiDashboardList;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T20:16:58.188+01:00")
 
 @Api(value = "DashboardsResource", description = "the DashboardsResource API")
@@ -52,10 +53,10 @@ public interface DashboardsResourceApi {
     @ApiOperation(value = "Creates the list of dashboards.", nickname = "createDashboards", notes = "Creates the list of dashboards. If any of the dashboards already exist this whole command will fail and no dashboards will be created. <p> Available since API v6.", response = ApiDashboardList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "DashboardsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiDashboardList.class) })
     @RequestMapping(value = "/timeseries/dashboards",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiDashboardList> createDashboards(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The list of dashboards to create."  )  @Valid @RequestBody ApiDashboardList body) {
@@ -78,10 +79,10 @@ public interface DashboardsResourceApi {
     @ApiOperation(value = "Deletes a dashboard.", nickname = "deleteDashboard", notes = "Deletes a dashboard.  <p> Available since API v6.", response = ApiDashboard.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "DashboardsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success", response = ApiDashboard.class) })
     @RequestMapping(value = "/timeseries/dashboards/{dashboardName}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.DELETE)
     default ResponseEntity<ApiDashboard> deleteDashboard(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the dashboard.",required=true) @PathVariable("dashboardName") String dashboardName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -103,10 +104,10 @@ public interface DashboardsResourceApi {
     @ApiOperation(value = "Returns a dashboard definition for the specified name.", nickname = "getDashboard", notes = "Returns a dashboard definition for the specified name. This dashboard can be imported with the createDashboards API. <p> Available since API v6.", response = ApiDashboard.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "DashboardsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiDashboard.class) })
     @RequestMapping(value = "/timeseries/dashboards/{dashboardName}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiDashboard> getDashboard(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the dashboard.",required=true) @PathVariable("dashboardName") String dashboardName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -128,10 +129,10 @@ public interface DashboardsResourceApi {
     @ApiOperation(value = "Returns the list of all user-customized dashboards.", nickname = "getDashboards", notes = "Returns the list of all user-customized dashboards. This includes both the new dashboards created by users as well as any user customizations to built-in dashboards. <p> Available since API v6.", response = ApiDashboardList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "DashboardsResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiDashboardList.class) })
     @RequestMapping(value = "/timeseries/dashboards",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiDashboardList> getDashboards(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {

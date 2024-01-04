@@ -3,7 +3,7 @@ package com.sequenceiq.distrox.v1.distrox.audit.rest;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;

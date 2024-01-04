@@ -3,7 +3,7 @@ package com.sequenceiq.periscope.service.ha;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 

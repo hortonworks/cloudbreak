@@ -2,7 +2,7 @@ package com.sequenceiq.freeipa.api.v1.recipe.model;
 
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;

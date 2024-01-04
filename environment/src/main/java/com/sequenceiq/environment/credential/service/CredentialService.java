@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.credential.service;
 
-
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.common.model.CredentialType.AUDIT;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
@@ -15,10 +14,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.InternalServerErrorException;
+import jakarta.annotation.Nonnull;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.InternalServerErrorException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.reactor.handler.orchestration;
 
 import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ClusterStatus.Value.DELETED;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

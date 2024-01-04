@@ -3,8 +3,8 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 
 import org.testng.annotations.Test;
 

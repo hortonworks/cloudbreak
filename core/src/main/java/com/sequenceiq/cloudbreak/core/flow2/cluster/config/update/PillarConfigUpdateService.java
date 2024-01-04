@@ -7,7 +7,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PILLAR_CONFI
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PILLAR_CONFIG_UPDATE_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PILLAR_CONFIG_UPDATE_STARTED;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

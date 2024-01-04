@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.network;
 import static com.sequenceiq.common.api.type.ResourceType.GCP_SUBNET;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 

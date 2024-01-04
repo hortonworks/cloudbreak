@@ -3,7 +3,7 @@ package com.sequenceiq.freeipa.flow.freeipa.user.handler;
 import java.io.IOException;
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

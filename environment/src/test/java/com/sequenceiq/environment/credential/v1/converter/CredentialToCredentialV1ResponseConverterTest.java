@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.credential.v1.converter;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

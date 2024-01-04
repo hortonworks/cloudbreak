@@ -6,7 +6,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_STOP_FAILED;
 
 import java.time.Duration;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 

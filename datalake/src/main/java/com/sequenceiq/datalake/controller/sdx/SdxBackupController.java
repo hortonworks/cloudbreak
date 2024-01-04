@@ -2,7 +2,7 @@ package com.sequenceiq.datalake.controller.sdx;
 
 import java.util.Collections;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Controller;
 

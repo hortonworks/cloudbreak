@@ -11,7 +11,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.Map;
 
-import javax.ws.rs.ext.WriterInterceptorContext;
+import jakarta.ws.rs.ext.WriterInterceptorContext;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

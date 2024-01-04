@@ -3,7 +3,7 @@ package com.sequenceiq.datalake.service.sdx;
 import java.util.Collection;
 import java.util.Collections;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

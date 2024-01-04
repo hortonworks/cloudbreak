@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.repository;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

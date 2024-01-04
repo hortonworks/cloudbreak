@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.ccm.cloudinit;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
 

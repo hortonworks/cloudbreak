@@ -1,26 +1,18 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiClusterRef;
-import com.sequenceiq.mock.swagger.model.ApiCommissionState;
-import com.sequenceiq.mock.swagger.model.ApiConfigList;
-import com.sequenceiq.mock.swagger.model.ApiEntityStatus;
-import com.sequenceiq.mock.swagger.model.ApiEntityTag;
-import com.sequenceiq.mock.swagger.model.ApiEntityType;
-import com.sequenceiq.mock.swagger.model.ApiHealthCheck;
-import com.sequenceiq.mock.swagger.model.ApiHealthSummary;
-import com.sequenceiq.mock.swagger.model.ApiOsDistribution;
-import com.sequenceiq.mock.swagger.model.ApiRoleRef;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * This is the model for a host in the system.
@@ -372,7 +364,7 @@ public class ApiHost   {
   }
 
   /**
-   * 
+   *
    * @return config
   **/
   @ApiModelProperty(value = "")
@@ -581,7 +573,7 @@ public class ApiHost   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHost {\n");
-    
+
     sb.append("    hostId: ").append(toIndentedString(hostId)).append("\n");
     sb.append("    ipAddress: ").append(toIndentedString(ipAddress)).append("\n");
     sb.append("    hostname: ").append(toIndentedString(hostname)).append("\n");

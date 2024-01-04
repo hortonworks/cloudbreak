@@ -1,17 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiAuthRoleRef;
-import com.sequenceiq.mock.swagger.model.ApiExternalUserMappingType;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * This is the model for external user mapping information in the API, v19 and beyond. These can be of 4 types : LDAP group, SAML, SAML attribute and External Script. &lt;p&gt;
@@ -152,7 +152,7 @@ public class ApiExternalUserMapping   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiExternalUserMapping {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    uuid: ").append(toIndentedString(uuid)).append("\n");

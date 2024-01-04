@@ -3,7 +3,7 @@ package com.sequenceiq.authorization.service;
 import java.util.Collection;
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.aspectj.lang.ProceedingJoinPoint;

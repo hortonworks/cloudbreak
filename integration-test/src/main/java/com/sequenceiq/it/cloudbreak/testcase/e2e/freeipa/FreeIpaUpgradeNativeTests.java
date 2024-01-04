@@ -6,7 +6,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
 
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 

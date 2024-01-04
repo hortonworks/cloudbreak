@@ -8,7 +8,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.DELETE_VOLUMES_FAILE
 
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -5,6 +5,25 @@
  */
 package com.sequenceiq.mock.swagger.v43.api;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.mock.swagger.model.ApiCommand;
 import com.sequenceiq.mock.swagger.model.ApiCommandList;
 import com.sequenceiq.mock.swagger.model.ApiCommandMetadataList;
@@ -41,30 +60,13 @@ import com.sequenceiq.mock.swagger.model.ApiServiceList;
 import com.sequenceiq.mock.swagger.model.ApiServiceRef;
 import com.sequenceiq.mock.swagger.model.ApiYarnApplicationDiagnosticsCollectionArgs;
 import com.sequenceiq.mock.swagger.model.ApiYarnUtilization;
-import java.util.List;
-import org.springframework.core.io.Resource;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2021-04-23T12:05:48.864+02:00")
 
 @Api(value = "ServicesResource", description = "the ServicesResource API")
@@ -88,10 +90,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Attach tags to the service.", nickname = "addTags", notes = "Attach tags to the service. Tag names beginning with the prefix _cldr_ (case insensitive) are reserved for internal use by Cloudera.", response = ApiEntityTag.class, responseContainer = "List", authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "A list of tags that were added to the service", response = ApiEntityTag.class, responseContainer = "List") })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/tags",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.PUT)
     default ResponseEntity<List<ApiEntityTag>> addTags(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the service",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "List of tags to add to the service"  )  @Valid @RequestBody List<ApiEntityTag> body) {
@@ -114,10 +116,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Collect the Diagnostics data for Yarn applications.", nickname = "collectYarnApplicationDiagnostics", notes = "Collect the Diagnostics data for Yarn applications <p> Available since API v8.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/yarnApplicationDiagnosticsCollection",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> collectYarnApplicationDiagnostics(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the YARN service on which to run the command.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Arguments used for collecting diagnostics data for Yarn applications"  )  @Valid @RequestBody ApiYarnApplicationDiagnosticsCollectionArgs body) {
@@ -140,10 +142,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Copies source HDFS file to destination cluster HDFS.", nickname = "copyHdfsFile", notes = "Copies source HDFS file to destination cluster HDFS", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/copyHdfsFile",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> copyHdfsFile(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The source HDFS service",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "HDFS full path at destination") @Valid @RequestParam(value = "destinationPath", required = false) String destinationPath,@ApiParam(value = "HDFS full path at source") @Valid @RequestParam(value = "sourcePath", required = false) String sourcePath,@ApiParam(value = "ApiServiceRef for the destination"  )  @Valid @RequestBody ApiServiceRef body) {
@@ -166,10 +168,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Create the Beeswax role's Hive warehouse directory, on Hue services.", nickname = "createBeeswaxWarehouseCommand", notes = "Create the Beeswax role's Hive warehouse directory, on Hue services.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hueCreateHiveWarehouse",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> createBeeswaxWarehouseCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The Hue service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -191,10 +193,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Creates the root directory of an HBase service.", nickname = "createHBaseRootCommand", notes = "Creates the root directory of an HBase service.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hbaseCreateRoot",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> createHBaseRootCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The HBase service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -216,10 +218,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "", nickname = "createHdfsFile", notes = "", response = String.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "\"CREATED\" or \"FILE_EXISTS\" will be returned", response = String.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/createHdfsFile",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<String> createHdfsFile(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The HDFS service name",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "If true overwrite the file", defaultValue = "false") @Valid @RequestParam(value = "overwrite", required = false, defaultValue="false") Boolean overwrite,@ApiParam(value = "full path to the HDFS file to be created") @Valid @RequestParam(value = "path", required = false) String path,@ApiParam(value = "Content to be put in the file to be created"  )  @Valid @RequestBody String body) {
@@ -242,10 +244,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Create the Hive user directory.", nickname = "createHiveUserDirCommand", notes = "Create the Hive user directory <p> Available since API v4. </p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hiveCreateHiveUserDir",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> createHiveUserDirCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The Hive service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -267,10 +269,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Create the Hive warehouse directory, on Hive services.", nickname = "createHiveWarehouseCommand", notes = "Create the Hive warehouse directory, on Hive services. <p> Available since API v3. </p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hiveCreateHiveWarehouse",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> createHiveWarehouseCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The Hive service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -292,10 +294,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Create the Hive warehouse external directory for Private Cloud.", nickname = "createHiveWarehouseExternalCommand", notes = "Create the Hive warehouse external directory for Private Cloud.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hiveCreateHiveWarehouseExternal",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> createHiveWarehouseExternalCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The Hive service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Name of the warehouse external directory.") @Valid @RequestParam(value = "directory", required = false) String directory) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -317,10 +319,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Create the Impala user directory.", nickname = "createImpalaUserDirCommand", notes = "Create the Impala user directory <p> Available since API v6. </p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/impalaCreateUserDir",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> createImpalaUserDirCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The Impala service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -342,10 +344,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Creates the Oozie Database Schema in the configured database.", nickname = "createOozieDb", notes = "Creates the Oozie Database Schema in the configured database. This command does not create database. This command creates only tables required by Oozie. To create database, please refer to oozieCreateEmbeddedDatabase()  <p> Available since API v2. </p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/createOozieDb",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> createOozieDb(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the Oozie service on which to run the command.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -367,10 +369,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Creates a list of services.", nickname = "createServices", notes = "Creates a list of services. <p> There are typically two service creation strategies: <ol> <li> The caller may choose to set up a new service piecemeal, by first creating the service itself (without any roles or configuration), and then create the roles, and then specify configuration. </li> <li> Alternatively, the caller can pack all the information in one call, by fully specifying the fields in the com.cloudera.api.model.ApiService object, with <ul> <li>service config and role type config, and</li> <li>role to host assignment.</li> </ul> </li> </ol>  <table> <thead> <tr> <th>Cluster Version</th> <th>Available Service Types</th> </tr> </thead> <tbody> <tr> <td>CDH4</td> <td>HDFS, MAPREDUCE, HBASE, OOZIE, ZOOKEEPER, HUE, YARN, IMPALA, FLUME, HIVE, SOLR, SQOOP, KS_INDEXER</td> </tr> <tr> <td>CDH5</td> <td>HDFS, MAPREDUCE, HBASE, OOZIE, ZOOKEEPER, HUE, YARN, IMPALA, FLUME, HIVE, SOLR, SQOOP, KS_INDEXER, SQOOP_CLIENT, SENTRY, ACCUMULO16, KMS, SPARK_ON_YARN, KAFKA </td> </tr> </tbody> </table>  As of V6, GET /{clusterName}/serviceTypes should be used to get the service types available to the cluster.", response = ApiServiceList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "List of created services.", response = ApiServiceList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiServiceList> createServices(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Details of the services to create."  )  @Valid @RequestBody ApiServiceList body) {
@@ -393,10 +395,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Creates the home directory of a Solr service in HDFS.", nickname = "createSolrHdfsHomeDirCommand", notes = "Creates the home directory of a Solr service in HDFS.  <p> Available since API v4.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/createSolrHdfsHomeDir",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> createSolrHdfsHomeDirCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The Solr service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -418,10 +420,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Creates the user directory of a Sqoop service in HDFS.", nickname = "createSqoopUserDirCommand", notes = "Creates the user directory of a Sqoop service in HDFS.  <p> Available since API v4.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/createSqoopUserDir",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> createSqoopUserDirCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The Sqoop service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -443,10 +445,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Creates the HDFS directory where YARN container usage metrics are stored by NodeManagers for CM to read and aggregate into app usage metrics.", nickname = "createYarnCmContainerUsageInputDirCommand", notes = "Creates the HDFS directory where YARN container usage metrics are stored by NodeManagers for CM to read and aggregate into app usage metrics. <p> Available since API v13. </p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/yarnCreateCmContainerUsageInputDirCommand",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> createYarnCmContainerUsageInputDirCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The YARN service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -468,10 +470,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Create the Yarn job history directory.", nickname = "createYarnJobHistoryDirCommand", notes = "Create the Yarn job history directory <p> Available since API v6. </p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/yarnCreateJobHistoryDirCommand",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> createYarnJobHistoryDirCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The YARN service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -493,10 +495,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Create the Yarn NodeManager remote application log directory.", nickname = "createYarnNodeManagerRemoteAppLogDirCommand", notes = "Create the Yarn NodeManager remote application log directory <p> Available since API v6. </p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/yarnNodeManagerRemoteAppLogDirCommand",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> createYarnNodeManagerRemoteAppLogDirCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The YARN service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -518,10 +520,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Decommission roles of a service.", nickname = "decommissionCommand", notes = "Decommission roles of a service. <p> For HBase services, the list should contain names of RegionServers to decommission. <p> For HDFS services, the list should contain names of DataNodes to decommission.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/decommission",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> decommissionCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The HBase service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "List of role names to decommision."  )  @Valid @RequestBody ApiRoleNameList body) {
@@ -544,10 +546,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Deletes a service from the system.", nickname = "deleteService", notes = "Deletes a service from the system.", response = ApiService.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "The details of the deleted service.", response = ApiService.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.DELETE)
     default ResponseEntity<ApiService> deleteService(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The name of the service to delete.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -569,10 +571,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Remove the tags associated with the service.", nickname = "deleteTags", notes = "Remove the tags associated with the service. Tag names beginning with the prefix _cldr_ (case insensitive) are reserved for internal use by Cloudera.", response = ApiEntityTag.class, responseContainer = "List", authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "A list of tags that were removed from the service", response = ApiEntityTag.class, responseContainer = "List") })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/tags",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.DELETE)
     default ResponseEntity<List<ApiEntityTag>> deleteTags(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the service to remove tags from",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "List of tags to remove from the service"  )  @Valid @RequestBody List<ApiEntityTag> body) {
@@ -595,10 +597,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Deploy a service's client configuration.", nickname = "deployClientConfigCommand", notes = "Deploy a service's client configuration. <p> The client configuration is deployed to the hosts where the given roles are running. <p/> Added in v3: passing null for the role name list will deploy client configs to all known service roles. Added in v6: passing an empty role name list will deploy client configs to all known service roles. <p/> In Cloudera Manager 5.3 and newer, client configurations are fully managed, meaning that the server maintains state about which client configurations should exist and be managed by alternatives, and the agents actively rectify their hosts with this state. Consequently, if this API call is made with a specific set of roles, Cloudera Manager will deactivate, from alternatives, any deployed client configs from any non-gateway roles that are <em>not</em> specified as arguments. Gateway roles are always preserved, and calling this API with an empty or null argument continues to deploy to all roles. <p/>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/deployClientConfig",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> deployClientConfigCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "List of role names."  )  @Valid @RequestBody ApiRoleNameList body) {
@@ -621,10 +623,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Disable high availability (HA) for JobTracker.", nickname = "disableJtHaCommand", notes = "Disable high availability (HA) for JobTracker.  As part of disabling HA, any services that depend on the MapReduce service being modified will be stopped. The command arguments provide options to specify name of JobTracker that will be preserved. The Command will redeploy the client configurations for services of the cluster after HA has been disabled.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/disableJtHa",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> disableJtHaCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The MapReduce service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Arguments for the command."  )  @Valid @RequestBody ApiDisableJtHaArguments body) {
@@ -647,10 +649,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Not Supported.", nickname = "disableLlamaHaCommand", notes = "Not Supported. Llama was removed.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/impalaDisableLlamaHa",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> disableLlamaHaCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = ""  )  @Valid @RequestBody ApiDisableLlamaHaArguments body) {
@@ -673,10 +675,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Not Supported.", nickname = "disableLlamaRmCommand", notes = "Not Supported. Llama was removed.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/impalaDisableLlamaRm",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> disableLlamaRmCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -698,10 +700,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Disable high availability (HA) for Oozie.", nickname = "disableOozieHaCommand", notes = "Disable high availability (HA) for Oozie.  As part of disabling HA, any services that depend on the Oozie service being modified will be stopped. The command arguments provide options to specify name of Oozie Server that will be preserved. After deleting, other Oozie servers, all the services that were stopped are restarted.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/oozieDisableHa",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> disableOozieHaCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The Oozie service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Arguments for the command."  )  @Valid @RequestBody ApiDisableOozieHaArguments body) {
@@ -724,10 +726,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Disable high availability (HA) for ResourceManager.", nickname = "disableRmHaCommand", notes = "Disable high availability (HA) for ResourceManager.  As part of disabling HA, any services that depend on the YARN service being modified will be stopped. The command arguments provide options to specify name of ResourceManager that will be preserved. The command will redeploy the client configurations for services of the cluster after HA has been disabled.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/disableRmHa",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> disableRmHaCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The YARN service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Arguments for the command."  )  @Valid @RequestBody ApiDisableRmHaArguments body) {
@@ -750,10 +752,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Disable high availability (HA) for Sentry service.", nickname = "disableSentryHaCommand", notes = "Disable high availability (HA) for Sentry service. <p> This command only applies to CDH 5.13+ Sentry services. <p> The command will keep exactly one Sentry server, on the specified host, and update the ZooKeeper configs needed for Sentry. <p> All services that depend on HDFS will be restarted after enabling Sentry HA. <p> Note: Sentry doesn't support Rolling Restart.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "the created command instance", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/disableSentryHa",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> disableSentryHaCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "A String representing the Sentry service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "An instance of ApiDisableSentryHaArgs representing the arguments to the command."  )  @Valid @RequestBody ApiDisableSentryHaArgs body) {
@@ -776,10 +778,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Enable high availability (HA) for a JobTracker.", nickname = "enableJtHaCommand", notes = "Enable high availability (HA) for a JobTracker. <p> This command only applies to CDH4 MapReduce services. <p> The command will create a new JobTracker on the specified host and then create an active/standby pair with the existing JobTracker. Autofailover will be enabled using ZooKeeper. A ZNode will be created for this purpose. Command arguments provide option to forcefully create this ZNode if one already exists. A node may already exists if JobTracker was previously enabled in HA mode but HA mode was disabled later on. The ZNode is not deleted when HA is disabled. <p> As part of enabling HA, any services that depends on the MapReduce service being modified will be stopped. Command will redeploy the client configurations for services of the cluster after HA has been enabled.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/enableJtHa",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> enableJtHaCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The MapReduce service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Arguments for the command."  )  @Valid @RequestBody ApiEnableJtHaArguments body) {
@@ -802,10 +804,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Not Supported.", nickname = "enableLlamaHaCommand", notes = "Not Supported. Llama was removed.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/impalaEnableLlamaHa",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> enableLlamaHaCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = ""  )  @Valid @RequestBody ApiEnableLlamaHaArguments body) {
@@ -828,10 +830,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Not Supported.", nickname = "enableLlamaRmCommand", notes = "Not Supported. Llama was removed.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/impalaEnableLlamaRm",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> enableLlamaRmCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = ""  )  @Valid @RequestBody ApiEnableLlamaRmArguments body) {
@@ -854,10 +856,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Enable high availability (HA) for Oozie service.", nickname = "enableOozieHaCommand", notes = "Enable high availability (HA) for Oozie service. <p> This command only applies to CDH5+ Oozie services. <p> The command will create new Oozie Servers on the specified hosts and set the ZooKeeper and Load Balancer configs needed for Oozie HA. <p> As part of enabling HA, any services that depends on the Oozie service being modified will be stopped and restarted after enabling Oozie HA.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/oozieEnableHa",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> enableOozieHaCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The Oozie service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Arguments for the command."  )  @Valid @RequestBody ApiEnableOozieHaArguments body) {
@@ -880,10 +882,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Enable high availability (HA) for a YARN ResourceManager.", nickname = "enableRmHaCommand", notes = "Enable high availability (HA) for a YARN ResourceManager. <p> This command only applies to CDH5+ YARN services. <p> The command will create a new ResourceManager on the specified host and then create an active/standby pair with the existing ResourceManager. Autofailover will be enabled using ZooKeeper. <p> As part of enabling HA, any services that depends on the YARN service being modified will be stopped. Command will redeploy the client configurations for services of the cluster after HA has been enabled.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/enableRmHa",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> enableRmHaCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The YARN service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Arguments for the command."  )  @Valid @RequestBody ApiEnableRmHaArguments body) {
@@ -906,10 +908,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Enable high availability (HA) for Sentry service.", nickname = "enableSentryHaCommand", notes = "Enable high availability (HA) for Sentry service. <p> This command only applies to CDH 5.13+ Sentry services. <p> The command will create a new Sentry server on the specified host and set the ZooKeeper configs needed for Sentry HA. <p> As part of enabling HA, all services that depend on HDFS will be restarted after enabling Sentry HA. <p> Note: Sentry doesn't support Rolling Restart.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "the created command instance", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/enableSentryHa",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> enableSentryHaCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "A String representing the Sentry service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "An instance of ApiEnableSentryHaArgs representing the arguments to the command."  )  @Valid @RequestBody ApiEnableSentryHaArgs body) {
@@ -932,10 +934,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Put the service into maintenance mode.", nickname = "enterMaintenanceMode", notes = "Put the service into maintenance mode. This is a synchronous command. The result is known immediately upon return.  <p> Available since API v2. </p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Synchronous command result.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/enterMaintenanceMode",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> enterMaintenanceMode(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -957,10 +959,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Take the service out of maintenance mode.", nickname = "exitMaintenanceMode", notes = "Take the service out of maintenance mode. This is a synchronous command. The result is known immediately upon return.  <p> Available since API v2. </p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Synchronous command result.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/exitMaintenanceMode",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> exitMaintenanceMode(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -982,10 +984,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Prepare and start a service.", nickname = "firstRun", notes = "Prepare and start a service.  <p> Perform all the steps needed to prepare the service and start it. </p>  <p> Available since API v7. </p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/firstRun",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> firstRun(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The name of the cluster.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1007,10 +1009,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Download a zip-compressed archive of the client configuration, of a specific service.", nickname = "getClientConfig", notes = "Download a zip-compressed archive of the client configuration, of a specific service. This resource does not require any authentication.", response = Resource.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "The archive data.", response = Resource.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/clientConfig",
-        produces = { "application/octet-stream" }, 
+        produces = { "application/octet-stream" },
         method = RequestMethod.GET)
     default ResponseEntity<Resource> getClientConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1032,10 +1034,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Fetch the HDFS usage report.", nickname = "getHdfsUsageReport", notes = "Fetch the HDFS usage report. For the requested time range, at the specified aggregation intervals, the report shows HDFS disk usages per user. <p> This call supports returning JSON or CSV, as determined by the \"Accept\" header of application/json or text/csv. <p> Available since API v4. Only available with Cloudera Manager Enterprise Edition.", response = ApiHdfsUsageReport.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Report data.", response = ApiHdfsUsageReport.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/reports/hdfsUsageReport",
-        produces = { "text/csv", "application/json" }, 
+        produces = { "text/csv", "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiHdfsUsageReport> getHdfsUsageReport(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The HDFS service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The (optional) aggregation period for the data. Supports \"hourly\", \"daily\" (default) and \"weekly\".", allowableValues = "DAILY, HOURLY, WEEKLY", defaultValue = "daily") @Valid @RequestParam(value = "aggregation", required = false, defaultValue="daily") String aggregation,@ApiParam(value = "The (optional) start time of the report in ISO 8601 format ( defaults to 24 hours before \"to\" time).") @Valid @RequestParam(value = "from", required = false) String from,@ApiParam(value = "The (optional) HDFS nameservice. Required for HA setup.") @Valid @RequestParam(value = "nameservice", required = false) String nameservice,@ApiParam(value = "The (optional) end time of the report in ISO 8601 format ( defaults to now).", defaultValue = "now") @Valid @RequestParam(value = "to", required = false, defaultValue="now") String to) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1057,10 +1059,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Provides the resource utilization of the Impala service as well as the resource utilization per tenant.", nickname = "getImpalaUtilization", notes = "Provides the resource utilization of the Impala service as well as the resource utilization per tenant. Only available with Cloudera Manager Enterprise Edition.", response = ApiImpalaUtilization.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "utilization report of Impala service.", response = ApiImpalaUtilization.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/impalaUtilization",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiImpalaUtilization> getImpalaUtilization(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "service name",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The days of the week for which the user wants to report utilization. Days is a list of number between 1 to 7, where 1 corresponds to Mon. and 7 corresponds to Sun. All 7 days are included if this is not specified.") @Valid @RequestParam(value = "daysOfWeek", required = false) List<String> daysOfWeek,@ApiParam(value = "The end hour of a day for which the user wants to report utilization. The hour is a number between [0-23]. Default value is 23 if this is not specified.", defaultValue = "23") @Valid @RequestParam(value = "endHourOfDay", required = false, defaultValue="23") Integer endHourOfDay,@ApiParam(value = "Start of the time range to report utilization in ISO 8601 format.") @Valid @RequestParam(value = "from", required = false) String from,@ApiParam(value = "The start hour of a day for which the user wants to report utilization. The hour is a number between [0-23]. Default value is 0 if this is not specified.", defaultValue = "0") @Valid @RequestParam(value = "startHourOfDay", required = false, defaultValue="0") Integer startHourOfDay,@ApiParam(value = "The type of the tenant (POOL or USER).", defaultValue = "POOL") @Valid @RequestParam(value = "tenantType", required = false, defaultValue="POOL") String tenantType,@ApiParam(value = "End of the the time range to report utilization in ISO 8601 format (defaults to now).", defaultValue = "now") @Valid @RequestParam(value = "to", required = false, defaultValue="now") String to) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1082,10 +1084,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Fetch metric readings for a particular service.", nickname = "getMetrics", notes = "Fetch metric readings for a particular service. <p> By default, this call will look up all metrics available for the service. If only specific metrics are desired, use the <i>metrics</i> parameter. <p> By default, the returned results correspond to a 5 minute window based on the provided end time (which defaults to the current server time). The <i>from</i> and <i>to</i> parameters can be used to control the window being queried. A maximum window of 3 hours is enforced. <p> When requesting a \"full\" view, aside from the extended properties of the returned metric data, the collection will also contain information about all metrics available for the service, even if no readings are available in the requested window. <p> HDFS services that have more than one nameservice will not expose any metrics. Instead, the nameservices should be queried separately. <p/>", response = ApiMetricList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "List of readings from the monitors.", response = ApiMetricList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/metrics",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiMetricList> getMetrics(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The name of the service.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Start of the period to query.") @Valid @RequestParam(value = "from", required = false) String from,@ApiParam(value = "Filter for which metrics to query.") @Valid @RequestParam(value = "metrics", required = false) List<String> metrics,@ApiParam(value = "End of the period to query.", defaultValue = "now") @Valid @RequestParam(value = "to", required = false, defaultValue="now") String to,@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1107,10 +1109,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Fetch the MR usage report.", nickname = "getMrUsageReport", notes = "Fetch the MR usage report. For the requested time range, at the specified aggregation intervals, the report shows job CPU usages (and other metrics) per user. <p> This call supports returning JSON or CSV, as determined by the \"Accept\" header of application/json or text/csv. <p> Available since API v4. Only available with Cloudera Manager Enterprise Edition.", response = ApiMrUsageReport.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Report data.", response = ApiMrUsageReport.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/reports/mrUsageReport",
-        produces = { "text/csv", "application/json" }, 
+        produces = { "text/csv", "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiMrUsageReport> getMrUsageReport(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The MR service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The (optional) aggregation period for the data. Supports \"hourly\", \"daily\" (default) and \"weekly\".", allowableValues = "DAILY, HOURLY, WEEKLY", defaultValue = "daily") @Valid @RequestParam(value = "aggregation", required = false, defaultValue="daily") String aggregation,@ApiParam(value = "The (optional) start time of the report in ISO 8601 format (defaults to 24 hours before \"to\" time).") @Valid @RequestParam(value = "from", required = false) String from,@ApiParam(value = "The (optional) end time of the report in ISO 8601 format (defaults to now).", defaultValue = "now") @Valid @RequestParam(value = "to", required = false, defaultValue="now") String to) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1132,10 +1134,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Provides the resource utilization of the yarn service as well as the resource utilization per tenant.", nickname = "getYarnUtilization", notes = "Provides the resource utilization of the yarn service as well as the resource utilization per tenant. Only available with Cloudera Manager Enterprise Edition.", response = ApiYarnUtilization.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "utilization report of yarn service.", response = ApiYarnUtilization.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/yarnUtilization",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiYarnUtilization> getYarnUtilization(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "service name",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The days of the week for which the user wants to report utilization. Days is a list of number between 1 to 7, where 1 corresponds to Mon. and 7 corresponds to Sun. All 7 days are included if this is not specified.") @Valid @RequestParam(value = "daysOfWeek", required = false) List<String> daysOfWeek,@ApiParam(value = "The end hour of a day for which the user wants to report utilization. The hour is a number between [0-23]. Default value is 23 if this is not specified.", defaultValue = "23") @Valid @RequestParam(value = "endHourOfDay", required = false, defaultValue="23") Integer endHourOfDay,@ApiParam(value = "Start of the time range to report utilization in ISO 8601 format.") @Valid @RequestParam(value = "from", required = false) String from,@ApiParam(value = "The start hour of a day for which the user wants to report utilization. The hour is a number between [0-23]. Default value is 0 if this is not specified.", defaultValue = "0") @Valid @RequestParam(value = "startHourOfDay", required = false, defaultValue="0") Integer startHourOfDay,@ApiParam(value = "The type of the tenant (POOL or USER).", defaultValue = "POOL") @Valid @RequestParam(value = "tenantType", required = false, defaultValue="POOL") String tenantType,@ApiParam(value = "End of the the time range to report utilization in ISO 8601 format (defaults to now).", defaultValue = "now") @Valid @RequestParam(value = "to", required = false, defaultValue="now") String to) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1157,10 +1159,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Perform one time setup for HBase replication.", nickname = "hbaseReplicationSetup", notes = "Perform one time setup for HBase replication.  Generate the a keystore to HDFS for use by replication and transfer the keystore to HDFS on the the peer.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hbaseReplicationSetup",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hbaseReplicationSetup(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "If true, perform setup even if already setup. (Default false)", defaultValue = "false") @Valid @RequestParam(value = "force", required = false, defaultValue="false") Boolean force,@ApiParam(value = ""  )  @Valid @RequestBody ApiHBaseReplicationSetupCommandArgs body) {
@@ -1183,10 +1185,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "", nickname = "hbaseReplicationSetupAdmin", notes = "", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hbaseReplicationSetupAdmin",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hbaseReplicationSetupAdmin(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "") @Valid @RequestParam(value = "cmPeerDefinition", required = false) String cmPeerDefinition,@ApiParam(value = "") @Valid @RequestParam(value = "op", required = false) String op,@ApiParam(value = "") @Valid @RequestParam(value = "path", required = false) String path,@ApiParam(value = "") @Valid @RequestParam(value = "user", required = false) String user) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1208,10 +1210,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Execute a hbase shell command.", nickname = "hbaseShellCommand", notes = "Execute a hbase shell command", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command's execution", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hbaseShellCommand",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hbaseShellCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The HBase service name",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "hbase shell command to be executed"  )  @Valid @RequestBody ApiHBaseShellCommand body) {
@@ -1234,10 +1236,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Upgrade HBase data in HDFS and ZooKeeper as part of upgrade from CDH4 to CDH5.", nickname = "hbaseUpgradeCommand", notes = "Upgrade HBase data in HDFS and ZooKeeper as part of upgrade from CDH4 to CDH5. <p/> This is required in order to run HBase after upgrade. <p/> Available since API v6.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hbaseUpgrade",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hbaseUpgradeCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The HBase service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1259,10 +1261,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Creates a tmp directory on the HDFS filesystem.", nickname = "hdfsCreateTmpDir", notes = "Creates a tmp directory on the HDFS filesystem. <p> Available since API v2. </p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hdfsCreateTmpDir",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hdfsCreateTmpDir(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the HDFS service on which to run the command.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1284,10 +1286,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Disable auto-failover for a highly available HDFS nameservice.", nickname = "hdfsDisableAutoFailoverCommand", notes = "Disable auto-failover for a highly available HDFS nameservice. <p> The command will modify the nameservice's NameNodes configuration to disable automatic failover, and delete the existing failover controllers. <p> The ZooKeeper dependency of the service will not be removed.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hdfsDisableAutoFailover",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "text/plain", "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hdfsDisableAutoFailoverCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The HDFS service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The nameservice name."  )  @Valid @RequestBody String body) {
@@ -1310,10 +1312,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Disable high availability (HA) for an HDFS NameNode.", nickname = "hdfsDisableHaCommand", notes = "Disable high availability (HA) for an HDFS NameNode. <p> The NameNode to be kept must be running before HA can be disabled. <p> As part of disabling HA, any services that depend on the HDFS service being modified will be stopped. The command arguments provide options to re-start these services and to re-deploy the client configurations for services of the cluster after HA has been disabled.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hdfsDisableHa",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hdfsDisableHaCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The HDFS service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Arguments for the command."  )  @Valid @RequestBody ApiHdfsDisableHaArguments body) {
@@ -1336,10 +1338,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Disable High Availability (HA) with Automatic Failover for an HDFS NameNode.", nickname = "hdfsDisableNnHaCommand", notes = "Disable High Availability (HA) with Automatic Failover for an HDFS NameNode. <p> As part of disabling HA, any services that depend on the HDFS service being modified will be stopped. The command will delete the Standby NameNode associated with the specified NameNode. Any FailoverControllers associated with the NameNode's nameservice are also deleted. A SecondaryNameNode is created on the host specified by the arugments. <p> If no nameservices uses Quorum Journal after HA is disabled for the specified nameservice, then all JournalNodes are also deleted. <p> Then, HDFS service is restarted and all services that were stopped are started again afterwards. Finally, client configs for HDFS and its depedents will be re-deployed.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hdfsDisableNnHa",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hdfsDisableNnHaCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The HDFS service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Arguments for the command."  )  @Valid @RequestBody ApiDisableNnHaArguments body) {
@@ -1362,10 +1364,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Enable auto-failover for an HDFS nameservice.", nickname = "hdfsEnableAutoFailoverCommand", notes = "Enable auto-failover for an HDFS nameservice. <p> This command requires that the nameservice exists, and HA has been configured for that nameservice. <p> The command will create the needed failover controllers, perform the needed initialization and configuration, and will start the new roles. The existing NameNodes which are part of the nameservice will be re-started in the process. <p> This process may require changing the service's configuration, to add a dependency on the provided ZooKeeper service. This will be done if such a dependency has not been configured yet, and will cause roles that are not affected by this command to show an \"outdated configuration\" status. <p> If a ZooKeeper dependency has already been set up by some other means, it does not need to be provided in the command arguments.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hdfsEnableAutoFailover",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hdfsEnableAutoFailoverCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The HDFS service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Arguments for the command."  )  @Valid @RequestBody ApiHdfsFailoverArguments body) {
@@ -1388,10 +1390,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Enable high availability (HA) for an HDFS NameNode.", nickname = "hdfsEnableHaCommand", notes = "Enable high availability (HA) for an HDFS NameNode. <p> The command will set up the given \"active\" and \"stand-by\" NameNodes as an HA pair. Both nodes need to already exist. <p> If there is a SecondaryNameNode associated with either given NameNode instance, it will be deleted. <p> Note that while the shared edits path may be different for both nodes, they need to point to the same underlying storage (e.g., an NFS share). <p> As part of enabling HA, any services that depend on the HDFS service being modified will be stopped. The command arguments provide options to re-start these services and to re-deploy the client configurations for services of the cluster after HA has been enabled.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hdfsEnableHa",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hdfsEnableHaCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The HDFS service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Arguments for the command."  )  @Valid @RequestBody ApiHdfsHaArguments body) {
@@ -1414,10 +1416,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Enable High Availability (HA) with Automatic Failover for an HDFS NameNode.", nickname = "hdfsEnableNnHaCommand", notes = "Enable High Availability (HA) with Automatic Failover for an HDFS NameNode. <p> The command will create a Standby NameNode for the given nameservice and create FailoverControllers for both Active and Standby NameNodes. The SecondaryNameNode associated with the Active NameNode will be deleted. <p> The command will also create JournalNodes needed for HDFS HA if they do not already exist. <p> As part of enabling HA, any services that depend on the HDFS service being modified will be stopped. They will be restarted after HA has been enabled. Finally, client configs for HDFS and its depedents will be re-deployed.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hdfsEnableNnHa",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hdfsEnableNnHaCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The HDFS service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Arguments for the command."  )  @Valid @RequestBody ApiEnableNnHaArguments body) {
@@ -1440,10 +1442,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Initiate a failover in an HDFS HA NameNode pair.", nickname = "hdfsFailoverCommand", notes = "Initiate a failover in an HDFS HA NameNode pair. <p> The arguments should contain the names of the two NameNodes in the HA pair. The first one should be the currently active NameNode, the second one the NameNode to be made active.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hdfsFailover",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hdfsFailoverCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The HDFS service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Whether to force failover.", defaultValue = "false") @Valid @RequestParam(value = "force", required = false, defaultValue="false") Boolean force,@ApiParam(value = "Names of the NameNodes in the HA pair."  )  @Valid @RequestBody ApiRoleNameList body) {
@@ -1466,10 +1468,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Finalizes the rolling upgrade for HDFS by updating the NameNode metadata permanently to the next version.", nickname = "hdfsFinalizeRollingUpgrade", notes = "Finalizes the rolling upgrade for HDFS by updating the NameNode metadata permanently to the next version. Should be done after doing a rolling upgrade to a CDH version >= 5.2.0. <p> Available since API v8.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hdfsFinalizeRollingUpgrade",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hdfsFinalizeRollingUpgrade(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The HDFS service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1491,10 +1493,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Roll the edits of an HDFS NameNode or Nameservice.", nickname = "hdfsRollEditsCommand", notes = "Roll the edits of an HDFS NameNode or Nameservice. <p> Available since API v3.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hdfsRollEdits",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hdfsRollEditsCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The HDFS service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Arguments to the Roll Edits command."  )  @Valid @RequestBody ApiRollEditsArgs body) {
@@ -1517,10 +1519,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Upgrade HDFS Metadata as part of a major version upgrade.", nickname = "hdfsUpgradeMetadataCommand", notes = "Upgrade HDFS Metadata as part of a major version upgrade. <p/> When doing a major version upgrade for HDFS, it is necessary to start HDFS in a special mode where it will do any necessary upgrades of stored metadata. Trying to start HDFS normally will result in an error message and the NameNode(s) failing to start. <p/> The metadata upgrade must eventually be finalized, using the hdfsFinalizeMetadataUpgrade command on the NameNode. <p/> Available since API v6.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hdfsUpgradeMetadata",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hdfsUpgradeMetadataCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The HDFS service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1542,10 +1544,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Create the Hive Metastore Database.", nickname = "hiveCreateMetastoreDatabaseCommand", notes = "Create the Hive Metastore Database. Only works with embedded postgresql database. <p> This command is to be run whenever a new user and database needs to be created in the embedded postgresql database for a Hive service. This command should usually be followed by a call to hiveCreateMetastoreDatabaseTables. <p> Available since API v4.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hiveCreateMetastoreDatabase",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hiveCreateMetastoreDatabaseCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the Hive service on which to run the command.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1567,10 +1569,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Create the Hive Metastore Database tables.", nickname = "hiveCreateMetastoreDatabaseTablesCommand", notes = "Create the Hive Metastore Database tables. <p> This command is to be run whenever a new database has been specified. Will do nothing if tables already exist. Will not perform an upgrade. Only Available when all Hive Metastore Servers are stopped. <p> Available since API v3.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hiveCreateMetastoreDatabaseTables",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hiveCreateMetastoreDatabaseTablesCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the Hive service on which to run the command.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1592,10 +1594,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Update Hive Metastore to point to a NameNode's Nameservice name instead of hostname.", nickname = "hiveUpdateMetastoreNamenodesCommand", notes = "Update Hive Metastore to point to a NameNode's Nameservice name instead of hostname. <p> <strong>Back up the Hive Metastore Database before running this command.</strong> <p> This command is to be run after enabling HDFS High Availability. Only available when all Hive Metastore Servers are stopped. <p> Available since API v4.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hiveUpdateMetastoreNamenodes",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hiveUpdateMetastoreNamenodesCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the Hive service on which to run the command.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1617,10 +1619,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Upgrade Hive Metastore as part of a major version upgrade.", nickname = "hiveUpgradeMetastoreCommand", notes = "Upgrade Hive Metastore as part of a major version upgrade. <p/> When doing a major version upgrade for Hive, it is necessary to upgrade data in the metastore database. <p/> Available since API v6.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hiveUpgradeMetastore",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hiveUpgradeMetastoreCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The Hive service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1642,10 +1644,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Validate the Hive Metastore Schema.", nickname = "hiveValidateMetastoreSchemaCommand", notes = "Validate the Hive Metastore Schema. <p> This command checks the Hive metastore schema for any errors and corruptions. This command is to be run on two instances: <li>After the Hive Metastore database tables are created.</li> <li>Both before and after upgrading the Hive metastore database schema./li> * <p> Available since API v17.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hiveValidateMetastoreSchema",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hiveValidateMetastoreSchemaCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the Hive service on which to run the command.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1667,10 +1669,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Runs Hue's dumpdata command.", nickname = "hueDumpDbCommand", notes = "Runs Hue's dumpdata command.  Available since API v10.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hueDumpDb",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hueDumpDbCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The name of the service",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1692,10 +1694,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Runs Hue's loaddata command.", nickname = "hueLoadDbCommand", notes = "Runs Hue's loaddata command.  Available since API v10.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hueLoadDb",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hueLoadDbCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The name of the service",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1717,10 +1719,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Runs Hue's syncdb command.", nickname = "hueSyncDbCommand", notes = "Runs Hue's syncdb command.  Available since API v10.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/hueSyncDb",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> hueSyncDbCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The name of the service",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1742,10 +1744,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = ".", nickname = "impalaCreateCatalogDatabaseCommand", notes = "<strong>Not needed in CM 5.0.0 Release, since Impala Catalog Database is not yet available in CDH as of this release.</strong> Create the Impala Catalog Database. Only works with embedded postgresql database. <p> This command is to be run whenever a new user and database needs to be created in the embedded postgresql database for the Impala Catalog Server. This command should usually be followed by a call to impalaCreateCatalogDatabaseTables. <p> Available since API v6.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/impalaCreateCatalogDatabase",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> impalaCreateCatalogDatabaseCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the Impala service on which to run the command.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1767,10 +1769,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = ".", nickname = "impalaCreateCatalogDatabaseTablesCommand", notes = "<strong>Not needed in CM 5.0.0 Release, since Impala Catalog Database is not yet available in CDH as of this release.</strong> Create the Impala Catalog Database tables. <p> This command is to be run whenever a new database has been specified. Will do nothing if tables already exist. Will not perform an upgrade. Only available when all Impala Catalog Servers are stopped. <p> Available since API v6.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/impalaCreateCatalogDatabaseTables",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> impalaCreateCatalogDatabaseTablesCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the Impala service on which to run the command.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1792,10 +1794,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Import MapReduce configuration into Yarn, overwriting Yarn configuration.", nickname = "importMrConfigsIntoYarn", notes = "Import MapReduce configuration into Yarn, overwriting Yarn configuration. <p> You will lose existing Yarn configuration. Read all MapReduce configuration, role assignments, and role configuration groups and update Yarn with corresponding values. MR1 configuration will be converted into the equivalent MR2 configuration. <p> Before running this command, Yarn must be stopped and MapReduce must exist with valid configuration. <p> Available since API v6.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/importMrConfigsIntoYarn",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> importMrConfigsIntoYarn(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the Yarn service on which to run the command.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1817,10 +1819,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Initializes the Solr service in Zookeeper.", nickname = "initSolrCommand", notes = "Initializes the Solr service in Zookeeper.  <p> Available since API v4.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/initSolr",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> initSolrCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The Solr service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1842,10 +1844,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Creates an HDFS directory to hold the MapReduce2 framework JARs (if necessary), and uploads the framework JARs to it.", nickname = "installMrFrameworkJars", notes = "Creates an HDFS directory to hold the MapReduce2 framework JARs (if necessary), and uploads the framework JARs to it. <p> This command is run automatically when starting a YARN service for the first time, or when upgrading an existing YARN service. It can also be run manually to ensure that the latest version of the framework JARS is installed. <p> Available since API v30. <p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/installMrFrameworkJars",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> installMrFrameworkJars(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the YARN service on which to run the command.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1867,10 +1869,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Creates directory for Oozie user in HDFS and installs the ShareLib in it.", nickname = "installOozieShareLib", notes = "Creates directory for Oozie user in HDFS and installs the ShareLib in it. <p/> This command should be re-run after a major version upgrade to refresh the ShareLib to the latest version. <p/> Available since API v3. <p/>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/installOozieShareLib",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> installOozieShareLib(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the Oozie service on which to run the command.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1892,10 +1894,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Migrates the HBase Indexer policy-based permissions to Sentry, by invoking the SentryConfigToolIndexer.", nickname = "ksMigrateToSentry", notes = "Migrates the HBase Indexer policy-based permissions to Sentry, by invoking the SentryConfigToolIndexer. <p> Note: <li> <ul>KeyStore Indexer service should be in Stopped state.</ul> <ul>This is only needed for upgrading to CDH6.0.</ul> <p> Available since API v30.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "the created command instance", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/migrateToSentry",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> ksMigrateToSentry(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "A String representing the KeyStore Indexer service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1917,10 +1919,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "List active service commands.", nickname = "listActiveCommands", notes = "List active service commands.", response = ApiCommandList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "A list of active service commands.", response = ApiCommandList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiCommandList> listActiveCommands(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service to which the role belongs.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1942,10 +1944,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "List the supported role types for a service.", nickname = "listRoleTypes", notes = "List the supported role types for a service.", response = ApiRoleTypeList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "List of role types the service supports.", response = ApiRoleTypeList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roleTypes",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiRoleTypeList> listRoleTypes(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service to modify.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1967,10 +1969,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Lists all the commands that can be executed by name on the provided service.", nickname = "listServiceCommands", notes = "Lists all the commands that can be executed by name on the provided service.  <p> Available since API v6. </p>", response = ApiCommandMetadataList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "a list of command metadata objects.", response = ApiCommandMetadataList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commandsByName",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiCommandMetadataList> listServiceCommands(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -1992,10 +1994,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Offline roles of a service.", nickname = "offlineCommand", notes = "Offline roles of a service. <p> Currently the offline operation is only supported by HDFS. <p> For HDFS, the offline operation will put DataNodes into <em>HDFS IN MAINTENANCE</em> state which prevents unnecessary re-replication which could occur if decommissioned. <p> The <em>timeout</em> parameter is used to specify a timeout for offline. For HDFS, when the timeout expires, the DataNode will automatically transition out of <em>HDFS IN MAINTENANCE</em> state, back to <em>HDFS IN SERVICE</em> state. <p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/offline",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> offlineCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Offline timeout in seconds. Offlined roles will automatically transition from offline state to normal state after timeout. Specify as null to get the default timeout (4 hours).") @Valid @RequestParam(value = "timeout", required = false) Integer timeout,@ApiParam(value = "List of role names to offline."  )  @Valid @RequestBody ApiRoleNameList body) {
@@ -2018,10 +2020,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Create the Oozie Server Database.", nickname = "oozieCreateEmbeddedDatabaseCommand", notes = "Create the Oozie Server Database. Only works with embedded postgresql database. <p> This command is to be run whenever a new user and database need to be created in the embedded postgresql database for an Oozie service. This command should usually be followed by a call to createOozieDb. <p> Available since API v10.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/oozieCreateEmbeddedDatabase",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> oozieCreateEmbeddedDatabaseCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the Oozie service on which to run the command.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2043,10 +2045,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Dump the Oozie Server Database.", nickname = "oozieDumpDatabaseCommand", notes = "Dump the Oozie Server Database.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/oozieDumpDatabase",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> oozieDumpDatabaseCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The name of the service",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2068,10 +2070,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Load the Oozie Server Database from dump.", nickname = "oozieLoadDatabaseCommand", notes = "Load the Oozie Server Database from dump.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/oozieLoadDatabase",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> oozieLoadDatabaseCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The name of the service",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2093,10 +2095,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Upgrade Oozie Database schema as part of a major version upgrade.", nickname = "oozieUpgradeDbCommand", notes = "Upgrade Oozie Database schema as part of a major version upgrade. <p/> When doing a major version upgrade for Oozie, it is necessary to upgrade the schema of its database before Oozie can run successfully. <p/> Available since API v6.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/oozieUpgradeDb",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> oozieUpgradeDbCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The Oozie service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2118,10 +2120,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Retrieves details information about a service.", nickname = "readService", notes = "Retrieves details information about a service.", response = ApiService.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "The details of the service.", response = ApiService.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiService> readService(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "DataView to materialize. Defaults to 'full'.", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "full") @Valid @RequestParam(value = "view", required = false, defaultValue="full") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2143,10 +2145,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Retrieves the configuration of a specific service.", nickname = "readServiceConfig", notes = "Retrieves the configuration of a specific service. <p> The \"summary\" view contains only the configured parameters, and configuration for role types that contain configured parameters. <p> The \"full\" view contains all available configuration parameters for the service and its role types. This mode performs validation on the configuration, which could take a few seconds on a large cluster (around 500 nodes or more).", response = ApiServiceConfig.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "List of service and role types configuration parameters.", response = ApiServiceConfig.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/config",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiServiceConfig> readServiceConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service to query.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2168,10 +2170,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Lists all services registered in the cluster.", nickname = "readServices", notes = "Lists all services registered in the cluster.", response = ApiServiceList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "List of services.", response = ApiServiceList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiServiceList> readServices(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2193,10 +2195,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Returns the tags associated with this service.", nickname = "readTags", notes = "Returns the tags associated with this service. Tag names beginning with the prefix _cldr_ (case insensitive) are reserved for internal use by Cloudera.", response = ApiEntityTag.class, responseContainer = "List", authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "A list of tags associated with the service", response = ApiEntityTag.class, responseContainer = "List") })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/tags",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<List<ApiEntityTag>> readTags(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The name of the service",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Number of tags", defaultValue = "10") @Valid @RequestParam(value = "limit", required = false, defaultValue="10") Integer limit,@ApiParam(value = "Index of the first tag to retrieve", defaultValue = "0") @Valid @RequestParam(value = "offset", required = false, defaultValue="0") Integer offset) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2218,10 +2220,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Recommission roles of a service.", nickname = "recommissionCommand", notes = "Recommission roles of a service. <p> The list should contain names of slave roles to recommission. </p>  <p> Available since API v2. </p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/recommission",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> recommissionCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the service on which to run the command.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "List of role names to recommision."  )  @Valid @RequestBody ApiRoleNameList body) {
@@ -2244,10 +2246,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Start and recommission roles of a service.", nickname = "recommissionWithStartCommand", notes = "Start and recommission roles of a service. <p> The list should contain names of slave roles to start and recommission. </p>  <p> Warning: Evolving. This method may change in the future and does not offer standard compatibility guarantees. Only support by HDFS. Do not use without guidance from Cloudera. </p>  <p> Available since API v15. </p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/recommissionWithStart",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> recommissionWithStartCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the service on which to run the command.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "List of role names to recommision."  )  @Valid @RequestBody ApiRoleNameList body) {
@@ -2270,10 +2272,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Restart the service.", nickname = "restartCommand", notes = "Restart the service.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/restart",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> restartCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service to start.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2295,10 +2297,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Command to run rolling restart of roles in a service.", nickname = "rollingRestart", notes = "Command to run rolling restart of roles in a service. The sequence is: <ol> <li>Restart all the non-slave roles <li>If slaves are present restart them in batches of size specified in RollingRestartCmdArgs <li>Perform any post-command needed after rolling restart </ol> <p> Available since API v3. Only available with Cloudera Manager Enterprise Edition.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/rollingRestart",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> rollingRestart(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = ""  )  @Valid @RequestBody ApiRollingRestartArgs body) {
@@ -2321,10 +2323,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Create the Sentry Server Database.", nickname = "sentryCreateDatabaseCommand", notes = "Create the Sentry Server Database. Only works with embedded postgresql database. <p> This command is to be run whenever a new user and database need to be created in the embedded postgresql database for a Sentry service. This command should usually be followed by a call to sentryCreateDatabaseTables. <p> Available since API v7.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/sentryCreateDatabase",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> sentryCreateDatabaseCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the Sentry service on which to run the command.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2346,10 +2348,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Create the Sentry Server Database tables.", nickname = "sentryCreateDatabaseTablesCommand", notes = "Create the Sentry Server Database tables. <p> This command is to be run whenever a new database has been specified. Will do nothing if tables already exist. Will not perform an upgrade. Only Available when Sentry Server is stopped. <p> Available since API v7.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/sentryCreateDatabaseTables",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> sentryCreateDatabaseTablesCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the Sentry service on which to run the command.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2371,10 +2373,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Upgrade the Sentry Server Database tables.", nickname = "sentryUpgradeDatabaseTablesCommand", notes = "Upgrade the Sentry Server Database tables. <p> This command is to be run whenever Sentry requires an upgrade to its database tables. <p> Available since API v8.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/sentryUpgradeDatabaseTables",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> sentryUpgradeDatabaseTablesCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the Sentry service on which to run the command.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2396,10 +2398,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Executes a command on the service specified by name.", nickname = "serviceCommandByName", notes = "Executes a command on the service specified by name. <p> Available since API v6. </p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/{commandName}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> serviceCommandByName(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The command name.",required=true) @PathVariable("commandName") String commandName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2421,10 +2423,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Bootstraps Solr Collections after the CDH upgrade.", nickname = "solrBootstrapCollectionsCommand", notes = "Bootstraps Solr Collections after the CDH upgrade. <p> Note: This is only needed for upgrading to CDH6.0. <p> Available since API v30.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "the created command instance", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/solrBootstrapCollections",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> solrBootstrapCollectionsCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "A String representing the Solr service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2446,10 +2448,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Bootstraps Solr config during the CDH upgrade.", nickname = "solrBootstrapConfigCommand", notes = "Bootstraps Solr config during the CDH upgrade. <p> Note: This is only needed for upgrading to CDH6.0. <p> Available since API v30.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "the created command instance", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/solrBootstrapConfig",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> solrBootstrapConfigCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "A String representing the Solr service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2471,10 +2473,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Backs up Solr configuration metadata before CDH upgrade.", nickname = "solrConfigBackupCommand", notes = "Backs up Solr configuration metadata before CDH upgrade. <p> Note: <li> <ul>Solr service should be in Stopped state.</ul> <ul>HDFS and Zookeeper services should in Running state.</ul> <ul>This is only needed for upgrading to CDH6.0.</ul> </p> Available since API v30.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "the created command instance", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/solrConfigBackup",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> solrConfigBackupCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "A String representing the Solr service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2496,10 +2498,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Migrates Sentry privileges to new model compatible to support more granular permissions if Solr is configured with a Sentry service.", nickname = "solrMigrateSentryPrivilegesCommand", notes = "Migrates Sentry privileges to new model compatible to support more granular permissions if Solr is configured with a Sentry service. <p> Note: <li> <ul>Solr service should be in Stopped state.</ul> <ul>HDFS, Zookeeper, and Sentry services should in Running state.</ul> <ul>This is only needed for upgrading to CDH6.0.</ul> <p> Available since API v30.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "the created command instance", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/solrMigrateSentryPrivilegesCommand",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> solrMigrateSentryPrivilegesCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "A String representing the Solr service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2521,10 +2523,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Reinitializes the Solr state by clearing the Solr HDFS data directory, the Solr data directory, and the Zookeeper state.", nickname = "solrReinitializeStateForUpgradeCommand", notes = "Reinitializes the Solr state by clearing the Solr HDFS data directory, the Solr data directory, and the Zookeeper state. <p> Note: <li> <ul>Solr service should be in Stopped state.</ul> <ul>HDFS and Zookeeper services should in Running state.</ul> <ul>This is only needed for upgrading to CDH6.0.</ul> <p> Available since API v30.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "the created command instance", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/solrReinitializeStateForUpgrade",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> solrReinitializeStateForUpgradeCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "A String representing the Solr service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2546,10 +2548,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Validates Solr metadata and configurations.", nickname = "solrValidateMetadataCommand", notes = "Validates Solr metadata and configurations. <p> Note: This is only needed for upgrading to CDH6.0. <p> Available since API v30.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "the created command instance", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/solrValidateMetadata",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> solrValidateMetadataCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "A String representing the Solr service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2571,10 +2573,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Create the Sqoop2 Server Database tables.", nickname = "sqoopCreateDatabaseTablesCommand", notes = "Create the Sqoop2 Server Database tables. <p> This command is to be run whenever a new database has been specified. Will do nothing if tables already exist. Will not perform an upgrade. Only available when Sqoop2 Server is stopped. <p> Available since API v10.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/sqoopCreateDatabaseTables",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> sqoopCreateDatabaseTablesCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the Sentry service on which to run the command.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2596,10 +2598,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Upgrade Sqoop Database schema as part of a major version upgrade.", nickname = "sqoopUpgradeDbCommand", notes = "Upgrade Sqoop Database schema as part of a major version upgrade. <p/> When doing a major version upgrade for Sqoop, it is necessary to upgrade the schema of its database before Sqoop can run successfully. <p/> Available since API v6.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/sqoopUpgradeDb",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> sqoopUpgradeDbCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The Sqoop service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2621,10 +2623,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Start the service.", nickname = "startCommand", notes = "Start the service.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/start",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> startCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service to start.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2646,10 +2648,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Stop the service.", nickname = "stopCommand", notes = "Stop the service.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/stop",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> stopCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service to stop.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2671,10 +2673,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Change the cluster to use MR2 instead of MR1.", nickname = "switchToMr2", notes = "Change the cluster to use MR2 instead of MR1. Services will be restarted. <p> Will perform the following steps: <ul> <li>Update all services that depend on MapReduce to instead depend on Yarn. </li> <li>Stop MapReduce</li> <li>Start Yarn (MR2 Included)</li> <li>Deploy Yarn (MR2) Client Configuration</li> </ul> <p> Available since API v6.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/switchToMr2",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> switchToMr2(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the Yarn service on which to run the command.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2696,10 +2698,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Updates service information.", nickname = "updateService", notes = "Updates service information. <p/> This method will update only writable fields of the service information. Currently this only includes the service display name. <p/> Available since API v3.", response = ApiService.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "The updated service information.", response = ApiService.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.PUT)
     default ResponseEntity<ApiService> updateService(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Updated service information."  )  @Valid @RequestBody ApiService body) {
@@ -2722,10 +2724,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Updates the service configuration with the given values.", nickname = "updateServiceConfig", notes = "Updates the service configuration with the given values. <p> If a value is set in the given configuration, it will be added to the service's configuration, replacing any existing entries. If a value is unset (its value is null), the existing configuration for the attribute will be erased, if any. <p> Attributes that are not listed in the input will maintain their current values in the configuration.", response = ApiServiceConfig.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "The new service configuration.", response = ApiServiceConfig.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/config",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.PUT)
     default ResponseEntity<ApiServiceConfig> updateServiceConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service to modify.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Optional message describing the changes.") @Valid @RequestParam(value = "message", required = false) String message,@ApiParam(value = "Configuration changes."  )  @Valid @RequestBody ApiServiceConfig body) {
@@ -2748,10 +2750,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Formats the state store in ZooKeeper used for Resource Manager High Availability.", nickname = "yarnFormatStateStore", notes = "Formats the state store in ZooKeeper used for Resource Manager High Availability. Typically used while moving from non-secure to secure cluster or vice-versa. <p> Available since API v8.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/yarnFormatStateStore",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> yarnFormatStateStore(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The YARN service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2773,10 +2775,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Clean up all running server instances of a ZooKeeper service.", nickname = "zooKeeperCleanupCommand", notes = "Clean up all running server instances of a ZooKeeper service. <p> This command removes snapshots and transaction log files kept by ZooKeeper for backup purposes. Refer to the ZooKeeper documentation for more details.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/zooKeeperCleanup",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> zooKeeperCleanupCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service to start.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -2798,10 +2800,10 @@ public interface ServicesResourceApi {
     @ApiOperation(value = "Initializes all the server instances of a ZooKeeper service.", nickname = "zooKeeperInitCommand", notes = "Initializes all the server instances of a ZooKeeper service. <p> ZooKeeper server roles need to be initialized before they can be used.", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "ServicesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Information about the submitted command.", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/commands/zooKeeperInit",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> zooKeeperInitCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service to start.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {

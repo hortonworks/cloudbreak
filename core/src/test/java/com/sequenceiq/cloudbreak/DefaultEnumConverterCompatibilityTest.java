@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import javax.persistence.Convert;
+import jakarta.persistence.Convert;
 
 import org.junit.Assert;
 import org.junit.Test;

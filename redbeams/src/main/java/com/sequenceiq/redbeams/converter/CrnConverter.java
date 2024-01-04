@@ -1,6 +1,6 @@
 package com.sequenceiq.redbeams.converter;
 
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 
 import org.springframework.stereotype.Component;
 

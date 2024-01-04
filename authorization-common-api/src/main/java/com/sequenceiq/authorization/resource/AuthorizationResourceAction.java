@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.ws.rs.NotFoundException;
+import jakarta.ws.rs.NotFoundException;
 
 public enum AuthorizationResourceAction {
     CHANGE_CREDENTIAL("environments/changeCredential", AuthorizationResourceType.ENVIRONMENT),

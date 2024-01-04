@@ -2,7 +2,7 @@ package com.sequenceiq.environment.experience;
 
 import java.util.Optional;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 public interface ResponseReader {
 

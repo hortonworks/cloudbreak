@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.function.Supplier;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

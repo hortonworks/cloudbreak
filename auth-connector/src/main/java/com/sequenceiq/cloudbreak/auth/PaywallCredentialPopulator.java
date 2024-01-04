@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.auth;
 
 import java.util.regex.Pattern;
 
-import javax.inject.Inject;
-import javax.ws.rs.client.WebTarget;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.client.WebTarget;
 
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.slf4j.Logger;

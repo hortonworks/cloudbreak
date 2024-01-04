@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.Diagnostics
 
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

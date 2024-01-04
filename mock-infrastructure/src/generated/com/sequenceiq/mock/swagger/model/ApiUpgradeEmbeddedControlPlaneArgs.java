@@ -1,13 +1,13 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Arguments used to upgrade a Private Cloud Control Plane on embedded kubernetes and the associated experience cluster.
@@ -113,7 +113,7 @@ public class ApiUpgradeEmbeddedControlPlaneArgs   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiUpgradeEmbeddedControlPlaneArgs {\n");
-    
+
     sb.append("    remoteRepoUrl: ").append(toIndentedString(remoteRepoUrl)).append("\n");
     sb.append("    valuesYaml: ").append(toIndentedString(valuesYaml)).append("\n");
     sb.append("    experienceClusterName: ").append(toIndentedString(experienceClusterName)).append("\n");

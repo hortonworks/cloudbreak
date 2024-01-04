@@ -1,14 +1,16 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.Origin;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Detailed information about a Hive replication job.
@@ -89,7 +91,7 @@ public class ApiHiveOnTezReplicationResult   {
   }
 
   /**
-   * 
+   *
    * @return status
   **/
   @ApiModelProperty(value = "")
@@ -109,7 +111,7 @@ public class ApiHiveOnTezReplicationResult   {
   }
 
   /**
-   * 
+   *
    * @return error
   **/
   @ApiModelProperty(value = "")
@@ -129,7 +131,7 @@ public class ApiHiveOnTezReplicationResult   {
   }
 
   /**
-   * 
+   *
    * @return tablesCurrent
   **/
   @ApiModelProperty(required = true, value = "")
@@ -150,7 +152,7 @@ public class ApiHiveOnTezReplicationResult   {
   }
 
   /**
-   * 
+   *
    * @return tablesTotal
   **/
   @ApiModelProperty(required = true, value = "")
@@ -171,7 +173,7 @@ public class ApiHiveOnTezReplicationResult   {
   }
 
   /**
-   * 
+   *
    * @return functionsCurrent
   **/
   @ApiModelProperty(required = true, value = "")
@@ -192,7 +194,7 @@ public class ApiHiveOnTezReplicationResult   {
   }
 
   /**
-   * 
+   *
    * @return functionsTotal
   **/
   @ApiModelProperty(required = true, value = "")
@@ -213,7 +215,7 @@ public class ApiHiveOnTezReplicationResult   {
   }
 
   /**
-   * 
+   *
    * @return eventsCurrent
   **/
   @ApiModelProperty(required = true, value = "")
@@ -234,7 +236,7 @@ public class ApiHiveOnTezReplicationResult   {
   }
 
   /**
-   * 
+   *
    * @return eventsTotal
   **/
   @ApiModelProperty(required = true, value = "")
@@ -255,7 +257,7 @@ public class ApiHiveOnTezReplicationResult   {
   }
 
   /**
-   * 
+   *
    * @return policiesCurrent
   **/
   @ApiModelProperty(required = true, value = "")
@@ -276,7 +278,7 @@ public class ApiHiveOnTezReplicationResult   {
   }
 
   /**
-   * 
+   *
    * @return policiesTotal
   **/
   @ApiModelProperty(required = true, value = "")
@@ -297,7 +299,7 @@ public class ApiHiveOnTezReplicationResult   {
   }
 
   /**
-   * 
+   *
    * @return entitiesCurrent
   **/
   @ApiModelProperty(required = true, value = "")
@@ -318,7 +320,7 @@ public class ApiHiveOnTezReplicationResult   {
   }
 
   /**
-   * 
+   *
    * @return entitiesTotal
   **/
   @ApiModelProperty(required = true, value = "")
@@ -339,7 +341,7 @@ public class ApiHiveOnTezReplicationResult   {
   }
 
   /**
-   * 
+   *
    * @return origin
   **/
   @ApiModelProperty(value = "")
@@ -389,7 +391,7 @@ public class ApiHiveOnTezReplicationResult   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHiveOnTezReplicationResult {\n");
-    
+
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    error: ").append(toIndentedString(error)).append("\n");

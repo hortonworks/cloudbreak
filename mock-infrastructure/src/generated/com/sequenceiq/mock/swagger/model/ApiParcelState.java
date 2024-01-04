@@ -1,15 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * The ApiParcelState encapsulates the state of a parcel while it is in transition and reports any errors that may have occurred.. &lt;p&gt; The complete progress of a parcel is broken up into two different reporting indicators - progress and count. Progress is the primary indicator that reports the global state of transitions. For example, when downloading, progress and totalProgress will show the current number of bytes downloaded and the total number of bytes needed to be downloaded respectively. &lt;/p&gt; &lt;p&gt; The count and totalCount indicator is used when a state transition affects multiple hosts. The count and totalCount show the current number of hosts completed and the total number of hosts respectively. For example, during distribution, the progress and totalProgress will show how many bytes have been transferred to each host and the count will indicate how many hosts of of totalCount have had parcels unpacked. &lt;/p&gt; &lt;p&gt; Along with the two progress indicators, the ApiParcelState shows both errors and warnings that may have turned up during a state transition. &lt;/p&gt;
@@ -205,7 +207,7 @@ public class ApiParcelState   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiParcelState {\n");
-    
+
     sb.append("    progress: ").append(toIndentedString(progress)).append("\n");
     sb.append("    totalProgress: ").append(toIndentedString(totalProgress)).append("\n");
     sb.append("    count: ").append(toIndentedString(count)).append("\n");

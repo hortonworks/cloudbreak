@@ -3,7 +3,7 @@ package com.sequenceiq.datalake.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-import javax.ws.rs.ServiceUnavailableException;
+import jakarta.ws.rs.ServiceUnavailableException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

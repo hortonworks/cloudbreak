@@ -1,6 +1,6 @@
 package com.sequenceiq.redbeams.service.crn;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 

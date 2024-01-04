@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.cmsync.handler;
 
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

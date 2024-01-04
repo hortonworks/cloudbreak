@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.controller.validation;
 
 import static org.mockito.Mockito.when;
 
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidatorContext;
 
 import org.junit.Assert;
 import org.junit.Before;

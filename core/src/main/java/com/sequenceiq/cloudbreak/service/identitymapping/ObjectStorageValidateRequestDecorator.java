@@ -6,7 +6,7 @@ import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

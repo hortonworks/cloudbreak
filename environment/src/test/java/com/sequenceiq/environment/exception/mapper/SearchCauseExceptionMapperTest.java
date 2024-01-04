@@ -6,12 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Providers;
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Providers;
 
 import org.glassfish.jersey.internal.ExceptionMapperFactory;
 import org.glassfish.jersey.internal.JaxrsProviders;
@@ -46,9 +46,8 @@ public class SearchCauseExceptionMapperTest {
         Mockito.when(injectionManager.getAllServiceHolders(ExceptionMapper.class)).thenReturn(ret);
         Provider<ExceptionMappers> mappers = () -> new ExceptionMapperFactory(injectionManager);
 
-        Providers providers = new JaxrsProviders();
+        Providers providers = new JaxrsProviders(null, null, mappers);
 
-        ReflectionTestUtils.setField(providers, "mappers", mappers);
         ReflectionTestUtils.setField(underTest, "providers", providers);
     }
 

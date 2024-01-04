@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.action.v4.ldap;
 
-import javax.ws.rs.NotFoundException;
+import jakarta.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -6,8 +6,8 @@ import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.RUNNING;
 
 import java.util.Collections;
 
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,7 +103,7 @@ public class SdxRecoveryService {
                     return getStackResponseAttemptResult(sdxCluster, pollingMessage, flowState);
                 }
             }
-        } catch (javax.ws.rs.NotFoundException e) {
+        } catch (jakarta.ws.rs.NotFoundException e) {
             LOGGER.debug("Stack not found on CB side " + sdxCluster.getClusterName(), e);
             return AttemptResults.breakFor("Stack not found on CB side " + sdxCluster.getClusterName());
         }

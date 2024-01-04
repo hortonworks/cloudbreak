@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.repository.cluster;
 import java.util.List;
 import java.util.Set;
 
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
+import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

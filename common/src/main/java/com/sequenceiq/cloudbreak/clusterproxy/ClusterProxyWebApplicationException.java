@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.clusterproxy;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 
 public class ClusterProxyWebApplicationException extends WebApplicationException {
 

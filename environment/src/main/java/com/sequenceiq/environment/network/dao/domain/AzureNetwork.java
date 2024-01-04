@@ -3,10 +3,10 @@ package com.sequenceiq.environment.network.dao.domain;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
 import com.sequenceiq.cloudbreak.common.database.StringSetToStringConverter;
 import com.sequenceiq.cloudbreak.common.json.Json;

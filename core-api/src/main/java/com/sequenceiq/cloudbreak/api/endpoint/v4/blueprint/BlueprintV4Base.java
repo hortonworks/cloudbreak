@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;

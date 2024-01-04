@@ -6,7 +6,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

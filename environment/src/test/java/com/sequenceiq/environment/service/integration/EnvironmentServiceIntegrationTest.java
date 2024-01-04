@@ -20,10 +20,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.NotFoundException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.NotFoundException;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -32,7 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck;
@@ -187,7 +187,7 @@ public class EnvironmentServiceIntegrationTest {
         when(resourceDefinitionRequest.await()).thenReturn(new ResourceDefinitionResult(1L, DEFINITION_AWS));
 
         CredentialResponse response = client.credentialV1Endpoint().create(credentialRequest);
-        assertTrue(response.getName().equals(credentialRequest.getName()), " not saved, or response is different");
+        assertEquals(response.getName(), credentialRequest.getName(), " not saved, or response is different");
         assertTrue(credentialRepository.findByNameAndAccountId(credentialRequest.getName(), TEST_ACCOUNT_ID, List.of("AWS"), ENVIRONMENT).isPresent());
     }
 
@@ -222,8 +222,7 @@ public class EnvironmentServiceIntegrationTest {
     public void testCredentialGetByName() {
         credentialRepository.save(credential);
         CredentialResponse results = client.credentialV1Endpoint().getByName(credential.getName());
-        assertTrue(results.getName().equals(credential.getName()),
-                String.format("Result should have credential with name: %s", credential.getName()));
+        assertEquals(results.getName(), credential.getName(), String.format("Result should have credential with name: %s", credential.getName()));
     }
 
     @Test
@@ -235,8 +234,7 @@ public class EnvironmentServiceIntegrationTest {
     public void testCredentialGetByCrn() {
         credentialRepository.save(credential);
         CredentialResponse results = client.credentialV1Endpoint().getByResourceCrn(credential.getResourceCrn());
-        assertTrue(results.getName().equals(credential.getName()),
-                String.format("Result should have credential with name: %s", credential.getName()));
+        assertEquals(results.getName(), credential.getName(), String.format("Result should have credential with name: %s", credential.getName()));
     }
 
     @Test
@@ -287,8 +285,7 @@ public class EnvironmentServiceIntegrationTest {
     public void testProxyGetByName() {
         proxyConfigRepository.save(getProxyConfig());
         ProxyResponse results = client.proxyV1Endpoint().getByName(getProxyRequest().getName());
-        assertTrue(results.getName().equals(getProxyConfig().getName()),
-                String.format("Result should have proxy with name: %s", getProxyConfig().getName()));
+        assertEquals(results.getName(), getProxyConfig().getName(), String.format("Result should have proxy with name: %s", getProxyConfig().getName()));
     }
 
     @Test
@@ -300,7 +297,7 @@ public class EnvironmentServiceIntegrationTest {
     public void testProxyGetByCrnName() {
         proxyConfigRepository.save(getProxyConfig());
         ProxyResponse results = client.proxyV1Endpoint().getByResourceCrn(getProxyConfig().getResourceCrn());
-        assertTrue(results.getCrn().equals(getProxyConfig().getResourceCrn()),
+        assertEquals(results.getCrn(), getProxyConfig().getResourceCrn(),
                 String.format("Result should have proxy with resource crn: %s", getProxyConfig().getResourceCrn()));
     }
 
@@ -313,7 +310,7 @@ public class EnvironmentServiceIntegrationTest {
     public void testProxyDeleteByName() {
         proxyConfigRepository.save(getProxyConfig());
         ProxyResponse results = client.proxyV1Endpoint().deleteByName(getProxyRequest().getName());
-        assertTrue(results.getName().equals(getProxyConfig().getName()),
+        assertEquals(results.getName(), getProxyConfig().getName(),
                 String.format("Result should have proxy with name: %s", getProxyConfig().getName()));
     }
 
@@ -326,7 +323,7 @@ public class EnvironmentServiceIntegrationTest {
     public void testProxyDeleteByCrnName() {
         proxyConfigRepository.save(getProxyConfig());
         ProxyResponse results = client.proxyV1Endpoint().deleteByCrn(getProxyConfig().getResourceCrn());
-        assertTrue(results.getCrn().equals(getProxyConfig().getResourceCrn()),
+        assertEquals(results.getCrn(), getProxyConfig().getResourceCrn(),
                 String.format("Result should have proxy with resource crn: %s", getProxyConfig().getResourceCrn()));
     }
 

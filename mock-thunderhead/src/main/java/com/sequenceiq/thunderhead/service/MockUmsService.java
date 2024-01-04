@@ -2,7 +2,7 @@ package com.sequenceiq.thunderhead.service;
 
 import static java.lang.String.format;
 import static java.time.temporal.ChronoUnit.DAYS;
-import static javax.servlet.http.HttpServletResponse.SC_FOUND;
+import static jakarta.servlet.http.HttpServletResponse.SC_FOUND;
 import static org.springframework.security.jwt.JwtHelper.decodeAndVerify;
 import static org.springframework.security.jwt.JwtHelper.encode;
 
@@ -10,12 +10,12 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.NotFoundException;
+import jakarta.annotation.Nonnull;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

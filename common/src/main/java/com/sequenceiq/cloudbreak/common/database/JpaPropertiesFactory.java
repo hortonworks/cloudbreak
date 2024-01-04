@@ -10,11 +10,11 @@ import com.sequenceiq.cloudbreak.common.tx.HibernateNPlusOneCircuitBreaker;
 import com.sequenceiq.cloudbreak.common.tx.HibernateStatementStatisticsLogger;
 import com.sequenceiq.cloudbreak.common.tx.HibernateTransactionInterceptor;
 
-public class JpaPropertiesFacory {
+public class JpaPropertiesFactory {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JpaPropertiesFacory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JpaPropertiesFactory.class);
 
-    private JpaPropertiesFacory() {
+    private JpaPropertiesFactory() {
     }
 
     public static Properties create(String hbm2ddlStrategy, boolean debug, String dbSchemaName, CircuitBreakerType circuitBreakerType,

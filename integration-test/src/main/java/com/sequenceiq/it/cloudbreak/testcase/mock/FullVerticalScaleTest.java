@@ -4,7 +4,7 @@ import static com.sequenceiq.environment.api.v1.environment.model.response.Envir
 
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 

@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.parameters.v1.converter;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;

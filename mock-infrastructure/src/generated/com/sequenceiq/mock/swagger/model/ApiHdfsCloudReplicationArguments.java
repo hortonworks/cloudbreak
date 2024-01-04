@@ -1,17 +1,13 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiHdfsReplicationArguments;
-import com.sequenceiq.mock.swagger.model.ApiServiceRef;
-import com.sequenceiq.mock.swagger.model.ReplicationStrategy;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.List;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Replication arguments for HDFS.
@@ -36,7 +32,7 @@ public class ApiHdfsCloudReplicationArguments extends ApiHdfsReplicationArgument
   }
 
   /**
-   * 
+   *
    * @return sourceAccount
   **/
   @ApiModelProperty(value = "")
@@ -56,7 +52,7 @@ public class ApiHdfsCloudReplicationArguments extends ApiHdfsReplicationArgument
   }
 
   /**
-   * 
+   *
    * @return destinationAccount
   **/
   @ApiModelProperty(value = "")

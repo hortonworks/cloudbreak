@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.client;
 import java.util.List;
 import java.util.Locale;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 

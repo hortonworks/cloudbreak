@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.action.freeipa;
 
 import static java.lang.String.format;
 
-import javax.ws.rs.ClientErrorException;
+import jakarta.ws.rs.ClientErrorException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

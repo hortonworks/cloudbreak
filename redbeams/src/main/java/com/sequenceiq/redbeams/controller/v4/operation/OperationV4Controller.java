@@ -2,7 +2,7 @@ package com.sequenceiq.redbeams.controller.v4.operation;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATABASE_SERVER;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.springframework.stereotype.Controller;
 

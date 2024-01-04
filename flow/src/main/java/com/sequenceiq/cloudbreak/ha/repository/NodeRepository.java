@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.ha.repository;
 
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
+import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

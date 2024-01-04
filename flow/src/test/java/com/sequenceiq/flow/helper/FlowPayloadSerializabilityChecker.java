@@ -22,8 +22,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.SetUtils;

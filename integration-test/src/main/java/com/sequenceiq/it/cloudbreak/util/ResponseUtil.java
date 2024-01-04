@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.util;
 
 import java.io.IOException;
 
-import javax.ws.rs.WebApplicationException;
+import jakarta.ws.rs.WebApplicationException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;

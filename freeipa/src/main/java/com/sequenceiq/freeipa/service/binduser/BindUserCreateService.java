@@ -5,7 +5,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.binduser.create.event.CreateBi
 
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

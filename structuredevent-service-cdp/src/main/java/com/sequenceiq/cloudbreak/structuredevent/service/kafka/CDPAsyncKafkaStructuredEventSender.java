@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.kafka;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

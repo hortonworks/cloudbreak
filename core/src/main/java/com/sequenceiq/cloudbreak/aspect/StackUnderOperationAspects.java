@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.aspect;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Pointcut;

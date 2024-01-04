@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.service.publicendpoint.dns;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.nifi.NifiConfigProvider;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;

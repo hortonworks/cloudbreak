@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource;
 
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

@@ -11,7 +11,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;

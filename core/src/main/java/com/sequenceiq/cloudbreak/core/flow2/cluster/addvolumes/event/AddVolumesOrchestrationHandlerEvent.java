@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumes
 
 import java.util.StringJoiner;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

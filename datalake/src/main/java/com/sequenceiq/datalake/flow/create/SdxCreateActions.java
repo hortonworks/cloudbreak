@@ -7,7 +7,7 @@ import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_STACK_CREAT
 import java.util.Map;
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

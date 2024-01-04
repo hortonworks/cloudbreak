@@ -5,7 +5,7 @@ import static java.util.Objects.isNull;
 
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

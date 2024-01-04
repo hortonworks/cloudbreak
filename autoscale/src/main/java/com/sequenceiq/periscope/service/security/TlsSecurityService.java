@@ -1,7 +1,7 @@
 package com.sequenceiq.periscope.service.security;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;

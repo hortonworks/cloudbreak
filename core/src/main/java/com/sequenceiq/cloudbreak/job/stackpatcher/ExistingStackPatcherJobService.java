@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.job.stackpatcher;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;

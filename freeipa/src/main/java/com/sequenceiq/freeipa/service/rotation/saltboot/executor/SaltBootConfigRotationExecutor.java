@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.SALTBO
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;

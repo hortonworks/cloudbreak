@@ -12,7 +12,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SALT_UPDATE_
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SALT_UPDATE_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_BOOTSTRAP;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

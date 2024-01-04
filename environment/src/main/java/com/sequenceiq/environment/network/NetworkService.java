@@ -6,7 +6,7 @@ import static java.util.stream.Collectors.toMap;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;

@@ -9,7 +9,7 @@ import java.net.http.HttpResponse;
 import java.util.Optional;
 import java.util.concurrent.BlockingDeque;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.externaldatabase.start.config
 
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;

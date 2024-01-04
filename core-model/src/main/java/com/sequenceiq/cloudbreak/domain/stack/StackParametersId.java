@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.domain.stack;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
+import jakarta.persistence.Column;
 
 public class StackParametersId implements Serializable {
     @Column(name = "stack_id")

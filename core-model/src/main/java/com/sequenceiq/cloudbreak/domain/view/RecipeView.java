@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.domain.view;
 
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 import org.hibernate.annotations.Where;
 

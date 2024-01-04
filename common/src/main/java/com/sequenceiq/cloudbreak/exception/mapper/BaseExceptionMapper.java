@@ -6,8 +6,8 @@ import static ch.qos.logback.classic.Level.ERROR_INT;
 import static ch.qos.logback.classic.Level.INFO_INT;
 import static ch.qos.logback.classic.Level.WARN_INT;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

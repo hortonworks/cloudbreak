@@ -1,17 +1,18 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ReplicationType;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
- * 
+ *
  */
 @ApiModel(description = "")
 @Validated
@@ -39,7 +40,7 @@ public class ApiHive3ReplicationMetricsMetadata   {
   }
 
   /**
-   * 
+   *
    * @return dbName
   **/
   @ApiModelProperty(value = "")
@@ -59,7 +60,7 @@ public class ApiHive3ReplicationMetricsMetadata   {
   }
 
   /**
-   * 
+   *
    * @return replicationType
   **/
   @ApiModelProperty(value = "")
@@ -80,7 +81,7 @@ public class ApiHive3ReplicationMetricsMetadata   {
   }
 
   /**
-   * 
+   *
    * @return stagingDir
   **/
   @ApiModelProperty(value = "")
@@ -100,7 +101,7 @@ public class ApiHive3ReplicationMetricsMetadata   {
   }
 
   /**
-   * 
+   *
    * @return lastReplId
   **/
   @ApiModelProperty(value = "")
@@ -139,7 +140,7 @@ public class ApiHive3ReplicationMetricsMetadata   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHive3ReplicationMetricsMetadata {\n");
-    
+
     sb.append("    dbName: ").append(toIndentedString(dbName)).append("\n");
     sb.append("    replicationType: ").append(toIndentedString(replicationType)).append("\n");
     sb.append("    stagingDir: ").append(toIndentedString(stagingDir)).append("\n");

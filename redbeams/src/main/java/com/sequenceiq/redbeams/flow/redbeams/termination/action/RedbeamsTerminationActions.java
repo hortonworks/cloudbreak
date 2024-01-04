@@ -6,7 +6,7 @@ import static com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminat
 import java.util.Map;
 import java.util.Optional;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;

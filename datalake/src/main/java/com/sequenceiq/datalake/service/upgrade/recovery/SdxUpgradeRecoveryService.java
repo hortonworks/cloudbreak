@@ -3,8 +3,8 @@ package com.sequenceiq.datalake.service.upgrade.recovery;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

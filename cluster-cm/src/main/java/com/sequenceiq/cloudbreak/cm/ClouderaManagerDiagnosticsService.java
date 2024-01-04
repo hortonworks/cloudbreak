@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.cm;
 
 import java.math.BigDecimal;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.joda.time.DateTime;

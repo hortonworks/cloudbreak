@@ -1,14 +1,16 @@
 package com.sequenceiq.mock.swagger.model;
 
+import java.math.BigDecimal;
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Utilization report information of a tenant of Yarn application.
@@ -441,7 +443,7 @@ public class ApiYarnTenantUtilization   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiYarnTenantUtilization {\n");
-    
+
     sb.append("    tenantName: ").append(toIndentedString(tenantName)).append("\n");
     sb.append("    avgYarnCpuAllocation: ").append(toIndentedString(avgYarnCpuAllocation)).append("\n");
     sb.append("    avgYarnCpuUtilization: ").append(toIndentedString(avgYarnCpuUtilization)).append("\n");

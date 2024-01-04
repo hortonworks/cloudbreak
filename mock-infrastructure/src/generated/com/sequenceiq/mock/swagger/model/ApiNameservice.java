@@ -1,18 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiHealthCheck;
-import com.sequenceiq.mock.swagger.model.ApiHealthSummary;
-import com.sequenceiq.mock.swagger.model.ApiRoleRef;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Provides information about an HDFS nameservice. &lt;p&gt; Nameservices can be either a stand-alone NameNode, a NameNode paired with a SecondaryNameNode, or a high-availability pair formed by an active and a stand-by NameNode. &lt;p&gt; The following fields are only available in the object&#39;s full view: &lt;ul&gt; &lt;li&gt;healthSummary&lt;/li&gt; &lt;li&gt;healthChecks&lt;/li&gt; &lt;/ul&gt;
@@ -287,7 +286,7 @@ public class ApiNameservice   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiNameservice {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    active: ").append(toIndentedString(active)).append("\n");
     sb.append("    activeFailoverController: ").append(toIndentedString(activeFailoverController)).append("\n");

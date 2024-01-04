@@ -1,13 +1,13 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Arguments used for the command to generate the docker copy script.
@@ -113,7 +113,7 @@ public class ApiGenerateCopyDockerArgs   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiGenerateCopyDockerArgs {\n");
-    
+
     sb.append("    remoteRepoUrl: ").append(toIndentedString(remoteRepoUrl)).append("\n");
     sb.append("    dockerRegistry: ").append(toIndentedString(dockerRegistry)).append("\n");
     sb.append("    controlPlaneUuid: ").append(toIndentedString(controlPlaneUuid)).append("\n");

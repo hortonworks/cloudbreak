@@ -1,14 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiCmPeerType;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Information about a Cloudera Manager peer instance. &lt;p&gt; The requirement and usage of &lt;i&gt;username&lt;/i&gt; and &lt;i&gt;password&lt;/i&gt; properties are dependent on the &lt;i&gt;clouderaManagerCreatedUser&lt;/i&gt; flag. &lt;p&gt; When creating peers, if &#39;clouderaManagerCreatedUser&#39; is true, the username/password should be the credentials of a user with administrator privileges on the remote Cloudera Manager. These credentials are not stored, they are used to connect to the peer and create a user in that peer. The newly created user is stored and used for communication with that peer. If &#39;clouderaManagerCreatedUser&#39; is false, which is not applicable to REPLICATION peer type, the username/password to the remote Cloudera Manager are directly stored and used for all communications with that peer. &lt;p&gt; When updating peers, if &#39;clouderaManagerCreatedUser&#39; is true and username/password are set, a new remote user will be created. If &#39;clouderaManagerCreatedUser&#39; is false and username/password are set, the stored username/password will be updated. &lt;p&gt; If &#39;createUserWithAdminRole&#39; is true and &#39;clouderaManagerCreatedUser&#39; is true, the created internal user will also be granted admin role.
@@ -211,7 +212,7 @@ public class ApiCmPeer   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiCmPeer {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    url: ").append(toIndentedString(url)).append("\n");

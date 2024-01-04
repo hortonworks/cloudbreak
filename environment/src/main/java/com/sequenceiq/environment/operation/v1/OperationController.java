@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.operation.v1;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.springframework.stereotype.Controller;
 

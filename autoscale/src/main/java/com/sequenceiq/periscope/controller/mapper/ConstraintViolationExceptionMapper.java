@@ -3,10 +3,10 @@ package com.sequenceiq.periscope.controller.mapper;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.Provider;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.ext.Provider;
 
 @Provider
 public class ConstraintViolationExceptionMapper extends BaseExceptionMapper<ConstraintViolationException> {

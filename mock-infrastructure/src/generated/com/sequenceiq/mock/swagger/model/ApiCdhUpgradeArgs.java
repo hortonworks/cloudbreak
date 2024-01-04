@@ -1,14 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiRollingUpgradeClusterArgs;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Arguments used for the CDH Upgrade command.
@@ -163,7 +164,7 @@ public class ApiCdhUpgradeArgs   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiCdhUpgradeArgs {\n");
-    
+
     sb.append("    cdhParcelVersion: ").append(toIndentedString(cdhParcelVersion)).append("\n");
     sb.append("    cdhPackageVersion: ").append(toIndentedString(cdhPackageVersion)).append("\n");
     sb.append("    rollingRestartArgs: ").append(toIndentedString(rollingRestartArgs)).append("\n");

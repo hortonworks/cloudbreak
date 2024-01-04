@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.service.stackpatch;
 import java.util.Date;
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 

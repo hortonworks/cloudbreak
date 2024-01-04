@@ -5,6 +5,24 @@
  */
 package com.sequenceiq.mock.swagger.v40.api;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.mock.swagger.model.ApiCommand;
 import com.sequenceiq.mock.swagger.model.ApiCommandList;
 import com.sequenceiq.mock.swagger.model.ApiCommandMetadataList;
@@ -15,29 +33,13 @@ import com.sequenceiq.mock.swagger.model.ApiMetricList;
 import com.sequenceiq.mock.swagger.model.ApiRole;
 import com.sequenceiq.mock.swagger.model.ApiRoleList;
 import com.sequenceiq.mock.swagger.model.ApiRoleNameList;
-import java.util.List;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T21:48:33.802+01:00")
 
 @Api(value = "RolesResource", description = "the RolesResource API")
@@ -61,10 +63,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "Attach tags to the role.", nickname = "addTags", notes = "Attach tags to the role", response = ApiEntityTag.class, responseContainer = "List", authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success", response = ApiEntityTag.class, responseContainer = "List") })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}/tags",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.PUT)
     default ResponseEntity<List<ApiEntityTag>> addTags(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the role",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "List of tags to add to the role"  )  @Valid @RequestBody List<ApiEntityTag> body) {
@@ -87,10 +89,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "Bulk delete roles in a particular service by name.", nickname = "bulkDeleteRoles", notes = "Bulk delete roles in a particular service by name. Fails if any role cannot be found.", response = ApiRoleList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiRoleList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/bulkDelete",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiRoleList> bulkDeleteRoles(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "list of role names to be deleted"  )  @Valid @RequestBody ApiRoleNameList body) {
@@ -113,10 +115,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "Create new roles in a given service.", nickname = "createRoles", notes = "Create new roles in a given service.  <table> <thead> <tr> <th>Service Type</th> <th>Available Role Types</th> </tr> </thead> <tbody> <tr> <td>HDFS (CDH3)</td> <td>NAMENODE, DATANODE, SECONDARYNAMENODE, BALANCER, GATEWAY</td> </tr> <tr> <td>HDFS (CDH4)</td> <td>NAMENODE, DATANODE, SECONDARYNAMENODE, BALANCER, HTTPFS, FAILOVERCONTROLLER, GATEWAY, JOURNALNODE</td> </tr> <tr> <td>HDFS (CDH5)</td> <td>NAMENODE, DATANODE, SECONDARYNAMENODE, BALANCER, HTTPFS, FAILOVERCONTROLLER, GATEWAY, JOURNALNODE, NFSGATEWAY</td> </tr> <td>MAPREDUCE</td> <td>JOBTRACKER, TASKTRACKER, GATEWAY, FAILOVERCONTROLLER,</td> </tr> <td>HBASE</td> <td>MASTER, REGIONSERVER, GATEWAY, HBASETHRIFTSERVER, HBASERESTSERVER</td> </tr> <tr> <td>YARN</td> <td>RESOURCEMANAGER, NODEMANAGER, JOBHISTORY, GATEWAY</td> </tr> <tr> <td>OOZIE</td> <td>OOZIE_SERVER</td> </tr> <tr> <td>ZOOKEEPER</td> <td>SERVER</td> </tr> <tr> <td>HUE (CDH3)</td> <td>HUE_SERVER, BEESWAX_SERVER, KT_RENEWER, JOBSUBD</td> </tr> <tr> <td>HUE (CDH4)</td> <td>HUE_SERVER, BEESWAX_SERVER, KT_RENEWER</td> </tr> <tr> <td>HUE (CDH5)</td> <td>HUE_SERVER, KT_RENEWER</td> </tr> <tr> <td>HUE (CDH5 5.5+)</td> <td>HUE_SERVER, KT_RENEWER, HUE_LOAD_BALANCER</td> </tr> <tr> <td>FLUME</td> <td>AGENT</td> </tr> <tr> <td>IMPALA (CDH4)</td> <td>IMPALAD, STATESTORE, CATALOGSERVER</td> </tr> <tr> <td>IMPALA (CDH5)</td> <td>IMPALAD, STATESTORE, CATALOGSERVER</td> </tr> <tr> <td>HIVE</td> <td>HIVESERVER2, HIVEMETASTORE, WEBHCAT, GATEWAY</td> </tr> <tr> <td>SOLR</td> <td>SOLR_SERVER, GATEWAY</td> </tr> <tr> <td>SQOOP</td> <td>SQOOP_SERVER</td> </tr> <tr> <td>SQOOP_CLIENT</td> <td>GATEWAY</td> </tr> <tr> <td>SENTRY</td> <td>SENTRY_SERVER</td> </tr> <tr> <td>ACCUMULO16</td> <td>GARBAGE_COLLECTOR, GATEWAY, ACCUMULO16_MASTER, MONITOR, ACCUMULO16_TSERVER, TRACER</td> </tr> <tr> <td>KMS</td> <td>KMS</td> </tr> <tr> <td>KS_INDEXER</td> <td>HBASE_INDEXER</td> </tr> <tr> <td>SPARK_ON_YARN</td> <td>GATEWAY, SPARK_YARN_HISTORY_SERVER</td> </tr> </tbody>  </table>  When specifying roles to be created, the names provided for each role must not conflict with the names that CM auto-generates for roles. Specifically, names of the form \"<service name>-<role type>-<arbitrary value>\" cannot be used unless the <arbitrary value> is the same one CM would use. If CM detects such a conflict, the error message will indicate what <arbitrary value> is safe to use. Alternately, a differently formatted name should be used.  Since API v6: The role name can be left blank to allow CM to generate the name.", response = ApiRoleList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiRoleList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiRoleList> createRoles(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Roles to create."  )  @Valid @RequestBody ApiRoleList body) {
@@ -139,10 +141,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "Deletes a role from a given service.", nickname = "deleteRole", notes = "Deletes a role from a given service.", response = ApiRole.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success", response = ApiRole.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.DELETE)
     default ResponseEntity<ApiRole> deleteRole(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The role name.",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -164,10 +166,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "Remove the tags associated with the role.", nickname = "deleteTags", notes = "Remove the tags associated with the role", response = ApiEntityTag.class, responseContainer = "List", authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success", response = ApiEntityTag.class, responseContainer = "List") })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}/tags",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.DELETE)
     default ResponseEntity<List<ApiEntityTag>> deleteTags(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the role to remove tags from",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "A list of tags to remove from the role"  )  @Valid @RequestBody List<ApiEntityTag> body) {
@@ -190,10 +192,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "Put the role into maintenance mode.", nickname = "enterMaintenanceMode", notes = "Put the role into maintenance mode. This is a synchronous command. The result is known immediately upon return.  <p> Available since API v2. </p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}/commands/enterMaintenanceMode",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> enterMaintenanceMode(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The role name.",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -215,10 +217,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "Take the role out of maintenance mode.", nickname = "exitMaintenanceMode", notes = "Take the role out of maintenance mode. This is a synchronous command. The result is known immediately upon return.  <p> Available since API v2. </p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}/commands/exitMaintenanceMode",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> exitMaintenanceMode(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The role name.",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -240,10 +242,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "Retrieves the log file for the role's main process.", nickname = "getFullLog", notes = "Retrieves the log file for the role's main process. <p> If the role is not started, this will be the log file associated with the last time the role was run. <p> Log files are returned as plain text (type \"text/plain\").", response = String.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = String.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}/logs/full",
-        produces = { "text/plain" }, 
+        produces = { "text/plain" },
         method = RequestMethod.GET)
     default ResponseEntity<String> getFullLog(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The role to fetch logs from.",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -265,10 +267,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "Fetch metric readings for a particular role.", nickname = "getMetrics", notes = "Fetch metric readings for a particular role. <p> By default, this call will look up all metrics available for the role. If only specific metrics are desired, use the <i>metrics</i> parameter. <p> By default, the returned results correspond to a 5 minute window based on the provided end time (which defaults to the current server time). The <i>from</i> and <i>to</i> parameters can be used to control the window being queried. A maximum window of 3 hours is enforced. <p> When requesting a \"full\" view, aside from the extended properties of the returned metric data, the collection will also contain information about all metrics available for the role, even if no readings are available in the requested window.", response = ApiMetricList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiMetricList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}/metrics",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiMetricList> getMetrics(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The name of the role.",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Start of the period to query.") @Valid @RequestParam(value = "from", required = false) String from,@ApiParam(value = "Filter for which metrics to query.") @Valid @RequestParam(value = "metrics", required = false) List<String> metrics,@ApiParam(value = "End of the period to query.", defaultValue = "now") @Valid @RequestParam(value = "to", required = false, defaultValue="now") String to,@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -290,10 +292,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "Retrieves the stacks log file, if any, for the role's main process.", nickname = "getStacksLog", notes = "Retrieves the stacks log file, if any, for the role's main process. Note that not all roles support periodic stacks collection.  The log files are returned as plain text (type \"text/plain\").", response = String.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = String.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}/logs/stacks",
-        produces = { "text/plain" }, 
+        produces = { "text/plain" },
         method = RequestMethod.GET)
     default ResponseEntity<String> getStacksLog(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The role to fetch stacks logs from.",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -315,10 +317,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "Download a zip-compressed archive of role stacks logs.", nickname = "getStacksLogsBundle", notes = "Download a zip-compressed archive of role stacks logs. Note that not all roles support periodic stacks collection.", authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success") })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}/logs/stacksBundle",
-        produces = { "application/octet-stream" }, 
+        produces = { "application/octet-stream" },
         method = RequestMethod.GET)
     default ResponseEntity<Void> getStacksLogsBundle(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The role to fetch the stacks logs bundle from.",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -332,10 +334,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "Retrieves the role's standard error output.", nickname = "getStandardError", notes = "Retrieves the role's standard error output. <p> If the role is not started, this will be the output associated with the last time the role was run. <p> Log files are returned as plain text (type \"text/plain\").", response = String.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = String.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}/logs/stderr",
-        produces = { "text/plain" }, 
+        produces = { "text/plain" },
         method = RequestMethod.GET)
     default ResponseEntity<String> getStandardError(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The role to fetch stderr from.",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -357,10 +359,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "Retrieves the role's standard output.", nickname = "getStandardOutput", notes = "Retrieves the role's standard output. <p> If the role is not started, this will be the output associated with the last time the role was run. <p> Log files are returned as plain text (type \"text/plain\").", response = String.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = String.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}/logs/stdout",
-        produces = { "text/plain" }, 
+        produces = { "text/plain" },
         method = RequestMethod.GET)
     default ResponseEntity<String> getStandardOutput(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The role to fetch stdout from.",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -382,10 +384,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "Collects diagnostics data for an Impala role.", nickname = "impalaDiagnostics", notes = "Collects diagnostics data for an Impala role.  <p> Available since API v31. </p>", response = ApiCommand.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiCommand.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}/commands/impalaDiagnostics",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiCommand> impalaDiagnostics(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The role name.",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = ""  )  @Valid @RequestBody ApiImpalaRoleDiagnosticsArgs body) {
@@ -408,10 +410,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "List active role commands.", nickname = "listActiveCommands", notes = "List active role commands.", response = ApiCommandList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiCommandList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}/commands",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiCommandList> listActiveCommands(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The role to start.",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -433,10 +435,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "Lists all the commands that can be executed by name on the provided role.", nickname = "listCommands", notes = "Lists all the commands that can be executed by name on the provided role.", response = ApiCommandMetadataList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiCommandMetadataList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}/commandsByName",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiCommandMetadataList> listCommands(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the role name.",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -458,10 +460,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "Retrieves detailed information about a role.", nickname = "readRole", notes = "Retrieves detailed information about a role.", response = ApiRole.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiRole.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiRole> readRole(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The role name.",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The view to materialize. Defaults to 'full'.", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "full") @Valid @RequestParam(value = "view", required = false, defaultValue="full") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -483,10 +485,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "Retrieves the configuration of a specific role.", nickname = "readRoleConfig", notes = "Retrieves the configuration of a specific role. Note that the \"full\" view performs validation on the configuration, which could take a few seconds on a large cluster (around 500 nodes or more).", response = ApiConfigList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiConfigList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}/config",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiConfigList> readRoleConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The role to look up.",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -508,10 +510,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "Lists all roles of a given service.", nickname = "readRoles", notes = "Lists all roles of a given service.", response = ApiRoleList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiRoleList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiRoleList> readRoles(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Optional query to filter the roles by. <p> The query specifies the intersection of a list of constraints, joined together with semicolons (without spaces). For example: hostname==host1.abc.com;type==DATANODE </p>  Currently supports filtering by: <ul> <li>hostname: The hostname of the host the role is running on.</li> <li>hostId: The unique identifier of the host the role is running on.</li> <li>type: The role's type.</li> </ul>", defaultValue = "") @Valid @RequestParam(value = "filter", required = false, defaultValue="") String filter,@ApiParam(value = "DataView for getting roles. Defaults to 'summary'.", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -533,10 +535,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "Returns the tags associated with this role.", nickname = "readTags", notes = "Returns the tags associated with this role.", response = ApiEntityTag.class, responseContainer = "List", authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiEntityTag.class, responseContainer = "List") })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}/tags",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<List<ApiEntityTag>> readTags(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The name of the role",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Number of tags", defaultValue = "10") @Valid @RequestParam(value = "limit", required = false, defaultValue="10") Integer limit,@ApiParam(value = "Index of the first tag to retrieve", defaultValue = "0") @Valid @RequestParam(value = "offset", required = false, defaultValue="0") Integer offset) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -558,10 +560,10 @@ public interface RolesResourceApi {
     @ApiOperation(value = "Updates the role configuration with the given values.", nickname = "updateRoleConfig", notes = "Updates the role configuration with the given values. <p> If a value is set in the given configuration, it will be added to the role's configuration, replacing any existing entries. If a value is unset (its value is null), the existing configuration for the attribute will be erased, if any. <p> Attributes that are not listed in the input will maintain their current values in the configuration.", response = ApiConfigList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "RolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success", response = ApiConfigList.class) })
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}/config",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.PUT)
     default ResponseEntity<ApiConfigList> updateRoleConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The role to modify.",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Optional message describing the changes.") @Valid @RequestParam(value = "message", required = false) String message,@ApiParam(value = "Configuration changes."  )  @Valid @RequestBody ApiConfigList body) {

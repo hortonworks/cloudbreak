@@ -1,17 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiClusterRef;
-import com.sequenceiq.mock.swagger.model.ApiRoleConfigGroupRef;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * A host template belongs to a cluster and contains a set of role config groups for slave roles (such as DataNodes and TaskTrackers) from services in the cluster. At most one role config group per role type can be present in a host template. Host templates can be applied to fresh hosts (those with no roles on them) in order to create a role for each of the role groups on each host.
@@ -128,7 +128,7 @@ public class ApiHostTemplate   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHostTemplate {\n");
-    
+
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    clusterRef: ").append(toIndentedString(clusterRef)).append("\n");
     sb.append("    roleConfigGroupRefs: ").append(toIndentedString(roleConfigGroupRefs)).append("\n");

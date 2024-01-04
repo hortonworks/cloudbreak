@@ -2,7 +2,7 @@ package com.sequenceiq.environment.experience.api;
 
 import java.util.Set;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.sequenceiq.environment.experience.common.responses.CpInternalCluster;
 import com.sequenceiq.environment.experience.policy.response.ExperiencePolicyResponse;

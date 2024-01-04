@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.ccm.endpoint;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 /**
  * Provides utilities for dealing with service families.

@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
-import javax.ws.rs.InternalServerErrorException;
+import jakarta.ws.rs.InternalServerErrorException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

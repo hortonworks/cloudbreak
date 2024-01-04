@@ -2,7 +2,7 @@ package com.sequenceiq.freeipa.client;
 
 import java.util.Optional;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.client.RpcListener;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyError;

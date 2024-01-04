@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.quartz.cleanup.service;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;

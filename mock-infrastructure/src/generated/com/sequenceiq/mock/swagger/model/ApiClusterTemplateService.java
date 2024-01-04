@@ -1,19 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.mock.swagger.model.ApiClusterTemplateRole;
-import com.sequenceiq.mock.swagger.model.ApiClusterTemplateRoleConfigGroup;
-import com.sequenceiq.mock.swagger.model.ApiEntityTag;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Service information
@@ -255,7 +253,7 @@ public class ApiClusterTemplateService   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiClusterTemplateService {\n");
-    
+
     sb.append("    refName: ").append(toIndentedString(refName)).append("\n");
     sb.append("    serviceType: ").append(toIndentedString(serviceType)).append("\n");
     sb.append("    serviceConfigs: ").append(toIndentedString(serviceConfigs)).append("\n");

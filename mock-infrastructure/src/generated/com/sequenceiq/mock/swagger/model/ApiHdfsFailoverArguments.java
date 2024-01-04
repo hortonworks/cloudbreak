@@ -1,14 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiServiceRef;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Arguments used when enabling HDFS automatic failover.
@@ -139,7 +140,7 @@ public class ApiHdfsFailoverArguments   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHdfsFailoverArguments {\n");
-    
+
     sb.append("    nameservice: ").append(toIndentedString(nameservice)).append("\n");
     sb.append("    zooKeeperService: ").append(toIndentedString(zooKeeperService)).append("\n");
     sb.append("    activeFCName: ").append(toIndentedString(activeFCName)).append("\n");

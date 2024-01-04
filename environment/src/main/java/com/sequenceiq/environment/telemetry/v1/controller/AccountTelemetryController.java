@@ -2,7 +2,7 @@ package com.sequenceiq.environment.telemetry.v1.controller;
 
 import java.util.List;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.springframework.stereotype.Controller;
 

@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.workspace.util;
 
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;

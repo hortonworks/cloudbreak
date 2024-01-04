@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.consumption;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.inject.Inject;
-import javax.validation.ValidationException;
+import jakarta.inject.Inject;
+import jakarta.validation.ValidationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

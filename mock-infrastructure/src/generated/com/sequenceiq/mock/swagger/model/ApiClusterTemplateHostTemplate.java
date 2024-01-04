@@ -1,16 +1,17 @@
 package com.sequenceiq.mock.swagger.model;
 
-import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiEntityTag;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import jakarta.validation.Valid;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Host templates will contain information about the role config groups that should be applied to a host. This basically means a host will have a role corresponding to each config group.
@@ -159,7 +160,7 @@ public class ApiClusterTemplateHostTemplate   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiClusterTemplateHostTemplate {\n");
-    
+
     sb.append("    refName: ").append(toIndentedString(refName)).append("\n");
     sb.append("    roleConfigGroupsRefNames: ").append(toIndentedString(roleConfigGroupsRefNames)).append("\n");
     sb.append("    cardinality: ").append(toIndentedString(cardinality)).append("\n");

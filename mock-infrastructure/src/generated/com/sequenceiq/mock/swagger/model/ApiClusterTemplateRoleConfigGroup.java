@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.springframework.validation.annotation.Validated;
 
@@ -175,7 +175,7 @@ public class ApiClusterTemplateRoleConfigGroup   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiClusterTemplateRoleConfigGroup {\n");
-    
+
     sb.append("    refName: ").append(toIndentedString(refName)).append("\n");
     sb.append("    roleType: ").append(toIndentedString(roleType)).append("\n");
     sb.append("    base: ").append(toIndentedString(base)).append("\n");

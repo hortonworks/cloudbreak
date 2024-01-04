@@ -1,19 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiHdfsReplicationArguments;
-import com.sequenceiq.mock.swagger.model.ApiHiveReplicationArguments;
-import com.sequenceiq.mock.swagger.model.ApiHiveTable;
-import com.sequenceiq.mock.swagger.model.ApiServiceRef;
-import com.sequenceiq.mock.swagger.model.ReplicationOption;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.List;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Replication arguments for Hive services.
@@ -44,7 +40,7 @@ public class ApiHiveCloudReplicationArguments extends ApiHiveReplicationArgument
   }
 
   /**
-   * 
+   *
    * @return sourceAccount
   **/
   @ApiModelProperty(value = "")
@@ -64,7 +60,7 @@ public class ApiHiveCloudReplicationArguments extends ApiHiveReplicationArgument
   }
 
   /**
-   * 
+   *
    * @return destinationAccount
   **/
   @ApiModelProperty(value = "")
@@ -84,7 +80,7 @@ public class ApiHiveCloudReplicationArguments extends ApiHiveReplicationArgument
   }
 
   /**
-   * 
+   *
    * @return cloudRootPath
   **/
   @ApiModelProperty(value = "")
@@ -104,7 +100,7 @@ public class ApiHiveCloudReplicationArguments extends ApiHiveReplicationArgument
   }
 
   /**
-   * 
+   *
    * @return replicationOption
   **/
   @ApiModelProperty(value = "")

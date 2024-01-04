@@ -3,8 +3,8 @@ package com.sequenceiq.freeipa.service.client;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.ws.rs.InternalServerErrorException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.InternalServerErrorException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

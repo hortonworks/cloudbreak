@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.service.ha;
 
 import java.util.Set;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;

@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.reset;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RESET;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

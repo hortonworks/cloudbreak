@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.task;
 
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 

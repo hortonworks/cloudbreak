@@ -1,13 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.constraints.NotNull;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Holds information for an HBase table.
@@ -32,7 +34,7 @@ public class HBaseTableArgs   {
   }
 
   /**
-   * 
+   *
    * @return tableName
   **/
   @ApiModelProperty(value = "")
@@ -52,7 +54,7 @@ public class HBaseTableArgs   {
   }
 
   /**
-   * 
+   *
    * @return initialSnapshot
   **/
   @ApiModelProperty(required = true, value = "")
@@ -90,7 +92,7 @@ public class HBaseTableArgs   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class HBaseTableArgs {\n");
-    
+
     sb.append("    tableName: ").append(toIndentedString(tableName)).append("\n");
     sb.append("    initialSnapshot: ").append(toIndentedString(initialSnapshot)).append("\n");
     sb.append("}");

@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.util.base;
 
 import java.util.List;
 
-import javax.validation.constraints.Pattern;
+import jakarta.validation.constraints.Pattern;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.SecurityRuleModelDescription;
 import com.sequenceiq.cloudbreak.validation.SubnetType;

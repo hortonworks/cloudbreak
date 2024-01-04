@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

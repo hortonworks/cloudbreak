@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.ccm.cloudinit;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpoint;

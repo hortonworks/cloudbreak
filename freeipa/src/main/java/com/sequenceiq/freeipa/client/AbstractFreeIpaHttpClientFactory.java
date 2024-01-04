@@ -5,8 +5,8 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.inject.Inject;
-import javax.ws.rs.client.Client;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.client.Client;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

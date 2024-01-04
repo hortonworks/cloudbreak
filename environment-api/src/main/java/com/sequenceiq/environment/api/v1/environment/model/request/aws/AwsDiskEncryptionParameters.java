@@ -2,7 +2,7 @@ package com.sequenceiq.environment.api.v1.environment.model.request.aws;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.Pattern;
+import jakarta.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.annotations.VisibleForTesting;

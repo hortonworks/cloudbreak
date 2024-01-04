@@ -2,7 +2,7 @@ package com.sequenceiq.freeipa.service.config;
 
 import java.util.StringJoiner;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.filter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 
 public class WorkspaceIdModifiedRequest extends HttpServletRequestWrapper {
 

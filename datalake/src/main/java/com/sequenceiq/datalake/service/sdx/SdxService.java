@@ -29,8 +29,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
+import jakarta.annotation.Nonnull;
+import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.EnumUtils;
@@ -307,7 +307,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> stackV4Endpoint.get(WORKSPACE_ID_DEFAULT, name, entries, accountId));
-        } catch (javax.ws.rs.NotFoundException e) {
+        } catch (jakarta.ws.rs.NotFoundException e) {
             LOGGER.info("Sdx cluster not found on CB side", e);
             return null;
         }

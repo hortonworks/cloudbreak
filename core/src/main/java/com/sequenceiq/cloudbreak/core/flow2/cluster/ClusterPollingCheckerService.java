@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

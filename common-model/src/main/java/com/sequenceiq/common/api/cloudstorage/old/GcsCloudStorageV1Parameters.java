@@ -2,7 +2,7 @@ package com.sequenceiq.common.api.cloudstorage.old;
 
 import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.sequenceiq.common.api.cloudstorage.old.validation.ValidGcsCloudStorageParameters;
 import com.sequenceiq.common.model.FileSystemAwareCloudStorage;

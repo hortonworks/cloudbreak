@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.recovery.bringup;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RECOVERY_BRINGUP_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RECOVERY_BRINGUP_FINISHED;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.template.model;
 
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import org.apache.commons.lang3.tuple.Pair;
 

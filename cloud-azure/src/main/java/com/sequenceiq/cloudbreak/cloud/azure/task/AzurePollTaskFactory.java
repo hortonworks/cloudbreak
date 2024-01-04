@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.task;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;

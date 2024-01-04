@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.telemetry.metering;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

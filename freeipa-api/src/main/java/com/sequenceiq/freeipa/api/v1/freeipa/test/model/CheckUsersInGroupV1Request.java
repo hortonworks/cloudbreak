@@ -2,7 +2,7 @@ package com.sequenceiq.freeipa.api.v1.freeipa.test.model;
 
 import java.util.Set;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.service.api.doc.ModelDescriptions;

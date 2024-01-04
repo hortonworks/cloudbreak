@@ -11,7 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import javax.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriBuilder;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

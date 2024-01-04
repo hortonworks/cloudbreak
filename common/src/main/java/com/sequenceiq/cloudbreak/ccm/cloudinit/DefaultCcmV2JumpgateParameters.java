@@ -5,7 +5,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 import java.util.Map;
 import java.util.Objects;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 public class DefaultCcmV2JumpgateParameters extends DefaultCcmV2Parameters implements CcmV2JumpgateParameters {
 

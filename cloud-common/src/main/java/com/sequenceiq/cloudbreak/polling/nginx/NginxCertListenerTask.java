@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.polling.nginx;
 
 import java.security.cert.X509Certificate;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.WebTarget;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

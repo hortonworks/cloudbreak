@@ -2,7 +2,7 @@ package com.sequenceiq.environment.api.v1.credential.model.parameters.azure;
 
 import java.io.Serializable;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

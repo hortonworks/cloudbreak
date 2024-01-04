@@ -1,16 +1,15 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiCommand;
-import com.sequenceiq.mock.swagger.model.Status;
-import com.sequenceiq.mock.swagger.model.SubStatus;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Contains status info about the HBase replication first time setup
@@ -44,7 +43,7 @@ public class ApiHBaseReplicationSetupStatus   {
   }
 
   /**
-   * 
+   *
    * @return status
   **/
   @ApiModelProperty(value = "")
@@ -65,7 +64,7 @@ public class ApiHBaseReplicationSetupStatus   {
   }
 
   /**
-   * 
+   *
    * @return subStatus
   **/
   @ApiModelProperty(value = "")
@@ -86,7 +85,7 @@ public class ApiHBaseReplicationSetupStatus   {
   }
 
   /**
-   * 
+   *
    * @return mainCommandId
   **/
   @ApiModelProperty(value = "")
@@ -107,7 +106,7 @@ public class ApiHBaseReplicationSetupStatus   {
   }
 
   /**
-   * 
+   *
    * @return currentCommandId
   **/
   @ApiModelProperty(value = "")
@@ -128,7 +127,7 @@ public class ApiHBaseReplicationSetupStatus   {
   }
 
   /**
-   * 
+   *
    * @return error
   **/
   @ApiModelProperty(value = "")
@@ -168,7 +167,7 @@ public class ApiHBaseReplicationSetupStatus   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHBaseReplicationSetupStatus {\n");
-    
+
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    subStatus: ").append(toIndentedString(subStatus)).append("\n");
     sb.append("    mainCommandId: ").append(toIndentedString(mainCommandId)).append("\n");

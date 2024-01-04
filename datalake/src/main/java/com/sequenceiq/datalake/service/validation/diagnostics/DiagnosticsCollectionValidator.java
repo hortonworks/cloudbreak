@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.service.validation.diagnostics;
 
-import javax.ws.rs.ServiceUnavailableException;
+import jakarta.ws.rs.ServiceUnavailableException;
 
 import org.springframework.stereotype.Component;
 

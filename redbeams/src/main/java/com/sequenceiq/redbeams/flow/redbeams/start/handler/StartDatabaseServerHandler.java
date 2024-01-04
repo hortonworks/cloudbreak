@@ -2,7 +2,7 @@ package com.sequenceiq.redbeams.flow.redbeams.start.handler;
 
 import static com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus.STARTED;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

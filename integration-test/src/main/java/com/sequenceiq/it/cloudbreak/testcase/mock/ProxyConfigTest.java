@@ -4,8 +4,8 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMess
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static org.junit.Assert.assertNotNull;
 
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 
 import org.testng.annotations.Test;
 

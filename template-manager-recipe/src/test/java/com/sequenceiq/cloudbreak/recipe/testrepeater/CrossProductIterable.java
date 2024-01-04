@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.recipe.testrepeater;
 
 import java.util.Iterator;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public class CrossProductIterable<A, B> implements Iterable<Tuple<A, B>> {
 

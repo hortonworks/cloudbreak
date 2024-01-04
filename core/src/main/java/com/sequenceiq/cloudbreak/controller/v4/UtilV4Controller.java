@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.controller.v4;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;

@@ -8,8 +8,8 @@ package com.sequenceiq.mock.swagger.v31.api;
 import java.io.IOException;
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,10 +55,10 @@ public interface AuthRolesResourceApi {
     @ApiOperation(value = "Creates a list of auth roles.", nickname = "createAuthRoles", notes = "Creates a list of auth roles.", response = ApiAuthRoleList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthRolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 201, message = "Success", response = ApiAuthRoleList.class) })
     @RequestMapping(value = "/authRoles",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
     default ResponseEntity<ApiAuthRoleList> createAuthRoles(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "List of auth roles to create."  )  @Valid @RequestBody ApiAuthRoleList body) {
@@ -81,10 +81,10 @@ public interface AuthRolesResourceApi {
     @ApiOperation(value = "Deletes an auth role from the system.", nickname = "deleteAuthRole", notes = "Deletes an auth role from the system. <p/>", response = ApiAuthRole.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthRolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success", response = ApiAuthRole.class) })
     @RequestMapping(value = "/authRoles/{uuid}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.DELETE)
     default ResponseEntity<ApiAuthRole> deleteAuthRole(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The uuid of the auth role to delete.",required=true) @PathVariable("uuid") String uuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -106,10 +106,10 @@ public interface AuthRolesResourceApi {
     @ApiOperation(value = "Returns detailed information about an auth role.", nickname = "readAuthRole", notes = "Returns detailed information about an auth role.", response = ApiAuthRole.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthRolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiAuthRole.class) })
     @RequestMapping(value = "/authRoles/{uuid}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiAuthRole> readAuthRole(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The auth role to read.",required=true) @PathVariable("uuid") String uuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -131,10 +131,10 @@ public interface AuthRolesResourceApi {
     @ApiOperation(value = "Returns a list of the auth roles configured in the system.", nickname = "readAuthRoles", notes = "Returns a list of the auth roles configured in the system.", response = ApiAuthRoleList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthRolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiAuthRoleList.class) })
     @RequestMapping(value = "/authRoles",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiAuthRoleList> readAuthRoles(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -156,10 +156,10 @@ public interface AuthRolesResourceApi {
     @ApiOperation(value = "Returns a list of the auth roles' metadata for the built-in roles.", nickname = "readAuthRolesMetadata", notes = "Returns a list of the auth roles' metadata for the built-in roles.", response = ApiAuthRoleMetadataList.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthRolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Success", response = ApiAuthRoleMetadataList.class) })
     @RequestMapping(value = "/authRoles/metadata",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         method = RequestMethod.GET)
     default ResponseEntity<ApiAuthRoleMetadataList> readAuthRolesMetadata(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
@@ -181,10 +181,10 @@ public interface AuthRolesResourceApi {
     @ApiOperation(value = "Updates the given auth role's information.", nickname = "updateAuthRole", notes = "Updates the given auth role's information.", response = ApiAuthRole.class, authorizations = {
         @Authorization(value = "basic")
     }, tags={ "AuthRolesResource", })
-    @ApiResponses(value = { 
+    @ApiResponses(value = {
         @ApiResponse(code = 204, message = "Success", response = ApiAuthRole.class) })
     @RequestMapping(value = "/authRoles/{uuid}",
-        produces = { "application/json" }, 
+        produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.PUT)
     default ResponseEntity<ApiAuthRole> updateAuthRole(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Uuid of the auth role being updated.",required=true) @PathVariable("uuid") String uuid,@ApiParam(value = "The auth role information."  )  @Valid @RequestBody ApiAuthRole body) {

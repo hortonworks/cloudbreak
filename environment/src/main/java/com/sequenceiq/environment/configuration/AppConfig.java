@@ -10,9 +10,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.client.Client;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.ws.rs.client.Client;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;

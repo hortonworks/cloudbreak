@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.config;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

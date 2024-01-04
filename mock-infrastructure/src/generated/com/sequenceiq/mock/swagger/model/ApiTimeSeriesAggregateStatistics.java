@@ -1,15 +1,16 @@
 package com.sequenceiq.mock.swagger.model;
 
+import java.math.BigDecimal;
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiTimeSeriesCrossEntityMetadata;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
  * Statistics related to one time series aggregate data point. It is available from v6 for data points containing aggregate data. It includes further statistics about the data point. An aggregate can be across entities (e.g., fd_open_across_datanodes), over time (e.g., a daily point for the fd_open metric for a specific DataNode), or both (e.g., a daily point for the fd_open_across_datanodes metric). If the data point is for non-aggregate date this will return null.
@@ -289,7 +290,7 @@ public class ApiTimeSeriesAggregateStatistics   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiTimeSeriesAggregateStatistics {\n");
-    
+
     sb.append("    sampleTime: ").append(toIndentedString(sampleTime)).append("\n");
     sb.append("    sampleValue: ").append(toIndentedString(sampleValue)).append("\n");
     sb.append("    count: ").append(toIndentedString(count)).append("\n");

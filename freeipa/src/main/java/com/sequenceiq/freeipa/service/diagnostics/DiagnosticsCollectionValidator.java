@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.service.diagnostics;
 
-import javax.ws.rs.ServiceUnavailableException;
+import jakarta.ws.rs.ServiceUnavailableException;
 
 import org.springframework.stereotype.Component;
 

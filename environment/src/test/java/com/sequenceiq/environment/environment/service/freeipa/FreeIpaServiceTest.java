@@ -14,9 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -152,7 +152,7 @@ class FreeIpaServiceTest {
     @Test
     void internalDescribeApiNotFoundTest() {
         when(freeIpaV1Endpoint.describeInternal(eq(ENVCRN), eq("1111")))
-                .thenThrow(new javax.ws.rs.NotFoundException());
+                .thenThrow(new jakarta.ws.rs.NotFoundException());
         FreeIpaOperationFailedException freeIpaOperationFailedException = Assertions.assertThrows(FreeIpaOperationFailedException.class,
                 () -> underTest.internalDescribe(ENVCRN, "1111"));
         String errorMessage = freeIpaOperationFailedException.getMessage();

@@ -1,10 +1,10 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
-import io.swagger.annotations.ApiModel;
+
 import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
+
+import io.swagger.annotations.ApiModel;
 
 /**
  * A generic list.
@@ -38,7 +38,7 @@ public class ApiListBase   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiListBase {\n");
-    
+
     sb.append("}");
     return sb.toString();
   }

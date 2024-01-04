@@ -1,19 +1,18 @@
 package com.sequenceiq.mock.swagger.model;
 
 import java.util.Objects;
+
+import jakarta.validation.Valid;
+
+import org.springframework.validation.annotation.Validated;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sequenceiq.mock.swagger.model.ApiHive3ReplicationMetricsResultRow;
-import com.sequenceiq.mock.swagger.model.ApiHive3ReplicationScheduledExecutionsResultRow;
-import com.sequenceiq.mock.swagger.model.ApiHive3ReplicationScheduledQueriesResultRow;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.springframework.validation.annotation.Validated;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
 
 /**
- * 
+ *
  */
 @ApiModel(description = "")
 @Validated
@@ -38,7 +37,7 @@ public class ApiHive3ReplicationQueryResultRow   {
   }
 
   /**
-   * 
+   *
    * @return scheduledQueriesResultRow
   **/
   @ApiModelProperty(value = "")
@@ -59,7 +58,7 @@ public class ApiHive3ReplicationQueryResultRow   {
   }
 
   /**
-   * 
+   *
    * @return scheduledExecutionsResultRow
   **/
   @ApiModelProperty(value = "")
@@ -80,7 +79,7 @@ public class ApiHive3ReplicationQueryResultRow   {
   }
 
   /**
-   * 
+   *
    * @return replicationMetricsResultRow
   **/
   @ApiModelProperty(value = "")
@@ -119,7 +118,7 @@ public class ApiHive3ReplicationQueryResultRow   {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ApiHive3ReplicationQueryResultRow {\n");
-    
+
     sb.append("    scheduledQueriesResultRow: ").append(toIndentedString(scheduledQueriesResultRow)).append("\n");
     sb.append("    scheduledExecutionsResultRow: ").append(toIndentedString(scheduledExecutionsResultRow)).append("\n");
     sb.append("    replicationMetricsResultRow: ").append(toIndentedString(replicationMetricsResultRow)).append("\n");

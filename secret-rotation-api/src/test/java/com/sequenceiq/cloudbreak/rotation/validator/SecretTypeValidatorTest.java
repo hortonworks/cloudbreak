@@ -8,8 +8,8 @@ import static org.mockito.Mockito.lenient;
 import java.lang.annotation.Annotation;
 import java.util.UUID;
 
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.Payload;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.Payload;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

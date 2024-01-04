@@ -4,8 +4,8 @@ import static com.sequenceiq.common.api.type.InstanceGroupType.isGateway;
 
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.type.InstanceGroupType;

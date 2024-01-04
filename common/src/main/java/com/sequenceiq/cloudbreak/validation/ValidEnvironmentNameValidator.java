@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.validation;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 public class ValidEnvironmentNameValidator implements ConstraintValidator<ValidEnvironmentName, String> {
 
