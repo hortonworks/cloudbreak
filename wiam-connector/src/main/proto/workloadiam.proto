@@ -5,8 +5,9 @@ package workloadiam;
 option java_package = "com.cloudera.thunderhead.service.workloadiam";
 option java_outer_classname = "WorkloadIamProto";
 
-import "version.proto";
 import "nullable.proto";
+import "options.proto";
+import "version.proto";
 
 // For future compatibility, all rpcs must take a request and return a response
 // even if there is initially no content for these messages.
@@ -40,13 +41,25 @@ service WorkloadIam {
   // for backwards compatibility of the environments2 API service. Internal services
   // and new use cases should not use this RPC. Deprecated.
   rpc LegacySyncUsers (LegacySyncUsersRequest)
-      returns (LegacySyncUsersResponse) {}
+      returns (LegacySyncUsersResponse) {
+    option (options.MethodExtension.deprecated) = true;
+  }
 
   // Get the status of a LegacySyncUsers request. This RPC is for supporting
   // backwards compatibility of the environments2 API service. Internal services
   // and new use cases should not use this RPC. Deprecated.
   rpc LegacyGetSyncUsersStatus (LegacyGetSyncUsersStatusRequest)
-      returns (LegacyGetSyncUsersStatusResponse) {}
+      returns (LegacyGetSyncUsersStatusResponse) {
+    option (options.MethodExtension.deprecated) = true;
+  }
+
+  // Get the state and last usersync Crn for an environment. This RPC is for supporting
+  // backwards compatibility of the environments2 API service. Internal services
+  // and new use cases should not use this RPC. Deprecated.
+  rpc LegacyGetEnvironmentUsersyncState (LegacyGetEnvironmentUsersyncStateRequest)
+      returns (LegacyGetEnvironmentUsersyncStateResponse) {
+    option (options.MethodExtension.deprecated) = true;
+  }
 
   // Request a manual usersync. Specifying exactly one environment is required.
   rpc SyncUsers (SyncUsersRequest)
@@ -151,11 +164,13 @@ message GetAutomatedSyncEnvironmentStatusResponse {
 
 message GetSyncEventStatusRequest {
   string eventCrn = 1;
+  // The account id for the SyncEventStatusRequest.
+  string accountId = 2;
 }
 
 message GetSyncEventStatusResponse {
   string eventCrn = 1;
-  // The state of the sync event
+  // The state of the sync event.
   enum SyncEventState {
     UNKNOWN = 0;
     CREATED = 1;
@@ -186,11 +201,12 @@ message CompletionDetails {
     ENVIRONMENT_DELETED = 3;
     ENVIRONMENT_NOT_ENTITLED = 4;
   }
-  // The completion reason
+  // The completion reason.
   Reason reason = 1;
 }
 
 message LegacySyncUsersRequest {
+  option (options.MessageExtension.deprecated) = true;
   // The account id for the usersync.
   string accountId = 1;
   // The environments to sync. All environments in the account will be synced if
@@ -204,11 +220,13 @@ message LegacySyncUsersRequest {
 }
 
 message LegacySyncUsersResponse {
+  option (options.MessageExtension.deprecated) = true;
   // Status of usersync.
   LegacyUsersyncStatus status = 1;
 }
 
 message LegacyUsersyncStatus {
+  option (options.MessageExtension.deprecated) = true;
   // A CRN for the requested usersync
   string usersyncCrn = 1;
   // A string indicating the status of the usersync.
@@ -231,6 +249,7 @@ message LegacyUsersyncStatus {
 }
 
 message LegacyEnvironmentSyncDetails {
+  option (options.MessageExtension.deprecated) = true;
   // The environment CRN.
   string environmentCrn = 1;
   // The status of the environment usersync. Allowed values are SUCCESS, FAILURE.
@@ -242,6 +261,7 @@ message LegacyEnvironmentSyncDetails {
 }
 
 message LegacyEnvironmentSyncAdditionalDetail {
+  option (options.MessageExtension.deprecated) = true;
   // The subject of the additional detail.
   string subject = 1;
   // The value(s) of the additional detail.
@@ -249,13 +269,35 @@ message LegacyEnvironmentSyncAdditionalDetail {
 }
 
 message LegacyGetSyncUsersStatusRequest {
+  option (options.MessageExtension.deprecated) = true;
   // The usersync CRN.
   string usersyncCrn = 1;
 }
 
 message LegacyGetSyncUsersStatusResponse {
+  option (options.MessageExtension.deprecated) = true;
   // Status of usersync.
   LegacyUsersyncStatus status = 1;
+}
+
+message LegacyGetEnvironmentUsersyncStateRequest {
+  option (options.MessageExtension.deprecated) = true;
+  // The environment CRN to retrieve state for.
+  string environmentCrn = 1;
+}
+
+message LegacyGetEnvironmentUsersyncStateResponse {
+  option (options.MessageExtension.deprecated) = true;
+  // The state of the environment. Valid values are:
+  // UP_TO_DATE, STALE, SYNC_IN_PROGRESS, SYNC_FAILED
+  string state = 1;
+  // The environment CRN.
+  string environmentCrn = 2;
+  // A CRN for the requested usersync.
+  string usersyncCrn = 3;
+  // Status of usersync. Status is included to support the
+  // environments2 lastSyncStatus API.
+  LegacyUsersyncStatus usersyncStatus = 4;
 }
 
 message SyncUsersRequest {
@@ -271,7 +313,7 @@ message SyncUsersRequest {
 message SyncUsersResponse {
   // The environment CRN.
   string environmentCrn = 1;
-  // A CRN for the requested usersync
+  // A CRN for the requested usersync.
   string usersyncCrn = 2;
 }
 
@@ -301,13 +343,13 @@ message GetSyncUsersStatusResponse {
 }
 
 message RunningStatus {
-  // Details TBD
+  // Details TBD.
 }
 
 message CompletedStatus {
-  // Details TBD
+  // Details TBD.
 }
 
 message FailedStatus {
-  // Details TBD
+  // Details TBD.
 }

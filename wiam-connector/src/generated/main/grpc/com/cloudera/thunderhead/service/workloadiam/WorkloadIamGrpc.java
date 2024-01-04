@@ -236,6 +236,37 @@ public final class WorkloadIamGrpc {
     return getLegacyGetSyncUsersStatusMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest,
+      com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse> getLegacyGetEnvironmentUsersyncStateMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "LegacyGetEnvironmentUsersyncState",
+      requestType = com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest.class,
+      responseType = com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest,
+      com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse> getLegacyGetEnvironmentUsersyncStateMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest, com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse> getLegacyGetEnvironmentUsersyncStateMethod;
+    if ((getLegacyGetEnvironmentUsersyncStateMethod = WorkloadIamGrpc.getLegacyGetEnvironmentUsersyncStateMethod) == null) {
+      synchronized (WorkloadIamGrpc.class) {
+        if ((getLegacyGetEnvironmentUsersyncStateMethod = WorkloadIamGrpc.getLegacyGetEnvironmentUsersyncStateMethod) == null) {
+          WorkloadIamGrpc.getLegacyGetEnvironmentUsersyncStateMethod = getLegacyGetEnvironmentUsersyncStateMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest, com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "LegacyGetEnvironmentUsersyncState"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new WorkloadIamMethodDescriptorSupplier("LegacyGetEnvironmentUsersyncState"))
+              .build();
+        }
+      }
+    }
+    return getLegacyGetEnvironmentUsersyncStateMethod;
+  }
+
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.SyncUsersRequest,
       com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.SyncUsersResponse> getSyncUsersMethod;
 
@@ -430,6 +461,18 @@ public final class WorkloadIamGrpc {
 
     /**
      * <pre>
+     * Get the state and last usersync Crn for an environment. This RPC is for supporting
+     * backwards compatibility of the environments2 API service. Internal services
+     * and new use cases should not use this RPC. Deprecated.
+     * </pre>
+     */
+    public void legacyGetEnvironmentUsersyncState(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getLegacyGetEnvironmentUsersyncStateMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
      * Request a manual usersync. Specifying exactly one environment is required.
      * </pre>
      */
@@ -499,6 +542,13 @@ public final class WorkloadIamGrpc {
                 com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetSyncUsersStatusRequest,
                 com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetSyncUsersStatusResponse>(
                   this, METHODID_LEGACY_GET_SYNC_USERS_STATUS)))
+          .addMethod(
+            getLegacyGetEnvironmentUsersyncStateMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest,
+                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse>(
+                  this, METHODID_LEGACY_GET_ENVIRONMENT_USERSYNC_STATE)))
           .addMethod(
             getSyncUsersMethod(),
             io.grpc.stub.ServerCalls.asyncUnaryCall(
@@ -622,6 +672,19 @@ public final class WorkloadIamGrpc {
 
     /**
      * <pre>
+     * Get the state and last usersync Crn for an environment. This RPC is for supporting
+     * backwards compatibility of the environments2 API service. Internal services
+     * and new use cases should not use this RPC. Deprecated.
+     * </pre>
+     */
+    public void legacyGetEnvironmentUsersyncState(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getLegacyGetEnvironmentUsersyncStateMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
      * Request a manual usersync. Specifying exactly one environment is required.
      * </pre>
      */
@@ -737,6 +800,18 @@ public final class WorkloadIamGrpc {
     public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetSyncUsersStatusResponse legacyGetSyncUsersStatus(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetSyncUsersStatusRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getLegacyGetSyncUsersStatusMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get the state and last usersync Crn for an environment. This RPC is for supporting
+     * backwards compatibility of the environments2 API service. Internal services
+     * and new use cases should not use this RPC. Deprecated.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse legacyGetEnvironmentUsersyncState(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getLegacyGetEnvironmentUsersyncStateMethod(), getCallOptions(), request);
     }
 
     /**
@@ -865,6 +940,19 @@ public final class WorkloadIamGrpc {
 
     /**
      * <pre>
+     * Get the state and last usersync Crn for an environment. This RPC is for supporting
+     * backwards compatibility of the environments2 API service. Internal services
+     * and new use cases should not use this RPC. Deprecated.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse> legacyGetEnvironmentUsersyncState(
+        com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getLegacyGetEnvironmentUsersyncStateMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
      * Request a manual usersync. Specifying exactly one environment is required.
      * </pre>
      */
@@ -893,8 +981,9 @@ public final class WorkloadIamGrpc {
   private static final int METHODID_GET_SYNC_EVENT_STATUS = 4;
   private static final int METHODID_LEGACY_SYNC_USERS = 5;
   private static final int METHODID_LEGACY_GET_SYNC_USERS_STATUS = 6;
-  private static final int METHODID_SYNC_USERS = 7;
-  private static final int METHODID_GET_SYNC_USERS_STATUS = 8;
+  private static final int METHODID_LEGACY_GET_ENVIRONMENT_USERSYNC_STATE = 7;
+  private static final int METHODID_SYNC_USERS = 8;
+  private static final int METHODID_GET_SYNC_USERS_STATUS = 9;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -940,6 +1029,10 @@ public final class WorkloadIamGrpc {
         case METHODID_LEGACY_GET_SYNC_USERS_STATUS:
           serviceImpl.legacyGetSyncUsersStatus((com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetSyncUsersStatusRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetSyncUsersStatusResponse>) responseObserver);
+          break;
+        case METHODID_LEGACY_GET_ENVIRONMENT_USERSYNC_STATE:
+          serviceImpl.legacyGetEnvironmentUsersyncState((com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse>) responseObserver);
           break;
         case METHODID_SYNC_USERS:
           serviceImpl.syncUsers((com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.SyncUsersRequest) request,
@@ -1017,6 +1110,7 @@ public final class WorkloadIamGrpc {
               .addMethod(getGetSyncEventStatusMethod())
               .addMethod(getLegacySyncUsersMethod())
               .addMethod(getLegacyGetSyncUsersStatusMethod())
+              .addMethod(getLegacyGetEnvironmentUsersyncStateMethod())
               .addMethod(getSyncUsersMethod())
               .addMethod(getGetSyncUsersStatusMethod())
               .build();

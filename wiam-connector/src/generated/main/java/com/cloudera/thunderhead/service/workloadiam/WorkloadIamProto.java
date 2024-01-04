@@ -8450,6 +8450,26 @@ public final class WorkloadIamProto {
      */
     com.google.protobuf.ByteString
         getEventCrnBytes();
+
+    /**
+     * <pre>
+     * The account id for the SyncEventStatusRequest.
+     * </pre>
+     *
+     * <code>string accountId = 2;</code>
+     * @return The accountId.
+     */
+    java.lang.String getAccountId();
+    /**
+     * <pre>
+     * The account id for the SyncEventStatusRequest.
+     * </pre>
+     *
+     * <code>string accountId = 2;</code>
+     * @return The bytes for accountId.
+     */
+    com.google.protobuf.ByteString
+        getAccountIdBytes();
   }
   /**
    * Protobuf type {@code workloadiam.GetSyncEventStatusRequest}
@@ -8465,6 +8485,7 @@ public final class WorkloadIamProto {
     }
     private GetSyncEventStatusRequest() {
       eventCrn_ = "";
+      accountId_ = "";
     }
 
     @java.lang.Override
@@ -8530,6 +8551,52 @@ public final class WorkloadIamProto {
       }
     }
 
+    public static final int ACCOUNTID_FIELD_NUMBER = 2;
+    private volatile java.lang.Object accountId_;
+    /**
+     * <pre>
+     * The account id for the SyncEventStatusRequest.
+     * </pre>
+     *
+     * <code>string accountId = 2;</code>
+     * @return The accountId.
+     */
+    @java.lang.Override
+    public java.lang.String getAccountId() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The account id for the SyncEventStatusRequest.
+     * </pre>
+     *
+     * <code>string accountId = 2;</code>
+     * @return The bytes for accountId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getAccountIdBytes() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -8547,6 +8614,9 @@ public final class WorkloadIamProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, eventCrn_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, accountId_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -8558,6 +8628,9 @@ public final class WorkloadIamProto {
       size = 0;
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, eventCrn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, accountId_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -8576,6 +8649,8 @@ public final class WorkloadIamProto {
 
       if (!getEventCrn()
           .equals(other.getEventCrn())) return false;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -8589,6 +8664,8 @@ public final class WorkloadIamProto {
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + EVENTCRN_FIELD_NUMBER;
       hash = (53 * hash) + getEventCrn().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountId().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -8719,6 +8796,8 @@ public final class WorkloadIamProto {
         super.clear();
         eventCrn_ = "";
 
+        accountId_ = "";
+
         return this;
       }
 
@@ -8746,6 +8825,7 @@ public final class WorkloadIamProto {
       public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncEventStatusRequest buildPartial() {
         com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncEventStatusRequest result = new com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncEventStatusRequest(this);
         result.eventCrn_ = eventCrn_;
+        result.accountId_ = accountId_;
         onBuilt();
         return result;
       }
@@ -8798,6 +8878,10 @@ public final class WorkloadIamProto {
           eventCrn_ = other.eventCrn_;
           onChanged();
         }
+        if (!other.getAccountId().isEmpty()) {
+          accountId_ = other.accountId_;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -8829,6 +8913,11 @@ public final class WorkloadIamProto {
 
                 break;
               } // case 10
+              case 18: {
+                accountId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -8917,6 +9006,102 @@ public final class WorkloadIamProto {
   checkByteStringIsUtf8(value);
         
         eventCrn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object accountId_ = "";
+      /**
+       * <pre>
+       * The account id for the SyncEventStatusRequest.
+       * </pre>
+       *
+       * <code>string accountId = 2;</code>
+       * @return The accountId.
+       */
+      public java.lang.String getAccountId() {
+        java.lang.Object ref = accountId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The account id for the SyncEventStatusRequest.
+       * </pre>
+       *
+       * <code>string accountId = 2;</code>
+       * @return The bytes for accountId.
+       */
+      public com.google.protobuf.ByteString
+          getAccountIdBytes() {
+        java.lang.Object ref = accountId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The account id for the SyncEventStatusRequest.
+       * </pre>
+       *
+       * <code>string accountId = 2;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The account id for the SyncEventStatusRequest.
+       * </pre>
+       *
+       * <code>string accountId = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAccountId() {
+        
+        accountId_ = getDefaultInstance().getAccountId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The account id for the SyncEventStatusRequest.
+       * </pre>
+       *
+       * <code>string accountId = 2;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        accountId_ = value;
         onChanged();
         return this;
       }
@@ -9110,7 +9295,7 @@ public final class WorkloadIamProto {
 
     /**
      * <pre>
-     * The state of the sync event
+     * The state of the sync event.
      * </pre>
      *
      * Protobuf enum {@code workloadiam.GetSyncEventStatusResponse.SyncEventState}
@@ -11219,7 +11404,7 @@ public final class WorkloadIamProto {
 
     /**
      * <pre>
-     * The completion reason
+     * The completion reason.
      * </pre>
      *
      * <code>.workloadiam.CompletionDetails.Reason reason = 1;</code>
@@ -11228,7 +11413,7 @@ public final class WorkloadIamProto {
     int getReasonValue();
     /**
      * <pre>
-     * The completion reason
+     * The completion reason.
      * </pre>
      *
      * <code>.workloadiam.CompletionDetails.Reason reason = 1;</code>
@@ -11416,7 +11601,7 @@ public final class WorkloadIamProto {
     private int reason_;
     /**
      * <pre>
-     * The completion reason
+     * The completion reason.
      * </pre>
      *
      * <code>.workloadiam.CompletionDetails.Reason reason = 1;</code>
@@ -11427,7 +11612,7 @@ public final class WorkloadIamProto {
     }
     /**
      * <pre>
-     * The completion reason
+     * The completion reason.
      * </pre>
      *
      * <code>.workloadiam.CompletionDetails.Reason reason = 1;</code>
@@ -11756,7 +11941,7 @@ public final class WorkloadIamProto {
       private int reason_ = 0;
       /**
        * <pre>
-       * The completion reason
+       * The completion reason.
        * </pre>
        *
        * <code>.workloadiam.CompletionDetails.Reason reason = 1;</code>
@@ -11767,7 +11952,7 @@ public final class WorkloadIamProto {
       }
       /**
        * <pre>
-       * The completion reason
+       * The completion reason.
        * </pre>
        *
        * <code>.workloadiam.CompletionDetails.Reason reason = 1;</code>
@@ -11782,7 +11967,7 @@ public final class WorkloadIamProto {
       }
       /**
        * <pre>
-       * The completion reason
+       * The completion reason.
        * </pre>
        *
        * <code>.workloadiam.CompletionDetails.Reason reason = 1;</code>
@@ -11796,7 +11981,7 @@ public final class WorkloadIamProto {
       }
       /**
        * <pre>
-       * The completion reason
+       * The completion reason.
        * </pre>
        *
        * <code>.workloadiam.CompletionDetails.Reason reason = 1;</code>
@@ -11814,7 +11999,7 @@ public final class WorkloadIamProto {
       }
       /**
        * <pre>
-       * The completion reason
+       * The completion reason.
        * </pre>
        *
        * <code>.workloadiam.CompletionDetails.Reason reason = 1;</code>
@@ -18997,6 +19182,1827 @@ public final class WorkloadIamProto {
 
   }
 
+  public interface LegacyGetEnvironmentUsersyncStateRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:workloadiam.LegacyGetEnvironmentUsersyncStateRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The environment CRN to retrieve state for.
+     * </pre>
+     *
+     * <code>string environmentCrn = 1;</code>
+     * @return The environmentCrn.
+     */
+    java.lang.String getEnvironmentCrn();
+    /**
+     * <pre>
+     * The environment CRN to retrieve state for.
+     * </pre>
+     *
+     * <code>string environmentCrn = 1;</code>
+     * @return The bytes for environmentCrn.
+     */
+    com.google.protobuf.ByteString
+        getEnvironmentCrnBytes();
+  }
+  /**
+   * Protobuf type {@code workloadiam.LegacyGetEnvironmentUsersyncStateRequest}
+   */
+  public static final class LegacyGetEnvironmentUsersyncStateRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:workloadiam.LegacyGetEnvironmentUsersyncStateRequest)
+      LegacyGetEnvironmentUsersyncStateRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use LegacyGetEnvironmentUsersyncStateRequest.newBuilder() to construct.
+    private LegacyGetEnvironmentUsersyncStateRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private LegacyGetEnvironmentUsersyncStateRequest() {
+      environmentCrn_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new LegacyGetEnvironmentUsersyncStateRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.internal_static_workloadiam_LegacyGetEnvironmentUsersyncStateRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.internal_static_workloadiam_LegacyGetEnvironmentUsersyncStateRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest.class, com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest.Builder.class);
+    }
+
+    public static final int ENVIRONMENTCRN_FIELD_NUMBER = 1;
+    private volatile java.lang.Object environmentCrn_;
+    /**
+     * <pre>
+     * The environment CRN to retrieve state for.
+     * </pre>
+     *
+     * <code>string environmentCrn = 1;</code>
+     * @return The environmentCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getEnvironmentCrn() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        environmentCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The environment CRN to retrieve state for.
+     * </pre>
+     *
+     * <code>string environmentCrn = 1;</code>
+     * @return The bytes for environmentCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getEnvironmentCrnBytes() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        environmentCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, environmentCrn_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, environmentCrn_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest other = (com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest) obj;
+
+      if (!getEnvironmentCrn()
+          .equals(other.getEnvironmentCrn())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ENVIRONMENTCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getEnvironmentCrn().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code workloadiam.LegacyGetEnvironmentUsersyncStateRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:workloadiam.LegacyGetEnvironmentUsersyncStateRequest)
+        com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.internal_static_workloadiam_LegacyGetEnvironmentUsersyncStateRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.internal_static_workloadiam_LegacyGetEnvironmentUsersyncStateRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest.class, com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        environmentCrn_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.internal_static_workloadiam_LegacyGetEnvironmentUsersyncStateRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest build() {
+        com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest buildPartial() {
+        com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest result = new com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest(this);
+        result.environmentCrn_ = environmentCrn_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest other) {
+        if (other == com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest.getDefaultInstance()) return this;
+        if (!other.getEnvironmentCrn().isEmpty()) {
+          environmentCrn_ = other.environmentCrn_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                environmentCrn_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+
+      private java.lang.Object environmentCrn_ = "";
+      /**
+       * <pre>
+       * The environment CRN to retrieve state for.
+       * </pre>
+       *
+       * <code>string environmentCrn = 1;</code>
+       * @return The environmentCrn.
+       */
+      public java.lang.String getEnvironmentCrn() {
+        java.lang.Object ref = environmentCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          environmentCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The environment CRN to retrieve state for.
+       * </pre>
+       *
+       * <code>string environmentCrn = 1;</code>
+       * @return The bytes for environmentCrn.
+       */
+      public com.google.protobuf.ByteString
+          getEnvironmentCrnBytes() {
+        java.lang.Object ref = environmentCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          environmentCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The environment CRN to retrieve state for.
+       * </pre>
+       *
+       * <code>string environmentCrn = 1;</code>
+       * @param value The environmentCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnvironmentCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        environmentCrn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The environment CRN to retrieve state for.
+       * </pre>
+       *
+       * <code>string environmentCrn = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEnvironmentCrn() {
+        
+        environmentCrn_ = getDefaultInstance().getEnvironmentCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The environment CRN to retrieve state for.
+       * </pre>
+       *
+       * <code>string environmentCrn = 1;</code>
+       * @param value The bytes for environmentCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnvironmentCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        environmentCrn_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:workloadiam.LegacyGetEnvironmentUsersyncStateRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:workloadiam.LegacyGetEnvironmentUsersyncStateRequest)
+    private static final com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<LegacyGetEnvironmentUsersyncStateRequest>
+        PARSER = new com.google.protobuf.AbstractParser<LegacyGetEnvironmentUsersyncStateRequest>() {
+      @java.lang.Override
+      public LegacyGetEnvironmentUsersyncStateRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<LegacyGetEnvironmentUsersyncStateRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<LegacyGetEnvironmentUsersyncStateRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface LegacyGetEnvironmentUsersyncStateResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:workloadiam.LegacyGetEnvironmentUsersyncStateResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The state of the environment. Valid values are:
+     * UP_TO_DATE, STALE, SYNC_IN_PROGRESS, SYNC_FAILED
+     * </pre>
+     *
+     * <code>string state = 1;</code>
+     * @return The state.
+     */
+    java.lang.String getState();
+    /**
+     * <pre>
+     * The state of the environment. Valid values are:
+     * UP_TO_DATE, STALE, SYNC_IN_PROGRESS, SYNC_FAILED
+     * </pre>
+     *
+     * <code>string state = 1;</code>
+     * @return The bytes for state.
+     */
+    com.google.protobuf.ByteString
+        getStateBytes();
+
+    /**
+     * <pre>
+     * The environment CRN.
+     * </pre>
+     *
+     * <code>string environmentCrn = 2;</code>
+     * @return The environmentCrn.
+     */
+    java.lang.String getEnvironmentCrn();
+    /**
+     * <pre>
+     * The environment CRN.
+     * </pre>
+     *
+     * <code>string environmentCrn = 2;</code>
+     * @return The bytes for environmentCrn.
+     */
+    com.google.protobuf.ByteString
+        getEnvironmentCrnBytes();
+
+    /**
+     * <pre>
+     * A CRN for the requested usersync.
+     * </pre>
+     *
+     * <code>string usersyncCrn = 3;</code>
+     * @return The usersyncCrn.
+     */
+    java.lang.String getUsersyncCrn();
+    /**
+     * <pre>
+     * A CRN for the requested usersync.
+     * </pre>
+     *
+     * <code>string usersyncCrn = 3;</code>
+     * @return The bytes for usersyncCrn.
+     */
+    com.google.protobuf.ByteString
+        getUsersyncCrnBytes();
+
+    /**
+     * <pre>
+     * Status of usersync. Status is included to support the
+     * environments2 lastSyncStatus API.
+     * </pre>
+     *
+     * <code>.workloadiam.LegacyUsersyncStatus usersyncStatus = 4;</code>
+     * @return Whether the usersyncStatus field is set.
+     */
+    boolean hasUsersyncStatus();
+    /**
+     * <pre>
+     * Status of usersync. Status is included to support the
+     * environments2 lastSyncStatus API.
+     * </pre>
+     *
+     * <code>.workloadiam.LegacyUsersyncStatus usersyncStatus = 4;</code>
+     * @return The usersyncStatus.
+     */
+    com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatus getUsersyncStatus();
+    /**
+     * <pre>
+     * Status of usersync. Status is included to support the
+     * environments2 lastSyncStatus API.
+     * </pre>
+     *
+     * <code>.workloadiam.LegacyUsersyncStatus usersyncStatus = 4;</code>
+     */
+    com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatusOrBuilder getUsersyncStatusOrBuilder();
+  }
+  /**
+   * Protobuf type {@code workloadiam.LegacyGetEnvironmentUsersyncStateResponse}
+   */
+  public static final class LegacyGetEnvironmentUsersyncStateResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:workloadiam.LegacyGetEnvironmentUsersyncStateResponse)
+      LegacyGetEnvironmentUsersyncStateResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use LegacyGetEnvironmentUsersyncStateResponse.newBuilder() to construct.
+    private LegacyGetEnvironmentUsersyncStateResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private LegacyGetEnvironmentUsersyncStateResponse() {
+      state_ = "";
+      environmentCrn_ = "";
+      usersyncCrn_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new LegacyGetEnvironmentUsersyncStateResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.internal_static_workloadiam_LegacyGetEnvironmentUsersyncStateResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.internal_static_workloadiam_LegacyGetEnvironmentUsersyncStateResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse.class, com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse.Builder.class);
+    }
+
+    public static final int STATE_FIELD_NUMBER = 1;
+    private volatile java.lang.Object state_;
+    /**
+     * <pre>
+     * The state of the environment. Valid values are:
+     * UP_TO_DATE, STALE, SYNC_IN_PROGRESS, SYNC_FAILED
+     * </pre>
+     *
+     * <code>string state = 1;</code>
+     * @return The state.
+     */
+    @java.lang.Override
+    public java.lang.String getState() {
+      java.lang.Object ref = state_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        state_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The state of the environment. Valid values are:
+     * UP_TO_DATE, STALE, SYNC_IN_PROGRESS, SYNC_FAILED
+     * </pre>
+     *
+     * <code>string state = 1;</code>
+     * @return The bytes for state.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getStateBytes() {
+      java.lang.Object ref = state_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        state_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ENVIRONMENTCRN_FIELD_NUMBER = 2;
+    private volatile java.lang.Object environmentCrn_;
+    /**
+     * <pre>
+     * The environment CRN.
+     * </pre>
+     *
+     * <code>string environmentCrn = 2;</code>
+     * @return The environmentCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getEnvironmentCrn() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        environmentCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The environment CRN.
+     * </pre>
+     *
+     * <code>string environmentCrn = 2;</code>
+     * @return The bytes for environmentCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getEnvironmentCrnBytes() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        environmentCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int USERSYNCCRN_FIELD_NUMBER = 3;
+    private volatile java.lang.Object usersyncCrn_;
+    /**
+     * <pre>
+     * A CRN for the requested usersync.
+     * </pre>
+     *
+     * <code>string usersyncCrn = 3;</code>
+     * @return The usersyncCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getUsersyncCrn() {
+      java.lang.Object ref = usersyncCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        usersyncCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * A CRN for the requested usersync.
+     * </pre>
+     *
+     * <code>string usersyncCrn = 3;</code>
+     * @return The bytes for usersyncCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getUsersyncCrnBytes() {
+      java.lang.Object ref = usersyncCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        usersyncCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int USERSYNCSTATUS_FIELD_NUMBER = 4;
+    private com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatus usersyncStatus_;
+    /**
+     * <pre>
+     * Status of usersync. Status is included to support the
+     * environments2 lastSyncStatus API.
+     * </pre>
+     *
+     * <code>.workloadiam.LegacyUsersyncStatus usersyncStatus = 4;</code>
+     * @return Whether the usersyncStatus field is set.
+     */
+    @java.lang.Override
+    public boolean hasUsersyncStatus() {
+      return usersyncStatus_ != null;
+    }
+    /**
+     * <pre>
+     * Status of usersync. Status is included to support the
+     * environments2 lastSyncStatus API.
+     * </pre>
+     *
+     * <code>.workloadiam.LegacyUsersyncStatus usersyncStatus = 4;</code>
+     * @return The usersyncStatus.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatus getUsersyncStatus() {
+      return usersyncStatus_ == null ? com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatus.getDefaultInstance() : usersyncStatus_;
+    }
+    /**
+     * <pre>
+     * Status of usersync. Status is included to support the
+     * environments2 lastSyncStatus API.
+     * </pre>
+     *
+     * <code>.workloadiam.LegacyUsersyncStatus usersyncStatus = 4;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatusOrBuilder getUsersyncStatusOrBuilder() {
+      return getUsersyncStatus();
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(state_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, state_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, environmentCrn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(usersyncCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, usersyncCrn_);
+      }
+      if (usersyncStatus_ != null) {
+        output.writeMessage(4, getUsersyncStatus());
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(state_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, state_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, environmentCrn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(usersyncCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, usersyncCrn_);
+      }
+      if (usersyncStatus_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, getUsersyncStatus());
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse other = (com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse) obj;
+
+      if (!getState()
+          .equals(other.getState())) return false;
+      if (!getEnvironmentCrn()
+          .equals(other.getEnvironmentCrn())) return false;
+      if (!getUsersyncCrn()
+          .equals(other.getUsersyncCrn())) return false;
+      if (hasUsersyncStatus() != other.hasUsersyncStatus()) return false;
+      if (hasUsersyncStatus()) {
+        if (!getUsersyncStatus()
+            .equals(other.getUsersyncStatus())) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + STATE_FIELD_NUMBER;
+      hash = (53 * hash) + getState().hashCode();
+      hash = (37 * hash) + ENVIRONMENTCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getEnvironmentCrn().hashCode();
+      hash = (37 * hash) + USERSYNCCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getUsersyncCrn().hashCode();
+      if (hasUsersyncStatus()) {
+        hash = (37 * hash) + USERSYNCSTATUS_FIELD_NUMBER;
+        hash = (53 * hash) + getUsersyncStatus().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code workloadiam.LegacyGetEnvironmentUsersyncStateResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:workloadiam.LegacyGetEnvironmentUsersyncStateResponse)
+        com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.internal_static_workloadiam_LegacyGetEnvironmentUsersyncStateResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.internal_static_workloadiam_LegacyGetEnvironmentUsersyncStateResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse.class, com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        state_ = "";
+
+        environmentCrn_ = "";
+
+        usersyncCrn_ = "";
+
+        if (usersyncStatusBuilder_ == null) {
+          usersyncStatus_ = null;
+        } else {
+          usersyncStatus_ = null;
+          usersyncStatusBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.internal_static_workloadiam_LegacyGetEnvironmentUsersyncStateResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse build() {
+        com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse buildPartial() {
+        com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse result = new com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse(this);
+        result.state_ = state_;
+        result.environmentCrn_ = environmentCrn_;
+        result.usersyncCrn_ = usersyncCrn_;
+        if (usersyncStatusBuilder_ == null) {
+          result.usersyncStatus_ = usersyncStatus_;
+        } else {
+          result.usersyncStatus_ = usersyncStatusBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse other) {
+        if (other == com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse.getDefaultInstance()) return this;
+        if (!other.getState().isEmpty()) {
+          state_ = other.state_;
+          onChanged();
+        }
+        if (!other.getEnvironmentCrn().isEmpty()) {
+          environmentCrn_ = other.environmentCrn_;
+          onChanged();
+        }
+        if (!other.getUsersyncCrn().isEmpty()) {
+          usersyncCrn_ = other.usersyncCrn_;
+          onChanged();
+        }
+        if (other.hasUsersyncStatus()) {
+          mergeUsersyncStatus(other.getUsersyncStatus());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                state_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                environmentCrn_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                usersyncCrn_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 34: {
+                input.readMessage(
+                    getUsersyncStatusFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 34
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+
+      private java.lang.Object state_ = "";
+      /**
+       * <pre>
+       * The state of the environment. Valid values are:
+       * UP_TO_DATE, STALE, SYNC_IN_PROGRESS, SYNC_FAILED
+       * </pre>
+       *
+       * <code>string state = 1;</code>
+       * @return The state.
+       */
+      public java.lang.String getState() {
+        java.lang.Object ref = state_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          state_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The state of the environment. Valid values are:
+       * UP_TO_DATE, STALE, SYNC_IN_PROGRESS, SYNC_FAILED
+       * </pre>
+       *
+       * <code>string state = 1;</code>
+       * @return The bytes for state.
+       */
+      public com.google.protobuf.ByteString
+          getStateBytes() {
+        java.lang.Object ref = state_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          state_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The state of the environment. Valid values are:
+       * UP_TO_DATE, STALE, SYNC_IN_PROGRESS, SYNC_FAILED
+       * </pre>
+       *
+       * <code>string state = 1;</code>
+       * @param value The state to set.
+       * @return This builder for chaining.
+       */
+      public Builder setState(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        state_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The state of the environment. Valid values are:
+       * UP_TO_DATE, STALE, SYNC_IN_PROGRESS, SYNC_FAILED
+       * </pre>
+       *
+       * <code>string state = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearState() {
+        
+        state_ = getDefaultInstance().getState();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The state of the environment. Valid values are:
+       * UP_TO_DATE, STALE, SYNC_IN_PROGRESS, SYNC_FAILED
+       * </pre>
+       *
+       * <code>string state = 1;</code>
+       * @param value The bytes for state to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStateBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        state_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object environmentCrn_ = "";
+      /**
+       * <pre>
+       * The environment CRN.
+       * </pre>
+       *
+       * <code>string environmentCrn = 2;</code>
+       * @return The environmentCrn.
+       */
+      public java.lang.String getEnvironmentCrn() {
+        java.lang.Object ref = environmentCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          environmentCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The environment CRN.
+       * </pre>
+       *
+       * <code>string environmentCrn = 2;</code>
+       * @return The bytes for environmentCrn.
+       */
+      public com.google.protobuf.ByteString
+          getEnvironmentCrnBytes() {
+        java.lang.Object ref = environmentCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          environmentCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The environment CRN.
+       * </pre>
+       *
+       * <code>string environmentCrn = 2;</code>
+       * @param value The environmentCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnvironmentCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        environmentCrn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The environment CRN.
+       * </pre>
+       *
+       * <code>string environmentCrn = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEnvironmentCrn() {
+        
+        environmentCrn_ = getDefaultInstance().getEnvironmentCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The environment CRN.
+       * </pre>
+       *
+       * <code>string environmentCrn = 2;</code>
+       * @param value The bytes for environmentCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnvironmentCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        environmentCrn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object usersyncCrn_ = "";
+      /**
+       * <pre>
+       * A CRN for the requested usersync.
+       * </pre>
+       *
+       * <code>string usersyncCrn = 3;</code>
+       * @return The usersyncCrn.
+       */
+      public java.lang.String getUsersyncCrn() {
+        java.lang.Object ref = usersyncCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          usersyncCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * A CRN for the requested usersync.
+       * </pre>
+       *
+       * <code>string usersyncCrn = 3;</code>
+       * @return The bytes for usersyncCrn.
+       */
+      public com.google.protobuf.ByteString
+          getUsersyncCrnBytes() {
+        java.lang.Object ref = usersyncCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          usersyncCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * A CRN for the requested usersync.
+       * </pre>
+       *
+       * <code>string usersyncCrn = 3;</code>
+       * @param value The usersyncCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUsersyncCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        usersyncCrn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A CRN for the requested usersync.
+       * </pre>
+       *
+       * <code>string usersyncCrn = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUsersyncCrn() {
+        
+        usersyncCrn_ = getDefaultInstance().getUsersyncCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A CRN for the requested usersync.
+       * </pre>
+       *
+       * <code>string usersyncCrn = 3;</code>
+       * @param value The bytes for usersyncCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUsersyncCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        usersyncCrn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatus usersyncStatus_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatus, com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatus.Builder, com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatusOrBuilder> usersyncStatusBuilder_;
+      /**
+       * <pre>
+       * Status of usersync. Status is included to support the
+       * environments2 lastSyncStatus API.
+       * </pre>
+       *
+       * <code>.workloadiam.LegacyUsersyncStatus usersyncStatus = 4;</code>
+       * @return Whether the usersyncStatus field is set.
+       */
+      public boolean hasUsersyncStatus() {
+        return usersyncStatusBuilder_ != null || usersyncStatus_ != null;
+      }
+      /**
+       * <pre>
+       * Status of usersync. Status is included to support the
+       * environments2 lastSyncStatus API.
+       * </pre>
+       *
+       * <code>.workloadiam.LegacyUsersyncStatus usersyncStatus = 4;</code>
+       * @return The usersyncStatus.
+       */
+      public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatus getUsersyncStatus() {
+        if (usersyncStatusBuilder_ == null) {
+          return usersyncStatus_ == null ? com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatus.getDefaultInstance() : usersyncStatus_;
+        } else {
+          return usersyncStatusBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Status of usersync. Status is included to support the
+       * environments2 lastSyncStatus API.
+       * </pre>
+       *
+       * <code>.workloadiam.LegacyUsersyncStatus usersyncStatus = 4;</code>
+       */
+      public Builder setUsersyncStatus(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatus value) {
+        if (usersyncStatusBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          usersyncStatus_ = value;
+          onChanged();
+        } else {
+          usersyncStatusBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of usersync. Status is included to support the
+       * environments2 lastSyncStatus API.
+       * </pre>
+       *
+       * <code>.workloadiam.LegacyUsersyncStatus usersyncStatus = 4;</code>
+       */
+      public Builder setUsersyncStatus(
+          com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatus.Builder builderForValue) {
+        if (usersyncStatusBuilder_ == null) {
+          usersyncStatus_ = builderForValue.build();
+          onChanged();
+        } else {
+          usersyncStatusBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of usersync. Status is included to support the
+       * environments2 lastSyncStatus API.
+       * </pre>
+       *
+       * <code>.workloadiam.LegacyUsersyncStatus usersyncStatus = 4;</code>
+       */
+      public Builder mergeUsersyncStatus(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatus value) {
+        if (usersyncStatusBuilder_ == null) {
+          if (usersyncStatus_ != null) {
+            usersyncStatus_ =
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatus.newBuilder(usersyncStatus_).mergeFrom(value).buildPartial();
+          } else {
+            usersyncStatus_ = value;
+          }
+          onChanged();
+        } else {
+          usersyncStatusBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of usersync. Status is included to support the
+       * environments2 lastSyncStatus API.
+       * </pre>
+       *
+       * <code>.workloadiam.LegacyUsersyncStatus usersyncStatus = 4;</code>
+       */
+      public Builder clearUsersyncStatus() {
+        if (usersyncStatusBuilder_ == null) {
+          usersyncStatus_ = null;
+          onChanged();
+        } else {
+          usersyncStatus_ = null;
+          usersyncStatusBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of usersync. Status is included to support the
+       * environments2 lastSyncStatus API.
+       * </pre>
+       *
+       * <code>.workloadiam.LegacyUsersyncStatus usersyncStatus = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatus.Builder getUsersyncStatusBuilder() {
+        
+        onChanged();
+        return getUsersyncStatusFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Status of usersync. Status is included to support the
+       * environments2 lastSyncStatus API.
+       * </pre>
+       *
+       * <code>.workloadiam.LegacyUsersyncStatus usersyncStatus = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatusOrBuilder getUsersyncStatusOrBuilder() {
+        if (usersyncStatusBuilder_ != null) {
+          return usersyncStatusBuilder_.getMessageOrBuilder();
+        } else {
+          return usersyncStatus_ == null ?
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatus.getDefaultInstance() : usersyncStatus_;
+        }
+      }
+      /**
+       * <pre>
+       * Status of usersync. Status is included to support the
+       * environments2 lastSyncStatus API.
+       * </pre>
+       *
+       * <code>.workloadiam.LegacyUsersyncStatus usersyncStatus = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatus, com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatus.Builder, com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatusOrBuilder> 
+          getUsersyncStatusFieldBuilder() {
+        if (usersyncStatusBuilder_ == null) {
+          usersyncStatusBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatus, com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatus.Builder, com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyUsersyncStatusOrBuilder>(
+                  getUsersyncStatus(),
+                  getParentForChildren(),
+                  isClean());
+          usersyncStatus_ = null;
+        }
+        return usersyncStatusBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:workloadiam.LegacyGetEnvironmentUsersyncStateResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:workloadiam.LegacyGetEnvironmentUsersyncStateResponse)
+    private static final com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<LegacyGetEnvironmentUsersyncStateResponse>
+        PARSER = new com.google.protobuf.AbstractParser<LegacyGetEnvironmentUsersyncStateResponse>() {
+      @java.lang.Override
+      public LegacyGetEnvironmentUsersyncStateResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<LegacyGetEnvironmentUsersyncStateResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<LegacyGetEnvironmentUsersyncStateResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface SyncUsersRequestOrBuilder extends
       // @@protoc_insertion_point(interface_extends:workloadiam.SyncUsersRequest)
       com.google.protobuf.MessageOrBuilder {
@@ -20091,7 +22097,7 @@ public final class WorkloadIamProto {
 
     /**
      * <pre>
-     * A CRN for the requested usersync
+     * A CRN for the requested usersync.
      * </pre>
      *
      * <code>string usersyncCrn = 2;</code>
@@ -20100,7 +22106,7 @@ public final class WorkloadIamProto {
     java.lang.String getUsersyncCrn();
     /**
      * <pre>
-     * A CRN for the requested usersync
+     * A CRN for the requested usersync.
      * </pre>
      *
      * <code>string usersyncCrn = 2;</code>
@@ -20201,7 +22207,7 @@ public final class WorkloadIamProto {
     private volatile java.lang.Object usersyncCrn_;
     /**
      * <pre>
-     * A CRN for the requested usersync
+     * A CRN for the requested usersync.
      * </pre>
      *
      * <code>string usersyncCrn = 2;</code>
@@ -20222,7 +22228,7 @@ public final class WorkloadIamProto {
     }
     /**
      * <pre>
-     * A CRN for the requested usersync
+     * A CRN for the requested usersync.
      * </pre>
      *
      * <code>string usersyncCrn = 2;</code>
@@ -20679,7 +22685,7 @@ public final class WorkloadIamProto {
       private java.lang.Object usersyncCrn_ = "";
       /**
        * <pre>
-       * A CRN for the requested usersync
+       * A CRN for the requested usersync.
        * </pre>
        *
        * <code>string usersyncCrn = 2;</code>
@@ -20699,7 +22705,7 @@ public final class WorkloadIamProto {
       }
       /**
        * <pre>
-       * A CRN for the requested usersync
+       * A CRN for the requested usersync.
        * </pre>
        *
        * <code>string usersyncCrn = 2;</code>
@@ -20720,7 +22726,7 @@ public final class WorkloadIamProto {
       }
       /**
        * <pre>
-       * A CRN for the requested usersync
+       * A CRN for the requested usersync.
        * </pre>
        *
        * <code>string usersyncCrn = 2;</code>
@@ -20739,7 +22745,7 @@ public final class WorkloadIamProto {
       }
       /**
        * <pre>
-       * A CRN for the requested usersync
+       * A CRN for the requested usersync.
        * </pre>
        *
        * <code>string usersyncCrn = 2;</code>
@@ -20753,7 +22759,7 @@ public final class WorkloadIamProto {
       }
       /**
        * <pre>
-       * A CRN for the requested usersync
+       * A CRN for the requested usersync.
        * </pre>
        *
        * <code>string usersyncCrn = 2;</code>
@@ -23312,7 +25318,7 @@ public final class WorkloadIamProto {
   }
   /**
    * <pre>
-   * Details TBD
+   * Details TBD.
    * </pre>
    *
    * Protobuf type {@code workloadiam.RunningStatus}
@@ -23500,7 +25506,7 @@ public final class WorkloadIamProto {
     }
     /**
      * <pre>
-     * Details TBD
+     * Details TBD.
      * </pre>
      *
      * Protobuf type {@code workloadiam.RunningStatus}
@@ -23720,7 +25726,7 @@ public final class WorkloadIamProto {
   }
   /**
    * <pre>
-   * Details TBD
+   * Details TBD.
    * </pre>
    *
    * Protobuf type {@code workloadiam.CompletedStatus}
@@ -23908,7 +25914,7 @@ public final class WorkloadIamProto {
     }
     /**
      * <pre>
-     * Details TBD
+     * Details TBD.
      * </pre>
      *
      * Protobuf type {@code workloadiam.CompletedStatus}
@@ -24128,7 +26134,7 @@ public final class WorkloadIamProto {
   }
   /**
    * <pre>
-   * Details TBD
+   * Details TBD.
    * </pre>
    *
    * Protobuf type {@code workloadiam.FailedStatus}
@@ -24316,7 +26322,7 @@ public final class WorkloadIamProto {
     }
     /**
      * <pre>
-     * Details TBD
+     * Details TBD.
      * </pre>
      *
      * Protobuf type {@code workloadiam.FailedStatus}
@@ -24641,6 +26647,16 @@ public final class WorkloadIamProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_workloadiam_LegacyGetSyncUsersStatusResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_workloadiam_LegacyGetEnvironmentUsersyncStateRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_workloadiam_LegacyGetEnvironmentUsersyncStateRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_workloadiam_LegacyGetEnvironmentUsersyncStateResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_workloadiam_LegacyGetEnvironmentUsersyncStateResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_workloadiam_SyncUsersRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -24684,120 +26700,133 @@ public final class WorkloadIamProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\021workloadiam.proto\022\013workloadiam\032\rversio" +
-      "n.proto\032\016nullable.proto\"\211\003\n\026CreateSyncEv" +
-      "entRequest\022\021\n\taccountId\030\001 \001(\t\022\023\n\013descrip" +
-      "tion\030\002 \001(\t\022\025\n\rcommitDelayMs\030\003 \001(\005\022\031\n\021com" +
-      "mitImmediately\030\010 \001(\010\022A\n\024fullSyncRequestE" +
-      "vent\030\004 \001(\0132!.workloadiam.FullSyncRequest" +
-      "EventH\000\0229\n\020actorUpdateEvent\030\005 \001(\0132\035.work" +
-      "loadiam.ActorUpdateEventH\000\0229\n\020groupUpdat" +
-      "eEvent\030\006 \001(\0132\035.workloadiam.GroupUpdateEv" +
-      "entH\000\022O\n\033servicePrincipalUpdateEvent\030\007 \001" +
-      "(\0132(.workloadiam.ServicePrincipalUpdateE" +
-      "ventH\000B\013\n\tsyncEvent\"<\n\027CreateSyncEventRe" +
-      "sponse\022\017\n\007eventId\030\001 \001(\003\022\020\n\010eventCrn\030\002 \001(" +
-      "\t\".\n\024FullSyncRequestEvent\022\026\n\016environment" +
-      "Crn\030\001 \001(\t\":\n\020ActorUpdateEvent\022\020\n\010actorCr" +
-      "n\030\001 \001(\t\022\024\n\014actorDeleted\030\002 \001(\010\"$\n\020GroupUp" +
-      "dateEvent\022\020\n\010groupCrn\030\001 \001(\t\"\035\n\033ServicePr" +
-      "incipalUpdateEvent\")\n\026CommitSyncEventReq" +
-      "uest\022\017\n\007eventId\030\001 \001(\003\"\031\n\027CommitSyncEvent" +
-      "Response\"\324\001\n\030LastAutomatedSyncDetails\022\021\n" +
-      "\ttimestamp\030\001 \001(\003\022M\n\006status\030\002 \001(\0162=.workl" +
-      "oadiam.LastAutomatedSyncDetails.LastAuto" +
-      "matedSyncStatus\022\025\n\rstatusMessage\030\003 \001(\t\"?" +
-      "\n\027LastAutomatedSyncStatus\022\013\n\007UNKNOWN\020\000\022\013" +
-      "\n\007SUCCESS\020\001\022\n\n\006FAILED\020\002\"B\n(GetAutomatedS" +
-      "yncEnvironmentStatusRequest\022\026\n\016environme" +
-      "ntCrn\030\001 \001(\t\"\270\002\n)GetAutomatedSyncEnvironm" +
-      "entStatusResponse\022a\n\020syncPendingState\030\001 " +
-      "\001(\0162G.workloadiam.GetAutomatedSyncEnviro" +
-      "nmentStatusResponse.SyncPendingState\022G\n\030" +
-      "lastAutomatedSyncDetails\030\002 \001(\0132%.workloa" +
-      "diam.LastAutomatedSyncDetails\"_\n\020SyncPen" +
-      "dingState\022\013\n\007UNKNOWN\020\000\022\020\n\014SYNC_PENDING\020\001" +
-      "\022\n\n\006SYNCED\020\002\022\017\n\013SYNC_HALTED\020\003\022\017\n\013QUARANT" +
-      "INED\020\004\"-\n\031GetSyncEventStatusRequest\022\020\n\010e" +
-      "ventCrn\030\001 \001(\t\"\257\002\n\032GetSyncEventStatusResp" +
-      "onse\022\020\n\010eventCrn\030\001 \001(\t\022N\n\016syncEventState" +
-      "\030\002 \001(\01626.workloadiam.GetSyncEventStatusR" +
-      "esponse.SyncEventState\022\024\n\014creationDate\030\003" +
-      " \001(\004\022A\n\025eventEnvironmentState\030\004 \003(\0132\".wo" +
-      "rkloadiam.EventEnvironmentState\"V\n\016SyncE" +
-      "ventState\022\013\n\007UNKNOWN\020\000\022\013\n\007CREATED\020\001\022\r\n\tC" +
-      "OMMITTED\020\002\022\014\n\010ACCEPTED\020\003\022\r\n\tCOMPLETED\020\004\"" +
-      "j\n\025EventEnvironmentState\022\026\n\016environmentC" +
-      "rn\030\001 \001(\t\0229\n\021completionDetails\030\002 \001(\0132\036.wo" +
-      "rkloadiam.CompletionDetails\"\273\001\n\021Completi" +
-      "onDetails\0225\n\006reason\030\001 \001(\0162%.workloadiam." +
-      "CompletionDetails.Reason\"o\n\006Reason\022\013\n\007UN" +
-      "KNOWN\020\000\022\023\n\017SYNC_SUCCESSFUL\020\001\022\014\n\010SUBSUMED" +
-      "\020\002\022\027\n\023ENVIRONMENT_DELETED\020\003\022\034\n\030ENVIRONME" +
-      "NT_NOT_ENTITLED\020\004\"U\n\026LegacySyncUsersRequ" +
-      "est\022\021\n\taccountId\030\001 \001(\t\022\026\n\016environmentCrn" +
-      "\030\002 \003(\t\022\020\n\010actorCrn\030\003 \003(\t\"L\n\027LegacySyncUs" +
+      "\n\021workloadiam.proto\022\013workloadiam\032\016nullab" +
+      "le.proto\032\roptions.proto\032\rversion.proto\"\211" +
+      "\003\n\026CreateSyncEventRequest\022\021\n\taccountId\030\001" +
+      " \001(\t\022\023\n\013description\030\002 \001(\t\022\025\n\rcommitDelay" +
+      "Ms\030\003 \001(\005\022\031\n\021commitImmediately\030\010 \001(\010\022A\n\024f" +
+      "ullSyncRequestEvent\030\004 \001(\0132!.workloadiam." +
+      "FullSyncRequestEventH\000\0229\n\020actorUpdateEve" +
+      "nt\030\005 \001(\0132\035.workloadiam.ActorUpdateEventH" +
+      "\000\0229\n\020groupUpdateEvent\030\006 \001(\0132\035.workloadia" +
+      "m.GroupUpdateEventH\000\022O\n\033servicePrincipal" +
+      "UpdateEvent\030\007 \001(\0132(.workloadiam.ServiceP" +
+      "rincipalUpdateEventH\000B\013\n\tsyncEvent\"<\n\027Cr" +
+      "eateSyncEventResponse\022\017\n\007eventId\030\001 \001(\003\022\020" +
+      "\n\010eventCrn\030\002 \001(\t\".\n\024FullSyncRequestEvent" +
+      "\022\026\n\016environmentCrn\030\001 \001(\t\":\n\020ActorUpdateE" +
+      "vent\022\020\n\010actorCrn\030\001 \001(\t\022\024\n\014actorDeleted\030\002" +
+      " \001(\010\"$\n\020GroupUpdateEvent\022\020\n\010groupCrn\030\001 \001" +
+      "(\t\"\035\n\033ServicePrincipalUpdateEvent\")\n\026Com" +
+      "mitSyncEventRequest\022\017\n\007eventId\030\001 \001(\003\"\031\n\027" +
+      "CommitSyncEventResponse\"\324\001\n\030LastAutomate" +
+      "dSyncDetails\022\021\n\ttimestamp\030\001 \001(\003\022M\n\006statu" +
+      "s\030\002 \001(\0162=.workloadiam.LastAutomatedSyncD" +
+      "etails.LastAutomatedSyncStatus\022\025\n\rstatus" +
+      "Message\030\003 \001(\t\"?\n\027LastAutomatedSyncStatus" +
+      "\022\013\n\007UNKNOWN\020\000\022\013\n\007SUCCESS\020\001\022\n\n\006FAILED\020\002\"B" +
+      "\n(GetAutomatedSyncEnvironmentStatusReque" +
+      "st\022\026\n\016environmentCrn\030\001 \001(\t\"\270\002\n)GetAutoma" +
+      "tedSyncEnvironmentStatusResponse\022a\n\020sync" +
+      "PendingState\030\001 \001(\0162G.workloadiam.GetAuto" +
+      "matedSyncEnvironmentStatusResponse.SyncP" +
+      "endingState\022G\n\030lastAutomatedSyncDetails\030" +
+      "\002 \001(\0132%.workloadiam.LastAutomatedSyncDet" +
+      "ails\"_\n\020SyncPendingState\022\013\n\007UNKNOWN\020\000\022\020\n" +
+      "\014SYNC_PENDING\020\001\022\n\n\006SYNCED\020\002\022\017\n\013SYNC_HALT" +
+      "ED\020\003\022\017\n\013QUARANTINED\020\004\"@\n\031GetSyncEventSta" +
+      "tusRequest\022\020\n\010eventCrn\030\001 \001(\t\022\021\n\taccountI" +
+      "d\030\002 \001(\t\"\257\002\n\032GetSyncEventStatusResponse\022\020" +
+      "\n\010eventCrn\030\001 \001(\t\022N\n\016syncEventState\030\002 \001(\016" +
+      "26.workloadiam.GetSyncEventStatusRespons" +
+      "e.SyncEventState\022\024\n\014creationDate\030\003 \001(\004\022A" +
+      "\n\025eventEnvironmentState\030\004 \003(\0132\".workload" +
+      "iam.EventEnvironmentState\"V\n\016SyncEventSt" +
+      "ate\022\013\n\007UNKNOWN\020\000\022\013\n\007CREATED\020\001\022\r\n\tCOMMITT" +
+      "ED\020\002\022\014\n\010ACCEPTED\020\003\022\r\n\tCOMPLETED\020\004\"j\n\025Eve" +
+      "ntEnvironmentState\022\026\n\016environmentCrn\030\001 \001" +
+      "(\t\0229\n\021completionDetails\030\002 \001(\0132\036.workload" +
+      "iam.CompletionDetails\"\273\001\n\021CompletionDeta" +
+      "ils\0225\n\006reason\030\001 \001(\0162%.workloadiam.Comple" +
+      "tionDetails.Reason\"o\n\006Reason\022\013\n\007UNKNOWN\020" +
+      "\000\022\023\n\017SYNC_SUCCESSFUL\020\001\022\014\n\010SUBSUMED\020\002\022\027\n\023" +
+      "ENVIRONMENT_DELETED\020\003\022\034\n\030ENVIRONMENT_NOT" +
+      "_ENTITLED\020\004\"[\n\026LegacySyncUsersRequest\022\021\n" +
+      "\taccountId\030\001 \001(\t\022\026\n\016environmentCrn\030\002 \003(\t" +
+      "\022\020\n\010actorCrn\030\003 \003(\t:\004\230\227\"\001\"R\n\027LegacySyncUs" +
       "ersResponse\0221\n\006status\030\001 \001(\0132!.workloadia" +
-      "m.LegacyUsersyncStatus\"\277\001\n\024LegacyUsersyn" +
-      "cStatus\022\023\n\013usersyncCrn\030\001 \001(\t\022\016\n\006status\030\002" +
-      " \001(\t\022\026\n\016startTimestamp\030\003 \001(\003\022\024\n\014endTimes" +
-      "tamp\030\004 \001(\003\022\r\n\005error\030\005 \001(\t\022E\n\022environment" +
-      "Details\030\006 \003(\0132).workloadiam.LegacyEnviro" +
-      "nmentSyncDetails\"\246\001\n\034LegacyEnvironmentSy" +
-      "ncDetails\022\026\n\016environmentCrn\030\001 \001(\t\022\016\n\006sta" +
-      "tus\030\002 \001(\t\022\017\n\007message\030\003 \001(\t\022M\n\021additional" +
-      "Details\030\004 \003(\01322.workloadiam.LegacyEnviro" +
-      "nmentSyncAdditionalDetail\"G\n%LegacyEnvir" +
-      "onmentSyncAdditionalDetail\022\017\n\007subject\030\001 " +
-      "\001(\t\022\r\n\005value\030\002 \003(\t\"6\n\037LegacyGetSyncUsers" +
-      "StatusRequest\022\023\n\013usersyncCrn\030\001 \001(\t\"U\n Le" +
-      "gacyGetSyncUsersStatusResponse\0221\n\006status" +
-      "\030\001 \001(\0132!.workloadiam.LegacyUsersyncStatu" +
-      "s\"O\n\020SyncUsersRequest\022\021\n\taccountId\030\001 \001(\t" +
-      "\022\026\n\016environmentCrn\030\002 \001(\t\022\020\n\010actorCrn\030\003 \003" +
-      "(\t\"@\n\021SyncUsersResponse\022\026\n\016environmentCr" +
-      "n\030\001 \001(\t\022\023\n\013usersyncCrn\030\002 \001(\t\"H\n\031GetSyncU" +
-      "sersStatusRequest\022\026\n\016environmentCrn\030\001 \001(" +
-      "\t\022\023\n\013usersyncCrn\030\002 \001(\t\"\220\002\n\032GetSyncUsersS" +
-      "tatusResponse\022\026\n\016environmentCrn\030\001 \001(\t\022\023\n" +
-      "\013usersyncCrn\030\002 \001(\t\022\026\n\016startTimestamp\030\003 \001" +
-      "(\003\022\024\n\014endTimestamp\030\004 \001(\003\022-\n\007running\030\005 \001(" +
-      "\0132\032.workloadiam.RunningStatusH\000\0221\n\tcompl" +
-      "eted\030\006 \001(\0132\034.workloadiam.CompletedStatus" +
-      "H\000\022+\n\006failed\030\007 \001(\0132\031.workloadiam.FailedS" +
-      "tatusH\000B\010\n\006status\"\017\n\rRunningStatus\"\021\n\017Co" +
-      "mpletedStatus\"\016\n\014FailedStatus2\242\007\n\013Worklo" +
-      "adIam\022A\n\nGetVersion\022\027.version.VersionReq" +
-      "uest\032\030.version.VersionResponse\"\000\022^\n\017Crea" +
-      "teSyncEvent\022#.workloadiam.CreateSyncEven" +
-      "tRequest\032$.workloadiam.CreateSyncEventRe" +
-      "sponse\"\000\022^\n\017CommitSyncEvent\022#.workloadia" +
-      "m.CommitSyncEventRequest\032$.workloadiam.C" +
-      "ommitSyncEventResponse\"\000\022\224\001\n!GetAutomate" +
-      "dSyncEnvironmentStatus\0225.workloadiam.Get" +
-      "AutomatedSyncEnvironmentStatusRequest\0326." +
-      "workloadiam.GetAutomatedSyncEnvironmentS" +
-      "tatusResponse\"\000\022g\n\022GetSyncEventStatus\022&." +
-      "workloadiam.GetSyncEventStatusRequest\032\'." +
-      "workloadiam.GetSyncEventStatusResponse\"\000" +
-      "\022^\n\017LegacySyncUsers\022#.workloadiam.Legacy" +
-      "SyncUsersRequest\032$.workloadiam.LegacySyn" +
-      "cUsersResponse\"\000\022y\n\030LegacyGetSyncUsersSt" +
-      "atus\022,.workloadiam.LegacyGetSyncUsersSta" +
-      "tusRequest\032-.workloadiam.LegacyGetSyncUs" +
-      "ersStatusResponse\"\000\022L\n\tSyncUsers\022\035.workl" +
-      "oadiam.SyncUsersRequest\032\036.workloadiam.Sy" +
-      "ncUsersResponse\"\000\022g\n\022GetSyncUsersStatus\022" +
-      "&.workloadiam.GetSyncUsersStatusRequest\032" +
-      "\'.workloadiam.GetSyncUsersStatusResponse" +
-      "\"\000B@\n,com.cloudera.thunderhead.service.w" +
-      "orkloadiamB\020WorkloadIamProtob\006proto3"
+      "m.LegacyUsersyncStatus:\004\230\227\"\001\"\305\001\n\024LegacyU" +
+      "sersyncStatus\022\023\n\013usersyncCrn\030\001 \001(\t\022\016\n\006st" +
+      "atus\030\002 \001(\t\022\026\n\016startTimestamp\030\003 \001(\003\022\024\n\014en" +
+      "dTimestamp\030\004 \001(\003\022\r\n\005error\030\005 \001(\t\022E\n\022envir" +
+      "onmentDetails\030\006 \003(\0132).workloadiam.Legacy" +
+      "EnvironmentSyncDetails:\004\230\227\"\001\"\254\001\n\034LegacyE" +
+      "nvironmentSyncDetails\022\026\n\016environmentCrn\030" +
+      "\001 \001(\t\022\016\n\006status\030\002 \001(\t\022\017\n\007message\030\003 \001(\t\022M" +
+      "\n\021additionalDetails\030\004 \003(\01322.workloadiam." +
+      "LegacyEnvironmentSyncAdditionalDetail:\004\230" +
+      "\227\"\001\"M\n%LegacyEnvironmentSyncAdditionalDe" +
+      "tail\022\017\n\007subject\030\001 \001(\t\022\r\n\005value\030\002 \003(\t:\004\230\227" +
+      "\"\001\"<\n\037LegacyGetSyncUsersStatusRequest\022\023\n" +
+      "\013usersyncCrn\030\001 \001(\t:\004\230\227\"\001\"[\n LegacyGetSyn" +
+      "cUsersStatusResponse\0221\n\006status\030\001 \001(\0132!.w" +
+      "orkloadiam.LegacyUsersyncStatus:\004\230\227\"\001\"H\n" +
+      "(LegacyGetEnvironmentUsersyncStateReques" +
+      "t\022\026\n\016environmentCrn\030\001 \001(\t:\004\230\227\"\001\"\250\001\n)Lega" +
+      "cyGetEnvironmentUsersyncStateResponse\022\r\n" +
+      "\005state\030\001 \001(\t\022\026\n\016environmentCrn\030\002 \001(\t\022\023\n\013" +
+      "usersyncCrn\030\003 \001(\t\0229\n\016usersyncStatus\030\004 \001(" +
+      "\0132!.workloadiam.LegacyUsersyncStatus:\004\230\227" +
+      "\"\001\"O\n\020SyncUsersRequest\022\021\n\taccountId\030\001 \001(" +
+      "\t\022\026\n\016environmentCrn\030\002 \001(\t\022\020\n\010actorCrn\030\003 " +
+      "\003(\t\"@\n\021SyncUsersResponse\022\026\n\016environmentC" +
+      "rn\030\001 \001(\t\022\023\n\013usersyncCrn\030\002 \001(\t\"H\n\031GetSync" +
+      "UsersStatusRequest\022\026\n\016environmentCrn\030\001 \001" +
+      "(\t\022\023\n\013usersyncCrn\030\002 \001(\t\"\220\002\n\032GetSyncUsers" +
+      "StatusResponse\022\026\n\016environmentCrn\030\001 \001(\t\022\023" +
+      "\n\013usersyncCrn\030\002 \001(\t\022\026\n\016startTimestamp\030\003 " +
+      "\001(\003\022\024\n\014endTimestamp\030\004 \001(\003\022-\n\007running\030\005 \001" +
+      "(\0132\032.workloadiam.RunningStatusH\000\0221\n\tcomp" +
+      "leted\030\006 \001(\0132\034.workloadiam.CompletedStatu" +
+      "sH\000\022+\n\006failed\030\007 \001(\0132\031.workloadiam.Failed" +
+      "StatusH\000B\010\n\006status\"\017\n\rRunningStatus\"\021\n\017C" +
+      "ompletedStatus\"\016\n\014FailedStatus2\305\010\n\013Workl" +
+      "oadIam\022A\n\nGetVersion\022\027.version.VersionRe" +
+      "quest\032\030.version.VersionResponse\"\000\022^\n\017Cre" +
+      "ateSyncEvent\022#.workloadiam.CreateSyncEve" +
+      "ntRequest\032$.workloadiam.CreateSyncEventR" +
+      "esponse\"\000\022^\n\017CommitSyncEvent\022#.workloadi" +
+      "am.CommitSyncEventRequest\032$.workloadiam." +
+      "CommitSyncEventResponse\"\000\022\224\001\n!GetAutomat" +
+      "edSyncEnvironmentStatus\0225.workloadiam.Ge" +
+      "tAutomatedSyncEnvironmentStatusRequest\0326" +
+      ".workloadiam.GetAutomatedSyncEnvironment" +
+      "StatusResponse\"\000\022g\n\022GetSyncEventStatus\022&" +
+      ".workloadiam.GetSyncEventStatusRequest\032\'" +
+      ".workloadiam.GetSyncEventStatusResponse\"" +
+      "\000\022b\n\017LegacySyncUsers\022#.workloadiam.Legac" +
+      "ySyncUsersRequest\032$.workloadiam.LegacySy" +
+      "ncUsersResponse\"\004\270\246\035\001\022}\n\030LegacyGetSyncUs" +
+      "ersStatus\022,.workloadiam.LegacyGetSyncUse" +
+      "rsStatusRequest\032-.workloadiam.LegacyGetS" +
+      "yncUsersStatusResponse\"\004\270\246\035\001\022\230\001\n!LegacyG" +
+      "etEnvironmentUsersyncState\0225.workloadiam" +
+      ".LegacyGetEnvironmentUsersyncStateReques" +
+      "t\0326.workloadiam.LegacyGetEnvironmentUser" +
+      "syncStateResponse\"\004\270\246\035\001\022L\n\tSyncUsers\022\035.w" +
+      "orkloadiam.SyncUsersRequest\032\036.workloadia" +
+      "m.SyncUsersResponse\"\000\022g\n\022GetSyncUsersSta" +
+      "tus\022&.workloadiam.GetSyncUsersStatusRequ" +
+      "est\032\'.workloadiam.GetSyncUsersStatusResp" +
+      "onse\"\000B@\n,com.cloudera.thunderhead.servi" +
+      "ce.workloadiamB\020WorkloadIamProtob\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-          com.cloudera.thunderhead.service.common.version.Version.getDescriptor(),
           com.cloudera.thunderhead.service.NullableScalarTypeProto.getDescriptor(),
+          com.cloudera.thunderhead.service.common.options.Options.getDescriptor(),
+          com.cloudera.thunderhead.service.common.version.Version.getDescriptor(),
         });
     internal_static_workloadiam_CreateSyncEventRequest_descriptor =
       getDescriptor().getMessageTypes().get(0);
@@ -24870,7 +26899,7 @@ public final class WorkloadIamProto {
     internal_static_workloadiam_GetSyncEventStatusRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_workloadiam_GetSyncEventStatusRequest_descriptor,
-        new java.lang.String[] { "EventCrn", });
+        new java.lang.String[] { "EventCrn", "AccountId", });
     internal_static_workloadiam_GetSyncEventStatusResponse_descriptor =
       getDescriptor().getMessageTypes().get(12);
     internal_static_workloadiam_GetSyncEventStatusResponse_fieldAccessorTable = new
@@ -24931,50 +26960,69 @@ public final class WorkloadIamProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_workloadiam_LegacyGetSyncUsersStatusResponse_descriptor,
         new java.lang.String[] { "Status", });
-    internal_static_workloadiam_SyncUsersRequest_descriptor =
+    internal_static_workloadiam_LegacyGetEnvironmentUsersyncStateRequest_descriptor =
       getDescriptor().getMessageTypes().get(22);
+    internal_static_workloadiam_LegacyGetEnvironmentUsersyncStateRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_workloadiam_LegacyGetEnvironmentUsersyncStateRequest_descriptor,
+        new java.lang.String[] { "EnvironmentCrn", });
+    internal_static_workloadiam_LegacyGetEnvironmentUsersyncStateResponse_descriptor =
+      getDescriptor().getMessageTypes().get(23);
+    internal_static_workloadiam_LegacyGetEnvironmentUsersyncStateResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_workloadiam_LegacyGetEnvironmentUsersyncStateResponse_descriptor,
+        new java.lang.String[] { "State", "EnvironmentCrn", "UsersyncCrn", "UsersyncStatus", });
+    internal_static_workloadiam_SyncUsersRequest_descriptor =
+      getDescriptor().getMessageTypes().get(24);
     internal_static_workloadiam_SyncUsersRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_workloadiam_SyncUsersRequest_descriptor,
         new java.lang.String[] { "AccountId", "EnvironmentCrn", "ActorCrn", });
     internal_static_workloadiam_SyncUsersResponse_descriptor =
-      getDescriptor().getMessageTypes().get(23);
+      getDescriptor().getMessageTypes().get(25);
     internal_static_workloadiam_SyncUsersResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_workloadiam_SyncUsersResponse_descriptor,
         new java.lang.String[] { "EnvironmentCrn", "UsersyncCrn", });
     internal_static_workloadiam_GetSyncUsersStatusRequest_descriptor =
-      getDescriptor().getMessageTypes().get(24);
+      getDescriptor().getMessageTypes().get(26);
     internal_static_workloadiam_GetSyncUsersStatusRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_workloadiam_GetSyncUsersStatusRequest_descriptor,
         new java.lang.String[] { "EnvironmentCrn", "UsersyncCrn", });
     internal_static_workloadiam_GetSyncUsersStatusResponse_descriptor =
-      getDescriptor().getMessageTypes().get(25);
+      getDescriptor().getMessageTypes().get(27);
     internal_static_workloadiam_GetSyncUsersStatusResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_workloadiam_GetSyncUsersStatusResponse_descriptor,
         new java.lang.String[] { "EnvironmentCrn", "UsersyncCrn", "StartTimestamp", "EndTimestamp", "Running", "Completed", "Failed", "Status", });
     internal_static_workloadiam_RunningStatus_descriptor =
-      getDescriptor().getMessageTypes().get(26);
+      getDescriptor().getMessageTypes().get(28);
     internal_static_workloadiam_RunningStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_workloadiam_RunningStatus_descriptor,
         new java.lang.String[] { });
     internal_static_workloadiam_CompletedStatus_descriptor =
-      getDescriptor().getMessageTypes().get(27);
+      getDescriptor().getMessageTypes().get(29);
     internal_static_workloadiam_CompletedStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_workloadiam_CompletedStatus_descriptor,
         new java.lang.String[] { });
     internal_static_workloadiam_FailedStatus_descriptor =
-      getDescriptor().getMessageTypes().get(28);
+      getDescriptor().getMessageTypes().get(30);
     internal_static_workloadiam_FailedStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_workloadiam_FailedStatus_descriptor,
         new java.lang.String[] { });
-    com.cloudera.thunderhead.service.common.version.Version.getDescriptor();
+    com.google.protobuf.ExtensionRegistry registry =
+        com.google.protobuf.ExtensionRegistry.newInstance();
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.deprecated);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.deprecated);
+    com.google.protobuf.Descriptors.FileDescriptor
+        .internalUpdateFileDescriptor(descriptor, registry);
     com.cloudera.thunderhead.service.NullableScalarTypeProto.getDescriptor();
+    com.cloudera.thunderhead.service.common.options.Options.getDescriptor();
+    com.cloudera.thunderhead.service.common.version.Version.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)
