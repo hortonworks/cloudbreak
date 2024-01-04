@@ -173,7 +173,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
     }
 
     private void secretRotation(TestContext testContext) {
-        String clusterName = testContext.given(SdxInternalTestDto.class).getResponse().getName();
+        String clusterName = testContext.given(sdxInternal, SdxInternalTestDto.class).getResponse().getName();
         testContext
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .when(sdxTestClient.describeInternal(), key(sdxInternal))
