@@ -1410,8 +1410,13 @@ class ClouderaManagerModificationServiceTest {
 
         underTest.updateConfig(HashBasedTable.create());
 
-        verify(clouderaManagerConfigModificationService).updateConfig(any(), any(), any());
         verify(clouderaManagerRestartService).doRestartServicesIfNeeded(any(), any(), eq(false), eq(Optional.of(List.of("test"))));
+    }
+
+    @Test
+    void testClusterRollingRestart() throws Exception {
+        underTest.rollingRestartServices();
+        verify(clouderaManagerRestartService).doRestartServicesIfNeeded(any(), any(), eq(true), any());
     }
 
     private ClusterComponentView createClusterComponent(ClouderaManagerProduct clouderaManagerProduct) {

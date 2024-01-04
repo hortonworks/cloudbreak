@@ -44,7 +44,7 @@ public class ClusterServicesRestartWaitHandler extends EventSenderAwareHandler<S
         StackEvent data = event.getData();
         Stack stack = stackService.get(data.getResourceId());
         try {
-            clusterApiConnectors.getConnector(stack).clusterModificationService().refreshAndRestartCluster();
+            clusterApiConnectors.getConnector(stack).clusterModificationService().rollingRestartServices();
         } catch (Exception e) {
             LOGGER.error("Cluster services rolling restart failed with exception", e);
             ClusterServicesRestartEvent result = new ClusterServicesRestartEvent(SERVICES_ROLLING_RESTART_FAILURE_EVENT.event(),
