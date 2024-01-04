@@ -19,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.quartz.metric.statusmetric.StackCountByStatusView;
+import com.sequenceiq.cloudbreak.common.metrics.status.StackCountByStatusView;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.service.stack.StackStatusService;
 
