@@ -418,7 +418,7 @@ public class SaltStateService {
         try {
             Map<String, List<Map<String, String>>> result =
                     measure(() -> sc.run(new HostList(List.of(gatewayConfig.getHostname())), "cmd.run", LOCAL, Map.class,
-                            "cat /etc/default/cloudera-scm-server | grep CMF_JAVA_OPTS"), LOGGER, "Get memory info took {}ms");
+                            "cat /etc/default/cloudera-scm-server | grep '^export CMF_JAVA_OPTS' | tail -n1"), LOGGER, "Get memory info took {}ms");
             LOGGER.info("Salt response from cloudera manager config: {}", result);
             String configLine = result.get("return").get(0).get(gatewayConfig.getHostname());
             Matcher matcher = CLOUDERA_MANAGER_JVM_CONFIG_LINE.matcher(configLine);
