@@ -79,7 +79,7 @@ public class StackResponseUtils {
 
     public String getRoleConfigNameForHostGroup(StackV4Response stackResponse, String hostGroupName, String serviceType, String roleType)
             throws Exception {
-        String template = stackResponse.getCluster().getBlueprint().getBlueprint();
+        String template = stackResponse.getCluster().getExtendedBlueprintText();
         ApiClusterTemplate cmTemplate = JsonUtil.readValue(template, ApiClusterTemplate.class);
 
         Set<String> hostGroupRoleConfigNames = cmTemplate.getHostTemplates().stream()
