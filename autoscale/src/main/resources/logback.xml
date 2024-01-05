@@ -29,7 +29,7 @@
             <MaxFileSize>1024MB</MaxFileSize>
         </triggeringPolicy>
     </appender>
-    
+
     <root level="${PERISCOPE_LOG_LEVEL:-INFO}">
         <appender-ref ref="AUTOSCALE_FILE_BASED"/>
         <appender-ref ref="STDOUT"/>
@@ -60,16 +60,13 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <logger name="org.hibernate.type.descriptor.sql.BasicBinder">
-        <level value="${PERISCOPE_SQL_LOG_LEVEL:-INFO}"/>
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="${PERISCOPE_SQL_LOG_LEVEL:-INFO}">
     </logger>
 
-    <logger name="org.springframework.orm.jpa">
-        <level value="${PERISCOPE_SQL_LOG_LEVEL:-INFO}"/>
+    <logger name="org.springframework.orm.jpa" level="${PERISCOPE_SQL_LOG_LEVEL:-INFO}">
     </logger>
 
-    <logger name="com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerScheduledExecutor">
-        <level value="${PERISCOPE_LOG_LEVEL:-WARN}"/>
+    <logger name="com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerScheduledExecutor" level="${PERISCOPE_LOG_LEVEL:-WARN}">
     </logger>
 
     <logger name="org.glassfish.jersey.logging.LoggingFeature" level="ERROR">

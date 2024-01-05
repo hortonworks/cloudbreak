@@ -3,8 +3,8 @@ package com.sequenceiq.environment.parameters.dao.repository;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
+import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,7 +19,7 @@ public interface BaseParametersRepository<T extends BaseParameters> extends JpaR
 
     @Query("SELECT COUNT(ep.id) > 0 "
             + "FROM BaseParameters ep "
-            + "JOIN Environment e ON e.id = ep.environment "
+            + "JOIN Environment e ON e.id = ep.environment.id "
             + "WHERE e.accountId = :accountId "
             + "AND e.cloudPlatform = :cloudPlatform "
             + "AND e.status IN :activeStatuses "

@@ -28,6 +28,6 @@ dependencies {
 
   testImplementation group: 'org.hamcrest',                        name: 'hamcrest',                                 version: hamcrestVersion
   testImplementation group: 'org.springframework.boot',            name: 'spring-boot-starter-test',                 version: springBootVersion
-  testImplementation group: 'org.mockito',                         name: 'mockito-inline',                           version: mockitoVersion
+  testImplementation group: 'org.mockito',                         name: 'mockito-inline',                           version: mockitoInlineVersion
 }
 

@@ -3,9 +3,10 @@ package com.sequenceiq.cloudbreak.structuredevent.service.kafka;
 import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.REPLACEMENT;
 
 import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.apache.kafka.common.errors.InvalidTopicException;
 import org.slf4j.Logger;
@@ -13,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -43,7 +43,7 @@ public class LegacyKafkaStructuredEventHandler<T extends StructuredEvent> implem
         try {
             StructuredEvent event = structuredEvent.getData();
             sanitizeSensitiveRestData(event);
-            ListenableFuture<SendResult<String, String>> sendResultFuture =
+            CompletableFuture<SendResult<String, String>> sendResultFuture =
                     kafkaTemplate.send(topicByType, JsonUtil.writeValueAsString(structuredEvent.getData()));
             SendResult<String, String> sendResult = sendResultFuture.get();
             LOGGER.trace("Structured event sent to kafka with topic {}: {}", topicByType, sendResult.getProducerRecord());

@@ -15,15 +15,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.TimeAlert;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
-public class DateServiceTest {
+class DateServiceTest {
 
     private static final boolean SHOULD_NOT_TRIGGER = false;
 
@@ -76,13 +73,13 @@ public class DateServiceTest {
                 "UTC", 2017, 12, 19, 12, 0, 0, 0, "UTC", 60000L, SHOULD_TRIGGER }
         };
     }
+
     // CHECKSTYLE:ON
     // @formatter:on
-
-    @ParameterizedTest
+    @ParameterizedTest(name = "{0}")
     @MethodSource("isTriggerScenarios")
     void testIsTrigger(String testCaseName, String alertTimeZone, int year, int month, int day, int hour, int min, int sec, int nano, String currentTimeZone,
-        long updateRate, boolean expectedIsTrigger) {
+            long updateRate, boolean expectedIsTrigger) {
         ZonedDateTime currentTime = ZonedDateTime.of(year, month, day, hour, min, sec, nano, ZoneId.of(currentTimeZone));
         when(dateTimeService.getDefaultZonedDateTime()).thenReturn(currentTime);
         TimeAlert timeAlert = createTimeAlert(alertTimeZone);
@@ -90,12 +87,12 @@ public class DateServiceTest {
     }
 
     @Test
-    public void testValidateTimeZoneWhenValid() throws Exception {
+    void testValidateTimeZoneWhenValid() throws Exception {
         underTest.validateTimeZone("GMT");
     }
 
     @Test
-    public void testValidateTimeZoneWhenInvalid() throws Exception {
+    void testValidateTimeZoneWhenInvalid() {
         Assertions.assertThrows(ParseException.class,
                 () -> underTest.validateTimeZone("GMTzen"));
     }
@@ -111,3 +108,4 @@ public class DateServiceTest {
         return testTime;
     }
 }
+

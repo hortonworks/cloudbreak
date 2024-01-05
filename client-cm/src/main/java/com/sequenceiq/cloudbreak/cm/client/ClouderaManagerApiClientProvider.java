@@ -2,8 +2,9 @@ package com.sequenceiq.cloudbreak.cm.client;
 
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
 import javax.net.ssl.SSLContext;
+
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.ssl.SSLContexts;

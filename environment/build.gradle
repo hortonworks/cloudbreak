@@ -21,6 +21,7 @@ plugins {
 }
 
 apply plugin: org.sonarqube.gradle.SonarQubePlugin
+apply plugin: 'io.spring.dependency-management'
 
 configurations.all {
     resolutionStrategy {
@@ -49,7 +50,7 @@ sonarqube {
 }
 
 dependencies {
-    implementation project(':audit-connector')
+    implementation     project(':audit-connector')
     implementation     project(":authorization-common")
     implementation     project(":common")
     implementation     project(':core-common')
@@ -83,7 +84,8 @@ dependencies {
     implementation     group: "org.yaml",                  name: "snakeyaml",                                version: snakeYamlVersion
     implementation     group: "com.google.code.gson",      name: "gson",                                     version: gsonVersion
     implementation     group: "dnsjava",                   name: "dnsjava",                                  version: dnsjavaVersion
-    implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2',                           version: swaggerCoreVersion
+    implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2-jakarta',                   version: swaggerCoreVersion
+    implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                                 version: javaxXmlBindJaxbApiVersion
     implementation     group: "org.glassfish.jersey.core", name: "jersey-server",                            version: jerseyCoreVersion
     implementation     group: "org.mybatis",               name: "mybatis-migrations",                       version: mybatisMigrationVersion
     implementation     group: "org.postgresql",            name: "postgresql",                               version: postgreSQLVersion
@@ -93,6 +95,7 @@ dependencies {
     implementation     group: "org.springframework.boot",  name: "spring-boot-starter-jersey",               version: springBootVersion
     implementation     group: "org.springframework.boot",  name: "spring-boot-starter-data-jpa",             version: springBootVersion
     implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',               version: springBootVersion
+    implementation     group: 'org.springframework.security', name: 'spring-security-web',                   version: springSecurityVersion
     implementation     group: 'com.dyngr',                 name: 'polling',                                  version: dyngrPollingVersion
     implementation     group: 'net.sourceforge.jregex',    name: 'jregex',                                   version: '1.2_01'
     implementation     group: 'com.fasterxml.jackson.core',name: 'jackson-databind',                         version: jacksonDatabindVersion

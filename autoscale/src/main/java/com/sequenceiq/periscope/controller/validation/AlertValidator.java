@@ -6,8 +6,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 
 import org.springframework.stereotype.Component;
 
@@ -142,7 +142,7 @@ public class AlertValidator {
     public void validateSchedule(TimeAlertRequest json) {
         try {
             dateService.validateTimeZone(json.getTimeZone());
-            dateService.getCronExpression(json.getCron(), json.getTimeZone());
+            dateService.getCronExpression(json.getCron());
         } catch (ParseException parseException) {
             throw new BadRequestException(parseException.getMessage(), parseException);
         }

@@ -5,9 +5,8 @@ import java.net.InetAddress;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,7 +14,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Represents a host endpoint.
  */
-@Immutable
 public class HostEndpoint implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -94,7 +92,7 @@ public class HostEndpoint implements Serializable {
     @Override
     public int hashCode() {
         int result = hostAddressString.hashCode();
-        result = 31 * result + ((hostAddress == null) ? 0 : hostAddress.hashCode());
+        result = 31 * result + (hostAddress == null ? 0 : hostAddress.hashCode());
         return result;
     }
 
@@ -102,7 +100,7 @@ public class HostEndpoint implements Serializable {
     public String toString() {
         return "HostEndpoint{"
                 + "hostAddressString='" + hostAddressString + '\''
-                + ((hostAddress == null) ? "" : ", hostAddress=" + hostAddress)
+                + (hostAddress == null ? "" : ", hostAddress=" + hostAddress)
                 + '}';
     }
 }

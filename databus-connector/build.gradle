@@ -15,6 +15,7 @@ dependencies {
   implementation project(':auth-connector')
   implementation project(':streaming-common')
 
+  implementation     group: 'javax.annotation',                    name: 'javax.annotation-api',           version: javaxAnnotationApiVersion
   implementation     group: 'org.springframework.boot',            name: 'spring-boot-starter-jersey',     version: springBootVersion
   implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: byteBuddyVersion
   implementation     group: 'com.google.protobuf',                 name: 'protobuf-java-util', version: protobufVersion
@@ -24,7 +25,7 @@ dependencies {
   }
   testImplementation group: 'org.assertj',                         name: 'assertj-core',                   version: assertjVersion
   testImplementation group: 'org.mockito',                         name: 'mockito-core',                   version: mockitoVersion
-  testImplementation group: 'org.mockito',                         name: 'mockito-inline',                 version: mockitoVersion
+  testImplementation group: 'org.mockito',                         name: 'mockito-inline',                 version: mockitoInlineVersion
 }
 
 checkstyle {

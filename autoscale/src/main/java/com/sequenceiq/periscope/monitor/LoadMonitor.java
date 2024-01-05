@@ -34,7 +34,7 @@ public class LoadMonitor extends ClusterMonitor {
     @Override
     protected List<Cluster> getMonitored() {
         return getClusterService().findLoadAlertClusterIdsForPeriscopeNodeId(StackType.WORKLOAD, ClusterState.RUNNING, true, getPeriscopeNodeConfig().getId())
-                .stream().map(clusterId -> new Cluster(clusterId))
+                .stream().map(Cluster::new)
                 .collect(Collectors.toList());
     }
 }

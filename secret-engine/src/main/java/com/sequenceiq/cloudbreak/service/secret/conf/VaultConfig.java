@@ -17,17 +17,26 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.client.LaxRedirectStrategy;
-import org.apache.http.impl.conn.DefaultSchemePortResolver;
-import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
+import jakarta.inject.Inject;
+
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.CredentialsStore;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.DefaultSchemePortResolver;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.impl.routing.SystemDefaultRoutePlanner;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.core5.http.ssl.TLS;
+import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
+import org.apache.hc.core5.pool.PoolReusePolicy;
+import org.apache.hc.core5.util.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,6 +67,8 @@ public class VaultConfig extends AbstractVaultConfiguration {
 
     private static final String AUTH_TYPE_K8S = "kubernetes";
 
+    private static final AuthScope AUTH_SCOPE_ANY = new AuthScope(null, -1);
+
     @Value("${vault.addr:localhost}")
     private String address;
 
@@ -87,6 +98,9 @@ public class VaultConfig extends AbstractVaultConfiguration {
 
     @Value("${https.proxyPassword:}")
     private String httpsProxyPassword;
+
+    @Inject
+    private LaxRedirectStrategy laxRedirectStrategy;
 
     @Override
     public VaultEndpoint vaultEndpoint() {
@@ -135,32 +149,47 @@ public class VaultConfig extends AbstractVaultConfiguration {
                     DefaultSchemePortResolver.INSTANCE, ProxySelector.getDefault()));
 
             if (isNoneEmpty(httpsProxyUser, httpsProxyPassword)) {
-                UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(httpsProxyUser, httpsProxyPassword);
-                CredentialsProvider provider = new BasicCredentialsProvider();
-                provider.setCredentials(AuthScope.ANY, credentials);
+                UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(httpsProxyUser, httpsProxyPassword.toCharArray());
+                CredentialsStore provider = new BasicCredentialsProvider();
+                provider.setCredentials(AUTH_SCOPE_ANY, credentials);
                 httpClientBuilder.setDefaultCredentialsProvider(provider);
-            }
-
-            if (hasSslConfiguration(sslConfiguration)) {
-                SSLContext sslContext = getSSLContext(sslConfiguration,
-                        getTrustManagers(sslConfiguration));
-                SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(
-                        sslContext);
-                httpClientBuilder.setSSLSocketFactory(sslSocketFactory);
-                httpClientBuilder.setSSLContext(sslContext);
             }
 
             RequestConfig requestConfig = RequestConfig
                     .custom()
-                    .setConnectTimeout(Math.toIntExact(options.getConnectionTimeout().toMillis()))
-                    .setSocketTimeout(Math.toIntExact(options.getReadTimeout().toMillis()))
                     .setAuthenticationEnabled(true)
                     .build();
 
             httpClientBuilder.setDefaultRequestConfig(requestConfig);
-
-            httpClientBuilder.setRedirectStrategy(new LaxRedirectStrategy());
+            httpClientBuilder.setConnectionManager(getConnectionManager(options, sslConfiguration));
+            httpClientBuilder.setRedirectStrategy(laxRedirectStrategy);
             return new HttpComponentsClientHttpRequestFactory(httpClientBuilder.build());
+        }
+
+        private HttpClientConnectionManager getConnectionManager(ClientOptions options, SslConfiguration sslConfiguration)
+                throws GeneralSecurityException, IOException {
+            PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = PoolingHttpClientConnectionManagerBuilder.create();
+            if (hasSslConfiguration(sslConfiguration)) {
+                SSLContext sslContext = getSSLContext(sslConfiguration,
+                        getTrustManagers(sslConfiguration));
+                connectionManagerBuilder.setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
+                        .setSslContext(sslContext)
+                        .setTlsVersions(TLS.V_1_3)
+                        .build()
+                );
+            }
+            ConnectionConfig connectionConfig = ConnectionConfig.custom()
+                    .setConnectTimeout(Timeout.ofMilliseconds(Math.toIntExact(options.getConnectionTimeout().toMillis())))
+                    .setSocketTimeout(Timeout.ofMilliseconds(Math.toIntExact(options.getReadTimeout().toMillis())))
+                    .build();
+            return connectionManagerBuilder
+                    .setDefaultSocketConfig(SocketConfig.custom()
+                            .setSoTimeout(Timeout.ofMinutes(1))
+                            .build())
+                    .setPoolConcurrencyPolicy(PoolConcurrencyPolicy.STRICT)
+                    .setConnPoolPolicy(PoolReusePolicy.LIFO)
+                    .setDefaultConnectionConfig(connectionConfig)
+                    .build();
         }
 
         private boolean hasSslConfiguration(SslConfiguration sslConfiguration) {

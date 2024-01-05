@@ -5,13 +5,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
@@ -21,7 +22,7 @@ import com.sequenceiq.periscope.domain.ScalingActivity;
 
 @EntityType(entityClass = ScalingActivity.class)
 @Transactional(Transactional.TxType.REQUIRED)
-public interface ScalingActivityRepository extends PagingAndSortingRepository<ScalingActivity, Long> {
+public interface ScalingActivityRepository extends PagingAndSortingRepository<ScalingActivity, Long>, CrudRepository<ScalingActivity, Long> {
 
     @Query("SELECT st FROM ScalingActivity st WHERE st.operationId = :operationId AND st.cluster.stackCrn = :clusterCrn")
     Optional<ScalingActivity> findByOperationIdAndClusterCrn(@Param("operationId") String operationId, @Param("clusterCrn") String clusterCrn);

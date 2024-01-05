@@ -62,6 +62,6 @@ dependencies {
     implementation group: 'net.bytebuddy',          name: 'byte-buddy',                   version: byteBuddyVersion
 
     //to be able to mock final class(es)
-    testImplementation group: 'org.mockito',        name: 'mockito-inline',               version: mockitoVersion
+    testImplementation group: 'org.mockito',        name: 'mockito-inline',               version: mockitoInlineVersion
 
 }

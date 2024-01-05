@@ -1,7 +1,7 @@
 package com.sequenceiq.datalake.flow.refresh.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.refEq;
@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.TimeUnit;
 
 import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguration;
@@ -77,7 +78,7 @@ class DatahubRefreshHandlerTest {
     }
 
     @Test
-    void acceptSuccess() throws Exception {
+    void acceptSuccess() {
         DatahubRefreshWaitEvent request = new DatahubRefreshWaitEvent(SDX_ID, "user");
         PollingConfig expectedPollingConfig = new PollingConfig(1, TimeUnit.SECONDS, 2, TimeUnit.MINUTES);
         Event.Headers headers = new Event.Headers();
@@ -91,7 +92,8 @@ class DatahubRefreshHandlerTest {
 
     @ParameterizedTest
     @ValueSource(classes = {UserBreakException.class, PollerStoppedException.class, PollerException.class})
-    void acceptWithExceptions(Class<? extends Throwable> errorClass) throws Exception {
+    void acceptWithExceptions(Class<? extends Exception> errorClass)
+            throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         DatahubRefreshWaitEvent request = new DatahubRefreshWaitEvent(SDX_ID, "user");
         Event.Headers headers = new Event.Headers();
         Event<DatahubRefreshWaitEvent> event = new Event<>(headers, request);
@@ -99,7 +101,8 @@ class DatahubRefreshHandlerTest {
         doThrow(errorClass).when(sdxRefreshService).waitCloudbreakCluster(eq(SDX_ID), any(PollingConfig.class));
         Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
 
-        DatahubRefreshFailedEvent failedEvent = new DatahubRefreshFailedEvent(SDX_ID, "user", new Exception("error"));
+        Exception error = errorClass.getDeclaredConstructor(String.class).newInstance("error");
+        DatahubRefreshFailedEvent failedEvent = new DatahubRefreshFailedEvent(SDX_ID, "user", error);
 
         assertThat(selectable)
                 .usingRecursiveComparison(RecursiveComparisonConfiguration.builder().withIgnoredFields("accepted").build())

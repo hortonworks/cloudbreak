@@ -26,10 +26,10 @@ import com.sequenceiq.flow.core.helloworld.config.HelloWorldEvent;
 import com.sequenceiq.flow.core.helloworld.config.HelloWorldFlowConfig;
 
 @ExtendWith(MockitoExtension.class)
-public class Flow2InitializerTest {
+class Flow2InitializerTest {
 
     @Spy
-    private List<FlowConfiguration<?>> flowConfigs = new ArrayList<>();
+    private List<AbstractFlowConfiguration<?, ?>> flowConfigs = new ArrayList<>();
 
     @Mock
     private EventBus reactor;
@@ -47,7 +47,7 @@ public class Flow2InitializerTest {
     private Flow2Initializer underTest;
 
     @Test
-    public void testInitialize() {
+    void testInitialize() {
         flowConfigs.add(new HelloWorldFlowConfig());
         given(flowEventChainFactory.initEvent()).willReturn("OTHER_SELECTOR");
         flowChainFactories.add(flowEventChainFactory);
@@ -68,7 +68,7 @@ public class Flow2InitializerTest {
     }
 
     @Test
-    public void testInitializeFailsWithFlowSelectorIsFlowChainSelector() {
+    void testInitializeFailsWithFlowSelectorIsFlowChainSelector() {
         flowConfigs.add(new HelloWorldFlowConfig());
         given(flowEventChainFactory.initEvent()).willReturn(HelloWorldEvent.HELLOWORLD_TRIGGER_EVENT.name());
         flowChainFactories.add(flowEventChainFactory);

@@ -10,7 +10,7 @@ buildscript {
 }
 
 plugins {
-    id "java-library"
+  id "java-library"
 }
 
 apply plugin: 'java'
@@ -53,8 +53,9 @@ dependencies {
 
 }
 
-task testJar(type: Jar, dependsOn: testClasses) {
-  archiveBaseName = "test-${project.archivesBaseName}"
+tasks.register('testJar', Jar) {
+  dependsOn testClasses
+  archiveBaseName = "test-${project.name}"
   archiveClassifier = 'test'
   from sourceSets.test.output
   from sourceSets.main.output

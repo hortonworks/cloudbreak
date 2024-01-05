@@ -12,9 +12,9 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response.Status;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
 class ErrorResponseHandlerTest {
 
     @Spy
-    private List<BaseExceptionMapper> exceptionMappers = new ArrayList<>();
+    private List<BaseExceptionMapper<?>> exceptionMappers = new ArrayList<>();
 
     @Mock
     private BaseExceptionMapper exceptionMapper;

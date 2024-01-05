@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
+import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -39,7 +39,7 @@ public interface LegacyStructuredEventRepository extends WorkspaceResourceReposi
 
     List<StructuredEventEntity> findByEventTypeAndResourceTypeAndResourceId(StructuredEventType eventType, String resourceType, Long resourceId);
 
-    @Query("SELECT se from StructuredEventEntity se WHERE se.workspace = null OR se.user = null")
+    @Query("SELECT se from StructuredEventEntity se WHERE se.workspace IS null OR se.user IS null")
     List<StructuredEventEntity> findAllWithoutWorkspaceOrUser();
 
     @Override

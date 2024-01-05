@@ -14,4 +14,6 @@ dependencies {
   implementation project(':structuredevent-model')
 
   testImplementation project(path: ':common', configuration: 'tests')
+
+  implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                   version: javaxXmlBindJaxbApiVersion
 }

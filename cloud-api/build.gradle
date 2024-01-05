@@ -17,7 +17,7 @@ dependencies {
   implementation project(':common-model')
   implementation project(':usage-collection')
 
-  implementation     group: 'io.swagger.core.v3',         name: 'swagger-jaxrs2',        version: swaggerCoreVersion
+  implementation     group: 'io.swagger.core.v3',         name: 'swagger-jaxrs2-jakarta', version: swaggerCoreVersion
 
   testImplementation(group: 'org.mockito',                name: 'mockito-core',          version: mockitoVersion) {
     exclude          group: 'org.hamcrest'

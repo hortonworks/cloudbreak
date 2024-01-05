@@ -127,8 +127,8 @@
             <property name="path" value="cloud-aws-cloudformation/src/main/java.*$"/>
         </module>
         <module name="ImportOrder">
-            <property name="staticGroups" value="com,io,java,javax,org"/>
-            <property name="groups" value="java,javax,org,com"/>
+            <property name="staticGroups" value="com,io,java,javax,jakarta,org"/>
+            <property name="groups" value="java,javax,jakarta,org,com"/>
             <property name="ordered" value="true"/>
             <property name="separated" value="true"/>
             <property name="option" value="top"/>

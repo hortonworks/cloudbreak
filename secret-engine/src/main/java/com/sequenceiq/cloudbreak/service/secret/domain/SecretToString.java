@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.secret.domain;
 
-import javax.persistence.AttributeConverter;
+import jakarta.persistence.AttributeConverter;
 
 public class SecretToString implements AttributeConverter<Secret, String> {
 

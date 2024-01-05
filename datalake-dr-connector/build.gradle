@@ -14,6 +14,7 @@ dependencies {
     implementation project(':common')
     implementation project(':grpc-common')
 
+    implementation     group: 'javax.annotation',                    name: 'javax.annotation-api',           version: javaxAnnotationApiVersion
     implementation     group: 'com.google.protobuf',                 name: 'protobuf-java',                  version: protobufVersion
 
     implementation ("io.grpc:grpc-all:$grpcVersion") {

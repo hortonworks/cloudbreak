@@ -43,9 +43,10 @@ sonarqube {
 
 dependencies {
   implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                     version: okhttpVersion
-  implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2',             version: swaggerCoreVersion
+  implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2-jakarta',     version: swaggerCoreVersion
+  implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                   version: javaxXmlBindJaxbApiVersion
 
-  implementation     group: 'org.yaml',                  name: 'snakeyaml'
+  implementation     group: 'org.yaml',                  name: 'snakeyaml', version: snakeYamlVersion
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
   implementation            group: 'net.bytebuddy',             name: 'byte-buddy', version: byteBuddyVersion
 
@@ -61,6 +62,7 @@ dependencies {
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',           version: springBootVersion
+  implementation     group: 'org.springframework.security', name: 'spring-security-web',               version: springSecurityVersion
 
   implementation(group: 'net.minidev', name: 'json-smart') {
     version {

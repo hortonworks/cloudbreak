@@ -5,13 +5,12 @@ import static com.sequenceiq.periscope.common.AlertConstants.PARAMETERS;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
 
 import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.converter.db.LoadAlertConfigAttributeConverter;
@@ -24,21 +23,9 @@ import com.sequenceiq.periscope.converter.db.LoadAlertConfigAttributeConverter;
 })
 public class LoadAlert extends BaseAlert {
 
-    @ManyToOne
-    private Cluster cluster;
-
     @Convert(converter = LoadAlertConfigAttributeConverter.class)
     @Column(name = "load_alert_config")
     private LoadAlertConfiguration loadAlertConfiguration;
-
-    @Override
-    public Cluster getCluster() {
-        return cluster;
-    }
-
-    public void setCluster(Cluster cluster) {
-        this.cluster = cluster;
-    }
 
     public LoadAlertConfiguration getLoadAlertConfiguration() {
         return loadAlertConfiguration;

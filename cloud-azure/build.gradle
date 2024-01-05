@@ -42,6 +42,8 @@ dependencies {
 
   implementation group: 'io.micrometer',                name: 'micrometer-core',                            version: micrometerVersion
 
+  implementation group: 'javax.xml.bind',               name: 'jaxb-api',                                   version: javaxXmlBindJaxbApiVersion
+
   implementation group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',                           version: { strictly jacksonDatabindVersion }
   constraints {
     implementation 'com.nimbusds:nimbus-jose-jwt:9.31'

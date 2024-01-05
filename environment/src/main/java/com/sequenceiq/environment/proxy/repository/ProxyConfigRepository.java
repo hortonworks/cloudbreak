@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
+import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -23,25 +23,25 @@ public interface ProxyConfigRepository extends JpaRepository<ProxyConfig, Long> 
     Set<ProxyConfig> findAllInAccount(@Param("accountId") String accountId);
 
     @Query("SELECT p FROM ProxyConfig p WHERE p.accountId= :accountId AND p.name= :name "
-            + "AND p.archived IS FALSE")
+            + "AND p.archived = FALSE")
     Optional<ProxyConfig> findByNameInAccount(@Param("name") String name, @Param("accountId") String accountId);
 
     @Query("SELECT p FROM ProxyConfig p WHERE p.accountId= :accountId AND p.resourceCrn= :crn "
-            + "AND p.archived IS FALSE")
+            + "AND p.archived = FALSE")
     Optional<ProxyConfig> findByResourceCrnInAccount(@Param("crn") String crn, @Param("accountId") String accountId);
 
     @Query("SELECT p FROM ProxyConfig p WHERE p.accountId= :accountId AND (p.name IN :nameList OR p.resourceCrn IN :nameList) "
-            + "AND p.archived IS FALSE")
+            + "AND p.archived = FALSE")
     Set<ProxyConfig> findByNameOrResourceCrnInAccount(@Param("nameList") Set<String> names, @Param("accountId") String accountId);
 
     @Query("SELECT p FROM ProxyConfig p JOIN Environment e ON e.proxyConfig.id = p.id WHERE e.resourceCrn = :envCrn AND p.accountId = :accountId "
-            + "AND e.accountId = :accountId AND p.archived IS FALSE")
+            + "AND e.accountId = :accountId AND p.archived = FALSE")
     Optional<ProxyConfig> findByEnvironmentCrnAndAccountId(
             @Param("envCrn") String envCrn,
             @Param("accountId") String accountId);
 
     @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(p.id, p.resourceCrn) FROM ProxyConfig p " +
-            "WHERE p.accountId = :accountId AND p.archived IS FALSE")
+            "WHERE p.accountId = :accountId AND p.archived = FALSE")
     List<ResourceWithId> findAuthorizationResourcesByAccountId(@Param("accountId") String accountId);
 
     @Query("SELECT p.resourceCrn FROM ProxyConfig p WHERE p.accountId = :accountId AND p.name IN (:names)")

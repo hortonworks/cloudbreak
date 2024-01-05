@@ -43,7 +43,8 @@ sonarqube {
 }
 
 dependencies {
-  implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2',                       version: swaggerCoreVersion
+  implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2-jakarta',               version: swaggerCoreVersion
+  implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                             version: javaxXmlBindJaxbApiVersion
   implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                               version: okhttpVersion
 
   implementation     group: 'com.google.code.gson',      name: 'gson'
@@ -61,19 +62,20 @@ dependencies {
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',           version: springBootVersion
   implementation     group: 'org.springframework',       name: 'spring-context-support',               version: springFrameworkVersion
-  implementation     group: 'org.hibernate',             name: 'hibernate-envers'
+  implementation     group: 'org.springframework.security', name: 'spring-security-web',               version: springSecurityVersion
+  implementation     group: 'org.hibernate',             name: 'hibernate-envers',                     version: hibernateCoreVersion
   implementation    (group: 'org.springframework.data',  name: 'spring-data-envers',                   version: springDataJpaFrameworkVersion) {
     exclude group: 'org.hibernate', module: 'hibernate-envers'
   }
   implementation     group: 'com.google.guava',          name: 'guava',                                version: guavaVersion
-  implementation     (group: 'org.apache.directory.server', name: 'apacheds-kerberos-codec',            version: '2.0.0.AM26') {
+  implementation     (group: 'org.apache.directory.server', name: 'apacheds-kerberos-codec',           version: '2.0.0.AM26') {
     exclude group: 'org.apache.mina', module: 'mina-core'
   }
 
   implementation     group: 'com.github.briandilley.jsonrpc4j', name: 'jsonrpc4j',                     version: '1.6'
   implementation     group: 'com.dyngr',                        name: 'polling',                       version: dyngrPollingVersion
   implementation     group: 'org.freemarker',                   name: 'freemarker',                    version: freemarkerVersion
-  testImplementation group: 'org.mockito',                      name: 'mockito-inline',                   version: mockitoVersion
+  testImplementation group: 'org.mockito',                      name: 'mockito-inline',                version: mockitoInlineVersion
   testImplementation ('org.springframework.boot:spring-boot-starter-test') {
     exclude group: 'junit'
   }
@@ -107,7 +109,7 @@ dependencies {
     implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',   version: springBootVersion
     implementation     group: 'org.hibernate',             name: 'hibernate-envers',               version: hibernateCoreVersion
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
-    testImplementation group: 'org.mockito',               name: 'mockito-inline',                 version: mockitoVersion
+    testImplementation group: 'org.mockito',               name: 'mockito-inline',                 version: mockitoInlineVersion
   }
 
   implementation project(':secret-rotation')

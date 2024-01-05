@@ -7,7 +7,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,10 +63,10 @@ public class PersistRejectedThreadExecutionHandler extends AbortPolicy {
     @Override
     public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
         Object realTask = findRealTask(r);
-        if (realTask instanceof EvaluatorExecutor) {
+        if (realTask instanceof EvaluatorExecutor evex) {
             LOGGER.debug("Total count of rejected tasks: {}", rejectedThreadService.getAllRejectedCluster().size());
             LOGGER.debug("Thread is rejected: {} from {}", realTask, executor);
-            rejectedThreadService.create((EvaluatorExecutor) realTask);
+            rejectedThreadService.create(evex);
             super.rejectedExecution(r, executor);
         }
     }

@@ -1,0 +1,39 @@
+{
+  "deny": [
+    {
+      "module": "org.powermock:powermock-core",
+      "reason": "Forbidden usage of PowerMock",
+      "author": "Denes Berger",
+      "date": "2023-09-25T12:00:00.000Z"
+    },
+    {
+      "module": "org.powermock:powermock-reflect",
+      "reason": "Forbidden usage of PowerMock",
+      "author": "Denes Berger",
+      "date": "2023-09-25T12:00:00.000Z"
+    },
+    {
+      "module": "org.powermock:powermock-module-junit4",
+      "reason": "Forbidden usage of PowerMock",
+      "author": "Denes Berger",
+      "date": "2023-09-25T12:00:00.000Z"
+    },
+    {
+      "module": "org.powermock:powermock-api-mockito2",
+      "reason": "Forbidden usage of PowerMock",
+      "author": "Denes Berger",
+      "date": "2023-09-25T12:00:00.000Z"
+    },
+    {
+      "module": "com.cedarsoftware:json-io",
+      "reason": "Forbidden usage of Cedarsoft's json-io",
+      "author": "Denes Berger",
+      "date": "2023-09-25T12:00:00.000Z"
+    }
+  ],
+  "align": [],
+  "replace": [],
+  "reject": [],
+  "exclude": [],
+  "substitute": []
+}

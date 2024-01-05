@@ -1,10 +1,10 @@
 package com.sequenceiq.freeipa.controller.mapper;
 
-import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 
 @Component

@@ -75,7 +75,11 @@ spring:
     prefer-file-system-access: false
   datasource:
     maxActive: 30
-  profiles: test
+  config:
+    activate:
+      on-profile: test
+
+
 
 secret:
   application: as/shared

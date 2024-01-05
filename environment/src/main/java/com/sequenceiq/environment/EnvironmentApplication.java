@@ -1,7 +1,6 @@
 package com.sequenceiq.environment;
 
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.actuate.autoconfigure.metrics.web.servlet.WebMvcMetricsAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -12,7 +11,7 @@ import com.sequenceiq.cloudbreak.util.OpenSSLLoaderUtil;
 
 @EnableScheduling
 @EnableJpaRepositories(basePackages = "com.sequenceiq")
-@SpringBootApplication(scanBasePackages = "com.sequenceiq", exclude = { WebMvcMetricsAutoConfiguration.class, ErrorMvcAutoConfiguration.class })
+@SpringBootApplication(scanBasePackages = "com.sequenceiq", exclude = ErrorMvcAutoConfiguration.class)
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class EnvironmentApplication {
 

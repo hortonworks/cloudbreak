@@ -4,8 +4,6 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.concurrent.Immutable;
-
 import com.github.rholder.retry.Attempt;
 import com.github.rholder.retry.StopStrategies;
 import com.github.rholder.retry.StopStrategy;
@@ -37,7 +35,6 @@ public final class StopStrategyFactory {
         return StopStrategies.stopAfterDelay(millisecondsUntilStop, TimeUnit.MILLISECONDS);
     }
 
-    @Immutable
     private static final class StopImmediately implements StopStrategy {
 
         StopImmediately() {

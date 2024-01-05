@@ -60,6 +60,7 @@ publishing {
 }
 
 dependencies {
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-properties-migrator',      version: springBootVersion
   implementation project(':cloud-common')
   implementation project(':core-api')
   implementation (project(':orchestrator-api')) {
@@ -153,7 +154,8 @@ dependencies {
 
   implementation group:  'org.apache.velocity',          name: 'velocity',                       version: '1.7'
   implementation group:  'org.testng',                   name: 'testng',                         version: testNgVersion
-  implementation group:  'javax.el',                     name: 'javax.el-api',                   version: '3.0.0'
+  implementation group:  'jakarta.el',                   name: 'jakarta.el-api',                 version: '5.0.1'
+  implementation group: 'javax.xml.bind',                name: 'jaxb-api',                       version: javaxXmlBindJaxbApiVersion
   implementation group:  'org.apache.commons',           name: 'commons-lang3',                  version: '3.12.0'
   implementation group:  'org.opentest4j',               name: 'opentest4j',                     version: '1.2.0'
 
@@ -185,7 +187,7 @@ dependencies {
     because 'because there is no jar for 2.4.3 in maven central repo...'
   }
   implementation group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonDatabindVersion
-
+  implementation group: 'com.google.inject',             name: 'guice',                          version: '7.0.0'
 }
 
 test {

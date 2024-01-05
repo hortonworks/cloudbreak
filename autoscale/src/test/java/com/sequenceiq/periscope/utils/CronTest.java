@@ -12,21 +12,21 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.scheduling.support.CronSequenceGenerator;
+import org.springframework.scheduling.support.CronExpression;
 
 import com.sequenceiq.periscope.service.DateService;
 import com.sequenceiq.periscope.service.DateTimeService;
 
 @ExtendWith(MockitoExtension.class)
-public class CronTest {
+class CronTest {
 
     @Mock
     private DateTimeService dateTimeService;
 
     @InjectMocks
-    private final DateService underTest = new DateService();
+    private DateService underTest;
 
-    public static Iterable<Object[]> data() {
+    static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {"* * * * * ?", "* * * * * ?", null},
                 {"00 59 23 31 DEC Fri", "00 59 23 31 DEC Fri", null},
@@ -64,15 +64,15 @@ public class CronTest {
 
     @ParameterizedTest(name = "state = {0} internalTenant = {1} expectedShouldPopulate = {2}")
     @MethodSource("data")
-    public void test(String input, String expected, Class<? extends Exception> exception) throws ParseException {
+    void test(String input, String expected, Class<? extends Exception> exception) throws ParseException {
 
         if (expected != null) {
-            CronSequenceGenerator cronExpression = underTest.getCronExpression(input, "UTC");
-            assertEquals(String.format("CronSequenceGenerator: %s", expected), cronExpression.toString());
+            CronExpression cronExpression = underTest.getCronExpression(input);
+            assertEquals(expected, cronExpression.toString());
         }
 
         if (exception != null) {
-            assertThrows(exception, () -> underTest.getCronExpression(input, "UTC"));
+            assertThrows(exception, () -> underTest.getCronExpression(input));
         }
     }
 }

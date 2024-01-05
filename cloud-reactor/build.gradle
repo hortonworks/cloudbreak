@@ -23,7 +23,6 @@ dependencies {
     implementation group: 'org.springframework',           name: 'spring-tx',                      version: springFrameworkVersion
     implementation group: 'org.springframework',           name: 'spring-aspects',                 version: springFrameworkVersion
     implementation group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
-    implementation group: 'com.google.code.findbugs',      name: 'jsr305',                         version: '3.0.2'
     implementation group: 'com.dyngr',                     name: 'polling',                        version: dyngrPollingVersion
     implementation group: 'com.microsoft.azure',           name: 'msal4j',                         version: '1.13.8'
 
@@ -32,11 +31,12 @@ dependencies {
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
 }
 
-task testJar(type: Jar, dependsOn: testClasses) {
-    archiveBaseName = "test-${project.archivesBaseName}"
-    archiveClassifier = 'test'
-    from sourceSets.test.output
-    from sourceSets.main.output
+tasks.register('testJar', Jar) {
+  dependsOn testClasses
+  archiveBaseName = "test-${project.name}"
+  archiveClassifier = 'test'
+  from sourceSets.test.output
+  from sourceSets.main.output
 }
 
 configurations {

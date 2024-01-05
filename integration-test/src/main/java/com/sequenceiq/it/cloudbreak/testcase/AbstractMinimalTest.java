@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.ITestContext;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -87,7 +86,7 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
     private boolean purge;
 
     @BeforeSuite
-    public void beforeSuite(ITestContext testngContext) {
+    public void beforeSuite() {
         MDC.put("testlabel", "init of " + getClass().getSimpleName());
     }
 

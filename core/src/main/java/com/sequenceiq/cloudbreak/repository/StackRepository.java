@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
+import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -49,24 +49,24 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     Set<Stack> findAllByWorkspaceId(@Param("workspaceId") Long workspaceId);
 
     @Query("SELECT s.id as id, s.name as name, s.resourceCrn as crn from Stack s "
-            + "WHERE s.cluster.clusterManagerIp= :clusterManagerIp AND s.terminated = null "
-            + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
+            + "WHERE s.cluster.clusterManagerIp= :clusterManagerIp AND s.terminated IS null "
+            + "AND (s.type <> 'TEMPLATE' OR s.type is null)")
     Optional<StackIdView> findByAmbari(@Param("clusterManagerIp") String clusterManagerIp);
 
-    @Query("SELECT s FROM Stack s WHERE s.name= :name AND s.workspace.id= :workspaceId AND s.terminated = null "
-            + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
+    @Query("SELECT s FROM Stack s WHERE s.name= :name AND s.workspace.id= :workspaceId AND s.terminated IS null "
+            + "AND (s.type <> 'TEMPLATE' OR s.type is null)")
     Optional<Stack> findByNameAndWorkspaceId(@Param("name") String name, @Param("workspaceId") Long workspaceId);
 
-    @Query("SELECT s FROM Stack s WHERE s.resourceCrn= :crn AND s.workspace.id= :workspaceId AND s.terminated = null "
-            + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
+    @Query("SELECT s FROM Stack s WHERE s.resourceCrn= :crn AND s.workspace.id= :workspaceId AND s.terminated IS null "
+            + "AND (s.type <> 'TEMPLATE' OR s.type is null)")
     Optional<Stack> findNotTerminatedByCrnAndWorkspaceId(@Param("crn") String crn, @Param("workspaceId") Long workspaceId);
 
     @Query("SELECT s FROM Stack s WHERE s.resourceCrn= :crn AND s.workspace.id= :workspaceId "
-            + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
+            + "AND (s.type <> 'TEMPLATE' OR s.type is null)")
     Optional<Stack> findByCrnAndWorkspaceId(@Param("crn") String crn, @Param("workspaceId") Long workspaceId);
 
-    @Query("SELECT s FROM Stack s WHERE s.name in :names AND s.workspace.id= :workspaceId AND s.terminated = null "
-            + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
+    @Query("SELECT s FROM Stack s WHERE s.name in :names AND s.workspace.id= :workspaceId AND s.terminated IS null "
+            + "AND (s.type <> 'TEMPLATE' OR s.type is null)")
     Set<Stack> findByNameInAndWorkspaceId(@Param("names") Set<String> name, @Param("workspaceId") Long workspaceId);
 
     @Query("SELECT s FROM Stack s WHERE s.name= :name AND s.workspace.id= :workspaceId AND s.type = :type AND " + SHOW_TERMINATED_CLUSTERS_IF_REQUESTED)
@@ -74,11 +74,11 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             @Param("showTerminated") Boolean showTerminated, @Param("terminatedAfter") Long terminatedAfter);
 
     @Query("SELECT s.id as id, s.name as name, s.resourceCrn as crn FROM Stack s "
-            + "WHERE s.environmentCrn= :environmentCrn AND s.type = :type AND s.terminated=null")
+            + "WHERE s.environmentCrn = :environmentCrn AND s.type = :type AND s.terminated IS null")
     List<StackIdView> findByEnvironmentCrnAndStackType(@Param("environmentCrn") String environmentCrn, @Param("type") StackType type);
 
     @Query("SELECT COUNT(s.id) FROM Stack s "
-            + "WHERE s.environmentCrn= :environmentCrn AND s.type = :type AND s.terminated=null")
+            + "WHERE s.environmentCrn= :environmentCrn AND s.type = :type AND s.terminated IS null")
     Long countByEnvironmentCrnAndStackType(@Param("environmentCrn") String environmentCrn, @Param("type") StackType type);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData LEFT JOIN FETCH ig.template "
@@ -103,45 +103,45 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData LEFT JOIN FETCH ig.template " +
             "LEFT JOIN FETCH ig.securityGroup LEFT JOIN FETCH ig.instanceGroupNetwork LEFT JOIN FETCH ig.availabilityZones " +
-            "WHERE s.id= :id AND (s.type is not 'TEMPLATE' OR s.type is null)")
+            "WHERE s.id= :id AND (s.type <> 'TEMPLATE' OR s.type is null)")
     Optional<Stack> findOneWithLists(@Param("id") Long id);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData im LEFT JOIN FETCH ig.template " +
             "WHERE s.id= :id AND ig.instanceGroupType = 'GATEWAY' AND im.instanceMetadataType = 'GATEWAY_PRIMARY' " +
-            "AND (s.type is not 'TEMPLATE' OR s.type is null)")
+            "AND (s.type <> 'TEMPLATE' OR s.type is null)")
     Optional<Stack> findOneWithGateway(@Param("id") Long id);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData LEFT JOIN FETCH ig.template " +
             "LEFT JOIN FETCH ig.securityGroup LEFT JOIN FETCH ig.instanceGroupNetwork WHERE s.resourceCrn= :crn " +
-            "AND (s.type is not 'TEMPLATE' OR s.type is null)")
+            "AND (s.type <> 'TEMPLATE' OR s.type is null)")
     Optional<Stack> findOneByCrnWithLists(@Param("crn") String crn);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData LEFT JOIN FETCH ig.template " +
             "LEFT JOIN FETCH ig.securityGroup LEFT JOIN FETCH ig.instanceGroupNetwork LEFT JOIN FETCH s.cluster c " +
             "LEFT JOIN FETCH c.components WHERE s.id= :id " +
-            "AND (s.type is not 'TEMPLATE' OR s.type is null)")
+            "AND (s.type <> 'TEMPLATE' OR s.type is null)")
     Optional<Stack> findOneWithCluster(@Param("id") Long id);
 
-    @Query("SELECT s.id as id, s.name as name, s.stackStatus as status FROM Stack s WHERE s.id IN (:ids) AND (s.type is not 'TEMPLATE' OR s.type is null)")
+    @Query("SELECT s.id as id, s.name as name, s.stackStatus as status FROM Stack s WHERE s.id IN (:ids) AND (s.type <> 'TEMPLATE' OR s.type is null)")
     List<StackStatusView> findStackStatusesWithoutAuth(@Param("ids") Set<Long> ids);
 
     @Query("SELECT s.id as id, s.name as name, s.resourceCrn as crn, s.workspace as workspace, "
             + "s.stackStatus as status, c.creationFinished as creationFinished "
-            + "FROM Stack s LEFT JOIN s.cluster c LEFT JOIN s.workspace WHERE s.terminated = null " +
-            "AND (s.type is not 'TEMPLATE' OR s.type is null)")
+            + "FROM Stack s LEFT JOIN s.cluster c LEFT JOIN s.workspace WHERE s.terminated IS null " +
+            "AND (s.type <> 'TEMPLATE' OR s.type is null)")
     List<StackTtlView> findAllAlive();
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig "
-            + "WHERE s.terminated = null AND (s.type is not 'TEMPLATE' OR s.type is null)")
+            + "WHERE s.terminated IS null AND (s.type <> 'TEMPLATE' OR s.type is null)")
     Set<Stack> findAllAliveWithInstanceGroups();
 
     @Query("SELECT DISTINCT s.id as id, im.image as image FROM Stack s JOIN s.instanceGroups ig JOIN ig.instanceMetaData im "
-            + "WHERE (s.terminated = null OR s.terminated >= :thresholdTimestamp) " +
-            "AND (s.type is not 'TEMPLATE' OR s.type is null) AND im.image is not null")
+            + "WHERE (s.terminated IS null OR s.terminated >= :thresholdTimestamp) " +
+            "AND (s.type <> 'TEMPLATE' OR s.type is null) AND im.image is not null")
     List<StackImageView> findImagesOfAliveStacks(@Param("thresholdTimestamp") long thresholdTimestamp);
 
     @Query("SELECT s.id as id, s.name as name, s.stackStatus as status FROM Stack s "
-            + "WHERE s.stackStatus.status IN :statuses AND (s.type is not 'TEMPLATE' OR s.type is null)")
+            + "WHERE s.stackStatus.status IN :statuses AND (s.type <> 'TEMPLATE' OR s.type is null)")
     List<StackStatusView> findByStatuses(@Param("statuses") List<Status> statuses);
 
     @Query("SELECT s.id as id, "
@@ -243,9 +243,9 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "LEFT JOIN s.creator u "
             + "WHERE ig.instanceGroupType = 'GATEWAY' "
             + "AND im.instanceMetadataType = 'GATEWAY_PRIMARY' "
-            + "AND s.terminated = null "
+            + "AND s.terminated IS null "
             + "AND c.status in ('AVAILABLE', 'REQUESTED', 'UPDATE_IN_PROGRESS') "
-            + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
+            + "AND (s.type <> 'TEMPLATE' OR s.type is null)")
     Set<AutoscaleStack> findAliveOnesWithClusterManager();
 
     @Query("SELECT s.id as id, s.name as name FROM Stack s WHERE s.network = :network")
@@ -257,8 +257,8 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Query("SELECT s.workspace FROM Stack s where s.resourceCrn = :crn")
     Optional<Workspace> findWorkspaceByCrn(@Param("crn") String crn);
 
-    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.id= :id "
-            + "AND s.type is 'TEMPLATE'")
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.id = :id "
+            + "AND s.type = 'TEMPLATE'")
     Optional<Stack> findTemplateWithLists(@Param("id") Long id);
 
     @Query("SELECT s FROM Stack s WHERE s.resourceCrn = :crn")
@@ -276,20 +276,20 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Query("SELECT VALUE(s.parameters) FROM Stack s WHERE s.id = :stackId AND KEY(s.parameters) = :ttlKey")
     String findTimeToLiveValueForSTack(@Param("stackId") Long stackId, @Param("ttlKey") String ttl);
 
-    @Query("SELECT new java.lang.Boolean(count(*) > 0) FROM Stack s WHERE s.terminated = null AND s.workspace.id= :workspaceId")
+    @Query("SELECT new java.lang.Boolean(count(*) > 0) FROM Stack s WHERE s.terminated IS null AND s.workspace.id= :workspaceId")
     Boolean anyStackInWorkspace(@Param("workspaceId") Long workspaceId);
 
     @Query("SELECT new java.lang.Boolean(count(*) > 0) "
-            + "FROM Stack c LEFT JOIN c.instanceGroups ig WHERE ig.template.id= :templateId AND c.stackStatus.status <> 'DELETE_COMPLETED'")
+            + "FROM Stack c LEFT JOIN c.instanceGroups ig WHERE ig.template.id = :templateId AND c.stackStatus.status <> 'DELETE_COMPLETED'")
     Boolean findTemplateInUse(@Param("templateId") Long templateId);
 
-    @Query("SELECT s.id FROM Stack s WHERE s.name= :name AND s.workspace.id= :workspaceId AND s.terminated = null")
+    @Query("SELECT s.id FROM Stack s WHERE s.name= :name AND s.workspace.id = :workspaceId AND s.terminated IS null")
     Optional<Long> findIdByNameAndWorkspaceId(@Param("name") String name, @Param("workspaceId") Long workspaceId);
 
-    @Query("SELECT s.id FROM Stack s WHERE s.resourceCrn= :crn AND s.workspace.id= :workspaceId AND s.terminated = null")
+    @Query("SELECT s.id FROM Stack s WHERE s.resourceCrn= :crn AND s.workspace.id = :workspaceId AND s.terminated IS null")
     Optional<Long> findIdByCrnAndWorkspaceId(@Param("crn") String crn, @Param("workspaceId") Long workspaceId);
 
-    @Query("SELECT s.resourceCrn FROM Stack s WHERE s.id= :id AND s.terminated = null")
+    @Query("SELECT s.resourceCrn FROM Stack s WHERE s.id = :id AND s.terminated IS null")
     Optional<String> findCrnById(@Param("id") Long id);
 
     @Query("SELECT s.name as name, s.resourceCrn as crn FROM Stack s WHERE s.workspace.id = :workspaceId AND s.resourceCrn IN (:resourceCrns)")
@@ -335,7 +335,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "LEFT JOIN s.stackStatus ss "
             + "LEFT JOIN s.creator u "
             + "LEFT JOIN s.database db "
-            + "WHERE s.workspace.id= :id AND s.terminated = null "
+            + "WHERE s.workspace.id = :id AND s.terminated IS null "
             + "AND (:environmentCrn IS null OR s.environmentCrn = :environmentCrn) "
             + "AND (s.type IS null OR s.type in :stackTypes)")
     Set<StackListItem> findByWorkspaceId(@Param("id") Long id, @Param("environmentCrn") String environmentCrn, @Param("stackTypes") List<StackType> stackTypes);
@@ -380,30 +380,30 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "LEFT JOIN s.creator u "
             + "LEFT JOIN s.database db "
             + "WHERE s.id in :stackIds "
-            + "AND s.workspace.id= :workspaceId AND s.terminated = null "
+            + "AND s.workspace.id = :workspaceId AND s.terminated IS null "
             + "AND (s.type IS null OR s.type in :stackTypes)")
     Set<StackListItem> findByWorkspaceIdAnStackIds(@Param("workspaceId") Long workspaceId, @Param("stackIds") List<Long> stackIds,
             @Param("stackTypes") List<StackType> stackTypes);
 
     @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(s.id, s.resourceCrn, s.environmentCrn) "
             + "FROM Stack s "
-            + "WHERE s.workspace.id = :id AND s.terminated = null "
+            + "WHERE s.workspace.id = :id AND s.terminated IS null "
             + "AND s.environmentCrn = :environmentCrn "
-            + "AND (s.type IS null OR s.type = :stackTypes)")
+            + "AND (s.type IS null OR s.type IN :stackTypes)")
     List<ResourceWithId> getAsAuthorizationResourcesByEnvCrn(@Param("id") Long id, @Param("environmentCrn") String environmentCrn,
             @Param("stackTypes") List<StackType> stackTypes);
 
     @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(s.id, s.resourceCrn, s.environmentCrn) "
             + "FROM Stack s "
-            + "WHERE s.workspace.id = :id AND s.terminated = null "
-            + "AND (s.type IS null OR s.type = :stackTypes)")
+            + "WHERE s.workspace.id = :id AND s.terminated IS null "
+            + "AND (s.type IS null OR s.type IN :stackTypes)")
     List<ResourceWithId> getAsAuthorizationResources(@Param("id") Long id, @Param("stackTypes") List<StackType> stackTypes);
 
     @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(s.id, s.resourceCrn, s.environmentCrn) "
             + "FROM Stack s "
             + "WHERE s.workspace.id = :id "
             + "AND s.resourceCrn IN :crns "
-            + "AND s.terminated = null "
+            + "AND s.terminated IS null "
             + "AND (s.type IS null OR s.type = :stackType)")
     List<ResourceWithId> getAsAuthorizationResourcesByCrns(@Param("id") Long id, @Param("stackType") StackType stackType,
             @Param("crns") List<String> crns);
@@ -435,38 +435,38 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name, s.cloudPlatform as provider " +
             "FROM Stack s " +
             "LEFT JOIN s.stackStatus ss " +
-            "WHERE s.terminated = null " +
-            "AND (s.type is not 'TEMPLATE' OR s.type is null) " +
+            "WHERE s.terminated IS null " +
+            "AND (s.type <> 'TEMPLATE' OR s.type is null) " +
             "AND ss.status not in (:notInStatuses)")
     List<JobResource> getJobResourcesNotIn(@Param("notInStatuses") Set<Status> notInStatuses);
 
     @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name, s.cloudPlatform as provider " +
             "FROM Stack s " +
             "LEFT JOIN s.stackStatus ss " +
-            "WHERE s.terminated = null " +
+            "WHERE s.terminated IS null " +
             "AND s.type = 'WORKLOAD' " +
             "AND ss.status not in (:notInStatuses)")
     List<JobResource> getDatahubJobResourcesNotIn(@Param("notInStatuses") Set<Status> notInStatuses);
 
     @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name " +
             "FROM Stack s " +
-            "WHERE s.terminated = null " +
-            "AND (s.type is not 'TEMPLATE' OR s.type is null) " +
+            "WHERE s.terminated IS null " +
+            "AND (s.type <> 'TEMPLATE' OR s.type is null) " +
             "AND s.resourceCrn = :resourceCrn")
     Optional<ResourceBasicView> findResourceBasicViewByResourceCrn(@Param("resourceCrn") String resourceCrn);
 
     @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name " +
             "FROM Stack s " +
-            "WHERE s.terminated = null " +
-            "AND (s.type is not 'TEMPLATE' OR s.type is null) " +
+            "WHERE s.terminated IS null " +
+            "AND (s.type <> 'TEMPLATE' OR s.type is null) " +
             "AND s.resourceCrn in (:resourceCrns)")
     List<ResourceBasicView> findAllResourceBasicViewByResourceCrns(@Param("resourceCrns") Collection<String> resourceCrns);
 
     @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name " +
             "FROM Stack s " +
             "LEFT JOIN s.workspace w " +
-            "WHERE s.terminated = null " +
-            "AND (s.type is not 'TEMPLATE' OR s.type is null) " +
+            "WHERE s.terminated IS null " +
+            "AND (s.type <> 'TEMPLATE' OR s.type is null) " +
             "AND s.name = :name " +
             "AND w.id = :workspaceId")
     Optional<ResourceBasicView> findResourceBasicViewByNameAndWorkspaceId(@Param("name") String name, @Param("workspaceId") Long workspaceId);
@@ -474,8 +474,8 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name " +
             "FROM Stack s " +
             "LEFT JOIN s.workspace w " +
-            "WHERE s.terminated = null " +
-            "AND (s.type is not 'TEMPLATE' OR s.type is null) " +
+            "WHERE s.terminated IS null " +
+            "AND (s.type <> 'TEMPLATE' OR s.type is null) " +
             "AND s.name in (:names) " +
             "AND w.id = :workspaceId")
     List<ResourceBasicView> findAllResourceBasicViewByNamesAndWorkspaceId(@Param("names") Collection<String> names, @Param("workspaceId") Long workspaceId);

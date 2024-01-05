@@ -18,6 +18,8 @@ apply plugin: 'com.google.protobuf'
 dependencies {
   api project(':grpc-common')
 
+  implementation group: 'javax.annotation',             name: 'javax.annotation-api',           version: javaxAnnotationApiVersion
+
   implementation group: 'org.springframework.boot',     name: 'spring-boot-starter-jersey',     version: springBootVersion
   implementation group: 'org.springframework.security', name: 'spring-security-jwt',            version: springSecurityJwtVersion
   implementation group: 'org.springframework.security', name: 'spring-security-core',           version: springSecurityVersion
@@ -28,7 +30,7 @@ dependencies {
 
   implementation group: 'org.glassfish.jersey.core',    name: 'jersey-client',                  version: jerseyCoreVersion
   implementation group: 'org.glassfish.jersey.media',   name: 'jersey-media-multipart',         version: jerseyCoreVersion
-  implementation group: 'org.apache.httpcomponents',    name: 'httpclient',                     version: httpClientVersion
+  implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5',               version: httpClientVersion
 
   implementation     group: 'com.google.protobuf',      name: 'protobuf-java',                  version: protobufVersion
 
@@ -36,7 +38,7 @@ dependencies {
     exclude group: 'org.mockito'
     exclude group: 'junit', module: 'junit'
   }
-  testImplementation group: 'org.mockito',              name: 'mockito-inline',                 version: mockitoVersion
+  testImplementation group: 'org.mockito',              name: 'mockito-inline',                 version: mockitoInlineVersion
   testImplementation group: 'org.assertj',              name: 'assertj-core',                   version: assertjVersion
   testImplementation group: 'org.hamcrest',             name: 'hamcrest',                       version: hamcrestVersion
   testImplementation project(path: ':common', configuration: 'tests')

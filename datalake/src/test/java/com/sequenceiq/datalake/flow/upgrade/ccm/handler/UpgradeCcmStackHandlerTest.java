@@ -9,8 +9,10 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.TimeUnit;
 
+import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -91,13 +93,17 @@ class UpgradeCcmStackHandlerTest {
 
         UpgradeCcmSuccessEvent successEvent = new UpgradeCcmSuccessEvent(1L, "user");
 
-        assertThat(selectable).usingRecursiveComparison().isEqualTo(successEvent);
+        RecursiveComparisonConfiguration config = RecursiveComparisonConfiguration.builder()
+                .withIgnoredFields("accepted")
+                .build();
+        assertThat(selectable).usingRecursiveComparison(config).isEqualTo(successEvent);
         verify(ccmUpgradeService).initAndWaitForStackUpgrade(eq(sdxCluster), refEq(expectedPollingConfig));
     }
 
     @ParameterizedTest
     @ValueSource(classes = { UserBreakException.class, PollerStoppedException.class, PollerException.class })
-    void acceptWithExceptions(Class<? extends Throwable> errorClass) {
+    void acceptWithExceptions(Class<? extends Exception> errorClass)
+            throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         UpgradeCcmStackRequest request = new UpgradeCcmStackRequest(1L, "user");
         Event.Headers headers = new Event.Headers();
         Event<UpgradeCcmStackRequest> event = new Event<>(headers, request);
@@ -106,9 +112,13 @@ class UpgradeCcmStackHandlerTest {
         doThrow(errorClass).when(ccmUpgradeService).initAndWaitForStackUpgrade(any(SdxCluster.class), any(PollingConfig.class));
         Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
 
-        UpgradeCcmFailedEvent failedEvent = new UpgradeCcmFailedEvent(1L, "user", new Exception("error"));
+        Exception error = errorClass.getDeclaredConstructor(String.class).newInstance("error");
+        UpgradeCcmFailedEvent failedEvent = new UpgradeCcmFailedEvent(1L, "user", error);
 
-        assertThat(selectable).usingRecursiveComparison().isEqualTo(failedEvent);
+        RecursiveComparisonConfiguration config = RecursiveComparisonConfiguration.builder()
+                .withIgnoredFields("accepted")
+                .build();
+        assertThat(selectable).usingRecursiveComparison(config).isEqualTo(failedEvent);
     }
 
     private SdxCluster getSdxCluster() {

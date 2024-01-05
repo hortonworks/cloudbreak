@@ -8,12 +8,11 @@ import static com.sequenceiq.periscope.common.AlertConstants.TIME_ZONE;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
 
 import com.sequenceiq.periscope.api.model.AlertType;
 
@@ -24,9 +23,6 @@ import com.sequenceiq.periscope.api.model.AlertType;
         @NamedQuery(name = "TimeAlert.findAllByCluster", query = "SELECT c FROM TimeAlert c WHERE c.cluster.id= :clusterId")
 })
 public class TimeAlert extends BaseAlert {
-
-    @ManyToOne
-    private Cluster cluster;
 
     @Column(name = "time_zone")
     private String timeZone;
@@ -47,15 +43,6 @@ public class TimeAlert extends BaseAlert {
 
     public void setCron(String cron) {
         this.cron = cron;
-    }
-
-    @Override
-    public Cluster getCluster() {
-        return cluster;
-    }
-
-    public void setCluster(Cluster cluster) {
-        this.cluster = cluster;
     }
 
     public AlertType getAlertType() {

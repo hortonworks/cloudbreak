@@ -32,7 +32,7 @@ public class TimeMonitor extends ClusterMonitor {
     @Override
     protected List<Cluster> getMonitored() {
         return getClusterService().findTimeAlertClusterIdsForPeriscopeNodeId(StackType.WORKLOAD, true, getPeriscopeNodeConfig().getId())
-                .stream().map(clusterId -> new Cluster(clusterId))
+                .stream().map(Cluster::new)
                 .collect(Collectors.toList());
     }
 }

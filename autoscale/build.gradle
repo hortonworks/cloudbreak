@@ -146,6 +146,9 @@ dependencyManagement {
 }
 
 dependencies {
+  implementation group: 'org.springframework.data',           name: 'spring-data-envers',         version: springDataJpaFrameworkVersion
+
+
     implementation group: 'com.squareup.okhttp3',               name: 'okhttp',                     version: okhttpVersion
     implementation group: 'com.fasterxml.jackson.core',         name: 'jackson-databind'
     implementation group: 'org.springframework.boot',           name: 'spring-boot-starter'
@@ -164,9 +167,9 @@ dependencies {
     implementation group: 'org.quartz-scheduler',          name: 'quartz'
     implementation group: 'com.zaxxer',                    name: 'HikariCP'
     implementation group: 'dnsjava',                       name: 'dnsjava'
-    implementation group: 'org.ehcache',                   name: 'ehcache',                              version: '3.10.8'
 
-    implementation group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2',                           version: swaggerCoreVersion
+    implementation group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2-jakarta',                   version: swaggerCoreVersion
+    implementation group: 'javax.xml.bind',            name: 'jaxb-api',                                 version: javaxXmlBindJaxbApiVersion
 
     implementation group: 'com.dyngr',                 name: 'polling',                                  version: dyngrPollingVersion
 

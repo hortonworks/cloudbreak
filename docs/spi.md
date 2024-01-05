@@ -28,7 +28,11 @@ If a provider has templating support, then the provider's [gradle](http://gradle
 ```
 apply plugin: 'java'
 
-sourceCompatibility = 1.7
+
+java {
+  sourceCompatibility = JavaVersion.VERSION_17
+  targetCompatibility = JavaVersion.VERSION_17
+}
 
 repositories {
     mavenCentral()
@@ -58,7 +62,10 @@ If the provider has no templating support, then the provider's [gradle](http://g
 ```
 apply plugin: 'java'
 
-sourceCompatibility = 1.7
+java {
+  sourceCompatibility = JavaVersion.VERSION_17
+  targetCompatibility = JavaVersion.VERSION_17
+}
 
 repositories {
     mavenCentral()

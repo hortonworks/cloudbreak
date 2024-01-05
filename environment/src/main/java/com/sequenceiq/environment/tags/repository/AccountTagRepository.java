@@ -2,8 +2,8 @@ package com.sequenceiq.environment.tags.repository;
 
 import java.util.Set;
 
-import javax.transaction.Transactional;
-import javax.transaction.Transactional.TxType;
+import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -17,7 +17,7 @@ import com.sequenceiq.environment.tags.domain.AccountTag;
 @Transactional(TxType.REQUIRED)
 public interface AccountTagRepository extends JpaRepository<AccountTag, Long> {
 
-    @Query("SELECT a FROM AccountTag a WHERE a.accountId = :accountId AND a.archived IS FALSE")
+    @Query("SELECT a FROM AccountTag a WHERE a.accountId = :accountId AND a.archived = FALSE")
     Set<AccountTag> findAllInAccount(@Param("accountId") String accountId);
 
     @Modifying

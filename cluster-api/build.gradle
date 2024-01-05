@@ -25,10 +25,10 @@ dependencies {
   implementation project(':template-manager-core')
   implementation project(':workspace')
 
-  implementation     group: 'org.hibernate',           name: 'hibernate-envers',      version: hibernateCoreVersion
+  implementation     group: 'org.hibernate',           name: 'hibernate-envers',         version: hibernateCoreVersion
 
-  testImplementation(group: 'org.mockito',             name: 'mockito-inline',          version: mockitoVersion) {
+  testImplementation(group: 'org.mockito',             name: 'mockito-inline',           version: mockitoInlineVersion) {
     exclude group: 'org.hamcrest'
   }
-  testImplementation group: 'org.hamcrest',            name: 'hamcrest',              version: hamcrestVersion
+  testImplementation group: 'org.hamcrest',            name: 'hamcrest',                 version: hamcrestVersion
 }

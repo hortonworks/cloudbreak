@@ -24,7 +24,7 @@ plugins {
   id "org.ajoberstar.grgit" version "5.2.0"
   id "com.github.spotbugs" version "5.0.14"
   id "com.adarshr.test-logger" version "3.2.0"
-  id "nebula.blacklist" version "3.1.0"
+  id "nebula.resolution-rules" version "9.0.0"
 //  id 'nebula.lint' version '17.2.3'
 }
 
@@ -56,7 +56,7 @@ allprojects {
 
   apply plugin: 'idea'
   apply plugin: 'eclipse'
-  apply plugin: 'nebula.blacklist'
+  apply plugin: 'nebula.resolution-rules'
 
   group = 'com.sequenceiq'
 
@@ -68,6 +68,7 @@ allprojects {
 
   // override Spring Depenendencies
   ext['commons-codec.version'] = commonsCodecVersion
+  ext['hibernate.version'] = hibernateCoreVersion
   ext['hibernate-validator.version'] = hibernateValidatorVersion
   ext['jackson.version'] = jacksonVersion
   ext['snakeyaml.version'] = snakeYamlVersion
@@ -75,16 +76,17 @@ allprojects {
   ext['spring-security.version'] = springSecurityVersion
   ext['jersey.version'] = jerseyCoreVersion
   ext['logback.version'] = logbackVersion
+  ext['mockito.version'] = mockitoVersion
 
   // override AWS SDK Depenendencies
   ext['netty.version'] = nettyVersion
 
-  // forbid depenedencies
-  blacklist {
-    flag {
-      block group: 'org.powermock'
-      block group: 'com.cedarsoftware', name: 'json-io'
-    }
+  nebulaResolutionRules {
+    include = ['forbidden-dependencies']
+  }
+
+  dependencies {
+    resolutionRules files('forbidden-dependencies.json')
   }
 
   configurations {
@@ -106,8 +108,6 @@ allprojects {
         force "org.testng:testng:$testNgVersion"
         force "org.springframework:spring-messaging:$springFrameworkVersion"
         force "org.springframework.security:spring-security-web:$springSecurityVersion"
-        force "io.swagger:swagger-jersey2-jaxrs:$swaggerVersion"
-        force "io.swagger:swagger-annotations:$swaggerVersion"
         force "org.ow2.asm:asm:9.2"
         force "com.google.protobuf:protobuf-java:$protobufVersion"
         force "com.google.guava:guava:$guavaVersion"
@@ -129,8 +129,10 @@ subprojects {
   apply plugin: 'com.adarshr.test-logger'
   //apply plugin: org.sonarqube.gradle.SonarQubePlugin
 
-  sourceCompatibility = 17
-  targetCompatibility = 17
+  java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+  }
 
   configurations {
     deployerJars
@@ -226,8 +228,8 @@ subprojects {
 
   tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
     reports {
-      xml.enabled false
-      html.enabled true
+      xml.enabled = false
+      html.enabled = true
     }
   }
 

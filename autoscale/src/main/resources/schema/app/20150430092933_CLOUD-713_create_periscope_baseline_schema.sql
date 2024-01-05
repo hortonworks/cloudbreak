@@ -58,8 +58,8 @@ CREATE TABLE history (
 
 CREATE TABLE history_properties (
     history_id bigint NOT NULL,
-    value text,
-    key character varying(255) NOT NULL
+    "value" text,
+    "key" character varying(255) NOT NULL
 );
 
 
@@ -171,7 +171,7 @@ ALTER TABLE ONLY history
 --
 
 ALTER TABLE ONLY history_properties
-    ADD CONSTRAINT history_properties_pkey PRIMARY KEY (history_id, key);
+    ADD CONSTRAINT history_properties_pkey PRIMARY KEY (history_id, "key");
 
 
 --

@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,16 +21,18 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationProvider;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
@@ -56,7 +58,7 @@ public class SecurityConfig {
     }
 
     @Configuration
-    protected static class ResourceServerConfiguration extends WebSecurityConfigurerAdapter {
+    protected static class ResourceServerConfiguration {
 
         private static final String V4_API = API_ROOT_CONTEXT + "/v4/**";
 
@@ -94,7 +96,6 @@ public class SecurityConfig {
         }
 
         @Bean
-        @Override
         protected AuthenticationManager authenticationManager() throws Exception {
             List<AuthenticationProvider> providers = new ArrayList<>(1);
             providers.add(preAuthAuthProvider());
@@ -109,37 +110,34 @@ public class SecurityConfig {
         }
 
         @Bean
-        public UserDetailsByNameServiceWrapper<PreAuthenticatedAuthenticationToken> userDetailsServiceWrapper() throws Exception {
+        public UserDetailsByNameServiceWrapper<PreAuthenticatedAuthenticationToken> userDetailsServiceWrapper() {
             UserDetailsByNameServiceWrapper<PreAuthenticatedAuthenticationToken> wrapper = new UserDetailsByNameServiceWrapper<>();
             wrapper.setUserDetailsService(userDetailsService());
             return wrapper;
         }
 
-        @Override
-        public void configure(HttpSecurity http) throws Exception {
-            http.addFilterAfter(headerAuthenticationFilter(), AbstractPreAuthenticatedProcessingFilter.class)
-                    .authorizeRequests()
-                    .antMatchers(V4_API)
-                    .authenticated()
-                    .antMatchers(DISTROX_API)
-                    .authenticated()
-                    .antMatchers(INTERNAL_DISTROX_API)
-                    .authenticated()
-                    .antMatchers(AUTOSCALE_API)
-                    .authenticated()
-                    .antMatchers(FLOW_API)
-                    .authenticated()
-                    .antMatchers(FLOW_PUBLIC_API)
-                    .authenticated()
-                    .antMatchers(AUTHORIZATION_API)
-                    .authenticated()
-                    .antMatchers(API_ROOT_CONTEXT + "/openapi.json").permitAll()
-                    .antMatchers(API_ROOT_CONTEXT + "/**").denyAll();
-
-            http.csrf().disable();
-            http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-            http.headers().contentTypeOptions();
-            http.exceptionHandling().authenticationEntryPoint(new CloudbreakAuthenticationEntryPoint(errorResponseHandler));
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+            http.addFilterAfter(headerAuthenticationFilter(), AbstractPreAuthenticatedProcessingFilter.class);
+            http.authorizeHttpRequests(req -> {
+                req.requestMatchers(AntPathRequestMatcher.antMatcher(V4_API)).authenticated();
+                req.requestMatchers(AntPathRequestMatcher.antMatcher(DISTROX_API)).authenticated();
+                req.requestMatchers(AntPathRequestMatcher.antMatcher(INTERNAL_DISTROX_API)).authenticated();
+                req.requestMatchers(AntPathRequestMatcher.antMatcher(AUTOSCALE_API)).authenticated();
+                req.requestMatchers(AntPathRequestMatcher.antMatcher(FLOW_API)).authenticated();
+                req.requestMatchers(AntPathRequestMatcher.antMatcher(FLOW_PUBLIC_API)).authenticated();
+                req.requestMatchers(AntPathRequestMatcher.antMatcher(AUTHORIZATION_API)).authenticated();
+                req.requestMatchers(AntPathRequestMatcher.antMatcher(API_ROOT_CONTEXT + "/openapi.json")).permitAll();
+                req.requestMatchers(AntPathRequestMatcher.antMatcher("/info")).permitAll();
+                req.requestMatchers(AntPathRequestMatcher.antMatcher("/health")).permitAll();
+                req.requestMatchers(AntPathRequestMatcher.antMatcher("/metrics")).permitAll();
+                req.requestMatchers(AntPathRequestMatcher.antMatcher(API_ROOT_CONTEXT + "/**")).denyAll();
+            });
+            http.csrf(AbstractHttpConfigurer::disable);
+            http.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+            http.headers(h -> h.contentTypeOptions(t -> { }));
+            http.exceptionHandling(c -> c.authenticationEntryPoint(new CloudbreakAuthenticationEntryPoint(errorResponseHandler)));
+            return http.build();
         }
     }
 

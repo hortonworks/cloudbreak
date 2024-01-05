@@ -1,34 +1,36 @@
+// Version definitions
 ext {
-  // Version definitions
   // Gradle Build tools
   sonarVersion = '4.2.1.3168'
   protobufPluginVersion = '0.9.3'
+  springDependencyManagementVersion = '1.1.3'
 
   // Spring
-  caffeineVersion = '2.8.1'
-  springBootVersion = '2.7.15'
-  springDataJpaFrameworkVersion = '2.7.12'
-  springFrameworkVersion = '5.3.28'
-  springKafkaVersion = '2.9.9'
-  springRetryVersion = '1.3.4'
+  caffeineVersion = '3.1.8'
+  springBootVersion = '3.1.4'
+  springDataJpaFrameworkVersion = '3.1.4'
+  springFrameworkVersion = '6.0.12'
+  springKafkaVersion = '3.0.11'
+  springRetryVersion = '2.0.3'
   springSecurityJwtVersion = '1.1.1.RELEASE'
-  springSecurityVersion = '5.8.6'
-  sprintStateMachineCoreVersion = '1.0.1.RELEASE'
-  sprintVaultCoreVersion = '2.3.3'
+  springSecurityVersion = '6.1.4'
+  springStateMachineCoreVersion = '1.0.1.RELEASE'
+  springVaultCoreVersion = '3.0.4'
 
   // Polling
   dyngrPollingVersion = '1.1.3'
 
   // Rest API
-  hibernateValidatorVersion = '6.2.5.Final'
-  javaxActivationVersion = '1.1.1'
-  javaxValidationVersion = '2.0.1.Final'
-  jerseyCoreVersion = '2.37'
-  swaggerCoreVersion = '2.2.18'
+  hibernateValidatorVersion = '8.0.1.Final'
+  jakartaActivationVersion = '2.1.2'
+  jakartaServletApiVersion = '6.0.0'
+  jakartaValidationVersion = '3.0.2'
+  jerseyCoreVersion = '3.1.3'
+  swaggerCoreVersion = '2.2.20'
 
   // Network
   dnsjavaVersion = '2.1.7'
-  httpClientVersion = '4.5.10'
+  httpClientVersion = '5.2.1'
   nettyVersion = '4.1.101.Final'
   okhttpVersion = '4.12.0'
 
@@ -59,9 +61,9 @@ ext {
   commonsBeanutilsVersion = '1.9.4'
 
   // Logging
-  logbackVersion = '1.2.13'
+  logbackVersion = '1.4.11'
   logbackJsonClassicVersion = '0.1.5'
-  slf4jApiVersion = '1.7.36'
+  slf4jApiVersion = '2.0.7'
 
   // Serialization
   accessorSmartVersion = '2.4.7'
@@ -69,7 +71,7 @@ ext {
   jacksonVersion = '2.16.1'
   jacksonDatabindVersion = '2.16.1'
   jsonSmartVersion = '2.4.9'
-  snakeYamlVersion = '1.33'
+  snakeYamlVersion = '2.2'
   xerces = '2.12.0'
 
   // Templating
@@ -82,11 +84,13 @@ ext {
   grpcVersion = '1.42.1'
 
   // Database
-  hibernateCoreVersion = '5.6.15.Final'
-  h2databaseVersion = '1.3.148'
+  hibernateCoreVersion = '6.2.9.Final'
+  h2databaseVersion = '2.2.224'
+  jakartaPersistenceApiVersion = '3.1.0'
+  jakartaTransactionApiVersion = '2.0.1'
   mybatisMigrationVersion = '3.3.9'
-  postgreSQLVersion = '42.3.7'
-  hikariCPVersion = '4.0.3'
+  postgreSQLVersion = '42.5.4'
+  hikariCPVersion = '5.0.1'
 
   // Crypto
   bouncycastleVersion = '1.76'
@@ -100,19 +104,22 @@ ext {
   awaitilityVersion = '3.1.6'
   hamcrestVersion = '2.2'
   junitVersion = '4.13.2'
-  junitJupiterVersion = '5.9.2'
+  junitJupiterVersion = '5.10.0'
   mockitoVersion = '5.1.1'
+  mockitoInlineVersion = '5.1.1'
   openPojoVersion = '0.9.1'
   testContainersVersion = '1.16.0'
-  testNgVersion = '7.3.0'
+  testNgVersion = '7.9.0'
   podamVersion = '7.2.11.RELEASE'
 
   // Tracing
   micrometerVersion = '1.10.4'
-  micrometerJersey2Version = '1.8.13'
   microMeterJvmExtrasVersion = '0.2.2'
 
+  // JavaX Legacy
+  javaxAnnotationApiVersion = '1.3.2' // because of protoc-gen
+  javaxXmlBindJaxbApiVersion = '2.3.1' // because of SpringFox Swagger
+
   // TO REMOVE
-  jasyptVersion = '1.9.2'
   hadoopVersion = '2.7.1'
 }

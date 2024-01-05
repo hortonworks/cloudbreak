@@ -1,23 +1,23 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.kafka;
 
 import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.REPLACEMENT;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.conf.StructuredEventSenderConfig;
@@ -28,8 +28,8 @@ import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
 
-@RunWith(MockitoJUnitRunner.class)
-public class KafkaStructuredEventHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class KafkaStructuredEventHandlerTest {
 
     @Mock
     private StructuredEventSenderConfig structuredEventSenderConfig;
@@ -41,10 +41,10 @@ public class KafkaStructuredEventHandlerTest {
     private LegacyKafkaStructuredEventHandler classIntest;
 
     @Test
-    public void checkEventTypeBasedTopicDistribution() throws ExecutionException, InterruptedException {
+    void checkEventTypeBasedTopicDistribution() throws ExecutionException, InterruptedException {
         StructuredRestCallEvent structuredEvent = createDummyStructuredRestEvent();
         Event<StructuredEvent> event = new Event<>(structuredEvent);
-        ListenableFuture<SendResult<String, String>> futures = generateMockFutureWrappers();
+        CompletableFuture<SendResult<String, String>> futures = generateMockFutureWrappers();
         when(kafkaTemplate.send(eq("cbStructuredRestCallEvent"), anyString())).thenReturn(futures);
 
         classIntest.accept(event);
@@ -53,15 +53,15 @@ public class KafkaStructuredEventHandlerTest {
     }
 
     @Test
-    public void checkIfPropertiesGetFilteredWithCustomMapper() {
+    void checkIfPropertiesGetFilteredWithCustomMapper() {
         StructuredRestCallEvent restEvent = createDummyStructuredRestEvent();
 
         classIntest.sanitizeSensitiveRestData(restEvent);
         RestRequestDetails requestDetails = restEvent.getRestCall().getRestRequest();
 
-        assertTrue("Should be sanitized from Kafka event", requestDetails.getBody().contains(REPLACEMENT));
-        assertTrue("Should be empty because of ", requestDetails.getHeaders().isEmpty());
-        assertTrue("Should be left intact", requestDetails.getRequestUri().equals("/v3/clusters"));
+        assertTrue(requestDetails.getBody().contains(REPLACEMENT), "Should be sanitized from Kafka event");
+        assertTrue(requestDetails.getHeaders().isEmpty(), "Should be empty because of ");
+        assertTrue(requestDetails.getRequestUri().equals("/v3/clusters"), "Should be left intact");
     }
 
     private StructuredRestCallEvent createDummyStructuredRestEvent() {
@@ -81,10 +81,10 @@ public class KafkaStructuredEventHandlerTest {
         return restEvent;
     }
 
-    private ListenableFuture<SendResult<String, String>> generateMockFutureWrappers() throws InterruptedException, ExecutionException {
-        ListenableFuture futureMock = mock(ListenableFuture.class);
+    private CompletableFuture<SendResult<String, String>> generateMockFutureWrappers() throws InterruptedException, ExecutionException {
+        CompletableFuture futureMock = mock(CompletableFuture.class);
         when(futureMock.get()).thenReturn((SendResult<String, String>) mock(SendResult.class));
-        return (ListenableFuture<SendResult<String, String>>) futureMock;
+        return (CompletableFuture<SendResult<String, String>>) futureMock;
     }
 
 }

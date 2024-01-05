@@ -2,7 +2,6 @@ apply plugin: 'java'
 
 repositories {
   mavenCentral()
-  mavenLocal()
 }
 
 dependencies {
@@ -22,7 +21,6 @@ dependencies {
   testImplementation group: 'org.junit.jupiter',        name: 'junit-jupiter-api',        version: junitJupiterVersion
   testImplementation group: 'org.mockito',              name: 'mockito-core',             version: mockitoVersion
   testImplementation group: 'org.apache.commons',       name: 'commons-collections4',     version: commonsCollections4Version
-  testRuntimeOnly    group: 'org.junit.jupiter',        name: 'junit-jupiter-engine'
 }
 
 test {

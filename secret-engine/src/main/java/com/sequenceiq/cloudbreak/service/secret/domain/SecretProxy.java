@@ -11,6 +11,7 @@ public class SecretProxy extends Secret {
         super(null, secret);
     }
 
+    @Override
     public String getRaw() {
         SecretService secretService = StaticApplicationContext.getApplicationContext().getBean(SecretService.class);
         return secretService.get(getSecret());

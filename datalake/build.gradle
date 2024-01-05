@@ -76,7 +76,8 @@ dependencies {
   implementation     group: 'com.google.code.gson',      name: 'gson',                            version: gsonVersion
   implementation     group: 'dnsjava',                   name: 'dnsjava',                         version: '3.5.2'
   implementation     group: 'com.dyngr',                 name: 'polling',                         version: dyngrPollingVersion
-  implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2',                  version: swaggerCoreVersion
+  implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2-jakarta',          version: swaggerCoreVersion
+  implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                        version: javaxXmlBindJaxbApiVersion
   implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                   version: jerseyCoreVersion
   implementation     group: 'org.glassfish.jersey.media',name: 'jersey-media-json-jackson',       version: jerseyCoreVersion
   implementation     group: 'org.mybatis',               name: 'mybatis-migrations',              version: mybatisMigrationVersion
@@ -88,6 +89,7 @@ dependencies {
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',    version: springBootVersion
 
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',      version: springBootVersion
+  implementation     group: 'org.springframework.security', name: 'spring-security-web',          version: springSecurityVersion
 
   implementation     group: 'com.cloudera.api.swagger',    name: 'cloudera-manager-api-swagger',  version: cmClientVersion
 
@@ -100,7 +102,7 @@ dependencies {
   testImplementation project(path: ':common', configuration: 'tests')
   testImplementation project(path: ':flow', configuration: 'tests')
   testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',        version: springBootVersion
-  testImplementation group: 'org.mockito',               name: 'mockito-inline',                  version: mockitoVersion
+  testImplementation group: 'org.mockito',               name: 'mockito-inline',                  version: mockitoInlineVersion
 
   testRuntimeOnly group: 'org.testcontainers',      name: 'postgresql',                      version: testContainersVersion
   testRuntimeOnly group: 'org.awaitility',          name: 'awaitility',                      version: awaitilityVersion

@@ -10,11 +10,9 @@ buildscript {
 }
 
 plugins {
-    id "java-library"
+  id "java-library"
+  id "io.spring.dependency-management" version "${springDependencyManagementVersion}"
 }
-
-apply plugin: 'java'
-apply plugin: 'io.spring.dependency-management'
 
 jar {
   archiveBaseName = 'secret-rotation-api'
@@ -36,8 +34,9 @@ dependencies {
 
 }
 
-task testJar(type: Jar, dependsOn: testClasses) {
-  archiveBaseName = "test-${project.archivesBaseName}"
+tasks.register('testJar', Jar) {
+  dependsOn testClasses
+  archiveBaseName = "test-${project.name}"
   archiveClassifier = 'test'
   from sourceSets.test.output
   from sourceSets.main.output

@@ -27,8 +27,9 @@ dependencies {
   implementation project(':structuredevent-api-cdp')
 
   constraints {
-    implementation group: 'org.glassfish.jersey.ext', name: 'jersey-proxy-client',   version: jerseyCoreVersion
-    implementation group: 'io.swagger.core.v3',       name: 'swagger-jaxrs2',        version: swaggerCoreVersion
+    implementation group: 'org.glassfish.jersey.ext', name: 'jersey-proxy-client',    version: jerseyCoreVersion
+    implementation group: 'io.swagger.core.v3',       name: 'swagger-jaxrs2-jakarta', version: swaggerCoreVersion
+    implementation group: 'javax.xml.bind',           name: 'jaxb-api',               version: javaxXmlBindJaxbApiVersion
   }
 
   testImplementation group: 'org.hamcrest',           name: 'hamcrest',              version: hamcrestVersion
