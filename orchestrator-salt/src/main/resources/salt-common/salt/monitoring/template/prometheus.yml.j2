@@ -65,6 +65,8 @@ scrape_configs:
     static_configs:
      - targets: ['localhost:{{ monitoring.agentPort }}']
        labels:
+         form_factor: 'paas-vm'
+         app_type: {{ telemetry.clusterType }}
          resource_crn: {{ telemetry.clusterCrn }}
          platform: {{ telemetry.platform }}
 {%- if hostgroup %}
@@ -86,6 +88,8 @@ scrape_configs:
     static_configs:
      - targets: ['localhost:{{ monitoring.nodeExporterPort }}']
        labels:
+         form_factor: 'paas-vm'
+         app_type: {{ telemetry.clusterType }}
          resource_crn: {{ telemetry.clusterCrn }}
          platform: {{ telemetry.platform }}
 {%- if hostgroup %}
