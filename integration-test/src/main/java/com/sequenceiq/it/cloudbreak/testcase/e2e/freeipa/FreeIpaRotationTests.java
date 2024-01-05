@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 import static com.sequenceiq.common.model.OsType.RHEL8;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_ADMIN_PASSWORD;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_SALT_BOOT_SECRETS;
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_USERSYNC_USER_PASSWORD;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.HashMap;
@@ -15,7 +16,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.testng.ITestContext;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -40,7 +40,7 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
     private static final String GET_PASSWORD_LAST_CHANGED_COMMAND = "export PASSWORD=$(sudo cat /srv/pillar/freeipa/init.sls | grep -i '\"password\"' | " +
             "awk -F'\"' '{print $4}'); kinit admin <<<$PASSWORD > /dev/null 2>&1; ipa user-show --all admin | grep krblastpwdchange: | awk -F': ' '{print $2}'";
 
-    private static final String GET_PASSWORD_FROM_PILLAR_COMMAND = "sudo cat /srv/pillar/freeipa/init.sls| tail -n +2 | jq -r .freeipa.password";
+    private static final String GET_PASSWORD_FROM_PILLAR_COMMAND = "sudo cat /srv/pillar/freeipa/init.sls | tail -n +2 | jq -r .freeipa.password";
 
     private static final String CHECK_DIRECTORY_MANAGER_PASSWORD_COMMAND = "export HOSTNAME=$(hostname -f); dsconf -D \"cn=Directory Manager\" -w \"%s\" " +
             "ldaps://$HOSTNAME config get";
@@ -62,10 +62,10 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
     @Description(
             given = "there is a running cloudbreak",
             when = "a valid stack create request is sent with 2 FreeIPA instance " +
-                    "AND do a FREEIPA_ADMIN_PASSWORD rotation",
+                    "AND do a FREEIPA_ADMIN_PASSWORD rotation, after that {FREEIPA_SALT_BOOT_SECRETS, FREEIPA_USERSYNC_USER_PASSWORD} rotations",
             then = "the stack should be available AND deletable and have 2 nodes AND the primary gateway should not change" +
-                    " AND the rotation should happen")
-    public void testFreeIpaAdminPasswordRotation(TestContext testContext) {
+                    " AND the rotations should happen")
+    public void testFreeIpaRotation(TestContext testContext) {
         String freeIpa = resourcePropertyProvider().getName();
         Map<String, String> originalPasswordLastChangedMap = new HashMap<>();
         Map<String, String> originalPasswordsFromPillarMap = new HashMap<>();
@@ -79,66 +79,55 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
                 .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {
                     Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client);
-                    originalPasswordsFromPillarMap.putAll(getPasswordFromPillar(instanceMetaDataResponses));
-                    originalPasswordLastChangedMap.putAll(getPasswordLastChanged(instanceMetaDataResponses));
-                    if (originalPasswordsFromPillarMap.values().stream().distinct().count() != 1) {
-                        throw new TestFailException("The passwords are not the same on the instances");
-                    }
+                    getPasswordAndLastChangedFromPillar(originalPasswordLastChangedMap, originalPasswordsFromPillarMap, instanceMetaDataResponses);
                     checkDirectoryManagerPassword(instanceMetaDataResponses, originalPasswordsFromPillarMap);
                     return testDto;
                 })
-
                 .given(FreeIpaRotationTestDto.class)
                 .withSecrets(List.of(FREEIPA_ADMIN_PASSWORD))
                 .when(freeIpaTestClient.rotateSecret())
                 .awaitForFlow()
-
                 .then((tc, testDto, client) -> {
-                    Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getEnvironmentCrn(), client);
-                    Map<String, String> passwordFromPillar = getPasswordFromPillar(instanceMetaDataResponses);
-                    passwordFromPillar.forEach((key, value) -> {
-                        String originalPassword = originalPasswordsFromPillarMap.get(key);
-                        if (originalPassword.equals(value)) {
-                            throw new TestFailException("Freeipa admin password remained the same in pillar on " + key);
-                        }
-                    });
-                    Map<String, String> passwordLastChanged = getPasswordLastChanged(instanceMetaDataResponses);
-                    if (passwordLastChanged.values().size() != originalPasswordLastChangedMap.values().size()) {
-                        throw new TestFailException("The return size of the password last changed result is different");
-                    }
-                    passwordLastChanged.forEach((key, value) -> {
-                        String originalPasswordLastChanged = originalPasswordLastChangedMap.get(key);
-                        if (originalPasswordLastChanged.equals(value)) {
-                            throw new TestFailException("The password time for admin user is not different on " + key);
-                        }
-                    });
-                    checkDirectoryManagerPassword(instanceMetaDataResponses, passwordFromPillar);
-
+                    checkDirectoryManagerPasswordAfterRotation(originalPasswordLastChangedMap, originalPasswordsFromPillarMap, testDto, client);
                     return testDto;
                 })
-
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT)
-    @Description(
-            given = "there is a running environment",
-            when = "freeipa salt boot secrets are rotation",
-            then = "rotation should be successful and clusters should be available")
-    public void testFreeIpaSaltBootSecretRotation(TestContext testContext, ITestContext iTestContext) {
-        String freeIpa = resourcePropertyProvider().getName();
-        testContext
-                .given(freeIpa, FreeIpaTestDto.class)
-                    .withTelemetry("telemetry")
-                    .withOsType(RHEL8.getOs())
-                    .withFreeIpaHa(1, 2)
-                .when(freeIpaTestClient.create(), key(freeIpa))
-                .await(FREEIPA_AVAILABLE)
                 .given(FreeIpaRotationTestDto.class)
-                    .withSecrets(List.of(FREEIPA_SALT_BOOT_SECRETS))
+                .withSecrets(List.of(FREEIPA_SALT_BOOT_SECRETS, FREEIPA_USERSYNC_USER_PASSWORD))
                 .when(freeIpaTestClient.rotateSecret())
                 .awaitForFlow()
                 .validate();
+    }
+
+    private void getPasswordAndLastChangedFromPillar(Map<String, String> originalPasswordLastChangedMap,
+            Map<String, String> originalPasswordsFromPillarMap, Set<InstanceMetaDataResponse> instanceMetaDataResponses) {
+        originalPasswordLastChangedMap.putAll(getPasswordLastChanged(instanceMetaDataResponses));
+        originalPasswordsFromPillarMap.putAll(getPasswordFromPillar(instanceMetaDataResponses));
+        if (originalPasswordsFromPillarMap.values().stream().distinct().count() != 1) {
+            throw new TestFailException("The passwords are not the same on the instances");
+        }
+    }
+
+    private void checkDirectoryManagerPasswordAfterRotation(Map<String, String> originalPasswordLastChangedMap,
+            Map<String, String> originalPasswordsFromPillarMap, FreeIpaRotationTestDto testDto, FreeIpaClient client) {
+        Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getEnvironmentCrn(), client);
+        Map<String, String> passwordFromPillar = getPasswordFromPillar(instanceMetaDataResponses);
+        passwordFromPillar.forEach((key, value) -> {
+            String originalPassword = originalPasswordsFromPillarMap.get(key);
+            if (originalPassword.equals(value)) {
+                throw new TestFailException("Freeipa admin password remained the same in pillar on " + key);
+            }
+        });
+        Map<String, String> passwordLastChanged = getPasswordLastChanged(instanceMetaDataResponses);
+        if (passwordLastChanged.values().size() != originalPasswordLastChangedMap.values().size()) {
+            throw new TestFailException("The return size of the password last changed result is different");
+        }
+        passwordLastChanged.forEach((key, value) -> {
+            String originalPasswordLastChanged = originalPasswordLastChangedMap.get(key);
+            if (originalPasswordLastChanged.equals(value)) {
+                throw new TestFailException("The password time for admin user is not different on " + key);
+            }
+        });
+        checkDirectoryManagerPassword(instanceMetaDataResponses, passwordFromPillar);
     }
 
     private Map<String, String> getPasswordLastChanged(Set<InstanceMetaDataResponse> instanceMetaDataResponses) {
