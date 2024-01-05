@@ -8,6 +8,7 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.common.metrics.status.StackCountByStatusView;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
@@ -24,13 +25,13 @@ public interface StackStatusRepository extends CrudRepository<StackStatus, Long>
             "FROM StackStatus st " +
             "WHERE st.id IN (SELECT s.stackStatus.id FROM Stack s WHERE s.terminated < 0 AND s.cloudPlatform = :cloudPlatform) " +
             "GROUP BY (st.status)")
-    List<StackCountByStatusView> countStacksByStatusAndCloudPlatform(String cloudPlatform);
+    List<StackCountByStatusView> countStacksByStatusAndCloudPlatform(@Param("cloudPlatform") String cloudPlatform);
 
     @Query("SELECT COUNT(status) as count, st.status as status " +
             "FROM StackStatus st " +
             "WHERE st.id IN (SELECT s.stackStatus.id FROM Stack s WHERE s.terminated < 0 AND s.tunnel = :tunnel) " +
             "GROUP BY (st.status)")
-    List<StackCountByStatusView> countStacksByStatusAndTunnel(Tunnel tunnel);
+    List<StackCountByStatusView> countStacksByStatusAndTunnel(@Param("tunnel") Tunnel tunnel);
 }
 
 
