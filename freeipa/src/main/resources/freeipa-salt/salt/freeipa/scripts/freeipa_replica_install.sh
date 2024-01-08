@@ -111,6 +111,11 @@ ipa-replica-install \
           --admin-password "$FPW" \
           --setup-dns \
           --auto-reverse \
+{%- if salt['pillar.get']('freeipa:reverseZones') %}
+  {%- for zone in salt['pillar.get']('freeipa:reverseZones').split(',') %}
+          --reverse-zone {{ zone }} \
+  {%- endfor %}
+{%- endif %}
           --allow-zone-overlap \
           --ssh-trust-dns \
           --mkhomedir \
