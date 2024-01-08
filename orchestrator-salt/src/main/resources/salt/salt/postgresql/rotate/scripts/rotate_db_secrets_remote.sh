@@ -27,31 +27,64 @@ set -e
 if [[ "$rotationphase" == "rotation" ]];then
     echo "$(date '+%d/%m/%Y %H:%M:%S') - Create user $newusername."
     if [ -z "$(PGPASSWORD={{ values['remote_admin_pw'] }} psql --host={{ values['remote_db_url'] }} --port={{ values['remote_db_port'] }} --username={{ values['remote_admin'] }} -d {{ values['database'] }} -tXAc "SELECT rolname FROM pg_roles" | grep {{ rotationvalues['newUser'] }} )" ]; then
-        echo "CREATE USER $newusername WITH PASSWORD '$newpassword';" | PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname
+        PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -tXAc \
+            "CREATE USER $newusername WITH PASSWORD '$newpassword';"
     fi
-    echo "GRANT ALL PRIVILEGES ON DATABASE $dbname TO $newusername;" | PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname
-    echo "GRANT $newusername TO $admin_username" | PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname
-    echo "ALTER SCHEMA public OWNER TO $newusername" | PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname
-    echo "REASSIGN OWNED BY $oldusername TO $newusername" | PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname
+    PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -tXA \
+        -c "GRANT ALL PRIVILEGES ON DATABASE $dbname TO $newusername;" \
+        -c "select pg_backend_pid();"
+    PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -tXA \
+        -c "GRANT $newusername TO $admin_username;" \
+        -c "select pg_backend_pid();"
+    PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -tXA \
+        -c "ALTER SCHEMA public OWNER TO $newusername;"  \
+        -c "select pg_backend_pid();"
+    PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -tXA \
+        -c "REASSIGN OWNED BY $oldusername TO $newusername;" \
+        -c "select pg_backend_pid();"
+    echo "$(date '+%d/%m/%Y %H:%M:%S') - For debugging reasons, querying blocked processes."
+    PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -c \
+      "select pid, usename, pg_blocking_pids(pid) as blocked_by, query as blocked_query from pg_stat_activity where cardinality(pg_blocking_pids(pid)) > 0;"
 fi
 
 if [[ "$rotationphase" == "rollback" ]];then
     echo "$(date '+%d/%m/%Y %H:%M:%S') - Rolling back old user $oldusername."
-    echo "ALTER SCHEMA public OWNER TO $oldusername" | PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname
+    PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -tXAc \
+      "ALTER SCHEMA public OWNER TO $oldusername;"
     if [ ! -z "$(PGPASSWORD={{ values['remote_admin_pw'] }} psql --host={{ values['remote_db_url'] }} --port={{ values['remote_db_port'] }} --username={{ values['remote_admin'] }} -d {{ values['database'] }} -tXAc "SELECT rolname FROM pg_roles" | grep {{ rotationvalues['newUser'] }} )" ]; then
-        echo "REASSIGN OWNED BY $newusername TO $oldusername" | PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname
-        echo "REVOKE $newusername FROM $admin_username" | PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname
-        echo "REVOKE ALL PRIVILEGES ON DATABASE $dbname FROM $newusername;" | PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname
-        echo "DROP USER IF EXISTS $newusername;" | PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname
+        PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -tXA \
+          -c "REASSIGN OWNED BY $newusername TO $oldusername;" \
+          -c "select pg_backend_pid();"
+        PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -tXA \
+          -c "REVOKE $newusername FROM $admin_username;" \
+          -c "select pg_backend_pid();"
+        PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -tXA \
+          -c "REVOKE ALL PRIVILEGES ON DATABASE $dbname FROM $newusername;" \
+          -c "select pg_backend_pid();"
+        PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -tXA \
+          -c "DROP USER IF EXISTS $newusername;" \
+          -c "select pg_backend_pid();"
+        echo "$(date '+%d/%m/%Y %H:%M:%S') - For debugging reasons, querying blocked processes."
+        PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -c \
+          "select pid, usename, pg_blocking_pids(pid) as blocked_by, query as blocked_query from pg_stat_activity where cardinality(pg_blocking_pids(pid)) > 0;"
     fi
 fi
 
 if [[ "$rotationphase" == "finalize" ]];then
     echo "$(date '+%d/%m/%Y %H:%M:%S') - Removing old user $oldusername."
     if [ ! -z "$(PGPASSWORD={{ values['remote_admin_pw'] }} psql --host={{ values['remote_db_url'] }} --port={{ values['remote_db_port'] }} --username={{ values['remote_admin'] }} -d {{ values['database'] }} -tXAc "SELECT rolname FROM pg_roles" | grep {{ rotationvalues['oldUser'] }} )" ]; then
-        echo "REVOKE $oldusername FROM $admin_username" | PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname
-        echo "REVOKE ALL PRIVILEGES ON DATABASE $dbname FROM $oldusername;" | PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname
-        echo "DROP USER IF EXISTS $oldusername;" | PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname
+        PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -tXA \
+          -c "REVOKE $oldusername FROM $admin_username;" \
+          -c "select pg_backend_pid();"
+        PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -tXA \
+          -c "REVOKE ALL PRIVILEGES ON DATABASE $dbname FROM $oldusername;" \
+          -c "select pg_backend_pid();"
+        PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -tXA \
+          -c "DROP USER IF EXISTS $oldusername;" \
+          -c "select pg_backend_pid();"
+        echo "$(date '+%d/%m/%Y %H:%M:%S') - For debugging reasons, querying blocked processes."
+        PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -c \
+          "select pid, usename, pg_blocking_pids(pid) as blocked_by, query as blocked_query from pg_stat_activity where cardinality(pg_blocking_pids(pid)) > 0;"
     fi
 fi
 
