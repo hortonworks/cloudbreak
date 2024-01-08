@@ -91,7 +91,7 @@ public class EventBusConfig {
 
     private void handleException(Event<?> event, Throwable exception, ThreadPoolExecutor threadPoolExecutor) {
         try {
-            LOGGER.error("Exception during event: {}", event);
+            LOGGER.error("Exception during event: {}", event, exception);
             if (!threadPoolExecutor.isTerminating()) {
                 String flowId = Optional.ofNullable(tryGetFlowIdFromEvent(event))
                         .or(() -> Optional.ofNullable(getFlowIdFromMDC()))

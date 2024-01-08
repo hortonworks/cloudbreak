@@ -43,9 +43,9 @@ public class CollectLoadBalancerMetadataHandler implements CloudPlatformEventHan
 
             request.getResult().onNext(collectLBMetadataResult);
             eventBus.notify(collectLBMetadataResult.selector(), new Event<>(collectLBMetadataRequestEvent.getHeaders(), collectLBMetadataResult));
-            LOGGER.debug("Load balancer metadata collection successfully finished");
+            LOGGER.info("Load balancer metadata collection successfully finished");
         } catch (RuntimeException e) {
-            LOGGER.error("Collecting load balancer metadata failed", e);
+            LOGGER.warn("Collecting load balancer metadata failed", e);
             CollectLoadBalancerMetadataResult failure = new CollectLoadBalancerMetadataResult(e, request.getResourceId());
             request.getResult().onNext(failure);
             eventBus.notify(failure.selector(), new Event<>(collectLBMetadataRequestEvent.getHeaders(), failure));

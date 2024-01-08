@@ -15,8 +15,8 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataRequest;
-import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataResult;
+import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataCloudPlatformRequest;
+import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataCloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -115,11 +115,11 @@ public class AwsMigrationUtil {
                 .map(LoadBalancer::getType)
                 .collect(Collectors.toList());
         List<CloudResource> cloudResources = resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, stackId);
-        CollectLoadBalancerMetadataRequest request = new CollectLoadBalancerMetadataRequest(authenticatedContext.getCloudContext(),
+        CollectLoadBalancerMetadataCloudPlatformRequest request = new CollectLoadBalancerMetadataCloudPlatformRequest(authenticatedContext.getCloudContext(),
                 authenticatedContext.getCloudCredential(), loadBalancerTypes, cloudResources);
         eventBus.notify(request.selector(), Event.wrap(request));
         try {
-            CollectLoadBalancerMetadataResult res = request.await();
+            CollectLoadBalancerMetadataCloudPlatformResult res = request.await();
             LOGGER.debug("Collect load balancer metadata result: {}", res);
             if (res.getStatus().equals(EventStatus.FAILED)) {
                 String msg = "Failed to collect the load balancer metadata. " + res.getErrorDetails().getMessage();
