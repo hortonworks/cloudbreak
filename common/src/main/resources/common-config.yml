@@ -74,20 +74,12 @@ telemetry:
       # see: https://github.com/prometheus/node_exporter/blob/master/README.md#collectors
       collectors:
         - cpu
-        - cpufreq
         - diskstats
-        - filefd
         - filesystem
         - loadavg
         - meminfo
-        - netstat
         - netdev
-        - pressure
-        - processes
-        - stat
-        - systemd
         - vmstat
-        - xfs
     blackbox-exporter:
       user: blackboxuser
       port: 9115
