@@ -24,3 +24,5 @@ cert: |-
   k88UItrPSHCAVAefPk5PhjwLC7MDE3ZBJQxdT4R1nXuEEoFaqqxL81RLcqpUI6PU
   4Nv4+7bXbAfksPVRtf4bOoVLH7HOm7WJdRym
   -----END CERTIFICATE-----
+fingerprint: 6d2096a5f530e4877253ac75f509ad6b6b492c42
+deprecated: false

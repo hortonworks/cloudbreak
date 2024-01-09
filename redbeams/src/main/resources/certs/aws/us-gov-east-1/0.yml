@@ -24,3 +24,5 @@ cert: |-
   rirVdtCyK+dEDq2xKoyR79VesgiPKTMcJPou6gXdeezJE1nL8te47yZlJFoAUL6v
   EP9EpISn/Jp+QPoFSUFL/FssWEfdLw==
   -----END CERTIFICATE-----
+fingerprint: 3b8474375b15f45e15593ded4deb40e0b042a5ca
+deprecated: true
