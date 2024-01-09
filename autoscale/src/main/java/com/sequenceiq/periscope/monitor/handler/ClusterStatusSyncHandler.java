@@ -67,10 +67,10 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
         LoggingUtils.buildMdcContext(cluster);
 
         StackV4Response stackResponse = cloudbreakCommunicator.getByCrn(cluster.getStackCrn());
-        if (stackResponse.getCluster() != null && stackResponse.getCluster().getBlueprint() != null
+        if (stackResponse.getCluster() != null && stackResponse.getCluster().getExtendedBlueprintText() != null
                 && (StringUtils.isEmpty(cluster.getBluePrintText())
-                || !Objects.equals(cluster.getBluePrintText(), stackResponse.getCluster().getBlueprint().getBlueprint()))) {
-            cluster.setBluePrintText(stackResponse.getCluster().getBlueprint().getBlueprint());
+                || !Objects.equals(cluster.getBluePrintText(), stackResponse.getCluster().getExtendedBlueprintText()))) {
+            cluster.setBluePrintText(stackResponse.getCluster().getExtendedBlueprintText());
             clusterService.save(cluster);
         }
 

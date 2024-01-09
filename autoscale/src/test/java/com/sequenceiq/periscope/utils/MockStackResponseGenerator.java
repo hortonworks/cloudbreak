@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -124,21 +123,19 @@ public class MockStackResponseGenerator {
     public static StackV4Response getBasicMockStackResponse(Status clusterStatus) {
         StackV4Response stackResponse = new StackV4Response();
         stackResponse.setStatus(clusterStatus);
-        BlueprintV4Response blueprintV4Response = new BlueprintV4Response();
+        ClusterV4Response clusterResponse = new ClusterV4Response();
         try {
-            blueprintV4Response.setBlueprint(getTestBP());
+            clusterResponse.setExtendedBlueprintText(getTestBP());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        ClusterV4Response clusterResponse = new ClusterV4Response();
         clusterResponse.setStatus(clusterStatus);
-        clusterResponse.setBlueprint(blueprintV4Response);
         stackResponse.setCluster(clusterResponse);
         return stackResponse;
     }
 
     private static String getTestBP() throws IOException {
-        return FileReaderUtils.readFileFromClasspath("/dataengineering-test.json");
+        return FileReaderUtils.readFileFromClasspath("/customde-test.json");
     }
 
     public static StackV4Response getMockStackResponseWithDependentHostGroup(Status clusterStatus,
@@ -156,14 +153,12 @@ public class MockStackResponseGenerator {
         });
         stackResponse.setInstanceGroups(instanceGroupV4Responses);
         stackResponse.setStatus(clusterStatus);
-        BlueprintV4Response blueprintV4Response = new BlueprintV4Response();
+        ClusterV4Response clusterResponse = new ClusterV4Response();
         try {
-            blueprintV4Response.setBlueprint(getTestBP());
+            clusterResponse.setExtendedBlueprintText(getTestBP());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        ClusterV4Response clusterResponse = new ClusterV4Response();
-        clusterResponse.setBlueprint(blueprintV4Response);
         clusterResponse.setStatus(clusterStatus);
         stackResponse.setCluster(clusterResponse);
         return stackResponse;

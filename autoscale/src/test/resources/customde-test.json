@@ -1,0 +1,1086 @@
+{
+  "cdhVersion": "7.2.15",
+  "products": [
+    {
+      "version": "7.2.15-1.cdh7.2.15.p400.47111845",
+      "product": "CDH"
+    }
+  ],
+  "services": [
+    {
+      "refName": "zookeeper",
+      "serviceType": "ZOOKEEPER",
+      "roleConfigGroups": [
+        {
+          "refName": "zookeeper-SERVER-BASE",
+          "roleType": "SERVER",
+          "base": true,
+          "configs": [
+            {
+              "name": "dataDir",
+              "value": "/hadoopfs/fs1/zookeeper"
+            },
+            {
+              "name": "dataLogDir",
+              "value": "/hadoopfs/fs1/zookeeper"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "hdfs",
+      "serviceType": "HDFS",
+      "serviceConfigs": [
+        {
+          "name": "hdfs_verify_ec_with_topology_enabled",
+          "value": "false"
+        },
+        {
+          "name": "dfs_replication",
+          "value": "1"
+        },
+        {
+          "name": "zookeeper_service",
+          "ref": "zookeeper"
+        },
+        {
+          "name": "core_site_safety_valve",
+          "value": "<property><name>fs.azure.enable.readahead</name><value>false</value></property>\n<property><name>fs.s3a.buffer.dir</name><value>${env.LOCAL_DIRS:-${hadoop.tmp.dir}}/s3a</value></property><property><name>fs.s3a.committer.name</name><value>directory</value></property>"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "hdfs-NAMENODE-BASE",
+          "roleType": "NAMENODE",
+          "base": true,
+          "configs": [
+            {
+              "name": "dfs_federation_namenode_nameservice",
+              "value": "ns1"
+            },
+            {
+              "name": "dfs_namenode_quorum_journal_name",
+              "value": "ns1"
+            },
+            {
+              "name": "role_config_suppression_fs_trash_interval_minimum_validator",
+              "value": "true"
+            },
+            {
+              "name": "autofailover_enabled",
+              "value": "true"
+            },
+            {
+              "name": "role_config_suppression_namenode_java_heapsize_minimum_validator",
+              "value": "true"
+            },
+            {
+              "name": "dfs_name_dir_list",
+              "value": "/hadoopfs/fs1/namenode"
+            },
+            {
+              "name": "erasure_coding_default_policy",
+              "value": " "
+            },
+            {
+              "name": "fs_trash_checkpoint_interval",
+              "value": "0"
+            },
+            {
+              "name": "fs_trash_interval",
+              "value": "0"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "refName": "hdfs-FAILOVERCONTROLLER-BASE",
+          "roleType": "FAILOVERCONTROLLER",
+          "base": true,
+          "configs": [
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "refName": "hdfs-JOURNALNODE-BASE",
+          "roleType": "JOURNALNODE",
+          "base": true,
+          "configs": [
+            {
+              "name": "dfs_journalnode_edits_dir",
+              "value": "/hadoopfs/fs1/journalnode"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "refName": "hdfs-DATANODE-BASE",
+          "roleType": "DATANODE",
+          "base": true,
+          "configs": [
+            {
+              "name": "dfs_datanode_failed_volumes_tolerated",
+              "value": "0"
+            },
+            {
+              "name": "dfs_data_dir_list",
+              "value": "/hadoopfs/fs1/datanode"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "refName": "hdfs-SECONDARYNAMENODE-BASE",
+          "roleType": "SECONDARYNAMENODE",
+          "base": true,
+          "configs": [
+            {
+              "name": "fs_checkpoint_dir_list",
+              "value": "/should_not_be_required_in_HA_setup"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "refName": "hdfs-BALANCER-BASE",
+          "roleType": "BALANCER",
+          "base": true
+        },
+        {
+          "refName": "hdfs-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true,
+          "configs": [
+            {
+              "name": "role_config_suppression_hdfs_trash_disabled_validator",
+              "value": "true"
+            },
+            {
+              "name": "dfs_client_use_trash",
+              "value": "false"
+            },
+            {
+              "name": "hdfs_client_env_safety_valve",
+              "value": "HADOOP_OPTS=\"-Dorg.wildfly.openssl.path=/usr/lib64 ${HADOOP_OPTS}\"\nHADOOP_OPTS=\"-Dorg.wildfly.openssl.path=/usr/lib64 ${HADOOP_OPTS}\""
+            }
+          ]
+        },
+        {
+          "refName": "hdfs-HTTPFS-BASE",
+          "roleType": "HTTPFS",
+          "base": true,
+          "configs": [
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "hms",
+      "serviceType": "HIVE",
+      "serviceConfigs": [
+        {
+          "name": "hive_warehouse_external_directory",
+          "value": "abfs://location@vatsalstorage.dfs.core.windows.net/warehouse/tablespace/external/hive"
+        },
+        {
+          "name": "jdbc_url_override",
+          "value": "jdbc:postgresql://vatsal-az3-dl-master0.vatsal-a.xcu2-8y8x.wl.cloudera.site:5432/hive?sslmode=verify-full&sslrootcert=/hadoopfs/fs1/database-cacerts/certs.pem"
+        },
+        {
+          "name": "hive_metastore_database_type",
+          "value": "postgresql"
+        },
+        {
+          "name": "hive_metastore_database_user",
+          "value": "hive"
+        },
+        {
+          "name": "hive_service_config_safety_valve",
+          "value": "<property><name>hive.hook.proto.file.per.event</name><value>true</value></property>"
+        },
+        {
+          "name": "hive_repl_replica_functions_root_dir",
+          "value": "abfs://location@vatsalstorage.dfs.core.windows.net/hive_replica_functions_dir"
+        },
+        {
+          "name": "hive_warehouse_directory",
+          "value": "abfs://location@vatsalstorage.dfs.core.windows.net/warehouse/tablespace/managed/hive"
+        },
+        {
+          "name": "hive_metastore_database_name",
+          "value": "hive"
+        },
+        {
+          "name": "hive_metastore_database_port",
+          "value": "5432"
+        },
+        {
+          "name": "hive_compactor_initiator_on",
+          "value": "false"
+        },
+        {
+          "name": "hive_metastore_database_password",
+          "value": "****"
+        },
+        {
+          "name": "hive_metastore_database_host",
+          "value": "vatsal-az3-dl-master0.vatsal-a.xcu2-8y8x.wl.cloudera.site"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "hms-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
+        },
+        {
+          "refName": "hms-HIVEMETASTORE-BASE",
+          "roleType": "HIVEMETASTORE",
+          "base": true,
+          "configs": [
+            {
+              "name": "metastore_canary_health_enabled",
+              "value": "false"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        }
+      ],
+      "displayName": "Hive Metastore"
+    },
+    {
+      "refName": "hive",
+      "serviceType": "HIVE_ON_TEZ",
+      "serviceConfigs": [
+        {
+          "name": "hive_hook_proto_base_directory",
+          "value": "abfs://location@vatsalstorage.dfs.core.windows.net/warehouse/tablespace/external/hive/sys.db/query_data"
+        },
+        {
+          "name": "tez_auto_reducer_parallelism",
+          "value": "false"
+        },
+        {
+          "name": "hive_service_config_safety_valve",
+          "value": "<property><name>hive.hook.proto.file.per.event</name><value>true</value></property>\n<property><name>fs.s3a.ssl.channel.mode</name><value>openssl</value></property><property><name>hive.txn.acid.dir.cache.duration</name><value>0</value></property><property><name>hive.server2.tez.session.lifetime</name><value>30m</value></property>\n <property><name>hive.blobstore.supported.schemes</name><value>s3,s3a,s3n,abfs,gs</value></property><property><name>hive.orc.splits.include.fileid</name><value>false</value></property><property><name>hive.hook.proto.events.clean.freq</name><value>1h</value></property>\n <property><name>hive.metastore.try.direct.sql.ddl</name><value>true</value></property>"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "hive-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
+        },
+        {
+          "refName": "hive-HIVESERVER2-BASE",
+          "roleType": "HIVESERVER2",
+          "base": true,
+          "configs": [
+            {
+              "name": "hiveserver2_idle_session_timeout",
+              "value": "14400000"
+            },
+            {
+              "name": "hiveserver2_load_dynamic_partitions_thread_count",
+              "value": "20"
+            },
+            {
+              "name": "hiveserver2_mv_files_thread",
+              "value": "20"
+            },
+            {
+              "name": "hive_server2_transport_mode",
+              "value": "http"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        }
+      ],
+      "displayName": "Hive"
+    },
+    {
+      "refName": "hue",
+      "serviceType": "HUE",
+      "serviceConfigs": [
+        {
+          "name": "database_type",
+          "value": "postgresql"
+        },
+        {
+          "name": "database_user",
+          "value": "hue"
+        },
+        {
+          "name": "database_name",
+          "value": "hue"
+        },
+        {
+          "name": "database_host",
+          "value": "trial-deazure-gateway0.vatsal-a.xcu2-8y8x.wl.cloudera.site"
+        },
+        {
+          "name": "database_port",
+          "value": "5432"
+        },
+        {
+          "name": "auth_backend",
+          "value": "desktop.auth.backend.KnoxSpnegoDjangoBackend"
+        },
+        {
+          "name": "database_password",
+          "value": "****"
+        },
+        {
+          "name": "hue_service_safety_valve",
+          "value": "[desktop]\napp_blacklist=spark,zookeeper,hbase,search,sqoop,security,pig\n[[database]]\noptions='{\"sslmode\": \"verify-full\", \"sslrootcert\": \"/hadoopfs/fs1/database-cacerts/certs.pem\"}'\n"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "hue-HUE_SERVER-BASE",
+          "roleType": "HUE_SERVER",
+          "base": true
+        },
+        {
+          "refName": "hue-HUE_LOAD_BALANCER-BASE",
+          "roleType": "HUE_LOAD_BALANCER",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "livy",
+      "serviceType": "LIVY",
+      "roleConfigGroups": [
+        {
+          "refName": "livy-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
+        },
+        {
+          "refName": "livy-LIVY_SERVER-BASE",
+          "roleType": "LIVY_SERVER",
+          "base": true,
+          "configs": [
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "sqoop",
+      "serviceType": "SQOOP_CLIENT",
+      "roleConfigGroups": [
+        {
+          "refName": "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "yarn",
+      "serviceType": "YARN",
+      "serviceConfigs": [
+        {
+          "name": "yarn_admin_acl",
+          "value": "yarn,hive,hdfs,mapred"
+        },
+        {
+          "name": "yarn_service_mapred_safety_valve",
+          "value": "<property><name>mapreduce.fileoutputcommitter.algorithm.version</name><value>1</value></property><property><name>mapreduce.input.fileinputformat.list-status.num-threads</name><value>100</value></property>"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "yarn-RESOURCEMANAGER-BASE",
+          "roleType": "RESOURCEMANAGER",
+          "base": true,
+          "configs": [
+            {
+              "name": "resourcemanager_capacity_scheduler_configuration",
+              "value": "<configuration><property><name>yarn.scheduler.capacity.schedule-asynchronously.maximum-threads</name><value>1</value></property><property><name>yarn.scheduler.capacity.root.abinitio.maximum-capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.default.minimum-user-limit-percent</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.acl_submit_applications</name><value> </value></property><property><name>yarn.scheduler.capacity.maximum-am-resource-percent</name><value>0.33</value></property><property><name>yarn.scheduler.capacity.root.acl_administer_queue</name><value> </value></property><property><name>yarn.scheduler.capacity.root.abinitio.accessible-node-labels</name><value>abinitio</value></property><property><name>yarn.scheduler.capacity.root.default.maximum-applications</name><value>5000</value></property><property><name>yarn.scheduler.capacity.root.queues</name><value>default,abinitio,Batch</value></property><property><name>yarn.scheduler.capacity.root.default.acl_submit_applications</name><value>*</value></property><property><name>yarn.scheduler.capacity.root.abinitio.capacity</name><value>0</value></property><property><name>yarn.webservice.mutation-api.version</name><value>1664195675177</value></property><property><name>yarn.scheduler.capacity.root.default.accessible-node-labels</name><value>*,abinitio</value></property><property><name>yarn.scheduler.capacity.root.accessible-node-labels.abinitio.maximum-capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.accessible-node-labels</name><value>*,abinitio</value></property><property><name>yarn.scheduler.capacity.root.abinitio.accessible-node-labels.abinitio.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.accessible-node-labels.abinitio.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.Batch.capacity</name><value>50</value></property><property><name>yarn.scheduler.capacity.root.abinitio.state</name><value>RUNNING</value></property><property><name>yarn.scheduler.capacity.root.Batch.maximum-capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.default.capacity</name><value>50</value></property><property><name>yarn.scheduler.capacity.root.abinitio.maximum-applications</name><value>67</value></property><property><name>yarn.scheduler.capacity.root.abinitio.default-node-label-expression</name><value>abinitio</value></property><property><name>yarn.scheduler.capacity.root.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.default.maximum-capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.node-locality-delay</name><value>0</value></property><property><name>yarn.scheduler.capacity.root.abinitio.accessible-node-labels.abinitio.maximum-capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.scheduling-interval-ms</name><value>10</value></property></configuration>"
+            },
+            {
+              "name": "resourcemanager_config_safety_valve",
+              "value": "<property><name>yarn.resourcemanager.am.placement-preference-with-node-attributes</name><value>ORDER NODES IN NodeInstanceType WITH worker &gt; compute</value></property><property><name>yarn.resourcemanager.non-am.placement-preference-with-node-attributes</name><value>ORDER NODES IN NodeInstanceType WITH compute &gt; worker</value></property>\n<property><name>yarn.scheduler.configuration.store.class</name><value>zk</value></property>"
+            },
+            {
+              "name": "yarn_scheduler_capacity_resource_calculator",
+              "value": "org.apache.hadoop.yarn.util.resource.DefaultResourceCalculator"
+            },
+            {
+              "name": "yarn_resourcemanager_scheduler_class",
+              "value": "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "refName": "yarn-JOBHISTORY-BASE",
+          "roleType": "JOBHISTORY",
+          "base": true,
+          "configs": [
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "refName": "yarn-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true,
+          "configs": [
+            {
+              "name": "mapreduce_client_env_safety_valve",
+              "value": "HADOOP_OPTS=\"-Dorg.wildfly.openssl.path=/usr/lib64 ${HADOOP_OPTS}\"\nHADOOP_OPTS=\"-Dorg.wildfly.openssl.path=/usr/lib64 ${HADOOP_OPTS}\""
+            }
+          ]
+        },
+        {
+          "refName": "yarn-NODEMANAGER-worker",
+          "roleType": "NODEMANAGER",
+          "base": false,
+          "configs": [
+            {
+              "name": "yarn_nodemanager_local_dirs",
+              "value": "/hadoopfs/ephfs1/nodemanager"
+            },
+            {
+              "name": "yarn_nodemanager_log_dirs",
+              "value": "/hadoopfs/ephfs1/nodemanager/log"
+            },
+            {
+              "name": "yarn_nodemanager_remote_app_log_dir",
+              "value": "abfs://location@vatsalstorage.dfs.core.windows.net/oplogs/yarn-app-logs"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "refName": "yarn-NODEMANAGER-abinitioexecutor",
+          "roleType": "NODEMANAGER",
+          "base": false,
+          "configs": [
+            {
+              "name": "yarn_nodemanager_local_dirs",
+              "value": "/hadoopfs/ephfs1/nodemanager"
+            },
+            {
+              "name": "yarn_nodemanager_log_dirs",
+              "value": "/hadoopfs/ephfs1/nodemanager/log"
+            },
+            {
+              "name": "yarn_nodemanager_remote_app_log_dir",
+              "value": "abfs://location@vatsalstorage.dfs.core.windows.net/oplogs/yarn-app-logs"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "refName": "yarn-NODEMANAGER-hivecompute",
+          "roleType": "NODEMANAGER",
+          "base": false,
+          "configs": [
+            {
+              "name": "yarn_nodemanager_local_dirs",
+              "value": "/hadoopfs/ephfs1/nodemanager"
+            },
+            {
+              "name": "yarn_nodemanager_log_dirs",
+              "value": "/hadoopfs/ephfs1/nodemanager/log"
+            },
+            {
+              "name": "yarn_nodemanager_remote_app_log_dir",
+              "value": "abfs://location@vatsalstorage.dfs.core.windows.net/oplogs/yarn-app-logs"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "refName": "yarn-NODEMANAGER-abinitiocompute",
+          "roleType": "NODEMANAGER",
+          "base": false,
+          "configs": [
+            {
+              "name": "yarn_nodemanager_local_dirs",
+              "value": "/hadoopfs/ephfs1/nodemanager"
+            },
+            {
+              "name": "yarn_nodemanager_log_dirs",
+              "value": "/hadoopfs/ephfs1/nodemanager/log"
+            },
+            {
+              "name": "yarn_nodemanager_remote_app_log_dir",
+              "value": "abfs://location@vatsalstorage.dfs.core.windows.net/oplogs/yarn-app-logs"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "spark_on_yarn",
+      "serviceType": "SPARK_ON_YARN",
+      "roleConfigGroups": [
+        {
+          "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+          "roleType": "SPARK_YARN_HISTORY_SERVER",
+          "base": true,
+          "configs": [
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "refName": "spark_on_yarn-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true,
+          "configs": [
+            {
+              "name": "spark-conf/spark-defaults.conf_client_config_safety_valve",
+              "value": "spark.yarn.access.hadoopFileSystems=abfs://location@vatsalstorage.dfs.core.windows.net\nspark.hadoop.fs.s3a.ssl.channel.mode=openssl\nspark.hadoop.mapreduce.fileoutputcommitter.algorithm.version=1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "tez",
+      "serviceType": "TEZ",
+      "serviceConfigs": [
+        {
+          "name": "yarn_service",
+          "ref": "yarn"
+        },
+        {
+          "name": "tez.am.container.reuse.non-local-fallback.enabled",
+          "value": "true"
+        },
+        {
+          "name": "tez.am.container.reuse.locality.delay-allocation-millis",
+          "value": "0"
+        },
+        {
+          "name": "tez.am.launch.cmd-opts",
+          "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
+        },
+        {
+          "name": "tez.task.launch.cmd-opts",
+          "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
+        },
+        {
+          "name": "tez.grouping.split-waves",
+          "value": "1.4"
+        },
+        {
+          "name": "tez.grouping.min-size",
+          "value": "268435456"
+        },
+        {
+          "name": "tez.grouping.max-size",
+          "value": "268435456"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "tez-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true,
+          "configs": [
+            {
+              "name": "tez-conf/tez-site.xml_client_config_safety_valve",
+              "value": "<property><name>tez.history.logging.proto-base-dir</name><value>abfs://location@vatsalstorage.dfs.core.windows.net/warehouse/tablespace/external/hive/sys.db</value></property>\n<property><name>tez.runtime.pipelined.sorter.lazy-allocate.memory</name><value>true</value></property>"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "das",
+      "serviceType": "DAS",
+      "serviceConfigs": [
+        {
+          "name": "data_analytics_studio_database_host",
+          "value": "trial-deazure-gateway0.vatsal-a.xcu2-8y8x.wl.cloudera.site"
+        },
+        {
+          "name": "data_analytics_studio_database_port",
+          "value": "5432"
+        },
+        {
+          "name": "data_analytics_studio_database_name",
+          "value": "das"
+        },
+        {
+          "name": "data_analytics_studio_database_username",
+          "value": "das"
+        },
+        {
+          "name": "data_analytics_studio_database_password",
+          "value": "****"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "das-DAS_WEBAPP",
+          "roleType": "DAS_WEBAPP",
+          "base": true,
+          "configs": [
+            {
+              "name": "data_analytics_studio_admin_users",
+              "value": "*"
+            },
+            {
+              "name": "data_analytics_studio_user_authentication",
+              "value": "KNOX_PROXY"
+            }
+          ]
+        },
+        {
+          "refName": "das-DAS_EVENT_PROCESSOR",
+          "roleType": "DAS_EVENT_PROCESSOR",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "knox",
+      "serviceType": "KNOX",
+      "serviceConfigs": [
+        {
+          "name": "knox_gateway_database_type",
+          "value": "postgresql"
+        },
+        {
+          "name": "knox_gateway_database_name",
+          "value": "knox_gateway"
+        },
+        {
+          "name": "knox_gateway_database_host",
+          "value": "trial-deazure-gateway0.vatsal-a.xcu2-8y8x.wl.cloudera.site"
+        },
+        {
+          "name": "knox_gateway_database_port",
+          "value": "5432"
+        },
+        {
+          "name": "knox_gateway_database_user",
+          "value": "knox_gateway"
+        },
+        {
+          "name": "knox_gateway_database_password",
+          "value": "****"
+        },
+        {
+          "name": "autorestart_on_stop",
+          "value": "true"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "knox-KNOX_GATEWAY-BASE",
+          "roleType": "KNOX_GATEWAY",
+          "base": true,
+          "configs": [
+            {
+              "name": "gateway_service_tokenstate_impl",
+              "value": "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService"
+            },
+            {
+              "name": "gateway_database_ssl_enabled",
+              "value": "true"
+            },
+            {
+              "name": "gateway_dispatch_whitelist",
+              "value": "^/.*$;^https://([^/]+\\.vatsal-a.xcu2-8y8x.wl.cloudera.site):[0-9]+/?.*$"
+            },
+            {
+              "name": "gateway_signing_keystore_name",
+              "value": "signing.jks"
+            },
+            {
+              "name": "gateway_token_generation_knox_token_ttl",
+              "value": "86400000"
+            },
+            {
+              "name": "gateway_signing_key_alias",
+              "value": "signing-identity"
+            },
+            {
+              "name": "gateway_default_topology_name",
+              "value": "cdp-proxy"
+            },
+            {
+              "name": "gateway_auto_discovery_enabled",
+              "value": "false"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            },
+            {
+              "name": "gateway_database_ssl_truststore_file",
+              "value": "/hadoopfs/fs1/database-cacerts/certs.pem"
+            },
+            {
+              "name": "gateway_signing_keystore_type",
+              "value": "JKS"
+            },
+            {
+              "name": "gateway_knox_admin_groups",
+              "value": "_c_environments_adminknox"
+            },
+            {
+              "name": "gateway_master_secret",
+              "value": "****"
+            },
+            {
+              "name": "gateway_path",
+              "value": "trial-deazure"
+            },
+            {
+              "name": "gateway_token_generation_enable_lifespan_input",
+              "value": "true"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "zeppelin",
+      "serviceType": "ZEPPELIN",
+      "serviceConfigs": [
+        {
+          "name": "yarn_service",
+          "ref": "yarn"
+        },
+        {
+          "name": "hdfs_service",
+          "ref": "hdfs"
+        },
+        {
+          "name": "spark_on_yarn_service",
+          "ref": "spark_on_yarn"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "zeppelin-ZEPPELIN_SERVER-BASE",
+          "roleType": "ZEPPELIN_SERVER",
+          "base": true,
+          "configs": [
+            {
+              "name": "zeppelin.notebook.dir",
+              "value": "abfs://location@vatsalstorage.dfs.core.windows.net/trial-deazure/zeppelin/notebook"
+            },
+            {
+              "name": "zeppelin.admin.group",
+              "value": "_c_environments_adminzeppelin"
+            },
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "refName": "queuemanager",
+      "serviceType": "QUEUEMANAGER",
+      "serviceConfigs": [
+        {
+          "name": "kerberos.auth.enabled",
+          "value": "true"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "yarn-QUEUEMANAGER_WEBAPP-BASE",
+          "roleType": "QUEUEMANAGER_WEBAPP",
+          "base": true,
+          "configs": [
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        },
+        {
+          "refName": "yarn-QUEUEMANAGER_STORE-BASE",
+          "roleType": "QUEUEMANAGER_STORE",
+          "base": true,
+          "configs": [
+            {
+              "name": "process_auto_restart",
+              "value": "true"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "hostTemplates": [
+    {
+      "refName": "master",
+      "roleConfigGroupsRefNames": [
+        "hdfs-FAILOVERCONTROLLER-BASE",
+        "hdfs-NAMENODE-BASE",
+        "hdfs-GATEWAY-BASE",
+        "hdfs-HTTPFS-BASE",
+        "hive-GATEWAY-BASE",
+        "hive-HIVESERVER2-BASE",
+        "hms-GATEWAY-BASE",
+        "hms-HIVEMETASTORE-BASE",
+        "hue-HUE_LOAD_BALANCER-BASE",
+        "hue-HUE_SERVER-BASE",
+        "livy-GATEWAY-BASE",
+        "spark_on_yarn-GATEWAY-BASE",
+        "tez-GATEWAY-BASE",
+        "yarn-RESOURCEMANAGER-BASE",
+        "hdfs-JOURNALNODE-BASE",
+        "zookeeper-SERVER-BASE",
+        "yarn-GATEWAY-BASE",
+        "sqoop-SQOOP_CLIENT-GATEWAY-BASE"
+      ],
+      "cardinality": 2
+    },
+    {
+      "refName": "masterx",
+      "roleConfigGroupsRefNames": [
+        "hdfs-BALANCER-BASE",
+        "hdfs-GATEWAY-BASE",
+        "hive-GATEWAY-BASE",
+        "hms-GATEWAY-BASE",
+        "livy-GATEWAY-BASE",
+        "livy-LIVY_SERVER-BASE",
+        "spark_on_yarn-GATEWAY-BASE",
+        "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+        "tez-GATEWAY-BASE",
+        "yarn-JOBHISTORY-BASE",
+        "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
+        "zeppelin-ZEPPELIN_SERVER-BASE",
+        "das-DAS_EVENT_PROCESSOR",
+        "das-DAS_WEBAPP",
+        "hdfs-JOURNALNODE-BASE",
+        "zookeeper-SERVER-BASE",
+        "yarn-QUEUEMANAGER_WEBAPP-BASE",
+        "yarn-QUEUEMANAGER_STORE-BASE",
+        "yarn-GATEWAY-BASE"
+      ],
+      "cardinality": 1
+    },
+    {
+      "refName": "gateway",
+      "roleConfigGroupsRefNames": [
+        "hdfs-GATEWAY-BASE",
+        "hive-GATEWAY-BASE",
+        "hms-GATEWAY-BASE",
+        "livy-GATEWAY-BASE",
+        "spark_on_yarn-GATEWAY-BASE",
+        "tez-GATEWAY-BASE",
+        "yarn-GATEWAY-BASE",
+        "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
+        "knox-KNOX_GATEWAY-BASE"
+      ],
+      "cardinality": 1
+    },
+    {
+      "refName": "abinitiocompute",
+      "roleConfigGroupsRefNames": [
+        "hive-GATEWAY-BASE",
+        "yarn-NODEMANAGER-abinitiocompute"
+      ],
+      "cardinality": 1
+    },
+    {
+      "refName": "worker",
+      "roleConfigGroupsRefNames": [
+        "hdfs-DATANODE-BASE",
+        "yarn-NODEMANAGER-worker"
+      ],
+      "cardinality": 3
+    },
+    {
+      "refName": "hivecompute",
+      "roleConfigGroupsRefNames": [
+        "hive-GATEWAY-BASE",
+        "yarn-NODEMANAGER-hivecompute"
+      ],
+      "cardinality": 2
+    },
+    {
+      "refName": "abinitiolauncher",
+      "roleConfigGroupsRefNames": [
+        "hdfs-GATEWAY-BASE",
+        "hive-GATEWAY-BASE"
+      ],
+      "cardinality": 1
+    },
+    {
+      "refName": "abinitioexecutor",
+      "roleConfigGroupsRefNames": [
+        "hive-GATEWAY-BASE",
+        "yarn-NODEMANAGER-abinitioexecutor"
+      ],
+      "cardinality": 2
+    }
+  ],
+  "displayName": "trial-deazure",
+  "cmVersion": "7.6.2",
+  "instantiator": {
+    "clusterName": "trial-deazure",
+    "hosts": [
+      {
+        "hostName": "trial-deazure-hivecompute0.vatsal-a.xcu2-8y8x.wl.cloudera.site",
+        "rackId": "/westus2",
+        "hostTemplateRefName": "hivecompute"
+      },
+      {
+        "hostName": "trial-deazure-hivecompute1.vatsal-a.xcu2-8y8x.wl.cloudera.site",
+        "rackId": "/westus2",
+        "hostTemplateRefName": "hivecompute"
+      },
+      {
+        "hostName": "trial-deazure-abinitiolauncher0.vatsal-a.xcu2-8y8x.wl.cloudera.site",
+        "rackId": "/westus2",
+        "hostTemplateRefName": "abinitiolauncher"
+      },
+      {
+        "hostName": "trial-deazure-worker2.vatsal-a.xcu2-8y8x.wl.cloudera.site",
+        "rackId": "/westus2",
+        "hostTemplateRefName": "worker"
+      },
+      {
+        "hostName": "trial-deazure-worker1.vatsal-a.xcu2-8y8x.wl.cloudera.site",
+        "rackId": "/westus2",
+        "hostTemplateRefName": "worker"
+      },
+      {
+        "hostName": "trial-deazure-worker0.vatsal-a.xcu2-8y8x.wl.cloudera.site",
+        "rackId": "/westus2",
+        "hostTemplateRefName": "worker"
+      },
+      {
+        "hostName": "trial-deazure-abinitioexecutor1.vatsal-a.xcu2-8y8x.wl.cloudera.site",
+        "rackId": "/westus2",
+        "hostTemplateRefName": "abinitioexecutor"
+      },
+      {
+        "hostName": "trial-deazure-abinitioexecutor0.vatsal-a.xcu2-8y8x.wl.cloudera.site",
+        "rackId": "/westus2",
+        "hostTemplateRefName": "abinitioexecutor"
+      },
+      {
+        "hostName": "trial-deazure-abinitiocompute0.vatsal-a.xcu2-8y8x.wl.cloudera.site",
+        "rackId": "/westus2",
+        "hostTemplateRefName": "abinitiocompute"
+      },
+      {
+        "hostName": "trial-deazure-masterx0.vatsal-a.xcu2-8y8x.wl.cloudera.site",
+        "rackId": "/westus2",
+        "hostTemplateRefName": "masterx"
+      },
+      {
+        "hostName": "trial-deazure-gateway0.vatsal-a.xcu2-8y8x.wl.cloudera.site",
+        "rackId": "/westus2",
+        "hostTemplateRefName": "gateway"
+      },
+      {
+        "hostName": "trial-deazure-master0.vatsal-a.xcu2-8y8x.wl.cloudera.site",
+        "rackId": "/westus2",
+        "hostTemplateRefName": "master"
+      },
+      {
+        "hostName": "trial-deazure-master1.vatsal-a.xcu2-8y8x.wl.cloudera.site",
+        "rackId": "/westus2",
+        "hostTemplateRefName": "master"
+      }
+    ],
+    "roleConfigGroups": [
+      {
+        "rcgRefName": "yarn-NODEMANAGER-worker"
+      },
+      {
+        "rcgRefName": "yarn-NODEMANAGER-abinitioexecutor"
+      },
+      {
+        "rcgRefName": "yarn-NODEMANAGER-hivecompute"
+      },
+      {
+        "rcgRefName": "yarn-NODEMANAGER-abinitiocompute"
+      }
+    ],
+    "clusterSpec": {
+      "dataContextRefs": [
+        {
+          "name": "vatsal-az3-dl"
+        }
+      ]
+    },
+    "keepHostTemplates": true,
+    "lenient": true,
+    "enableKerberos": {}
+  },
+  "repositories": [
+    "http://build-cache-azure.kc.cloudera.com/s3/build/47111845/cdh/7.x/parcels/"
+  ],
+  "tags": [
+    {
+      "name": "_cldr_cb_origin",
+      "value": "cloudbreak"
+    },
+    {
+      "name": "_cldr_cb_clustertype",
+      "value": "Data Hub"
+    }
+  ]
+}
