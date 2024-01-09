@@ -67,7 +67,7 @@ scrape_configs:
        labels:
          form_factor: 'paas-vm'
          app_type: {{ telemetry.clusterType }}
-         resource_crn: {{ telemetry.clusterCrn }}
+         cluster_id: {{ telemetry.clusterCrn }}
          platform: {{ telemetry.platform }}
 {%- if hostgroup %}
          hostgroup: {{ hostgroup }}
@@ -90,7 +90,7 @@ scrape_configs:
        labels:
          form_factor: 'paas-vm'
          app_type: {{ telemetry.clusterType }}
-         resource_crn: {{ telemetry.clusterCrn }}
+         cluster_id: {{ telemetry.clusterCrn }}
          platform: {{ telemetry.platform }}
 {%- if hostgroup %}
          hostgroup: {{ hostgroup }}
