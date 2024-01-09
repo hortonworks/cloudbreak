@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CB_CM_ADMIN_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CM_DB_PASSWORD;
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_CM_SERVICES_DB_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_LDAP_BIND_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_MGMT_CM_ADMIN_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_CM_INTERMEDIATE_CA_CERT;
@@ -69,7 +68,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
             then = "all the actions (secret rotatioin then recovery for AWS OR just recovery) should be successful, " +
                     "the cluster should be available"
     )
-    public void testMasterRepairWithTerminatedInstances(TestContext testContext) {
+    public void testSecretRotationAndMasterRepairWithTerminatedInstances(TestContext testContext) {
         String cloudProvider = commonCloudProperties().getCloudProvider();
 
         if (CloudPlatform.AWS.equalsIgnoreCase(cloudProvider)) {
@@ -91,7 +90,8 @@ public class DistroXRepairTests extends AbstractE2ETest {
                         CLUSTER_MGMT_CM_ADMIN_PASSWORD,
                         CLUSTER_CB_CM_ADMIN_PASSWORD,
                         CLUSTER_CM_DB_PASSWORD,
-                        CLUSTER_CM_SERVICES_DB_PASSWORD,
+                        // we should enable this again when CDPD-43281 is resolved
+                        //CLUSTER_CM_SERVICES_DB_PASSWORD,
                         DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD,
                         DATAHUB_CM_INTERMEDIATE_CA_CERT)))
                 .awaitForFlow()

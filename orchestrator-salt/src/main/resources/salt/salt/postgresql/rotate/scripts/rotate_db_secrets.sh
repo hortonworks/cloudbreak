@@ -37,7 +37,7 @@ if [[ "$rotationphase" == "rotation" ]];then
       -c "select pg_backend_pid();"
     echo "$(date '+%d/%m/%Y %H:%M:%S') - For debugging reasons, querying blocked processes."
     psql -U postgres -d $dbname -v "ON_ERROR_STOP=1" -c \
-      "select pid, usename, pg_blocking_pids(pid) as blocked_by, query as blocked_query from pg_stat_activity where cardinality(pg_blocking_pids(pid)) > 0;"
+      "select pid, usename, pg_blocking_pids(pid) as blocked_by from pg_stat_activity where cardinality(pg_blocking_pids(pid)) > 0;"
 
     echo "$(date '+%d/%m/%Y %H:%M:%S') - Add access to pg_hba.conf"
     {% if postgresql.ssl_enabled == True %}
@@ -60,7 +60,7 @@ if [[ "$rotationphase" == "rollback" ]];then
         echo "DROP USER IF EXISTS $newusername;"
         echo "$(date '+%d/%m/%Y %H:%M:%S') - For debugging reasons, querying blocked processes."
         psql -U postgres -d $dbname -v "ON_ERROR_STOP=1" -c \
-          "select pid, usename, pg_blocking_pids(pid) as blocked_by, query as blocked_query from pg_stat_activity where cardinality(pg_blocking_pids(pid)) > 0;"
+          "select pid, usename, pg_blocking_pids(pid) as blocked_by from pg_stat_activity where cardinality(pg_blocking_pids(pid)) > 0;"
     fi
 fi
 
@@ -75,7 +75,7 @@ if [[ "$rotationphase" == "finalize" ]];then
           -c "select pg_backend_pid();"
         echo "$(date '+%d/%m/%Y %H:%M:%S') - For debugging reasons, querying blocked processes."
         psql -U postgres -d $dbname -v "ON_ERROR_STOP=1" -c \
-          "select pid, usename, pg_blocking_pids(pid) as blocked_by, query as blocked_query from pg_stat_activity where cardinality(pg_blocking_pids(pid)) > 0;"
+          "select pid, usename, pg_blocking_pids(pid) as blocked_by from pg_stat_activity where cardinality(pg_blocking_pids(pid)) > 0;"
     fi
 fi
 

@@ -44,7 +44,7 @@ if [[ "$rotationphase" == "rotation" ]];then
         -c "select pg_backend_pid();"
     echo "$(date '+%d/%m/%Y %H:%M:%S') - For debugging reasons, querying blocked processes."
     PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -c \
-      "select pid, usename, pg_blocking_pids(pid) as blocked_by, query as blocked_query from pg_stat_activity where cardinality(pg_blocking_pids(pid)) > 0;"
+      "select pid, usename, pg_blocking_pids(pid) as blocked_by from pg_stat_activity where cardinality(pg_blocking_pids(pid)) > 0;"
 fi
 
 if [[ "$rotationphase" == "rollback" ]];then
@@ -66,7 +66,7 @@ if [[ "$rotationphase" == "rollback" ]];then
           -c "select pg_backend_pid();"
         echo "$(date '+%d/%m/%Y %H:%M:%S') - For debugging reasons, querying blocked processes."
         PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -c \
-          "select pid, usename, pg_blocking_pids(pid) as blocked_by, query as blocked_query from pg_stat_activity where cardinality(pg_blocking_pids(pid)) > 0;"
+          "select pid, usename, pg_blocking_pids(pid) as blocked_by from pg_stat_activity where cardinality(pg_blocking_pids(pid)) > 0;"
     fi
 fi
 
@@ -84,7 +84,7 @@ if [[ "$rotationphase" == "finalize" ]];then
           -c "select pg_backend_pid();"
         echo "$(date '+%d/%m/%Y %H:%M:%S') - For debugging reasons, querying blocked processes."
         PGPASSWORD=$remotedbpass psql --host=$remotedburl --port=$remotedbport --username=$admin_username -v "ON_ERROR_STOP=1" $dbname -c \
-          "select pid, usename, pg_blocking_pids(pid) as blocked_by, query as blocked_query from pg_stat_activity where cardinality(pg_blocking_pids(pid)) > 0;"
+          "select pid, usename, pg_blocking_pids(pid) as blocked_by from pg_stat_activity where cardinality(pg_blocking_pids(pid)) > 0;"
     fi
 fi
 
