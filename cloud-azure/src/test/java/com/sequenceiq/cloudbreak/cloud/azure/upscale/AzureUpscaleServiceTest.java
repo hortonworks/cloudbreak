@@ -16,6 +16,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -54,6 +56,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudImageException;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -224,6 +227,35 @@ public class AzureUpscaleServiceTest {
         assertThat(cloudResourceList).extracting(CloudResource::getParameters).extracting(map -> map.get(PRIVATE_ID)).containsExactly(1L);
         verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(false), any());
         verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(any(), eq(true), any());
+    }
+
+    @Test
+    public void testUpscaleWhenSourceImageSignAttemptedAndFails() {
+        reset(azureUtils);
+        when(azureUtils.getStackName(any(CloudContext.class))).thenReturn(STACK_NAME);
+        CloudContext cloudContext = createCloudContext();
+        CloudCredential cloudCredential = mock(CloudCredential.class);
+        when(cloudCredential.getParameters()).thenReturn(Map.of("subscriptionId", "subscriptionId"));
+        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
+        CloudResource template = createCloudResource(TEMPLATE, ResourceType.ARM_TEMPLATE);
+        List<CloudResource> resources = List.of(createCloudResource("volumes", ResourceType.AZURE_VOLUMESET), template);
+
+        Map<String, String> packageVersions = Map.of(ImagePackageVersion.SOURCE_IMAGE.getKey(), "cloudera:cdp-7_2_17:runtime-7_2_17:200.46967063.1701370975");
+        Image image = new Image("azureImage.vhd", null, null, null, null, null, null, packageVersions, null, null);
+        when(stack.getImage()).thenReturn(image);
+        AzureMarketplaceImage azureMpImage = new AzureMarketplaceImage("cloudera", "7_2_17", "runtime-7_2_17", "200.46967063.1701370975");
+        when(azureMarketplaceImageProviderService.getSourceImage(eq(image))).thenReturn(azureMpImage);
+        when(azureImageFormatValidator.isMarketplaceImageFormat(eq(image))).thenReturn(false);
+        when(azureImageFormatValidator.hasSourceImagePlan(eq(image))).thenReturn(true);
+        doThrow(new CloudImageException("")).when(azureImageTermsSignerService).signImageTermsIfAllowed(any(), any(), eq(azureMpImage), any());
+
+        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class, () -> underTest.upscale(ac, stack, resources, azureStackView, client,
+                adjustmentTypeWithThreshold));
+        assertFalse(exception instanceof CloudImageException, "Should not fallback in case of source image signing");
+
+        verify(azureImageTermsSignerService).signImageTermsIfAllowed(eq(stack), eq(client), eq(azureMpImage), isNull());
+        verify(azureTemplateDeploymentService, never()).getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE);
     }
 
     @Test

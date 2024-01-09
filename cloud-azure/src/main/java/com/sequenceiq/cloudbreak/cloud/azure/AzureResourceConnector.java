@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudImageException;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -183,10 +184,15 @@ public class AzureResourceConnector extends AbstractResourceConnector {
 
     private void signSourceImageIfExists(CloudStack stack, AzureCredentialView azureCredentialView, AzureClient client, Image stackImage,
             boolean hasSourceImagePlan) {
-        if (hasSourceImagePlan) {
-            AzureMarketplaceImage sourceImage = azureMarketplaceImageProviderService.getSourceImage(stackImage);
-            LOGGER.debug("Image has a source image plan, attempting to sign source image: {}", sourceImage.toString());
-            azureImageTermsSignerService.signImageTermsIfAllowed(stack, client, sourceImage, azureCredentialView.getSubscriptionId());
+        try {
+            if (hasSourceImagePlan) {
+                AzureMarketplaceImage sourceImage = azureMarketplaceImageProviderService.getSourceImage(stackImage);
+                LOGGER.debug("Image has a source image plan, attempting to sign source image: {}", sourceImage.toString());
+                azureImageTermsSignerService.signImageTermsIfAllowed(stack, client, sourceImage, azureCredentialView.getSubscriptionId());
+            }
+        } catch (CloudImageException e) {
+            LOGGER.debug("Failed to sign source image: {}. Unboxing exception, because we have no fallback path for this case.", e.getMessage());
+            throw new CloudConnectorException(e.getMessage());
         }
     }
 
