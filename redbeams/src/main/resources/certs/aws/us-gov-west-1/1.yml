@@ -17,3 +17,5 @@ cert: |-
   BFr6JV1x8VLbePblHd0V1MwDdRWeAwIwarWfOVdB1ijrwzjROzCwE0uBkHYUPr0Z
   vgwdtlsnwDw9TnjsBrTJkQ0aS8c0Ahl1
   -----END CERTIFICATE-----
+fingerprint: 0c65ee235044880586052e27f119f1df02871665
+deprecated: false

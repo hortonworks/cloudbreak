@@ -24,3 +24,5 @@ cert: |-
   8Zmdbpv8xnUA+oo/QdLLX+eJP/+8tdeDdB6rYFKpJmC2B3EnaKS4X4UpxZJFAgig
   oB6q5jNJ5onkWIfx8luNdbagKSFZXHhSO8KP
   -----END CERTIFICATE-----
+fingerprint: d1e951aadadac8705db2b764491ee08c868de2f9
+deprecated: false
