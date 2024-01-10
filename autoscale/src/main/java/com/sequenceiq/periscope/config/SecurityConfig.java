@@ -113,9 +113,9 @@ public class SecurityConfig {
                 req.requestMatchers(AntPathRequestMatcher.antMatcher(API_ROOT_CONTEXT + "/v1/yarn_recommendation/**")).authenticated();
                 req.requestMatchers(AntPathRequestMatcher.antMatcher(API_ROOT_CONTEXT + "/authorization/**")).authenticated();
                 req.requestMatchers(AntPathRequestMatcher.antMatcher(API_ROOT_CONTEXT + "/openapi.json")).permitAll();
-                req.requestMatchers(AntPathRequestMatcher.antMatcher("/info")).permitAll();
-                req.requestMatchers(AntPathRequestMatcher.antMatcher("/health")).permitAll();
-                req.requestMatchers(AntPathRequestMatcher.antMatcher("/metrics")).permitAll();
+                req.requestMatchers(AntPathRequestMatcher.antMatcher("/info/**")).permitAll();
+                req.requestMatchers(AntPathRequestMatcher.antMatcher("/health/**")).permitAll();
+                req.requestMatchers(AntPathRequestMatcher.antMatcher("/metrics/**")).permitAll();
                 req.requestMatchers(AntPathRequestMatcher.antMatcher(API_ROOT_CONTEXT + "/**")).denyAll();
             });
             http.csrf(AbstractHttpConfigurer::disable);

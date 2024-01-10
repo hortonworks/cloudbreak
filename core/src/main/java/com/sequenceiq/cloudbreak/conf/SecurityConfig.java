@@ -128,9 +128,9 @@ public class SecurityConfig {
                 req.requestMatchers(AntPathRequestMatcher.antMatcher(FLOW_PUBLIC_API)).authenticated();
                 req.requestMatchers(AntPathRequestMatcher.antMatcher(AUTHORIZATION_API)).authenticated();
                 req.requestMatchers(AntPathRequestMatcher.antMatcher(API_ROOT_CONTEXT + "/openapi.json")).permitAll();
-                req.requestMatchers(AntPathRequestMatcher.antMatcher("/info")).permitAll();
-                req.requestMatchers(AntPathRequestMatcher.antMatcher("/health")).permitAll();
-                req.requestMatchers(AntPathRequestMatcher.antMatcher("/metrics")).permitAll();
+                req.requestMatchers(AntPathRequestMatcher.antMatcher("/info/**")).permitAll();
+                req.requestMatchers(AntPathRequestMatcher.antMatcher("/health/**")).permitAll();
+                req.requestMatchers(AntPathRequestMatcher.antMatcher("/metrics/**")).permitAll();
                 req.requestMatchers(AntPathRequestMatcher.antMatcher(API_ROOT_CONTEXT + "/**")).denyAll();
             });
             http.csrf(AbstractHttpConfigurer::disable);
