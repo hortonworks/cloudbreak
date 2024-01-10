@@ -1,0 +1,319 @@
+syntax = "proto3";
+
+package cdlcrud;
+
+option java_package = "com.cloudera.thunderhead.service.cdlcrud";
+option java_outer_classname = "CdlCrudProto";
+
+import "version.proto";
+import "options.proto";
+import "resources.proto";
+
+// For future compatibility, all rpcs must take a request and return a response
+// even if there is initially no content for these messages.
+service CdlCrud {
+
+  // Create a Datalake
+  rpc CreateDatalake (CreateDatalakeRequest)
+      returns (CreateDatalakeResponse) {}
+
+  // Delete a Datalake
+  rpc DeleteDatalake (DeleteDatalakeRequest)
+      returns (DeleteDatalakeResponse) {}
+
+  // Describe a Datalake
+  rpc DescribeDatalake (DescribeDatalakeRequest)
+      returns (DescribeDatalakeResponse) {}
+
+  // Describe a Datalake
+  rpc FindDatalake (FindDatalakeRequest)
+      returns (DatalakeResponse) {}
+
+  // Describe Datalake Services
+  rpc DescribeServices (DescribeServicesRequest)
+      returns (DescribeServicesResponse) {}
+}
+// Database availability type
+message DatabaseAvailabilityType {
+  enum Value {
+    // Field is not set
+    UNSET = 0;
+    // None
+    NONE = 1;
+    // Not Highly Available
+    NON_HA = 2;
+    // Highly Available
+    HA = 3;
+  }
+}
+
+// Status of the Datalake
+message StatusType {
+  enum Value {
+    UNSET = 0;
+    REQUESTED = 1;
+    PROVISIONING = 2;
+    PROVISIONED = 3;
+    PROVISIONING_FAILED = 4;
+    RUNNING = 5;
+    STOPPED = 6;
+    UPGRADING = 7;
+    DELETING = 8;
+    DELETED = 9;
+    DELETE_FAILED = 10;
+    UNKNOWN = 11;
+  }
+}
+
+// Information on each Instance Group
+message InstanceGroup {
+  // Name of the Instance Group
+  string name = 1;
+  // List of instances
+  repeated Instance instances = 2;
+}
+
+message Instance {
+  // ID of the Instance Group
+  string id = 1;
+  // State of the Instance Group
+  string state = 2;
+  // FQDN for Discovery
+  string discoveryFQDN = 3;
+  // Private IP of the Instance Group
+  string privateIP = 4;
+  // Public IP of the Instance Group (N/A if unavailable)
+  string publicIP = 5;
+  // Rack ID (if it exists)
+  string rackID = 6;
+  // Subnet ID
+  string subnetID = 7;
+  // Availability Zone
+  string availabilityZone = 8;
+}
+
+// Information on each Endpoint
+message Endpoint {
+  // Service Name of the Endpoint
+  string serviceName = 1;
+  // Service URL of the Endpoint
+  string serviceURL = 2;
+}
+
+// Network information of the Datalake
+message NetworkInfo {
+  // Security Groups associated with Datalake
+  repeated string securityGroups = 1;
+  // Virtual Network associated with Datalake
+  string virtualNetwork = 2;
+  // Subnets associated with Datalake
+  repeated string subnets = 3;
+  // Whether an existing Virtual Network is being used
+  bool existingVirtualNetwork = 4;
+}
+
+// Database information of the Datalake
+message DatabaseInfo {
+  // CRN of the database
+  string crn = 1;
+  // Name of the database
+  string databaseName = 2;
+  // Created date of the database
+  int64 created = 3 [(options.FieldExtension.datetime) = true];
+  // Whether SSL mode is enabled or not
+  bool sslModeEnabled = 4;
+  // which is the availability type of the database
+  DatabaseAvailabilityType.Value availabilityType = 5;
+  // Database instance host
+  string host = 7;
+  // Database instance port
+  uint32 port = 8;
+  // Secret engine path
+  string secretEnginePath = 9;
+  // Connection username path in the secrets manager
+  string connectionUsernamePath = 10;
+  // Connection password path in the secrets manager
+  string connectionPasswordPath = 11;
+}
+
+// Definition of an endpoint structure
+message EndpointInfo {
+  // Name of the endpoint
+  string name = 1;
+  // Version of the service
+  string version = 2;
+  // Service-specific configuration key-value pairs
+  repeated Config serviceConfigs = 3 [(options.FieldExtension.sensitive) = true];
+  // List of endpoint hosts within the endpoint
+  repeated EndpointHost endpointHosts = 4;
+  // Type of endpoint service
+  string serviceType = 5;
+}
+
+// Definition of the config key-value pairs
+message Config {
+  // Key of the configuration entry
+  string key = 1;
+  // Value of the configuration entry
+  string value = 2;
+}
+
+// Definition of the endpoint host structure
+message EndpointHost {
+  // URI to access the endpoint host
+  string uri = 1;
+  // Host-specific configuration key-value pairs
+  repeated Config endPointHostConfigs = 2 [(options.FieldExtension.sensitive) = true];
+  // Type of the endpoint host
+  string type = 3;
+}
+
+// Create Datalake request
+message CreateDatalakeRequest {
+  // Name of the Datalake
+  string datalakeName = 1;
+  // Environment name in which the cluster is created
+  string environmentName = 2;
+  // The database availability type
+  optional DatabaseAvailabilityType.Value databaseAvailabilityType = 3;
+  // Tags in key / value format
+  map<string,string> tags = 4;
+  // The database engine version
+  optional string databaseEngineVersion = 5;
+  // Whether Ranger raz is enabled or not
+  optional bool enableRangerRaz = 6;
+  // Whether multi availability zones is enabled or not
+  optional bool enableMultiAz = 7;
+  // Cloudera runtime version
+  string clouderaRuntimeVersion = 8;
+  // Custom Layout
+  optional string layout = 9;
+  // Configurations specfic for AWS
+  optional AwsConfiguration awsConfiguration = 10;
+}
+
+// Create Datalake response
+message CreateDatalakeResponse {
+  // CRN of the Datalake
+  string crn = 1;
+  // Status of the Datalake
+  string status = 2;
+  // Name of the Datalake
+  string datalakeName = 3;
+  // CRN of the environment in which the cluster is created
+  string environmentCrn = 4;
+  // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
+  uint64 creationDateMs = 5;
+  // Status reason
+  string statusReason = 6;
+  // Whether multi availability zones is enabled or not
+  bool enableRangerRaz = 7;
+  // Whether multi availability zones is enabled or not
+  bool enableMultiAz = 8;
+}
+
+// Delete Datalake request
+message DeleteDatalakeRequest {
+  // Name or CRN of the Datalake
+  string datalake = 1;
+}
+
+// Delete Datalake response
+message DeleteDatalakeResponse {
+  // CRN of the Datalake
+  string crn = 1;
+  // Status of the Datalake
+  string status = 2;
+}
+
+// Describe Datalake request
+message DescribeDatalakeRequest {
+  // Name or CRN of the Datalake
+  string datalake = 1;
+}
+
+// Describe Datalake response
+message DescribeDatalakeResponse {
+  // CRN of the Datalake
+  string crn = 1;
+  // Name of the Datalake
+  string name = 2;
+  // Status of the Datalake
+  StatusType.Value status = 3;
+  // Shape of the Datalake
+  string shape = 4;
+  // Environment CRN associated with Datalake
+  string environmentCrn = 5;
+  // Cloud Platform
+  string cloudPlatform = 6;
+  // Instance Groups associated with Datalake
+  repeated InstanceGroup instanceGroups = 7;
+  // Service endpoint info
+  repeated Endpoint endpoints = 8;
+  // Network information of Datalake
+  NetworkInfo network = 9;
+  // Account ID
+  string accountID = 10;
+  // Runtime Version
+  string runtimeVersion = 11;
+  // Tags associated with Datalake
+  map<string, string> tags = 12;
+  // Created date
+  int64 created = 13 [(options.FieldExtension.datetime) = true];
+  // Deleted date (if it exists)
+  string deleted = 14;
+  // Ranger RAZ enabled or not
+  bool rangerRazEnabled = 15;
+  // Database Details of Datalake
+  DatabaseInfo databaseDetails = 16;
+  // Status reason
+  string statusReason = 17;
+  // Whether multi availability zones is enabled or not
+  bool multiAzEnabled = 18;
+  // Geographic location code where cluster was created
+  string region = 19;
+}
+
+// Find Datalake Request
+message FindDatalakeRequest {
+  // Name or CRN of the Datalake
+  string datalake = 1;
+  string accountID = 2;
+  string environment = 3;
+}
+
+// Find Datalake response
+message DatalakeResponse {
+  // CRN of the Datalake
+  string crn = 1;
+  // Name of the Datalake
+  string name = 2;
+  // Status of the Datalake
+  string status = 3;
+}
+
+// Describe Services Request
+message DescribeServicesRequest {
+  // CRN or Name of the Datalake
+  string datalake = 1;
+}
+
+// Describe Services Response
+message DescribeServicesResponse {
+  // Name of the Datalake
+  string name = 1;
+  // CRN of the datalake
+  string crn = 2;
+  // Collection of endpoint objects
+  repeated EndpointInfo endpoints = 3;
+  // Collection of global configuration key-value pairs
+  repeated Config configs = 4 [(options.FieldExtension.sensitive) = true];
+  // Version of the datalake
+  string version = 5;
+}
+
+// Aws Configurations
+message AwsConfiguration {
+  // AWS bucket path
+  string storageBucketLocation = 1;
+}

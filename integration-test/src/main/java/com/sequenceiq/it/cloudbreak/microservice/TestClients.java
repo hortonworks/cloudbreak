@@ -79,7 +79,6 @@ public class TestClients {
             EnvironmentClient environmentClient = createEnvironmentClient(cloudbreakUser);
             SdxClient sdxClient = createSdxClient(cloudbreakUser);
             UmsClient umsClient = createUmsClient();
-            SdxSaasItClient sdxSaasItClient = createSdxSaasClient();
             AuthDistributorClient authDistributorClient = createAuthDistributorClient();
             RedbeamsClient redbeamsClient = createRedbeamsClient(cloudbreakUser);
             PeriscopeClient periscopeClient = createPeriscopeClient(cloudbreakUser);
@@ -90,7 +89,6 @@ public class TestClients {
                     SdxClient.class, sdxClient,
                     RedbeamsClient.class, redbeamsClient,
                     UmsClient.class, umsClient,
-                    SdxSaasItClient.class, sdxSaasItClient,
                     AuthDistributorClient.class, authDistributorClient,
                     PeriscopeClient.class, periscopeClient);
             clients.put(cloudbreakUser.getAccessKey(), clientMap);
@@ -130,10 +128,6 @@ public class TestClients {
 
     private UmsClient createUmsClient() {
         return new UmsClient(serverProperties.getUmsHost(), serverProperties.getUmsPort(), regionAwareInternalCrnGeneratorFactory);
-    }
-
-    private SdxSaasItClient createSdxSaasClient() {
-        return new SdxSaasItClient(serverProperties.getUmsHost(), regionAwareInternalCrnGeneratorFactory);
     }
 
     private synchronized AuthDistributorClient createAuthDistributorClient() {

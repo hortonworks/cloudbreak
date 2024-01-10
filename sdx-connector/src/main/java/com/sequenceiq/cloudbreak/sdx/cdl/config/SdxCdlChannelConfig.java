@@ -25,7 +25,7 @@ public class SdxCdlChannelConfig {
         return newManagedChannelWrapper(host, port);
     }
 
-    public ManagedChannelWrapper newManagedChannelWrapper(String host, int port) {
+    public static ManagedChannelWrapper newManagedChannelWrapper(String host, int port) {
         return new ManagedChannelWrapper(
                 ManagedChannelBuilder.forAddress(host, port)
                         .usePlaintext()

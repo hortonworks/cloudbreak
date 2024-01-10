@@ -40,11 +40,11 @@ public class PlatformAwareSdxConnector {
 
     public AttemptResult<Object> getAttemptResultForDeletion(String environmentCrn, String environmentName, Set<String> sdxCrns) {
         return getAttemptResultForPolling(platformDependentServiceMap.get(calculatePlatform(sdxCrns))
-                        .getPollingResultForDeletion(environmentCrn, environmentName, sdxCrns), "SDX deletion is failed for these: %s");
+                .getPollingResultForDeletion(environmentCrn, environmentName, sdxCrns), "SDX deletion is failed for these: %s");
     }
 
     public Set<String> listSdxCrns(String environmentName, String environmentCrn) {
-        Set<String> saasSdxCrns = platformDependentServiceMap.get(TargetPlatform.SAAS).listSdxCrns(environmentName, environmentCrn);
+        Set<String> saasSdxCrns = platformDependentServiceMap.get(TargetPlatform.CDL).listSdxCrns(environmentName, environmentCrn);
         Set<String> paasSdxCrns = platformDependentServiceMap.get(TargetPlatform.PAAS).listSdxCrns(environmentName, environmentCrn);
         if (!paasSdxCrns.isEmpty() && !saasSdxCrns.isEmpty()) {
             throw new IllegalStateException(String.format("Environment %s should not have SDX from both PaaS and SaaS platform", environmentCrn));
@@ -58,7 +58,7 @@ public class PlatformAwareSdxConnector {
 
     private TargetPlatform calculatePlatform(Set<String> sdxCrns) {
         if (sdxCrns.stream().allMatch(crn -> Crn.ResourceType.INSTANCE.equals(Crn.safeFromString(crn).getResourceType()))) {
-            return TargetPlatform.SAAS;
+            return TargetPlatform.CDL;
         } else if (sdxCrns.stream().allMatch(crn -> Crn.ResourceType.DATALAKE.equals(Crn.safeFromString(crn).getResourceType()))) {
             return TargetPlatform.PAAS;
         }

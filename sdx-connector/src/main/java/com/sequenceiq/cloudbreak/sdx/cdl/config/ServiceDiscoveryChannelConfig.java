@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.sdx.saas.client.config;
+package com.sequenceiq.cloudbreak.sdx.cdl.config;
 
 import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 
@@ -12,19 +12,19 @@ import io.grpc.ManagedChannelBuilder;
 import io.netty.util.internal.StringUtil;
 
 @Configuration
-public class SdxSaasChannelConfig {
+public class ServiceDiscoveryChannelConfig {
 
-    @Value("${saas.sdx.host:localhost}")
+    @Value("${saas.servicediscovery.host:localhost}")
     private String host;
 
-    @Value("${saas.sdx.port:8982}")
+    @Value("${saas.servicediscovery.port:8982}")
     private int port;
 
-    @Value("${saad.sdx.grpc.timeout.sec:120}")
+    @Value("${saas.servicediscovery.grpc.timeout.sec:120}")
     private long grpcTimeoutSec;
 
     @Bean
-    public ManagedChannelWrapper sdxSaasManagedChannelWrapper() {
+    public ManagedChannelWrapper discoveryManagedChannelWrapper() {
         return newManagedChannelWrapper(host, port);
     }
 
