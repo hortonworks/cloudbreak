@@ -376,6 +376,25 @@ class AzureDatabaseServerParameterDecoratorTest {
     }
 
     @Test
+    public void testValidateWhenValidationShouldHappenAndUsingNonHaShouldThrowBadRequestException() {
+        DatabaseServerV4StackRequest databaseServerV4StackRequest = mock(DatabaseServerV4StackRequest.class);
+        DatabaseServerParameter databaseServerParameter = mock(DatabaseServerParameter.class);
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
+        AzureDatabaseServerV4Parameters azureDatabaseServerV4Parameters = mock(AzureDatabaseServerV4Parameters.class);
+
+        when(databaseServerV4StackRequest.getAzure()).thenReturn(azureDatabaseServerV4Parameters);
+        when(databaseServerParameter.getAvailabilityType()).thenReturn(DatabaseAvailabilityType.NON_HA);
+        when(environmentResponse.getAccountId()).thenReturn("accountId");
+        when(entitlementService.localDevelopment(anyString())).thenReturn(false);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () ->
+                underTest.validate(databaseServerV4StackRequest, databaseServerParameter, environmentResponse, true));
+
+        Assert.assertEquals(exception.getMessage(),
+                "Non HA Database is not supported for Azure multi availability zone Data Hubs.");
+    }
+
+    @Test
     public void testValidateWhenValidationShouldHappenAndUsingMultiAzAndNonFlexibleServerShouldThrowBadRequestException() {
         DatabaseServerV4StackRequest databaseServerV4StackRequest = mock(DatabaseServerV4StackRequest.class);
         DatabaseServerParameter databaseServerParameter = mock(DatabaseServerParameter.class);

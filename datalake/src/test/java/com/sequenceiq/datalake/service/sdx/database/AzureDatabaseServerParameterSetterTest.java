@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.sdx.database;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.SAME_ZONE;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.ZONE_REDUNDANT;
 import static com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType.HA;
+import static com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType.NON_HA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -226,6 +227,28 @@ public class AzureDatabaseServerParameterSetterTest {
                 underTest.validate(databaseServerV4StackRequest, sdxCluster, environmentResponse, "initiatorUserCrn"));
 
         assertEquals(exception.getMessage(), "Azure Data Lake requested in multi availability zone setup must use external database.");
+    }
+
+    @Test
+    public void testValidateWhenValidationShouldHappenAndUsingNonHaShouldThrowBadRequestException() {
+        DatabaseServerV4StackRequest databaseServerV4StackRequest = mock(DatabaseServerV4StackRequest.class);
+        SdxCluster sdxCluster = mock(SdxCluster.class);
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
+        AzureDatabaseServerV4Parameters azureDatabaseServerV4Parameters = mock(AzureDatabaseServerV4Parameters.class);
+        SdxDatabase sdxDatabase = mock(SdxDatabase.class);
+
+        when(databaseServerV4StackRequest.getAzure()).thenReturn(azureDatabaseServerV4Parameters);
+        when(sdxCluster.isEnableMultiAz()).thenReturn(true);
+        when(sdxDatabase.hasExternalDatabase()).thenReturn(true);
+        when(sdxDatabase.getDatabaseAvailabilityType()).thenReturn(NON_HA);
+        when(sdxCluster.getSdxDatabase()).thenReturn(sdxDatabase);
+        when(environmentResponse.getAccountId()).thenReturn("accountId");
+        when(entitlementService.localDevelopment(anyString())).thenReturn(false);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () ->
+                underTest.validate(databaseServerV4StackRequest, sdxCluster, environmentResponse, "initiatorUserCrn"));
+
+        assertEquals(exception.getMessage(), "Non HA Database is not supported for Azure multi availability zone Data Hubs.");
     }
 
     @Test
