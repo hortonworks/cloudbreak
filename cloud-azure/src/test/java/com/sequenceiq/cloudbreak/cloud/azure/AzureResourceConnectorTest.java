@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -33,6 +36,8 @@ import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudImageException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -267,6 +272,30 @@ public class AzureResourceConnectorTest {
         verify(azureMarketplaceImageProviderService, times(2)).getSourceImage(eq(imageModel));
         verify(azureImageTermsSignerService).signImageTermsIfAllowed(any(), any(), eq(azureMarketplaceImage), any());
         verify(azureTemplateBuilder).build(eq(STACK_NAME), any(), any(), any(), any(), eq(stack), eq(AzureInstanceTemplateOperation.PROVISION),
+                eq(azureMarketplaceImage));
+    }
+
+    @Test
+    public void testWhenSourceImageExistsThenSignFails() {
+        AzureMarketplaceImage azureMarketplaceImage = new AzureMarketplaceImage("cloudera", "my-offer", "my-plan", "my-version", true);
+
+        when(azureImageFormatValidator.isMarketplaceImageFormat(any(Image.class))).thenReturn(false);
+        when(azureImageFormatValidator.hasSourceImagePlan(any(Image.class))).thenReturn(true);
+        when(azureMarketplaceImageProviderService.getSourceImage(imageModel)).thenReturn(azureMarketplaceImage);
+        doThrow(new CloudImageException("")).when(azureImageTermsSignerService).signImageTermsIfAllowed(any(), any(), eq(azureMarketplaceImage), any());
+
+        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(ADJUSTMENT_TYPE, THRESHOLD);
+        CloudConnectorException exception =
+                assertThrows(CloudConnectorException.class, () -> underTest.launch(ac, stack, notifier, adjustmentTypeWithThreshold));
+        assertFalse(exception instanceof CloudImageException, "Should not fallback in case of source image signing");
+
+        verify(azureComputeResourceService, never()).buildComputeResourcesForLaunch(eq(ac), eq(stack), eq(adjustmentTypeWithThreshold),
+                eq(instances), any());
+        verify(azureCloudResourceService, never()).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
+        verify(azureMarketplaceImageProviderService, times(0)).get(imageModel);
+        verify(azureMarketplaceImageProviderService, times(1)).getSourceImage(eq(imageModel));
+        verify(azureImageTermsSignerService).signImageTermsIfAllowed(any(), any(), eq(azureMarketplaceImage), any());
+        verify(azureTemplateBuilder, never()).build(eq(STACK_NAME), any(), any(), any(), any(), eq(stack), eq(AzureInstanceTemplateOperation.PROVISION),
                 eq(azureMarketplaceImage));
     }
 

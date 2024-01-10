@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudImageException;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.exception.RolledbackResourcesException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -171,12 +172,23 @@ public class AzureUpscaleService {
     }
 
     private void attemptToSignImageIfApplicable(AuthenticatedContext ac, CloudStack stack, AzureClient client, Image stackImage) {
-        if (azureImageFormatValidator.isMarketplaceImageFormat(stackImage) || azureImageFormatValidator.hasSourceImagePlan(stackImage)) {
+        boolean hasSourceImagePlan = azureImageFormatValidator.hasSourceImagePlan(stackImage);
+        if (azureImageFormatValidator.isMarketplaceImageFormat(stackImage) || hasSourceImagePlan) {
             AzureMarketplaceImage azureMarketplaceImage = azureImageFormatValidator.isMarketplaceImageFormat(stackImage) ?
                     azureMarketplaceImageProviderService.get(stackImage) : azureMarketplaceImageProviderService.getSourceImage(stackImage);
             AzureCredentialView azureCredentialView = new AzureCredentialView(ac.getCloudCredential());
             LOGGER.debug("Attempt to sign Azure Marketplace image {}", azureMarketplaceImage.toString());
-            azureImageTermsSignerService.signImageTermsIfAllowed(stack, client, azureMarketplaceImage, azureCredentialView.getSubscriptionId());
+            try {
+                azureImageTermsSignerService.signImageTermsIfAllowed(stack, client, azureMarketplaceImage, azureCredentialView.getSubscriptionId());
+            } catch (CloudImageException e) {
+                if (hasSourceImagePlan) {
+                    LOGGER.debug("Failed to sign source image: {}. Unboxing exception, because we have no fallback path for this case.", e.getMessage());
+                    throw new CloudConnectorException(e.getMessage());
+                } else {
+                    LOGGER.debug("Failed to sign marketplace image: {}. Rethrowing to continue fallback handling.", e.getMessage());
+                    throw e;
+                }
+            }
         }
     }
 
