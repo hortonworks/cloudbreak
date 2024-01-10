@@ -85,6 +85,9 @@ public class FlowUtil {
     private void waitForFlow(FlowPublicEndpoint flowEndpoint, String crn, String flowChainId, String flowId, RunningParameter runningParameter) {
         boolean flowRunning = true;
         boolean flowFailed = false;
+        String flowType = "";
+        String flowCurrentState = "";
+        String flowReason = "";
 
         int retryCount = 0;
         int failureCount = 0;
@@ -98,20 +101,28 @@ public class FlowUtil {
                     FlowCheckResponse flowCheckResponse = flowEndpoint.hasFlowRunningByChainId(flowChainId, crn);
                     flowRunning = flowCheckResponse.getHasActiveFlow();
                     flowFailed = flowCheckResponse.getLatestFlowFinalizedAndFailed();
+                    flowType = flowCheckResponse.getFlowType();
+                    flowCurrentState = flowCheckResponse.getCurrentState();
+                    flowReason = flowCheckResponse.getReason();
                 } else if (StringUtils.isNoneBlank(flowId)) {
                     LOGGER.info("Waiting for flow: '{}' at resource: '{}', retry count: '{}'", flowId, crn, retryCount);
                     FlowCheckResponse flowCheckResponse = flowEndpoint.hasFlowRunningByFlowId(flowId, crn);
                     flowRunning = flowCheckResponse.getHasActiveFlow();
                     flowFailed = flowCheckResponse.getLatestFlowFinalizedAndFailed();
+                    flowType = flowCheckResponse.getFlowType();
+                    flowCurrentState = flowCheckResponse.getCurrentState();
+                    flowReason = flowCheckResponse.getReason();
                 } else {
                     LOGGER.info("Flow id and flow chain id are empty so flow is not running at resource: '{}'", crn);
                     flowRunning = false;
                 }
             } catch (Exception ex) {
                 if (failureCount >= maxFailureRetry) {
-                    LOGGER.error("Error during polling flow. Crn={}, FlowId={}, FlowChainId={}, Message={}", crn, flowId, flowChainId, ex.getMessage(), ex);
-                    throw new TestFailException(String.format(" Error during polling flow. Crn=%s, FlowId=%s , FlowChainId=%s, Message=%s ",
-                            crn, flowId, flowChainId, ex.getMessage()));
+                    LOGGER.error("Error during polling flow. Crn={}, FlowId={}, FlowChainId={}, FlowType={}, FlowCurrentState={}, FlowReason={}, Message={}",
+                            crn, flowId, flowChainId, flowType, flowCurrentState, flowReason, ex.getMessage(), ex);
+                    throw new TestFailException(String.format(" Error during polling flow. Crn=%s, FlowId=%s , FlowChainId=%s, FlowType=%s, " +
+                                    "FlowCurrentState=%s, FlowReason=%s, Message=%s ",
+                            crn, flowId, flowChainId, flowType, flowCurrentState, flowReason, ex.getMessage()));
                 } else {
                     LOGGER.info("Retrying after failure. Failure count {}", ++failureCount);
                 }
@@ -119,21 +130,24 @@ public class FlowUtil {
             retryCount++;
         }
         if (timeoutChecker.checkTimeout()) {
-            String errorMessage = String.format("Test timed out, flow did not finish in %s. Crn=%s, FlowId=%s, FlowChainId=%s",
-                    timeoutChecker, crn, flowId, flowChainId);
+            String errorMessage = String.format("Test timed out, flow did not finish in %s. Crn=%s, FlowId=%s, FlowChainId=%s, FlowType=%s, " +
+                            "FlowCurrentState=%s, FlowReason=%s",
+                    timeoutChecker, crn, flowId, flowChainId, flowType, flowCurrentState, flowReason);
             LOGGER.error(errorMessage);
             throw new TestFailException(errorMessage);
         }
         if (flowFailed && runningParameter.isWaitForFlowSuccess()) {
-            LOGGER.error("Flow has been finalized with failed status. Crn={}, FlowId={}, FlowChainId={}", crn, flowId, flowChainId);
-            throw new TestFailException(String.format(" Flow has been finalized with failed status. Crn=%s, FlowId=%s , FlowChainId=%s ", crn, flowId,
-                    flowChainId));
+            LOGGER.error("Flow has been finalized with failed status. Crn={}, FlowId={}, FlowChainId={}, FlowType={}, FlowCurrentState={}, FlowReason={}",
+                    crn, flowId, flowChainId, flowType, flowCurrentState, flowReason);
+            throw new TestFailException(String.format(" Flow has been finalized with failed status. Crn=%s, FlowId=%s, FlowChainId=%s, FlowType=%s, " +
+                            "FlowCurrentState=%s, FlowReason=%s", crn, flowId, flowChainId, flowType, flowCurrentState, flowReason));
         }
         if (!flowFailed && runningParameter.isWaitForFlowFail()) {
-            LOGGER.error("Flow has been finalized with success status. Crn={}, FlowId={}, FlowChainId={}", crn, flowId, flowChainId);
+            LOGGER.error("Flow has been finalized with success status. Crn={}, FlowId={}, FlowChainId={}, FlowType={}, FlowCurrentState={}, FlowReason={}",
+                    crn, flowId, flowChainId, flowType, flowCurrentState, flowReason);
             throw new TestFailException(
-                    String.format(" Flow has been finalized with success status but it was expected to fail. Crn=%s, FlowId=%s , FlowChainId=%s ", crn, flowId,
-                    flowChainId));
+                    String.format(" Flow has been finalized with success status but it was expected to fail. Crn=%s, FlowId=%s, FlowChainId=%s, " +
+                            "FlowType=%s, FlowCurrentState=%s, FlowReason=%s", crn, flowId, flowChainId, flowType, flowCurrentState, flowReason));
         }
     }
 
