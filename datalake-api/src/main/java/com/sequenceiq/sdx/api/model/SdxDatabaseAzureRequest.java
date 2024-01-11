@@ -31,4 +31,12 @@ public class SdxDatabaseAzureRequest {
     public void setFlexibleServerDelegatedSubnetId(String flexibleServerDelegatedSubnetId) {
         this.flexibleServerDelegatedSubnetId = flexibleServerDelegatedSubnetId;
     }
+
+    @Override
+    public String toString() {
+        return "SdxDatabaseAzureRequest{" +
+                "azureDatabaseType=" + azureDatabaseType +
+                ", flexibleServerDelegatedSubnetId='" + flexibleServerDelegatedSubnetId + '\'' +
+                '}';
+    }
 }

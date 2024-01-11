@@ -58,4 +58,14 @@ public class SdxDatabaseRequest {
     public void setSdxDatabaseAzureRequest(SdxDatabaseAzureRequest sdxDatabaseAzureRequest) {
         this.sdxDatabaseAzureRequest = sdxDatabaseAzureRequest;
     }
+
+    @Override
+    public String toString() {
+        return "SdxDatabaseRequest{" +
+                "create=" + create +
+                ", availabilityType=" + availabilityType +
+                ", databaseEngineVersion='" + databaseEngineVersion + '\'' +
+                ", sdxDatabaseAzureRequest=" + sdxDatabaseAzureRequest +
+                '}';
+    }
 }

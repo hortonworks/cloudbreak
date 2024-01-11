@@ -92,6 +92,10 @@ public class AzureDatabaseServerParameterDecorator implements DatabaseServerPara
                 String message = String.format("Azure Data Hub which requested in multi availability zone option must use external database.");
                 LOGGER.debug(message);
                 throw new BadRequestException(message);
+            } else if (NON_HA.equals(serverParameter.getAvailabilityType())) {
+                String message = String.format("Non HA Database is not supported for Azure multi availability zone Data Hubs.");
+                LOGGER.debug(message);
+                throw new BadRequestException(message);
             } else if (!FLEXIBLE_SERVER.equals(azure.getAzureDatabaseType())) {
                 String message = String.format("Azure Data Hub which requested in multi availability zone option must use Flexible server.");
                 LOGGER.debug(message);

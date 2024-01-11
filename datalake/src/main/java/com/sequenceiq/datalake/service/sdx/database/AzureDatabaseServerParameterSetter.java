@@ -6,7 +6,6 @@ import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.DISABLED;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.SAME_ZONE;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.ZONE_REDUNDANT;
 import static com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType.HA;
-import static com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType.NON_HA;
 
 import java.util.List;
 import java.util.Optional;
@@ -101,6 +100,10 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
                 String message = "Azure Data Lake requested in multi availability zone setup must use external database.";
                 LOGGER.debug(message);
                 throw new BadRequestException(message);
+            } else if (SdxDatabaseAvailabilityType.NON_HA.equals(sdxCluster.getSdxDatabase().getDatabaseAvailabilityType())) {
+                String message = String.format("Non HA Database is not supported for Azure multi availability zone Data Hubs.");
+                LOGGER.debug(message);
+                throw new BadRequestException(message);
             } else if (!FLEXIBLE_SERVER.equals(azure.getAzureDatabaseType())) {
                 String message = "Azure Data Lake requested in multi availability zone setup must use Flexible server.";
                 LOGGER.debug(message);
@@ -146,7 +149,7 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
             } else {
                 return SAME_ZONE;
             }
-        } else if (NON_HA.equals(availabilityType)) {
+        } else if (SdxDatabaseAvailabilityType.NON_HA.equals(availabilityType)) {
             return DISABLED;
         } else {
             throw unkownDatabaseAvailabilityType(availabilityType);
@@ -156,7 +159,7 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
     private boolean isGeoRedundantBackup(SdxDatabaseAvailabilityType availabilityType) {
         if (HA.equals(availabilityType)) {
             return geoRedundantBackupHa;
-        } else if (NON_HA.equals(availabilityType)) {
+        } else if (SdxDatabaseAvailabilityType.NON_HA.equals(availabilityType)) {
             return geoRedundantBackupNonHa;
         } else {
             throw unkownDatabaseAvailabilityType(availabilityType);
@@ -166,7 +169,7 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
     private int getBackupRetentionPeriod(SdxDatabaseAvailabilityType availabilityType) {
         if (HA.equals(availabilityType)) {
             return backupRetentionPeriodHa;
-        } else if (NON_HA.equals(availabilityType)) {
+        } else if (SdxDatabaseAvailabilityType.NON_HA.equals(availabilityType)) {
             return backupRetentionPeriodNonHa;
         } else {
             throw unkownDatabaseAvailabilityType(availabilityType);

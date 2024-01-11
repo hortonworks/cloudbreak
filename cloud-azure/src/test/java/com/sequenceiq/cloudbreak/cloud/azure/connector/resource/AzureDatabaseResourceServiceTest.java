@@ -252,6 +252,29 @@ class AzureDatabaseResourceServiceTest {
     }
 
     @Test
+    void shouldReturnDeletedDbServerButNotDeleteAccessPolicyWhenTerminateFlexibleDatabaseServerAndSingleResourceGroup() {
+        Map<String, Object> params = new HashMap<>();
+        params.put(AzureDatabaseType.AZURE_DATABASE_TYPE_KEY, AzureDatabaseType.FLEXIBLE_SERVER.name());
+        params.put("keyVaultUrl", "dummyKeyVaultUrl");
+        params.put("keyVaultResourceGroupName", "dummyKeyVaultResourceGroupName");
+        when(databaseStack.getDatabaseServer()).thenReturn(DatabaseServer.builder().withParams(params).build());
+        when(azureResourceGroupMetadataProvider.getResourceGroupUsage(any(DatabaseStack.class))).thenReturn(ResourceGroupUsage.SINGLE);
+        when(azureUtils.deleteDatabaseServer(any(), anyString(), anyBoolean())).thenReturn(Optional.empty());
+        List<CloudResource> cloudResources = List.of(buildResource(AZURE_DATABASE));
+
+        List<CloudResourceStatus> resourceStatuses = underTest.terminateDatabaseServer(ac, databaseStack, cloudResources, false, persistenceNotifier);
+
+        assertEquals(1, resourceStatuses.size());
+        assertEquals(AZURE_DATABASE, resourceStatuses.get(0).getCloudResource().getType());
+        assertEquals(DELETED, resourceStatuses.get(0).getStatus());
+        verify(azureUtils).deleteDatabaseServer(any(), eq(RESOURCE_REFERENCE), anyBoolean());
+        verify(client, never()).removeKeyVaultAccessPolicyForServicePrincipal("dummyKeyVaultResourceGroupName",
+                "dummyVaultName", "dummyPrincipalId");
+        verify(client, never()).deleteResourceGroup(anyString());
+        verify(persistenceNotifier).notifyDeletion(any(), any());
+    }
+
+    @Test
     void shouldUpgradeDatabaseWhenUpgradeDatabaseServerAndPrivateEndpoint() {
         DatabaseServer databaseServer = buildDatabaseServer();
 
