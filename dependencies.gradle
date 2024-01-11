@@ -7,13 +7,14 @@ ext {
 
   // Spring
   caffeineVersion = '3.1.8'
-  springBootVersion = '3.1.4'
-  springDataJpaFrameworkVersion = '3.1.4'
-  springFrameworkVersion = '6.0.12'
+  quartzVersion = '2.4.0-rc2'
+  springBootVersion = '3.1.7'
+  springDataJpaFrameworkVersion = '3.1.7'
+  springFrameworkVersion = '6.0.15'
   springKafkaVersion = '3.0.11'
   springRetryVersion = '2.0.3'
   springSecurityJwtVersion = '1.1.1.RELEASE'
-  springSecurityVersion = '6.1.4'
+  springSecurityVersion = '6.1.6'
   springStateMachineCoreVersion = '1.0.1.RELEASE'
   springVaultCoreVersion = '3.0.4'
 
@@ -61,7 +62,7 @@ ext {
   commonsBeanutilsVersion = '1.9.4'
 
   // Logging
-  logbackVersion = '1.4.11'
+  logbackVersion = '1.4.14'
   logbackJsonClassicVersion = '0.1.5'
   slf4jApiVersion = '2.0.7'
 

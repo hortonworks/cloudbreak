@@ -3,11 +3,7 @@
 set -e
 
 : ${SECURE_RANDOM:=true}
-: ${EXPOSE_JMX_METRICS:=false}
-: ${EXPOSE_JMX_METRICS_PORT:=20105}
-: ${EXPOSE_JMX_METRICS_CONFIG:=config.yaml}
 : ${TRUSTED_CERT_DIR:=/certs/trusted}
-: ${EXPOSE_JMX_BIND_ADDRESS:=0.0.0.0}
 : ${SERVICE_SPECIFIC_CERT_DIR:=/cloudbreak/certs}
 
 echo "Importing certificates to the default Java certificate  trust store."
@@ -39,9 +35,6 @@ echo "Starting the Cloudbreak application..."
 set -x
 if [ "$SECURE_RANDOM" == "false" ]; then
   CB_JAVA_OPTS="$CB_JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"
-fi
-if [ "$EXPOSE_JMX_METRICS" == "true" ]; then
-  CB_JAVA_OPTS="$CB_JAVA_OPTS -javaagent:/jmx_prometheus_javaagent.jar=$EXPOSE_JMX_BIND_ADDRESS:$EXPOSE_JMX_METRICS_PORT:$EXPOSE_JMX_METRICS_CONFIG"
 fi
 
 CB_JAVA_OPTS="$CB_JAVA_OPTS -Djavax.net.ssl.keyStore=NONE -Djavax.net.ssl.keyStoreType=PKCS11 -Djavax.net.ssl.trustStore=NONE -Djavax.net.ssl.trustStoreType=PKCS11"
