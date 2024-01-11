@@ -16,6 +16,7 @@ import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IM
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_FALLBACK_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_FALLBACK_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_FALLBACK_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_FALLBACK_START_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_PREPARATION_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_PREPARATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.LAUNCH_STACK_FAILED_EVENT;
@@ -38,6 +39,7 @@ import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.FI
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.GET_TLS_INFO_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.IMAGESETUP_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.IMAGE_CHECK_STATE;
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.IMAGE_FALLBACK_START_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.IMAGE_FALLBACK_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.INIT_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.PROVISIONING_FINISHED_STATE;
@@ -71,7 +73,8 @@ public class StackProvisionFlowConfig extends AbstractFlowConfiguration<StackPro
             .from(CREATE_CREDENTIAL_STATE).to(START_PROVISIONING_STATE).event(CREATE_CREDENTIAL_FINISHED_EVENT).failureEvent(CREATE_CREDENTIAL_FAILED_EVENT)
             .from(START_PROVISIONING_STATE).to(PROVISIONING_FINISHED_STATE).event(LAUNCH_STACK_FINISHED_EVENT).failureEvent(LAUNCH_STACK_FAILED_EVENT)
             .from(START_PROVISIONING_STATE).to(IMAGE_FALLBACK_STATE).event(IMAGE_FALLBACK_EVENT).failureEvent(LAUNCH_STACK_FAILED_EVENT)
-            .from(IMAGE_FALLBACK_STATE).to(IMAGESETUP_STATE).event(IMAGE_FALLBACK_FINISHED_EVENT).failureEvent(IMAGE_FALLBACK_FAILED_EVENT)
+            .from(IMAGE_FALLBACK_STATE).to(IMAGE_FALLBACK_START_STATE).event(IMAGE_FALLBACK_START_EVENT).failureEvent(IMAGE_FALLBACK_FAILED_EVENT)
+            .from(IMAGE_FALLBACK_START_STATE).to(IMAGESETUP_STATE).event(IMAGE_FALLBACK_FINISHED_EVENT).failureEvent(IMAGE_FALLBACK_FAILED_EVENT)
             .from(PROVISIONING_FINISHED_STATE).to(COLLECTMETADATA_STATE).event(COLLECT_METADATA_FINISHED_EVENT).failureEvent(COLLECT_METADATA_FAILED_EVENT)
             .from(COLLECTMETADATA_STATE).to(GET_TLS_INFO_STATE).event(GET_TLS_INFO_FINISHED_EVENT).failureEvent(GET_TLS_INFO_FAILED_EVENT)
             .from(GET_TLS_INFO_STATE).to(TLS_SETUP_STATE).event(SETUP_TLS_EVENT).defaultFailureEvent()

@@ -2,7 +2,6 @@ package com.sequenceiq.freeipa.flow.stack.provision.action;
 
 import static java.lang.String.format;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,7 +10,6 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -142,22 +140,14 @@ public class StackProvisionService {
             LOGGER.debug("The flow has been cancelled.");
         } else {
             if (!stack.isStackInDeletionPhase()) {
-                handleFailure(stack, errorReason);
+                handleFailure();
                 stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_FAILED, errorReason);
             }
         }
     }
 
-    private void handleFailure(Stack stack, String errorReason) {
+    private void handleFailure() {
         LOGGER.debug("Nothing to do.");
-    }
-
-    private long calculateStackCreationTime(Date startDate) {
-        long result = 0;
-        if (startDate != null) {
-            return (new Date().getTime() - startDate.getTime()) / DateUtils.MILLIS_PER_SECOND;
-        }
-        return result;
     }
 
     private void validateResourceResults(CloudContext cloudContext, LaunchStackResult res) {

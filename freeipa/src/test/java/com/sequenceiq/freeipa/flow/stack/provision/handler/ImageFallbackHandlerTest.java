@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,7 +23,6 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackFailed;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackRequest;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackSuccess;
-import com.sequenceiq.freeipa.service.image.FreeIpaImageFilterSettings;
 import com.sequenceiq.freeipa.service.image.ImageFallbackService;
 import com.sequenceiq.freeipa.service.image.ImageProviderFactory;
 import com.sequenceiq.freeipa.service.image.ImageService;
@@ -83,6 +83,7 @@ class ImageFallbackHandlerTest {
         Stack stack = mock(Stack.class);
         ImageEntity currentImage = mock(ImageEntity.class);
 
+        when(stack.getAccountId()).thenReturn("1234");
         when(event.getData()).thenReturn(request);
         when(request.getResourceId()).thenReturn(123L);
         when(stackService.getStackById(123L)).thenReturn(stack);
@@ -105,9 +106,8 @@ class ImageFallbackHandlerTest {
         ImageFallbackRequest request = mock(ImageFallbackRequest.class);
         Stack stack = mock(Stack.class);
         ImageEntity currentImage = mock(ImageEntity.class);
-        FreeIpaImageFilterSettings settings =
-                new FreeIpaImageFilterSettings(null, null, null, null, null, "azure", false);
 
+        when(stack.getAccountId()).thenReturn("1234");
         when(event.getData()).thenReturn(request);
         when(request.getResourceId()).thenReturn(123L);
         when(stackService.getStackById(123L)).thenReturn(stack);
