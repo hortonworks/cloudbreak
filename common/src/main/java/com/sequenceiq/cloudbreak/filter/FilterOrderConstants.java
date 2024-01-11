@@ -10,6 +10,8 @@ public class FilterOrderConstants {
 
     public static final int MDC_FILTER_ORDER = Integer.MIN_VALUE + 3;
 
+    public static final int SLASH_FILTER_ORDER = Integer.MIN_VALUE + 4;
+
     // Spring Security Filters
 
     public static final int CLOUDBREAK_USER_CONFIGURATOR_ORDER = 1;

@@ -26,6 +26,15 @@ public class CommonFilterConfiguration {
     private ErrorResponseHandler errorResponseHandler;
 
     @Bean
+    public FilterRegistrationBean<InfoTrailingSlashFilter> infoTrailingSlashFilterFilterRegistrationBean() {
+        FilterRegistrationBean<InfoTrailingSlashFilter> registrationBean = new FilterRegistrationBean<>();
+        InfoTrailingSlashFilter filter = new InfoTrailingSlashFilter();
+        registrationBean.setFilter(filter);
+        registrationBean.setOrder(FilterOrderConstants.SLASH_FILTER_ORDER);
+        return registrationBean;
+    }
+
+    @Bean
     public FilterRegistrationBean<ExceptionHandlerFilter> exceptionHandlerFilterRegistrationBean() {
         FilterRegistrationBean<ExceptionHandlerFilter> registrationBean = new FilterRegistrationBean<>();
         ExceptionHandlerFilter filter = new ExceptionHandlerFilter(errorResponseHandler);
