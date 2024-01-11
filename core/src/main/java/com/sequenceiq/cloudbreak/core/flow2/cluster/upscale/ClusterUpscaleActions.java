@@ -93,6 +93,7 @@ public class ClusterUpscaleActions {
                 variables.put(CLUSTER_MANAGER_TYPE, payload.getClusterManagerType());
                 variables.put(RESTART_SERVICES, payload.isRestartServices());
                 variables.put(HOST_NAMES_BY_HOST_GROUP, payload.getHostGroupsWithHostNames());
+                variables.put(ROLLING_RESTART_ENABLED, payload.isRollingRestartEnabled());
                 if (payload.isSinglePrimaryGateway()) {
                     variables.put(HOST_NAME, getMasterHostname(payload));
                 }
@@ -176,11 +177,10 @@ public class ClusterUpscaleActions {
                             new AmbariRepairSingleMasterStartResult(context.getStackId(), context.getHostGroups());
                     sendEvent(context, result.selector(), result);
                 } else {
-                    Map<String, Set<String>> hostGroupsWithHostNames =
-                            (Map<String, Set<String>>) variables.getOrDefault(HOST_NAMES_BY_HOST_GROUP, new HashMap<>());
+                    Map<String, Set<String>> hostGroupsWithHostNames = getHostNamesByHostGroup(variables);
                     UpscaleClusterRequest request = new UpscaleClusterRequest(context.getStackId(), context.getHostGroups(),
                             context.isRepair(), context.isRestartServices(), hostGroupsWithHostNames, context.getHostGroupWithAdjustment(),
-                            context.isSinglePrimaryGateway());
+                            context.isSinglePrimaryGateway(), isRollingRestartEnabled(variables));
                     sendEvent(context, request.selector(), request);
                 }
             }
@@ -345,7 +345,7 @@ public class ClusterUpscaleActions {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, ClusterManagerStartComponentsResult payload, Map<Object, Object> variables) {
-                AmbariRestartAllRequest request = new AmbariRestartAllRequest(context.getStackId(), context.getHostGroups());
+                AmbariRestartAllRequest request = new AmbariRestartAllRequest(context.getStackId(), context.getHostGroups(), isRollingRestartEnabled(variables));
                 if (isKerberosSecured(variables) && !isSingleNodeCluster(variables)) {
                     clusterUpscaleFlowService.restartAllClusterComponents(context.getStackId());
                     sendEvent(context, request.selector(), request);
@@ -456,6 +456,8 @@ public class ClusterUpscaleActions {
 
         static final String REPAIR = "REPAIR";
 
+        static final String ROLLING_RESTART_ENABLED = "ROLLING_RESTART_ENABLED";
+
         @Inject
         private StackDtoService stackDtoService;
 
@@ -494,6 +496,10 @@ public class ClusterUpscaleActions {
             return (String) variables.get(HOST_NAME);
         }
 
+        Map<String, Set<String>> getHostNamesByHostGroup(Map<Object, Object> variables) {
+            return (Map<String, Set<String>>) variables.getOrDefault(HOST_NAMES_BY_HOST_GROUP, new HashMap<>());
+        }
+
         Map<String, String> getInstalledComponents(Map<Object, Object> variables) {
             return (Map<String, String>) variables.get(INSTALLED_COMPONENTS);
         }
@@ -518,5 +524,8 @@ public class ClusterUpscaleActions {
             return (ClusterManagerType) variables.get(CLUSTER_MANAGER_TYPE);
         }
 
+        boolean isRollingRestartEnabled(Map<Object, Object> variables) {
+            return (Boolean) variables.getOrDefault(ROLLING_RESTART_ENABLED, false);
+        }
     }
 }

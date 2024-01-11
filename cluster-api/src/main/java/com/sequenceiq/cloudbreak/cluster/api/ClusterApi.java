@@ -133,8 +133,12 @@ public interface ClusterApi {
         clusterModificationService().cleanupCluster(telemetry);
     }
 
-    default void restartAll(boolean withMgmtServices) throws CloudbreakException {
+    default void restartAll(boolean withMgmtServices) {
         clusterModificationService().restartAll(withMgmtServices);
+    }
+
+    default void rollingRestartServices() {
+        clusterModificationService().rollingRestartServices();
     }
 
     default Optional<String> getRoleConfigValueByServiceType(String clusterName, String roleConfigGroup, String serviceType, String configName) {

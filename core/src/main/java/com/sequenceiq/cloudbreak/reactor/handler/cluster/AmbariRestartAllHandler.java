@@ -36,7 +36,7 @@ public class AmbariRestartAllHandler implements EventHandler<AmbariRestartAllReq
         Long stackId = request.getResourceId();
         AmbariRestartAllResult result;
         try {
-            clusterUpscaleService.restartAll(stackId);
+            clusterUpscaleService.restartAll(stackId, request.isRollingRestartEnabled());
             result = new AmbariRestartAllResult(request);
         } catch (Exception e) {
             String message = "Failed to restart all";

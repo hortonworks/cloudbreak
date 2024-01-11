@@ -463,6 +463,7 @@ public enum ResourceEvent {
     CLUSTER_CM_CLUSTER_SERVICES_STARTED("cm.cluster.services.started"),
     CLUSTER_CM_CLUSTER_SERVICES_STARTING("cm.cluster.services.starting"),
     CLUSTER_CM_CLUSTER_SERVICES_RESTARTING("cm.cluster.services.restarting"),
+    CLUSTER_CM_CLUSTER_SERVICES_ROLLING_RESTART("cm.cluster.services.rolling.restart"),
     CLUSTER_CM_UPDATING_REMOTE_DATA_CONTEXT("cm.cluster.updating.remote.data.context"),
     CLUSTER_CM_UPDATED_REMOTE_DATA_CONTEXT("cm.cluster.updated.remote.data.context"),
     CLUSTER_CM_SECURITY_GROUP_TOO_STRICT("cm.cluster.securitygroup.too.strict"),

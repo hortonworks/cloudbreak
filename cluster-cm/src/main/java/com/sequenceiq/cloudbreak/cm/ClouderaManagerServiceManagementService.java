@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 @Service
 public class ClouderaManagerServiceManagementService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerConfigService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerServiceManagementService.class);
 
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;

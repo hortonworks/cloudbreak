@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cm;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.cm.DataView.SUMMARY;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_RESTARTING;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_ROLLING_RESTART;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -72,7 +73,8 @@ public class ClouderaManagerRestartService {
             ApiCommand restartCommand = rollingRestartEnabled ?
                     executeRollingRestartCommand(apiClient, stack, clustersResourceApi) :
                     executeRestartCommand(stack, clustersResourceApi, serviceNames);
-            eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_RESTARTING);
+            eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
+                    rollingRestartEnabled ? CLUSTER_CM_CLUSTER_SERVICES_ROLLING_RESTART : CLUSTER_CM_CLUSTER_SERVICES_RESTARTING);
             waitForRestartExecution(apiClient, stack, restartCommand);
         }
     }

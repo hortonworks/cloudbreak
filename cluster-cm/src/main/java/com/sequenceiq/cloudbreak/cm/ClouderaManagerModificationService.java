@@ -1156,6 +1156,16 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
+    public void rollingRestartServices() {
+        try {
+            restartServices(true);
+        } catch (ApiException | CloudbreakException e) {
+            LOGGER.error("Could not perform rolling restart services", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public void updateConfig(Table<String, String, String> configTable) throws Exception {
         clouderaManagerConfigModificationService.updateConfig(configTable, v31Client, stack);
         LOGGER.info("Updating relevant configs finished for cluster {} in CM, deploying client configs and restarting services.", stack.getName());

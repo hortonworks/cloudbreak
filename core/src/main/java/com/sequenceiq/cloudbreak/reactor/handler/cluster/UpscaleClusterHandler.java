@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.cluster.ClusterUpscaleService;
@@ -14,6 +16,9 @@ import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
 @Component
 public class UpscaleClusterHandler implements EventHandler<UpscaleClusterRequest> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpscaleClusterHandler.class);
+
     @Inject
     private EventBus eventBus;
 
@@ -27,14 +32,14 @@ public class UpscaleClusterHandler implements EventHandler<UpscaleClusterRequest
 
     @Override
     public void accept(Event<UpscaleClusterRequest> event) {
+        LOGGER.debug("Accepting cluster upscale event: {}", event);
         UpscaleClusterRequest request = event.getData();
         UpscaleClusterResult result;
         try {
-            clusterUpscaleService.installServicesOnNewHosts(request.getResourceId(), request.getHostGroupNames(),
-                    request.isRepair(), request.isRestartServices(), request.getHostGroupsWithHostNames(),
-                    request.getHostGroupWithAdjustment(), request.isPrimaryGatewayChanged());
+            clusterUpscaleService.installServicesOnNewHosts(request);
             result = new UpscaleClusterResult(request);
         } catch (Exception e) {
+            LOGGER.debug("Failed to upscale cluster", e);
             result = new UpscaleClusterResult(e.getMessage(), e, request);
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));

@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterRequest;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ScalingException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -50,6 +51,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterUpscaleServiceTest {
+
+    private static final long STACK_ID = 1L;
 
     @Mock
     private StackDtoService stackDtoService;
@@ -99,11 +102,11 @@ class ClusterUpscaleServiceTest {
     public void setUp() {
         Cluster cluster = new Cluster();
         cluster.setId(2L);
-        when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
+        when(stackDtoService.getById(eq(STACK_ID))).thenReturn(stackDto);
         inOrder = Mockito.inOrder(parcelService, recipeEngine, clusterStatusService, clusterCommissionService, clusterApi, clusterHostServiceRunner,
                 clusterService);
         lenient().when(stackDto.getCluster()).thenReturn(cluster);
-        lenient().when(stackDto.getId()).thenReturn(1L);
+        lenient().when(stackDto.getId()).thenReturn(STACK_ID);
     }
 
     @Test
@@ -123,7 +126,7 @@ class ClusterUpscaleServiceTest {
         Map<String, String> candidates = Map.of("master-1", "privateIp");
         when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(candidates);
 
-        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")), null, false);
+        underTest.installServicesOnNewHosts(createRequest(true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")), null, false, false));
 
         inOrder.verify(parcelService).removeUnusedParcelComponents(stackDto);
         inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stackDto, Set.of(hostGroup), candidates);
@@ -152,7 +155,7 @@ class ClusterUpscaleServiceTest {
         Map<String, String> candidates = Map.of("master-1", "privateIp");
         when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(candidates);
 
-        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")), null, false);
+        underTest.installServicesOnNewHosts(createRequest(true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")), null, false, false));
 
         inOrder.verify(parcelService).removeUnusedParcelComponents(stackDto);
         inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stackDto, Set.of(hostGroup), candidates);
@@ -181,7 +184,7 @@ class ClusterUpscaleServiceTest {
         Map<String, String> candidates = Map.of("master-1", "privateIp");
         when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(candidates);
 
-        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")), null, false);
+        underTest.installServicesOnNewHosts(createRequest(true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")), null, false, false));
 
         inOrder.verify(parcelService).removeUnusedParcelComponents(stackDto);
         inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stackDto, Set.of(hostGroup), candidates);
@@ -206,7 +209,7 @@ class ClusterUpscaleServiceTest {
 
         when(clusterApiConnectors.getConnector(any(StackDto.class))).thenReturn(clusterApi);
 
-        underTest.installServicesOnNewHosts(1L, Set.of("master"), false, false, Map.of("master", Set.of("master-1", "master-2", "master-3")), null, false);
+        underTest.installServicesOnNewHosts(createRequest(false, false, Map.of("master", Set.of("master-1", "master-2", "master-3")), null, false, false));
 
         inOrder.verify(parcelService).removeUnusedParcelComponents(stackDto);
         inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stackDto, Set.of(hostGroup), candidates);
@@ -222,7 +225,7 @@ class ClusterUpscaleServiceTest {
         when(parcelService.removeUnusedParcelComponents(stackDto)).thenReturn(new ParcelOperationStatus(Map.of(), Map.of("parcel", "parcel")));
 
         CloudbreakException exception = assertThrows(CloudbreakException.class,
-                () -> underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, new HashMap<>(), null, false));
+                () -> underTest.installServicesOnNewHosts(createRequest(true, true, new HashMap<>(), null, false, false)));
 
         assertEquals("Failed to remove the following parcels: {parcel=[parcel]}", exception.getMessage());
         verify(parcelService).removeUnusedParcelComponents(stackDto);
@@ -245,7 +248,7 @@ class ClusterUpscaleServiceTest {
         when(clusterApiConnectors.getConnector(any(StackDto.class))).thenReturn(clusterApi);
         when(clusterApi.upscaleCluster(any())).thenThrow(new ScalingException("error", Set.of("instanceId1")));
 
-        underTest.installServicesOnNewHosts(1L, Set.of("master"), false, true, new HashMap<>(), null, false);
+        underTest.installServicesOnNewHosts(createRequest(false, true, new HashMap<>(), null, false, false));
 
         inOrder.verify(parcelService).removeUnusedParcelComponents(stackDto);
         inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stackDto, Set.of(hostGroup), candidates);
@@ -253,7 +256,7 @@ class ClusterUpscaleServiceTest {
         inOrder.verify(clusterApi, times(0)).restartAll(false);
         inOrder.verify(clusterStatusService, times(0)).getDecommissionedHostsFromCM();
         inOrder.verify(clusterCommissionService, times(0)).recommissionHosts(any());
-        inOrder.verify(clusterService, times(1)).updateInstancesToZombieByInstanceIds(eq(1L), eq(Set.of("instanceId1")));
+        inOrder.verify(clusterService, times(1)).updateInstancesToZombieByInstanceIds(eq(STACK_ID), eq(Set.of("instanceId1")));
     }
 
     @Test
@@ -273,7 +276,7 @@ class ClusterUpscaleServiceTest {
         when(clusterApi.upscaleCluster(any())).thenThrow(new ScalingException("error", Set.of("instanceId1")));
 
         ScalingException exception = assertThrows(ScalingException.class,
-                () -> underTest.installServicesOnNewHosts(1L, Set.of("master"), false, true, new HashMap<>(), null, true));
+                () -> underTest.installServicesOnNewHosts(createRequest(false, true, new HashMap<>(), null, true, false)));
 
         Assertions.assertThat(exception.getFailedInstanceIds()).containsExactly("instanceId1");
         assertEquals("error", exception.getMessage());
@@ -283,7 +286,27 @@ class ClusterUpscaleServiceTest {
         inOrder.verify(clusterApi, times(0)).restartAll(false);
         inOrder.verify(clusterStatusService, times(0)).getDecommissionedHostsFromCM();
         inOrder.verify(clusterCommissionService, times(0)).recommissionHosts(any());
-        inOrder.verify(clusterService, times(1)).updateInstancesToOrchestrationFailedByInstanceIds(eq(1L), eq(Set.of("instanceId1")));
+        inOrder.verify(clusterService, times(1)).updateInstancesToOrchestrationFailedByInstanceIds(eq(STACK_ID), eq(Set.of("instanceId1")));
+    }
+
+    @Test
+    void restartAllShouldCallRegularRestartWhenTheRollingRestartIsNotEnabled() {
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
+
+        underTest.restartAll(STACK_ID, false);
+
+        verify(clusterApi).restartAll(false);
+    }
+
+    @Test
+    void restartAllShouldCallRollingRestartWhenTheRollingRestartIsEnabled() {
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
+
+        underTest.restartAll(STACK_ID, true);
+
+        verify(clusterApi).rollingRestartServices();
     }
 
     private HostGroup newHostGroup(String name, InstanceMetaData... instances) {
@@ -299,6 +322,12 @@ class ClusterUpscaleServiceTest {
         InstanceMetaData instance = new InstanceMetaData();
         instance.setInstanceStatus(status);
         return instance;
+    }
+
+    private UpscaleClusterRequest createRequest(boolean repair, boolean restartServices, Map<String, Set<String>> hostGroupsWithHostNames,
+            Map<String, Integer> hostGroupWithAdjustment, boolean primaryGatewayChanged, boolean rollingRestartEnabled) {
+        return new UpscaleClusterRequest(STACK_ID, Set.of("master"), repair, restartServices, hostGroupsWithHostNames, hostGroupWithAdjustment,
+                primaryGatewayChanged, rollingRestartEnabled);
     }
 
 }

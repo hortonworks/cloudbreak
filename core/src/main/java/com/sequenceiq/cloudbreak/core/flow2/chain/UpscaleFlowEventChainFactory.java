@@ -105,7 +105,8 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
                             event.isKerberosSecured(),
                             event.isSingleNodeCluster(),
                             event.isRestartServices(),
-                            event.getClusterManagerType()
+                            event.getClusterManagerType(),
+                            event.isRollingRestartEnabled()
                     )
             );
         }

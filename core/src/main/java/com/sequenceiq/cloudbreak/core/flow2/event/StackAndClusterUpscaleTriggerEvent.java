@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.event;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -28,6 +29,8 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
 
     private final ClusterManagerType clusterManagerType;
 
+    private final boolean rollingRestartEnabled;
+
     public StackAndClusterUpscaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupWithAdjustment, ScalingType scalingType,
         NetworkScaleDetails networkScaleDetails, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant) {
         super(selector, stackId, hostGroupWithAdjustment, Collections.emptyMap(), Collections.emptyMap(), networkScaleDetails, adjustmentTypeWithThreshold,
@@ -38,6 +41,7 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
         singleNodeCluster = false;
         restartServices = false;
         clusterManagerType = ClusterManagerType.CLOUDERA_MANAGER;
+        rollingRestartEnabled = false;
     }
 
     @JsonCreator
@@ -55,7 +59,8 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
             @JsonProperty("restartServices") boolean restartServices,
             @JsonProperty("clusterManagerType") ClusterManagerType clusterManagerType,
             @JsonProperty("adjustmentTypeWithThreshold") AdjustmentTypeWithThreshold adjustmentTypeWithThreshold,
-            @JsonProperty("triggeredStackVariant") String triggeredStackVariant) {
+            @JsonProperty("triggeredStackVariant") String triggeredStackVariant,
+            @JsonProperty("rollingRestartEnabled") boolean rollingRestartEnabled) {
         super(selector, stackId, hostGroupWithAdjustment, hostGroupWithPrivateIds, hostGroupWithHostNames, adjustmentTypeWithThreshold, triggeredStackVariant,
                 accepted);
         this.scalingType = scalingType;
@@ -64,6 +69,7 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
         this.singleNodeCluster = singleNodeCluster;
         this.restartServices = restartServices;
         this.clusterManagerType = clusterManagerType;
+        this.rollingRestartEnabled = rollingRestartEnabled;
     }
 
     public ScalingType getScalingType() {
@@ -90,9 +96,27 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
         return clusterManagerType;
     }
 
+    public boolean isRollingRestartEnabled() {
+        return rollingRestartEnabled;
+    }
+
     @Override
     public StackAndClusterUpscaleTriggerEvent setRepair() {
         super.setRepair();
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", StackAndClusterUpscaleTriggerEvent.class.getSimpleName() + "[", "]")
+                .add("scalingType=" + scalingType)
+                .add("singleMasterGateway=" + singleMasterGateway)
+                .add("kerberosSecured=" + kerberosSecured)
+                .add("singleNodeCluster=" + singleNodeCluster)
+                .add("restartServices=" + restartServices)
+                .add("clusterManagerType=" + clusterManagerType)
+                .add("rollingRestartEnabled=" + rollingRestartEnabled)
+                .add(super.toString())
+                .toString();
     }
 }
