@@ -36,6 +36,7 @@ public enum StackProvisionEvent implements FlowEvent {
     LAUNCH_STACK_FINISHED_EVENT(CloudPlatformResult.selector(LaunchStackResult.class)),
     LAUNCH_STACK_FAILED_EVENT(CloudPlatformResult.failureSelector(LaunchStackResult.class)),
     IMAGE_FALLBACK_EVENT("IMAGEFALLBACK"),
+    IMAGE_FALLBACK_START_EVENT,
     IMAGE_FALLBACK_FINISHED_EVENT(EventSelectorUtil.selector(ImageFallbackSuccess.class)),
     IMAGE_FALLBACK_FAILED_EVENT(EventSelectorUtil.selector(ImageFallbackFailed.class)),
     COLLECT_METADATA_FINISHED_EVENT(CloudPlatformResult.selector(CollectMetadataResult.class)),
@@ -56,6 +57,10 @@ public enum StackProvisionEvent implements FlowEvent {
 
     StackProvisionEvent(String event) {
         this.event = event;
+    }
+
+    StackProvisionEvent() {
+        this.event = name();
     }
 
     @Override

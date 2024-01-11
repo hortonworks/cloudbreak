@@ -1,7 +1,12 @@
 package com.sequenceiq.freeipa.flow;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import jakarta.ws.rs.client.Client;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +15,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
+import com.sequenceiq.cloudbreak.auth.CrnUser;
+import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionMetricsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -82,6 +89,14 @@ public class FlowIntegrationTestConfig {
 
     @MockBean
     private FreeIpaParallelFlowValidator freeIpaParallelFlowValidator;
+
+    @MockBean
+    private CrnUserDetailsService crnUserDetailsService;
+
+    @BeforeEach
+    void init() {
+        when(crnUserDetailsService.loadUserByUsername(anyString())).thenReturn(mock(CrnUser.class));
+    }
 
     @Bean
     public EventBus reactor(MDCCleanerThreadPoolExecutor threadPoolExecutor) {

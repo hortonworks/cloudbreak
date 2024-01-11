@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.provision.action;
 
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionConstants.START_DATE;
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_FALLBACK_START_EVENT;
 
 import java.util.Date;
 import java.util.List;
@@ -9,6 +10,8 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
@@ -53,6 +56,7 @@ import com.sequenceiq.freeipa.flow.stack.provision.SetupResultToStackEventConver
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationRequest;
+import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackFailed;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackRequest;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.LaunchStackResultToStackEventConverter;
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserDataRequest;
@@ -63,6 +67,10 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Configuration
 public class StackProvisionActions {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackProvisionActions.class);
+
+    private static final String IMAGE_FALLBACK_STARTED = "IMAGE_FALLBACK_STARTED";
 
     @Inject
     private ImageService imageService;
@@ -194,17 +202,33 @@ public class StackProvisionActions {
         return new AbstractStackProvisionAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                if ((Boolean) variables.getOrDefault(IMAGE_FALLBACK_STARTED, Boolean.FALSE)) {
+                    LOGGER.warn("Image fallback already happened at least once! Failing flow to avoid infinite loop!");
+                    sendEvent(context, new ImageFallbackFailed(payload.getResourceId(), new Exception("Image fallback started second time!")));
+                } else {
+                    sendEvent(context, new StackEvent(IMAGE_FALLBACK_START_EVENT.event(), payload.getResourceId()));
+                }
+            }
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<StackEvent>> payloadConverters) {
+                payloadConverters.add(new LaunchStackResultToStackEventConverter());
+            }
+        };
+    }
+
+    @Bean(name = "IMAGE_FALLBACK_START_STATE")
+    public Action<?, ?> imageFallbackStartAction() {
+        return new AbstractStackProvisionAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                variables.put(IMAGE_FALLBACK_STARTED, Boolean.TRUE);
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackContext context) {
                 return new ImageFallbackRequest(context.getStack().getId());
-            }
-
-            @Override
-            protected void initPayloadConverterMap(List<PayloadConverter<StackEvent>> payloadConverters) {
-                payloadConverters.add(new LaunchStackResultToStackEventConverter());
             }
         };
     }

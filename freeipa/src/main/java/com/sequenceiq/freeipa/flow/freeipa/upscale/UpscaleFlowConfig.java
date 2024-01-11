@@ -9,6 +9,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.FAIL_
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.FREEIPA_UPSCALE_IMAGE_FALLBACK_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.FREEIPA_UPSCALE_IMAGE_FALLBACK_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.FREEIPA_UPSCALE_IMAGE_FALLBACK_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.IMAGE_FALLBACK_START_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_ADD_INSTANCES_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_ADD_INSTANCES_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_BOOTSTRAP_MACHINES_FAILED_EVENT;
@@ -44,6 +45,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCA
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATING_CLOUD_STORAGE_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATING_CLOUD_STORAGE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.FINAL_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.FREEIPA_UPSCALE_IMAGE_FALLBACK_START_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.FREEIPA_UPSCALE_IMAGE_FALLBACK_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.INIT_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_ADD_INSTANCES_STATE;
@@ -101,7 +103,11 @@ public class UpscaleFlowConfig extends AbstractFlowConfiguration<UpscaleState, U
                     .event(FREEIPA_UPSCALE_IMAGE_FALLBACK_EVENT)
                     .failureEvent(UPSCALE_ADD_INSTANCES_FAILED_EVENT)
 
-                    .from(FREEIPA_UPSCALE_IMAGE_FALLBACK_STATE).to(UPSCALE_ADD_INSTANCES_STATE)
+                    .from(FREEIPA_UPSCALE_IMAGE_FALLBACK_STATE).to(FREEIPA_UPSCALE_IMAGE_FALLBACK_START_STATE)
+                    .event(IMAGE_FALLBACK_START_EVENT)
+                    .failureEvent(FREEIPA_UPSCALE_IMAGE_FALLBACK_FAILED_EVENT)
+
+                    .from(FREEIPA_UPSCALE_IMAGE_FALLBACK_START_STATE).to(UPSCALE_ADD_INSTANCES_STATE)
                     .event(FREEIPA_UPSCALE_IMAGE_FALLBACK_FINISHED_EVENT)
                     .failureEvent(FREEIPA_UPSCALE_IMAGE_FALLBACK_FAILED_EVENT)
 

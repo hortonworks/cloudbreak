@@ -33,7 +33,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -115,9 +114,6 @@ class UpgradeCcmFlowIntegrationTest {
 
     @MockBean
     private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
-
-    @MockBean
-    private CrnUserDetailsService crnUserDetailsService;
 
     @BeforeEach
     public void setup() {
