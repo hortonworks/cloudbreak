@@ -80,13 +80,13 @@ public class StackResponseUtilsTest {
     @Test
     public void testGetRoleConfigNameForHostGroup() throws Exception {
         validateGetRoleConfigNameForHostGroup("YARN", "NODEMANAGER",
-                "compute", "yarn-NODEMANAGER-COMPUTE");
+                "hivecompute", "yarn-NODEMANAGER-hivecompute");
 
         validateGetRoleConfigNameForHostGroup("YARN", "NODEMANAGER",
-                "worker", "yarn-NODEMANAGER-WORKER");
+                "worker", "yarn-NODEMANAGER-worker");
 
         validateGetRoleConfigNameForHostGroup("YARN", "NODEMANAGER",
-                "randomHostGroup", "random-NODEMANAGER-BASE");
+                "abinitiocompute", "yarn-NODEMANAGER-abinitiocompute");
     }
 
     @Test
@@ -159,11 +159,9 @@ public class StackResponseUtilsTest {
             String testHostGroup, String expectedRoleConfigName) throws Exception {
         StackV4Response mockStackResponse = mock(StackV4Response.class);
         ClusterV4Response mockCluster = mock(ClusterV4Response.class);
-        BlueprintV4Response mockBluePrint = mock(BlueprintV4Response.class);
 
         when(mockStackResponse.getCluster()).thenReturn(mockCluster);
-        when(mockCluster.getBlueprint()).thenReturn(mockBluePrint);
-        when(mockBluePrint.getBlueprint()).thenReturn(getTestBP());
+        when(mockCluster.getExtendedBlueprintText()).thenReturn(getExtendedBP());
         String hostGroupRolename = underTest.getRoleConfigNameForHostGroup(mockStackResponse, testHostGroup, testService, testRole);
         assertEquals(expectedRoleConfigName, hostGroupRolename, "RoleConfigName in template should match for HostGroup");
     }
@@ -196,5 +194,9 @@ public class StackResponseUtilsTest {
 
     private String getTestBP() throws IOException {
         return FileReaderUtils.readFileFromClasspath("/dataengineering-test.json");
+    }
+
+    private String getExtendedBP() throws IOException {
+        return FileReaderUtils.readFileFromClasspath("/customdataengineering-test.json");
     }
 }
