@@ -69,6 +69,7 @@ mock:
       "[/**/cm/commands/hostsDecommission]":
         delay: 2-3
         errorRate: 1
-
-
-
+    badClustersConfig:
+      numBadClusters: 1
+      urisForLongDelay: /**/cm/version,/**/resourcemanager/**/cluster/scaling
+      longDelayInSecs: 30

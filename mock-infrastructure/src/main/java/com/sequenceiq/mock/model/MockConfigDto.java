@@ -3,6 +3,7 @@ package com.sequenceiq.mock.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.sequenceiq.mock.config.BadClustersConfig;
 import com.sequenceiq.mock.config.ConfigParams;
 
 public class MockConfigDto {
@@ -11,6 +12,8 @@ public class MockConfigDto {
     private String yarnRecommendationInterval;
 
     private Map<String, ConfigParams> loadTestConfig = new HashMap<>();
+
+    private BadClustersConfig badClustersConfig;
 
     public TestMode getTestMode() {
         return testMode;
@@ -34,5 +37,13 @@ public class MockConfigDto {
 
     public void setYarnRecommendationInterval(String yarnRecommendationInterval) {
         this.yarnRecommendationInterval = yarnRecommendationInterval;
+    }
+
+    public BadClustersConfig getBadClustersConfig() {
+        return badClustersConfig;
+    }
+
+    public void setBadClustersConfig(BadClustersConfig badClustersConfig) {
+        this.badClustersConfig = badClustersConfig;
     }
 }

@@ -26,6 +26,8 @@ public class MockConfig {
 
     private Map<String, ConfigParams> loadTestConfig = new HashMap<>();
 
+    private BadClustersConfig badClustersConfig;
+
     public TestMode getTestMode() {
         return testMode;
     }
@@ -48,6 +50,14 @@ public class MockConfig {
 
     public void setYarnRecommendationInterval(String yarnRecommendationInterval) {
         this.yarnRecommendationInterval = yarnRecommendationInterval;
+    }
+
+    public BadClustersConfig getBadClustersConfig() {
+        return badClustersConfig;
+    }
+
+    public void setBadClustersConfig(BadClustersConfig badClustersConfig) {
+        this.badClustersConfig = badClustersConfig;
     }
 
     @PostConstruct
@@ -76,6 +86,7 @@ public class MockConfig {
         mockConfigDto.setTestMode(testMode);
         mockConfigDto.setYarnRecommendationInterval(yarnRecommendationInterval);
         mockConfigDto.setLoadTestConfig(loadTestConfig);
+        mockConfigDto.setBadClustersConfig(badClustersConfig);
         return mockConfigDto;
     }
 
@@ -86,6 +97,9 @@ public class MockConfig {
             mockConfigDto.getLoadTestConfig().entrySet().forEach(entry -> {
                 this.loadTestConfig.put(entry.getKey(), entry.getValue());
             });
+        }
+        if (mockConfigDto.getBadClustersConfig() != null) {
+            this.badClustersConfig = mockConfigDto.getBadClustersConfig();
         }
     }
 }
