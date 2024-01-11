@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -231,7 +232,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
     }
 
     @Override
-    protected ResourceStatus getResourceStatus(AwsContext context, AuthenticatedContext auth, CloudResource resource) {
+    protected CloudResourceStatus getResourceStatus(AwsContext context, AuthenticatedContext auth, CloudResource resource) {
         boolean creation = context.isBuild();
         String operation = creation ? "creation" : "termination";
         if (StringUtils.isNotEmpty(resource.getInstanceId())) {
@@ -250,7 +251,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
             } catch (Ec2Exception e) {
                 if (e.awsErrorDetails().errorCode().contains("NotFound") && !creation) {
                     LOGGER.info("Aws resource does not found: {}", e.getMessage());
-                    return ResourceStatus.DELETED;
+                    return new CloudResourceStatus(resource, ResourceStatus.DELETED, "AWS resource does not found");
                 } else {
                     LOGGER.error("Cannot finished instance {}: {}", operation, e.getMessage(), e);
                     throw e;
@@ -259,29 +260,31 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         } else {
             LOGGER.warn("The resource with name: '{}' doesn't have instance identifier for operation: '{}'. There is no need to poll the state of the resource",
                     resource.getName(), operation);
-            return creation ? ResourceStatus.CREATED : ResourceStatus.DELETED;
+            ResourceStatus resourceStatus = creation ? ResourceStatus.CREATED : ResourceStatus.DELETED;
+            return new CloudResourceStatus(resource, resourceStatus);
         }
     }
 
-    private static ResourceStatus getResourceStatusForDeletion(CloudResource resource, InstanceState instanceState) {
+    private static CloudResourceStatus getResourceStatusForDeletion(CloudResource resource, InstanceState instanceState) {
         if (instanceState.code() == AWS_INSTANCE_TERMINATED_CODE) {
             LOGGER.debug("Instance {} termination finished", resource.getInstanceId());
-            return ResourceStatus.DELETED;
+            return new CloudResourceStatus(resource, ResourceStatus.DELETED);
         } else {
-            return ResourceStatus.IN_PROGRESS;
+            return new CloudResourceStatus(resource, ResourceStatus.IN_PROGRESS);
         }
     }
 
-    private static ResourceStatus getResourceStatusForCreation(CloudResource resource, InstanceState instanceState) {
+    private static CloudResourceStatus getResourceStatusForCreation(CloudResource resource, InstanceState instanceState) {
         if (instanceState.code() == AWS_INSTANCE_RUNNING_CODE) {
             LOGGER.debug("Instance {} creation finished", resource.getInstanceId());
-            return ResourceStatus.CREATED;
+            return new CloudResourceStatus(resource, ResourceStatus.CREATED);
         } else if (instanceState.code() == AWS_INSTANCE_TERMINATED_CODE) {
-            LOGGER.warn("Instance {} creation failed, instance is in terminated state. " +
-                    "It may have been terminated by an AWS policy or quote issue.", resource.getInstanceId());
-            return ResourceStatus.FAILED;
+            String message = String.format("Instance %s creation failed, instance is in terminated state. " +
+                    "It may have been terminated by an AWS policy or quota issue.", resource.getInstanceId());
+            LOGGER.warn(message);
+            return new CloudResourceStatus(resource, ResourceStatus.FAILED, message);
         } else {
-            return ResourceStatus.IN_PROGRESS;
+            return new CloudResourceStatus(resource, ResourceStatus.IN_PROGRESS);
         }
     }
 

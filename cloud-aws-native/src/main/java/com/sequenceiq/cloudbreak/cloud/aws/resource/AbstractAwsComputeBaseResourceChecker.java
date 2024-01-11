@@ -32,8 +32,7 @@ public abstract class AbstractAwsComputeBaseResourceChecker extends AbstractAwsB
         for (CloudResource resource : resources) {
             LOGGER.debug("Check {} resource: {}. Build: {}", type, resource, context.isBuild());
             try {
-                ResourceStatus resourceStatus = getResourceStatus(context, auth, resource);
-                result.add(new CloudResourceStatus(resource, resourceStatus));
+                result.add(getResourceStatus(context, auth, resource));
             } catch (Exception e) {
                 CloudContext cloudContext = auth.getCloudContext();
                 throw new AwsResourceException("Error during status check", type,
@@ -43,10 +42,10 @@ public abstract class AbstractAwsComputeBaseResourceChecker extends AbstractAwsB
         return result;
     }
 
-    protected ResourceStatus getResourceStatus(AwsContext context, AuthenticatedContext auth, CloudResource resource) {
+    protected CloudResourceStatus getResourceStatus(AwsContext context, AuthenticatedContext auth, CloudResource resource) {
         ResourceStatus resourceStatus = context.isBuild() ? ResourceStatus.CREATED : ResourceStatus.DELETED;
         LOGGER.debug("Resource: {} status: {}", resource, resourceStatus);
-        return resourceStatus;
+        return new CloudResourceStatus(resource, resourceStatus);
     }
 
     public AwsResourceNameService getResourceNameService() {
