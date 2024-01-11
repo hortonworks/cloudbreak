@@ -42,7 +42,7 @@ compatible() {
       --html /apidefinitions/result.html \
       --fail-on-incompatible)
 
-    if [[ ${compat_results} != *"No differences. Specifications are equivalents"* ]]; then
+    if [[ ${compat_results} =~ .*"API changes broke backward compatibility".* ]]; then
       echo
       echo "================ COMPATIBILITY BREAKS in ${service} ================"
       echo "$compat_results"
