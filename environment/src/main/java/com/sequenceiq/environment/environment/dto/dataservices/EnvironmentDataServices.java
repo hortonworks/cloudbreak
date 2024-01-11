@@ -10,7 +10,8 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonDeserialize(builder = EnvironmentDataServices.Builder.class)
-public record EnvironmentDataServices(AwsDataServiceParameters aws, AzureDataServiceParameters azure, GcpDataServiceParameters gcp) implements Serializable {
+public record EnvironmentDataServices(AwsDataServiceParameters aws, AzureDataServiceParameters azure, GcpDataServiceParameters gcp,
+        CustomDockerRegistryParameters customDockerRegistry) implements Serializable {
 
     public static Builder builder() {
         return new Builder();
@@ -24,6 +25,8 @@ public record EnvironmentDataServices(AwsDataServiceParameters aws, AzureDataSer
         private AzureDataServiceParameters azure;
 
         private GcpDataServiceParameters gcp;
+
+        private CustomDockerRegistryParameters customDockerRegistry;
 
         private Builder() {
         }
@@ -43,8 +46,13 @@ public record EnvironmentDataServices(AwsDataServiceParameters aws, AzureDataSer
             return this;
         }
 
+        public Builder withCustomDockerRegistry(CustomDockerRegistryParameters customDockerRegistry) {
+            this.customDockerRegistry = customDockerRegistry;
+            return this;
+        }
+
         public EnvironmentDataServices build() {
-            return new EnvironmentDataServices(aws, azure, gcp);
+            return new EnvironmentDataServices(aws, azure, gcp, customDockerRegistry);
         }
     }
 }

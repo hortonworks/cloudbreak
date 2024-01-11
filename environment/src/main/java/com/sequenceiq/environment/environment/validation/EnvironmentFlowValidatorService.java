@@ -17,6 +17,7 @@ import com.sequenceiq.environment.environment.validation.cloudstorage.Environmen
 import com.sequenceiq.environment.environment.validation.cloudstorage.EnvironmentLogStorageLocationValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyArnValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentAuthenticationValidator;
+import com.sequenceiq.environment.environment.validation.validators.EnvironmentDataServicesValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentNetworkProviderValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentParameterValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentRegionValidator;
@@ -45,6 +46,8 @@ public class EnvironmentFlowValidatorService {
 
     private final EncryptionKeyArnValidator encryptionKeyArnValidator;
 
+    private final EnvironmentDataServicesValidator environmentDataServicesValidator;
+
     public EnvironmentFlowValidatorService(
             EnvironmentRegionValidator environmentRegionValidator,
             EnvironmentNetworkProviderValidator environmentNetworkProviderValidator,
@@ -54,7 +57,8 @@ public class EnvironmentFlowValidatorService {
             EnvironmentAuthenticationValidator environmentAuthenticationValidator,
             EnvironmentLogStorageConfigurationValidator logStorageConfigurationValidator,
             EnvironmentBackupStorageConfigurationValidator backupStorageConfigurationValidator,
-            EncryptionKeyArnValidator encryptionKeyArnValidator) {
+            EncryptionKeyArnValidator encryptionKeyArnValidator,
+            EnvironmentDataServicesValidator environmentDataServicesValidator) {
         this.environmentRegionValidator = environmentRegionValidator;
         this.environmentNetworkProviderValidator = environmentNetworkProviderValidator;
         this.logStorageLocationValidator = logStorageLocationValidator;
@@ -64,6 +68,7 @@ public class EnvironmentFlowValidatorService {
         this.logStorageConfigurationValidator = logStorageConfigurationValidator;
         this.backupStorageConfigurationValidator = backupStorageConfigurationValidator;
         this.encryptionKeyArnValidator = encryptionKeyArnValidator;
+        this.environmentDataServicesValidator = environmentDataServicesValidator;
     }
 
     public ValidationResult.ValidationResultBuilder validateRegionsAndLocation(String location, Set<String> requestedRegions,
@@ -119,5 +124,10 @@ public class EnvironmentFlowValidatorService {
             return encryptionKeyArnValidator.validate(environmentValidationDto);
         }
         return validationResultBuilder.build();
+    }
+
+    public ValidationResult validateEnvironmentDataServices(EnvironmentValidationDto environmentValidationDto) {
+        LOGGER.debug("Validate Environment data services");
+        return environmentDataServicesValidator.validate(environmentValidationDto);
     }
 }

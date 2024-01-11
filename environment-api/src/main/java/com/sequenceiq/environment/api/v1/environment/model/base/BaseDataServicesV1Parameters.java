@@ -4,11 +4,13 @@ import java.io.Serializable;
 
 import com.sequenceiq.environment.api.v1.environment.model.AwsDataServicesV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.AzureDataServicesV1Parameters;
+import com.sequenceiq.environment.api.v1.environment.model.CustomDockerRegistryV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.GcpDataServicesV1Parameters;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(subTypes = { AwsDataServicesV1Parameters.class, AzureDataServicesV1Parameters.class, GcpDataServicesV1Parameters.class })
+@Schema(subTypes = { AwsDataServicesV1Parameters.class, AzureDataServicesV1Parameters.class, GcpDataServicesV1Parameters.class,
+        CustomDockerRegistryV1Parameters.class })
 public class BaseDataServicesV1Parameters implements Serializable {
 
     @Override

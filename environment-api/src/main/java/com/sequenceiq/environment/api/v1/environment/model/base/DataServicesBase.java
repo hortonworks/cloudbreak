@@ -10,13 +10,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.environment.api.doc.dataservices.DataServicesModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.AwsDataServicesV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.AzureDataServicesV1Parameters;
+import com.sequenceiq.environment.api.v1.environment.model.CustomDockerRegistryV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.GcpDataServicesV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.DataServicesRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DataServicesResponse;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(subTypes = { DataServicesRequest.class, DataServicesResponse.class })
+@Schema(subTypes = {DataServicesRequest.class, DataServicesResponse.class})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class DataServicesBase implements Serializable {
@@ -32,6 +33,10 @@ public abstract class DataServicesBase implements Serializable {
     @Schema(description = DataServicesModelDescription.GCP_PARAMETERS)
     @Valid
     private GcpDataServicesV1Parameters gcp;
+
+    @Schema(description = DataServicesModelDescription.REGISTRY_PARAMETERS)
+    @Valid
+    private CustomDockerRegistryV1Parameters customDockerRegistry;
 
     public AzureDataServicesV1Parameters getAzure() {
         return azure;
@@ -55,6 +60,14 @@ public abstract class DataServicesBase implements Serializable {
 
     public void setGcp(GcpDataServicesV1Parameters gcp) {
         this.gcp = gcp;
+    }
+
+    public CustomDockerRegistryV1Parameters getCustomDockerRegistry() {
+        return customDockerRegistry;
+    }
+
+    public void setCustomDockerRegistry(CustomDockerRegistryV1Parameters customDockerRegistry) {
+        this.customDockerRegistry = customDockerRegistry;
     }
 
     @Override
