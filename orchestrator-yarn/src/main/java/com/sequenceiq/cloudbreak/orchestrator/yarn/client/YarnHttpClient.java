@@ -2,8 +2,15 @@ package com.sequenceiq.cloudbreak.orchestrator.yarn.client;
 
 import java.net.MalformedURLException;
 
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 
+import org.glassfish.jersey.client.ClientResponse;
+import org.glassfish.jersey.logging.LoggingFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,11 +23,6 @@ import com.sequenceiq.cloudbreak.orchestrator.yarn.model.request.DeleteApplicati
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.response.ApplicationDetailResponse;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.response.ApplicationErrorResponse;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.response.ResponseContext;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
 
 public class YarnHttpClient implements YarnClient {
 
@@ -39,20 +41,24 @@ public class YarnHttpClient implements YarnClient {
 
         ResponseContext responseContext = new ResponseContext();
         // Construct the webresource and perform the get
-        WebResource webResource = getNewWebResource(dashEndpoint.getFullEndpointUrl().toString());
-        ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .post(ClientResponse.class, createApplicationRequest);
-        responseContext.setStatusCode(response.getStatus());
+        try (Client client = getLoggingClient()) {
+            WebTarget webResource = client.target(dashEndpoint.getFullEndpointUrl().toString());
+            ClientResponse response = webResource
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                    .post(Entity.entity(createApplicationRequest, MediaType.APPLICATION_JSON), ClientResponse.class);
+            responseContext.setStatusCode(response.getStatus());
 
             // Validate the results
-        if (responseContext.getStatusCode() == YarnResourceConstants.HTTP_ACCEPTED) {
-            responseContext.setResponseObject(response.getEntity(ApplicationDetailResponse.class));
-        } else {
-            responseContext.setResponseError(response.getEntity(ApplicationErrorResponse.class));
-        }
+            if (responseContext.getStatusCode() == YarnResourceConstants.HTTP_ACCEPTED) {
+                responseContext.setResponseObject(response.readEntity(ApplicationDetailResponse.class));
+            } else {
+                responseContext.setResponseError(response.readEntity(ApplicationErrorResponse.class));
+            }
 
-        return responseContext;
+            return responseContext;
+        }
     }
 
     @Override
@@ -63,33 +69,35 @@ public class YarnHttpClient implements YarnClient {
                 YarnResourceConstants.APPLICATIONS_PATH
                         + '/' + deleteApplicationRequest.getName());
 
-        ClientConfig clientConfig = new DefaultClientConfig();
-        Client client = Client.create(clientConfig);
+        try (Client client = getLoggingClient()) {
+            // Delete the application
+            WebTarget webResource = client.target(dashEndpoint.getFullEndpointUrl().toString());
+            ClientResponse response = webResource
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                    .delete(ClientResponse.class);
 
-        // Delete the application
-        WebResource webResource = client.resource(dashEndpoint.getFullEndpointUrl().toString());
-        ClientResponse response = webResource.accept("application/json").type("application/json").delete(ClientResponse.class);
-
-        // Validate HTTP 204 return
-        String msg;
-        switch (response.getStatus()) {
-            case YarnResourceConstants.HTTP_NO_CONTENT:
-                msg = String.format("Successfully deleted application %s", deleteApplicationRequest.getName());
-                LOGGER.debug(msg);
-                break;
-            case YarnResourceConstants.HTTP_NOT_FOUND:
-                msg = String.format("Application %s not found, already deleted?", deleteApplicationRequest.getName());
-                LOGGER.debug(msg);
-                break;
-            default:
-                msg = String.format("Received %d status code from url %s, reason: %s",
-                        response.getStatus(),
-                        dashEndpoint.getFullEndpointUrl().toString(),
-                        response.getEntity(String.class));
-                LOGGER.debug(msg);
-                throw new CloudbreakOrchestratorFailedException(msg);
+            // Validate HTTP 204 return
+            String msg;
+            switch (response.getStatus()) {
+                case YarnResourceConstants.HTTP_NO_CONTENT:
+                    msg = String.format("Successfully deleted application %s", deleteApplicationRequest.getName());
+                    LOGGER.debug(msg);
+                    break;
+                case YarnResourceConstants.HTTP_NOT_FOUND:
+                    msg = String.format("Application %s not found, already deleted?", deleteApplicationRequest.getName());
+                    LOGGER.debug(msg);
+                    break;
+                default:
+                    msg = String.format("Received %d status code from url %s, reason: %s",
+                            response.getStatus(),
+                            dashEndpoint.getFullEndpointUrl().toString(),
+                            response.readEntity(String.class));
+                    LOGGER.debug(msg);
+                    throw new CloudbreakOrchestratorFailedException(msg);
+            }
         }
-
     }
 
     @Override
@@ -99,20 +107,23 @@ public class YarnHttpClient implements YarnClient {
                 YarnResourceConstants.APPLICATIONS_PATH
                 );
 
-        ClientConfig clientConfig = new DefaultClientConfig();
-        Client client = Client.create(clientConfig);
+        try (Client client = getLoggingClient()) {
+            WebTarget webResource = client.target(dashEndpoint.getFullEndpointUrl().toString());
+            ClientResponse response = webResource
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                    .get(ClientResponse.class);
 
-        WebResource webResource = client.resource(dashEndpoint.getFullEndpointUrl().toString());
-        ClientResponse response = webResource.accept("application/json").type("application/json").get(ClientResponse.class);
-
-        // Validate HTTP 200 status code
-        if (response.getStatus() != YarnResourceConstants.HTTP_SUCCESS) {
-            String msg = String.format("Received %d status code from url %s, reason: %s",
-                    response.getStatus(),
-                    dashEndpoint.getFullEndpointUrl().toString(),
-                    response.getEntity(String.class));
-            LOGGER.debug(msg);
-            throw new CloudbreakOrchestratorFailedException(msg);
+            // Validate HTTP 200 status code
+            if (response.getStatus() != YarnResourceConstants.HTTP_SUCCESS) {
+                String msg = String.format("Received %d status code from url %s, reason: %s",
+                        response.getStatus(),
+                        dashEndpoint.getFullEndpointUrl().toString(),
+                        response.readEntity(String.class));
+                LOGGER.debug(msg);
+                throw new CloudbreakOrchestratorFailedException(msg);
+            }
         }
     }
 
@@ -128,40 +139,32 @@ public class YarnHttpClient implements YarnClient {
                         + '/' + applicationDetailRequest.getName());
 
         // Construct the webresource and perform the get
-        WebResource webResource = getNewWebResource(dashEndpoint.getFullEndpointUrl().toString());
-        ClientResponse response = webResource.accept(MediaType.APPLICATION_JSON)
-                .type(MediaType.APPLICATION_JSON)
-                .get(ClientResponse.class);
+        try (Client client = getLoggingClient()) {
+            WebTarget webResource = client.target(dashEndpoint.getFullEndpointUrl().toString());
+            ClientResponse response = webResource
+                    .request()
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                    .get(ClientResponse.class);
 
-        responseContext.setStatusCode(response.getStatus());
+            responseContext.setStatusCode(response.getStatus());
 
-        // Validate the results
-        if (checkStatusCode(response, YarnResourceConstants.HTTP_SUCCESS)) {
-            responseContext.setResponseObject(response.getEntity(ApplicationDetailResponse.class));
-        } else {
-            responseContext.setResponseError(response.getEntity(ApplicationErrorResponse.class));
+            // Validate the results
+            if (checkStatusCode(response, YarnResourceConstants.HTTP_SUCCESS)) {
+                responseContext.setResponseObject(response.readEntity(ApplicationDetailResponse.class));
+            } else {
+                responseContext.setResponseError(response.readEntity(ApplicationErrorResponse.class));
+            }
+
+            return responseContext;
         }
-
-        return responseContext;
-
     }
 
     public boolean checkStatusCode(ClientResponse response, int successStatusCode) {
-        boolean success = false;
-        if (successStatusCode == response.getStatus()) {
-            success = true;
-        }
-        return success;
+        return successStatusCode == response.getStatus();
     }
 
-    public WebResource getNewWebResource(String url) {
-        ClientConfig clientConfig = new DefaultClientConfig();
-        Client client = Client.create(clientConfig);
-        return client.resource(url);
-    }
-
-    public WebResource getNewWebResourceWithClientConfig(ClientConfig clientConfig, String url) {
-        Client client = Client.create(clientConfig);
-        return client.resource(url);
+    private Client getLoggingClient() {
+        return ClientBuilder.newClient().register(LoggingFeature.class);
     }
 }
