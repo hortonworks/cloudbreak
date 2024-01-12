@@ -8,11 +8,14 @@ import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
-import org.glassfish.jersey.client.ClientResponse;
+import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.logging.LoggingFeature;
+import org.glassfish.jersey.logging.LoggingFeature.Verbosity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 
 import com.sequenceiq.cloudbreak.cloud.yarn.client.api.YarnEndpoint;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.api.YarnResourceConstants;
@@ -44,20 +47,21 @@ public class YarnHttpClient implements YarnClient {
         try (Client client = getLoggingClient()) {
             // Construct the webresource and perform the get
             WebTarget webResource = client.target(dashEndpoint.getFullEndpointUrl().toString());
-            ClientResponse response = webResource
+            try (Response response = webResource
                     .request()
                     .accept(MediaType.APPLICATION_JSON)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                    .post(Entity.entity(createApplicationRequest, MediaType.APPLICATION_JSON_TYPE), ClientResponse.class);
-            responseContext.setStatusCode(response.getStatus());
-            // Validate the results
-            if (responseContext.getStatusCode() == YarnResourceConstants.HTTP_ACCEPTED) {
-                responseContext.setResponseObject(response.readEntity(ApplicationDetailResponse.class));
-            } else {
-                responseContext.setResponseError(response.readEntity(ApplicationErrorResponse.class));
-            }
+                    .post(Entity.entity(createApplicationRequest, MediaType.APPLICATION_JSON_TYPE))) {
+                responseContext.setStatusCode(response.getStatus());
+                // Validate the results
+                if (responseContext.getStatusCode() == YarnResourceConstants.HTTP_ACCEPTED) {
+                    responseContext.setResponseObject(response.readEntity(ApplicationDetailResponse.class));
+                } else {
+                    responseContext.setResponseError(response.readEntity(ApplicationErrorResponse.class));
+                }
 
-            return responseContext;
+                return responseContext;
+            }
         }
     }
 
@@ -72,30 +76,31 @@ public class YarnHttpClient implements YarnClient {
         try (Client client = getLoggingClient()) {
             // Delete the application
             WebTarget webResource = client.target(dashEndpoint.getFullEndpointUrl().toString());
-            ClientResponse response = webResource
+            try (Response response = webResource
                     .request()
                     .accept(MediaType.APPLICATION_JSON)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                    .delete(ClientResponse.class);
+                    .delete()) {
 
-            // Validate HTTP 204 return
-            String msg;
-            switch (response.getStatus()) {
-                case YarnResourceConstants.HTTP_NO_CONTENT:
-                    msg = String.format("Successfully deleted application %s", deleteApplicationRequest.getName());
-                    LOGGER.debug(msg);
-                    break;
-                case YarnResourceConstants.HTTP_NOT_FOUND:
-                    msg = String.format("Application %s not found, already deleted?", deleteApplicationRequest.getName());
-                    LOGGER.debug(msg);
-                    break;
-                default:
-                    msg = String.format("Received %d status code from url %s, reason: %s",
-                            response.getStatus(),
-                            dashEndpoint.getFullEndpointUrl().toString(),
-                            response.readEntity(String.class));
-                    LOGGER.debug(msg);
-                    throw new YarnClientException(msg);
+                // Validate HTTP 204 return
+                String msg;
+                switch (response.getStatus()) {
+                    case YarnResourceConstants.HTTP_NO_CONTENT:
+                        msg = String.format("Successfully deleted application %s", deleteApplicationRequest.getName());
+                        LOGGER.debug(msg);
+                        break;
+                    case YarnResourceConstants.HTTP_NOT_FOUND:
+                        msg = String.format("Application %s not found, already deleted?", deleteApplicationRequest.getName());
+                        LOGGER.debug(msg);
+                        break;
+                    default:
+                        msg = String.format("Received %d status code from url %s, reason: %s",
+                                response.getStatus(),
+                                dashEndpoint.getFullEndpointUrl().toString(),
+                                response.readEntity(String.class));
+                        LOGGER.debug(msg);
+                        throw new YarnClientException(msg);
+                }
             }
         }
     }
@@ -106,20 +111,21 @@ public class YarnHttpClient implements YarnClient {
 
         try (Client client = getLoggingClient()) {
             WebTarget webResource = client.target(dashEndpoint.getFullEndpointUrl().toString());
-            ClientResponse response = webResource
+            try (Response response = webResource
                     .request()
                     .accept(MediaType.APPLICATION_JSON)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                    .get(ClientResponse.class);
+                    .get()) {
 
-            // Validate HTTP 200 status code
-            if (response.getStatus() != YarnResourceConstants.HTTP_SUCCESS) {
-                String msg = String.format("Received %d status code from url %s, reason: %s",
-                        response.getStatus(),
-                        dashEndpoint.getFullEndpointUrl().toString(),
-                        response.readEntity(String.class));
-                LOGGER.debug(msg);
-                throw new YarnClientException(msg);
+                // Validate HTTP 200 status code
+                if (response.getStatus() != YarnResourceConstants.HTTP_SUCCESS) {
+                    String msg = String.format("Received %d status code from url %s, reason: %s",
+                            response.getStatus(),
+                            dashEndpoint.getFullEndpointUrl().toString(),
+                            response.readEntity(String.class));
+                    LOGGER.debug(msg);
+                    throw new YarnClientException(msg);
+                }
             }
         }
     }
@@ -138,30 +144,35 @@ public class YarnHttpClient implements YarnClient {
         // Construct the webresource and perform the get
         try (Client client = getLoggingClient()) {
             WebTarget webResource = client.target(dashEndpoint.getFullEndpointUrl().toString());
-            ClientResponse response = webResource
+            try (Response response = webResource
                     .request()
                     .accept(MediaType.APPLICATION_JSON)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                    .get(ClientResponse.class);
+                    .get()) {
 
-            responseContext.setStatusCode(response.getStatus());
+                responseContext.setStatusCode(response.getStatus());
 
-            // Validate the results
-            if (checkStatusCode(response, YarnResourceConstants.HTTP_SUCCESS)) {
-                responseContext.setResponseObject(response.readEntity(ApplicationDetailResponse.class));
-            } else {
-                responseContext.setResponseError(response.readEntity(ApplicationErrorResponse.class));
+                // Validate the results
+                if (checkStatusCode(response, YarnResourceConstants.HTTP_SUCCESS)) {
+                    responseContext.setResponseObject(response.readEntity(ApplicationDetailResponse.class));
+                } else {
+                    responseContext.setResponseError(response.readEntity(ApplicationErrorResponse.class));
+                }
+
+                return responseContext;
             }
-
-            return responseContext;
         }
     }
 
-    public boolean checkStatusCode(ClientResponse response, int successStatusCode) {
+    public boolean checkStatusCode(Response response, int successStatusCode) {
         return successStatusCode == response.getStatus();
     }
 
     private Client getLoggingClient() {
-        return ClientBuilder.newClient().register(LoggingFeature.class);
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.property(LoggingFeature.LOGGING_FEATURE_VERBOSITY_CLIENT, Verbosity.PAYLOAD_ANY);
+        clientConfig.property(LoggingFeature.LOGGING_FEATURE_LOGGER_LEVEL, Level.INFO);
+        clientConfig.register(LoggingFeature.class);
+        return ClientBuilder.newClient(clientConfig);
     }
 }
