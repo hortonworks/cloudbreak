@@ -15,11 +15,11 @@ import org.glassfish.jersey.logging.LoggingFeature;
 import org.glassfish.jersey.logging.LoggingFeature.Verbosity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.event.Level;
 
 import com.sequenceiq.cloudbreak.cloud.yarn.client.api.YarnEndpoint;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.api.YarnResourceConstants;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.exception.YarnClientException;
+import com.sequenceiq.cloudbreak.cloud.yarn.client.filter.ContentTypeFilter;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.request.ApplicationDetailRequest;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.request.CreateApplicationRequest;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.request.DeleteApplicationRequest;
@@ -114,7 +114,6 @@ public class YarnHttpClient implements YarnClient {
             try (Response response = webResource
                     .request()
                     .accept(MediaType.APPLICATION_JSON)
-                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                     .get()) {
 
                 // Validate HTTP 200 status code
@@ -147,7 +146,6 @@ public class YarnHttpClient implements YarnClient {
             try (Response response = webResource
                     .request()
                     .accept(MediaType.APPLICATION_JSON)
-                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                     .get()) {
 
                 responseContext.setStatusCode(response.getStatus());
@@ -170,9 +168,10 @@ public class YarnHttpClient implements YarnClient {
 
     private Client getLoggingClient() {
         ClientConfig clientConfig = new ClientConfig();
+        clientConfig.register(ContentTypeFilter.class, Integer.MAX_VALUE);
         clientConfig.property(LoggingFeature.LOGGING_FEATURE_VERBOSITY_CLIENT, Verbosity.PAYLOAD_ANY);
-        clientConfig.property(LoggingFeature.LOGGING_FEATURE_LOGGER_LEVEL, Level.INFO);
-        clientConfig.register(LoggingFeature.class);
+        clientConfig.property(LoggingFeature.LOGGING_FEATURE_LOGGER_LEVEL, "INFO");
+        clientConfig.register(LoggingFeature.class, Integer.MAX_VALUE - 1);
         return ClientBuilder.newClient(clientConfig);
     }
 }
