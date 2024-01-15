@@ -33,6 +33,11 @@ public class DocumentationLinkProvider {
         return "https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-azure/topics/mc-azure-vnet-and-subnets.html";
     }
 
+    public static String azureFlexibleServerForExistingEnvironmentLink() {
+        return "https://docs.cloudera.com/management-console/cloud/environments-azure/topics/" +
+                "mc-enable_private_flexible_server_on_an_existing_environment.html";
+    }
+
     public static String awsAddSubnetLink() {
         return "https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-aws/topics/mc-aws-req-vpc.html";
     }

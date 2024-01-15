@@ -56,7 +56,7 @@ public class CentOSToRedHatUpgradeImageFilter implements UpgradeImageFilter {
 
     private List<Image> filterImages(ImageFilterParams imageFilterParams, ImageFilterResult imageFilterResult, String currentOs, String currentOsType) {
         boolean rhel8ImagePreferred = entitlementService.isRhel8ImagePreferred(ThreadBasedUserCrnProvider.getAccountId());
-        List<Image> images = imageFilterResult.getImages()
+        return imageFilterResult.getImages()
                 .stream()
                 .filter(image -> {
                     if (!isCentOSImage(currentOs, currentOsType)) {
@@ -68,11 +68,6 @@ public class CentOSToRedHatUpgradeImageFilter implements UpgradeImageFilter {
                     return true;
                 })
                 .collect(Collectors.toList());
-        if (isCentOSImage(currentOs, currentOsType) && images.stream().anyMatch(image -> isRedHatImage(image.getOs(), image.getOsType()))) {
-            return images.stream().filter(image -> isRedHatImage(image.getOs(), image.getOsType())).toList();
-        } else {
-            return images;
-        }
     }
 
     public static boolean isCentOSToRedHatUpgradableVersion(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image image) {

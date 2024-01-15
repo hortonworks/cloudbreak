@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
@@ -34,7 +35,8 @@ public class EnvironmentDatabaseService {
         if (isAzurePrivateSingleServerSetup(environment)) {
             if (azureDatabaseType == AzureDatabaseType.FLEXIBLE_SERVER) {
                 throw new BadRequestException("Your environment was created with Azure Private Single Server database setup." +
-                        " If you would like to start your cluster with Private Flexible Server database, you have to change your environment network setup.");
+                        " If you would like to start your cluster with Private Flexible Server database, you have to change your environment network setup. " +
+                        "Please refer to the documentation at " + DocumentationLinkProvider.azureFlexibleServerForExistingEnvironmentLink());
             } else {
                 LOGGER.info("Fall back to Azure Private Single Server because the environment set up with private single server settings");
                 modifiedDbType = AzureDatabaseType.SINGLE_SERVER;
