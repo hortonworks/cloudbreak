@@ -22,6 +22,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_COST
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ROTATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_WIRE_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CENTRAL_COMPUTE_MONITORING;
@@ -535,6 +536,10 @@ public class EntitlementService {
 
     public boolean isWireEncryptionEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_WIRE_ENCRYPTION);
+    }
+
+    public boolean isSecretEncryptionEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_SECRET_ENCRYPTION);
     }
 
     public List<String> getEntitlements(String accountId) {

@@ -96,6 +96,7 @@ auth:
     rhel8:
       enabled: true
       preferred: true
+    secret.encryption.enabled: false
 crn:
   partition: cdp
   region: us-west-1

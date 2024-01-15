@@ -12,7 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -175,7 +174,9 @@ public class MockUserManagementServiceTest {
         GetAccountResponse res = observer.getValues().get(0);
         assertThat(res.hasAccount()).isTrue();
         Account account = res.getAccount();
-        List<String> entitlements = account.getEntitlementsList().stream().map(Entitlement::getEntitlementName).collect(Collectors.toList());
+        List<String> entitlements = account.getEntitlementsList().stream()
+                .map(Entitlement::getEntitlementName)
+                .toList();
         assertThat(entitlements).contains("CLOUDERA_INTERNAL_ACCOUNT", "DATAHUB_AZURE_AUTOSCALING",
                 "DATAHUB_AWS_AUTOSCALING", "DATAHUB_GCP_AUTOSCALING", "LOCAL_DEV", "DATAHUB_FLOW_SCALING", "DATAHUB_STREAMING_SCALING",
                 "CDP_CM_ADMIN_CREDENTIALS");
@@ -257,6 +258,9 @@ public class MockUserManagementServiceTest {
 
                 {"azureDatabaseFlexibleServerEnabled false", "azureDatabaseFlexibleServerEnabled", false, "CDP_AZURE_DATABASE_FLEXIBLE_SERVER", false},
                 {"azureDatabaseFlexibleServerEnabled true", "azureDatabaseFlexibleServerEnabled", true, "CDP_AZURE_DATABASE_FLEXIBLE_SERVER", true},
+
+                {"secretEncryptionEnabled false", "secretEncryptionEnabled", false, "CDP_CB_SECRET_ENCRYPTION", false},
+                {"secretEncryptionEnabled true", "secretEncryptionEnabled", true, "CDP_CB_SECRET_ENCRYPTION", true},
         };
     }
 
@@ -277,7 +281,9 @@ public class MockUserManagementServiceTest {
         GetAccountResponse res = observer.getValues().get(0);
         assertThat(res.hasAccount()).isTrue();
         Account account = res.getAccount();
-        List<String> entitlements = account.getEntitlementsList().stream().map(Entitlement::getEntitlementName).collect(Collectors.toList());
+        List<String> entitlements = account.getEntitlementsList().stream()
+                .map(Entitlement::getEntitlementName)
+                .toList();
         if (entitlementPresentExpected) {
             assertThat(entitlements).contains(entitlementName);
         } else {

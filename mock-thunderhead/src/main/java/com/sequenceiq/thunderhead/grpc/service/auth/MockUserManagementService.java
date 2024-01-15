@@ -25,6 +25,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_COST
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ROTATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CENTRAL_COMPUTE_MONITORING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
@@ -243,6 +244,7 @@ import com.sequenceiq.thunderhead.util.IniUtil;
 import com.sequenceiq.thunderhead.util.JsonUtil;
 
 import io.grpc.Status;
+import io.grpc.internal.testing.StreamRecorder;
 import io.grpc.stub.StreamObserver;
 
 @Service
@@ -537,6 +539,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.rhel8.preferred}")
     private boolean rhel8Preferred;
 
+    @Value("${auth.mock.secret.encryption.enabled}")
+    private boolean secretEncryptionEnabled;
+
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
@@ -559,11 +564,12 @@ public class MockUserManagementService extends UserManagementImplBase {
 
         initializeActorWorkloadCredentials();
         initializeWorkloadPasswordPolicy();
+
+        listEntitlements();
     }
 
     @VisibleForTesting
     void initializeActorWorkloadCredentials() {
-
         GetActorWorkloadCredentialsResponse.Builder builder = GetActorWorkloadCredentialsResponse.newBuilder();
         try {
             JsonFormat.parser().merge(Resources.toString(
@@ -580,6 +586,18 @@ public class MockUserManagementService extends UserManagementImplBase {
         WorkloadPasswordPolicy.Builder builder = WorkloadPasswordPolicy.newBuilder();
         builder.setWorkloadPasswordMaxLifetime(PASSWORD_LIFETIME);
         workloadPasswordPolicy = builder.build();
+    }
+
+    private void listEntitlements() {
+        GetAccountRequest req = GetAccountRequest.getDefaultInstance();
+        StreamRecorder<GetAccountResponse> observer = StreamRecorder.create();
+        getAccount(req, observer);
+        GetAccountResponse res = observer.getValues().get(0);
+        Account account = res.getAccount();
+        List<String> entitlements = account.getEntitlementsList().stream()
+                .map(Entitlement::getEntitlementName)
+                .toList();
+        LOGGER.info("Granted entitlements: {}", entitlements);
     }
 
     @Override
@@ -977,6 +995,9 @@ public class MockUserManagementService extends UserManagementImplBase {
             if (rhel8Preferred) {
                 builder.addEntitlements(createEntitlement(PREFER_RHEL8_IMAGES));
             }
+        }
+        if (secretEncryptionEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_CB_SECRET_ENCRYPTION));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

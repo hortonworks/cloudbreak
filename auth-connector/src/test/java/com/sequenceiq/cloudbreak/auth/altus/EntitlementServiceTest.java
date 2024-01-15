@@ -190,6 +190,9 @@ class EntitlementServiceTest {
 
                 {"CDP_CB_AZURE_MULTIAZ", (EntitlementCheckFunction) EntitlementService::isAzureMultiAzEnabled, false},
                 {"CDP_CB_AZURE_MULTIAZ", (EntitlementCheckFunction) EntitlementService::isAzureMultiAzEnabled, true},
+
+                {"CDP_CB_SECRET_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::isSecretEncryptionEnabled, false},
+                {"CDP_CB_SECRET_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::isSecretEncryptionEnabled, true},
         };
     }
 
