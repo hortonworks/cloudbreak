@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler;
 
+import static com.sequenceiq.common.model.OsType.RHEL8;
+
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -13,6 +15,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
@@ -61,6 +64,12 @@ public class ImageFallbackService {
         com.sequenceiq.cloudbreak.domain.stack.Component component = componentConfigProviderService.getImageComponent(stackId);
         Image currentImage = component.getAttributes().get(Image.class);
         if (imageFallbackPermitted(currentImage, stackView)) {
+            if (RHEL8.getOs().equalsIgnoreCase(currentImage.getOsType()) && azureImageFormatValidator.isVhdImageFormat(currentImage.getImageName())) {
+                String message = String.format("Failed to start instances with image: %s. The current image is a Redhat 8 VHD image, " +
+                                "please check if the source image is signed.",
+                        currentImage.getImageName());
+                throw new CloudbreakServiceException(message);
+            }
             String fallbackImageName = getFallbackImageName(stackView, currentImage);
             LOGGER.debug("Replacing current image {} with fallback image {}", currentImage.getImageName(), fallbackImageName);
             userDataService.makeSureUserDataIsMigrated(stackView.getId());
@@ -82,7 +91,6 @@ public class ImageFallbackService {
         if (!imageFallbackPermitted(currentImage, stack)) {
             return null;
         } else {
-
             ImageCatalogPlatform platformString = platformStringTransformer.getPlatformStringForImageCatalog(stack.getCloudPlatform(),
                     stack.getPlatformVariant());
             StatedImage image = imageCatalogService.getImage(stack.getWorkspaceId(), currentImage.getImageCatalogUrl(),

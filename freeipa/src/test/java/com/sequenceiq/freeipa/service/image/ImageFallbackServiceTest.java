@@ -114,6 +114,7 @@ class ImageFallbackServiceTest {
         ImageEntity currentImage = new ImageEntity();
         currentImage.setOsType("redhat8");
         currentImage.setImageName("vhdImageName");
+        currentImage.setSourceImage("redhat8:source:image");
 
         Stack stack = new Stack();
         stack.setCloudPlatform("cloudPlatform");
@@ -125,7 +126,8 @@ class ImageFallbackServiceTest {
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.getImageWrapper(currentImage, stack));
 
-        assertEquals("Failed to start instances with image: vhdImageName. No valid fallback path from Redhat 8 VHD image.", exception.getMessage());
+        assertEquals("Failed to start instances with image: vhdImageName. The current image is a Redhat 8 VHD image, " +
+                "please check if the source image is signed: redhat8:source:image.", exception.getMessage());
     }
 
     @Test

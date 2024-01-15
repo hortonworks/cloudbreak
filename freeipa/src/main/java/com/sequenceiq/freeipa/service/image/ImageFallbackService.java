@@ -55,8 +55,9 @@ public class ImageFallbackService {
 
     public ImageWrapper getImageWrapper(ImageEntity currentImage, Stack stack) {
         if (RHEL8.getOs().equalsIgnoreCase(currentImage.getOsType()) && azureImageFormatValidator.isVhdImageFormat(currentImage.getImageName())) {
-            String message = String.format("Failed to start instances with image: %s. No valid fallback path from Redhat 8 VHD image.",
-                    currentImage.getImageName());
+            String message = String.format("Failed to start instances with image: %s. The current image is a Redhat 8 VHD image, " +
+                            "please check if the source image is signed: %s.",
+                    currentImage.getImageName(), currentImage.getSourceImage());
             throw new CloudbreakServiceException(message);
         }
 
