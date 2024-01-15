@@ -140,4 +140,21 @@ public class DefaultClouderaManagerRepoServiceTest {
 
         Assertions.assertEquals("Cloudera Manager repo was not found in image for os: 'redhat8'.", exception.getMessage());
     }
+
+    @Test
+    public void testEmptyClouderaManagerImage() throws CloudbreakImageCatalogException {
+        StackRepoDetails stackRepoDetails = new StackRepoDetails(Map.of(StackRepoDetails.REPO_ID_TAG, "CDH"), null);
+        ImageStackDetails imageStackDetails = new ImageStackDetails("7.2.17", stackRepoDetails, "123");
+        when(image.getStackDetails()).thenReturn(imageStackDetails);
+        when(image.getOsType()).thenReturn("redhat8");
+        when(stackTypeResolver.determineStackType(any())).thenReturn(StackType.CDH);
+        ClouderaManagerRepo repo = new ClouderaManagerRepo();
+        repo.setBaseUrl("");
+        when(imageToClouderaManagerRepoConverter.convert(image)).thenReturn(repo);
+
+        CloudbreakImageCatalogException exception = assertThrows(CloudbreakImageCatalogException.class,
+                () -> underTest.getClouderaManagerRepo(image));
+
+        Assertions.assertEquals("Cloudera Manager repo was not found in image for os: 'redhat8'.", exception.getMessage());
+    }
 }

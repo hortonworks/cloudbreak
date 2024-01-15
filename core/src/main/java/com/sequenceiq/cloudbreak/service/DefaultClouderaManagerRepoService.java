@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -82,7 +83,7 @@ public class DefaultClouderaManagerRepoService {
         if (imgFromCatalog.getRepo() != null) {
             if (StackType.CDH.equals(stackType)) {
                 ClouderaManagerRepo clouderaManagerRepo = imageToClouderaManagerRepoConverter.convert(imgFromCatalog);
-                if (Objects.isNull(clouderaManagerRepo) || clouderaManagerRepo.getBaseUrl() == null) {
+                if (Objects.isNull(clouderaManagerRepo) || StringUtils.isEmpty(clouderaManagerRepo.getBaseUrl())) {
                     throw new CloudbreakImageCatalogException(
                             String.format("Cloudera Manager repo was not found in image for os: '%s'.", imgFromCatalog.getOsType()));
                 }
