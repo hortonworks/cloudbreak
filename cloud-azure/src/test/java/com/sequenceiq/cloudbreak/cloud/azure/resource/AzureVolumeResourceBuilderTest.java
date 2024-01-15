@@ -438,7 +438,7 @@ public class AzureVolumeResourceBuilderTest {
         when(instanceTemplate.getStringParameter(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID)).thenReturn(DISK_ENCRYPTION_SET_ID);
 
         when(azureClient.createManagedDisk(new AzureDisk(VOLUME_ID, VOLUME_SIZE, AzureDiskType.STANDARD_SSD_LRS, REGION, RESOURCE_GROUP,
-                Map.of(), null, null))).thenReturn(disk);
+                        Map.of(), null, null))).thenReturn(disk);
 
         List<CloudResource> result = underTest.build(context, cloudInstance, PRIVATE_ID, auth, group, List.of(volumeSetResource), cloudStack);
 

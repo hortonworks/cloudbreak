@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 
-set -x
+set -ex
 
 source /opt/salt/scripts/format-and-mount-common.sh
 
 LOG_FILE="/var/log/resize-storage-volumes.log"
-CLOUD_PLATFORM="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['cloud_platform'] }}"
 
 extend_partition() {
   device=$1
@@ -17,28 +16,10 @@ extend_partition() {
   if [[ "$STR" == *"$SUB"* ]]
   then
     log $LOG_FILE "resizing disk for filesystem: xfs_growfs"
-    log $LOG_FILE "growing: ${device}"
-    extend_azure_partition $device $LOG_FILE
     xfs_growfs -d / || log $LOG_FILE xfs_growfs indicates that there is no need for growing disk on $device
   else
     log $LOG_FILE "resizing disk for filesystem: resize2fs"
-    log $LOG_FILE "cloud platform: ${CLOUD_PLATFORM}"
-    extend_azure_partition $device $LOG_FILE
-    log $LOG_FILE "growing: ${device}"
     resize2fs $device || log $LOG_FILE resize2fs indicates that there is no need for growing disk on $device
-  fi
-}
-
-extend_azure_partition() {
-  device=$1
-  LOG_FILE=$2
-  local devicename="${device#/dev/*}"
-  local mountpoint_for_device=$(lsblk -n -oMOUNTPOINT,NAME | grep ${devicename} | awk '{print $1}')
-  if [[ "$CLOUD_PLATFORM" == "AZURE" && "$mountpoint_for_device" == *"/hadoopfs/"* ]]; then
-    log $LOG_FILE "cloud platform: ${CLOUD_PLATFORM}"
-    log $LOG_FILE "device being scanned for growing: ${devicename}"
-    log $LOG_FILE "mount point for device: $mountpoint_for_device"
-    echo 1 | sudo tee /sys/class/block/"${devicename}"/device/rescan >> $LOG_FILE 2>&1
   fi
 }
 
