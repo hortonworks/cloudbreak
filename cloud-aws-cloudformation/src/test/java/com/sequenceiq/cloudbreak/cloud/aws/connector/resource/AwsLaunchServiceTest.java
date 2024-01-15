@@ -44,7 +44,7 @@ import software.amazon.awssdk.services.cloudformation.model.DescribeStacksReques
 import software.amazon.awssdk.services.cloudformation.model.DescribeStacksResponse;
 import software.amazon.awssdk.services.cloudformation.model.Stack;
 import software.amazon.awssdk.services.cloudformation.model.StackStatus;
-import software.amazon.awssdk.services.cloudformation.waiters.DefaultCloudFormationWaiter;
+import software.amazon.awssdk.services.cloudformation.waiters.CloudFormationWaiter;
 
 @ExtendWith(MockitoExtension.class)
 class AwsLaunchServiceTest {
@@ -104,7 +104,7 @@ class AwsLaunchServiceTest {
                         .build());
         AmazonCloudFormationClient amazonCloudFormationClient = mock(AmazonCloudFormationClient.class);
         CloudFormationClient cloudFormationClient = mock(CloudFormationClient.class);
-        when(amazonCloudFormationClient.waiters()).thenReturn(DefaultCloudFormationWaiter.builder().client(cloudFormationClient).build());
+        when(amazonCloudFormationClient.waiters()).thenReturn(CloudFormationWaiter.builder().client(cloudFormationClient).build());
         when(awsClient.createCloudFormationClient(any(), anyString()))
                 .thenReturn(amazonCloudFormationClient);
         when(cloudFormationClient.describeStacks(any(DescribeStacksRequest.class))).thenReturn(DescribeStacksResponse.builder()
