@@ -1827,23 +1827,17 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
-    public Map<String, Map<String, String>> resizeDisksOnNodes(List<GatewayConfig> allGateway, Set<Node> nodesWithDiskData, Set<Node> allNodes,
-            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
+    public Map<String, Map<String, String>> resizeDisksOnNodes(List<GatewayConfig> allGateway, Set<Node> nodesWithDiskDataInTargetGroup,
+            Set<Node> allNodesInTargetGroup, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateway);
         Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGateway);
-        Target<String> allHosts = new HostList(nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toSet()));
+        Target<String> allHosts = new HostList(nodesWithDiskDataInTargetGroup.stream().map(Node::getHostname).collect(Collectors.toSet()));
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            Set<String> hostnames = nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toSet());
-            saltCommandRunner.runModifyGrainCommand(sc,
-                    new GrainAddRunner(saltStateService, hostnames, allNodes, "resize_disks"), exitModel, exitCriteria);
-            StateAllRunner stateAllRunner = new StateAllRunner(saltStateService, gatewayTargetIpAddresses, allNodes, "resize.init");
+            StateAllRunner stateAllRunner = new StateAllRunner(saltStateService, gatewayTargetIpAddresses, allNodesInTargetGroup, "resize_disks.init");
             OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateAllRunner);
             Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel);
             saltJobRunBootstrapRunner.call();
-            Map<String, Map<String, String>> fsTabInfo = getFstabInformation(sc, allHosts, nodesWithDiskData);
-            saltCommandRunner.runModifyGrainCommand(sc,
-                    new GrainRemoveRunner(saltStateService, hostnames, allNodes, "resize_disks"), exitModel, exitCriteria);
-            return fsTabInfo;
+            return getFstabInformation(sc, allHosts, nodesWithDiskDataInTargetGroup);
         } catch (Exception e) {
             LOGGER.info("Error occurred during the salt resize operation", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);

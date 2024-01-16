@@ -13,7 +13,6 @@ base:
     - logrotate
     - ntp
     - postgresql.root-certs
-    - resize
     - rhelrepo
 
   'G@roles:ad_member and G@os_family:RedHat':

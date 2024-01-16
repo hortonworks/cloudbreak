@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.datalake.DiskUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,9 +59,6 @@ class DistroXDiskUpdateValidationHandlerTest {
     private EventSender eventSender;
 
     @Captor
-    private ArgumentCaptor<BaseFlowEvent> captor;
-
-    @Captor
     private ArgumentCaptor<DistroXDiskUpdateFailedEvent> failureCaptor;
 
     private Json json;
@@ -72,7 +68,7 @@ class DistroXDiskUpdateValidationHandlerTest {
         underTest = new DistroXDiskUpdateValidationHandler(eventSender);
         ReflectionTestUtils.setField(underTest, null, stackDtoService, StackDtoService.class);
         ReflectionTestUtils.setField(underTest, null, diskUpdateService, DiskUpdateService.class);
-        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("vol-07d2212c81d1b8b00", "/dev/xvdb", 50, "standard",
+        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("vol-1", "/dev/xvdb", 50, "standard",
                 CloudVolumeUsageType.GENERAL);
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("us-west-2a", true, "", List.of(volume),
                 512, "standard");
@@ -100,13 +96,22 @@ class DistroXDiskUpdateValidationHandlerTest {
         doReturn("compute").when(resource).getInstanceGroup();
         doReturn(json).when(resource).getAttributes();
         doReturn(ResourceType.AWS_VOLUMESET).when(resource).getResourceType();
-        doReturn(Set.of(resource)).when(stack).getResources();
+
+        Resource resource2 = mock(Resource.class);
+        doReturn("B1234").when(resource2).getInstanceId();
+
+        doReturn(Set.of(resource, resource2)).when(stack).getResources();
+
         doReturn(CloudPlatform.AWS.toString()).when(stack).getCloudPlatform();
         doReturn(true).when(diskUpdateService).isDiskTypeChangeSupported(CloudPlatform.AWS.toString());
         doReturn(stack).when(stackDtoService).getById(anyLong());
+        ArgumentCaptor<DistroXDiskUpdateEvent> captor = ArgumentCaptor.forClass(DistroXDiskUpdateEvent.class);
         underTest.accept(new Event<>(event));
         verify(eventSender, times(1)).sendEvent(captor.capture(), any());
+        DistroXDiskUpdateEvent eventCaptured = captor.getValue();
         assertEquals(DATAHUB_DISK_UPDATE_EVENT.selector(), captor.getValue().getSelector());
+        assertEquals(1, eventCaptured.getVolumesToBeUpdated().size());
+        assertEquals("vol-1", eventCaptured.getVolumesToBeUpdated().get(0).getId());
     }
 
     @Test
@@ -128,8 +133,6 @@ class DistroXDiskUpdateValidationHandlerTest {
         Resource resource = mock(Resource.class);
         doReturn("A1234").when(resource).getInstanceId();
         doReturn("compute").when(resource).getInstanceGroup();
-        doReturn(json).when(resource).getAttributes();
-        doReturn(ResourceType.AWS_VOLUMESET).when(resource).getResourceType();
         doReturn(Set.of(resource)).when(stack).getResources();
         doReturn(stack).when(stackDtoService).getById(anyLong());
         underTest.accept(new Event<>(event));

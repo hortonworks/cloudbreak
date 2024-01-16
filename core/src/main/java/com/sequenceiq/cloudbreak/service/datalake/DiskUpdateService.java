@@ -209,15 +209,17 @@ public class DiskUpdateService {
         List<Resource> resourceList = resourceService.findAllByStackIdAndInstanceGroupAndResourceTypeIn(stackId, instanceGroup,
                 List.of(diskResourceType)).stream().filter(res -> null != res.getInstanceId()).toList();
         stack.setResources(new HashSet<>(resourceList));
-        Set<Node> allNodes = stackUtil.collectNodes(stack);
+        Set<Node> allNodesInTargetGroup = stackUtil.collectNodes(stack).stream().filter(node -> node.getHostGroup().equals(instanceGroup))
+                .collect(Collectors.toSet());
         Cluster cluster = stack.getCluster();
         InMemoryStateStore.putStack(stackId, PollGroup.POLLABLE);
-        Set<Node> nodesWithDiskData = stackUtil.collectNodesWithDiskData(stack);
+        Set<Node> nodesWithDiskDataInTargetGroup = stackUtil.collectNodesWithDiskData(stack).stream().filter(node -> node.getHostGroup()
+                .equals(instanceGroup)).collect(Collectors.toSet());
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-        LOGGER.debug("Calling host orchestrator for resizing and fetching fstab information for nodes - {}", allNodes);
-        Map<String, Map<String, String>> fstabInformation = hostOrchestrator.resizeDisksOnNodes(gatewayConfigs, nodesWithDiskData, allNodes,
-                exitCriteriaModel);
+        LOGGER.debug("Calling host orchestrator for resizing and fetching fstab information for nodes - {}", allNodesInTargetGroup);
+        Map<String, Map<String, String>> fstabInformation = hostOrchestrator.resizeDisksOnNodes(gatewayConfigs, nodesWithDiskDataInTargetGroup,
+                allNodesInTargetGroup, exitCriteriaModel);
 
         parseFstabAndPersistDiskInformation(fstabInformation, stack);
 

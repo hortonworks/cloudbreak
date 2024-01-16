@@ -371,7 +371,9 @@ class DiskUpdateServiceTest {
         List<Resource> resourceList = List.of(resource);
         doReturn(resourceList).when(resourceService).findAllByStackIdAndInstanceGroupAndResourceTypeIn(eq(STACK_ID), eq("compute"), anyList());
         doReturn(resourceList).when(stack).getDiskResources();
-        Set<Node> allNodes = Set.of(mock(Node.class));
+        Node node = mock(Node.class);
+        doReturn("compute").when(node).getHostGroup();
+        Set<Node> allNodes = Set.of(node);
         doReturn(allNodes).when(stackUtil).collectNodes(stack);
         doReturn(allNodes).when(stackUtil).collectNodesWithDiskData(stack);
         Cluster cluster = mock(Cluster.class);
@@ -403,7 +405,9 @@ class DiskUpdateServiceTest {
         doReturn("test-instance-1").when(resource).getInstanceId();
         List<Resource> resourceList = List.of(resource);
         doReturn(resourceList).when(resourceService).findAllByStackIdAndInstanceGroupAndResourceTypeIn(eq(STACK_ID), eq("compute"), anyList());
-        Set<Node> allNodes = Set.of(mock(Node.class));
+        Node node = mock(Node.class);
+        doReturn("compute").when(node).getHostGroup();
+        Set<Node> allNodes = Set.of(node);
         doReturn(allNodes).when(stackUtil).collectNodes(stack);
         doReturn(allNodes).when(stackUtil).collectNodesWithDiskData(stack);
         Cluster cluster = mock(Cluster.class);
