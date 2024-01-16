@@ -33,6 +33,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslCertStatus;
 
 @Configuration
 public class DatabaseServerSslCertificateConfig {
@@ -384,6 +385,19 @@ public class DatabaseServerSslCertificateConfig {
                 .filter(c -> !Strings.isNullOrEmpty(c))
                 .map(c -> getValueByCloudPlatformAndRegion(CERT_LEGACY_CLOUD_PROVIDER_IDENTIFIERS_BY_CLOUD_PLATFORM, c, region))
                 .orElse(null);
+    }
+
+    public SslCertStatus getSslCertificatesOutdated(String cloudPlatform, String region, Set<String> currentCerts) {
+        Set<SslCertificateEntry> certsTemp = getCertsByCloudPlatformAndRegion(cloudPlatform, region)
+                        .stream()
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet());
+
+        Set<String> certs = certsTemp
+                .stream()
+                .map(SslCertificateEntry::certPem)
+                .collect(Collectors.toSet());
+        return certs.equals(currentCerts) ? SslCertStatus.UP_TO_DATE : SslCertStatus.OUTDATED;
     }
 
     public Map<String, String> getCerts() {

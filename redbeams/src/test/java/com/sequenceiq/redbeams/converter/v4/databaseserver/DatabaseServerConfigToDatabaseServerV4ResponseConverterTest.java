@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConv
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslCertStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ConnectionNameFormat;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -327,6 +328,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         when(databaseServerSslCertificateConfig.getLegacyMaxVersionByCloudPlatformAndRegion(CLOUD_PLATFORM, REGION)).thenReturn(CERT_LEGACY_MAX_VERSION);
         when(databaseServerSslCertificateConfig.getLegacyCloudProviderIdentifierByCloudPlatformAndRegion(CLOUD_PLATFORM, REGION))
                 .thenReturn(CERT_LEGACY_CLOUD_PROVIDER_IDENTIFIER);
+        when(databaseServerSslCertificateConfig.getSslCertificatesOutdated(CLOUD_PLATFORM, REGION, CERTS)).thenReturn(SslCertStatus.OUTDATED);
 
         DatabaseServerV4Response response = converter.convert(server);
 
@@ -336,6 +338,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         assertThat(sslConfigV4Response.getSslMode()).isEqualTo(SslMode.ENABLED);
         assertThat(sslConfigV4Response.getSslCertificateType()).isEqualTo(SslCertificateType.CLOUD_PROVIDER_OWNED);
         assertThat(sslConfigV4Response.getSslCertificates()).isSameAs(CERTS);
+        assertThat(sslConfigV4Response.getSslCertificatesStatus()).isEqualTo(SslCertStatus.OUTDATED);
         assertThat(sslConfigV4Response.getSslCertificateHighestAvailableVersion()).isEqualTo(CERT_MAX_VERSION);
         assertThat(sslConfigV4Response.getSslCertificateActiveVersion()).isEqualTo(certActiveVersionExpected);
         assertThat(sslConfigV4Response.getSslCertificateActiveCloudProviderIdentifier()).isEqualTo(certActiveCloudProviderIdentifierExpected);

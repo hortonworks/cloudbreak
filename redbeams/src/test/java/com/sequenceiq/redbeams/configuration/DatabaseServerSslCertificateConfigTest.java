@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
+import java.security.cert.X509Certificate;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -11,10 +13,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslCertStatus;
 
 class DatabaseServerSslCertificateConfigTest {
 
@@ -23,6 +27,8 @@ class DatabaseServerSslCertificateConfigTest {
     private static final String CLOUD_PROVIDER_IDENTIFIER_2 = "SwissSign-Platinum-CA-G2";
 
     private static final String CLOUD_PROVIDER_IDENTIFIER_3 = "OISTE-WISeKey-Global-Root-GC-CA";
+
+    private static final X509Certificate X_509_CERT = Mockito.mock(X509Certificate.class);
 
     private static final int VERSION_0 = 0;
 
@@ -526,6 +532,22 @@ class DatabaseServerSslCertificateConfigTest {
     @Test
     void getSupportedPlatformsForLegacyMaxVersionTest() {
         assertThat(underTest.getSupportedPlatformsForLegacyMaxVersion()).isEqualTo(Set.of("aws", "azure"));
+    }
+
+    @Test
+    void testSslCertificatesOutdatedWhenNotEqualsTwoListMustReturnOUTDATED() {
+        SslCertificateEntry sslCertificateEntry = new SslCertificateEntry(1, "", "aws", "aws", "pem1", X_509_CERT);
+        ReflectionTestUtils.setField(underTest, "certsByCloudPlatformCache", Map.of("aws", Set.of(sslCertificateEntry)));
+
+        assertThat(underTest.getSslCertificatesOutdated("aws", "eu-west-1", Set.of("pem2"))).isEqualTo(SslCertStatus.OUTDATED);
+    }
+
+    @Test
+    void testSslCertificatesOutdatedWhenEqualsTwoListMustReturnUPTODATE() {
+        SslCertificateEntry sslCertificateEntry = new SslCertificateEntry(1, "", "aws", "aws", "pem1", X_509_CERT);
+        ReflectionTestUtils.setField(underTest, "certsByCloudPlatformCache", Map.of("aws", Set.of(sslCertificateEntry)));
+
+        assertThat(underTest.getSslCertificatesOutdated("aws", "eu-west-1", Set.of("pem1"))).isEqualTo(SslCertStatus.UP_TO_DATE);
     }
 
     @ParameterizedTest(name = "{0}")

@@ -3,6 +3,7 @@ package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
 import java.io.Serializable;
 import java.util.Set;
 
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslCertStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
@@ -29,6 +30,9 @@ public class SslConfigV4Response implements Serializable {
 
     @Schema(description = DatabaseServer.SSL_CERTIFICATE_ACTIVE_CLOUD_PROVIDER_IDENTIFIER)
     private String sslCertificateActiveCloudProviderIdentifier;
+
+    @Schema(description = DatabaseServer.SSL_CERTIFICATE_STATUS)
+    private SslCertStatus sslCertificatesStatus;
 
     public Set<String> getSslCertificates() {
         return sslCertificates;
@@ -78,4 +82,11 @@ public class SslConfigV4Response implements Serializable {
         this.sslCertificateActiveCloudProviderIdentifier = sslCertificateActiveCloudProviderIdentifier;
     }
 
+    public SslCertStatus getSslCertificatesStatus() {
+        return sslCertificatesStatus;
+    }
+
+    public void setSslCertificatesStatus(SslCertStatus sslCertificatesStatus) {
+        this.sslCertificatesStatus = sslCertificatesStatus;
+    }
 }
