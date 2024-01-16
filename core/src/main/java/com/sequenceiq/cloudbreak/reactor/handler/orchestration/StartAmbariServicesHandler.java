@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
+import com.sequenceiq.cloudbreak.core.cluster.ClusterManagerDefaultConfigAdjuster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
@@ -35,6 +36,9 @@ public class StartAmbariServicesHandler implements EventHandler<StartAmbariServi
     @Inject
     private StackDtoService stackDtoService;
 
+    @Inject
+    private ClusterManagerDefaultConfigAdjuster clusterManagerDefaultConfigAdjuster;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(StartAmbariServicesRequest.class);
@@ -50,6 +54,7 @@ public class StartAmbariServicesHandler implements EventHandler<StartAmbariServi
             String clusterManagerIp = clusterServiceRunner.updateClusterManagerClientConfig(stack);
             clusterServiceRunner.runClusterManagerServices(stack, request.isRunPreServiceDeploymentRecipe());
             clusterApiConnectors.getConnector(stack, clusterManagerIp).waitForServer(request.isDefaultClusterManagerAuth());
+            clusterManagerDefaultConfigAdjuster.adjustDefaultConfig(stack, stack.getNotDeletedInstanceMetaData().size(), request.isDefaultClusterManagerAuth());
             response = new StartClusterManagerServicesSuccess(stackId);
         } catch (Exception e) {
             LOGGER.info("Start cluster manager services failed!", e);

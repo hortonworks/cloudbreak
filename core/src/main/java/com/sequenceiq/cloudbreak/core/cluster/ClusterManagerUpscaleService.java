@@ -77,7 +77,7 @@ public class ClusterManagerUpscaleService {
         clusterService.updateInstancesToRunning(stackId, nodeReachabilityResult.getReachableNodes());
         clusterService.updateInstancesToZombie(stackId, nodeReachabilityResult.getUnreachableNodes());
 
-        clusterManagerDefaultConfigAdjuster.adjustDefaultConfig(stackDto, stackDto.getNotDeletedInstanceMetaData().size());
+        clusterManagerDefaultConfigAdjuster.adjustDefaultConfig(stackDto, stackDto.getNotDeletedInstanceMetaData().size(), false);
 
         ClusterApi connector = clusterApiConnectors.getConnector(stackDto, clusterManagerIp);
         ExtendedPollingResult result;

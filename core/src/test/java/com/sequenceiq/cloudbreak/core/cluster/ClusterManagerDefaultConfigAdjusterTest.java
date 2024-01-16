@@ -77,7 +77,7 @@ class ClusterManagerDefaultConfigAdjusterTest {
             throws CloudbreakOrchestratorException, ClusterClientInitException, CloudbreakException {
         setUpMocks(availableMemoryGB, currentCMMemoryGB);
 
-        clusterManagerDefaultConfigAdjuster.adjustDefaultConfig(stackDto, nodeCount);
+        clusterManagerDefaultConfigAdjuster.adjustDefaultConfig(stackDto, nodeCount, false);
 
         verify(hostOrchestrator).setClusterManagerMemory(gatewayConfig, Memory.ofGigaBytes(expectedNewCMMemoryGB));
         verify(hostOrchestrator).restartClusterManagerOnMaster(
@@ -99,7 +99,7 @@ class ClusterManagerDefaultConfigAdjusterTest {
                 .thenReturn(Optional.of(Memory.ofGigaBytes(16)));
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(hostOrchestrator.setClouderaManagerOperationTimeout(gatewayConfig)).thenReturn(true);
-        clusterManagerDefaultConfigAdjuster.adjustDefaultConfig(stackDto, 250);
+        clusterManagerDefaultConfigAdjuster.adjustDefaultConfig(stackDto, 250, false);
         verify(hostOrchestrator, times(1)).setClouderaManagerOperationTimeout(any());
         verify(hostOrchestrator, times(1)).restartClusterManagerOnMaster(any(), any(), any());
         verify(clusterApi, times(1)).waitForServer(false);
@@ -112,7 +112,7 @@ class ClusterManagerDefaultConfigAdjusterTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(stackDto)).thenReturn(gatewayConfig);
         when(hostOrchestrator.getClusterManagerMemory(gatewayConfig))
                 .thenReturn(Optional.of(Memory.ofGigaBytes(16)));
-        clusterManagerDefaultConfigAdjuster.adjustDefaultConfig(stackDto, 99);
+        clusterManagerDefaultConfigAdjuster.adjustDefaultConfig(stackDto, 100, false);
         verify(hostOrchestrator, times(0)).setClouderaManagerOperationTimeout(any());
         verify(hostOrchestrator, times(0)).restartClusterManagerOnMaster(any(), any(), any());
         verify(clusterApi, times(0)).waitForServer(false);
@@ -123,7 +123,7 @@ class ClusterManagerDefaultConfigAdjusterTest {
             throws CloudbreakOrchestratorException, ClusterClientInitException, CloudbreakException {
         setUpMocks(32, 2);
         when(stackDto.getType()).thenReturn(StackType.WORKLOAD);
-        clusterManagerDefaultConfigAdjuster.adjustDefaultConfig(stackDto, 99);
+        clusterManagerDefaultConfigAdjuster.adjustDefaultConfig(stackDto, 100, false);
         verify(hostOrchestrator, times(0)).setClouderaManagerOperationTimeout(any());
         verify(hostOrchestrator, times(1)).restartClusterManagerOnMaster(any(), any(), any());
         verify(clusterApi, times(1)).waitForServer(false);
@@ -131,7 +131,7 @@ class ClusterManagerDefaultConfigAdjusterTest {
 
     @Test
     public void testMemoryIsAdjustedToTheHighestPossible() throws CloudbreakOrchestratorException, ClusterClientInitException, CloudbreakException {
-        testMemoryAdjustment(12, 2, 3, 10);
+        testMemoryAdjustment(12, 2, 3, 100);
 
         verify(cloudbreakEventService).fireCloudbreakEvent(
                 1L, "UPDATE_IN_PROGRESS", ResourceEvent.CLUSTER_SCALING_CM_MEMORY_WARNING,
@@ -143,7 +143,7 @@ class ClusterManagerDefaultConfigAdjusterTest {
     public void testMemoryIsNotChangedIfNoChangeISRequired() throws CloudbreakOrchestratorException {
         setUpMocks(16, 4);
 
-        clusterManagerDefaultConfigAdjuster.adjustDefaultConfig(stackDto, 1);
+        clusterManagerDefaultConfigAdjuster.adjustDefaultConfig(stackDto, 150, false);
 
         verify(hostOrchestrator, never()).setClusterManagerMemory(any(), any());
         verify(hostOrchestrator, never()).restartClusterManagerOnMaster(any(), any(), any());
@@ -154,9 +154,21 @@ class ClusterManagerDefaultConfigAdjusterTest {
     public void testMemoryChangeIsSkippedIfStackIsNotDataHub() throws CloudbreakOrchestratorException {
         when(stackDto.getType()).thenReturn(StackType.DATALAKE);
 
-        clusterManagerDefaultConfigAdjuster.adjustDefaultConfig(stackDto, 1);
+        clusterManagerDefaultConfigAdjuster.adjustDefaultConfig(stackDto, 1, false);
 
         verify(gatewayConfigService, never()).getPrimaryGatewayConfig(any());
+        verify(hostOrchestrator, never()).setClusterManagerMemory(any(), any());
+        verify(hostOrchestrator, never()).restartClusterManagerOnMaster(any(), any(), any());
+        verify(cloudbreakEventService, never()).fireCloudbreakEvent(any(), any(), any(), any());
+    }
+
+    @Test
+    public void testMemoryChangeIsSkippedIfNodeCountIsUnderMinimum() throws CloudbreakOrchestratorException {
+        when(stackDto.getType()).thenReturn(StackType.WORKLOAD);
+
+        clusterManagerDefaultConfigAdjuster.adjustDefaultConfig(stackDto, 99, false);
+
+        verify(gatewayConfigService, times(1)).getPrimaryGatewayConfig(any());
         verify(hostOrchestrator, never()).setClusterManagerMemory(any(), any());
         verify(hostOrchestrator, never()).restartClusterManagerOnMaster(any(), any(), any());
         verify(cloudbreakEventService, never()).fireCloudbreakEvent(any(), any(), any(), any());
@@ -180,7 +192,7 @@ class ClusterManagerDefaultConfigAdjusterTest {
         int currentCMMemoryGB = 2;
 
         Stream.Builder<Arguments> builder = Stream.builder();
-        addTestData(builder, availableMemoryGB, currentCMMemoryGB, 1, 199, 4);
+        addTestData(builder, availableMemoryGB, currentCMMemoryGB, 100, 199, 4);
         addTestData(builder, availableMemoryGB, currentCMMemoryGB, 200, 299, 8);
         addTestData(builder, availableMemoryGB, currentCMMemoryGB, 300, 399, 12);
         addTestData(builder, availableMemoryGB, currentCMMemoryGB, 400, 499, 16);

@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
+import com.sequenceiq.cloudbreak.core.cluster.ClusterManagerDefaultConfigAdjuster;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.CcmUpgradeFlowTriggerCondition;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmActions;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmFlowConfig;
@@ -225,6 +226,9 @@ class UpgradeCcmFlowChainIntegrationTest {
 
     @MockBean
     private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
+
+    @MockBean
+    private ClusterManagerDefaultConfigAdjuster clusterManagerDefaultConfigAdjuster;
 
     @SpyBean
     private FlowChains flowChains;

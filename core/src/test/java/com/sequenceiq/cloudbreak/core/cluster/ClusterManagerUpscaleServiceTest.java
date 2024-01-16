@@ -104,7 +104,7 @@ public class ClusterManagerUpscaleServiceTest {
 
         verifyNoMoreInteractions(clusterServiceRunner);
         verify(clusterApi, times(2)).waitForHosts(any());
-        verify(clusterManagerDefaultConfigAdjuster, times(2)).adjustDefaultConfig(eq(stackDto), anyInt());
+        verify(clusterManagerDefaultConfigAdjuster, times(2)).adjustDefaultConfig(eq(stackDto), anyInt(), eq(false));
     }
 
     @Test
@@ -131,7 +131,7 @@ public class ClusterManagerUpscaleServiceTest {
         verify(clusterHostServiceRunner, times(1)).removeSecurityConfigFromCMAgentsConfig(stackDto, nodeReachabilityResult.getReachableNodes());
         verifyNoMoreInteractions(clusterServiceRunner);
         verify(clusterApi, times(2)).waitForHosts(any());
-        verify(clusterManagerDefaultConfigAdjuster, times(2)).adjustDefaultConfig(eq(stackDto), anyInt());
+        verify(clusterManagerDefaultConfigAdjuster, times(2)).adjustDefaultConfig(eq(stackDto), anyInt(), eq(false));
     }
 
     @Test

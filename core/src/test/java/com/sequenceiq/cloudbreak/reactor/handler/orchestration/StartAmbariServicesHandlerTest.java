@@ -2,9 +2,11 @@ package com.sequenceiq.cloudbreak.reactor.handler.orchestration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,6 +22,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
+import com.sequenceiq.cloudbreak.core.cluster.ClusterManagerDefaultConfigAdjuster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
@@ -58,6 +61,9 @@ class StartAmbariServicesHandlerTest {
     @Mock
     private ClusterApi clusterApi;
 
+    @Mock
+    private ClusterManagerDefaultConfigAdjuster clusterManagerDefaultConfigAdjuster;
+
     @ParameterizedTest
     @ValueSource(booleans = { false, true })
     void testAcceptWhenStartAmbariHandlerSucceeds(boolean defaultClusterManagerAuth) throws ClusterClientInitException, CloudbreakException {
@@ -78,6 +84,7 @@ class StartAmbariServicesHandlerTest {
         StartClusterManagerServicesSuccess result = (StartClusterManagerServicesSuccess) resultEvent.getData();
         assertEquals(STACK_ID, result.getResourceId());
         verify(clusterServiceRunner).updateClusterManagerClientConfig(stack);
+        verify(clusterManagerDefaultConfigAdjuster, times(1)).adjustDefaultConfig(eq(stack), anyInt(), eq(defaultClusterManagerAuth));
     }
 
     @ParameterizedTest
