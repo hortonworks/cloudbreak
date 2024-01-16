@@ -1,29 +1,27 @@
 package com.sequenceiq.freeipa.service.freeipa.flow;
 
-import java.util.Map;
-
-import jakarta.inject.Inject;
+import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.flow.core.EventParameterFactory;
-import com.sequenceiq.flow.core.FlowConstants;
+import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Component
-public class FreeIpaEventParameterFactory implements EventParameterFactory {
+public class FreeIpaEventParameterFactory extends EventParameterFactory {
 
-    @Inject
-    private StackService stackService;
+    private final StackService stackService;
 
-    public Map<String, Object> createEventParameters(Long stackId) {
-        String userCrn;
-        try {
-            userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        } catch (RuntimeException ex) {
-            userCrn = stackService.getStackById(stackId).getOwner();
-        }
-        return Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
+    public FreeIpaEventParameterFactory(CrnUserDetailsService crnUserDetailsService, StackService stackService) {
+        super(crnUserDetailsService);
+        this.stackService = stackService;
+    }
+
+    @Override
+    protected Optional<String> getUserCrnByResourceId(Long resourceId) {
+        return Optional.ofNullable(stackService.getStackById(resourceId))
+                .map(Stack::getOwner);
     }
 }

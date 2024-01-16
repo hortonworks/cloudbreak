@@ -1,11 +1,10 @@
 package com.sequenceiq.flow.component;
 
 import static com.sequenceiq.flow.component.FlowComponentTest.POSTGRES_CONTAINER;
+import static org.mockito.Mockito.mock;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -31,12 +30,11 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.common.dbmigration.SchemaLocationProvider;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.EventParameterFactory;
-import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
@@ -110,7 +108,12 @@ public class ComponentTestConfig {
 
     @Bean
     public EventParameterFactory eventParameterFactory() {
-        return resourceId -> Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, Objects.requireNonNull(ThreadBasedUserCrnProvider.getUserCrn()));
+        return new EventParameterFactory(mock(CrnUserDetailsService.class)) {
+            @Override
+            protected Optional<String> getUserCrnByResourceId(Long resourceId) {
+                return Optional.empty();
+            }
+        };
     }
 
     @Bean

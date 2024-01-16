@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.service;
+package com.sequenceiq.environment.environment.flow;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,28 +12,24 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.service.EnvironmentService;
 
 @ExtendWith(MockitoExtension.class)
-class CbEventParameterFactoryTest {
+class EnvEventParameterFactoryTest {
 
     private static final String CRN = "crn";
 
     private static final long RESOURCE_ID = 1L;
 
     @InjectMocks
-    private CbEventParameterFactory underTest;
+    private EnvEventParameterFactory underTest;
 
     @Mock
-    private StackService stackService;
+    private EnvironmentService environmentService;
 
     @Mock
-    private Stack stack;
-
-    @Mock
-    private User user;
+    private Environment environment;
 
     @Test
     void getUserCrnByResourceIdEmpty() {
@@ -44,12 +40,12 @@ class CbEventParameterFactoryTest {
 
     @Test
     void getUserCrnByResourceIdValue() {
-        when(stackService.get(RESOURCE_ID)).thenReturn(stack);
-        when(stack.getCreator()).thenReturn(user);
-        when(user.getUserCrn()).thenReturn(CRN);
+        when(environmentService.findEnvironmentById(RESOURCE_ID)).thenReturn(Optional.of(environment));
+        when(environment.getCreator()).thenReturn(CRN);
 
         Optional<String> result = underTest.getUserCrnByResourceId(RESOURCE_ID);
 
         assertEquals(CRN, result.get());
     }
+
 }

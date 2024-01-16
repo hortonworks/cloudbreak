@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -95,9 +96,9 @@ public class StructuredEventToCDPClusterDetailsConverter {
     private Optional<UsageProto.CDPDatabaseDetails> createDatabaseDetails(DatabaseDetails databaseDetails) {
         if (databaseDetails != null) {
             return Optional.of(UsageProto.CDPDatabaseDetails.newBuilder()
-                    .setEngineVersion(databaseDetails.getEngineVersion())
-                    .setAvailabilityType(databaseDetails.getAvailabilityType())
-                    .setAttributes(databaseDetails.getAttributes())
+                    .setEngineVersion(Objects.requireNonNullElse(databaseDetails.getEngineVersion(), ""))
+                    .setAvailabilityType(Objects.requireNonNullElse(databaseDetails.getAvailabilityType(), ""))
+                    .setAttributes(Objects.requireNonNullElse(databaseDetails.getAttributes(), ""))
                     .build());
         } else {
             return Optional.empty();

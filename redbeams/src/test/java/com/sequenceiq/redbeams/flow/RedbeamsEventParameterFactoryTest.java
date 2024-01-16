@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.service;
+package com.sequenceiq.redbeams.flow;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,28 +12,28 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.service.stack.DBStackService;
 
 @ExtendWith(MockitoExtension.class)
-class CbEventParameterFactoryTest {
+class RedbeamsEventParameterFactoryTest {
 
     private static final String CRN = "crn";
 
     private static final long RESOURCE_ID = 1L;
 
     @InjectMocks
-    private CbEventParameterFactory underTest;
+    private RedbeamsEventParameterFactory underTest;
 
     @Mock
-    private StackService stackService;
+    private DBStackService stackService;
 
     @Mock
-    private Stack stack;
+    private DBStack stack;
 
     @Mock
-    private User user;
+    private Crn userCrn;
 
     @Test
     void getUserCrnByResourceIdEmpty() {
@@ -44,12 +44,13 @@ class CbEventParameterFactoryTest {
 
     @Test
     void getUserCrnByResourceIdValue() {
-        when(stackService.get(RESOURCE_ID)).thenReturn(stack);
-        when(stack.getCreator()).thenReturn(user);
-        when(user.getUserCrn()).thenReturn(CRN);
+        when(stackService.getById(RESOURCE_ID)).thenReturn(stack);
+        when(stack.getOwnerCrn()).thenReturn(userCrn);
+        when(userCrn.toString()).thenReturn(CRN);
 
         Optional<String> result = underTest.getUserCrnByResourceId(RESOURCE_ID);
 
         assertEquals(CRN, result.get());
     }
+
 }

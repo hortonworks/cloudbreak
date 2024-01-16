@@ -264,6 +264,21 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
     }
 
     @Test
+    void testDatabaseDetailsConversionFlowWithEmptyDatabaseDetails() {
+        StackDetails stackDetails = new StackDetails();
+        DatabaseDetails databaseDetails = new DatabaseDetails();
+        stackDetails.setDatabaseDetails(databaseDetails);
+        StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
+        structuredFlowEvent.setStack(stackDetails);
+
+        CDPClusterDetails result = underTest.convert(structuredFlowEvent);
+
+        assertEquals("", result.getDatabaseDetails().getAttributes());
+        assertEquals("", result.getDatabaseDetails().getEngineVersion());
+        assertEquals("", result.getDatabaseDetails().getAvailabilityType());
+    }
+
+    @Test
     void testDatabaseDetailsConversionSync() {
         StackDetails stackDetails = new StackDetails();
         DatabaseDetails databaseDetails = new DatabaseDetails();
@@ -279,6 +294,21 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
         assertEquals(databaseDetails.getAttributes(), result.getDatabaseDetails().getAttributes());
         assertEquals(databaseDetails.getEngineVersion(), result.getDatabaseDetails().getEngineVersion());
         assertEquals(databaseDetails.getAvailabilityType(), result.getDatabaseDetails().getAvailabilityType());
+    }
+
+    @Test
+    void testDatabaseDetailsConversionSyncWithEmptyDatabaseDetails() {
+        StackDetails stackDetails = new StackDetails();
+        DatabaseDetails databaseDetails = new DatabaseDetails();
+        stackDetails.setDatabaseDetails(databaseDetails);
+        StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
+        structuredSyncEvent.setStack(stackDetails);
+
+        CDPClusterDetails result = underTest.convert(structuredSyncEvent);
+
+        assertEquals("", result.getDatabaseDetails().getAttributes());
+        assertEquals("", result.getDatabaseDetails().getEngineVersion());
+        assertEquals("", result.getDatabaseDetails().getAvailabilityType());
     }
 
 }

@@ -39,6 +39,7 @@ import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.ccm.termination.CcmResourceTerminationListener;
 import com.sequenceiq.cloudbreak.ccm.termination.CcmV2AgentTerminationListener;
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -135,6 +136,9 @@ class UpgradeCcmFlowIntegrationTest {
 
     @MockBean(reset = MockReset.NONE)
     private StackDtoService stackDtoService;
+
+    @MockBean
+    private CrnUserDetailsService crnUserDetailsService;
 
     @SpyBean
     private UpgradeCcmService upgradeCcmService;

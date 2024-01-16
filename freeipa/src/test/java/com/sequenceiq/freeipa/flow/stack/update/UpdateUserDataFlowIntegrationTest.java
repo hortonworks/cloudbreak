@@ -31,6 +31,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -114,6 +115,9 @@ class UpdateUserDataFlowIntegrationTest {
 
     @MockBean
     private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
+
+    @MockBean
+    private CrnUserDetailsService crnUserDetailsService;
 
     @Mock
     private ResourceConnector resourcesApi;

@@ -231,13 +231,13 @@ public class FreeIpaClientFactory {
 
     private FreeIpaClientException createFreeIpaUnableToBuildClient(Exception e) {
         String message = CANT_BUILD_CLIENT_MSG + e.getLocalizedMessage();
-        LOGGER.error(message);
+        LOGGER.error(message, e);
         return new FreeIpaClientBuildException(message, e);
     }
 
     private RetryableFreeIpaClientException createFreeIpaUnableToBuildClient(RetryableFreeIpaClientException e) {
         String message = CANT_BUILD_CLIENT_MSG + e.getLocalizedMessage();
-        LOGGER.error(message);
+        LOGGER.error(message, e);
         return new RetryableFreeIpaClientException(message, e);
     }
 
