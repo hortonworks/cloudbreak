@@ -338,7 +338,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             LOGGER.debug("Executing 'disks.format-and-mount' state on target nodes: {}", allHostNames);
             StateRunner stateRunner = new StateRunner(saltStateService, allHostNames, "disks.format-and-mount");
-            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner);
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner, false);
             saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel).call();
 
             Map<String, String> uuidResponse = saltStateService.getUuidList(sc);
