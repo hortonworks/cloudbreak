@@ -70,43 +70,8 @@ class ConfigUpdateUtilServiceTest {
     }
 
     @Test
-    void testStopClouderaManagerServicesSuccess() throws Exception {
-        doReturn(clusterModificationService).when(clusterApi).clusterModificationService();
-        Map<String, String> serviceStatuses = new HashMap<>();
-        serviceStatuses.put("yarn", "STOPPED");
-        doReturn(serviceStatuses).when(clusterModificationService).fetchServiceStatuses();
-        Set<ServiceComponent> hostTemplateServiceComponents = new HashSet<>();
-        ServiceComponent serviceComponent = ServiceComponent.of("yarn", "yarn");
-        hostTemplateServiceComponents.add(serviceComponent);
-        doReturn(1L).when(stack).getId();
-
-        underTest.stopClouderaManagerServices(stack, hostTemplateServiceComponents);
-
-        verify(clusterModificationService, times(1)).stopClouderaManagerService(eq("yarn"));
-        verify(clusterModificationService, times(1)).fetchServiceStatuses();
-    }
-
-    @Test
-    void testStopClouderaManagerServicesAndUpdateClusterConfigsException() throws Exception {
-        doReturn(clusterModificationService).when(clusterApi).clusterModificationService();
-        Set<ServiceComponent> hostTemplateServiceComponents = new HashSet<>();
-        ServiceComponent serviceComponent = ServiceComponent.of("yarn", "yarn");
-        hostTemplateServiceComponents.add(serviceComponent);
-        doThrow(new Exception("Test")).when(clusterModificationService).stopClouderaManagerService(eq("yarn"));
-        doReturn(1L).when(stack).getId();
-
-        Exception exception = assertThrows(Exception.class, () -> underTest.stopClouderaManagerServices(stack, hostTemplateServiceComponents));
-
-        assertEquals("Unable to stop CM services for service yarn, in stack 1: Test", exception.getMessage());
-    }
-
-    @Test
     void testUpdateCMConfigsForComputeAndStartServicesSuccess() throws Exception {
         doReturn(clusterModificationService).when(clusterApi).clusterModificationService();
-        Map<String, String> serviceStatuses = new HashMap<>();
-        serviceStatuses.put("yarn", "STARTED");
-        doReturn(serviceStatuses).when(clusterModificationService).fetchServiceStatuses();
-
         Set<ServiceComponent> hostTemplateServiceComponents = new HashSet<>();
         ServiceComponent serviceComponent = ServiceComponent.of("yarn", "yarn");
         hostTemplateServiceComponents.add(serviceComponent);
@@ -129,16 +94,11 @@ class ConfigUpdateUtilServiceTest {
 
         verify(clusterModificationService, times(1)).updateServiceConfig(eq("yarn"), eq(config), eq(roleGroupNames));
         verify(clusterModificationService, times(1)).startClouderaManagerService("yarn");
-        verify(clusterModificationService, times(1)).fetchServiceStatuses();
     }
 
     @Test
     void testUpdateCMConfigsForComputeAndStartImpalaServicesSuccess() throws Exception {
         doReturn(clusterModificationService).when(clusterApi).clusterModificationService();
-        Map<String, String> serviceStatuses = new HashMap<>();
-        serviceStatuses.put("impala", "STARTED");
-        doReturn(serviceStatuses).when(clusterModificationService).fetchServiceStatuses();
-
         Set<ServiceComponent> hostTemplateServiceComponents = new HashSet<>();
         ServiceComponent serviceComponent = ServiceComponent.of("impala", "impala");
         hostTemplateServiceComponents.add(serviceComponent);
@@ -161,7 +121,6 @@ class ConfigUpdateUtilServiceTest {
 
         verify(clusterModificationService, times(1)).updateServiceConfig(eq("impala"), eq(config), eq(roleGroupNames));
         verify(clusterModificationService, times(1)).startClouderaManagerService("impala");
-        verify(clusterModificationService, times(1)).fetchServiceStatuses();
     }
 
     @Test

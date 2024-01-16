@@ -103,6 +103,8 @@ public interface ClusterModificationService {
 
     void stopClouderaManagerService(String serviceType) throws Exception;
 
+    void deleteClouderaManagerService(String serviceType) throws Exception;
+
     void startClouderaManagerService(String serviceType) throws Exception;
 
     Map<String, String> fetchServiceStatuses() throws Exception;
