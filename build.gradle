@@ -117,6 +117,7 @@ allprojects {
         force "ch.qos.logback:logback-classic:$logbackVersion"
         force "ch.qos.logback:logback-core:$logbackVersion"
         force "org.slf4j:slf4j-api:$slf4jApiVersion"
+        force "org.quartz-scheduler:quartz:$quartzVersion"
       }
     }
   }
