@@ -52,6 +52,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRONMENT_PRIVILEGED_USER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPRESS_ONBOARDING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_DELAYED_STOP_START;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_USERSYNC_THREAD_TIMEOUT;
@@ -540,6 +541,10 @@ public class EntitlementService {
 
     public boolean isSecretEncryptionEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_SECRET_ENCRYPTION);
+    }
+
+    public boolean isExpressOnboardingEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_EXPRESS_ONBOARDING);
     }
 
     public List<String> getEntitlements(String accountId) {
