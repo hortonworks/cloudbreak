@@ -11,6 +11,7 @@ public enum LoggerContextKey {
     ENV_CRN("envCrn"),
     RESOURCE_TYPE("resourceType"),
     RESOURCE_NAME("resourceName"),
+    CLIENT_ID("clientId"),
     NAME("name"),
     CLUSTER_NAME("clusterName"),
     RESOURCE_CRN("resourceCrn"),

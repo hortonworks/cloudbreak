@@ -132,6 +132,8 @@ public interface StackView extends MdcContextInfoProvider {
 
     Long getDatabaseId();
 
+    String creatorClient();
+
     default boolean isDatalake() {
         return getType() == StackType.DATALAKE;
     }

@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
+import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.CALLER_ID_NOT_FOUND;
+import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.CDP_CALLER_ID_HEADER;
+import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.USER_AGENT_HEADER;
+import static com.sequenceiq.cloudbreak.common.request.HeaderValueProvider.getHeaderOrItsFallbackValueOrDefault;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.HashSet;
@@ -171,6 +175,8 @@ public class StackDecorator {
 
         measure(() -> validateInstanceGroups(subject),
                 LOGGER, "Validation of gateway instance groups has been finished in {} ms for stack {}", stackName);
+
+        subject.setCreatorClient(getHeaderOrItsFallbackValueOrDefault(USER_AGENT_HEADER, CDP_CALLER_ID_HEADER, CALLER_ID_NOT_FOUND));
 
         measure(() -> {
             ValidationResult validationResult = sharedServiceValidator.checkSharedServiceStackRequirements(request, workspace);

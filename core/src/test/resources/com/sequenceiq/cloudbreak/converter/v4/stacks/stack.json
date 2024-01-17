@@ -22,5 +22,6 @@
       "apple": "pear"
     }
   },
-  "javaVersion": 11
+  "javaVersion": 11,
+  "creatorClient": "cdp-cli"
 }

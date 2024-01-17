@@ -178,6 +178,9 @@ public class Environment implements AuthResource, AccountAwareResource {
     @Column(nullable = false, name = "enable_secret_encryption")
     private boolean enableSecretEncryption;
 
+    @Column(name = "creator_client")
+    private String creatorClient;
+
     public Environment() {
         regions = new Json(new HashSet<Region>());
         tags = new Json(new EnvironmentTags(new HashMap<>(), new HashMap<>()));
@@ -601,6 +604,14 @@ public class Environment implements AuthResource, AccountAwareResource {
 
     public void setEnableSecretEncryption(boolean enableSecretEncryption) {
         this.enableSecretEncryption = enableSecretEncryption;
+    }
+
+    public String getCreatorClient() {
+        return creatorClient;
+    }
+
+    public void setCreatorClient(String creatorClient) {
+        this.creatorClient = creatorClient;
     }
 
     @Override

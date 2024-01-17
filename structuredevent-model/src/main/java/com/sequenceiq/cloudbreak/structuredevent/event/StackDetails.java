@@ -73,6 +73,8 @@ public class StackDetails implements Serializable {
 
     private DatabaseDetails databaseDetails;
 
+    private String creatorClient;
+
     public Long getId() {
         return id;
     }
@@ -263,5 +265,13 @@ public class StackDetails implements Serializable {
 
     public void setDatabaseDetails(DatabaseDetails databaseDetails) {
         this.databaseDetails = databaseDetails;
+    }
+
+    public String getCreatorClient() {
+        return creatorClient;
+    }
+
+    public void setCreatorClient(String creatorClient) {
+        this.creatorClient = creatorClient;
     }
 }

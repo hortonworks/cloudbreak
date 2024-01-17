@@ -92,6 +92,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
 
     private boolean enableSecretEncryption;
 
+    private String creatorClient = "No Info";
+
     @Override
     public Long getResourceId() {
         return id;
@@ -406,6 +408,14 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         this.enableSecretEncryption = enableSecretEncryption;
     }
 
+    public String getCreatorClient() {
+        return creatorClient;
+    }
+
+    public void setCreatorClient(String creatorClient) {
+        this.creatorClient = creatorClient;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentDtoBase{" +
@@ -487,6 +497,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         private EnvironmentDeletionType deletionType;
 
         private String domain;
+
+        private String creatorClient;
 
         private EnvironmentDataServices dataServices;
 
@@ -655,6 +667,11 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             return (B) this;
         }
 
+        public B withCreatorClient(String creatorClient) {
+            this.creatorClient = creatorClient;
+            return (B) this;
+        }
+
         public B withDataServices(EnvironmentDataServices dataServices) {
             this.dataServices = dataServices;
             return (B) this;
@@ -699,6 +716,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             environmentDto.setDomain(domain);
             environmentDto.setDataServices(dataServices);
             environmentDto.setEnableSecretEncryption(enableSecretEncryption);
+            environmentDto.setCreatorClient(creatorClient);
         }
 
         public abstract T build();

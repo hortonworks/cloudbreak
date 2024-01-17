@@ -100,6 +100,8 @@ public class MdcContext {
 
         private String spanId;
 
+        private String clientId;
+
         public Builder resourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
             return this;
@@ -147,6 +149,11 @@ public class MdcContext {
 
         public Builder spanId(String spanId) {
             this.spanId = spanId;
+            return this;
+        }
+
+        public Builder clientId(String clientId) {
+            this.clientId = clientId;
             return this;
         }
 
