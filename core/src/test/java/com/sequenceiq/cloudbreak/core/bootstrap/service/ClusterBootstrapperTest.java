@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -9,16 +10,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
@@ -27,6 +30,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostClusterAvailabi
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostBootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostOrchestratorClusterContext;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -45,8 +49,14 @@ import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ClusterBootstrapperTest {
+
+    private static final String NODE_NAME = "nodeName";
+
+    private static final String INSTANCE_ID = "instanceId";
+
+    private static final String DOMAIN = "CUSTOM_DOMAIN";
 
     @Mock
     private StackDtoService stackDtoService;
@@ -96,7 +106,7 @@ public class ClusterBootstrapperTest {
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
 
-    @Spy
+    @Mock
     private ResourceAttributeUtil resourceAttributeUtil;
 
     @Mock
@@ -110,6 +120,15 @@ public class ClusterBootstrapperTest {
 
     @Mock
     private SaltBootstrapVersionChecker saltBootstrapVersionChecker;
+
+    @Mock
+    private Resource volumeSet;
+
+    @Mock
+    private VolumeSetAttributes volumeSetAttributes;
+
+    @Mock
+    private ClusterNodeNameGenerator clusterNodeNameGenerator;
 
     @Test
     public void shouldUseReachableInstances() throws Exception {
@@ -126,7 +145,7 @@ public class ClusterBootstrapperTest {
         instanceMetaData.setInstanceGroup(instanceGroup);
         when(stack.getId()).thenReturn(1L);
         when(instanceMetaDataService.getReachableInstanceMetadataByStackId(stack.getId())).thenReturn(Set.of(instanceMetaData));
-        when(stack.getCustomDomain()).thenReturn("CUSTOM_DOMAIN");
+        when(stack.getCustomDomain()).thenReturn(DOMAIN);
         Cluster cluster = new Cluster();
         cluster.setGateway(new Gateway());
         when(stack.getCluster()).thenReturn(cluster);
@@ -146,6 +165,43 @@ public class ClusterBootstrapperTest {
     }
 
     @Test
+    public void shouldInitializeDiscoveryFQDNForVolumeSets() throws Exception {
+        when(stackDtoService.getById(1L)).thenReturn(stack);
+        when(stack.getDiskResources()).thenReturn(List.of(volumeSet));
+        when(volumeSet.getInstanceId()).thenReturn(INSTANCE_ID);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setPrivateIp("1.1.1.1");
+        instanceMetaData.setPublicIp("2.2.2.2");
+        instanceMetaData.setInstanceId(INSTANCE_ID);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName("master");
+        Template template = new Template();
+        template.setInstanceType("GATEWAY");
+        instanceGroup.setTemplate(template);
+        instanceMetaData.setInstanceGroup(instanceGroup);
+        when(stack.getId()).thenReturn(1L);
+        when(instanceMetaDataService.getReachableInstanceMetadataByStackId(stack.getId())).thenReturn(Set.of(instanceMetaData));
+        when(stack.getCustomDomain()).thenReturn(DOMAIN);
+        Cluster cluster = new Cluster();
+        cluster.setGateway(new Gateway());
+        when(stack.getCluster()).thenReturn(cluster);
+        GatewayConfig gatewayConfig = new GatewayConfig("host1", "1.1.1.1", "1.1.1.1", 22, "i-1839", false);
+        when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(gatewayConfig));
+        when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
+        when(hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(any(), any(), anyInt(), anyLong()))
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
+        when(clusterNodeNameGenerator.getNodeNameForInstanceMetadata(any(), any(), any(), any())).thenReturn(NODE_NAME);
+        when(resourceAttributeUtil.getTypedAttributes(any(), any())).thenReturn(Optional.of(volumeSetAttributes));
+        ArgumentCaptor<String> fqdnCaptor = ArgumentCaptor.forClass(String.class);
+
+        underTest.bootstrapNewNodes(1L, Set.of("1.1.1.1"));
+
+        verify(volumeSetAttributes).setDiscoveryFQDN(fqdnCaptor.capture());
+        assertEquals(NODE_NAME + "." + DOMAIN, fqdnCaptor.getValue());
+        verify(resourceService, times(1)).saveAll(List.of(volumeSet));
+    }
+
+    @Test
     public void doNotThrowDuplicateKeyNullIfVolumeResourceDontHaveInstanceId() throws Exception {
         when(stackDtoService.getById(1L)).thenReturn(stack);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
@@ -160,7 +216,7 @@ public class ClusterBootstrapperTest {
         instanceMetaData.setInstanceGroup(instanceGroup);
         when(stack.getId()).thenReturn(1L);
         when(instanceMetaDataService.getReachableInstanceMetadataByStackId(stack.getId())).thenReturn(Set.of(instanceMetaData));
-        when(stack.getCustomDomain()).thenReturn("CUSTOM_DOMAIN");
+        when(stack.getCustomDomain()).thenReturn(DOMAIN);
         Cluster cluster = new Cluster();
         cluster.setGateway(new Gateway());
         when(stack.getCluster()).thenReturn(cluster);
@@ -194,7 +250,7 @@ public class ClusterBootstrapperTest {
         instanceMetaData.setInstanceGroup(instanceGroup);
         when(stack.getId()).thenReturn(1L);
         when(instanceMetaDataService.getReachableInstanceMetadataByStackId(stack.getId())).thenReturn(Set.of(instanceMetaData));
-        when(stack.getCustomDomain()).thenReturn("CUSTOM_DOMAIN");
+        when(stack.getCustomDomain()).thenReturn(DOMAIN);
         Cluster cluster = new Cluster();
         cluster.setGateway(new Gateway());
         when(stack.getCluster()).thenReturn(cluster);
@@ -237,7 +293,7 @@ public class ClusterBootstrapperTest {
 
         when(stack.getId()).thenReturn(1L);
         when(instanceMetaDataService.getReachableInstanceMetadataByStackId(stack.getId())).thenReturn(Set.of(instanceMetaData, instanceMetaData2));
-        when(stack.getCustomDomain()).thenReturn("CUSTOM_DOMAIN");
+        when(stack.getCustomDomain()).thenReturn(DOMAIN);
         Cluster cluster = new Cluster();
         cluster.setGateway(new Gateway());
         when(stack.getCluster()).thenReturn(cluster);

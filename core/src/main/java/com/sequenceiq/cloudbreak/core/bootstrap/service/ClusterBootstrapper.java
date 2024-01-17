@@ -30,8 +30,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -48,6 +50,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostClusterAvailabi
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostBootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostOrchestratorClusterContext;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -70,6 +73,7 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
@@ -157,6 +161,12 @@ public class ClusterBootstrapper {
 
     @Inject
     private CredentialToExtendedCloudCredentialConverter credentialToExtendedCloudCredentialConverter;
+
+    @Inject
+    private ResourceAttributeUtil resourceAttributeUtil;
+
+    @Inject
+    private ResourceService resourceService;
 
     public void bootstrapMachines(Long stackId) throws CloudbreakException {
         StackDto stackDto = stackDtoService.getById(stackId);
@@ -520,15 +530,31 @@ public class ClusterBootstrapper {
             LOGGER.info("FQDN is blank, generate FQDN for {}", instanceId);
             String hostname = clusterNodeNameGenerator.getNodeNameForInstanceMetadata(im, stack.getStack(), hostGroupNodeIndexes, clusterNodeNames);
             LOGGER.info("Generated hostname for {}: {}", instanceId, hostname);
-            initializeDiscoveryFqdnOfInstanceMetadata(im, domain, hostname);
+            String generatedFqdn = initializeDiscoveryFqdnOfInstanceMetadata(im, domain, hostname);
+            initializeDiscoveryFqdnForVolumeSets(stack, im, generatedFqdn);
             return new Node(im.getPrivateIp(), im.getPublicIpWrapper(), instanceId, instanceType, hostname, domain, im.getInstanceGroupName());
         }
     }
 
-    private void initializeDiscoveryFqdnOfInstanceMetadata(InstanceMetaData im, String domain, String hostname) {
+    private String initializeDiscoveryFqdnOfInstanceMetadata(InstanceMetaData im, String domain, String hostname) {
         String generatedFqdn = String.format("%s.%s", hostname, domain);
         LOGGER.info("Set generated FQDN for {}: {}", im.getInstanceId(), generatedFqdn);
         im.setDiscoveryFQDN(generatedFqdn);
+        return generatedFqdn;
+    }
+
+    private void initializeDiscoveryFqdnForVolumeSets(StackDto stack, InstanceMetaData im, String fqdn) {
+        List<Resource> diskResources = stack.getDiskResources();
+        resourceService.saveAll(diskResources.stream()
+                .filter(resource -> im.getInstanceId().equals(resource.getInstanceId()))
+                .peek(volumeSet -> resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class).ifPresent(volumeSetAttributes -> {
+                    if (volumeSetAttributes.getDiscoveryFQDN() == null) {
+                        LOGGER.info("DiscoveryFQDN is initialized for {} to {}", volumeSet.getResourceName(), fqdn);
+                        volumeSetAttributes.setDiscoveryFQDN(fqdn);
+                    }
+                    resourceAttributeUtil.setTypedAttributes(volumeSet, volumeSetAttributes);
+                }))
+                .collect(Collectors.toList()));
     }
 
     private void validatePollingResultForCancellation(PollingResult pollingResult, String cancelledMessage) {

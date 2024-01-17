@@ -139,7 +139,8 @@ public class MountDisks {
                     volumeSetAttributes.setUuids(uuids);
                     volumeSetAttributes.setFstab(fstab);
                     if (!discoveryFQDN.equals(volumeSetAttributes.getDiscoveryFQDN())) {
-                        LOGGER.info("DiscoveryFQDN is updated for {} to {}", volumeSet.getResourceName(), discoveryFQDN);
+                        LOGGER.warn("DiscoveryFQDN is updated for {} from {} to {}",
+                                volumeSet.getResourceName(), volumeSetAttributes.getDiscoveryFQDN(), discoveryFQDN);
                     }
                     volumeSetAttributes.setDiscoveryFQDN(discoveryFQDN);
                     resourceAttributeUtil.setTypedAttributes(volumeSet, volumeSetAttributes);
