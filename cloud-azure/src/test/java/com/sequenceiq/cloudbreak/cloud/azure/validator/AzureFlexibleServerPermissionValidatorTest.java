@@ -100,14 +100,9 @@ class AzureFlexibleServerPermissionValidatorTest {
         AzureResourceException exception = assertThrows(AzureResourceException.class, () -> underTest.validate(client, databaseServer));
 
         assertEquals("Permission validation failed because the following actions are missing from your role definition: "
-                        + "[Microsoft.DBforPostgreSQL/flexibleServers/write, Microsoft.Network/privateDnsZones/virtualNetworkLinks/write, "
-                        + "Microsoft.DBforPostgreSQL/flexibleServers/delete, Microsoft.Network/privateDnsZones/delete, "
-                        + "Microsoft.DBforPostgreSQL/servers/delete, Microsoft.DBforPostgreSQL/flexibleServers/read, "
-                        + "Microsoft.DBforPostgreSQL/flexibleServers/stop/action, Microsoft.Network/privateDnsZones/virtualNetworkLinks/delete, "
-                        + "Microsoft.Network/privateDnsZones/A/write, Microsoft.Network/privateDnsZones/write, Microsoft.DBforPostgreSQL/servers/read, "
-                        + "Microsoft.DBforPostgreSQL/flexibleServers/start/action, Microsoft.Network/privateDnsZones/join/action, "
-                        + "Microsoft.Storage/storageAccounts/fileServices/write, Microsoft.Network/privateDnsZones/A/delete, "
-                        + "Microsoft.Network/loadBalancers/delete]", exception.getMessage());
+                + "[Microsoft.DBforPostgreSQL/flexibleServers/write, Microsoft.DBforPostgreSQL/flexibleServers/delete, "
+                + "Microsoft.DBforPostgreSQL/flexibleServers/start/action, Microsoft.DBforPostgreSQL/flexibleServers/read, "
+                + "Microsoft.DBforPostgreSQL/flexibleServers/stop/action]", exception.getMessage());
     }
 
     @Test
@@ -122,14 +117,9 @@ class AzureFlexibleServerPermissionValidatorTest {
         AzureResourceException exception = assertThrows(AzureResourceException.class, () -> underTest.validate(client, databaseServer));
 
         assertEquals("Permission validation failed because the following actions are missing from your role definition: "
-                + "[Microsoft.DBforPostgreSQL/flexibleServers/write, Microsoft.Network/privateDnsZones/virtualNetworkLinks/write, "
-                + "Microsoft.DBforPostgreSQL/flexibleServers/delete, Microsoft.Network/privateDnsZones/delete, Microsoft.DBforPostgreSQL/flexibleServers/read, "
-                + "Microsoft.Network/privateDnsZones/read, Microsoft.DBforPostgreSQL/flexibleServers/stop/action, "
-                + "Microsoft.Network/privateDnsZones/virtualNetworkLinks/delete, Microsoft.Network/privateDnsZones/A/write, "
-                + "Microsoft.Network/privateDnsZones/virtualNetworkLinks/read, Microsoft.Network/privateDnsZones/write, "
-                + "Microsoft.Network/virtualNetworks/join/action, Microsoft.Network/privateDnsZones/A/read, "
-                + "Microsoft.DBforPostgreSQL/flexibleServers/start/action, Microsoft.Network/privateDnsZones/join/action, "
-                + "Microsoft.Network/privateDnsZones/A/delete]", exception.getMessage());
+                + "[Microsoft.DBforPostgreSQL/flexibleServers/write, Microsoft.DBforPostgreSQL/flexibleServers/delete, "
+                + "Microsoft.DBforPostgreSQL/flexibleServers/start/action, Microsoft.DBforPostgreSQL/flexibleServers/read, "
+                + "Microsoft.DBforPostgreSQL/flexibleServers/stop/action]", exception.getMessage());
     }
 
     @Test
