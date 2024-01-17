@@ -402,7 +402,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                         .filter(it -> it.getStack().getType().equals(StackType.TEMPLATE))
                         .map(it -> it.getStack().getId())
                         .collect(Collectors.toList());
-                Set<String> clusterDefinitions = getClusterDefinitionNameByStackTemplateIds(stackTemplateIds);
+                Set<String> clusterDefinitions = getClusterDefinitionNamesByStackTemplateIds(stackTemplateIds);
                 throw new BadRequestException(String.format(
                         "There are clusters or cluster definitions associated with cluster template '%s'. "
                                 + "The cluster template used by %s cluster(s) (%s) and %s cluster definitions (%s). "
@@ -412,14 +412,18 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
             }
             Cluster cluster = notDeletedClustersWithThisCd.iterator().next();
             String clusterType = getClusterType(cluster);
-            String clusterDefinitionName = getClusterDefinitionNameByStackTemplateIds(List.of(cluster.getStack().getId()))
-                    .stream().findFirst().orElseThrow(() -> new NotFoundException("Cannot find the cluster definition for the stack template"));
-            throw new BadRequestException(String.format("There is a %s ['%s'] which uses cluster template '%s'. Please remove this "
-                    + "cluster before deleting the cluster template.", clusterType, clusterDefinitionName, blueprint.getName()));
+            String clusterOrClusterDefinitonName = cluster.getStack().getName();
+            if (cluster.getStack().getType().equals(StackType.TEMPLATE)) {
+                clusterOrClusterDefinitonName = getClusterDefinitionNamesByStackTemplateIds(List.of(cluster.getStack().getId()))
+                        .stream().findFirst().orElseThrow(() -> new BadRequestException(String.format("The cluster template['%s'] could not be deleted, "
+                                + "because a cluster definition uses the template, but its name could not be loaded.", blueprint.getName())));
+            }
+            throw new BadRequestException(String.format("The %s with name ['%s'] uses cluster template '%s'. Please remove the "
+                    + "%s before deleting the cluster template.", clusterType, clusterOrClusterDefinitonName, blueprint.getName(), clusterType));
         }
     }
 
-    private Set<String> getClusterDefinitionNameByStackTemplateIds(List<Long> stackTemplateIds) {
+    private Set<String> getClusterDefinitionNamesByStackTemplateIds(List<Long> stackTemplateIds) {
         return clusterTemplateViewService.findAllByStackIds(stackTemplateIds)
                 .stream().map(CompactView::getName)
                 .collect(Collectors.toSet());
