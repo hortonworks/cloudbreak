@@ -12,6 +12,7 @@ import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
+import org.glassfish.jersey.client.ClientProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -186,6 +187,7 @@ public class ServerProperties {
         Client client = RestClientUtil.get();
         if (cbServerAddress.contains("dps.mow") || cbServerAddress.contains("cdp.mow") || cbServerAddress.contains("cdp-priv.mow")) {
             target = client.target(getCloudbreak() + "/cloud/cb/info");
+            target.property(ClientProperties.FOLLOW_REDIRECTS, Boolean.TRUE);
         } else {
             target = client.target(cbServerAddress + "/info");
         }
