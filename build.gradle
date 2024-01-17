@@ -21,9 +21,9 @@ buildscript {
 }
 
 plugins {
-  id "org.ajoberstar.grgit" version "5.2.0"
-  id "com.github.spotbugs" version "5.0.14"
-  id "com.adarshr.test-logger" version "3.2.0"
+  id "org.ajoberstar.grgit" version "5.2.1"
+  id "com.github.spotbugs" version "6.0.6"
+  id "com.adarshr.test-logger" version "4.0.0"
   id "nebula.resolution-rules" version "9.0.0"
 //  id 'nebula.lint' version '17.2.3'
 }
@@ -94,10 +94,10 @@ allprojects {
     all {
       resolutionStrategy {
         force 'commons-collections:commons-collections:3.2.2'
-        force 'xerces:xercesImpl:2.12.2'
+        force "xerces:xercesImpl:$xerces"
         force "io.netty:netty-codec-http2:$nettyVersion"
         force "io.netty:netty-handler-proxy:$nettyVersion"
-        force 'commons-beanutils:commons-beanutils:1.9.4'
+        force "commons-beanutils:commons-beanutils:$commonsBeanutilsVersion"
         force "commons-codec:commons-codec:$commonsCodecVersion"
         force "commons-codec:commons-codec:$commonsCodecVersion"
         force "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jacksonVersion"
@@ -109,7 +109,7 @@ allprojects {
         force "org.testng:testng:$testNgVersion"
         force "org.springframework:spring-messaging:$springFrameworkVersion"
         force "org.springframework.security:spring-security-web:$springSecurityVersion"
-        force "org.ow2.asm:asm:9.2"
+        force "org.ow2.asm:asm:9.6"
         force "com.google.protobuf:protobuf-java:$protobufVersion"
         force "com.google.guava:guava:$guavaVersion"
         force "junit:junit:$junitVersion"
@@ -147,7 +147,7 @@ subprojects {
   }
 
   dependencies {
-    checkstyle('com.puppycrawl.tools:checkstyle:10.12.1')
+    checkstyle('com.puppycrawl.tools:checkstyle:10.12.7')
     deployerJars("org.springframework.build.aws:org.springframework.build.aws.maven:3.1.0.RELEASE")
     testImplementation group: 'org.mockito',               name: 'mockito-junit-jupiter',          version: mockitoVersion
     testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter',                  version: junitJupiterVersion
@@ -157,12 +157,13 @@ subprojects {
     testImplementation(group: "org.junit.vintage",         name: "junit-vintage-engine",           version: junitJupiterVersion) {
       exclude group: "org.hamcrest", module: "hamcrest-core"
     }
+    testRuntimeOnly    group: 'org.junit.platform',        name: 'junit-platform-launcher'
   }
 
   spotbugs {
-    toolVersion = "4.7.3"
+    toolVersion = "4.8.3"
     excludeFilter = file("$rootProject.projectDir/config/spotbugs/excludeFilter.xml")
-    effort = "min"
+    effort = com.github.spotbugs.snom.Effort.MIN
     ignoreFailures = false
     showProgress = true
     onlyAnalyze = [ 'com.sequenceiq.cloudbreak.*' ]
@@ -170,7 +171,7 @@ subprojects {
   }
 
   jacoco {
-    toolVersion = "0.8.7"
+    toolVersion = "0.8.11"
     reportsDirectory = file("$buildDir/reports/jacoco")
   }
 
@@ -236,7 +237,7 @@ subprojects {
   }
 
   checkstyle {
-    toolVersion = "10.6.0"
+    toolVersion = "10.12.7"
   }
 
   checkstyleMain {
