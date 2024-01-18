@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.conclusion.step;
 
-import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
-import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.CM_UNHEALTHY_VMS_FOUND;
-import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.CM_UNHEALTHY_VMS_FOUND_DETAILS;
 import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.PROVIDER_NOT_RUNNING_VMS_FOUND;
 import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.PROVIDER_NOT_RUNNING_VMS_FOUND_DETAILS;
 import static java.util.stream.Collectors.toSet;
@@ -21,17 +18,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.HostName;
-import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
-import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
-import com.sequenceiq.cloudbreak.common.type.HealthCheck;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
@@ -58,9 +50,6 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
     private StackInstanceStatusChecker stackInstanceStatusChecker;
 
     @Inject
-    private RuntimeVersionService runtimeVersionService;
-
-    @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Override
@@ -68,35 +57,7 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
         Stack stack = stackService.getById(resourceId);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
         List<InstanceMetadataView> runningInstances = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stack.getId());
-        if (isClusterManagerRunning(stack, connector)) {
-            return checkCMForInstanceStatuses(connector, runningInstances, stack.getCluster().getId());
-        } else {
-            return checkProviderForInstanceStatuses(stack, runningInstances);
-        }
-    }
-
-    private Conclusion checkCMForInstanceStatuses(ClusterApi connector, List<InstanceMetadataView> runningInstances, Long clusterId) {
-        ExtendedHostStatuses extendedHostStatuses = connector.clusterStatusService().getExtendedHostStatuses(
-                runtimeVersionService.getRuntimeVersion(clusterId));
-        Map<HostName, Set<HealthCheck>> hostStatuses = extendedHostStatuses.getHostsHealth();
-        LOGGER.debug("Instance statuses based on CM: {}", hostStatuses);
-        Map<String, String> unhealthyHosts = hostStatuses.keySet().stream()
-                .filter(hostName -> !extendedHostStatuses.isHostHealthy(hostName))
-                .collect(Collectors.toMap(StringType::value, extendedHostStatuses::statusReasonForHost));
-        Set<String> noReportHosts = runningInstances.stream()
-                .map(InstanceMetadataView::getDiscoveryFQDN)
-                .filter(Objects::nonNull)
-                .filter(discoveryFQDN -> !hostStatuses.containsKey(hostName(discoveryFQDN)))
-                .collect(toSet());
-
-        if (!unhealthyHosts.isEmpty() || !noReportHosts.isEmpty()) {
-            String conclusion = cloudbreakMessagesService.getMessage(CM_UNHEALTHY_VMS_FOUND);
-            String details = cloudbreakMessagesService.getMessageWithArgs(CM_UNHEALTHY_VMS_FOUND_DETAILS, unhealthyHosts, noReportHosts);
-            LOGGER.warn(details);
-            return failed(conclusion, details);
-        } else {
-            return succeeded();
-        }
+        return checkProviderForInstanceStatuses(stack, runningInstances);
     }
 
     private Conclusion checkProviderForInstanceStatuses(Stack stack, List<InstanceMetadataView> runningInstances) {
@@ -111,23 +72,18 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
                 .filter(Objects::nonNull)
                 .collect(toSet());
 
-        if (!notRunningInstances.isEmpty()) {
-            String conclusion = cloudbreakMessagesService.getMessage(PROVIDER_NOT_RUNNING_VMS_FOUND);
-            String details = cloudbreakMessagesService.getMessageWithArgs(PROVIDER_NOT_RUNNING_VMS_FOUND_DETAILS, notRunningInstances);
+        Set<String> unknownVms = runningInstances.stream()
+                .filter(instanceMetadata -> instanceMetadata.getDiscoveryFQDN() == null)
+                .map(instanceMetadata -> String.format("privateId: %s", instanceMetadata.getPrivateId()))
+                .collect(toSet());
+
+        if (!notRunningInstances.isEmpty() || !unknownVms.isEmpty()) {
+            String conclusion = cloudbreakMessagesService.getMessageWithArgs(PROVIDER_NOT_RUNNING_VMS_FOUND, notRunningInstances, unknownVms);
+            String details = cloudbreakMessagesService.getMessageWithArgs(PROVIDER_NOT_RUNNING_VMS_FOUND_DETAILS, notRunningInstances, unknownVms);
             LOGGER.warn(details);
             return failed(conclusion, details);
         } else {
             return succeeded();
         }
-    }
-
-    private boolean isClusterManagerRunning(Stack stack, ClusterApi connector) {
-        return !stack.isStopped()
-                && !stack.isStackInDeletionOrFailedPhase()
-                && isCMRunning(connector);
-    }
-
-    private boolean isCMRunning(ClusterApi connector) {
-        return connector.clusterStatusService().isClusterManagerRunningQuickCheck();
     }
 }

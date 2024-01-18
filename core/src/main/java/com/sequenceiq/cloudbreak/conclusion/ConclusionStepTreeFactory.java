@@ -8,6 +8,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.conclusion.step.CmStatusCheckerConclusionStep;
 import com.sequenceiq.cloudbreak.conclusion.step.InfoCollectorConclusionStep;
 import com.sequenceiq.cloudbreak.conclusion.step.NetworkCheckerConclusionStep;
 import com.sequenceiq.cloudbreak.conclusion.step.NodeServicesCheckerConclusionStep;
@@ -26,6 +27,7 @@ class ConclusionStepTreeFactory {
                 initClusterProvisionBeforeSaltBootstrapConclusionStepTree());
         CONCLUSION_CHECKER_TYPE_MAP.put(ConclusionCheckerType.CLUSTER_PROVISION_AFTER_SALT_BOOTSTRAP,
                 initClusterProvisionAfterSaltBootstrapConclusionStepTree());
+        CONCLUSION_CHECKER_TYPE_MAP.put(ConclusionCheckerType.STACK_PROVISION, initStackProvisionConclusionStepTree());
     }
 
     private ConclusionStepTreeFactory() {
@@ -45,21 +47,30 @@ class ConclusionStepTreeFactory {
                 .withSuccessNode(stepNode(SaltCheckerConclusionStep.class)
                         .withSuccessNode(stepNode(NodeServicesCheckerConclusionStep.class)
                                 .withSuccessNode(stepNode(NetworkCheckerConclusionStep.class)))
-                        .withFailureNode(stepNode(VmStatusCheckerConclusionStep.class)
-                                .withSuccessNode(stepNode(NetworkCheckerConclusionStep.class))));
+                        .withFailureNode(stepNode(CmStatusCheckerConclusionStep.class)
+                                .withSuccessNode(stepNode(NetworkCheckerConclusionStep.class))
+                                .withFailureNode(stepNode(VmStatusCheckerConclusionStep.class))));
         return root;
     }
 
     private static ConclusionStepNode initClusterProvisionBeforeSaltBootstrapConclusionStepTree() {
         ConclusionStepNode root = stepNode(InfoCollectorConclusionStep.class)
-                .withSuccessNode(stepNode(VmStatusCheckerConclusionStep.class));
+                .withSuccessNode(stepNode(CmStatusCheckerConclusionStep.class)
+                        .withFailureNode(stepNode(VmStatusCheckerConclusionStep.class)));
         return root;
     }
 
     private static ConclusionStepNode initClusterProvisionAfterSaltBootstrapConclusionStepTree() {
         ConclusionStepNode root = stepNode(InfoCollectorConclusionStep.class)
                 .withSuccessNode(stepNode(SaltCheckerConclusionStep.class)
-                        .withFailureNode(stepNode(VmStatusCheckerConclusionStep.class)));
+                        .withFailureNode(stepNode(CmStatusCheckerConclusionStep.class)
+                                .withFailureNode(stepNode(VmStatusCheckerConclusionStep.class))));
+        return root;
+    }
+
+    private static ConclusionStepNode initStackProvisionConclusionStepTree() {
+        ConclusionStepNode root = stepNode(InfoCollectorConclusionStep.class)
+                .withSuccessNode(stepNode(VmStatusCheckerConclusionStep.class));
         return root;
     }
 }

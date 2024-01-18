@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRe
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.CleanupFreeIpaEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageFallbackRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.StackUpscaleFailedConclusionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
@@ -462,18 +463,12 @@ public class StackUpscaleActions {
         return new AbstractStackFailureAction<StackUpscaleState, StackUpscaleEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                Map<String, Set<String>> hostgroupWithHostnames = (Map<String, Set<String>>) variables.getOrDefault(HOST_GROUP_WITH_HOSTNAMES,
-                        new HashMap<>());
+                Map<String, Set<String>> hostgroupWithHostnames = (Map<String, Set<String>>) variables.getOrDefault(HOST_GROUP_WITH_HOSTNAMES, new HashMap<>());
                 Map<String, Integer> hostGroupWithAdjustment = (Map<String, Integer>) variables.getOrDefault(HOST_GROUP_WITH_ADJUSTMENT, new HashMap<>());
-                stackUpscaleService.handleStackUpscaleFailure(isRepair(variables), hostgroupWithHostnames, payload.getException(),
-                        payload.getResourceId(), hostGroupWithAdjustment);
                 getMetricService().incrementMetricCounter(MetricType.STACK_UPSCALE_FAILED, context.getStack(), payload.getException());
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(StackUpscaleEvent.UPSCALE_FAIL_HANDLED_EVENT.event(), context.getStackId());
+                StackUpscaleFailedConclusionRequest stackUpscaleFailedConclusionRequest = new StackUpscaleFailedConclusionRequest(context.getStackId(),
+                        hostgroupWithHostnames, hostGroupWithAdjustment, isRepair(variables), payload.getException());
+                sendEvent(context, stackUpscaleFailedConclusionRequest);
             }
         };
     }

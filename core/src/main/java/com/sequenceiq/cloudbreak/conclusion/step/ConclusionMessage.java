@@ -40,13 +40,15 @@ class ConclusionMessage {
 
     public static final String NETWORK_NEIGHBOUR_NOT_ACCESSIBLE_DETAILS = "conclusion.network.neighbour.not.accessible.details";
 
+    public static final String CM_SERVER_UNREACHABLE = "conclusion.cm.server.unreachable";
+
     public static final String CM_UNHEALTHY_VMS_FOUND = "conclusion.cm.unhealthy.vms.found";
 
     public static final String CM_UNHEALTHY_VMS_FOUND_DETAILS = "conclusion.cm.unhealthy.vms.found.details";
 
-    public static final String PROVIDER_NOT_RUNNING_VMS_FOUND = "conclusion.prodider.not.running.vms.found";
+    public static final String PROVIDER_NOT_RUNNING_VMS_FOUND = "conclusion.provider.not.running.vms.found";
 
-    public static final String PROVIDER_NOT_RUNNING_VMS_FOUND_DETAILS = "conclusion.prodider.not.running.vms.found.details";
+    public static final String PROVIDER_NOT_RUNNING_VMS_FOUND_DETAILS = "conclusion.provider.not.running.vms.found.details";
 
     private ConclusionMessage() {
     }

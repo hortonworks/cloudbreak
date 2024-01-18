@@ -1,15 +1,16 @@
 package com.sequenceiq.cloudbreak.conclusion.step;
 
-import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.PROVIDER_NOT_RUNNING_VMS_FOUND;
-import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.PROVIDER_NOT_RUNNING_VMS_FOUND_DETAILS;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.CM_SERVER_UNREACHABLE;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.CM_UNHEALTHY_VMS_FOUND;
+import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.CM_UNHEALTHY_VMS_FOUND_DETAILS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -37,19 +38,18 @@ import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.common.type.HealthCheck;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
-import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
+import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @ExtendWith(MockitoExtension.class)
-class VmStatusCheckerConclusionStepTest {
+class CmStatusCheckerConclusionStepTest {
 
     @Mock
     private StackService stackService;
@@ -61,16 +61,13 @@ class VmStatusCheckerConclusionStepTest {
     private InstanceMetaDataService instanceMetaDataService;
 
     @Mock
-    private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
-
-    @Mock
-    private StackInstanceStatusChecker stackInstanceStatusChecker;
+    private RuntimeVersionService runtimeVersionService;
 
     @Mock
     private CloudbreakMessagesService cloudbreakMessagesService;
 
     @InjectMocks
-    private VmStatusCheckerConclusionStep underTest;
+    private CmStatusCheckerConclusionStep underTest;
 
     private ClusterApi connector = Mockito.mock(ClusterApi.class);
 
@@ -86,59 +83,66 @@ class VmStatusCheckerConclusionStepTest {
         when(stackService.getById(anyLong())).thenReturn(stack);
         when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(connector);
         when(connector.clusterStatusService()).thenReturn(clusterStatusService);
+        lenient().when(runtimeVersionService.getRuntimeVersion(anyLong())).thenReturn(Optional.of("7.2.11"));
     }
 
     @Test
     public void checkShouldBeSuccessfulIfAllInstancesAreHealthy() {
-        when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.FALSE);
+        when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.TRUE);
         when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(anyLong()))
                 .thenReturn(List.of(createInstanceMetadata("host1"), createInstanceMetadata("host2")));
-        when(stackInstanceStatusChecker.queryInstanceStatuses(any(), anyList()))
-                .thenReturn(List.of(createCloudVmInstanceStatus("host1", true), createCloudVmInstanceStatus("host2", true)));
+        when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(createExtendedHostStatuses(true));
 
         Conclusion conclusion = underTest.check(1L);
         assertFalse(conclusion.isFailureFound());
         assertNull(conclusion.getConclusion());
         assertNull(conclusion.getDetails());
-        assertEquals(VmStatusCheckerConclusionStep.class, conclusion.getConclusionStepClass());
+        assertEquals(CmStatusCheckerConclusionStep.class, conclusion.getConclusionStepClass());
     }
 
     @Test
-    public void checkShouldFailIfUnhealthyInstanceExists() {
-        when(cloudbreakMessagesService.getMessageWithArgs(eq(PROVIDER_NOT_RUNNING_VMS_FOUND), any(Object[].class))).thenReturn("provider not running vms");
-        when(cloudbreakMessagesService.getMessageWithArgs(eq(PROVIDER_NOT_RUNNING_VMS_FOUND_DETAILS), any(Object[].class)))
-                .thenReturn("provider not running vms details");
-        when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.FALSE);
+    public void checkShouldFailIfUnhealthyOrUnknownInstanceExists() {
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(CM_UNHEALTHY_VMS_FOUND), any(Object[].class))).thenReturn("cm unhealthy vms");
+        when(cloudbreakMessagesService.getMessageWithArgs(eq(CM_UNHEALTHY_VMS_FOUND_DETAILS), any(Object[].class))).thenReturn("cm unhealthy vms details");
+        when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.TRUE);
         when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(anyLong()))
-                .thenReturn(List.of(createInstanceMetadata("host1"), createInstanceMetadata("host2")));
-        when(stackInstanceStatusChecker.queryInstanceStatuses(any(), anyList()))
-                .thenReturn(List.of(createCloudVmInstanceStatus("host1", false), createCloudVmInstanceStatus("host2", false)));
+                .thenReturn(List.of(createInstanceMetadata("host1"), createInstanceMetadata("host2"), createInstanceMetadata("host3")));
+        when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(createExtendedHostStatuses(false));
 
         Conclusion conclusion = underTest.check(1L);
         assertTrue(conclusion.isFailureFound());
-        assertEquals("provider not running vms", conclusion.getConclusion());
-        assertEquals("provider not running vms details", conclusion.getDetails());
-        assertEquals(VmStatusCheckerConclusionStep.class, conclusion.getConclusionStepClass());
+        assertEquals("cm unhealthy vms", conclusion.getConclusion());
+        assertEquals("cm unhealthy vms details", conclusion.getDetails());
+        assertEquals(CmStatusCheckerConclusionStep.class, conclusion.getConclusionStepClass());
     }
 
     @Test
-    public void checkShouldFailIfUnknownInstanceExists() {
-        when(cloudbreakMessagesService.getMessageWithArgs(eq(PROVIDER_NOT_RUNNING_VMS_FOUND), any(Object[].class))).thenReturn("provider not running vms");
-        when(cloudbreakMessagesService.getMessageWithArgs(eq(PROVIDER_NOT_RUNNING_VMS_FOUND_DETAILS), any(Object[].class)))
-                .thenReturn("provider not running vms details");
+    public void checkShouldFailIfCMIsNotRunning() {
+        when(cloudbreakMessagesService.getMessage(eq(CM_SERVER_UNREACHABLE))).thenReturn("cm server unreachable");
+        when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.FALSE);
+        when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(anyLong()))
+                .thenReturn(List.of(createInstanceMetadata("host1"), createInstanceMetadata("host2")));
+
+        Conclusion conclusion = underTest.check(1L);
+        assertTrue(conclusion.isFailureFound());
+        assertEquals("cm server unreachable", conclusion.getConclusion());
+        assertEquals("cm server unreachable", conclusion.getDetails());
+        assertEquals(CmStatusCheckerConclusionStep.class, conclusion.getConclusionStepClass());
+    }
+
+    @Test
+    public void checkShouldHandleMissingFqdns() {
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.FALSE);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceId("1");
         List<InstanceMetadataView> instanceMetaDataList = List.of(instanceMetaData);
         when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(anyLong())).thenReturn(instanceMetaDataList);
-        when(stackInstanceStatusChecker.queryInstanceStatuses(any(), anyList()))
-                .thenReturn(List.of(createCloudVmInstanceStatus("1", false)));
 
         Conclusion conclusion = underTest.check(1L);
         assertTrue(conclusion.isFailureFound());
-        assertEquals("provider not running vms", conclusion.getConclusion());
-        assertEquals("provider not running vms details", conclusion.getDetails());
-        assertEquals(VmStatusCheckerConclusionStep.class, conclusion.getConclusionStepClass());
+        assertNull(conclusion.getConclusion());
+        assertNull(conclusion.getDetails());
+        assertEquals(CmStatusCheckerConclusionStep.class, conclusion.getConclusionStepClass());
     }
 
     private ExtendedHostStatuses createExtendedHostStatuses(boolean healthy) {
