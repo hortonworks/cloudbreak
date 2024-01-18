@@ -90,6 +90,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
 
     private EnvironmentDataServices dataServices;
 
+    private boolean enableSecretEncryption;
+
     @Override
     public Long getResourceId() {
         return id;
@@ -396,16 +398,26 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         this.dataServices = dataServices;
     }
 
+    public boolean isEnableSecretEncryption() {
+        return enableSecretEncryption;
+    }
+
+    public void setEnableSecretEncryption(boolean enableSecretEncryption) {
+        this.enableSecretEncryption = enableSecretEncryption;
+    }
+
     @Override
     public String toString() {
-        return "EnvironmentDtoBase{"
-                + "name='" + name + '\''
-                + "originalName='" + originalName + '\''
-                + ", cloudPlatform='" + cloudPlatform + '\''
-                + ", resourceCrn='" + resourceCrn + '\''
-                + ", status='" + status + '\''
-                + ", domain='" + domain + '\''
-                + '}';
+        return "EnvironmentDtoBase{" +
+                "name='" + name + '\'' +
+                ", originalName='" + originalName + '\'' +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", status=" + status +
+                ", statusReason='" + statusReason + '\'' +
+                ", domain='" + domain + '\'' +
+                ", enableSecretEncryption=" + enableSecretEncryption +
+                '}';
     }
 
     public abstract static class EnvironmentDtoBaseBuilder<T extends EnvironmentDtoBase, B extends EnvironmentDtoBaseBuilder<T, B>> {
@@ -477,6 +489,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         private String domain;
 
         private EnvironmentDataServices dataServices;
+
+        private boolean enableSecretEncryption;
 
         protected EnvironmentDtoBaseBuilder() {
         }
@@ -646,6 +660,11 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             return (B) this;
         }
 
+        public B withEnableSecretEncryption(boolean enableSecretEncryption) {
+            this.enableSecretEncryption = enableSecretEncryption;
+            return (B) this;
+        }
+
         protected void build(T environmentDto) {
             environmentDto.setId(id);
             environmentDto.setLocation(locationDto);
@@ -679,8 +698,10 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             environmentDto.setDeletionType(deletionType);
             environmentDto.setDomain(domain);
             environmentDto.setDataServices(dataServices);
+            environmentDto.setEnableSecretEncryption(enableSecretEncryption);
         }
 
         public abstract T build();
     }
+
 }

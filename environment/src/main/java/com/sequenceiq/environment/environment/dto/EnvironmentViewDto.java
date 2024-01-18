@@ -44,7 +44,7 @@ public class EnvironmentViewDto extends EnvironmentDtoBase {
         }
 
         public Builder withCredentialView(CredentialView credential) {
-            this.credentialView = credential;
+            credentialView = credential;
             return this;
         }
 
@@ -58,7 +58,7 @@ public class EnvironmentViewDto extends EnvironmentDtoBase {
             EnvironmentViewDto environmentDto = new EnvironmentViewDto();
             environmentDto.setCredentialView(credentialView);
             environmentDto.setProxyConfig(proxyConfig);
-            super.build(environmentDto);
+            build(environmentDto);
             return environmentDto;
         }
     }

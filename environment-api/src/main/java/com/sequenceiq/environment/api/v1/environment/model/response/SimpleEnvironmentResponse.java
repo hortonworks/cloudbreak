@@ -61,7 +61,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         /**
          * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
-         * and can become invalid, usage of it can be error prone
+         * and can become invalid, usage of it can be error-prone
          */
         @Deprecated
         private String creator;
@@ -118,6 +118,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private DataServicesResponse dataServices;
 
+        private boolean enableSecretEncryption;
+
         private Builder() {
         }
 
@@ -152,13 +154,13 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
         }
 
         public Builder withCredentialView(CredentialViewResponse credentialResponse) {
-            this.credentialViewResponse = credentialResponse;
+            credentialViewResponse = credentialResponse;
             return this;
         }
 
         /**
          * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
-         * and can become invalid, usage of it can be error prone
+         * and can become invalid, usage of it can be error-prone
          */
         @Deprecated
         public Builder withCreator(String creator) {
@@ -281,6 +283,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withEnableSecretEncryption(boolean enableSecretEncryption) {
+            this.enableSecretEncryption = enableSecretEncryption;
+            return this;
+        }
+
         public SimpleEnvironmentResponse build() {
             SimpleEnvironmentResponse simpleEnvironmentResponse = new SimpleEnvironmentResponse();
             simpleEnvironmentResponse.setCrn(crn);
@@ -314,6 +321,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setDeletionType(deletionType);
             simpleEnvironmentResponse.setEnvironmentDomain(environmentDomain);
             simpleEnvironmentResponse.setDataServices(dataServices);
+            simpleEnvironmentResponse.setEnableSecretEncryption(enableSecretEncryption);
             return simpleEnvironmentResponse;
         }
     }

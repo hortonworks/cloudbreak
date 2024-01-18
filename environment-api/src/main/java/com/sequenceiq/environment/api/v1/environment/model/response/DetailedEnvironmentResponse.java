@@ -69,7 +69,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         /**
          * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
-         * and can become invalid, usage of it can be error prone
+         * and can become invalid, usage of it can be error-prone
          */
         @Deprecated
         private String creator;
@@ -140,6 +140,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private DataServicesResponse dataServices;
 
+        private boolean enableSecretEncryption;
+
         private Builder() {
         }
 
@@ -170,7 +172,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         /**
          * @deprecated data owner of any user is UMS, creator should not be stored and used anywhere, since user of creator can leave the given company
-         * and can become invalid, usage of it can be error prone
+         * and can become invalid, usage of it can be error-prone
          */
         @Deprecated
         public Builder withCreator(String creator) {
@@ -329,12 +331,17 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         }
 
         public Builder withEnvironmentDomain(String environmentDomainName) {
-            this.environmentDomain = environmentDomainName;
+            environmentDomain = environmentDomainName;
             return this;
         }
 
         public Builder withDataServices(DataServicesResponse dataServices) {
             this.dataServices = dataServices;
+            return this;
+        }
+
+        public Builder withEnableSecretEncryption(boolean enableSecretEncryption) {
+            this.enableSecretEncryption = enableSecretEncryption;
             return this;
         }
 
@@ -378,6 +385,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setEnvironmentDomain(environmentDomain);
             detailedEnvironmentResponse.setAccountId(accountId);
             detailedEnvironmentResponse.setDataServices(dataServices);
+            detailedEnvironmentResponse.setEnableSecretEncryption(enableSecretEncryption);
             return detailedEnvironmentResponse;
         }
     }

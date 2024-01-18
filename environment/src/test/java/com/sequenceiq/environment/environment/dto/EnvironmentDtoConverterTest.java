@@ -19,19 +19,13 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.tag.CostTagging;
-import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -59,10 +53,6 @@ import com.sequenceiq.environment.parameters.dao.domain.AzureParameters;
 import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersConverter;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.proxy.domain.ProxyConfigView;
-import com.sequenceiq.environment.tags.domain.AccountTag;
-import com.sequenceiq.environment.tags.service.AccountTagService;
-import com.sequenceiq.environment.tags.service.DefaultInternalAccountTagService;
-import com.sequenceiq.environment.tags.v1.converter.AccountTagToAccountTagResponsesConverter;
 
 @ExtendWith(MockitoExtension.class)
 class EnvironmentDtoConverterTest {
@@ -139,35 +129,13 @@ class EnvironmentDtoConverterTest {
 
     private static final String PARENT_CLOUD_PLATFORM = "GCP";
 
-    private static final boolean INTERNAL_TENANT = true;
-
-    private static final String USER_NAME = "userName";
-
     private static final String STORAGE_LOCATION = "storageLocation";
 
     @Mock
     private AuthenticationDtoConverter authenticationDtoConverter;
 
     @Mock
-    private CostTagging costTagging;
-
-    @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
     private EnvironmentTagsDtoConverter environmentTagsDtoConverter;
-
-    @Mock
-    private DefaultInternalAccountTagService defaultInternalAccountTagService;
-
-    @Mock
-    private AccountTagToAccountTagResponsesConverter accountTagToAccountTagResponsesConverter;
-
-    @Mock
-    private AccountTagService accountTagService;
-
-    @Mock
-    private CrnUserDetailsService crnUserDetailsService;
 
     @Mock
     private EnvironmentRecipeService environmentRecipeService;
@@ -195,9 +163,6 @@ class EnvironmentDtoConverterTest {
 
     @Mock
     private CredentialDetailsConverter credentialDetailsConverter;
-
-    @Captor
-    private ArgumentCaptor<CDPTagGenerationRequest> cdpTagGenerationRequestCaptor;
 
     @Test
     void testEnvironmentToEnvironmentDtoFreeIpaCreationWithoutAwsParameters() {
@@ -285,6 +250,7 @@ class EnvironmentDtoConverterTest {
         when(environmentView.getDomain()).thenReturn(DOMAIN);
         when(environmentView.getNetwork()).thenReturn(null);
         when(environmentView.getParentEnvironment()).thenReturn(null);
+        when(environmentView.isEnableSecretEncryption()).thenReturn(true);
 
         when(authenticationDtoConverter.authenticationToDto(authentication)).thenReturn(authenticationDto);
 
@@ -316,6 +282,7 @@ class EnvironmentDtoConverterTest {
         assertThat(result.getDeletionType()).isEqualTo(DELETION_TYPE);
         assertThat(result.getEnvironmentServiceVersion()).isEqualTo(ENVIRONMENT_SERVICE_VERSION);
         assertThat(result.getDomain()).isEqualTo(DOMAIN);
+        assertThat(result.isEnableSecretEncryption()).isTrue();
 
         LocationDto locationDto = result.getLocation();
         assertThat(locationDto).isNotNull();
@@ -510,6 +477,7 @@ class EnvironmentDtoConverterTest {
         when(environment.getDomain()).thenReturn(DOMAIN);
         when(environment.getNetwork()).thenReturn(null);
         when(environment.getParentEnvironment()).thenReturn(null);
+        when(environment.isEnableSecretEncryption()).thenReturn(true);
 
         when(authenticationDtoConverter.authenticationToDto(authentication)).thenReturn(authenticationDto);
         when(environmentRecipeService.getRecipes(ID)).thenReturn(freeipaRecipes);
@@ -542,6 +510,7 @@ class EnvironmentDtoConverterTest {
         assertThat(result.getDeletionType()).isEqualTo(DELETION_TYPE);
         assertThat(result.getEnvironmentServiceVersion()).isEqualTo(ENVIRONMENT_SERVICE_VERSION);
         assertThat(result.getDomain()).isEqualTo(DOMAIN);
+        assertThat(result.isEnableSecretEncryption()).isTrue();
 
         LocationDto locationDto = result.getLocation();
         assertThat(locationDto).isNotNull();
@@ -705,7 +674,6 @@ class EnvironmentDtoConverterTest {
         Set<String> regions = Set.of("region1", "region2");
 
         Map<String, String> userDefinedTags = Map.ofEntries(entry("userKey1", "userValue1"), entry("userKey2", "userValue2"));
-        AccountTag accountTag = new AccountTag();
         AccountTagResponse accountTagResponse = new AccountTagResponse();
         accountTagResponse.setKey("accountKey");
         accountTagResponse.setValue("accountValue");

@@ -65,7 +65,7 @@ public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDet
     }
 
     @JsonPOJOBuilder
-    public static final class Builder extends EnvironmentDtoBase.EnvironmentDtoBaseBuilder<EnvironmentDto, Builder> {
+    public static final class Builder extends EnvironmentDtoBaseBuilder<EnvironmentDto, Builder> {
 
         private Credential credential;
 
@@ -96,7 +96,7 @@ public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDet
             environmentDto.setCredential(credential);
             environmentDto.setProxyConfig(proxyConfig);
             environmentDto.setCredentialDetails(credentialDetails);
-            super.build(environmentDto);
+            build(environmentDto);
             return environmentDto;
         }
     }

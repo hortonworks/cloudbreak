@@ -11,10 +11,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
@@ -28,9 +25,6 @@ import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConvert
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersConverter;
-import com.sequenceiq.environment.tags.service.AccountTagService;
-import com.sequenceiq.environment.tags.service.DefaultInternalAccountTagService;
-import com.sequenceiq.environment.tags.v1.converter.AccountTagToAccountTagResponsesConverter;
 
 @Component
 public class EnvironmentDtoConverter {
@@ -40,18 +34,6 @@ public class EnvironmentDtoConverter {
     private final Map<CloudPlatform, EnvironmentParametersConverter> environmentParamsConverterMap;
 
     private final AuthenticationDtoConverter authenticationDtoConverter;
-
-    private final EntitlementService entitlementService;
-
-    private final AccountTagService accountTagService;
-
-    private final DefaultInternalAccountTagService defaultInternalAccountTagService;
-
-    private final AccountTagToAccountTagResponsesConverter accountTagToAccountTagResponsesConverter;
-
-    private final CostTagging costTagging;
-
-    private final CrnUserDetailsService crnUserDetailsService;
 
     private final EnvironmentRecipeService environmentRecipeService;
 
@@ -65,12 +47,6 @@ public class EnvironmentDtoConverter {
             EnvironmentNetworkConverter> environmentNetworkConverterMap,
             Map<CloudPlatform, EnvironmentParametersConverter> environmentParamsConverterMap,
             AuthenticationDtoConverter authenticationDtoConverter,
-            CostTagging costTagging,
-            EntitlementService entitlementService,
-            DefaultInternalAccountTagService defaultInternalAccountTagService,
-            AccountTagToAccountTagResponsesConverter accountTagToAccountTagResponsesConverter,
-            AccountTagService accountTagService,
-            CrnUserDetailsService crnUserDetailsService,
             EnvironmentRecipeService environmentRecipeService,
             FreeIpaInstanceCountByGroupProvider ipaInstanceCountByGroupProvider,
             CredentialDetailsConverter credentialDetailsConverter,
@@ -78,12 +54,6 @@ public class EnvironmentDtoConverter {
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
         this.environmentParamsConverterMap = environmentParamsConverterMap;
         this.authenticationDtoConverter = authenticationDtoConverter;
-        this.costTagging = costTagging;
-        this.entitlementService = entitlementService;
-        this.accountTagService = accountTagService;
-        this.defaultInternalAccountTagService = defaultInternalAccountTagService;
-        this.accountTagToAccountTagResponsesConverter = accountTagToAccountTagResponsesConverter;
-        this.crnUserDetailsService = crnUserDetailsService;
         this.environmentRecipeService = environmentRecipeService;
         this.ipaInstanceCountByGroupProvider = ipaInstanceCountByGroupProvider;
         this.credentialDetailsConverter = credentialDetailsConverter;
@@ -120,7 +90,8 @@ public class EnvironmentDtoConverter {
                 .withProxyConfig(environmentView.getProxyConfig())
                 .withEnvironmentDeletionType(environmentView.getDeletionType())
                 .withEnvironmentServiceVersion(environmentView.getEnvironmentServiceVersion())
-                .withEnvironmentDomain(environmentView.getDomain());
+                .withEnvironmentDomain(environmentView.getDomain())
+                .withEnableSecretEncryption(environmentView.isEnableSecretEncryption());
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentView.getCloudPlatform());
         doIfNotNull(environmentView.getParameters(), parameters -> builder.withParameters(
@@ -165,7 +136,8 @@ public class EnvironmentDtoConverter {
                 .withEnvironmentDeletionType(environment.getDeletionType())
                 .withEnvironmentServiceVersion(environment.getEnvironmentServiceVersion())
                 .withEnvironmentDomain(environment.getDomain())
-                .withDataServices(environment.getDataServices());
+                .withDataServices(environment.getDataServices())
+                .withEnableSecretEncryption(environment.isEnableSecretEncryption());
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         builder.withCredentialDetails(credentialDetailsConverter.credentialToCredentialDetails(cloudPlatform, environment.getCredential()));

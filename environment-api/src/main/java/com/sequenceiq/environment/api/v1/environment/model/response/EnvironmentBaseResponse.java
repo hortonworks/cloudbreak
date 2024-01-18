@@ -134,6 +134,9 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
     @Schema(description = EnvironmentModelDescription.DATA_SERVICES)
     private DataServicesResponse dataServices;
 
+    @Schema(description = EnvironmentModelDescription.ENVIRONMENT_ENABLE_SECRET_ENCRYPTION)
+    private boolean enableSecretEncryption;
+
     @JsonIgnore
     public boolean isCloudStorageLoggingEnabled() {
         return telemetry != null && telemetry.getFeatures() != null && telemetry.getFeatures().getCloudStorageLogging() != null
@@ -453,6 +456,14 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
         this.dataServices = dataServices;
     }
 
+    public boolean isEnableSecretEncryption() {
+        return enableSecretEncryption;
+    }
+
+    public void setEnableSecretEncryption(boolean enableSecretEncryption) {
+        this.enableSecretEncryption = enableSecretEncryption;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentBaseResponse{" +
@@ -491,6 +502,7 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
                 ", deletionType=" + deletionType +
                 ", environmentDomain='" + environmentDomain + '\'' +
                 ", dataServices=" + dataServices +
+                ", enableSecretEncryption=" + enableSecretEncryption +
                 '}';
     }
 }

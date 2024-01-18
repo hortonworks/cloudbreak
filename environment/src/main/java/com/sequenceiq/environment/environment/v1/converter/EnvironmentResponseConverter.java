@@ -125,7 +125,8 @@ public class EnvironmentResponseConverter {
                 .withCcmV2TlsType(environmentDto.getExperimentalFeatures().getCcmV2TlsType())
                 .withAccountId(environmentDto.getAccountId())
                 .withEnvironmentDomain(environmentDto.getDomain())
-                .withDataServices(dataServicesConverter.convertToResponse(environmentDto.getDataServices()));
+                .withDataServices(dataServicesConverter.convertToResponse(environmentDto.getDataServices()))
+                .withEnableSecretEncryption(environmentDto.isEnableSecretEncryption());
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convert(environmentDto.getProxyConfig())));
@@ -168,7 +169,8 @@ public class EnvironmentResponseConverter {
                 .withParentEnvironmentName(environmentViewDto.getParentEnvironmentName())
                 .withCcmV2TlsType(environmentViewDto.getExperimentalFeatures().getCcmV2TlsType())
                 .withEnvironmentDomain(environmentViewDto.getDomain())
-                .withDataServices(dataServicesConverter.convertToResponse(environmentViewDto.getDataServices()));
+                .withDataServices(dataServicesConverter.convertToResponse(environmentViewDto.getDataServices()))
+                .withEnableSecretEncryption(environmentViewDto.isEnableSecretEncryption());
 
         NullUtil.doIfNotNull(environmentViewDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convertToView(environmentViewDto.getProxyConfig())));
@@ -205,7 +207,8 @@ public class EnvironmentResponseConverter {
                 .withParentEnvironmentName(environmentDto.getParentEnvironmentName())
                 .withCcmV2TlsType(environmentDto.getExperimentalFeatures().getCcmV2TlsType())
                 .withEnvironmentDomain(environmentDto.getDomain())
-                .withDataServices(dataServicesConverter.convertToResponse(environmentDto.getDataServices()));
+                .withDataServices(dataServicesConverter.convertToResponse(environmentDto.getDataServices()))
+                .withEnableSecretEncryption(environmentDto.isEnableSecretEncryption());
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convertToView(environmentDto.getProxyConfig())));

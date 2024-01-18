@@ -160,6 +160,9 @@ public class EnvironmentView extends CompactView implements AuthResource {
     @JoinColumn(name = "parent_environment_id", referencedColumnName = "id")
     private ParentEnvironmentView parentEnvironment;
 
+    @Column(nullable = false, name = "enable_secret_encryption")
+    private boolean enableSecretEncryption;
+
     public ProxyConfigView getProxyConfig() {
         return proxyConfig;
     }
@@ -517,6 +520,14 @@ public class EnvironmentView extends CompactView implements AuthResource {
         this.freeipaRecipes = freeipaRecipes;
     }
 
+    public boolean isEnableSecretEncryption() {
+        return enableSecretEncryption;
+    }
+
+    public void setEnableSecretEncryption(boolean enableSecretEncryption) {
+        this.enableSecretEncryption = enableSecretEncryption;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -552,6 +563,8 @@ public class EnvironmentView extends CompactView implements AuthResource {
                 ", status=" + status +
                 ", freeipaRecipes='" + freeipaRecipes + '\'' +
                 ", deletionType=" + deletionType +
+                ", enableSecretEncryption=" + enableSecretEncryption +
                 '}';
     }
+
 }

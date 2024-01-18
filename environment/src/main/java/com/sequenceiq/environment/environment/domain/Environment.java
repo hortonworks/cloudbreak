@@ -175,6 +175,9 @@ public class Environment implements AuthResource, AccountAwareResource {
     @Column(name = "environment_domain")
     private String domain;
 
+    @Column(nullable = false, name = "enable_secret_encryption")
+    private boolean enableSecretEncryption;
+
     public Environment() {
         regions = new Json(new HashSet<Region>());
         tags = new Json(new EnvironmentTags(new HashMap<>(), new HashMap<>()));
@@ -592,18 +595,28 @@ public class Environment implements AuthResource, AccountAwareResource {
         this.domain = domain;
     }
 
+    public boolean isEnableSecretEncryption() {
+        return enableSecretEncryption;
+    }
+
+    public void setEnableSecretEncryption(boolean enableSecretEncryption) {
+        this.enableSecretEncryption = enableSecretEncryption;
+    }
+
     @Override
     public String toString() {
         return "Environment{" +
                 "name='" + name + '\'' +
                 ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", freeIpaEnableMultiAz=" + freeIpaEnableMultiAz +
                 ", creator='" + creator + '\'' +
                 ", resourceCrn='" + resourceCrn + '\'' +
                 ", status=" + status +
+                ", deletionType=" + deletionType +
                 ", statusReason='" + statusReason + '\'' +
-                ", freeIpaEnableMultiAz='" + freeIpaEnableMultiAz + '\'' +
-                ", deletionType='" + deletionType + '\'' +
                 ", domain='" + domain + '\'' +
+                ", enableSecretEncryption=" + enableSecretEncryption +
                 '}';
     }
+
 }

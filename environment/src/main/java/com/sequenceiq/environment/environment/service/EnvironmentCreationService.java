@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -67,6 +69,8 @@ public class EnvironmentCreationService {
 
     private final OwnerAssignmentService ownerAssignmentService;
 
+    private final EntitlementService entitlementService;
+
     @Value("${info.app.version}")
     private String environmentServiceVersion;
 
@@ -80,7 +84,8 @@ public class EnvironmentCreationService {
             ParametersService parametersService,
             LoadBalancerEntitlementService loadBalancerEntitlementService,
             EnvironmentRecipeService recipeService,
-            OwnerAssignmentService ownerAssignmentService) {
+            OwnerAssignmentService ownerAssignmentService,
+            EntitlementService entitlementService) {
         this.environmentService = environmentService;
         validatorService = environmentValidatorService;
         this.environmentResourceService = environmentResourceService;
@@ -91,6 +96,7 @@ public class EnvironmentCreationService {
         this.loadBalancerEntitlementService = loadBalancerEntitlementService;
         this.recipeService = recipeService;
         this.ownerAssignmentService = ownerAssignmentService;
+        this.entitlementService = entitlementService;
     }
 
     public EnvironmentDto create(EnvironmentCreationDto creationDto) {
@@ -116,6 +122,7 @@ public class EnvironmentCreationService {
         }
 
         environmentService.setSecurityAccess(environment, creationDto.getSecurityAccess());
+        initializeSecretEncryption(environment);
         validateCreation(creationDto, environment);
         validateRecipes(creationDto);
         try {
@@ -160,6 +167,12 @@ public class EnvironmentCreationService {
         environment.setEnvironmentServiceVersion(environmentServiceVersion);
         LOGGER.info("Environment is initialized for creation.");
         return environment;
+    }
+
+    private void initializeSecretEncryption(Environment environment) {
+        environment.setEnableSecretEncryption(CloudPlatform.AWS.name().equals(environment.getCloudPlatform()) &&
+                Boolean.TRUE.equals(environment.getCredential().getGovCloud()) && entitlementService.isSecretEncryptionEnabled(environment.getAccountId()));
+        LOGGER.info("Environment is initialized with enableSecretEncryption={}.", environment.isEnableSecretEncryption());
     }
 
     private void initializeEnvironmentTunnel(Environment environment) {

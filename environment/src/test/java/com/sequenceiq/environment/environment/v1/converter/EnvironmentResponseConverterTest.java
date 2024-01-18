@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.v1.converter;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -46,6 +47,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnviro
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponse;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyViewResponse;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.domain.CredentialView;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.credential.v1.converter.CredentialViewConverter;
 import com.sequenceiq.environment.environment.EnvironmentDeletionType;
@@ -55,6 +57,8 @@ import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentDtoBase;
+import com.sequenceiq.environment.environment.dto.EnvironmentViewDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
@@ -71,6 +75,7 @@ import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupCreation;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
+import com.sequenceiq.environment.proxy.domain.ProxyConfigView;
 import com.sequenceiq.environment.proxy.v1.converter.ProxyConfigToProxyResponseConverter;
 
 @ExtendWith(SpringExtension.class)
@@ -128,7 +133,7 @@ class EnvironmentResponseConverterTest {
         when(regionConverter.convertRegions(environment.getRegions())).thenReturn(compactRegionResponse);
         when(telemetryApiConverter.convert(eq(environment.getTelemetry()), any())).thenReturn(telemetryResponse);
         when(backupConverter.convert(environment.getBackup())).thenReturn(backupResponse);
-        when(proxyConfigToProxyResponseConverter.convert((ProxyConfig) environment.getProxyConfig())).thenReturn(proxyResponse);
+        when(proxyConfigToProxyResponseConverter.convert(environment.getProxyConfig())).thenReturn(proxyResponse);
         when(networkDtoToResponseConverter.convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), true))
                 .thenReturn(environmentNetworkResponse);
         when(dataServicesConverter.convertToResponse(environment.getDataServices())).thenReturn(dataServicesResponse);
@@ -166,6 +171,7 @@ class EnvironmentResponseConverterTest {
         assertEquals(environmentNetworkResponse, actual.getNetwork());
         assertEquals(dataServicesResponse, actual.getDataServices());
         assertSecurityAccess(environment.getSecurityAccess(), actual.getSecurityAccess());
+        assertThat(actual.isEnableSecretEncryption()).isTrue();
 
         verify(credentialConverter).convert(environment.getCredential());
         verify(freeIpaConverter).convert(environment.getFreeIpaCreation());
@@ -177,7 +183,7 @@ class EnvironmentResponseConverterTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE"})
+    @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE", "GCP"})
     void testDtoToSimpleResponse(CloudPlatform cloudPlatform) {
         EnvironmentDto environmentDto = createEnvironmentDto(cloudPlatform);
         CredentialViewResponse credentialResponse = mock(CredentialViewResponse.class);
@@ -224,6 +230,7 @@ class EnvironmentResponseConverterTest {
         assertEquals(proxyResponse, actual.getProxyConfig());
         assertEquals(environmentNetworkResponse, actual.getNetwork());
         assertEquals(dataServicesResponse, actual.getDataServices());
+        assertThat(actual.isEnableSecretEncryption()).isTrue();
 
         verify(credentialViewConverter).convertResponse(environmentDto.getCredential());
         verify(freeIpaConverter).convert(environmentDto.getFreeIpaCreation());
@@ -234,7 +241,66 @@ class EnvironmentResponseConverterTest {
         verify(dataServicesConverter).convertToResponse(environmentDto.getDataServices());
     }
 
-    private void assertParameters(EnvironmentDto environment, EnvironmentBaseResponse actual, CloudPlatform cloudPlatform) {
+    @ParameterizedTest
+    @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE", "GCP"})
+    void testViewDtoToSimpleResponse(CloudPlatform cloudPlatform) {
+        EnvironmentViewDto environmentViewDto = createEnvironmentViewDto(cloudPlatform);
+        CredentialViewResponse credentialResponse = mock(CredentialViewResponse.class);
+        FreeIpaResponse freeIpaResponse = mock(FreeIpaResponse.class);
+        CompactRegionResponse compactRegionResponse = mock(CompactRegionResponse.class);
+        TelemetryResponse telemetryResponse = mock(TelemetryResponse.class);
+        ProxyViewResponse proxyResponse = mock(ProxyViewResponse.class);
+        EnvironmentNetworkResponse environmentNetworkResponse = mock(EnvironmentNetworkResponse.class);
+        DataServicesResponse dataServicesResponse = mock(DataServicesResponse.class);
+
+        when(credentialViewConverter.convert(environmentViewDto.getCredentialView())).thenReturn(credentialResponse);
+        when(freeIpaConverter.convert(environmentViewDto.getFreeIpaCreation())).thenReturn(freeIpaResponse);
+        when(regionConverter.convertRegions(environmentViewDto.getRegions())).thenReturn(compactRegionResponse);
+        when(telemetryApiConverter.convert(eq(environmentViewDto.getTelemetry()), any())).thenReturn(telemetryResponse);
+        when(proxyConfigToProxyResponseConverter.convertToView(environmentViewDto.getProxyConfig())).thenReturn(proxyResponse);
+        when(networkDtoToResponseConverter.convert(environmentViewDto.getNetwork(), environmentViewDto.getExperimentalFeatures().getTunnel(), false))
+                .thenReturn(environmentNetworkResponse);
+        when(dataServicesConverter.convertToResponse(environmentViewDto.getDataServices())).thenReturn(dataServicesResponse);
+
+        SimpleEnvironmentResponse actual = underTest.dtoToSimpleResponse(environmentViewDto);
+
+        assertEquals(environmentViewDto.getResourceCrn(), actual.getCrn());
+        assertEquals(environmentViewDto.getName(), actual.getName());
+        assertEquals(environmentViewDto.getOriginalName(), actual.getOriginalName());
+        assertEquals(environmentViewDto.getDescription(), actual.getDescription());
+        assertEquals(environmentViewDto.getCloudPlatform(), actual.getCloudPlatform());
+        assertEquals(credentialResponse, actual.getCredential());
+        assertEquals(environmentViewDto.getStatus().getResponseStatus(), actual.getEnvironmentStatus());
+        assertEquals(environmentViewDto.getCreator(), actual.getCreator());
+        assertLocation(environmentViewDto.getLocation(), actual.getLocation());
+        assertTrue(actual.getCreateFreeIpa());
+        assertEquals(freeIpaResponse, actual.getFreeIpa());
+        assertEquals(environmentViewDto.getStatusReason(), actual.getStatusReason());
+        assertEquals(environmentViewDto.getCreated(), actual.getCreated());
+        assertEquals(environmentViewDto.getExperimentalFeatures().getTunnel(), actual.getTunnel());
+        assertEquals(environmentViewDto.getExperimentalFeatures().getCcmV2TlsType(), actual.getCcmV2TlsType());
+        assertEquals(environmentViewDto.getAdminGroupName(), actual.getAdminGroupName());
+        assertEquals(environmentViewDto.getTags().getUserDefinedTags(), actual.getTags().getUserDefined());
+        assertEquals(environmentViewDto.getTags().getDefaultTags(), actual.getTags().getDefaults());
+        assertEquals(telemetryResponse, actual.getTelemetry());
+        assertEquals(compactRegionResponse, actual.getRegions());
+        assertParameters(environmentViewDto, actual, cloudPlatform);
+        assertEquals(environmentViewDto.getParentEnvironmentName(), actual.getParentEnvironmentName());
+        assertEquals(proxyResponse, actual.getProxyConfig());
+        assertEquals(environmentNetworkResponse, actual.getNetwork());
+        assertEquals(dataServicesResponse, actual.getDataServices());
+        assertThat(actual.isEnableSecretEncryption()).isTrue();
+
+        verify(credentialViewConverter).convert(environmentViewDto.getCredentialView());
+        verify(freeIpaConverter).convert(environmentViewDto.getFreeIpaCreation());
+        verify(regionConverter).convertRegions(environmentViewDto.getRegions());
+        verify(telemetryApiConverter).convert(eq(environmentViewDto.getTelemetry()), any());
+        verify(proxyConfigToProxyResponseConverter).convertToView(environmentViewDto.getProxyConfig());
+        verify(networkDtoToResponseConverter).convert(environmentViewDto.getNetwork(), environmentViewDto.getExperimentalFeatures().getTunnel(), false);
+        verify(dataServicesConverter).convertToResponse(environmentViewDto.getDataServices());
+    }
+
+    private void assertParameters(EnvironmentDtoBase environment, EnvironmentBaseResponse actual, CloudPlatform cloudPlatform) {
         if (AWS.equals(cloudPlatform)) {
             assertEquals(environment.getParameters().getAwsParametersDto().getS3GuardTableName(), actual.getAws().getS3guard().getDynamoDbTableName());
             assertEquals(environment.getParameters().getAwsParametersDto().getAwsDiskEncryptionParametersDto().getEncryptionKeyArn(),
@@ -308,6 +374,39 @@ class EnvironmentResponseConverterTest {
                 .withNetwork(NetworkDto.builder().build())
                 .withSecurityAccess(createSecurityAccess())
                 .withEnvironmentDeletionType(EnvironmentDeletionType.FORCE)
+                .withEnableSecretEncryption(true)
+                .build();
+    }
+
+    private EnvironmentViewDto createEnvironmentViewDto(CloudPlatform cloudPlatform) {
+        return EnvironmentViewDto.builder()
+                .withProxyConfig(new ProxyConfigView())
+                .withCredentialView(new CredentialView())
+                .withResourceCrn("resource-crn")
+                .withName("my-env")
+                .withOriginalName("my-env")
+                .withDescription("Test environment.")
+                .withCloudPlatform("AWS")
+                .withEnvironmentStatus(EnvironmentStatus.AVAILABLE)
+                .withLocationDto(createLocationDto())
+                .withFreeIpaCreation(createFreeIpaCreationDto())
+                .withRegions(Set.of(createRegion()))
+                .withCreator("cloudbreak-user")
+                .withAuthentication(createAuthenticationDto())
+                .withStatusReason("status reason")
+                .withCreated(123L)
+                .withTags(createTags())
+                .withTelemetry(new EnvironmentTelemetry())
+                .withExperimentalFeatures(createExperimentalFeatures())
+                .withAdminGroupName("admin group")
+                .withParameters(createParametersDto(cloudPlatform))
+                .withParentEnvironmentCrn("environment crn")
+                .withParentEnvironmentName("parent-env")
+                .withParentEnvironmentCloudPlatform("AWS")
+                .withNetwork(NetworkDto.builder().build())
+                .withSecurityAccess(createSecurityAccess())
+                .withEnvironmentDeletionType(EnvironmentDeletionType.FORCE)
+                .withEnableSecretEncryption(true)
                 .build();
     }
 
