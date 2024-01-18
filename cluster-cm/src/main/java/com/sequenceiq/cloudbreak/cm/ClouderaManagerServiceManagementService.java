@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cm;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -15,6 +16,7 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
+import com.cloudera.api.swagger.model.ApiServiceState;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
@@ -51,57 +53,59 @@ public class ClouderaManagerServiceManagementService {
     public void startClouderaManagerService(ApiClient client, StackDtoDelegate stack, String serviceType) {
         LOGGER.info("Trying to start services for service type: {} for cluster {}", serviceType, stack.getName());
         ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
-        performClouderaManagerOperation(client, servicesResourceApi, stack, serviceType, "start", servicesResourceApi::startCommand,
-                clouderaManagerPollingServiceProvider::startPollingServiceStart);
+        performClouderaManagerOperation(client, stack, serviceType, "start", Set.of(ApiServiceState.STARTING, ApiServiceState.STARTED),
+                servicesResourceApi::startCommand, clouderaManagerPollingServiceProvider::startPollingServiceStart);
     }
 
     public void stopClouderaManagerService(ApiClient client, StackDtoDelegate stack, String serviceType) {
         LOGGER.info("Trying to stop services for service type: {} for cluster {}", serviceType, stack.getName());
         ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
-        performClouderaManagerOperation(client, servicesResourceApi, stack, serviceType, "stop", servicesResourceApi::stopCommand,
-                clouderaManagerPollingServiceProvider::startPollingServiceStop);
+        performClouderaManagerOperation(client, stack, serviceType, "stop", Set.of(ApiServiceState.STOPPING, ApiServiceState.STOPPED),
+                servicesResourceApi::stopCommand, clouderaManagerPollingServiceProvider::startPollingServiceStop);
     }
 
     public void deleteClouderaManagerService(ApiClient client, StackDtoDelegate stack, String serviceType) {
         LOGGER.debug("Trying to delete services for service type: {} for cluster {}", serviceType, stack.getName());
         ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
-        findServiceOnCluster(stack.getName(), serviceType, servicesResourceApi)
+        findServiceOnCluster(stack.getName(), serviceType, client)
                 .ifPresentOrElse(apiService -> {
-                            try {
-                                LOGGER.debug("Executing delete command on stack {} and service {}", stack.getName(), serviceType);
-                                servicesResourceApi.deleteService(stack.getName(), apiService.getName());
-                                ExtendedPollingResult result = clouderaManagerPollingServiceProvider.startPollingServiceDeletion(stack, client, serviceType);
-                                pollingResultErrorHandler.handlePollingResult(result,
-                                        String.format("Cluster was terminated while %s service deletion is running.", serviceType),
-                                        String.format("Timeout happened while %s service deletion is running.", serviceType));
-                            } catch (Exception e) {
-                                LOGGER.error("Failed to delete services for service type: {} for cluster {}", serviceType, stack.getName(), e);
-                                throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
-                            }
-                        }, () -> LOGGER.debug("Unable to delete {} service because is not present on the cluster", serviceType));
+                    try {
+                        LOGGER.debug("Executing delete command on stack {} and service {}", stack.getName(), serviceType);
+                        servicesResourceApi.deleteService(stack.getName(), apiService.getName());
+                        ExtendedPollingResult result = clouderaManagerPollingServiceProvider.startPollingServiceDeletion(stack, client, serviceType);
+                        pollingResultErrorHandler.handlePollingResult(result,
+                                String.format("Cluster was terminated while %s service deletion is running.", serviceType),
+                                String.format("Timeout happened while %s service deletion is running.", serviceType));
+                    } catch (Exception e) {
+                        LOGGER.error("Failed to delete services for service type: {} for cluster {}", serviceType, stack.getName(), e);
+                        throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+                    }
+                }, () -> LOGGER.debug("Unable to delete {} service because is not present on the cluster", serviceType));
     }
 
-    private void performClouderaManagerOperation(ApiClient client, ServicesResourceApi servicesResourceApi, StackDtoDelegate stack, String serviceType,
-            String operationName, ClouderaManagerServicesCommand clouderaManagerServicesCommand,
+    private void performClouderaManagerOperation(ApiClient client, StackDtoDelegate stack, String serviceType,
+            String operationName, Set<ApiServiceState> acceptedStates, ClouderaManagerServicesCommand clouderaManagerServicesCommand,
             ClouderaManagerOperationPollerCommand clouderaManagerOperationPollerCommand) {
-        Optional<ApiService> apiService = findServiceOnCluster(stack.getName(), serviceType, servicesResourceApi);
-        if (apiService.isPresent()) {
+        findServiceOnCluster(stack.getName(), serviceType, client).ifPresentOrElse(apiService -> {
             try {
-                LOGGER.debug("Executing {} command on stack {} and service {}", operationName, stack.getName(), serviceType);
-                ApiCommand apiCommand = clouderaManagerServicesCommand.apply(stack.getName(), apiService.get().getName());
-                waitForCommandExecution(client, stack, apiCommand, operationName, clouderaManagerOperationPollerCommand);
+                if (acceptedStates.stream().noneMatch(acceptedState -> acceptedState.equals(apiService.getServiceState()))) {
+                    LOGGER.debug("Executing {} command on stack {} and service {}", operationName, stack.getName(), serviceType);
+                    ApiCommand apiCommand = clouderaManagerServicesCommand.apply(stack.getName(), apiService.getName());
+                    waitForCommandExecution(client, stack, apiCommand, operationName, clouderaManagerOperationPollerCommand);
+                } else {
+                    LOGGER.debug("Not necessary to {} the service because it is already in {} state.", operationName, apiService.getServiceState());
+                }
             } catch (Exception e) {
                 LOGGER.error("Failed to {} services for service type: {} for cluster {}", operationName, serviceType, stack.getName(), e);
                 throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
             }
-        } else {
-            LOGGER.debug("Unable to {} {} service because is not present on the cluster", operationName, serviceType);
-        }
+        }, () -> LOGGER.debug("Unable to {} {} service because is not present on the cluster", operationName, serviceType));
     }
 
-    private Optional<ApiService> findServiceOnCluster(String clusterName, String serviceType, ServicesResourceApi servicesResourceApi) {
+    private Optional<ApiService> findServiceOnCluster(String clusterName, String serviceType, ApiClient client) {
         try {
             LOGGER.debug("Looking for service of name {} in cluster {}", serviceType, clusterName);
+            ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
             ApiServiceList serviceList = servicesResourceApi.readServices(clusterName, DataView.SUMMARY.name());
             return serviceList.getItems().stream()
                     .filter(service -> serviceType.equals(service.getType()))
@@ -118,7 +122,7 @@ public class ClouderaManagerServiceManagementService {
         if (Objects.isNull(apiCommand)) {
             LOGGER.debug("There is no running {} command.", operationName);
         } else {
-            LOGGER.debug("Start polling {} command. The command ID is: {}", apiCommand.getId(), operationName);
+            LOGGER.debug("Start polling {} command. The command ID is: {}", operationName, apiCommand.getId());
             ExtendedPollingResult pollingResult = clouderaManagerOperationPollerCommand.apply(stack, apiClient, apiCommand.getId());
             pollingResultErrorHandler.handlePollingResult(pollingResult,
                     String.format("Cluster was terminated while %s services command is running.", operationName),

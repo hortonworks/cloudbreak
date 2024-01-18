@@ -211,9 +211,9 @@ public class DeleteVolumesService {
         CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
         Set<ServiceComponent> hostTemplateServiceComponents = processor.getServiceComponentsByHostGroup().get(requestGroup);
         StackDto stackDto = stackDtoService.getById(stack.getId());
+        InMemoryStateStore.putStack(stack.getId(), PollGroup.POLLABLE);
         stopClouderaManagerService(stackDto, hostTemplateServiceComponents);
         Set<Node> allNodes = stackUtil.collectNodes(stack).stream().filter(node -> node.getHostGroup().equals(requestGroup)).collect(Collectors.toSet());
-        InMemoryStateStore.putStack(stack.getId(), PollGroup.POLLABLE);
         LOGGER.info("RE-Bootstrap machines - This is required for pushing script to nodes.");
         clusterBootstrapper.reBootstrapMachines(stack.getId());
         Set<Node> nodesWithDiskData = stackUtil.collectNodesWithDiskData(stack).stream().filter(node -> node.getHostGroup().equals(requestGroup))
