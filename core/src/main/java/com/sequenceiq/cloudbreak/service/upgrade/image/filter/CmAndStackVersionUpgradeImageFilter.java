@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image.filter;
 
+import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentOSToRedHatUpgradeImageFilter.isCentOSToRedHatUpgradableVersion;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,7 +42,7 @@ public class CmAndStackVersionUpgradeImageFilter implements UpgradeImageFilter {
     public String getMessage(ImageFilterParams imageFilterParams) {
         return imageFilterParams.isLockComponents()
                 ? "There is at least one activated parcel for which we cannot find image with matching version. Activated parcel(s): "
-                        + imageFilterParams.getStackRelatedParcels()
+                + imageFilterParams.getStackRelatedParcels()
                 : "There is no proper Cloudera Manager or CDP version to upgrade.";
     }
 
@@ -58,6 +60,7 @@ public class CmAndStackVersionUpgradeImageFilter implements UpgradeImageFilter {
 
     private boolean isUpgradePermitted(ImageFilterParams imageFilterParams, Image candidateImage) {
         return imageFilterParams.isLockComponents()
+                || isCentOSToRedHatUpgradableVersion(imageFilterParams.getCurrentImage(), candidateImage)
                 ? lockedComponentChecker.isUpgradePermitted(candidateImage, imageFilterParams.getStackRelatedParcels(), getCmBuildNumber(imageFilterParams))
                 : isUnlockedCmAndStackUpgradePermitted(imageFilterParams, candidateImage);
     }

@@ -2,12 +2,14 @@ package com.sequenceiq.cloudbreak.service.upgrade.image.filter;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,6 +33,12 @@ class ImageCreationBasedUpgradeImageFilterTest {
     private Image candidate;
 
     private com.sequenceiq.cloudbreak.cloud.model.Image current;
+
+    @BeforeEach
+    public void setUp() {
+        lenient().when(candidate.getOs()).thenReturn("centos7");
+        lenient().when(candidate.getOsType()).thenReturn("redhat7");
+    }
 
     @Test
     public void testImageIsNewer() {
@@ -177,6 +185,9 @@ class ImageCreationBasedUpgradeImageFilterTest {
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentImage(Long created) {
-        return ModelImageTestBuilder.builder().withPackageVersions(Map.of(ImagePackageVersion.STACK.getKey(), "a")).withCreated(created).build();
+        return ModelImageTestBuilder.builder()
+                .withOs("centos7")
+                .withOsType("redhat7")
+                .withPackageVersions(Map.of(ImagePackageVersion.STACK.getKey(), "a")).withCreated(created).build();
     }
 }

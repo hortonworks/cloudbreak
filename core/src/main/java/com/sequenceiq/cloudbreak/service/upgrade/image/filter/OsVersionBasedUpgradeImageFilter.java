@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image.filter;
 
+import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentOSToRedHatUpgradeImageFilter.isCentOSToRedHatUpgradableVersion;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +24,7 @@ public class OsVersionBasedUpgradeImageFilter implements UpgradeImageFilter {
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
         String currentOs = imageFilterParams.getCurrentImage().getOs();
         String currentOsType = imageFilterParams.getCurrentImage().getOsType();
-        List<Image> filteredImages = filterImages(imageFilterResult, currentOs, currentOsType);
+        List<Image> filteredImages = filterImages(imageFilterParams, imageFilterResult);
         LOGGER.debug("After the filtering {} image left with proper OS {} and OS type {}.", filteredImages.size(), currentOs, currentOsType);
         return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
     }
@@ -37,11 +39,11 @@ public class OsVersionBasedUpgradeImageFilter implements UpgradeImageFilter {
         return ORDER_NUMBER;
     }
 
-    private List<Image> filterImages(ImageFilterResult imageFilterResult, String currentOs, String currentOsType) {
+    private List<Image> filterImages(ImageFilterParams imageFilterParams, ImageFilterResult imageFilterResult) {
         return imageFilterResult.getImages()
                 .stream()
-                .filter(image -> isOsVersionsMatch(currentOs, currentOsType, image)
-                        || CentOSToRedHatUpgradeImageFilter.isCentOSToRedhatUpgrade(currentOs, currentOsType, image))
+                .filter(image -> isOsVersionsMatch(imageFilterParams.getCurrentImage().getOs(), imageFilterParams.getCurrentImage().getOsType(), image)
+                        || isCentOSToRedHatUpgradableVersion(imageFilterParams.getCurrentImage(), image))
                 .collect(Collectors.toList());
     }
 
