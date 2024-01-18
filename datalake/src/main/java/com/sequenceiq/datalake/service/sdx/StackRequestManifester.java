@@ -52,6 +52,7 @@ import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.MonitoringRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
+import com.sequenceiq.common.api.telemetry.request.WorkloadAnalyticsRequest;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.MonitoringResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
@@ -311,6 +312,11 @@ public class StackRequestManifester {
                 }
                 addAzureIdbrokerMsiToTelemetry(fluentAttributes, stackV4Request);
                 telemetryRequest.setFluentAttributes(fluentAttributes);
+            }
+            if (envTelemetry.getWorkloadAnalytics() != null && envTelemetry.getWorkloadAnalytics().getAttributes() != null) {
+                WorkloadAnalyticsRequest workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
+                workloadAnalyticsRequest.setAttributes(envTelemetry.getWorkloadAnalytics().getAttributes());
+                telemetryRequest.setWorkloadAnalytics(workloadAnalyticsRequest);
             }
             stackV4Request.setTelemetry(telemetryRequest);
         }

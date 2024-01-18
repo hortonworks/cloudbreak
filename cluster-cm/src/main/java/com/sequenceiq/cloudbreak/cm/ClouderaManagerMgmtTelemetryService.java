@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cm.util.ConfigUtils.makeApiConfigList;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS_NATIVE_GOV;
 import static java.util.stream.Collectors.joining;
 
 import java.util.ArrayList;
@@ -87,8 +88,6 @@ public class ClouderaManagerMgmtTelemetryService {
 
     private static final String DATABUS_HEADER_DATALAKE_CRN = "databus.header.datalake.crn";
 
-    private static final String DATABUS_HEADER_DATALAKE_NAME = "databus.header.datalake.name";
-
     private static final String DATABUS_HEADER_DATAHUB_CRN = "databus.header.datahub.crn";
 
     private static final String DATABUS_HEADER_DATAHUB_NAME = "databus.header.datahub.name";
@@ -100,6 +99,12 @@ public class ClouderaManagerMgmtTelemetryService {
     private static final String DATABUS_HEADER_SDX_ID = "databus.header.sdx.id";
 
     private static final String DATABUS_HEADER_SDX_NAME = "databus.header.sdx.name";
+
+    private static final String TELEMETRY_CONFIG_EXTRACTOR_METRIC_ENABLED = "extractor.metric.enabled";
+
+    private static final String TELEMETRY_CONFIG_EXTRACTOR_EVENT_ENABLED = "extractor.event.enabled";
+
+    private static final String TELEMETRY_CONFIG_EXTRACTOR_HMS_METADATA_ENABLED = "extractor.hms.metadata.enabled";
 
     private static final String TELEMETRY_WA_CLUSTER_TYPE_HEADER = "cluster.type";
 
@@ -135,7 +140,7 @@ public class ClouderaManagerMgmtTelemetryService {
 
     public void setupTelemetryRole(final StackDtoDelegate stack, final ApiClient client, final ApiHostRef cmHostRef,
             final ApiRoleList mgmtRoles, final Telemetry telemetry, String sdxStackCrn) throws ApiException {
-        if (isWorkflowAnalyticsEnabled(stack, telemetry)) {
+        if (isAnalyticsEnabled(stack, telemetry)) {
             WorkloadAnalytics workloadAnalytics = telemetry.getWorkloadAnalytics();
             String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
             boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(accountId);
@@ -166,7 +171,7 @@ public class ClouderaManagerMgmtTelemetryService {
     public void updateTelemetryConfigs(final StackDtoDelegate stack, final ApiClient client,
             final Telemetry telemetry, final String sdxContextName,
             final String sdxStackCrn, final ProxyConfig proxyConfig) throws ApiException {
-        if (isWorkflowAnalyticsEnabled(stack, telemetry)) {
+        if (isAnalyticsEnabled(stack, telemetry)) {
             MgmtRoleConfigGroupsResourceApi mgmtRoleConfigGroupsResourceApi = clouderaManagerApiFactory.getMgmtRoleConfigGroupsResourceApi(client);
             ApiConfigList configList = buildTelemetryConfigList(stack, telemetry.getWorkloadAnalytics(),
                     sdxContextName, sdxStackCrn, proxyConfig);
@@ -212,8 +217,15 @@ public class ClouderaManagerMgmtTelemetryService {
             String sdxCrn, ProxyConfig proxyConfig) {
         final Map<String, String> configsToUpdate = new HashMap<>();
         Map<String, String> telemetrySafetyValveMap = new HashMap<>();
-        telemetrySafetyValveMap.put(TELEMETRY_WA_CLUSTER_TYPE_HEADER,
-                TELEMETRY_WA_DEFAULT_CLUSTER_TYPE);
+        if (stack != null && stack.getType() == StackType.DATALAKE) {
+            telemetrySafetyValveMap.put(TELEMETRY_WA_CLUSTER_TYPE_HEADER,
+                    TELEMETRY_WA_DEFAULT_CLUSTER_TYPE + "_RUNTIME");
+        } else {
+            telemetrySafetyValveMap.put(TELEMETRY_WA_CLUSTER_TYPE_HEADER,
+                    TELEMETRY_WA_DEFAULT_CLUSTER_TYPE);
+            // the HMS metadata extractor is true by default in the Observability, but this make impact on the DHs performance therefore we should disable it.
+            telemetrySafetyValveMap.put(TELEMETRY_CONFIG_EXTRACTOR_HMS_METADATA_ENABLED, "false");
+        }
         enrichWithEnvironmentMetadata(sdxContextName, sdxCrn, stack, wa, telemetrySafetyValveMap);
         telemetrySafetyValveMap.put(TELEMETRY_UPLOAD_LOGS, "true");
         configsToUpdate.put(TELEMETRY_SAFETY_VALVE, createStringFromSafetyValveMap(telemetrySafetyValveMap));
@@ -253,8 +265,11 @@ public class ClouderaManagerMgmtTelemetryService {
 
         String sdxName = getSdxName(stack, sdxContextName);
         String sdxId = getSdxId(sdxCrn, sdxName);
+
         telemetrySafetyValveMap.put(DATABUS_HEADER_SDX_NAME, sdxName);
         telemetrySafetyValveMap.put(DATABUS_HEADER_SDX_ID, sdxId);
+
+        addDatalakeSpecificValues(stack, telemetrySafetyValveMap);
 
         addStackMetadata(stack, telemetrySafetyValveMap);
         addWorkloadAnalyticsAttributes(workloadAnalytics, telemetrySafetyValveMap);
@@ -312,13 +327,27 @@ public class ClouderaManagerMgmtTelemetryService {
                 .collect(joining("\n"));
     }
 
-    private boolean isWorkflowAnalyticsEnabled(StackDtoDelegate stack, Telemetry telemetry) {
+    private boolean isAnalyticsEnabled(StackDtoDelegate stack, Telemetry telemetry) {
         return telemetry != null
                 && telemetry.getWorkloadAnalytics() != null
-                && !StackType.DATALAKE.equals(stack.getType());
+                && !isGovCloud(stack);
     }
 
     private boolean isMonitoringSupported(Telemetry telemetry) {
         return telemetry.isComputeMonitoringEnabled() && telemetry.isMonitoringFeatureEnabled();
     }
+
+    private void addDatalakeSpecificValues(StackDtoDelegate stack, Map<String, String> telemetrySafetyValveMap) {
+        if (stack != null && stack.getType() == StackType.DATALAKE) {
+            telemetrySafetyValveMap.put(TELEMETRY_CONFIG_EXTRACTOR_METRIC_ENABLED, "false");
+            telemetrySafetyValveMap.put(TELEMETRY_CONFIG_EXTRACTOR_EVENT_ENABLED, "false");
+        }
+    }
+
+    private boolean isGovCloud(StackDtoDelegate stack) {
+        return stack.getPlatformVariant() != null
+                && !stack.getPlatformVariant().equalsIgnoreCase("govCloud")
+                && !stack.getPlatformVariant().equalsIgnoreCase(AWS_NATIVE_GOV);
+    }
+
 }
