@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -30,6 +31,17 @@ public class StackTest {
 
         assertEquals(4, stack.getInstanceGroups().size());
         assertEquals("gateway", stack.getGatewayHostGroup().get().getGroupName());
+    }
+
+    @Test
+    public void testPopulateStackIdForComponents() {
+        Stack stack = new Stack();
+        Long stackId = 100L;
+        stack.setId(stackId);
+        Set<Component> components = Set.of(new Component(), new Component());
+        stack.getComponents().addAll(components);
+        stack.populateStackIdForComponents();
+        stack.getComponents().forEach(component -> assertEquals(stackId, component.getStackId()));
     }
 
 }

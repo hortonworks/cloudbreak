@@ -219,6 +219,8 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
             stackTemplate = stackTemplateService.pureSave(stackTemplate);
 
+            stackTemplate.populateStackIdForComponents();
+
             componentConfigProviderService.store(new ArrayList<>(stackTemplate.getComponents()));
 
             if (cluster != null) {

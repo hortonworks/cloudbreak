@@ -285,6 +285,7 @@ class StackServiceTest {
         assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, null)))
                 .hasCause(imageNotFound);
         verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
+        verify(stack).populateStackIdForComponents();
     }
 
     @Test
@@ -312,6 +313,7 @@ class StackServiceTest {
 
         verify(stack).setStackVersion(stackVersion);
         verify(stackRepository, times(2)).save(stack);
+        verify(stack).populateStackIdForComponents();
         assertEquals(calculatedDbVersion, database.getExternalDatabaseEngineVersion());
     }
 
@@ -344,6 +346,7 @@ class StackServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, databaseRequest));
 
         verify(stack).setStackVersion(stackVersion);
+        verify(stack).populateStackIdForComponents();
         verify(stackRepository, times(2)).save(stack);
         assertEquals(calculatedDbVersion, database.getExternalDatabaseEngineVersion());
     }
@@ -377,6 +380,7 @@ class StackServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, databaseRequest));
 
         verify(stack).setStackVersion(stackVersion);
+        verify(stack).populateStackIdForComponents();
         verify(stackRepository, times(2)).save(stack);
         assertEquals(calculatedDbVersion, database.getExternalDatabaseEngineVersion());
     }
@@ -406,6 +410,7 @@ class StackServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, null));
 
         verify(stack).setStackVersion(stackVersion);
+        verify(stack).populateStackIdForComponents();
         verify(stackRepository, times(2)).save(stack);
         assertEquals(calculatedDbVersion, database.getExternalDatabaseEngineVersion());
     }
@@ -430,6 +435,7 @@ class StackServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(stack, statedImage, user, workspace, null));
 
         verify(stack, never()).setStackVersion(any());
+        verify(stack).populateStackIdForComponents();
         verify(stackRepository, times(2)).save(stack);
         verify(databaseService, never()).save(any());
     }
@@ -448,6 +454,7 @@ class StackServiceTest {
                     () -> underTest.create(stack, statedImage, user, workspace, null));
         } finally {
             verify(stack, times(1)).setPlatformVariant(eq(VARIANT_VALUE));
+            verify(stack).populateStackIdForComponents();
             verify(stackUpdater, times(0)).updateStackStatus(eq(Long.MAX_VALUE), eq(DetailedStackStatus.PROVISION_FAILED), anyString());
         }
     }
@@ -468,6 +475,7 @@ class StackServiceTest {
 
         verify(connector, never()).checkAndGetPlatformVariant(any(Stack.class));
         verify(stack, never()).setPlatformVariant(anyString());
+        verify(stack).populateStackIdForComponents();
         verify(openSshPublicKeyValidator, never()).validate(anyString(), anyBoolean());
     }
 
@@ -494,6 +502,7 @@ class StackServiceTest {
 
         verify(connector, never()).checkAndGetPlatformVariant(any(Stack.class));
         verify(stack, never()).setPlatformVariant(anyString());
+        verify(stack).populateStackIdForComponents();
         verify(openSshPublicKeyValidator).validate(PUBLIC_KEY, fipsEnabledExpected);
     }
 

@@ -129,7 +129,7 @@ public class ComponentConfigProviderService {
     public Component store(Component component) {
         LOGGER.debug("Component is going to be saved: {}", component);
         Component ret = componentRepository.save(component);
-        LOGGER.debug("Component saved: stackId: {}, component: {}", ret.getStack().getId(), ret);
+        LOGGER.debug("Component saved: stackId: {}, component: {}", ret.getStackId(), ret);
         return ret;
     }
 
@@ -157,7 +157,7 @@ public class ComponentConfigProviderService {
     }
 
     public void replaceImageComponentWithNew(Component component) {
-        Component componentEntity = componentRepository.findComponentByStackIdComponentTypeName(component.getStack().getId(), component.getComponentType(),
+        Component componentEntity = componentRepository.findComponentByStackIdComponentTypeName(component.getStackId(), component.getComponentType(),
                 component.getName()).orElseThrow(NotFoundException.notFound("component", component.getName()));
         componentEntity.setAttributes(component.getAttributes());
         componentEntity.setName(component.getName());

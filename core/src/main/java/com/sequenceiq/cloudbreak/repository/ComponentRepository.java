@@ -21,8 +21,7 @@ public interface ComponentRepository extends RevisionRepository<Component, Long,
 
     @Query("SELECT cv " +
             "FROM Component cv " +
-            "LEFT JOIN cv.stack s " +
-            "WHERE s.id = :stackId " +
+            "WHERE cv.stackId = :stackId " +
             "AND cv.componentType = :componentType " +
             "AND cv.name = :name")
     Optional<Component> findComponentByStackIdComponentTypeName(@Param("stackId") Long stackId, @Param("componentType") ComponentType componentType,
@@ -30,14 +29,12 @@ public interface ComponentRepository extends RevisionRepository<Component, Long,
 
     @Query("SELECT cv " +
             "FROM Component cv " +
-            "LEFT JOIN cv.stack s " +
-            "WHERE s.id = :stackId")
+            "WHERE cv.stackId = :stackId")
     Set<Component> findComponentByStackId(@Param("stackId") Long stackId);
 
     @Query("SELECT cv " +
             "FROM Component cv " +
-            "LEFT JOIN cv.stack s " +
-            "WHERE s.id = :stackId " +
+            "WHERE cv.stackId = :stackId " +
             "AND cv.componentType in :componentTypes")
     Set<Component> findComponentByStackIdWithType(@Param("stackId") Long stackId, @Param("componentTypes") Set<ComponentType> componentTypes);
 }

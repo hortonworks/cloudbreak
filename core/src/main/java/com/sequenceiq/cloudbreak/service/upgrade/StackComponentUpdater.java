@@ -54,7 +54,7 @@ public class StackComponentUpdater {
     }
 
     private boolean isStackIdEqual(Component component, Component targetComponent) {
-        return targetComponent.getStack().getId().equals(component.getStack().getId());
+        return targetComponent.getStackId().equals(component.getStackId());
     }
 
     private boolean isNameEqual(Component component, Component targetComponent) {

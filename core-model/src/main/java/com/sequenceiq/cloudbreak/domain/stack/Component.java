@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.domain.stack;
 
 import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
-import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -9,7 +8,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 
 import org.hibernate.envers.AuditTable;
@@ -41,9 +39,8 @@ public class Component implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private Json attributes;
 
-    @ManyToOne
-    @Audited(targetAuditMode = NOT_AUDITED)
-    private Stack stack;
+    @Column(name = "stack_id")
+    private Long stackId;
 
     public Component() {
 
@@ -53,7 +50,9 @@ public class Component implements ProvisionEntity {
         this.componentType = componentType;
         this.name = name;
         this.attributes = attributes;
-        this.stack = stack;
+        if (stack != null) {
+            this.stackId = stack.getId();
+        }
     }
 
     public Long getId() {
@@ -88,12 +87,12 @@ public class Component implements ProvisionEntity {
         this.attributes = attributes;
     }
 
-    public Stack getStack() {
-        return stack;
+    public Long getStackId() {
+        return stackId;
     }
 
-    public void setStack(Stack stack) {
-        this.stack = stack;
+    public void setStackId(Long stackId) {
+        this.stackId = stackId;
     }
 
     @Override
@@ -103,6 +102,7 @@ public class Component implements ProvisionEntity {
                 + ", componentType=" + componentType
                 + ", name='" + name + '\''
                 + ", attributes=" + anonymize(attributes.toString())
+                + ", stackId=" + stackId
                 + '}';
     }
 }

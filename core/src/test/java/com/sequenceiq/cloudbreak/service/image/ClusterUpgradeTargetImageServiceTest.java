@@ -83,7 +83,7 @@ public class ClusterUpgradeTargetImageServiceTest {
         Component targetComponent = targetComponentCaptor.getValue();
         assertEquals(ComponentType.IMAGE, targetComponent.getComponentType());
         assertEquals(TARGET_IMAGE, targetComponent.getName());
-        assertEquals(stack, targetComponent.getStack());
+        assertEquals(stack.getId(), targetComponent.getStackId());
         assertEquals(targetModelImage.getImageId(), targetComponent.getAttributes().get(Image.class).getImageId());
     }
 
@@ -111,7 +111,7 @@ public class ClusterUpgradeTargetImageServiceTest {
         Component targetComponent = targetComponentCaptor.getValue();
         assertEquals(ComponentType.IMAGE, targetComponent.getComponentType());
         assertEquals(TARGET_IMAGE, targetComponent.getName());
-        assertEquals(stack, targetComponent.getStack());
+        assertEquals(stack.getId(), targetComponent.getStackId());
         assertEquals(targetModelImage.getImageId(), targetComponent.getAttributes().get(Image.class).getImageId());
     }
 
@@ -140,7 +140,7 @@ public class ClusterUpgradeTargetImageServiceTest {
         Component targetComponent = targetComponentCaptor.getValue();
         assertEquals(ComponentType.IMAGE, targetComponent.getComponentType());
         assertEquals(TARGET_IMAGE, targetComponent.getName());
-        assertEquals(stack, targetComponent.getStack());
+        assertEquals(stack.getId(), targetComponent.getStackId());
         assertEquals(targetModelImage.getImageId(), targetComponent.getAttributes().get(Image.class).getImageId());
     }
 

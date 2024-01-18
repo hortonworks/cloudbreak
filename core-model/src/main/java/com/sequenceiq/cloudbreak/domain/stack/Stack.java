@@ -47,6 +47,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import jakarta.validation.constraints.NotNull;
@@ -182,7 +183,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<InstanceGroup> instanceGroups = new HashSet<>();
 
-    @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Transient
     private Set<Component> components = new HashSet<>();
 
     @Version
@@ -831,6 +832,12 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return gatewayCount > 1;
     }
 
+    public void populateStackIdForComponents() {
+        components.stream().forEach(component -> {
+            component.setStackId(id);
+        });
+    }
+
     public Long getCreated() {
         return created;
     }
@@ -841,10 +848,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
 
     public Set<Component> getComponents() {
         return components;
-    }
-
-    public void setComponents(Set<Component> components) {
-        this.components = components;
     }
 
     public boolean isInstanceGroupsSpecified() {

@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 
@@ -30,7 +31,7 @@ public class ClusterComponentUpdater {
 
     public void updateClusterComponentsByStackId(Stack stack, Set<Component> targetComponents, boolean removeUnused) {
         Set<ClusterComponent> clusterComponentsFromDb = clusterComponentConfigProvider.getComponentsByClusterId(stack.getCluster().getId());
-        targetComponents.forEach(targetComponent -> updateComponentFromDbAttributeField(clusterComponentsFromDb, targetComponent));
+        targetComponents.forEach(targetComponent -> updateComponentFromDbAttributeField(clusterComponentsFromDb, targetComponent, stack.getCluster()));
         clusterComponentConfigProvider.store(clusterComponentsFromDb);
         if (removeUnused) {
             removeUnusedComponents(targetComponents, clusterComponentsFromDb);
@@ -42,25 +43,25 @@ public class ClusterComponentUpdater {
         return component -> targetComponents.stream().noneMatch(componentFromImage -> componentFromImage.getName().contains(component.getName()));
     }
 
-    private void updateComponentFromDbAttributeField(Set<ClusterComponent> clusterComponentsFromDb, Component targetComponent) {
+    private void updateComponentFromDbAttributeField(Set<ClusterComponent> clusterComponentsFromDb, Component targetComponent, Cluster targetCluster) {
         Optional<ClusterComponent> matchingComponentFromDb = clusterComponentsFromDb.stream()
-                .filter(clusterComponent -> isMatchingComponent(targetComponent, clusterComponent))
+                .filter(clusterComponent -> isMatchingComponent(targetComponent, clusterComponent, targetCluster))
                 .findFirst();
         matchingComponentFromDb.ifPresent(clusterComponentFromDb -> clusterComponentFromDb.setAttributes(targetComponent.getAttributes()));
     }
 
-    private boolean isMatchingComponent(Component component, ClusterComponent clusterComponent) {
+    private boolean isMatchingComponent(Component component, ClusterComponent clusterComponent, Cluster cluster) {
         return isSameType(component, clusterComponent) &&
                 hasSameNameOrCdhComponent(component, clusterComponent) &&
-                isIdEqual(component, clusterComponent);
+                isIdEqual(clusterComponent, cluster);
     }
 
     private boolean hasSameNameOrCdhComponent(Component component, ClusterComponent clusterComponent) {
         return isNameEqual(component, clusterComponent) || isCdhComponent(component, clusterComponent);
     }
 
-    private boolean isIdEqual(Component component, ClusterComponent clusterComponent) {
-        return clusterComponent.getCluster().getId().equals(component.getStack().getClusterId());
+    private boolean isIdEqual(ClusterComponent clusterComponent, Cluster cluster) {
+        return clusterComponent.getCluster().getId().equals(cluster.getId());
     }
 
     private boolean isCdhComponent(Component component, ClusterComponent clusterComponent) {

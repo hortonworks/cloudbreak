@@ -583,6 +583,8 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
         Stack savedStack = measure(() -> save(stack), LOGGER, "Stackrepository save took {} ms for stack {}", stackName);
 
+        savedStack.populateStackIdForComponents();
+
         MDCBuilder.buildMdcContext(savedStack);
 
         measure(() -> addCloudbreakDetailsForStack(savedStack),
