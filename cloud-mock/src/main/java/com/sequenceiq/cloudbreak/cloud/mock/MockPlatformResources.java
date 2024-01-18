@@ -318,7 +318,8 @@ public class MockPlatformResources implements PlatformResources {
     public CloudDatabaseServerSslCertificates databaseServerGeneralSslRootCertificates(CloudCredential cloudCredential, Region region) {
         String[] certificates = mockUrlFactory.get("/db/certificates").get(String[].class);
         Set<CloudDatabaseServerSslCertificate> setOfCertificates = Stream.of(certificates).map(
-                certificate -> new CloudDatabaseServerSslCertificate(ROOT, certificate)).collect(Collectors.toSet());
+                certificate -> new CloudDatabaseServerSslCertificate(ROOT, certificate))
+                    .collect(Collectors.toSet());
 
         return new CloudDatabaseServerSslCertificates(setOfCertificates);
     }

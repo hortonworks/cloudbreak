@@ -197,7 +197,15 @@ public class DatabaseServerSslCertificateConfig {
                 .toLowerCase(Locale.ROOT).replace(DEFAULT_REGION, "");
         validateCloudProviderIdentifierFormat(cloudKey, cloudProviderIdentifier);
         X509Certificate x509Cert = extractX509Certificate(cloudKey, certPem);
-        return new SslCertificateEntry(version, cloudKey, cloudProviderIdentifier, cloudPlatform, certPem, x509Cert, content.getFingerprint(),
+        Long expirationDate = x509Cert.getNotAfter().getTime();
+        return new SslCertificateEntry(version,
+                cloudKey,
+                cloudProviderIdentifier,
+                cloudPlatform,
+                certPem,
+                x509Cert,
+                content.getFingerprint(),
+                expirationDate,
                 content.isDeprecated());
     }
 

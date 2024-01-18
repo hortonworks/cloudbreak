@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.sql;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import jakarta.inject.Inject;
 
@@ -44,9 +47,21 @@ public class GcpDatabaseServerCertificateService extends GcpDatabaseServerBaseSe
         } else {
             LOGGER.info("Returned GCP Database cert {}", serverCaCert.getCommonName());
             String certId = String.format("%s_%s", serverCaCert.getCreateTime(), serverCaCert.getExpirationTime());
-            result = new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, certId, serverCaCert.getCert());
+
+            result = new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, certId, serverCaCert.getCert(),
+                    getExpirationDate(serverCaCert.getExpirationTime()));
         }
         return result;
+    }
+
+    private long getExpirationDate(String expirationTime) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+        try {
+            return simpleDateFormat.parse(expirationTime).getTime();
+        } catch (ParseException e) {
+            LOGGER.warn("We could not parse {} date which came from google so setting that for now.", expirationTime);
+            return new Date().getTime();
+        }
     }
 
 }

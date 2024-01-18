@@ -88,8 +88,16 @@ public final class ModelDescriptions {
                 "Highest version number of the SSL certificate available for the database server; does not necessarily equal the active version";
         public static final String SSL_CERTIFICATE_ACTIVE_CLOUD_PROVIDER_IDENTIFIER =
                 "Cloud provider specific identifier of the SSL certificate currently active for the database server";
+
         public static final String SSL_CERTIFICATE_STATUS =
                 "Current status of the set of relevant SSL certificates for the database server";
+
+        public static final String SSL_CERTIFICATE_EXPIRATION_DATE_AS_LONG =
+                "Expiration date of the the ssl cert as long.";
+
+        public static final String SSL_CERTIFICATE_EXPIRATION_DATE_AS_STRING =
+                "Expiration date of the the ssl cert as date string.";
+
         public static final String TAGS = "UserDefined tags for the DB";
         public static final String MAJOR_VERSION = "Major version of the database server engine";
         public static final String CONNECTION_NAME_FORMAT = "The format of the username for the database connection";

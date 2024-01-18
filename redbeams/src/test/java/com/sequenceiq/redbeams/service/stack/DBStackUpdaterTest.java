@@ -1,5 +1,6 @@
 package com.sequenceiq.redbeams.service.stack;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -15,6 +16,8 @@ import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -49,6 +52,9 @@ public class DBStackUpdaterTest {
 
     @Mock
     private SslConfigService sslConfigService;
+
+    @Captor
+    private ArgumentCaptor<SslConfig> sslConfigArgumentCaptor;
 
     @Test
     public void testUpdateSslConfigWhenDBStackExistsEnabledAndActiveCertFound() {
@@ -85,7 +91,13 @@ public class DBStackUpdaterTest {
         Assertions.assertEquals("cloudPlatform", sslConfig.getSslCertificateActiveCloudProviderIdentifier());
         Assertions.assertEquals(SslCertificateType.CLOUD_PROVIDER_OWNED, sslConfig.getSslCertificateType());
 
-        verify(sslConfigService).save(sslConfig);
+        verify(sslConfigService).save(sslConfigArgumentCaptor.capture());
+        assertThat(sslConfigArgumentCaptor.getValue().getSslCertificateExpirationDate())
+                .isEqualTo(certificateEntries.stream()
+                        .filter(e -> e.version() == sslConfigArgumentCaptor.getValue().getSslCertificateActiveVersion())
+                        .findFirst()
+                        .get()
+                        .expirationDate());
     }
 
     @Test

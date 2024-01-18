@@ -3,6 +3,7 @@ package com.sequenceiq.redbeams.configuration;
 import static java.util.Objects.requireNonNull;
 
 import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.util.Objects;
 
 public record SslCertificateEntry(
@@ -13,16 +14,19 @@ public record SslCertificateEntry(
         String certPem,
         X509Certificate x509Cert,
         String fingerprint,
+        long expirationDate,
         boolean deprecated
 ) {
 
+    //Only for tests
     public SslCertificateEntry(int version,
             String cloudKey,
             String cloudProviderIdentifier,
             String cloudPlatform,
             String certPem,
             X509Certificate x509Cert) {
-        this(version, cloudKey, cloudProviderIdentifier, cloudPlatform, certPem, x509Cert, null, false);
+        this(version, cloudKey, cloudProviderIdentifier, cloudPlatform, certPem, x509Cert, null,
+                new Date().getTime(), false);
     }
 
     //CHECKSTYLE_CHECK:OFF ExecutableStatementCount
@@ -33,6 +37,7 @@ public record SslCertificateEntry(
             String certPem,
             X509Certificate x509Cert,
             String fingerprint,
+            long expirationDate,
             boolean deprecated) {
         this.version = version;
         this.cloudKey = requireNonNull(cloudKey);
@@ -41,6 +46,7 @@ public record SslCertificateEntry(
         this.x509Cert = requireNonNull(x509Cert);
         this.cloudPlatform = requireNonNull(cloudPlatform);
         this.fingerprint = fingerprint;
+        this.expirationDate = expirationDate;
         this.deprecated = deprecated;
     }
     //CHECKSTYLE_CHECK:ON ExecutableStatementCount
@@ -83,6 +89,7 @@ public record SslCertificateEntry(
                 ", certPem='" + certPem + '\'' +
                 ", x509Cert=" + x509Cert +
                 ", fingerprint='" + fingerprint + '\'' +
+                ", expirationDate=" + expirationDate +
                 ", deprecated=" + deprecated +
                 '}';
     }

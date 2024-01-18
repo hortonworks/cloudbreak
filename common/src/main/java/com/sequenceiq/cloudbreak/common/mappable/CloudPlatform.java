@@ -32,4 +32,8 @@ public enum CloudPlatform {
     public String getDislayName() {
         return DISPLAY_NAME.getOrDefault(this, name());
     }
+
+    public static boolean azureOrAws(String cloudPlatform) {
+        return AWS.equalsIgnoreCase(cloudPlatform) || AZURE.equalsIgnoreCase(cloudPlatform);
+    }
 }

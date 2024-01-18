@@ -71,7 +71,8 @@ public class AwsRdsStatusLookupService {
 
         return describeDBInstancesResponse == null ? null : describeDBInstancesResponse.dbInstances()
                 .stream()
-                .map(i -> new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, i.caCertificateIdentifier()))
+                .map(i -> new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT,
+                        i.caCertificateIdentifier()))
                 .findFirst()
                 .get();
     }

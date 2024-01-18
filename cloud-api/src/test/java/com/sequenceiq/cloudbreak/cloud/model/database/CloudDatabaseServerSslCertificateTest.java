@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServer
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.Date;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -14,6 +16,8 @@ class CloudDatabaseServerSslCertificateTest {
     private static final String CERTIFICATE_IDENTIFIER = "mycert";
 
     private static final String CERTIFICATE_PEM = "pem";
+
+    private static Date date = new Date();
 
     static Object[][] constructorTestWhenNPEDataProvider() {
         return new Object[][]{
@@ -27,18 +31,22 @@ class CloudDatabaseServerSslCertificateTest {
     @MethodSource("constructorTestWhenNPEDataProvider")
     void constructorTestWhenNPE(String testCaseName, CloudDatabaseServerSslCertificateType certificateType, String certificateIdentifier) {
         assertThrows(NullPointerException.class, () -> new CloudDatabaseServerSslCertificate(certificateType, certificateIdentifier));
-        assertThrows(NullPointerException.class, () -> new CloudDatabaseServerSslCertificate(certificateType, certificateIdentifier, CERTIFICATE_PEM));
+        assertThrows(NullPointerException.class, () -> new CloudDatabaseServerSslCertificate(certificateType, certificateIdentifier,
+                CERTIFICATE_PEM, date.getTime()));
         assertThrows(NullPointerException.class, () -> new CloudDatabaseServerSslCertificate(certificateType, certificateIdentifier, true));
-        assertThrows(NullPointerException.class, () -> new CloudDatabaseServerSslCertificate(certificateType, certificateIdentifier, CERTIFICATE_PEM, true));
+        assertThrows(NullPointerException.class, () -> new CloudDatabaseServerSslCertificate(certificateType, certificateIdentifier,
+                CERTIFICATE_PEM, date.getTime(), true));
     }
 
     @ParameterizedTest(name = "certificateIdentifier={0}")
     @ValueSource(strings = {"", " "})
     void constructorTestWhenBlankCertificateIdentifier(String certificateIdentifier) {
         assertThrows(IllegalArgumentException.class, () -> new CloudDatabaseServerSslCertificate(ROOT, certificateIdentifier));
-        assertThrows(IllegalArgumentException.class, () -> new CloudDatabaseServerSslCertificate(ROOT, certificateIdentifier, CERTIFICATE_PEM));
+        assertThrows(IllegalArgumentException.class, () -> new CloudDatabaseServerSslCertificate(ROOT, certificateIdentifier,
+                CERTIFICATE_PEM, date.getTime()));
         assertThrows(IllegalArgumentException.class, () -> new CloudDatabaseServerSslCertificate(ROOT, certificateIdentifier, true));
-        assertThrows(IllegalArgumentException.class, () -> new CloudDatabaseServerSslCertificate(ROOT, certificateIdentifier, CERTIFICATE_PEM, true));
+        assertThrows(IllegalArgumentException.class, () -> new CloudDatabaseServerSslCertificate(ROOT, certificateIdentifier,
+                CERTIFICATE_PEM, date.getTime(),  true));
     }
 
     @Test
@@ -52,7 +60,7 @@ class CloudDatabaseServerSslCertificateTest {
         assertThat(sslCertificate.overridden()).isFalse();
 
         sslCertificate =
-                new CloudDatabaseServerSslCertificate(ROOT, CERTIFICATE_IDENTIFIER, CERTIFICATE_PEM);
+                new CloudDatabaseServerSslCertificate(ROOT, CERTIFICATE_IDENTIFIER, CERTIFICATE_PEM, date.getTime());
 
         assertThat(sslCertificate.certificateType()).isEqualTo(ROOT);
         assertThat(sslCertificate.certificateIdentifier()).isSameAs(CERTIFICATE_IDENTIFIER);
@@ -68,7 +76,7 @@ class CloudDatabaseServerSslCertificateTest {
         assertThat(sslCertificate.overridden()).isTrue();
 
         sslCertificate =
-                new CloudDatabaseServerSslCertificate(ROOT, CERTIFICATE_IDENTIFIER, CERTIFICATE_PEM, true);
+                new CloudDatabaseServerSslCertificate(ROOT, CERTIFICATE_IDENTIFIER, CERTIFICATE_PEM, date.getTime(), true);
 
         assertThat(sslCertificate.certificateType()).isEqualTo(ROOT);
         assertThat(sslCertificate.certificateIdentifier()).isSameAs(CERTIFICATE_IDENTIFIER);

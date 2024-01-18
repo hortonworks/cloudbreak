@@ -69,6 +69,7 @@ public class DatabaseServerSslCertificateSyncService {
         sslConfig.setSslCertificateActiveVersion(0);
         sslConfig.setSslCertificates(Collections.singleton(activeSslRootCertificate.certificate()));
         sslConfig.setSslCertificateActiveCloudProviderIdentifier(activeSslRootCertificate.certificateIdentifier());
+        sslConfig.setSslCertificateExpirationDate(activeSslRootCertificate.expirationDate());
         sslConfigService.save(sslConfig);
     }
 
@@ -113,6 +114,7 @@ public class DatabaseServerSslCertificateSyncService {
             sslCertificates = new HashSet<>(sslCertificates);
             sslCertificates.add(activeSslCertificatePem);
         }
+        sslConfig.setSslCertificateExpirationDate(activeSslCertificateEntry.expirationDate());
         sslConfig.setSslCertificates(sslCertificates);
     }
 

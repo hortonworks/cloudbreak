@@ -983,7 +983,9 @@ public class AwsPlatformResources implements PlatformResources {
         AmazonRdsClient rdsClient = getAmazonRdsClient(cloudCredential, region);
         List<Certificate> certificates = rdsClient.describeCertificates(DescribeCertificatesRequest.builder().build());
         Set<CloudDatabaseServerSslCertificate> sslCertificates = certificates.stream()
-                .map(cert -> new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, cert.certificateIdentifier(),
+                .map(cert -> new CloudDatabaseServerSslCertificate(
+                        CloudDatabaseServerSslCertificateType.ROOT,
+                        cert.certificateIdentifier(),
                         Boolean.TRUE.equals(cert.customerOverride())))
                 .collect(Collectors.toSet());
         return new CloudDatabaseServerSslCertificates(sslCertificates);

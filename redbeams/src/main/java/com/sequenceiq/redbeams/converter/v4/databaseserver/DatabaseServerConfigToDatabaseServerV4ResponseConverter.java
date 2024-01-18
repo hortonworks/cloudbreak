@@ -4,7 +4,10 @@ import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.Ss
 import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode.ENABLED;
 import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType.NONE;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,6 +26,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslConfigV4Response;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
+import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
@@ -30,6 +34,12 @@ import com.sequenceiq.redbeams.service.sslcertificate.SslConfigService;
 
 @Component
 public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
+
+    private static final int TEN_YEARS = 10;
+
+    private static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+
+    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat(DATE_PATTERN);
 
     @Inject
     private DatabaseServerSslCertificateConfig databaseServerSslCertificateConfig;
@@ -83,6 +93,13 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
                                 .orElse(databaseServerSslCertificateConfig.getLegacyCloudProviderIdentifierByCloudPlatformAndRegion(cloudPlatform, region)));
                 sslConfigV4Response.setSslCertificatesStatus(
                         databaseServerSslCertificateConfig.getSslCertificatesOutdated(cloudPlatform, region, sslConfig.getSslCertificates()));
+                Long sslCertificateExpirationDate = sslConfig.getSslCertificateExpirationDate();
+                if (sslCertificateExpirationDate != null) {
+                    fillupExpirationDate(sslConfigV4Response, sslCertificateExpirationDate);
+                } else if (!NONE.equals(sslConfig.getSslCertificateType())) {
+                    sslCertificateExpirationDate = updateEmptyExpirationDate(source, sslConfig, sslConfigV4Response);
+                    fillupExpirationDate(sslConfigV4Response, sslCertificateExpirationDate);
+                }
                 response.setSslConfig(sslConfigV4Response);
             }
         } else if (source.getHost() != null && source.getPort() != null) {
@@ -95,6 +112,33 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
         }
 
         return response;
+    }
+
+    private void fillupExpirationDate(SslConfigV4Response sslConfigV4Response, long sslCertificateExpirationDate) {
+        sslConfigV4Response.setSslCertificateExpirationDate(sslCertificateExpirationDate);
+        Date expirationDate = new Date(sslCertificateExpirationDate);
+        sslConfigV4Response.setSslCertificateExpirationDateAsDateString(SIMPLE_DATE_FORMAT.format(expirationDate));
+    }
+
+    private long updateEmptyExpirationDate(DatabaseServerConfig databaseServerConfig, SslConfig sslConfig, SslConfigV4Response sslConfigV4Response) {
+        long expirationedDate = 0L;
+        DBStack dbStack = databaseServerConfig.getDbStack().get();
+        if (CloudPlatform.azureOrAws(dbStack.getCloudPlatform())) {
+            SslCertificateEntry cert = databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndVersion(
+                    dbStack.getCloudPlatform(),
+                    dbStack.getRegion(),
+                    sslConfigV4Response.getSslCertificateActiveVersion()
+            );
+            expirationedDate = cert.expirationDate();
+        } else if (dbStack.getCloudPlatform().equalsIgnoreCase(CloudPlatform.GCP.name())) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(databaseServerConfig.getCreationDate() == null ? new Date() : new Date(databaseServerConfig.getCreationDate()));
+            cal.add(Calendar.YEAR, TEN_YEARS);
+            expirationedDate = cal.getTimeInMillis();
+        }
+        sslConfig.setSslCertificateExpirationDate(expirationedDate);
+        sslConfigService.save(sslConfig);
+        return expirationedDate;
     }
 
     private DatabasePropertiesV4Response createDatabaseProperties(DatabaseServerConfig source) {

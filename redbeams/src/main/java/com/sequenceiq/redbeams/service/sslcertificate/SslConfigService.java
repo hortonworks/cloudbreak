@@ -46,7 +46,6 @@ public class SslConfigService {
             String region = dbStack.getRegion();
             int maxVersion = databaseServerSslCertificateConfig.getMaxVersionByCloudPlatformAndRegion(cloudPlatform, region);
             sslConfig.setSslCertificateActiveVersion(maxVersion);
-
             int numberOfCerts = databaseServerSslCertificateConfig.getNumberOfCertsByCloudPlatformAndRegion(cloudPlatform, region);
             if (numberOfCerts != 0) {
                 Set<SslCertificateEntry> certsTemp =
@@ -66,6 +65,13 @@ public class SslConfigService {
                 sslConfig.setSslCertificates(certs);
                 String cloudProviderIdentifier = findAndValidateCertByVersion(cloudPlatform, region, maxVersion, certsTemp).cloudProviderIdentifier();
                 sslConfig.setSslCertificateActiveCloudProviderIdentifier(cloudProviderIdentifier);
+
+                SslCertificateEntry cert = databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndVersion(
+                    dbStack.getCloudPlatform(),
+                    dbStack.getRegion(),
+                    sslConfig.getSslCertificateActiveVersion()
+                );
+                sslConfig.setSslCertificateExpirationDate(cert.expirationDate());
             } else {
                 sslConfig.setSslCertificates(Collections.emptySet());
             }

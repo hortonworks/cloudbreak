@@ -49,6 +49,7 @@ public class DBStackUpdater {
                         .filter(sslCert -> sslCert.version() == activeVersion)
                         .findFirst()
                         .orElseThrow(NotFoundException.notFound(String.format("Active SSL cert cannot be found for %s", dbStack.getName())));
+                sslConf.setSslCertificateExpirationDate(activeSslCert.expirationDate());
                 sslConf.setSslCertificateActiveVersion(activeVersion);
                 sslConf.setSslCertificateActiveCloudProviderIdentifier(activeSslCert.cloudProviderIdentifier());
                 sslConfigService.save(sslConf);

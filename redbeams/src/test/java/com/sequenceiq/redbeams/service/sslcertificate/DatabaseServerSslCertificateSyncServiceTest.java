@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.security.cert.X509Certificate;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -200,13 +201,17 @@ class DatabaseServerSslCertificateSyncServiceTest {
         when(sslConfigService.fetchById(SSL_CONF_ID)).thenReturn(createSslConfig(SslCertificateType.CLOUD_PROVIDER_OWNED, null));
 
         setupCloudConnectorMock();
-        CloudDatabaseServerSslCertificate certificate = new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, CERT_ID_2, CERT_PEM);
+        CloudDatabaseServerSslCertificate certificate = new CloudDatabaseServerSslCertificate(
+                CloudDatabaseServerSslCertificateType.ROOT,
+                CERT_ID_2,
+                CERT_PEM,
+                new Date().getTime());
         when(resourceConnector.getDatabaseServerActiveSslRootCertificate(authenticatedContext, databaseStack)).thenReturn(certificate);
 
         underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
 
         verify(sslConfigService).save(sslConfigArgumentCaptor.capture());
-        verifySslConfigCaptured(0, Set.of(CERT_PEM));
+        verifySslConfigCaptured(0, Set.of(CERT_PEM), certificate.expirationDate());
     }
 
     @Test
@@ -245,16 +250,20 @@ class DatabaseServerSslCertificateSyncServiceTest {
         underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
 
         verify(sslConfigService).save(sslConfigArgumentCaptor.capture());
-        verifySslConfigCaptured(null, Set.of());
+        verifySslConfigCaptured(null, Set.of(), null);
     }
 
-    private void verifySslConfigCaptured(Integer sslCertificateVersionExpected, Set<String> sslCertificatesExpected) {
+    private void verifySslConfigCaptured(Integer sslCertificateVersionExpected, Set<String> sslCertificatesExpected,
+        Long expirationDate) {
         SslConfig sslConfigCaptured = sslConfigArgumentCaptor.getValue();
         assertThat(sslConfigCaptured).isNotNull();
         assertThat(sslConfigCaptured.getSslCertificateType()).isEqualTo(SslCertificateType.CLOUD_PROVIDER_OWNED);
         assertThat(sslConfigCaptured.getSslCertificateActiveCloudProviderIdentifier()).isEqualTo(CERT_ID_2);
         assertThat(sslConfigCaptured.getSslCertificateActiveVersion()).isEqualTo(sslCertificateVersionExpected);
         assertThat(sslConfigCaptured.getSslCertificates()).isEqualTo(sslCertificatesExpected);
+        if (expirationDate != null) {
+            assertThat(sslConfigCaptured.getSslCertificateExpirationDate()).isEqualTo(expirationDate);
+        }
     }
 
     @ParameterizedTest(name = "sslCertificateActiveCloudProviderIdentifier={0}")
@@ -278,7 +287,7 @@ class DatabaseServerSslCertificateSyncServiceTest {
         underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
 
         verify(sslConfigService).save(sslConfigArgumentCaptor.capture());
-        verifySslConfigCaptured(CERT_VERSION_OTHER, Set.of(CERT_PEM_OTHER));
+        verifySslConfigCaptured(CERT_VERSION_OTHER, Set.of(CERT_PEM_OTHER), null);
     }
 
     @Test
@@ -352,7 +361,7 @@ class DatabaseServerSslCertificateSyncServiceTest {
         underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
 
         verify(sslConfigService).save(sslConfigArgumentCaptor.capture());
-        verifySslConfigCaptured(CERT_VERSION, Set.of(CERT_PEM));
+        verifySslConfigCaptured(CERT_VERSION, Set.of(CERT_PEM), cert.expirationDate());
     }
 
     @ParameterizedTest(name = "sslCertificateActiveCloudProviderIdentifier={0}")
@@ -376,7 +385,7 @@ class DatabaseServerSslCertificateSyncServiceTest {
         underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
 
         verify(sslConfigService).save(sslConfigArgumentCaptor.capture());
-        verifySslConfigCaptured(CERT_VERSION, Set.of(CERT_PEM));
+        verifySslConfigCaptured(CERT_VERSION, Set.of(CERT_PEM), cert.expirationDate());
     }
 
     @ParameterizedTest(name = "sslCertificateActiveCloudProviderIdentifier={0}")
@@ -400,7 +409,7 @@ class DatabaseServerSslCertificateSyncServiceTest {
         underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
 
         verify(sslConfigService).save(sslConfigArgumentCaptor.capture());
-        verifySslConfigCaptured(CERT_VERSION, Set.of(CERT_PEM));
+        verifySslConfigCaptured(CERT_VERSION, Set.of(CERT_PEM), null);
     }
 
     @ParameterizedTest(name = "sslCertificateActiveCloudProviderIdentifier={0}")
@@ -425,7 +434,7 @@ class DatabaseServerSslCertificateSyncServiceTest {
         underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
 
         verify(sslConfigService).save(sslConfigArgumentCaptor.capture());
-        verifySslConfigCaptured(CERT_VERSION, Set.of(CERT_PEM, CERT_PEM_OTHER));
+        verifySslConfigCaptured(CERT_VERSION, Set.of(CERT_PEM, CERT_PEM_OTHER), null);
     }
 
     @ParameterizedTest(name = "sslCertificateActiveCloudProviderIdentifier={0}")
@@ -449,7 +458,7 @@ class DatabaseServerSslCertificateSyncServiceTest {
         underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
 
         verify(sslConfigService).save(sslConfigArgumentCaptor.capture());
-        verifySslConfigCaptured(CERT_VERSION, Set.of(CERT_PEM, CERT_PEM_OTHER));
+        verifySslConfigCaptured(CERT_VERSION, Set.of(CERT_PEM, CERT_PEM_OTHER), cert.expirationDate());
     }
 
     private DBStack getDBStack() {

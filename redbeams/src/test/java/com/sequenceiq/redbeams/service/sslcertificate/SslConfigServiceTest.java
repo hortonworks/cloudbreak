@@ -174,6 +174,8 @@ class SslConfigServiceTest {
 
         when(databaseServerSslCertificateConfig.getNumberOfCertsByCloudPlatformAndRegion(CLOUDPLATFORM, REGION)).thenReturn(SINGLE_CERT);
         when(databaseServerSslCertificateConfig.getCertsByCloudPlatformAndRegion(CLOUDPLATFORM, REGION)).thenReturn(Set.of(sslCertificateEntryV3));
+        when(databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndVersion(CLOUDPLATFORM, REGION, 3))
+                .thenReturn(sslCertificateEntryV2);
 
         SslConfig sslConfig = underTest.createSslConfig(request, dbStack);
 
@@ -228,6 +230,8 @@ class SslConfigServiceTest {
         AllocateDatabaseServerV4Request request = createAllocateDbRequestWithSSlConfigRequest(createSslConfigV4Request(SslMode.ENABLED));
         when(databaseServerSslCertificateConfig.getNumberOfCertsByCloudPlatformAndRegion(CLOUDPLATFORM, REGION)).thenReturn(SINGLE_CERT);
         when(databaseServerSslCertificateConfig.getCertsByCloudPlatformAndRegion(CLOUDPLATFORM, REGION)).thenReturn(Set.of(sslCertificateEntryV3));
+        when(databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndVersion(CLOUDPLATFORM, REGION, 3))
+                .thenReturn(sslCertificateEntryV2);
 
         SslConfig sslConfig = underTest.createSslConfig(request, dbStack);
 
@@ -240,6 +244,8 @@ class SslConfigServiceTest {
         when(databaseServerSslCertificateConfig.getNumberOfCertsByCloudPlatformAndRegion(CLOUDPLATFORM, REGION)).thenReturn(TWO_CERTS);
         when(databaseServerSslCertificateConfig.getCertsByCloudPlatformAndRegion(CLOUDPLATFORM, REGION))
                 .thenReturn(Set.of(sslCertificateEntryV2, sslCertificateEntryV3));
+        when(databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndVersion(CLOUDPLATFORM, REGION, 3))
+                .thenReturn(sslCertificateEntryV2);
 
         SslConfig sslConfig = underTest.createSslConfig(request, dbStack);
 
@@ -254,6 +260,8 @@ class SslConfigServiceTest {
                 CLOUD_PROVIDER_IDENTIFIER_V1, CLOUDPLATFORM.toLowerCase(Locale.ROOT), CERT_PEM_V1, x509Certificate);
         when(databaseServerSslCertificateConfig.getCertsByCloudPlatformAndRegion(CLOUDPLATFORM, REGION))
                 .thenReturn(Set.of(sslCertificateEntryV1, sslCertificateEntryV2, sslCertificateEntryV3));
+        when(databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndVersion(CLOUDPLATFORM, REGION, 3))
+                .thenReturn(sslCertificateEntryV2);
 
         SslConfig sslConfig = underTest.createSslConfig(request, dbStack);
 

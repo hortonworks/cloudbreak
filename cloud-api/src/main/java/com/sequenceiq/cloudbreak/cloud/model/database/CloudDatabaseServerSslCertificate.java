@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
  * Represents an SSL certificate for a cloud provider managed database server.
  */
 public record CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType certificateType, String certificateIdentifier, String certificate,
-        boolean overridden) {
+        Long expirationDate, boolean overridden) {
 
     /**
      * Creates a new {@code CloudDatabaseServerSslCertificate} instance using the given arguments, and assuming {@code certificate = null} and
@@ -20,7 +20,7 @@ public record CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificat
      * @throws IllegalArgumentException if {@code certificateIdentifier} is blank
      */
     public CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType certificateType, String certificateIdentifier) {
-        this(certificateType, certificateIdentifier, null);
+        this(certificateType, certificateIdentifier, null, 0L);
     }
 
     /**
@@ -32,8 +32,9 @@ public record CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificat
      * @throws NullPointerException if either {@code certificateType} or {@code certificateIdentifier} is {@code null}
      * @throws IllegalArgumentException if {@code certificateIdentifier} is blank
      */
-    public CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType certificateType, String certificateIdentifier, String certificate) {
-        this(certificateType, certificateIdentifier, certificate, false);
+    public CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType certificateType, String certificateIdentifier, String certificate,
+        long expirationDate) {
+        this(certificateType, certificateIdentifier, certificate, expirationDate, false);
     }
 
     /**
@@ -46,7 +47,7 @@ public record CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificat
      * @throws IllegalArgumentException if {@code certificateIdentifier} is blank
      */
     public CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType certificateType, String certificateIdentifier, boolean overridden) {
-        this(certificateType, certificateIdentifier, null, overridden);
+        this(certificateType, certificateIdentifier, null, null, overridden);
     }
 
     /**
@@ -60,7 +61,7 @@ public record CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificat
      * @throws IllegalArgumentException if {@code certificateIdentifier} is blank
      */
     public CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType certificateType, String certificateIdentifier, String certificate,
-            boolean overridden) {
+            Long expirationDate, boolean overridden) {
         this.certificateType = requireNonNull(certificateType);
         this.certificateIdentifier = requireNonNull(certificateIdentifier);
         if (StringUtils.isBlank(certificateIdentifier)) {
@@ -68,6 +69,7 @@ public record CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificat
         }
         this.certificate = certificate;
         this.overridden = overridden;
+        this.expirationDate = expirationDate;
     }
 
 }

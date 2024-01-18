@@ -38,6 +38,8 @@ public class SslConfig {
 
     private String sslCertificateActiveCloudProviderIdentifier;
 
+    private Long sslCertificateExpirationDate;
+
     public Long getId() {
         return id;
     }
@@ -78,6 +80,14 @@ public class SslConfig {
         this.sslCertificateActiveCloudProviderIdentifier = sslCertificateActiveCloudProviderIdentifier;
     }
 
+    public Long getSslCertificateExpirationDate() {
+        return sslCertificateExpirationDate;
+    }
+
+    public void setSslCertificateExpirationDate(Long sslCertificateExpirationDate) {
+        this.sslCertificateExpirationDate = sslCertificateExpirationDate;
+    }
+
     @Override
     public String toString() {
         return "SslConfig{" +
@@ -86,6 +96,7 @@ public class SslConfig {
                 ", sslCertificateType=" + sslCertificateType +
                 ", sslCertificateActiveVersion=" + sslCertificateActiveVersion +
                 ", sslCertificateActiveCloudProviderIdentifier='" + sslCertificateActiveCloudProviderIdentifier + '\'' +
+                ", sslCertificateExpirationDate='" + sslCertificateExpirationDate + '\'' +
                 '}';
     }
 

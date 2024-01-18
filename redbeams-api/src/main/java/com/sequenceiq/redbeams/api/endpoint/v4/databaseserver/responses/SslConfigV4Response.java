@@ -34,6 +34,12 @@ public class SslConfigV4Response implements Serializable {
     @Schema(description = DatabaseServer.SSL_CERTIFICATE_STATUS)
     private SslCertStatus sslCertificatesStatus;
 
+    @Schema(description = DatabaseServer.SSL_CERTIFICATE_EXPIRATION_DATE_AS_LONG)
+    private long sslCertificateExpirationDate;
+
+    @Schema(description = DatabaseServer.SSL_CERTIFICATE_EXPIRATION_DATE_AS_STRING)
+    private String sslCertificateExpirationDateAsDateString;
+
     public Set<String> getSslCertificates() {
         return sslCertificates;
     }
@@ -80,6 +86,22 @@ public class SslConfigV4Response implements Serializable {
 
     public void setSslCertificateActiveCloudProviderIdentifier(String sslCertificateActiveCloudProviderIdentifier) {
         this.sslCertificateActiveCloudProviderIdentifier = sslCertificateActiveCloudProviderIdentifier;
+    }
+
+    public long getSslCertificateExpirationDate() {
+        return sslCertificateExpirationDate;
+    }
+
+    public void setSslCertificateExpirationDate(long sslCertificateExpirationDate) {
+        this.sslCertificateExpirationDate = sslCertificateExpirationDate;
+    }
+
+    public String getSslCertificateExpirationDateAsDateString() {
+        return sslCertificateExpirationDateAsDateString;
+    }
+
+    public void setSslCertificateExpirationDateAsDateString(String sslCertificateExpirationDateAsDateString) {
+        this.sslCertificateExpirationDateAsDateString = sslCertificateExpirationDateAsDateString;
     }
 
     public SslCertStatus getSslCertificatesStatus() {

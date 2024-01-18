@@ -1,11 +1,16 @@
 package com.sequenceiq.redbeams.converter.v4.databaseserver;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -37,6 +42,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCerti
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslConfigV4Response;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
+import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
@@ -48,6 +54,10 @@ import com.sequenceiq.redbeams.service.sslcertificate.SslConfigService;
 public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
 
     private static final String RESOURCE_TYPE_DATABASE_SERVER = "databaseServer";
+
+    private static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+
+    private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat(DATE_PATTERN);
 
     private static final String RESOURCE_ID = "myserver";
 
@@ -80,6 +90,9 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
 
     private static final String DATABASE_SERVER_ATTRIBUTES_FLEXIBLE =
             "{ \"engine\": \"10\", \"this\": \"that\", \"AZURE_DATABASE_TYPE\": \"FLEXIBLE_SERVER\" }";
+
+    @Mock
+    private X509Certificate x509Certificate;
 
     @Mock
     private DatabaseServerSslCertificateConfig databaseServerSslCertificateConfig;
@@ -271,16 +284,22 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         DatabaseServerConfig server = new DatabaseServerConfig();
         server.setResourceCrn(TestData.getTestCrn(RESOURCE_TYPE_DATABASE_SERVER, RESOURCE_ID));
         server.setDatabaseVendor(DatabaseVendor.POSTGRES);
+        server.setEnvironmentId("id");
 
         DBStack dbStack = new DBStack();
         SslConfig sslConfig = new SslConfig();
         sslConfig.setSslCertificateType(SslCertificateType.BRING_YOUR_OWN);
         dbStack.setSslConfig(1L);
+        dbStack.setRegion("eu-west-1");
         when(sslConfigService.fetchById(1L)).thenReturn(Optional.of(sslConfig));
         dbStack.setCloudPlatform(CLOUD_PLATFORM);
         setDatabaseServer(dbStack, null);
         server.setDbStack(dbStack);
-
+        SslCertificateEntry sslCertificateEntry = new SslCertificateEntry(1, "", "", "", "", x509Certificate);
+        when(databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndVersion(anyString(), anyString(), anyInt()))
+                .thenReturn(sslCertificateEntry);
+        when(databaseServerSslCertificateConfig.getSslCertificatesOutdated(anyString(), anyString(), anySet()))
+                .thenReturn(SslCertStatus.UP_TO_DATE);
         DatabaseServerV4Response response = converter.convert(server);
 
         assertThat(response).isNotNull();
@@ -288,6 +307,10 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         assertThat(sslConfigV4Response).isNotNull();
         assertThat(sslConfigV4Response.getSslMode()).isEqualTo(SslMode.ENABLED);
         assertThat(sslConfigV4Response.getSslCertificateType()).isEqualTo(SslCertificateType.BRING_YOUR_OWN);
+        assertThat(sslConfigV4Response.getSslCertificatesStatus()).isEqualTo(SslCertStatus.UP_TO_DATE);
+        assertThat(sslConfigV4Response.getSslCertificateExpirationDate()).isEqualTo(sslCertificateEntry.expirationDate());
+        assertThat(sslConfigV4Response.getSslCertificateExpirationDateAsDateString())
+                .isEqualTo(SIMPLE_DATE_FORMAT.format(sslCertificateEntry.expirationDate()));
     }
 
     static Object[][] testConversionOfSslConfigWhenDbStackPresentAndCertificateTypeCloudProviderOwnedDataProvider() {
@@ -318,6 +341,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         SslConfig sslConfig = new SslConfig();
         sslConfig.setSslCertificateType(SslCertificateType.CLOUD_PROVIDER_OWNED);
         sslConfig.setSslCertificates(CERTS);
+        sslConfig.setSslCertificateExpirationDate(new Date().getTime());
         sslConfig.setSslCertificateActiveVersion(certActiveVersionInput);
         sslConfig.setSslCertificateActiveCloudProviderIdentifier(certActiveCloudProviderIdentifierInput);
         dbStack.setSslConfig(1L);
