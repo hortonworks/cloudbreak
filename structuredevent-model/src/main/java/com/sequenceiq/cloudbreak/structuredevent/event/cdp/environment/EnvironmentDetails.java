@@ -43,5 +43,7 @@ public interface EnvironmentDetails {
 
     String getDomain();
 
+    boolean isEnableSecretEncryption();
+
     CredentialDetails getCredentialDetails();
 }

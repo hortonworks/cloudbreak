@@ -100,6 +100,8 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverter {
                 cdpEnvironmentDetails.setUserTags(JsonUtil.writeValueAsStringSilentSafe(userTags));
             }
             cdpEnvironmentDetails.setCredentialDetails(convertCredentialDetails(srcEnvironmentDetails.getCredentialDetails()));
+
+            cdpEnvironmentDetails.setSecretEncryptionEnabled(srcEnvironmentDetails.isEnableSecretEncryption());
         }
 
         UsageProto.CDPEnvironmentDetails ret = cdpEnvironmentDetails.build();

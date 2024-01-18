@@ -297,6 +297,8 @@ message Event {
     CDPDFProjectLifecycle cdpDFProjectLifecycle = 143;
     // A CDP DataFlow Proeject Resource was reassigned to another project.
     CDPDFProjectResourceAssigned cdpDFProjectResourceAssigned = 144;
+    // A Replication Manager policy creation event was detected
+    RMPolicyCreationEvent rmPolicyCreationEvent = 145;
   }
 }
 
@@ -2186,7 +2188,7 @@ message CDPEnvironmentDetails {
   string region = 2;
   // Number of availability zones used in the environment
   int32 numberOfAvailabilityZones = 3;
-  // Number of availability zones used in the environment
+  // Availability zones used in the environment, serialized as a comma-separated list of zones
   string availabilityZones = 4;
   // Network metadata
   CDPNetworkDetails networkDetails = 5;
@@ -2202,6 +2204,8 @@ message CDPEnvironmentDetails {
   CDPEnvironmentGcpDetails gcpDetails = 9;
   // Credential details of the environment
   CDPCredentialDetails credentialDetails = 10;
+  // True if the secret encryption feature is enabled for the environment
+  bool secretEncryptionEnabled = 11;
 }
 
 // CDP FreeIPA details closely related to the CDP Environment
@@ -2856,6 +2860,8 @@ message CDPDFServiceRequested {
   // The format of this is a map serialized into a string as json.
   // e.g.:   "tags": "{\"key1\":\"value1\",\"key2\":\"value2\"}"
   string userTags = 19;
+  // Is a node image update requested
+  bool updateNodeImages = 20;
 }
 
 message CDPDFServiceStatusChanged {
@@ -3663,6 +3669,8 @@ message CDPCDWResourceType {
     VIRTUAL_WAREHOUSE = 3;
     // Data Visualization.
     DATA_VISUALIZATION = 4;
+    // CDW Hue
+    CDW_HUE = 5;
   }
 }
 
@@ -3684,6 +3692,8 @@ message CDPCDWEnvironmentRequested {
   CDPCDWResourceStatus.Value status = 7;
   // Track Enable Das Link
   bool enableDas = 8;
+  // Track Enable CDW Hue
+  bool enableCdwHue = 9;
 }
 
 // Generated when a CDP CDW environment's status has changed.
@@ -4667,6 +4677,10 @@ message CDPAssignTrialAccount {
   CDPTrialEnvironment cdpTrialEnvironment = 7;
   // Status of CDP Assign Trial Request
   CDPAssignTrialStatus.Value status = 8;
+  // Trial id
+  string trialId = 9;
+  // Cloud Account id
+  string cloudAccountId = 10;
 }
 
 // Generated when a CDP trial account status is changed/updated.
@@ -4717,9 +4731,14 @@ message CDPTrialEnvironment {
 
 // The pattern and status for CDP Trial workloads.
 message CDPTrialWorkload {
-  // Pattern used by the trial workload. Currently supported CDP trial workload patterns are CDP_OPEN_DATA_LAKEHOUSE and CDP_DATA_DISTRIBUTION_AND_STREAM_ANALYTICS.
+  // Pattern used by the trial workload. Currently supported CDP trial workload patterns are CDP_OPEN_DATA_LAKEHOUSE, CDP_DATA_DISTRIBUTION_AND_STREAM_ANALYTICS,
+  // CDP_GENERATIVE_AI, CDP_DATA_ENGINEERING and CDP_SHARED_GENERATIVE_AI.
   // CDP_OPEN_DATA_LAKEHOUSE - Indicates open data lakehouse pattern for CDP.
-  // CDP_DATA_DISTRIBUTION_AND_STREAM_ANALYTICS - Indicates data flow pattern for CDP.
+  // CDP_DATA_DISTRIBUTION_AND_STREAM_ANALYTICS - Indicates data distribution and stream analytics for CDP.
+  // CDP_GENERATIVE_AI - Indicates generative AI pattern for CDP.
+  // CDP_DATA_ENGINEERING - Integrates data engineering for CDP.
+  // CDP_SHARED_GENERATIVE_AI = Indicates Multi user shared trial pattern for generative AI.
+
   string pattern = 1;
   // Status of the workload deployment for the trial.
   CDPTrialWorkloadStatus.Value status = 2;
@@ -5234,24 +5253,44 @@ message ModelV2UploadedEvent {
   uint32 projectId = 7;
 }
 
-// A Replication manager policy statistics details
-message RMPolicyStatistics {
-  // Amount of replication policies of certain type managed by Replication Manager
-  int32 amount = 1;
+// Statistics related to a general policy type managed by Replication Manager
+message RMGeneralPolicyStats {
+  // Total count of policies for a particular type
+  int32 totalCount = 1;
 }
 
-// A Replication manager statistics details
+// Statistics related to cloud-based policy types managed by Replication Manager
+message RMCloudPolicyStats {
+  // Total count of cloud-based policies for a particular type
+  int32 totalCount = 1;
+  // Count of AWS-specific policies
+  int32 awsPolicyCount = 2;
+  // Count of Azure-specific policies
+  int32 azurePolicyCount = 3;
+  // Count of GCP-specific policies
+  int32 gcpPolicyCount = 4;
+}
+
+// Consolidated statistics for Replication Manager usage
 message RMUsageStatistics {
-  // Amount of clusters managed by Replication Manager
-  int32 amountOfClusters = 1;
-  // Amount of replication policies managed by Replication Manager
-  int32 amountOfPolicies = 2;
-  // Details of HDFS Policies managed by Replication manager
-  RMPolicyStatistics hdfsPolicies = 3;
-  // Details of HIVE Policies managed by Replication manager
-  RMPolicyStatistics hivePolicies = 4;
-  // Details of HBase Policies managed by Replication manager
-  RMPolicyStatistics hbasePolicies = 5;
+  // Total number of clusters overseen by Replication Manager
+  int32 totalClusterCount = 1;
+  // Total number of replication policies overseen by Replication Manager
+  int32 totalPolicyCount = 2;
+
+  // Statistics for HDFS policies
+  RMGeneralPolicyStats hdfsPolicyStats = 3;
+  // Statistics for HIVE policies
+  RMGeneralPolicyStats hivePolicyStats = 4;
+  // Statistics for HBase policies
+  RMGeneralPolicyStats hbasePolicyStats = 5;
+
+  // Statistics for cloud-to-cloud replication policies
+  RMCloudPolicyStats cloudToCloudPolicyStats = 6;
+  // Statistics for cloud-to-on-premises replication policies
+  RMCloudPolicyStats cloudToOnPremPolicyStats = 7;
+  // Statistics for on-premises-to-cloud replication policies
+  RMCloudPolicyStats onPremToCloudPolicyStats = 8;
 }
 
 // Status of secret rotation event
@@ -5286,4 +5325,10 @@ message CDPSecretRotationEvent {
   string reason = 4;
   // corresponding account id
   string accountId = 5;
+}
+
+// Generic event emitted when a Replication Manager user creates a policy
+message RMPolicyCreationEvent {
+  string type = 1;
+  string direction = 2;
 }

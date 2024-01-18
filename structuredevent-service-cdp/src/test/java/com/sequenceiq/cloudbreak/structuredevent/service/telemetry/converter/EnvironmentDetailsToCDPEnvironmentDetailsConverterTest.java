@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -67,6 +68,7 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
         assertNotNull(cdpEnvironmentDetails.getAwsDetails());
         assertNotNull(cdpEnvironmentDetails.getAzureDetails());
         assertEquals("", cdpEnvironmentDetails.getUserTags());
+        assertThat(cdpEnvironmentDetails.getSecretEncryptionEnabled()).isFalse();
     }
 
     @Test
@@ -82,6 +84,7 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
         assertNotNull(cdpEnvironmentDetails.getAzureDetails());
         assertEquals("", cdpEnvironmentDetails.getUserTags());
         assertEquals(UsageProto.CDPCredentialType.Value.UNKNOWN, cdpEnvironmentDetails.getCredentialDetails().getCredentialType());
+        assertThat(cdpEnvironmentDetails.getSecretEncryptionEnabled()).isFalse();
     }
 
     @Test
@@ -328,6 +331,7 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
 
         Map<String, String> userTags = new HashMap<>();
         when(environmentDetails.getUserDefinedTags()).thenReturn(userTags);
+
         cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
         assertEquals("", cdpEnvironmentDetails.getUserTags());
@@ -336,6 +340,7 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
         userTags.put("key1", "value1");
         userTags.put("key2", "value2");
         when(environmentDetails.getUserDefinedTags()).thenReturn(userTags);
+
         cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
         assertEquals("{\"key1\":\"value1\",\"key2\":\"value2\"}", cdpEnvironmentDetails.getUserTags());
@@ -348,14 +353,26 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
                 .withCredentialType(credentialType)
                 .build();
         when(environmentDetails.getCredentialDetails()).thenReturn(credentialDetails);
+
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
+
         assertEquals(cdpCredentialType, cdpEnvironmentDetails.getCredentialDetails().getCredentialType());
     }
 
     @Test
     void testCredentialDetailsWhenNull() {
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
+
         assertEquals(UsageProto.CDPCredentialType.Value.UNKNOWN, cdpEnvironmentDetails.getCredentialDetails().getCredentialType());
+    }
+
+    @Test
+    void testConversionSecretEncryptionEnabled() {
+        when(environmentDetails.isEnableSecretEncryption()).thenReturn(true);
+
+        UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
+
+        assertThat(cdpEnvironmentDetails.getSecretEncryptionEnabled()).isTrue();
     }
 
     private static Stream<Arguments> credentialTypes() {
