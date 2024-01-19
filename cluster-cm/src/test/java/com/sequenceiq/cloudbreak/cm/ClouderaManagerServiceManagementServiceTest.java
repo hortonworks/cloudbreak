@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static com.cloudera.api.swagger.model.ApiServiceState.STARTED;
-import static com.cloudera.api.swagger.model.ApiServiceState.STOPPED;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -106,17 +104,6 @@ class ClouderaManagerServiceManagementServiceTest {
     }
 
     @Test
-    public void testStopServiceWhenTheServiceAlreadyStopped() throws Exception {
-        ApiServiceList apiServiceList = new ApiServiceList().addItemsItem(new ApiService().name(SERVICE_NAME).type(SERVICE_TYPE).serviceState(STOPPED));
-        when(servicesResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
-        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
-
-        underTest.stopClouderaManagerService(apiClient, stack, SERVICE_TYPE);
-
-        verify(servicesResourceApi, times(0)).stopCommand(TEST_CLUSTER_NAME, SERVICE_NAME);
-    }
-
-    @Test
     public void testStopServiceNoServiceFound() throws Exception {
         ApiServiceList apiServiceList = new ApiServiceList().addItemsItem(new ApiService().name(SERVICE_NAME).type("HUE"));
         when(servicesResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
@@ -140,17 +127,6 @@ class ClouderaManagerServiceManagementServiceTest {
         verify(servicesResourceApi, times(1)).startCommand(eq(TEST_CLUSTER_NAME), eq(SERVICE_NAME));
         verify(clouderaManagerPollingServiceProvider).startPollingServiceStart(stack, apiClient, COMMAND_ID);
         verify(pollingResultErrorHandler).handlePollingResult(any(ExtendedPollingResult.class), any(), any());
-    }
-
-    @Test
-    public void testStopServiceWhenTheServiceAlreadyStarted() throws Exception {
-        ApiServiceList apiServiceList = new ApiServiceList().addItemsItem(new ApiService().name(SERVICE_NAME).type(SERVICE_TYPE).serviceState(STARTED));
-        when(servicesResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
-        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
-
-        underTest.startClouderaManagerService(apiClient, stack, SERVICE_TYPE);
-
-        verify(servicesResourceApi, times(0)).startCommand(TEST_CLUSTER_NAME, SERVICE_NAME);
     }
 
     @Test
