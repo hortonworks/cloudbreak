@@ -60,9 +60,9 @@ public class ClouderaManagerStackCreationTest extends AbstractClouderaManagerTes
         String parcelKey = "parcelEx";
         String nameKey = "nameEx";
 
-        String versionValidation = "\\[\\{\"field\":\"post\\.arg1\\.cluster\\.cm.products\\[0\\]\\.version\",\"result\":\"must not be empty\"\\}\\]";
-        String parcelValidation = "\\[\\{\"field\":\"post\\.arg1\\.cluster\\.cm.products\\[0\\]\\.parcel\",\"result\":\"must not be empty\"\\}\\]";
-        String nameValidation = "\\[\\{\"field\":\"post\\.arg1\\.cluster\\.cm.products\\[0\\]\\.name\",\"result\":\"must not be empty\"\\}\\]";
+        String versionValidation = "\\[\\{\"field\":\"post\\.request\\.cluster\\.cm.products\\[0\\]\\.version\",\"result\":\"must not be empty\"\\}\\]";
+        String parcelValidation = "\\[\\{\"field\":\"post\\.request\\.cluster\\.cm.products\\[0\\]\\.parcel\",\"result\":\"must not be empty\"\\}\\]";
+        String nameValidation = "\\[\\{\"field\":\"post\\.request\\.cluster\\.cm.products\\[0\\]\\.name\",\"result\":\"must not be empty\"\\}\\]";
 
         testContext
                 .given(partialProduct, ClouderaManagerProductTestDto.class)
