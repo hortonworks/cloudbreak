@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ClouderaManagerPollingUtilService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -84,6 +85,9 @@ class DeleteVolumesServiceTest {
 
     @Mock
     private ClusterApiConnectors clusterApiConnectors;
+
+    @Mock
+    private ClouderaManagerPollingUtilService clouderaManagerPollingUtilService;
 
     @Mock
     private InstanceGroupService instanceGroupService;

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cm.exception;
+package com.sequenceiq.cloudbreak.cm;
 
 public class ClouderaManagerParcelActivationTimeoutException extends ClouderaManagerOperationFailedException {
 

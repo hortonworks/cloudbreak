@@ -84,8 +84,6 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
-import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
-import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerParcelActivationTimeoutException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
@@ -170,9 +168,6 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Inject
     private ClouderaManagerConfigModificationService clouderaManagerConfigModificationService;
-
-    @Inject
-    private ClouderaManagerServiceManagementService clouderaManagerServiceManagementService;
 
     private final StackDtoDelegate stack;
 
@@ -1176,22 +1171,17 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Override
     public void stopClouderaManagerService(String serviceType) {
-        clouderaManagerServiceManagementService.stopClouderaManagerService(v31Client, stack, serviceType);
-    }
-
-    @Override
-    public void deleteClouderaManagerService(String serviceType) {
-        clouderaManagerServiceManagementService.deleteClouderaManagerService(v31Client, stack, serviceType);
+        configService.stopClouderaManagerService(v31Client, stack, serviceType);
     }
 
     @Override
     public void startClouderaManagerService(String serviceType) {
-        clouderaManagerServiceManagementService.startClouderaManagerService(v31Client, stack, serviceType);
+        configService.startClouderaManagerService(v31Client, stack, serviceType);
     }
 
     @Override
     public Map<String, String> fetchServiceStatuses() {
-        ApiServiceList serviceSummary = clouderaManagerServiceManagementService.readServices(v31Client, stack.getName());
+        ApiServiceList serviceSummary = configService.readServices(v31Client, stack.getName());
         return serviceSummary.getItems().stream()
                 .collect(Collectors.toMap(ApiService::getName, item -> item.getServiceState().getValue()));
     }

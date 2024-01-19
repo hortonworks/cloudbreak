@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ClouderaManagerPollingUtilService;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
@@ -95,6 +96,9 @@ public class DeleteVolumesService {
 
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
+
+    @Inject
+    private ClouderaManagerPollingUtilService clouderaManagerPollingUtilService;
 
     @Inject
     private TemplateService templateService;
@@ -169,6 +173,7 @@ public class DeleteVolumesService {
             try {
                 LOGGER.debug("Stopping CM service {}, in stack {}", serviceComponent.getService(), stackDto.getId());
                 clusterApi.clusterModificationService().stopClouderaManagerService(serviceComponent.getService());
+                clouderaManagerPollingUtilService.pollClouderaManagerServices(clusterApi, serviceComponent.getService(), "STOPPED");
             } catch (Exception e) {
                 LOGGER.error("Unable to stop CM services for service {}, in stack {}", serviceComponent.getService(), stackDto.getId());
                 throw new CloudbreakException(String.format("Unable to stop CM services for " +
@@ -183,6 +188,7 @@ public class DeleteVolumesService {
             try {
                 LOGGER.debug("Starting CM service {}, in stack {}", serviceComponent.getService(), stackDto.getId());
                 clusterApi.clusterModificationService().startClouderaManagerService(serviceComponent.getService());
+                clouderaManagerPollingUtilService.pollClouderaManagerServices(clusterApi, serviceComponent.getService(), "STARTED");
             } catch (Exception e) {
                 LOGGER.error("Unable to start CM services for service {}, in stack {}", serviceComponent.getService(), stackDto.getId());
                 throw new CloudbreakException(String.format("Unable to start CM services for " +

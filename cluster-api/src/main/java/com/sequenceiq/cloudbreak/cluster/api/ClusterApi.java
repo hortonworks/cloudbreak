@@ -161,18 +161,6 @@ public interface ClusterApi {
         return clusterStatusService().getStatus(blueprintPresent).getClusterStatus();
     }
 
-    default void stopClouderaManagerService(String serviceType) throws Exception {
-        clusterModificationService().stopClouderaManagerService(serviceType);
-    }
-
-    default void deleteClouderaManagerService(String serviceType) throws Exception {
-        clusterModificationService().deleteClouderaManagerService(serviceType);
-    }
-
-    default boolean isServicePresent(String clusterName, String serviceType) {
-        return clusterModificationService().isServicePresent(clusterName, serviceType);
-    }
-
     ClusterSetupService clusterSetupService();
 
     ClusterModificationService clusterModificationService();
