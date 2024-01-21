@@ -248,7 +248,7 @@ class DeleteVolumesServiceTest {
         hostTemplateServiceComponents.add(serviceComponent);
 
         underTest.stopClouderaManagerService(stackDto, hostTemplateServiceComponents);
-        verify(clusterModificationService, times(1)).stopClouderaManagerService("yarn");
+        verify(clusterModificationService, times(1)).stopClouderaManagerService("yarn", false);
     }
 
     @Test
@@ -259,7 +259,7 @@ class DeleteVolumesServiceTest {
         Set<ServiceComponent> hostTemplateServiceComponents = new HashSet<>();
         ServiceComponent serviceComponent = ServiceComponent.of("yarn", "yarn");
         hostTemplateServiceComponents.add(serviceComponent);
-        doThrow(new Exception("Test")).when(clusterModificationService).stopClouderaManagerService("yarn");
+        doThrow(new Exception("Test")).when(clusterModificationService).stopClouderaManagerService("yarn", false);
 
         Exception exception = assertThrows(Exception.class, () -> underTest.stopClouderaManagerService(stackDto, hostTemplateServiceComponents));
         assertEquals("Unable to stop CM services for service yarn, in stack 1: Test", exception.getMessage());
@@ -293,7 +293,7 @@ class DeleteVolumesServiceTest {
         doReturn(nodes).when(stackUtil).collectNodes(stack);
         doReturn(nodes).when(stackUtil).collectNodesWithDiskData(stack);
         underTest.unmountBlockStorageDisks(stack, "test");
-        verify(clusterModificationService, times(1)).stopClouderaManagerService("yarn");
+        verify(clusterModificationService, times(1)).stopClouderaManagerService("yarn", false);
         verify(clusterBootstrapper, times(1)).reBootstrapMachines(1L);
         verify(hostOrchestrator, times(1)).unmountBlockStorageDisks(anyList(), eq(nodes), eq(nodes), any());
     }

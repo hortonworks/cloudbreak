@@ -64,12 +64,13 @@ public class ClusterUpgradeActions {
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeTriggerEvent payload, Map<Object, Object> variables) {
                 try {
                     UpgradeImageInfo images = imageComponentUpdaterService.updateComponentsForUpgrade(payload.getImageId(), payload.getResourceId());
+                    StatedImage targetStatedImage = images.targetStatedImage();
                     variables.put(CURRENT_MODEL_IMAGE, images.currentImage());
-                    variables.put(TARGET_IMAGE, images.targetStatedImage());
+                    variables.put(TARGET_IMAGE, targetStatedImage);
                     variables.put(ROLLING_UPGRADE_ENABLED, payload.isRollingUpgradeEnabled());
-                    clusterUpgradeTargetImageService.saveImage(context.getStackId(), images.targetStatedImage());
-                    clusterUpgradeService.initUpgradeCluster(context.getStackId(), getTargetImage(variables), payload.isRollingUpgradeEnabled());
-                    Selectable event = new ClusterUpgradeInitRequest(context.getStackId());
+                    clusterUpgradeTargetImageService.saveImage(context.getStackId(), targetStatedImage);
+                    clusterUpgradeService.initUpgradeCluster(context.getStackId(), targetStatedImage, payload.isRollingUpgradeEnabled());
+                    Selectable event = new ClusterUpgradeInitRequest(context.getStackId(), targetStatedImage.getImage().getVersion());
                     sendEvent(context, event.selector(), event);
                 } catch (Exception e) {
                     LOGGER.error("Error during updating cluster components with image id: [{}]", payload.getImageId(), e);
