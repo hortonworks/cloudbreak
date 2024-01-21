@@ -32,9 +32,9 @@ import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiVersionInfo;
 import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
-import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @Service
@@ -211,17 +211,6 @@ public class ClouderaManagerConfigService {
                 .getName();
     }
 
-    public ApiServiceList readServices(ApiClient client, String clusterName) {
-        try {
-            LOGGER.debug("Reading services of Cloudera Manager for cluster {}.", clusterName);
-            ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
-            return servicesResourceApi.readServices(clusterName, DataView.SUMMARY.name());
-        } catch (ApiException e) {
-            LOGGER.error("Failed to get services from Cloudera Manager.", e);
-            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
-        }
-    }
-
     @Retryable(value = ClouderaManagerOperationFailedException.class, backoff = @Backoff(delay = BACKOFF))
     public ApiServiceConfig readServiceConfig(ApiClient client, String clusterName, String serviceName) {
         try {
@@ -277,53 +266,6 @@ public class ClouderaManagerConfigService {
                     Joiner.on(",").withKeyValueSeparator("=").join(config), roleConfigGroupName, serviceName, e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
-    }
-
-    public void stopClouderaManagerService(ApiClient client, StackDtoDelegate stack, String serviceType) {
-        ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
-        LOGGER.info("Trying to stop services for service type: {} for cluster {}", serviceType, stack.getName());
-        getServiceName(stack.getName(), serviceType, servicesResourceApi)
-                .ifPresentOrElse(
-                        stopServices(stack, servicesResourceApi),
-                        () -> {
-                            LOGGER.info("{} service name is missing, skiping stop.", serviceType);
-                            throw new ClouderaManagerOperationFailedException(String.format("Service of type: %s is not found", serviceType));
-                        });
-    }
-
-    private Consumer<String> stopServices(StackDtoDelegate stack, ServicesResourceApi servicesResourceApi) {
-        return serviceName -> {
-            try {
-                servicesResourceApi.stopCommand(stack.getName(), serviceName);
-            } catch (Exception e) {
-                LOGGER.error("Failed to stop services for service type: {} for cluster {}", serviceName, stack.getName(), e);
-                throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
-            }
-        };
-    }
-
-    public void startClouderaManagerService(ApiClient client, StackDtoDelegate stack, String serviceType) {
-        ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
-        LOGGER.info("Trying to start services for service type: {} for cluster {}", serviceType, stack.getName());
-        getServiceName(stack.getName(), serviceType, servicesResourceApi)
-                .ifPresentOrElse(
-                        startServices(stack, servicesResourceApi),
-                        () -> {
-                            LOGGER.info("{} service name is missing, skiping start.", serviceType);
-                            throw new ClouderaManagerOperationFailedException(String.format("Service of type: %s is not found", serviceType));
-                        });
-    }
-
-    private Consumer<String> startServices(StackDtoDelegate stack, ServicesResourceApi servicesResourceApi) {
-        return serviceName -> {
-            try {
-                LOGGER.debug("Executing start command on stack {} and service {}", stack.getName(), serviceName);
-                servicesResourceApi.startCommand(stack.getName(), serviceName);
-            } catch (Exception e) {
-                LOGGER.error("Failed to start services for service type: {} for cluster {}", serviceName, stack.getName(), e);
-                throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
-            }
-        };
     }
 
     public void modifyRoleBasedConfig(ApiClient client, String stackName, String serviceType, Map<String, String> config, List<String> roleConfigGroupName) {

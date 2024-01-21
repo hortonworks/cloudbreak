@@ -81,7 +81,6 @@ public class ConfigUpdateUtilService {
                 }
                 LOGGER.debug("Starting CM service {}, in stack {}", serviceComponent.getService(), stackDto.getId());
                 clusterApi.clusterModificationService().startClouderaManagerService(serviceComponent.getService());
-                pollClouderaManagerServices(clusterApi, serviceComponent.getService(), "STARTED");
             } catch (Exception e) {
                 LOGGER.error("Unable to update and start CM services for service {}, in stack {}", serviceComponent.getService(), stackDto.getId());
                 throw new CloudbreakServiceException(String.format("Unable to update and start CM services for " +
