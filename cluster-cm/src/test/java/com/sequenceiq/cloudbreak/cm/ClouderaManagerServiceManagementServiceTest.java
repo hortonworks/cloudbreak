@@ -150,7 +150,7 @@ class ClouderaManagerServiceManagementServiceTest {
         when(servicesResourceApi.startCommand(TEST_CLUSTER_NAME, SERVICE_NAME)).thenReturn(new ApiCommand().id(COMMAND_ID));
         when(clouderaManagerPollingServiceProvider.startPollingServiceStart(stack, apiClient, COMMAND_ID)).thenReturn(Mockito.mock(ExtendedPollingResult.class));
 
-        underTest.startClouderaManagerService(apiClient, stack, SERVICE_TYPE);
+        underTest.startClouderaManagerService(apiClient, stack, SERVICE_TYPE, true);
 
         verify(servicesResourceApi, times(1)).startCommand(eq(TEST_CLUSTER_NAME), eq(SERVICE_NAME));
         verify(clouderaManagerPollingServiceProvider).startPollingServiceStart(stack, apiClient, COMMAND_ID);
@@ -163,7 +163,7 @@ class ClouderaManagerServiceManagementServiceTest {
         when(servicesResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
         when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
 
-        underTest.startClouderaManagerService(apiClient, stack, SERVICE_TYPE);
+        underTest.startClouderaManagerService(apiClient, stack, SERVICE_TYPE, true);
 
         verify(servicesResourceApi, times(0)).startCommand(TEST_CLUSTER_NAME, SERVICE_NAME);
     }
@@ -174,7 +174,7 @@ class ClouderaManagerServiceManagementServiceTest {
         when(servicesResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
         when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
 
-        underTest.startClouderaManagerService(apiClient, stack, SERVICE_TYPE);
+        underTest.startClouderaManagerService(apiClient, stack, SERVICE_TYPE, true);
 
         verify(servicesResourceApi, times(0)).startCommand(TEST_CLUSTER_NAME, SERVICE_NAME);
     }

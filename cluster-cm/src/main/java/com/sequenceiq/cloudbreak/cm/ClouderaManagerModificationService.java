@@ -1185,8 +1185,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void startClouderaManagerService(String serviceType) {
-        clouderaManagerServiceManagementService.startClouderaManagerService(v31Client, stack, serviceType);
+    public void startClouderaManagerService(String serviceType, boolean waitForExecution) {
+        clouderaManagerServiceManagementService.startClouderaManagerService(v31Client, stack, serviceType, waitForExecution);
     }
 
     @Override
