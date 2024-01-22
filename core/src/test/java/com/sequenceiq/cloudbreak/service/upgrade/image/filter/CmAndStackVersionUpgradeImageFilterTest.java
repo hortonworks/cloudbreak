@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -47,6 +48,12 @@ class CmAndStackVersionUpgradeImageFilterTest {
     private Image candidateImage;
 
     private final Map<String, String> activatedParcels = Map.of("stack", V_7_0_3);
+
+    @BeforeEach
+    public void setUp() {
+        lenient().when(candidateImage.getOs()).thenReturn("centos7");
+        lenient().when(candidateImage.getOsType()).thenReturn("redhat7");
+    }
 
     @Test
     public void testFilterShouldReturnErrorMessageWhenNotLockedAndStackPermitCheckIsFalse() {
@@ -116,6 +123,8 @@ class CmAndStackVersionUpgradeImageFilterTest {
 
     private ImageFilterParams createImageFilterParams(boolean lockComponents) {
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage1 = ModelImageTestBuilder.builder()
+                .withOs("centos7")
+                .withOsType("redhat7")
                 .withPackageVersions(Map.of(ImagePackageVersion.CM_BUILD_NUMBER.getKey(), BUILD_NUMBER)).build();
         return new ImageFilterParams(currentImage1, null, lockComponents, activatedParcels, StackType.DATALAKE, null, 1L,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform("AWS"), null, null, false);

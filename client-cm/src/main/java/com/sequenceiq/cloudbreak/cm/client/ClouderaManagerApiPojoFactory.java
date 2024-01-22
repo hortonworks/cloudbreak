@@ -7,6 +7,7 @@ import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.ParcelResourceApi;
 import com.cloudera.api.swagger.ParcelsResourceApi;
+import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.ToolsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.sequenceiq.cloudbreak.cm.client.retry.CmApiRetryAspect;
@@ -43,6 +44,10 @@ public class ClouderaManagerApiPojoFactory {
 
     public ClustersResourceApi getClustersResourceApi(ApiClient apiClient) {
         return new ClustersResourceApi(apiClient);
+    }
+
+    public ServicesResourceApi getServicesResourceApi(ApiClient apiClient) {
+        return new ServicesResourceApi(apiClient);
     }
     // CHECKSTYLE:ON
 }

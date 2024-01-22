@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterRequest;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ScalingException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -77,18 +78,16 @@ public class ClusterUpscaleService {
     @Inject
     private EntitlementService entitlementService;
 
-    public void installServicesOnNewHosts(Long stackId, Set<String> hostGroupNames, Boolean repair, Boolean restartServices,
-            Map<String, Set<String>> hostGroupsWithHostNames, Map<String, Integer> hostGroupWithAdjustment, boolean primaryGatewayChanged)
-            throws CloudbreakException {
-        StackDto stackDto = stackDtoService.getById(stackId);
+    public void installServicesOnNewHosts(UpscaleClusterRequest request) throws CloudbreakException {
+        StackDto stackDto = stackDtoService.getById(request.getResourceId());
         LOGGER.debug("Start installing CM services");
         removeUnusedParcelComponents(stackDto);
         Set<HostGroup> hostGroupSetWithRecipes = hostGroupService.getByClusterWithRecipes(stackDto.getCluster().getId());
         Set<HostGroup> hostGroupSetWithInstanceMetadas = hostGroupService.getByCluster(stackDto.getCluster().getId());
         Map<HostGroup, Set<InstanceMetaData>> instanceMetaDatasByHostGroup = hostGroupSetWithInstanceMetadas.stream()
-                .filter(hostGroup -> hostGroupNames.contains(hostGroup.getName()))
+                .filter(hostGroup -> request.getHostGroupNames().contains(hostGroup.getName()))
                 .collect(Collectors.toMap(Function.identity(), hostGroup -> hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet()));
-        Map<String, String> candidateAddresses = clusterHostServiceRunner.collectUpscaleCandidates(stackDto, hostGroupWithAdjustment, false);
+        Map<String, String> candidateAddresses = clusterHostServiceRunner.collectUpscaleCandidates(stackDto, request.getHostGroupWithAdjustment(), false);
         recipeEngine.executePostClouderaManagerStartRecipesOnTargets(stackDto, hostGroupSetWithRecipes, candidateAddresses);
         Set<InstanceMetaData> runningInstanceMetaDataSet =
                 hostGroupSetWithInstanceMetadas.stream()
@@ -97,9 +96,9 @@ public class ClusterUpscaleService {
         ClusterApi connector = getClusterConnector(stackDto);
         try {
             List<String> upscaledHosts = connector.upscaleCluster(instanceMetaDatasByHostGroup);
-            if (Boolean.TRUE.equals(repair)) {
-                recommissionHostsIfNeeded(connector, hostGroupsWithHostNames);
-                restartServicesIfNecessary(restartServices, stackDto, connector);
+            if (request.isRepair()) {
+                recommissionHostsIfNeeded(connector, request.getHostGroupsWithHostNames());
+                restartServicesIfNecessary(request.isRestartServices(), stackDto, connector, request.isRollingRestartEnabled());
                 connector.hostsStartRoles(upscaledHosts);
             }
             clusterHostServiceRunner.createCronForUserHomeCreation(stackDto, candidateAddresses.keySet());
@@ -107,10 +106,11 @@ public class ClusterUpscaleService {
         } catch (ScalingException se) {
             flowMessageService.fireEventAndLog(stackDto.getId(), Status.UPDATE_IN_PROGRESS.name(),
                     CLUSTER_SCALING_UPSCALE_FAILED, Joiner.on(",").join(se.getFailedInstanceIds()));
-            if (Boolean.FALSE.equals(repair) && !primaryGatewayChanged && entitlementService.targetedUpscaleSupported(stackDto.getAccountId())) {
-                clusterService.updateInstancesToZombieByInstanceIds(stackId, se.getFailedInstanceIds());
+            if (Boolean.FALSE.equals(request.isRepair()) && !request.isPrimaryGatewayChanged()
+                    && entitlementService.targetedUpscaleSupported(stackDto.getAccountId())) {
+                clusterService.updateInstancesToZombieByInstanceIds(stackDto.getId(), se.getFailedInstanceIds());
             } else {
-                clusterService.updateInstancesToOrchestrationFailedByInstanceIds(stackId, se.getFailedInstanceIds());
+                clusterService.updateInstancesToOrchestrationFailedByInstanceIds(stackDto.getId(), se.getFailedInstanceIds());
                 throw se;
             }
         }
@@ -133,11 +133,11 @@ public class ClusterUpscaleService {
                 });
     }
 
-    private void restartServicesIfNecessary(Boolean restartServices, StackDto stackDto, ClusterApi connector) throws CloudbreakException {
+    private void restartServicesIfNecessary(Boolean restartServices, StackDto stackDto, ClusterApi connector, boolean rollingRestartEnabled) {
         if (shouldRestartServices(restartServices, stackDto)) {
             try {
-                LOGGER.info("Trying to restart services");
-                connector.restartAll(false);
+                LOGGER.info("Trying to restart services, rolling restart enabled: {}", rollingRestartEnabled);
+                callProperRestartCommand(connector, rollingRestartEnabled);
             } catch (RuntimeException e) {
                 LOGGER.info("Restart services failed", e);
             }
@@ -213,10 +213,19 @@ public class ClusterUpscaleService {
         }
     }
 
-    public void restartAll(Long stackId) throws CloudbreakException {
+    public void restartAll(Long stackId, boolean rollingRestartEnabled) {
         StackDto stackDto = stackDtoService.getById(stackId);
-        LOGGER.info("Restart all in ambari");
-        getClusterConnector(stackDto).restartAll(false);
+        LOGGER.info("Restart all services in CM during upscale. Rolling restart enabled: {}", rollingRestartEnabled);
+        ClusterApi clusterApi = getClusterConnector(stackDto);
+        callProperRestartCommand(clusterApi, rollingRestartEnabled);
+    }
+
+    private void callProperRestartCommand(ClusterApi clusterApi, boolean rollingRestartEnabled) {
+        if (rollingRestartEnabled) {
+            clusterApi.rollingRestartServices();
+        } else {
+            clusterApi.restartAll(false);
+        }
     }
 
     private ClusterApi getClusterConnector(StackDto stackDto) {

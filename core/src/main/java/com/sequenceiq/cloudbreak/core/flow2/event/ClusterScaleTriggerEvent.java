@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.event;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -30,6 +31,8 @@ public class ClusterScaleTriggerEvent extends StackEvent {
 
     private final ClusterManagerType clusterManagerType;
 
+    private final boolean rollingRestartEnabled;
+
     @JsonCreator
     public ClusterScaleTriggerEvent(
             @JsonProperty("selector") String selector,
@@ -41,7 +44,8 @@ public class ClusterScaleTriggerEvent extends StackEvent {
             @JsonProperty("kerberosSecured") boolean kerberosSecured,
             @JsonProperty("singleNodeCluster") boolean singleNodeCluster,
             @JsonProperty("restartServices") boolean restartServices,
-            @JsonProperty("clusterManagerType") ClusterManagerType clusterManagerType) {
+            @JsonProperty("clusterManagerType") ClusterManagerType clusterManagerType,
+            @JsonProperty("rollingRestartEnabled") boolean rollingRestartEnabled) {
         super(selector, stackId);
         this.hostGroupsWithAdjustment = hostGroupsWithAdjustment == null ? Collections.emptyMap() : hostGroupsWithAdjustment;
         this.hostGroupsWithPrivateIds = hostGroupsWithPrivateIds;
@@ -51,12 +55,13 @@ public class ClusterScaleTriggerEvent extends StackEvent {
         this.singleNodeCluster = singleNodeCluster;
         this.restartServices = restartServices;
         this.clusterManagerType = clusterManagerType;
+        this.rollingRestartEnabled = rollingRestartEnabled;
     }
 
     public ClusterScaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupsWithAdjustment,
         Map<String, Set<Long>> hostGroupsWithPrivateIds, Map<String, Set<String>> hostGroupsWithHostNames) {
         this(selector, stackId, hostGroupsWithAdjustment, hostGroupsWithPrivateIds, hostGroupsWithHostNames, false, false, false, false,
-                ClusterManagerType.CLOUDERA_MANAGER);
+                ClusterManagerType.CLOUDERA_MANAGER, false);
     }
 
     public ClusterScaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupsWithAdjustment,
@@ -70,6 +75,7 @@ public class ClusterScaleTriggerEvent extends StackEvent {
         singleNodeCluster = false;
         restartServices = false;
         clusterManagerType = ClusterManagerType.CLOUDERA_MANAGER;
+        this.rollingRestartEnabled = false;
     }
 
     public Map<String, Set<Long>> getHostGroupsWithPrivateIds() {
@@ -107,5 +113,25 @@ public class ClusterScaleTriggerEvent extends StackEvent {
 
     public ClusterManagerType getClusterManagerType() {
         return clusterManagerType;
+    }
+
+    public boolean isRollingRestartEnabled() {
+        return rollingRestartEnabled;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ClusterScaleTriggerEvent.class.getSimpleName() + "[", "]")
+                .add("hostGroupsWithPrivateIds=" + hostGroupsWithPrivateIds)
+                .add("hostGroupsWithAdjustment=" + hostGroupsWithAdjustment)
+                .add("hostGroupsWithHostNames=" + hostGroupsWithHostNames)
+                .add("singlePrimaryGateway=" + singlePrimaryGateway)
+                .add("kerberosSecured=" + kerberosSecured)
+                .add("singleNodeCluster=" + singleNodeCluster)
+                .add("restartServices=" + restartServices)
+                .add("clusterManagerType=" + clusterManagerType)
+                .add("rollingRestartEnabled=" + rollingRestartEnabled)
+                .add(super.toString())
+                .toString();
     }
 }

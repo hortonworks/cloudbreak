@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +37,8 @@ class CentOSToRedHatUpgradeImageFilterTest {
 
     @InjectMocks
     private CentOSToRedHatUpgradeImageFilter underTest;
+
+    private AtomicLong imageCreationTimeSequence = new AtomicLong(1);
 
     @Test
     //CHECKSTYLE:OFF
@@ -73,19 +76,6 @@ class CentOSToRedHatUpgradeImageFilterTest {
         redhatImageIsPreferred();
         ImageFilterParams imageFilterParams = centosImageFilterParams(VERSION_7_2_17);
         Image redhatImage = redhatCatalogImage(VERSION_7_2_17);
-
-        ImageFilterResult result = testImageFiltering(imageFilterParams, redhatImage);
-
-        assertEquals(List.of(redhatImage), result.getImages());
-    }
-
-    @Test
-    //CHECKSTYLE:OFF
-    public void testCentOS_7_2_18_toRedHat_7_2_18_UpgradeIsAllowed() {
-        //CHECKSTYLE:ON
-        redhatImageIsPreferred();
-        ImageFilterParams imageFilterParams = centosImageFilterParams(VERSION_7_2_18);
-        Image redhatImage = redhatCatalogImage(VERSION_7_2_18);
 
         ImageFilterResult result = testImageFiltering(imageFilterParams, redhatImage);
 
@@ -141,7 +131,7 @@ class CentOSToRedHatUpgradeImageFilterTest {
 
         ImageFilterResult result = testImageFiltering(imageFilterParams, centOSImage1, redhatImage, centOSImage2);
 
-        assertEquals(List.of(centOSImage1, redhatImage, centOSImage2), result.getImages());
+        assertEquals(List.of(centOSImage1, centOSImage2, redhatImage), result.getImages());
     }
 
     private ImageFilterResult testImageFiltering(ImageFilterParams imageFilterParams, Image... images) {
@@ -174,7 +164,8 @@ class CentOSToRedHatUpgradeImageFilterTest {
 
     private Image catalogImage(String os, String osType, String version) {
         return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(
-                null, null, null, null, os, null, version, null, null, null, osType, null, null, null, null, false, null, null);
+                null, imageCreationTimeSequence.getAndIncrement(), null, null, os, null, version, null, null, null, osType, null, null, null, null, false, null,
+                null);
     }
 
     private void redhatImageIsPreferred() {

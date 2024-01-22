@@ -33,8 +33,11 @@ public class ClouderaManagerConfigModificationService {
     @Inject
     private ClouderaManagerConfigService configService;
 
+    @Inject
+    private ClouderaManagerServiceManagementService clouderaManagerServiceManagementService;
+
     public List<String> serviceNames(Table<String, String, String> configTable, ApiClient client, StackDtoDelegate stack) {
-        return configService.readServices(client, stack.getName()).getItems()
+        return clouderaManagerServiceManagementService.readServices(client, stack.getName()).getItems()
                 .stream()
                 .filter(apiService -> configTable.rowKeySet().contains(apiService.getType()))
                 .map(ApiService::getName)
@@ -42,7 +45,7 @@ public class ClouderaManagerConfigModificationService {
     }
 
     public void updateConfig(Table<String, String, String> configTable, ApiClient client, StackDtoDelegate stack) throws Exception {
-        Map<String, String> serviceMap = configService.readServices(client, stack.getName()).getItems()
+        Map<String, String> serviceMap = clouderaManagerServiceManagementService.readServices(client, stack.getName()).getItems()
                 .stream()
                 .collect(Collectors.toMap(ApiService::getType, ApiService::getName));
         Map<String, ApiServiceConfig> serviceConfigs = collectServiceConfigs(configTable, serviceMap, client, stack);

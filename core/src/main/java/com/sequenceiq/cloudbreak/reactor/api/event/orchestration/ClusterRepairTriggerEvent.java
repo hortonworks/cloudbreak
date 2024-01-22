@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -24,6 +25,8 @@ public class ClusterRepairTriggerEvent extends StackEvent {
 
     private final String triggeredStackVariant;
 
+    private final boolean rollingRestartEnabled;
+
     public ClusterRepairTriggerEvent(Long stackId, Map<String, List<String>> failedNodesMap, RepairType repairType, boolean restartServices,
             String triggeredStackVariant) {
         super(stackId);
@@ -33,17 +36,7 @@ public class ClusterRepairTriggerEvent extends StackEvent {
         this.restartServices = restartServices;
         this.upgrade = triggeredStackVariant != null;
         this.triggeredStackVariant = triggeredStackVariant;
-    }
-
-    public ClusterRepairTriggerEvent(Long stackId, Map<String, List<String>> failedNodesMap, RepairType repairType, boolean restartServices,
-            boolean upgrade) {
-        super(stackId);
-        this.failedNodesMap = copyToSerializableMap(failedNodesMap);
-        this.stackId = stackId;
-        this.repairType = repairType;
-        this.restartServices = restartServices;
-        this.upgrade = upgrade;
-        this.triggeredStackVariant = null;
+        this.rollingRestartEnabled = false;
     }
 
     public ClusterRepairTriggerEvent(Long stackId, Map<String, List<String>> failedNodesMap, RepairType repairType, boolean restartServices,
@@ -55,6 +48,7 @@ public class ClusterRepairTriggerEvent extends StackEvent {
         this.restartServices = restartServices;
         this.upgrade = upgrade;
         this.triggeredStackVariant = triggeredStackVariant;
+        this.rollingRestartEnabled = false;
     }
 
     @JsonCreator
@@ -64,7 +58,8 @@ public class ClusterRepairTriggerEvent extends StackEvent {
             @JsonProperty("repairType") RepairType repairType,
             @JsonProperty("failedNodesMap") Map<String, List<String>> failedNodesMap,
             @JsonProperty("restartServices") boolean restartServices,
-            @JsonProperty("triggeredStackVariant") String triggeredStackVariant) {
+            @JsonProperty("triggeredStackVariant") String triggeredStackVariant,
+            @JsonProperty("rollingRestartEnabled") boolean rollingRestartEnabled) {
         super(event, stackId);
         this.failedNodesMap = copyToSerializableMap(failedNodesMap);
         this.stackId = stackId;
@@ -72,6 +67,7 @@ public class ClusterRepairTriggerEvent extends StackEvent {
         this.restartServices = restartServices;
         this.upgrade = triggeredStackVariant != null;
         this.triggeredStackVariant = triggeredStackVariant;
+        this.rollingRestartEnabled = rollingRestartEnabled;
     }
 
     public Map<String, List<String>> getFailedNodesMap() {
@@ -98,6 +94,10 @@ public class ClusterRepairTriggerEvent extends StackEvent {
         return repairType;
     }
 
+    public boolean isRollingRestartEnabled() {
+        return rollingRestartEnabled;
+    }
+
     private Map<String, List<String>> copyToSerializableMap(Map<String, List<String>> map) {
         Map<String, List<String>> result = new HashMap<>();
         map.forEach((key, value) -> result.put(key, new ArrayList<>(value)));
@@ -116,5 +116,19 @@ public class ClusterRepairTriggerEvent extends StackEvent {
         ALL_AT_ONCE,
         BATCH,
         ONE_FROM_EACH_HOSTGROUP
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ClusterRepairTriggerEvent.class.getSimpleName() + "[", "]")
+                .add("failedNodesMap=" + failedNodesMap)
+                .add("repairType=" + repairType)
+                .add("restartServices=" + restartServices)
+                .add("upgrade=" + upgrade)
+                .add("stackId=" + stackId)
+                .add("triggeredStackVariant='" + triggeredStackVariant + "'")
+                .add("rollingRestartEnabled=" + rollingRestartEnabled)
+                .add(super.toString())
+                .toString();
     }
 }
