@@ -83,44 +83,20 @@ public class ResourceCreationCallable implements Callable<ResourceRequestResult<
             try {
                 Variant variant = auth.getCloudContext().getVariant();
                 List<ComputeResourceBuilder<ResourceBuilderContext>> compute = resourceBuilders.compute(variant);
+                Boolean failedComputeCreation = false;
                 for (ComputeResourceBuilder<ResourceBuilderContext> builder : compute) {
-                    LOGGER.info("Start building '{} ({})' resources of '{}' instance group of '{}' stack", builder.resourceType(),
-                            builder.getClass().getSimpleName(), group.getName(), stackName);
-                    List<CloudResource> cloudResources = builder.create(context, instance, privateId, auth, group, cloudStack.getImage());
-                    if (!CollectionUtils.isEmpty(cloudResources)) {
-                        try {
-                            persistResources(auth, cloudResources);
-
-                            PollGroup pollGroup = InMemoryStateStore.getStack(auth.getCloudContext().getId());
-                            if (isCancelled(pollGroup)) {
-                                throw new CancellationException(format("Building of %s has been cancelled", cloudResources));
-                            }
-
-                            List<CloudResource> resources = builder.build(context, instance, privateId, auth, group, cloudResources, cloudStack);
-                            updateResource(auth, resources);
-                            context.addComputeResources(privateId, resources);
-
-                            if (ResourceType.GCP_INSTANCE.equals(builder.resourceType())) {
-                                LOGGER.debug("Skip instance polling in case of GCP");
-                                resources.stream()
-                                        .map(resource -> new CloudResourceStatus(resource, ResourceStatus.IN_PROGRESS, privateId)).forEach(results::add);
-                            } else {
-                                PollTask<List<CloudResourceStatus>> task = resourcePollTaskFactory.newPollResourceTask(builder, auth, resources, context, true);
-                                List<CloudResourceStatus> pollerResult = scheduleTask(task, resources);
-                                for (CloudResourceStatus resourceStatus : pollerResult) {
-                                    resourceStatus.setPrivateId(privateId);
-                                }
-                                results.addAll(pollerResult);
-                            }
-                        } catch (Exception e) {
-                            String errorMessage = format("Failed to create resources for instance with id: '%s', message: '%s'",
-                                    instance.getTemplate().getPrivateId(), e.getMessage());
-                            LOGGER.error(errorMessage, e);
-                            results.removeIf(crs -> crs.getPrivateId().equals(privateId));
-                            for (CloudResource cloudResource : cloudResources) {
-                                results.add(new CloudResourceStatus(cloudResource, ResourceStatus.FAILED, errorMessage, privateId));
-                            }
-                        }
+                    if (failedComputeCreation) {
+                        LOGGER.info("Skipping compute resource creation for {} of '{}' instance group of '{}' stack",
+                                builder.resourceType(),
+                                group.getName(),
+                                stackName);
+                    } else {
+                        LOGGER.info("Start building '{} ({})' resources of '{}' instance group of '{}' stack",
+                                builder.resourceType(),
+                                builder.getClass().getSimpleName(),
+                                group.getName(),
+                                stackName);
+                        failedComputeCreation = createComputeResourceAndReportFailure(results, instance, privateId, builder);
                     }
                     LOGGER.info("Finished building '{} ({})' resources of '{}' instance group of '{}' stack", builder.resourceType(),
                             builder.getClass().getSimpleName(), group.getName(), stackName);
@@ -133,6 +109,48 @@ public class ResourceCreationCallable implements Callable<ResourceRequestResult<
         }
 
         return new ResourceRequestResult<>(FutureResult.SUCCESS, results);
+    }
+
+    private boolean createComputeResourceAndReportFailure(List<CloudResourceStatus> results, CloudInstance instance, Long privateId,
+        ComputeResourceBuilder<ResourceBuilderContext> builder) {
+        List<CloudResource> cloudResources = builder.create(context, instance, privateId, auth, group, cloudStack.getImage());
+        if (!CollectionUtils.isEmpty(cloudResources)) {
+            try {
+                persistResources(auth, cloudResources);
+
+                PollGroup pollGroup = InMemoryStateStore.getStack(auth.getCloudContext().getId());
+                if (isCancelled(pollGroup)) {
+                    throw new CancellationException(format("Building of %s has been cancelled", cloudResources));
+                }
+
+                List<CloudResource> resources = builder.build(context, instance, privateId, auth, group, cloudResources, cloudStack);
+                updateResource(auth, resources);
+                context.addComputeResources(privateId, resources);
+
+                if (ResourceType.GCP_INSTANCE.equals(builder.resourceType())) {
+                    LOGGER.debug("Skip instance polling in case of GCP");
+                    resources.stream()
+                            .map(resource -> new CloudResourceStatus(resource, ResourceStatus.IN_PROGRESS, privateId)).forEach(results::add);
+                } else {
+                    PollTask<List<CloudResourceStatus>> task = resourcePollTaskFactory.newPollResourceTask(builder, auth, resources, context, true);
+                    List<CloudResourceStatus> pollerResult = scheduleTask(task, resources);
+                    for (CloudResourceStatus resourceStatus : pollerResult) {
+                        resourceStatus.setPrivateId(privateId);
+                    }
+                    results.addAll(pollerResult);
+                }
+            } catch (Exception e) {
+                String errorMessage = format("Failed to create resources for instance with id: '%s', message: '%s'",
+                        instance.getTemplate().getPrivateId(), e.getMessage());
+                LOGGER.error(errorMessage, e);
+                results.removeIf(crs -> crs.getPrivateId().equals(privateId));
+                for (CloudResource cloudResource : cloudResources) {
+                    results.add(new CloudResourceStatus(cloudResource, ResourceStatus.FAILED, errorMessage, privateId));
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     private List<CloudResourceStatus> scheduleTask(PollTask<List<CloudResourceStatus>> task, List<CloudResource> resources) throws Exception {
