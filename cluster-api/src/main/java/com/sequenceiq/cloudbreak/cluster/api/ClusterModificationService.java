@@ -89,19 +89,19 @@ public interface ClusterModificationService {
 
     void hostsStartRoles(List<String> hostNames);
 
-    default void restartAll(boolean withMgmtServices) {
-        throw new UnsupportedOperationException("Interface not implemented.");
-    }
+    void restartAll(boolean withMgmtServices);
 
     default void restartClusterServices() {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 
-    void rollingRestartServices() throws Exception;
+    void rollingRestartServices();
 
     void updateConfig(Table<String, String, String> configTable) throws Exception;
 
-    void stopClouderaManagerService(String serviceType) throws Exception;
+    void stopClouderaManagerService(String serviceType, boolean waitForExecution) throws Exception;
+
+    void deleteClouderaManagerService(String serviceType) throws Exception;
 
     void startClouderaManagerService(String serviceType) throws Exception;
 

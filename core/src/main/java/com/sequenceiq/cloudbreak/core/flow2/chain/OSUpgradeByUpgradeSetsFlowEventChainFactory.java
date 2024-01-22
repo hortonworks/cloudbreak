@@ -139,7 +139,8 @@ public class OSUpgradeByUpgradeSetsFlowEventChainFactory implements FlowEventCha
                 false,
                 ClusterManagerType.CLOUDERA_MANAGER,
                 new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, groupsWithAdjustment.values().stream().mapToLong(Integer::intValue).sum()),
-                event.getPlatformVariant()).setRepair());
+                event.getPlatformVariant(),
+                true).setRepair());
     }
 
     private boolean isKerberosSecured(StackView stackView) {

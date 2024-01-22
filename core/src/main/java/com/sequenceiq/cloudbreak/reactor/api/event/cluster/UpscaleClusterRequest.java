@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.reactor.api.event.cluster;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,6 +21,8 @@ public class UpscaleClusterRequest extends AbstractClusterScaleRequest {
 
     private final boolean primaryGatewayChanged;
 
+    private final boolean rollingRestartEnabled;
+
     public UpscaleClusterRequest(Long stackId, Set<String> hostGroups, boolean repair, boolean restartServices, Map<String, Integer> hostGroupWithAdjustment,
             boolean primaryGatewayChanged) {
         super(stackId, hostGroups);
@@ -28,6 +31,7 @@ public class UpscaleClusterRequest extends AbstractClusterScaleRequest {
         this.hostGroupWithAdjustment = hostGroupWithAdjustment;
         this.hostGroupsWithHostNames = new HashMap<>();
         this.primaryGatewayChanged = primaryGatewayChanged;
+        this.rollingRestartEnabled = false;
     }
 
     @JsonCreator
@@ -38,13 +42,15 @@ public class UpscaleClusterRequest extends AbstractClusterScaleRequest {
             @JsonProperty("restartServices") boolean restartServices,
             @JsonProperty("hostGroupsWithHostNames") Map<String, Set<String>> hostGroupsWithHostNames,
             @JsonProperty("hostGroupWithAdjustment") Map<String, Integer> hostGroupWithAdjustment,
-            @JsonProperty("primaryGatewayChanged") boolean primaryGatewayChanged) {
+            @JsonProperty("primaryGatewayChanged") boolean primaryGatewayChanged,
+            @JsonProperty("rollingRestartEnabled") boolean rollingRestartEnabled) {
         super(stackId, hostGroups);
         this.repair = repair;
         this.restartServices = restartServices;
         this.hostGroupWithAdjustment = hostGroupWithAdjustment;
         this.hostGroupsWithHostNames = hostGroupsWithHostNames;
         this.primaryGatewayChanged = primaryGatewayChanged;
+        this.rollingRestartEnabled = rollingRestartEnabled;
     }
 
     public boolean isRepair() {
@@ -65,5 +71,22 @@ public class UpscaleClusterRequest extends AbstractClusterScaleRequest {
 
     public boolean isPrimaryGatewayChanged() {
         return primaryGatewayChanged;
+    }
+
+    public boolean isRollingRestartEnabled() {
+        return rollingRestartEnabled;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", UpscaleClusterRequest.class.getSimpleName() + "[", "]")
+                .add("repair=" + repair)
+                .add("restartServices=" + restartServices)
+                .add("hostGroupsWithHostNames=" + hostGroupsWithHostNames)
+                .add("hostGroupWithAdjustment=" + hostGroupWithAdjustment)
+                .add("primaryGatewayChanged=" + primaryGatewayChanged)
+                .add("rollingRestartEnabled=" + rollingRestartEnabled)
+                .add(super.toString())
+                .toString();
     }
 }

@@ -96,7 +96,7 @@ public class ConfigUpdateUtilService {
         for (ServiceComponent serviceComponent : hostTemplateServiceComponents) {
             try {
                 LOGGER.debug("Stopping CM service {}, in stack {}", serviceComponent.getService(), stackDto.getId());
-                clusterApi.clusterModificationService().stopClouderaManagerService(serviceComponent.getService());
+                clusterApi.clusterModificationService().stopClouderaManagerService(serviceComponent.getService(), false);
                 pollClouderaManagerServices(clusterApi, serviceComponent.getService(), "STOPPED");
             } catch (Exception e) {
                 LOGGER.error("Unable to stop CM services for service {}, in stack {}", serviceComponent.getService(), stackDto.getId());

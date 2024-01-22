@@ -42,7 +42,8 @@ public class ImageCreationBasedUpgradeImageFilter implements UpgradeImageFilter 
     private List<Image> filterImages(ImageFilterResult imageFilterResult, com.sequenceiq.cloudbreak.cloud.model.Image currentImage) {
         return imageFilterResult.getImages()
                 .stream()
-                .filter(candidate -> isDifferentVersion(currentImage, candidate) || isNewerOrSameCreationImage(currentImage, candidate))
+                .filter(candidate -> isDifferentVersion(currentImage, candidate) || isNewerOrSameCreationImage(currentImage, candidate)
+                        || CentOSToRedHatUpgradeImageFilter.isCentOSToRedHatUpgradableVersion(currentImage, candidate))
                 .collect(Collectors.toList());
     }
 

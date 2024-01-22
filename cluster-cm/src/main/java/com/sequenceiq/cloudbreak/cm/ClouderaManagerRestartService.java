@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cm;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.cm.DataView.SUMMARY;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_RESTARTING;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_ROLLING_RESTART;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -34,6 +35,7 @@ import com.cloudera.api.swagger.model.ApiRollingRestartClusterArgs;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
@@ -71,7 +73,8 @@ public class ClouderaManagerRestartService {
             ApiCommand restartCommand = rollingRestartEnabled ?
                     executeRollingRestartCommand(apiClient, stack, clustersResourceApi) :
                     executeRestartCommand(stack, clustersResourceApi, serviceNames);
-            eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_RESTARTING);
+            eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(),
+                    rollingRestartEnabled ? CLUSTER_CM_CLUSTER_SERVICES_ROLLING_RESTART : CLUSTER_CM_CLUSTER_SERVICES_RESTARTING);
             waitForRestartExecution(apiClient, stack, restartCommand);
         }
     }

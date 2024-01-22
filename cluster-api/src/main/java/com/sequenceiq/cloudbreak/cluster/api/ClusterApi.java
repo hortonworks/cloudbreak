@@ -133,8 +133,12 @@ public interface ClusterApi {
         clusterModificationService().cleanupCluster(telemetry);
     }
 
-    default void restartAll(boolean withMgmtServices) throws CloudbreakException {
+    default void restartAll(boolean withMgmtServices) {
         clusterModificationService().restartAll(withMgmtServices);
+    }
+
+    default void rollingRestartServices() {
+        clusterModificationService().rollingRestartServices();
     }
 
     default Optional<String> getRoleConfigValueByServiceType(String clusterName, String roleConfigGroup, String serviceType, String configName) {
@@ -155,6 +159,18 @@ public interface ClusterApi {
 
     default ClusterStatus getStatus(boolean blueprintPresent) {
         return clusterStatusService().getStatus(blueprintPresent).getClusterStatus();
+    }
+
+    default void stopClouderaManagerService(String serviceType, boolean waitForExecution) throws Exception {
+        clusterModificationService().stopClouderaManagerService(serviceType, waitForExecution);
+    }
+
+    default void deleteClouderaManagerService(String serviceType) throws Exception {
+        clusterModificationService().deleteClouderaManagerService(serviceType);
+    }
+
+    default boolean isServicePresent(String clusterName, String serviceType) {
+        return clusterModificationService().isServicePresent(clusterName, serviceType);
     }
 
     ClusterSetupService clusterSetupService();

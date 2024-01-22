@@ -127,13 +127,13 @@ public class DistroXUpgradeService {
                         request.getInternalUpgradeSettings().isRollingUpgradeEnabled(), request.isKeepVariant());
     }
 
-    private UpgradeV4Response initUpgrade(DistroXUpgradeDto upgradeDto, String userCrn, boolean enableRollingUpgrade, boolean keepVariant) {
+    private UpgradeV4Response initUpgrade(DistroXUpgradeDto upgradeDto, String userCrn, boolean rollingUpgradeEnabled, boolean keepVariant) {
         boolean replaceVms = determineReplaceVmsParam(upgradeDto.getUpgradeV4Response(), upgradeDto.isLockComponents(), upgradeDto.getStackDto().getStack());
-        LOGGER.debug("Initializing cluster upgrade. Target image: {}, lockComponents: {}, replaceVms: {}, enableRollingUpgrade: {}",
-                upgradeDto.getImageChangeDto().getImageId(), upgradeDto.isLockComponents(), replaceVms, enableRollingUpgrade);
+        LOGGER.debug("Initializing cluster upgrade. Target image: {}, lockComponents: {}, replaceVms: {}, rollingUpgradeEnabled: {}",
+                upgradeDto.getImageChangeDto().getImageId(), upgradeDto.isLockComponents(), replaceVms, rollingUpgradeEnabled);
         String upgradeVariant = stackUpgradeService.calculateUpgradeVariant(upgradeDto.getStackDto().getStack(), userCrn, keepVariant);
         FlowIdentifier flowIdentifier = reactorFlowManager.triggerDistroXUpgrade(upgradeDto.getStackDto().getStack().getId(), upgradeDto.getImageChangeDto(),
-                replaceVms, upgradeDto.isLockComponents(), upgradeVariant, enableRollingUpgrade);
+                replaceVms, upgradeDto.isLockComponents(), upgradeVariant, rollingUpgradeEnabled);
         return new UpgradeV4Response("Upgrade started with Image: " + upgradeDto.getImageChangeDto().getImageId(), flowIdentifier, replaceVms);
     }
 

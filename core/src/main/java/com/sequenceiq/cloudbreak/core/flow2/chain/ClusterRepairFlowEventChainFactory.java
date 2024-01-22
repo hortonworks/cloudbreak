@@ -341,7 +341,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                 addAwsNativeEventMigrationIfNeeded(flowTriggers, event, groupWithHostNames.getKey(), stackView);
             }
             flowTriggers.add(fullUpscaleEvent(event, repairableGroupsWithHostNames, singlePrimaryGW,
-                    event.isRestartServices(), isKerberosSecured(stackView)));
+                    event.isRestartServices(), isKerberosSecured(stackView), event.isRollingRestartEnabled()));
             LOGGER.info("Upscale event added for: {}", repairableGroupsWithHostNames);
         }
     }
@@ -411,7 +411,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private StackAndClusterUpscaleTriggerEvent fullUpscaleEvent(ClusterRepairTriggerEvent event, Map<String, Set<String>> groupsWithHostNames,
-            boolean singlePrimaryGateway, boolean restartServices, boolean kerberosSecured) {
+            boolean singlePrimaryGateway, boolean restartServices, boolean kerberosSecured, boolean rollingRestartEnabled) {
         Set<com.sequenceiq.cloudbreak.domain.view.InstanceGroupView> instanceGroupViews = instanceGroupService.findViewByStackId(event.getStackId());
         boolean singleNodeCluster = isSingleNode(instanceGroupViews);
         Integer adjustmentSize = groupsWithHostNames.values().stream().map(Set::size).reduce(0, Integer::sum);
@@ -422,7 +422,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         return new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.getResourceId(),
                 hostGroupAdjustments, null, groupsWithHostNames, ScalingType.UPSCALE_TOGETHER, singlePrimaryGateway,
                 kerberosSecured, event.accepted(), singleNodeCluster, restartServices, ClusterManagerType.CLOUDERA_MANAGER, adjustmentTypeWithThreshold,
-                event.getTriggeredStackVariant()).setRepair();
+                event.getTriggeredStackVariant(), rollingRestartEnabled).setRepair();
     }
 
     public boolean isSingleNode(Set<com.sequenceiq.cloudbreak.domain.view.InstanceGroupView> instanceGroupViews) {
