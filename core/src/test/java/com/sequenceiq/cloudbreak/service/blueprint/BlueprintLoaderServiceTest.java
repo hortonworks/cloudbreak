@@ -296,13 +296,32 @@ public class BlueprintLoaderServiceTest {
 
     @Test
     public void testLoadBlueprintsForTheSpecifiedUserWhenDefaultBlueprintsInTheDBHaveNullDefaultBlueprintText() {
-        Set<Blueprint> blueprints = generateBlueprintData(3, BlueprintUpgradeOption.ENABLED);
-        blueprints = blueprints.stream().peek(bp -> bp.setDefaultBlueprintText(null)).collect(Collectors.toSet());
+        Set<Blueprint> blueprints = generateBlueprintData(3, BlueprintUpgradeOption.ENABLED).stream()
+                .map(bp -> {
+                    bp.setDefaultBlueprintText(null);
+                    return bp;
+                })
+                .collect(Collectors.toSet());
         setupMock(generateCacheData(3, BlueprintUpgradeOption.ENABLED));
 
         Set<Blueprint> result = underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave);
 
         Assert.assertTrue(result.stream().allMatch(bp -> bp.getDefaultBlueprintText() != null));
+    }
+
+    @Test
+    public void testisAddingDefaultBlueprintsNecessaryForTheUserWhenBlueprintTextUnchangedButDefaultBlueprintTextNullForDefaultBlueprintInDBThenUpdateDB() {
+        Set<Blueprint> blueprintsFromDatabase = generateBlueprintData(3, BlueprintUpgradeOption.ENABLED).stream()
+                .map(bp -> {
+                    bp.setDefaultBlueprintText(null);
+                    return bp;
+                })
+                .collect(Collectors.toSet());
+        setupMock(generateCacheData(3, BlueprintUpgradeOption.ENABLED));
+
+        boolean result = underTest.isAddingDefaultBlueprintsNecessaryForTheUser(blueprintsFromDatabase);
+
+        Assert.assertTrue(result);
     }
 
     private Iterable<Blueprint> mockSave(Iterable<Blueprint> blueprints, Workspace workspace) {

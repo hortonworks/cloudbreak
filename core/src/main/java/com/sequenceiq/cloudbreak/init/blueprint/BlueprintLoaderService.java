@@ -153,15 +153,10 @@ public class BlueprintLoaderService {
     private boolean isActiveBlueprintMustBeUpdatedAndNotUserManaged(Blueprint blueprintInDatabase, BlueprintFile defaultBlueprint) {
         return isActiveDefaultBlueprint(blueprintInDatabase)
                 && isBlueprintInTheDefaultCache(defaultBlueprint)
-                && (defaultBlueprintWithoutDefaultBlueprintText(blueprintInDatabase)
-                        || defaultBlueprintNotSameAsNewTexts(blueprintInDatabase, defaultBlueprint.getBlueprintText())
+                && (defaultBlueprintNotSameAsNewTexts(blueprintInDatabase, defaultBlueprint.getBlueprintText(), defaultBlueprint.getDefaultBlueprintText())
                         || defaultBlueprintContainsNewDescription(blueprintInDatabase, defaultBlueprint)
                         || isBlueprintInDBSameNameButUserManaged(blueprintInDatabase, defaultBlueprint)
                         || isUpgradeOptionModified(blueprintInDatabase, defaultBlueprint));
-    }
-
-    private boolean defaultBlueprintWithoutDefaultBlueprintText(Blueprint blueprintInDatabase) {
-        return blueprintInDatabase.getDefaultBlueprintText() == null;
     }
 
     private boolean isUpgradeOptionModified(Blueprint blueprintInDatabase, BlueprintFile defaultBlueprint) {
@@ -230,9 +225,12 @@ public class BlueprintLoaderService {
         return DEFAULT.equals(bp.getStatus()) || USER_MANAGED.equals(bp.getStatus());
     }
 
-    private boolean defaultBlueprintNotSameAsNewTexts(Blueprint blueprintFromDatabase, String blueprintsText) {
-        String blueprintText = blueprintFromDatabase.getBlueprintJsonText();
-        return blueprintText == null || !blueprintText.equals(blueprintsText);
+    private boolean defaultBlueprintNotSameAsNewTexts(Blueprint blueprintFromDatabase, String blueprintText, String defaultBlueprintText) {
+        if (!defaultBlueprintText.equals(blueprintFromDatabase.getDefaultBlueprintText())) {
+            return true;
+        }
+        String blueprintTextFromVault = blueprintFromDatabase.getBlueprintJsonText();
+        return blueprintTextFromVault == null || !blueprintTextFromVault.equals(blueprintText);
     }
 
     private boolean defaultBlueprintContainsNewDescription(Blueprint cd, BlueprintFile blueprint) {
@@ -260,7 +258,7 @@ public class BlueprintLoaderService {
     private boolean isActiveAndMustBeUpdated(Blueprint blueprintFromDatabase, BlueprintFile defaultBlueprint) {
         return isActiveDefaultBlueprint(blueprintFromDatabase)
                 && isBlueprintInTheDefaultCache(defaultBlueprint)
-                && (defaultBlueprintNotSameAsNewTexts(blueprintFromDatabase, defaultBlueprint.getBlueprintText())
+                && (defaultBlueprintNotSameAsNewTexts(blueprintFromDatabase, defaultBlueprint.getBlueprintText(), defaultBlueprint.getDefaultBlueprintText())
                         || defaultBlueprintContainsNewDescription(blueprintFromDatabase, defaultBlueprint)
                         || isUpgradeOptionModified(blueprintFromDatabase, defaultBlueprint));
     }
