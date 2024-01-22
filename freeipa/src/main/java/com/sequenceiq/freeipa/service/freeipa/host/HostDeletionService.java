@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
@@ -31,24 +32,22 @@ public class HostDeletionService {
     @Inject
     private FreeIpaClientRetryService retryService;
 
+    @Measure(HostDeletionService.class)
     public Pair<Set<String>, Map<String, String>> removeHosts(FreeIpaClient client, Set<String> hosts) throws FreeIpaClientException {
+        LOGGER.info("Removing hosts: {}", hosts);
         return removeHosts(client, hosts, false);
     }
 
+    @Measure(HostDeletionService.class)
     public Pair<Set<String>, Map<String, String>> removeServers(FreeIpaClient client, Set<String> hosts) throws FreeIpaClientException {
+        LOGGER.info("Removing servers: {}", hosts);
         return removeHosts(client, hosts, true);
     }
 
     private Pair<Set<String>, Map<String, String>> removeHosts(FreeIpaClient client, Set<String> hosts, boolean servers) throws FreeIpaClientException {
         Set<String> hostCleanupSuccess = new HashSet<>();
         Map<String, String> hostCleanupFailed = new HashMap<>();
-        Set<String> existingHostFqdn;
-        if (servers) {
-            existingHostFqdn = collectExistingServersFqdns(client);
-        } else {
-            existingHostFqdn = collectExistingHostFqdns(client);
-        }
-        Set<String> hostsToRemove = filterHostsToBeRemoved(hosts, existingHostFqdn);
+        Set<String> hostsToRemove = collectHostsToRemove(client, hosts, servers);
         LOGGER.debug("Hosts to delete: {}", hostsToRemove);
         for (String host : hostsToRemove) {
             try {
@@ -63,6 +62,24 @@ public class HostDeletionService {
             }
         }
         return Pair.of(hostCleanupSuccess, hostCleanupFailed);
+    }
+
+    private Set<String> collectHostsToRemove(FreeIpaClient client, Set<String> hosts, boolean servers) throws FreeIpaClientException {
+        if (hosts.size() > 1) {
+            Set<String> existingHostFqdn = collectExistingHostFqdn(client, servers);
+            return filterHostsToBeRemoved(hosts, existingHostFqdn);
+        } else {
+            LOGGER.debug("Skipping filtering and fetching hosts from FreeIPA as for a single host {} it is too much overhead", hosts);
+            return hosts;
+        }
+    }
+
+    private Set<String> collectExistingHostFqdn(FreeIpaClient client, boolean servers) throws FreeIpaClientException {
+        if (servers) {
+            return collectExistingServersFqdns(client);
+        } else {
+            return collectExistingHostFqdns(client);
+        }
     }
 
     private void handleErrorDuringDeletion(Set<String> hostCleanupSuccess, Map<String, String> hostCleanupFailed, String host, FreeIpaClientException e) {
@@ -81,7 +98,7 @@ public class HostDeletionService {
     }
 
     private Set<String> collectExistingHostFqdns(FreeIpaClient client) throws FreeIpaClientException {
-        return client.findAllHost().stream().map(Host::getFqdn).collect(Collectors.toSet());
+        return client.findAllHostFqdnOnly().stream().map(Host::getFqdn).collect(Collectors.toSet());
     }
 
     private Set<String> collectExistingServersFqdns(FreeIpaClient client) throws FreeIpaClientException {

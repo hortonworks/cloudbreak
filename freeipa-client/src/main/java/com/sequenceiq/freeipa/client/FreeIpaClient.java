@@ -74,6 +74,8 @@ public class FreeIpaClient {
 
     private static final Map<String, Object> UNLIMITED_PARAMS = Map.of("sizelimit", 0, "timelimit", 0);
 
+    private static final Map<String, Object> PRIMARY_KEY_ONLY = Map.of("pkey_only", true);
+
     private JsonRpcHttpClient jsonRpcHttpClient;
 
     private final String apiVersion;
@@ -127,7 +129,7 @@ public class FreeIpaClient {
     }
 
     public Set<String> userListAllUids() throws FreeIpaClientException {
-        return userFindAll(Optional.empty(), Map.of("pkey_only", true)).stream()
+        return userFindAll(Optional.empty(), PRIMARY_KEY_ONLY).stream()
                 .map(User::getUid)
                 .collect(Collectors.toSet());
     }
@@ -176,11 +178,21 @@ public class FreeIpaClient {
     }
 
     public Set<Host> findAllHost() throws FreeIpaClientException {
+        return findAllHost(Map.of());
+    }
+
+    public Set<Host> findAllHostFqdnOnly() throws FreeIpaClientException {
+        return findAllHost(PRIMARY_KEY_ONLY);
+    }
+
+    private Set<Host> findAllHost(Map<String, Object> extraParams) throws FreeIpaClientException {
         List<Object> flags = List.of();
+        Map<String, Object> params = new HashMap<>(UNLIMITED_PARAMS);
+        params.putAll(extraParams);
 
         ParameterizedType type = TypeUtils
                 .parameterize(Set.class, Host.class);
-        return (Set<Host>) invoke("host_find", flags, UNLIMITED_PARAMS, type).getResult();
+        return (Set<Host>) invoke("host_find", flags, params, type).getResult();
     }
 
     public Host deleteHost(String fqdn) throws FreeIpaClientException {
@@ -389,11 +401,24 @@ public class FreeIpaClient {
     }
 
     public Set<Service> findAllService() throws FreeIpaClientException {
-        List<Object> flags = List.of();
+        return findAllService(List.of(), Map.of());
+    }
+
+    public Set<Service> findAllServiceCanonicalNamesOnly() throws FreeIpaClientException {
+        return findAllService(List.of(), PRIMARY_KEY_ONLY);
+    }
+
+    public Set<Service> findAllServiceCanonicalNamesOnly(String searchCriteria) throws FreeIpaClientException {
+        return findAllService(List.of(searchCriteria), PRIMARY_KEY_ONLY);
+    }
+
+    private Set<Service> findAllService(List<Object> flags, Map<String, Object> extraParams) throws FreeIpaClientException {
+        Map<String, Object> params = new HashMap<>(UNLIMITED_PARAMS);
+        params.putAll(extraParams);
 
         ParameterizedType type = TypeUtils
                 .parameterize(Set.class, Service.class);
-        return (Set<Service>) invoke("service_find", flags, UNLIMITED_PARAMS, type).getResult();
+        return (Set<Service>) invoke("service_find", flags, params, type).getResult();
     }
 
     public Service deleteService(String canonicalPrincipal) throws FreeIpaClientException {

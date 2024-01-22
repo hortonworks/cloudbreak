@@ -12,6 +12,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServicePrincipalRequest;
@@ -54,6 +55,7 @@ public class KeytabCleanupService {
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
+    @Measure(KeytabCleanupService.class)
     public void deleteServicePrincipal(ServicePrincipalRequest request, String accountId) throws FreeIpaClientException, DeleteException {
         LOGGER.debug("Request to delete service principal for account {}: {}", accountId, request);
         Stack freeIpaStack = keytabCommonService.getFreeIpaStackWithMdcContext(request.getEnvironmentCrn(), accountId);
@@ -78,9 +80,10 @@ public class KeytabCleanupService {
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
+    @Measure(KeytabCleanupService.class)
     public void deleteHost(HostRequest request, String accountId) throws FreeIpaClientException {
         FreeIpaClient ipaClient = freeIpaClientFactory.getFreeIpaClientByAccountAndEnvironment(request.getEnvironmentCrn(), accountId);
-        Set<com.sequenceiq.freeipa.client.model.Service> allService = ipaClient.findAllService();
+        Set<com.sequenceiq.freeipa.client.model.Service> allService = ipaClient.findAllServiceCanonicalNamesOnly(request.getServerHostName());
         cleanupServicesForHost(request, accountId, ipaClient, allService);
         hostDeletionService.deleteHostsWithDeleteException(ipaClient, Set.of(request.getServerHostName()));
         cleanupVaultAndRolesForHost(request, accountId, ipaClient);
@@ -90,6 +93,7 @@ public class KeytabCleanupService {
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
+    @Measure(KeytabCleanupService.class)
     public void removeHostRelatedKerberosConfiguration(HostRequest request, String accountId, FreeIpaClient ipaClient,
             Set<com.sequenceiq.freeipa.client.model.Service> allService) throws FreeIpaClientException {
         cleanupServicesForHost(request, accountId, ipaClient, allService);

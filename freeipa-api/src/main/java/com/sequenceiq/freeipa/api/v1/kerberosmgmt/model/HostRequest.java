@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.kerberosmgmt.model;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
@@ -15,12 +15,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class HostRequest {
 
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
-    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, required = true)
-    @NotNull
+    @Schema(description = ModelDescriptions.ENVIRONMENT_CRN, requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotEmpty
     private String environmentCrn;
 
-    @Schema(description = KeytabModelDescription.SERVICE_HOST, required = true)
-    @NotNull
+    @Schema(description = KeytabModelDescription.SERVICE_HOST, requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotEmpty
     private String serverHostName;
 
     @Schema(description = ModelDescriptions.CLUSTER_CRN)

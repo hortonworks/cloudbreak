@@ -53,19 +53,19 @@ public class HostDeletionServiceTest {
 
     @Test
     public void expectFreeIpaClientExceptionIfHostCollectionFails() throws FreeIpaClientException {
-        when(freeIpaClient.findAllHost()).thenThrow(new FreeIpaClientException("error"));
-        assertThrows(FreeIpaClientException.class, () -> underTest.removeHosts(freeIpaClient, Set.of("testHost")));
+        when(freeIpaClient.findAllHostFqdnOnly()).thenThrow(new FreeIpaClientException("error"));
+        assertThrows(FreeIpaClientException.class, () -> underTest.removeHosts(freeIpaClient, Set.of("testHost", "testHost2")));
     }
 
     @Test
     public void expectDeleteExceptionIfHostCollectionFails() throws FreeIpaClientException {
-        when(freeIpaClient.findAllHost()).thenThrow(new FreeIpaClientException("error"));
-        assertThrows(DeleteException.class, () -> underTest.deleteHostsWithDeleteException(freeIpaClient, Set.of("testHost")));
+        when(freeIpaClient.findAllHostFqdnOnly()).thenThrow(new FreeIpaClientException("error"));
+        assertThrows(DeleteException.class, () -> underTest.deleteHostsWithDeleteException(freeIpaClient, Set.of("testHost", "testHost2")));
     }
 
     @Test
     public void successfulDeletionIfNoHostReturned() throws FreeIpaClientException {
-        when(freeIpaClient.findAllHost()).thenReturn(Set.of());
+        when(freeIpaClient.findAllHostFqdnOnly()).thenReturn(Set.of());
         Set<String> hosts = Set.of("host1", "host2");
 
         Pair<Set<String>, Map<String, String>> result = underTest.removeHosts(freeIpaClient, hosts);
@@ -79,7 +79,7 @@ public class HostDeletionServiceTest {
         Set<String> hosts = Set.of("host1", "host2");
         Host host = new Host();
         host.setFqdn("host1");
-        when(freeIpaClient.findAllHost()).thenReturn(Set.of(host));
+        when(freeIpaClient.findAllHostFqdnOnly()).thenReturn(Set.of(host));
 
         Pair<Set<String>, Map<String, String>> result = underTest.removeHosts(freeIpaClient, hosts);
 
@@ -96,7 +96,7 @@ public class HostDeletionServiceTest {
         host1.setFqdn("host1");
         Host host2 = new Host();
         host2.setFqdn("host2");
-        when(freeIpaClient.findAllHost()).thenReturn(Set.of(host1, host2));
+        when(freeIpaClient.findAllHostFqdnOnly()).thenReturn(Set.of(host1, host2));
 
         Pair<Set<String>, Map<String, String>> result = underTest.removeHosts(freeIpaClient, hosts);
 
@@ -115,7 +115,7 @@ public class HostDeletionServiceTest {
         host1.setFqdn("host1");
         Host host2 = new Host();
         host2.setFqdn("host2");
-        when(freeIpaClient.findAllHost()).thenReturn(Set.of(host1, host2));
+        when(freeIpaClient.findAllHostFqdnOnly()).thenReturn(Set.of(host1, host2));
         when(freeIpaClient.deleteHost(host1.getFqdn())).thenReturn(host1);
         when(freeIpaClient.deleteHost(host2.getFqdn())).thenThrow(new FreeIpaClientException("not handled"));
 
@@ -135,7 +135,7 @@ public class HostDeletionServiceTest {
         host1.setFqdn("host1");
         Host host2 = new Host();
         host2.setFqdn("host2");
-        when(freeIpaClient.findAllHost()).thenReturn(Set.of(host1, host2));
+        when(freeIpaClient.findAllHostFqdnOnly()).thenReturn(Set.of(host1, host2));
         String message = "already deleted";
         when(freeIpaClient.deleteHost(host1.getFqdn())).thenReturn(host1);
         when(freeIpaClient.deleteHost(host2.getFqdn())).thenThrow(new FreeIpaClientException(message, new JsonRpcClientException(NOT_FOUND, message, null)));

@@ -139,7 +139,7 @@ public class KeytabCleanupServiceTest {
         request.setClusterCrn(CLUSTER_ID);
         request.setRoleName(ROLE);
         when(freeIpaClientFactory.getFreeIpaClientByAccountAndEnvironment(anyString(), anyString())).thenReturn(mockIpaClient);
-        when(mockIpaClient.findAllService()).thenReturn(services);
+        when(mockIpaClient.findAllServiceCanonicalNamesOnly(HOST)).thenReturn(services);
 
         underTest.deleteHost(request, ACCOUNT_ID);
 
