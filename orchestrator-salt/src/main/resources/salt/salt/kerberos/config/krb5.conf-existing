@@ -20,7 +20,7 @@ includedir /var/lib/sss/pubconf/krb5.include.d/
   dns_canonicalize_hostname = false
   ticket_lifetime = 24h
   forwardable = true
-  udp_preference_limit = 0
+  udp_preference_limit = 1
   default_ccache_name = /tmp/krb5cc_%{uid}
   renew_lifetime = 7d
   max_retries = 1
