@@ -124,7 +124,7 @@ class ConfigUpdateUtilServiceTest {
         underTest.updateCMConfigsForComputeAndStartServices(stack, hostTemplateServiceComponents, roleGroupNames, "test");
 
         verify(clusterModificationService, times(1)).updateServiceConfig(eq("yarn"), eq(config), eq(roleGroupNames));
-        verify(clusterModificationService, times(1)).startClouderaManagerService("yarn");
+        verify(clusterModificationService, times(1)).startClouderaManagerService("yarn", false);
     }
 
     @Test
@@ -151,7 +151,7 @@ class ConfigUpdateUtilServiceTest {
         underTest.updateCMConfigsForComputeAndStartServices(stack, hostTemplateServiceComponents, roleGroupNames, "test");
 
         verify(clusterModificationService, times(1)).updateServiceConfig(eq("impala"), eq(config), eq(roleGroupNames));
-        verify(clusterModificationService, times(1)).startClouderaManagerService("impala");
+        verify(clusterModificationService, times(1)).startClouderaManagerService("impala", false);
     }
 
     @Test
