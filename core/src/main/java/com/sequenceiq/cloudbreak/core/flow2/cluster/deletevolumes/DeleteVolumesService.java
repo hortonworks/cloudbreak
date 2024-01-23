@@ -187,7 +187,7 @@ public class DeleteVolumesService {
         for (ServiceComponent serviceComponent : hostTemplateServiceComponents) {
             try {
                 LOGGER.debug("Starting CM service {}, in stack {}", serviceComponent.getService(), stackDto.getId());
-                clusterApi.clusterModificationService().startClouderaManagerService(serviceComponent.getService(), false);
+                clusterApi.clusterModificationService().startClouderaManagerService(serviceComponent.getService());
                 clouderaManagerPollingUtilService.pollClouderaManagerServices(clusterApi, serviceComponent.getService(), "STARTED");
             } catch (Exception e) {
                 LOGGER.error("Unable to start CM services for service {}, in stack {}", serviceComponent.getService(), stackDto.getId());

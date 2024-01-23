@@ -105,7 +105,7 @@ public interface ClusterModificationService {
 
     void deleteClouderaManagerService(String serviceType) throws Exception;
 
-    void startClouderaManagerService(String serviceType, boolean waitForExecution) throws Exception;
+    void startClouderaManagerService(String serviceType) throws Exception;
 
     Map<String, String> fetchServiceStatuses() throws Exception;
 

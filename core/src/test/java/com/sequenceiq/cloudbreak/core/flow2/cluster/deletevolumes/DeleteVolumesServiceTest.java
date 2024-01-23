@@ -221,7 +221,7 @@ class DeleteVolumesServiceTest {
         hostTemplateServiceComponents.add(serviceComponent);
 
         underTest.startClouderaManagerService(stackDto, hostTemplateServiceComponents);
-        verify(clusterModificationService, times(1)).startClouderaManagerService("yarn", false);
+        verify(clusterModificationService, times(1)).startClouderaManagerService("yarn");
     }
 
     @Test
@@ -232,7 +232,7 @@ class DeleteVolumesServiceTest {
         Set<ServiceComponent> hostTemplateServiceComponents = new HashSet<>();
         ServiceComponent serviceComponent = ServiceComponent.of("yarn", "yarn");
         hostTemplateServiceComponents.add(serviceComponent);
-        doThrow(new Exception("Test")).when(clusterModificationService).startClouderaManagerService("yarn", false);
+        doThrow(new Exception("Test")).when(clusterModificationService).startClouderaManagerService("yarn");
 
         Exception exception = assertThrows(Exception.class, () -> underTest.startClouderaManagerService(stackDto, hostTemplateServiceComponents));
         assertEquals("Unable to start CM services for service yarn, in stack 1: Test", exception.getMessage());

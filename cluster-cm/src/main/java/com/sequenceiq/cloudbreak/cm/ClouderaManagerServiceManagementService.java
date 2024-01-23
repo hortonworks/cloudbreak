@@ -55,13 +55,13 @@ public class ClouderaManagerServiceManagementService {
         }
     }
 
-    public void startClouderaManagerService(ApiClient client, StackDtoDelegate stack, String serviceType, boolean waitForExecution) {
+    public void startClouderaManagerService(ApiClient client, StackDtoDelegate stack, String serviceType) {
         LOGGER.info("Trying to start services for service type: {} for cluster {}", serviceType, stack.getName());
         ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
         String operationName = "start";
         findServiceToPerformOperation(servicesResourceApi, stack, serviceType, Set.of(STARTING, STARTED), operationName)
                 .ifPresent(apiService -> {
-                    performClouderaManagerOperation(client, stack, operationName, apiService, waitForExecution,
+                    performClouderaManagerOperation(client, stack, operationName, apiService, true,
                             servicesResourceApi::startCommand,
                             clouderaManagerPollingServiceProvider::startPollingServiceStart);
                 });
