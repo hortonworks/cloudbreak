@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cm.exception;
+package com.sequenceiq.cloudbreak.cm;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 

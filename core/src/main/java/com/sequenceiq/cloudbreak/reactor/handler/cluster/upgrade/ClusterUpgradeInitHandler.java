@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgrad
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeInitSuccess;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePrerequisitesService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -32,9 +31,6 @@ public class ClusterUpgradeInitHandler extends ExceptionCatcherEventHandler<Clus
 
     @Inject
     private ParcelService parcelService;
-
-    @Inject
-    private ClusterUpgradePrerequisitesService clusterUpgradePrerequisitesService;
 
     @Override
     public String selector() {
@@ -55,10 +51,9 @@ public class ClusterUpgradeInitHandler extends ExceptionCatcherEventHandler<Clus
         try {
             Set<ClusterComponentView> componentsByBlueprint = parcelService.getParcelComponentsByBlueprint(stackDto);
             parcelService.removeUnusedParcelComponents(stackDto, componentsByBlueprint);
-            clusterUpgradePrerequisitesService.removeDasServiceIfNecessary(stackDto, request.getTargetRuntimeVersion());
             result = new ClusterUpgradeInitSuccess(request.getResourceId());
         } catch (Exception e) {
-            LOGGER.error("Upgrade initialization failed", e);
+            LOGGER.error("Cluster Manager parcel deactivation failed", e);
             result = new ClusterUpgradeFailedEvent(request.getResourceId(), e, DetailedStackStatus.CLUSTER_UPGRADE_INIT_FAILED);
         }
         return result;
