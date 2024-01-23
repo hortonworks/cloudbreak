@@ -103,10 +103,6 @@ class ConfigUpdateUtilServiceTest {
     @Test
     void testUpdateCMConfigsForComputeAndStartServicesSuccess() throws Exception {
         doReturn(clusterModificationService).when(clusterApi).clusterModificationService();
-        Map<String, String> serviceStatuses = new HashMap<>();
-        serviceStatuses.put("yarn", "STARTED");
-        doReturn(serviceStatuses).when(clusterModificationService).fetchServiceStatuses();
-
         Set<ServiceComponent> hostTemplateServiceComponents = new HashSet<>();
         ServiceComponent serviceComponent = ServiceComponent.of("yarn", "yarn");
         hostTemplateServiceComponents.add(serviceComponent);
@@ -128,17 +124,12 @@ class ConfigUpdateUtilServiceTest {
         underTest.updateCMConfigsForComputeAndStartServices(stack, hostTemplateServiceComponents, roleGroupNames, "test");
 
         verify(clusterModificationService, times(1)).updateServiceConfig(eq("yarn"), eq(config), eq(roleGroupNames));
-        verify(clusterModificationService, times(1)).startClouderaManagerService("yarn");
-        verify(clusterModificationService, times(1)).fetchServiceStatuses();
+        verify(clusterModificationService, times(1)).startClouderaManagerService("yarn", false);
     }
 
     @Test
     void testUpdateCMConfigsForComputeAndStartImpalaServicesSuccess() throws Exception {
         doReturn(clusterModificationService).when(clusterApi).clusterModificationService();
-        Map<String, String> serviceStatuses = new HashMap<>();
-        serviceStatuses.put("impala", "STARTED");
-        doReturn(serviceStatuses).when(clusterModificationService).fetchServiceStatuses();
-
         Set<ServiceComponent> hostTemplateServiceComponents = new HashSet<>();
         ServiceComponent serviceComponent = ServiceComponent.of("impala", "impala");
         hostTemplateServiceComponents.add(serviceComponent);
@@ -160,8 +151,7 @@ class ConfigUpdateUtilServiceTest {
         underTest.updateCMConfigsForComputeAndStartServices(stack, hostTemplateServiceComponents, roleGroupNames, "test");
 
         verify(clusterModificationService, times(1)).updateServiceConfig(eq("impala"), eq(config), eq(roleGroupNames));
-        verify(clusterModificationService, times(1)).startClouderaManagerService("impala");
-        verify(clusterModificationService, times(1)).fetchServiceStatuses();
+        verify(clusterModificationService, times(1)).startClouderaManagerService("impala", false);
     }
 
     @Test
