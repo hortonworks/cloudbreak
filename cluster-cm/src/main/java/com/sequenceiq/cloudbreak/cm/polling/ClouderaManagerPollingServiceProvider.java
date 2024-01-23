@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerParcelActivation
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerParcelDeletedListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerParcelStatusListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerParcelsApiListenerTask;
-import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerServiceDeletionListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerSingleParcelActivationListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStartupListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStatusListenerTask;
@@ -146,20 +145,6 @@ public class ClouderaManagerPollingServiceProvider {
 
     public ExtendedPollingResult startPollingCmStartup(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId) {
         return startDefaultPolling(stack, apiClient, commandId, "Service start");
-    }
-
-    public ExtendedPollingResult startPollingServiceStop(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId) {
-        return startDefaultPolling(stack, apiClient, commandId, "Stop CM service");
-    }
-
-    public ExtendedPollingResult startPollingServiceDeletion(StackDtoDelegate stack, ApiClient apiClient, String serviceType) {
-        LOGGER.debug("Waiting for Cloudera Manager to delete service {}", serviceType);
-        return pollApiWithTimeListener(stack, apiClient, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
-                new ClouderaManagerServiceDeletionListenerTask(clouderaManagerApiPojoFactory, clusterEventService, serviceType));
-    }
-
-    public ExtendedPollingResult startPollingServiceStart(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId) {
-        return startDefaultPolling(stack, apiClient, commandId, "Start CM service");
     }
 
     public ExtendedPollingResult startPollingCmKerberosJob(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId) {

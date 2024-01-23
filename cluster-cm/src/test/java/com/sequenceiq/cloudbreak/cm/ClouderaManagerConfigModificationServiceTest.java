@@ -38,9 +38,6 @@ public class ClouderaManagerConfigModificationServiceTest {
     @Mock
     private ClouderaManagerConfigService configService;
 
-    @Mock
-    private ClouderaManagerServiceManagementService clouderaManagerServiceManagementService;
-
     @InjectMocks
     private ClouderaManagerConfigModificationService underTest;
 
@@ -107,7 +104,7 @@ public class ClouderaManagerConfigModificationServiceTest {
     }
 
     private void mockReadServices() {
-        when(clouderaManagerServiceManagementService.readServices(any(), any())).thenReturn(new ApiServiceList()
+        when(configService.readServices(any(), any())).thenReturn(new ApiServiceList()
                 .addItemsItem(apiService("service1", "serviceType1"))
                 .addItemsItem(apiService("service2", "serviceType2"))
                 .addItemsItem(apiService("service3", "serviceType3")));

@@ -91,7 +91,6 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
-import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
 import com.sequenceiq.cloudbreak.cm.util.TestUtil;
@@ -212,9 +211,6 @@ class ClouderaManagerModificationServiceTest {
 
     @Mock
     private ClouderaManagerConfigModificationService clouderaManagerConfigModificationService;
-
-    @Mock
-    private ClouderaManagerServiceManagementService clouderaManagerServiceManagementService;
 
     @Spy
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
@@ -1464,13 +1460,13 @@ class ClouderaManagerModificationServiceTest {
     }
 
     @Test
-    public void testReadServices() {
+    public void testReadServices() throws Exception {
         List<ApiService> services = List.of(
                 new ApiService().name("RANGER_RAZ").serviceState(ApiServiceState.STOPPED),
                 new ApiService().name("ATLAS").serviceState(ApiServiceState.STOPPED),
                 new ApiService().name("TEZ").serviceState(ApiServiceState.NA),
                 new ApiService().name("HDFS").serviceState(ApiServiceState.STOPPING));
-        when(clouderaManagerServiceManagementService.readServices(any(), anyString())).thenReturn(new ApiServiceList().items(services));
+        when(configService.readServices(any(), anyString())).thenReturn(new ApiServiceList().items(services));
 
         Map<String, String> results = underTest.fetchServiceStatuses();
 
