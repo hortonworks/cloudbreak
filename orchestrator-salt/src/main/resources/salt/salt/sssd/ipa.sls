@@ -158,11 +158,12 @@ dns_resolution_fix:
     - text: "domain {{ salt['grains.get']('domain') }}"
 {% else %}
 java11_dns_resolution_fix:
-  file.append:
+  file.replace:
     - name: /etc/resolv.conf
-    - text: "domain {{ salt['grains.get']('domain') }}"
+    - pattern: "^domain .*"
+    - repl: "domain {{ salt['grains.get']('domain') }}"
+    - append_if_not_found: True
     - onlyif:
-      - ! grep -q '^domain .*' /etc/resolv.conf
       - java -version |& grep 'openjdk version "11.0'
 {% endif %}
 
