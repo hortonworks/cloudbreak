@@ -69,6 +69,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS_SDX_INTEGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SHOW_CLI;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SKIP_ROLLING_UPGRADE_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_TARGETED_UPSCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_UNBOUND_ELIMINATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK;
@@ -418,6 +419,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datalake.zdu.osupgrade.enable}")
     private boolean enableDatalakeZduOSUpgrade;
+
+    @Value("${auth.mock.upgrade.skip.rolling.upgrade.validation}")
+    private boolean skipRollingUpgradeValidationEnabled;
 
     @Value("${auth.mock.freeipa.privileged.user.enable}")
     private boolean enablePrivilegedUser;
@@ -919,6 +923,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableDatalakeZduOSUpgrade) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_ZDU_OS_UPGRADE));
+        }
+        if (skipRollingUpgradeValidationEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_SKIP_ROLLING_UPGRADE_VALIDATION));
         }
         if (enablePrivilegedUser) {
             builder.addEntitlements(createEntitlement(CDP_ENVIRONMENT_PRIVILEGED_USER));
