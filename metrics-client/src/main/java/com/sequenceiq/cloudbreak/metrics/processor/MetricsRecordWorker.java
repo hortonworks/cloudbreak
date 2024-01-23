@@ -8,11 +8,12 @@ import org.xerial.snappy.Snappy;
 
 import com.sequenceiq.cloudbreak.streaming.model.StreamProcessingException;
 import com.sequenceiq.cloudbreak.streaming.processor.RecordWorker;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
+
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class MetricsRecordWorker extends RecordWorker<MetricsRecordProcessor, MetricsProcessorConfiguration, MetricsRecordRequest> {
 
@@ -67,10 +68,10 @@ public class MetricsRecordWorker extends RecordWorker<MetricsRecordProcessor, Me
 
     private OkHttpClient createClient() {
         Integer timeout = getConfiguration().getHttpTimeout();
-        OkHttpClient okHttpClient = new OkHttpClient();
-        okHttpClient.setConnectTimeout(timeout, TimeUnit.SECONDS);
-        okHttpClient.setReadTimeout(timeout, TimeUnit.SECONDS);
-        okHttpClient.setWriteTimeout(timeout, TimeUnit.SECONDS);
-        return okHttpClient;
+        return new OkHttpClient.Builder()
+                .connectTimeout(timeout, TimeUnit.SECONDS)
+                .readTimeout(timeout, TimeUnit.SECONDS)
+                .writeTimeout(timeout, TimeUnit.SECONDS)
+                .build();
     }
 }
