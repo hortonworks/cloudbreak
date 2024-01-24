@@ -6,6 +6,10 @@ server:
     mbeanregistry:
       enabled: true
 
+nodemanager:
+  irrecoverable:
+    healthchecks: NODE_MANAGER_HEALTH_CHECKER,NODE_MANAGER_SCM_HEALTH,NODEMANAGER_RECOVERY_DIRECTORY_FREE_SPACE,NODE_MANAGER_LOG_DIRECTORY_FREE_SPACE
+
 management:
   endpoints:
     web:

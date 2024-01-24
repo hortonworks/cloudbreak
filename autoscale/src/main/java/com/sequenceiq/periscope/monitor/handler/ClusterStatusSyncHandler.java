@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.DependentHostGroupsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.LoadAlert;
@@ -88,7 +87,7 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
 
     private void updateClusterState(Cluster cluster, StackV4Response stackResponse, boolean clusterAvailable) {
         if (clusterAvailable && !RUNNING.equals(cluster.getState())) {
-            clusterService.setState(cluster.getId(), ClusterState.RUNNING);
+            clusterService.setState(cluster.getId(), RUNNING);
             LOGGER.info("Updated cluster '{}' to Running, CB Stack Status '{}', CB Cluster Status '{}'.",
                     cluster.getStackCrn(), stackResponse.getStatus(), stackResponse.getCluster().getStatus());
         } else if (!clusterAvailable && RUNNING.equals(cluster.getState())) {

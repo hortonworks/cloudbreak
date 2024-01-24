@@ -62,12 +62,6 @@ public class StopStartUpscaleGetRecoveryCandidatesHandler implements CloudPlatfo
     public void accept(Event<StopStartUpscaleGetRecoveryCandidatesRequest> event) {
         StopStartUpscaleGetRecoveryCandidatesRequest request = event.getData();
         LOGGER.info("StopStartUpscaleGetRecoveryCandidatesHandler: {}", event.getData().getResourceId());
-        if (!request.isFailureRecoveryEnabled()) {
-            StopStartUpscaleGetRecoveryCandidatesResult result = new StopStartUpscaleGetRecoveryCandidatesResult(request.getResourceId(), request,
-                    Collections.emptyList(), request.getAdjustment(), request.getHostGroupName());
-            notify(result, event);
-            return;
-        }
 
         CloudContext cloudContext = request.getCloudContext();
         try {
@@ -84,7 +78,7 @@ public class StopStartUpscaleGetRecoveryCandidatesHandler implements CloudPlatfo
 
             List<InstanceMetadataView> instanceMetadataWithServicesNotRunning =
                     recoveryCandidateCollectionService.getStartedInstancesWithServicesNotRunning(stack, request.getHostGroupName(),
-                            startedInstanceIdsOnCloudProvider);
+                            startedInstanceIdsOnCloudProvider, request.isFailureRecoveryEnabled());
 
             List<CloudInstance> instancesWithServicesNotRunning;
 

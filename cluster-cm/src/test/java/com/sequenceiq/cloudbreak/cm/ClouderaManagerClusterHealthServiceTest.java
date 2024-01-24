@@ -56,6 +56,10 @@ class ClouderaManagerClusterHealthServiceTest {
 
     private static final String NODE_MANAGER_CONNECTIVITY = "NODE_MANAGER_CONNECTIVITY";
 
+    private static final String NODE_MANAGER_HEALTH_CHECKER = "NODE_MANAGER_HEALTH_CHECKER";
+
+    private static final String NODE_MANAGER_SCM_HEALTH = "NODE_MANAGER_SCM_HEALTH";
+
     private static final String NODEMANAGER_LOG_DIRECTORIES_FREE_SPACE = "NODEMANAGER_LOG_DIRECTORIES_FREE_SPACE";
 
     private static final String RESOURCE_MANAGER_FILE_DESCRIPTOR = "RESOURCE_MANAGER_FILE_DESCRIPTOR";
@@ -100,6 +104,8 @@ class ClouderaManagerClusterHealthServiceTest {
     @Test
     void testAllGoodHealthChecks() throws ApiException {
 
+        underTest = spy(underTest);
+        doReturn("yarn").when(underTest).extractYarnServiceNameFromBlueprint(any(StackDtoDelegate.class));
         mockHosts(
                 new ApiHost().hostname("host-1")
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
@@ -107,6 +113,13 @@ class ClouderaManagerClusterHealthServiceTest {
                 new ApiHost().hostname("host-2")
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.GOOD))
+        );
+
+        mockRoles(
+                new ApiRole().name("resourcemanager").type(RESOURCEMANAGER).hostRef(new ApiHostRef().hostname("host-1")).healthSummary(ApiHealthSummary.GOOD)
+                        .addHealthChecksItem(new ApiHealthCheck().name(RESOURCE_MANAGER_FILE_DESCRIPTOR).summary(ApiHealthSummary.GOOD)),
+                new ApiRole().name("nodemanager-compute0").type(NODEMANAGER).hostRef(new ApiHostRef().hostname("host-2")).healthSummary(ApiHealthSummary.GOOD)
+                        .addHealthChecksItem(new ApiHealthCheck().name(NODE_MANAGER_CONNECTIVITY).summary(ApiHealthSummary.GOOD))
         );
 
         DetailedHostStatuses result = underTest.getDetailedHostStatuses(Optional.of(RUNTIME));
@@ -118,6 +131,14 @@ class ClouderaManagerClusterHealthServiceTest {
     @Test
     void testUnrecognisedHealthCheckItemFiltered() throws ApiException {
 
+        underTest = spy(underTest);
+        doReturn("yarn").when(underTest).extractYarnServiceNameFromBlueprint(any(StackDtoDelegate.class));
+        mockRoles(
+                new ApiRole().name("resourcemanager").type(RESOURCEMANAGER).hostRef(new ApiHostRef().hostname("host-1")).healthSummary(ApiHealthSummary.GOOD)
+                        .addHealthChecksItem(new ApiHealthCheck().name(RESOURCE_MANAGER_FILE_DESCRIPTOR).summary(ApiHealthSummary.GOOD)),
+                new ApiRole().name("nodemanager-compute0").type(NODEMANAGER).hostRef(new ApiHostRef().hostname("host-2")).healthSummary(ApiHealthSummary.GOOD)
+                        .addHealthChecksItem(new ApiHealthCheck().name(NODE_MANAGER_CONNECTIVITY).summary(ApiHealthSummary.GOOD))
+        );
         mockHosts(
                 new ApiHost().hostname("host-1")
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
@@ -136,6 +157,19 @@ class ClouderaManagerClusterHealthServiceTest {
     @Test
     void testUnhealthyHostsAndCertificates() throws ApiException {
 
+        underTest = spy(underTest);
+        doReturn("yarn").when(underTest).extractYarnServiceNameFromBlueprint(any(StackDtoDelegate.class));
+        mockRoles(
+                new ApiRole().name("resourcemanager").type(RESOURCEMANAGER).hostRef(new ApiHostRef().hostname("host-1")).healthSummary(ApiHealthSummary.GOOD)
+                        .addHealthChecksItem(new ApiHealthCheck().name(RESOURCE_MANAGER_FILE_DESCRIPTOR).summary(ApiHealthSummary.GOOD)),
+                new ApiRole().name("nodemanager-compute0").type(NODEMANAGER).hostRef(new ApiHostRef().hostname("host-2")).healthSummary(ApiHealthSummary.GOOD)
+                        .addHealthChecksItem(new ApiHealthCheck().name(NODE_MANAGER_CONNECTIVITY).summary(ApiHealthSummary.GOOD)),
+                new ApiRole().name("nodemanager-compute1").type(NODEMANAGER).hostRef(new ApiHostRef().hostname("host-3")).healthSummary(ApiHealthSummary.GOOD)
+                        .addHealthChecksItem(new ApiHealthCheck().name(NODE_MANAGER_CONNECTIVITY).summary(ApiHealthSummary.GOOD)),
+                new ApiRole().name("nodemanager-compute2").type(NODEMANAGER).hostRef(new ApiHostRef().hostname("host-4")).healthSummary(ApiHealthSummary.GOOD)
+                        .addHealthChecksItem(new ApiHealthCheck().name(NODE_MANAGER_CONNECTIVITY).summary(ApiHealthSummary.GOOD))
+        );
+
         mockHosts(
                 new ApiHost().hostname("host-1")
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
@@ -153,12 +187,7 @@ class ClouderaManagerClusterHealthServiceTest {
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.GOOD)),
                 new ApiHost().hostname("host-4")
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.CONCERNING))
-                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.GOOD)),
-                new ApiHost().hostname("host-5")
-                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.GOOD))
-                        .addRoleRefsItem(new ApiRoleRef().roleName("role-1").serviceName("bad-service-1").healthSummary(ApiHealthSummary.BAD))
-                        .addRoleRefsItem(new ApiRoleRef().roleName("role-2").serviceName("bad-service-2").healthSummary(ApiHealthSummary.CONCERNING))
         );
 
         DetailedHostStatuses result = underTest.getDetailedHostStatuses(Optional.of(RUNTIME));
@@ -169,14 +198,18 @@ class ClouderaManagerClusterHealthServiceTest {
         assertThat(result.isHostHealthy(hostName("host-1"))).isTrue();
         assertThat(result.isHostHealthy(hostName("host-3"))).isFalse();
         assertThat(result.isHostHealthy(hostName("host-4"))).isFalse();
-        assertThat(result.isHostHealthy(hostName("host-5"))).isFalse();
-        assertThat(result.getServicesHealth().get(hostName("host-5"))
-                .get().getServicesWithBadHealth()).hasSameElementsAs(Arrays.asList("bad-service-1", "bad-service-2"));
     }
 
     @Test
     void testHostsDecommissioned() throws ApiException {
-
+        underTest = spy(underTest);
+        doReturn("yarn").when(underTest).extractYarnServiceNameFromBlueprint(any(StackDtoDelegate.class));
+        mockRoles(
+                new ApiRole().name("resourcemanager").type(RESOURCEMANAGER).hostRef(new ApiHostRef().hostname("host-1")).healthSummary(ApiHealthSummary.GOOD)
+                        .addHealthChecksItem(new ApiHealthCheck().name(RESOURCE_MANAGER_FILE_DESCRIPTOR).summary(ApiHealthSummary.GOOD)),
+                new ApiRole().name("nodemanager-compute0").type(NODEMANAGER).hostRef(new ApiHostRef().hostname("host-2")).healthSummary(ApiHealthSummary.GOOD)
+                        .addHealthChecksItem(new ApiHealthCheck().name(NODE_MANAGER_CONNECTIVITY).summary(ApiHealthSummary.GOOD))
+        );
         ApiHost host1 = new ApiHost().hostname("host-1")
                 .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
                 .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.GOOD));
@@ -205,6 +238,14 @@ class ClouderaManagerClusterHealthServiceTest {
     @Test
     void testHostsInMaintenanceMode() throws ApiException {
 
+        underTest = spy(underTest);
+        doReturn("yarn").when(underTest).extractYarnServiceNameFromBlueprint(any(StackDtoDelegate.class));
+        mockRoles(
+                new ApiRole().name("resourcemanager").type(RESOURCEMANAGER).hostRef(new ApiHostRef().hostname("host-1")).healthSummary(ApiHealthSummary.GOOD)
+                        .addHealthChecksItem(new ApiHealthCheck().name(RESOURCE_MANAGER_FILE_DESCRIPTOR).summary(ApiHealthSummary.GOOD)),
+                new ApiRole().name("nodemanager-compute0").type(NODEMANAGER).hostRef(new ApiHostRef().hostname("host-2")).healthSummary(ApiHealthSummary.GOOD)
+                        .addHealthChecksItem(new ApiHealthCheck().name(NODE_MANAGER_CONNECTIVITY).summary(ApiHealthSummary.GOOD))
+        );
         mockHosts(
                 new ApiHost().hostname("host-1")
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
@@ -234,6 +275,14 @@ class ClouderaManagerClusterHealthServiceTest {
     @Test
     void testServicesNotRunningOnHosts() throws ApiException {
 
+        underTest = spy(underTest);
+        doReturn("yarn").when(underTest).extractYarnServiceNameFromBlueprint(any(StackDtoDelegate.class));
+        mockRoles(
+                new ApiRole().name("resourcemanager").type(RESOURCEMANAGER).hostRef(new ApiHostRef().hostname("host-1")).healthSummary(ApiHealthSummary.GOOD)
+                        .addHealthChecksItem(new ApiHealthCheck().name(RESOURCE_MANAGER_FILE_DESCRIPTOR).summary(ApiHealthSummary.GOOD)),
+                new ApiRole().name("nodemanager-compute0").type(NODEMANAGER).hostRef(new ApiHostRef().hostname("host-2")).healthSummary(ApiHealthSummary.GOOD)
+                        .addHealthChecksItem(new ApiHealthCheck().name(NODE_MANAGER_CONNECTIVITY).summary(ApiHealthSummary.GOOD))
+        );
         mockHosts(
                 new ApiHost().hostname("host-1")
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
@@ -256,6 +305,70 @@ class ClouderaManagerClusterHealthServiceTest {
         assertThat(result.areServicesNotRunning(hostName("host-1"))).isTrue();
         assertThat(result.areServicesNotRunning(hostName("host-2"))).isTrue();
         assertThat(result.areServicesNotRunning(hostName("host-3"))).isFalse();
+    }
+
+    @Test
+    void testServicesInIrrecoverableHealthCondition() throws ApiException {
+        underTest = spy(underTest);
+        doReturn("yarn").when(underTest).extractYarnServiceNameFromBlueprint(any(StackDtoDelegate.class));
+        mockRoles(
+                new ApiRole().name("nodemanager-compute0").type(NODEMANAGER).hostRef(new ApiHostRef().hostname("host-2")).healthSummary(ApiHealthSummary.GOOD)
+                        .addHealthChecksItem(new ApiHealthCheck().name(NODE_MANAGER_SCM_HEALTH).summary(ApiHealthSummary.BAD))
+        );
+
+        mockHosts(
+                new ApiHost().hostname("host-2")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.GOOD))
+        );
+
+        DetailedHostStatuses result = underTest.getDetailedHostStatuses(Optional.of(RUNTIME));
+
+        assertThat(result.areServicesUnhealthy(hostName("host-2"))).isTrue();
+    }
+
+    @Test
+    void testServicesInIrrecoverableHealthConditionWithHealthyRole() throws ApiException {
+        underTest = spy(underTest);
+        doReturn("yarn").when(underTest).extractYarnServiceNameFromBlueprint(any(StackDtoDelegate.class));
+        mockRoles(
+                new ApiRole().name("nodemanager-compute0").type(NODEMANAGER).hostRef(new ApiHostRef().hostname("host-2")).healthSummary(ApiHealthSummary.GOOD)
+                        .addHealthChecksItem(new ApiHealthCheck().name(NODE_MANAGER_HEALTH_CHECKER).summary(ApiHealthSummary.BAD)),
+                new ApiRole().name("nodemanager-compute0").type(NODEMANAGER).hostRef(new ApiHostRef().hostname("host-2")).healthSummary(ApiHealthSummary.GOOD)
+                        .addHealthChecksItem(new ApiHealthCheck().name(NODE_MANAGER_CONNECTIVITY).summary(ApiHealthSummary.GOOD))
+        );
+
+        mockHosts(
+                new ApiHost().hostname("host-2")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.GOOD))
+        );
+
+        DetailedHostStatuses result = underTest.getDetailedHostStatuses(Optional.of(RUNTIME));
+
+        assertThat(result.areServicesUnhealthy(hostName("host-2"))).isTrue();
+    }
+
+    @Test
+    void testServicesInIrrecoverableHealthConditionHealthy() throws ApiException {
+        underTest = spy(underTest);
+        doReturn("yarn").when(underTest).extractYarnServiceNameFromBlueprint(any(StackDtoDelegate.class));
+        mockRoles(
+                new ApiRole().name("nodemanager-compute0").type(NODEMANAGER).hostRef(new ApiHostRef().hostname("host-2")).healthSummary(ApiHealthSummary.GOOD)
+                        .addHealthChecksItem(new ApiHealthCheck().name(NODE_MANAGER_HEALTH_CHECKER).summary(ApiHealthSummary.GOOD)),
+                new ApiRole().name("nodemanager-compute0").type(NODEMANAGER).hostRef(new ApiHostRef().hostname("host-2")).healthSummary(ApiHealthSummary.GOOD)
+                        .addHealthChecksItem(new ApiHealthCheck().name(NODE_MANAGER_CONNECTIVITY).summary(ApiHealthSummary.BAD))
+        );
+
+        mockHosts(
+                new ApiHost().hostname("host-2")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.GOOD))
+        );
+
+        DetailedHostStatuses result = underTest.getDetailedHostStatuses(Optional.of(RUNTIME));
+
+        assertThat(result.areServicesUnhealthy(hostName("host-2"))).isFalse();
     }
 
     @Test

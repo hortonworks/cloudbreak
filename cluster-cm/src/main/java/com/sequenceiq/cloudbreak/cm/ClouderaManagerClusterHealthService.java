@@ -12,6 +12,7 @@ import static com.sequenceiq.cloudbreak.common.type.HealthCheckResult.UNHEALTHY;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -129,13 +130,14 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
     @Override
     public DetailedHostStatuses getDetailedHostStatuses(Optional<String> runtimeVersion) {
         List<ApiHost> apiHosts = getHostsFromCM();
+        List<ApiRole> apiRoles = getRolesFromCM(extractYarnServiceNameFromBlueprint(stack), null);
         Map<HostName, Optional<DetailedHostHealthCheck>> hostsHealth = apiHosts.stream().collect(Collectors.toMap(
                 apiHost -> hostName(apiHost.getHostname()),
                 this::getDetailedHostHealthCheck));
 
         Map<HostName, Optional<DetailedServicesHealthCheck>> servicesHealth = apiHosts.stream().collect(Collectors.toMap(
                 apiHost -> hostName(apiHost.getHostname()),
-                apiHost -> getDetailedServicesHealthCheck(apiHost, runtimeVersion)));
+                apiHost -> getDetailedServicesHealthCheck(apiHost, runtimeVersion, apiRoles)));
 
         Map<HostName, Optional<DetailedCertHealthCheck>>  certHealth = apiHosts.stream().collect(Collectors.toMap(
                 apiHost -> hostName(apiHost.getHostname()),
@@ -166,17 +168,23 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
         }
     }
 
-    private List<ApiRole> getNodemanagerRolesFromCM(StackDtoDelegate stack) {
+    private List<ApiRole> getRolesFromCM(String serviceRefName, String queryFilter) {
         RolesResourceApi rolesResourceApi = clouderaManagerApiFactory.getRolesResourceApi(apiClient);
+        ApiRoleList roles = null;
         try {
-            String yarnServiceName = extractYarnServiceNameFromBlueprint(stack);
-            ApiRoleList roles = rolesResourceApi.readRoles(stack.getName(), yarnServiceName, null, FULL_WITH_HEALTH_CHECK_EXPLANATION);
+            roles = rolesResourceApi.readRoles(stack.getName(), serviceRefName, queryFilter, FULL_WITH_HEALTH_CHECK_EXPLANATION);
             LOGGER.info("Fetched ApiRoleList from CM RolesResourceAPI readRoles call: {}", roles);
-            return emptyIfNull(roles.getItems()).stream().filter(role -> YarnRoles.NODEMANAGER.equalsIgnoreCase(role.getType())).toList();
+            return roles.getItems();
         } catch (ApiException e) {
-            LOGGER.error("Error when trying to read roles from CM", e);
-            throw new RuntimeException("Error when trying to read roles from CM", e);
+            LOGGER.error("Error when reading roles from CM", e);
+            throw new RuntimeException(e);
         }
+    }
+
+    private List<ApiRole> getNodemanagerRolesFromCM(StackDtoDelegate stack) {
+        String yarnServiceName = extractYarnServiceNameFromBlueprint(stack);
+        return emptyIfNull(getRolesFromCM(yarnServiceName, null)).stream()
+                .filter(role -> YarnRoles.NODEMANAGER.equalsIgnoreCase(role.getType())).toList();
     }
 
     private Optional<DetailedHostHealthCheck> getDetailedHostHealthCheck(ApiHost apiHost) {
@@ -189,13 +197,9 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
                         HostCommissionState.valueOf(apiHost.getCommissionState().getValue()), apiHost.getLastHeartbeat()));
     }
 
-    private Optional<DetailedServicesHealthCheck> getDetailedServicesHealthCheck(ApiHost apiHost, Optional<String> runtimeVersion) {
+    private Optional<DetailedServicesHealthCheck> getDetailedServicesHealthCheck(ApiHost apiHost, Optional<String> runtimeVersion, List<ApiRole> apiRoles) {
         if (CMRepositoryVersionUtil.isCmServicesHealthCheckAllowed(runtimeVersion)) {
-            Set<String> servicesWithBadHealth = emptyIfNull(apiHost.getRoleRefs()).stream()
-                    .filter(roleRef -> nonNull(roleRef.getHealthSummary()))
-                    .filter(roleRef -> UNHEALTHY.equals(healthSummaryToHealthCheckResult(roleRef.getHealthSummary())))
-                    .map(ApiRoleRef::getServiceName)
-                    .collect(Collectors.toSet());
+            Set<String> servicesRolesWithBadHealth = getServicesRolesWithBadHealth(apiHost, apiRoles);
 
             Set<String> servicesNotRunning = emptyIfNull(apiHost.getRoleRefs()).stream()
                     .filter(roleRef -> nonNull(roleRef.getRoleStatus()))
@@ -203,9 +207,23 @@ public class ClouderaManagerClusterHealthService implements ClusterHealthService
                     .map(ApiRoleRef::getServiceName)
                     .collect(Collectors.toSet());
 
-            return Optional.of(new DetailedServicesHealthCheck(servicesWithBadHealth, servicesNotRunning));
+            return Optional.of(new DetailedServicesHealthCheck(servicesRolesWithBadHealth, servicesNotRunning));
         }
         return Optional.empty();
+    }
+
+    private Set<String> getServicesRolesWithBadHealth(ApiHost apiHost, List<ApiRole> apiRoles) {
+        for (ApiRole apiRole : apiRoles) {
+            if (apiRole.getHostRef().getHostname().equals(apiHost.getHostname())) {
+                return collectUnhealthyHealthChecks(apiRole);
+            }
+        }
+        return Collections.emptySet();
+    }
+
+    private Set<String> collectUnhealthyHealthChecks(ApiRole apiRole) {
+        return emptyIfNull(apiRole.getHealthChecks()).stream().filter(hc -> BAD.equals(hc.getSummary()) ||
+                CONCERNING.equals(hc.getSummary())).map(ApiHealthCheck::getName).collect(Collectors.toSet());
     }
 
     private Set<String> collectDisconnectedNodeManagers(List<ApiRole> allNMRoles) {

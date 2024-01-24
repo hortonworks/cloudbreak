@@ -63,13 +63,6 @@ public class StopStartDownscaleGetRecoveryCandidatesHandler implements CloudPlat
         StopStartDownscaleGetRecoveryCandidatesRequest request = event.getData();
         LOGGER.info("StopStartDownscaleGetRunningInstancesHandler: {}, with request: {}", request.getResourceId(), request);
 
-        if (!request.isFailureRecoveryEnabled()) {
-            StopStartDownscaleGetRecoveryCandidatesResult result = new StopStartDownscaleGetRecoveryCandidatesResult(request.getResourceId(),
-                    Collections.emptyList(), request.getHostGroupName(), request.getHostIds());
-            notify(result, event);
-            return;
-        }
-
         CloudContext cloudContext = request.getCloudContext();
 
         try {
@@ -86,7 +79,7 @@ public class StopStartDownscaleGetRecoveryCandidatesHandler implements CloudPlat
 
             List<InstanceMetadataView> startedInstanceMetadataWithServicesNotRunning =
                     recoveryCandidateCollectionService.getStartedInstancesWithServicesNotRunning(stack, request.getHostGroupName(),
-                            startedInstanceIdsOnCloudProvider);
+                            startedInstanceIdsOnCloudProvider, request.isFailureRecoveryEnabled());
 
             List<CloudInstance> instancesWithServicesNotRunning;
 

@@ -13,6 +13,7 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
@@ -35,6 +36,9 @@ public class RecoveryCandidateCollectionService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecoveryCandidateCollectionService.class);
 
+    @Value("#{'${nodemanager.irrecoverable.healthchecks}'.split(',')}")
+    private Set<String> irrecoverableHealthChecks;
+
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
 
@@ -45,7 +49,7 @@ public class RecoveryCandidateCollectionService {
     private CloudInstanceIdToInstanceMetaDataConverter cloudInstanceIdToInstanceMetaDataConverter;
 
     public List<InstanceMetadataView> getStartedInstancesWithServicesNotRunning(StackDto stack, String hostGroupName,
-            Set<String> startedInstanceIdsOnCloudProvider) {
+            Set<String> startedInstanceIdsOnCloudProvider, boolean failureRecoveryEnabled) {
         ClusterHealthService clusterHealthService = clusterApiConnectors.getConnector(stack).clusterHealthService();
 
         if (clusterHealthService.isClusterManagerRunning()) {
@@ -60,16 +64,49 @@ public class RecoveryCandidateCollectionService {
             LOGGER.info("DetailedHostsStatuses retrieved via CM API call for stack: {}", stack.getId());
 
             return collectRecoveryCandidates(startedInstancesMetadata,
-                    detailedHostStatuses, runtimeVersionService.getRuntimeVersion(stack.getCluster().getId()));
+                    detailedHostStatuses, runtimeVersionService.getRuntimeVersion(stack.getCluster().getId()), failureRecoveryEnabled);
         } else {
             return Collections.emptyList();
         }
     }
 
     private List<InstanceMetadataView> collectRecoveryCandidates(List<InstanceMetadataView> startedInstances, DetailedHostStatuses detailedHostStatuses,
-            Optional<String> runtimeVersion) {
+            Optional<String> runtimeVersion, boolean failureRecoveryEnabled) {
         boolean servicesHealthCheckAllowed = CMRepositoryVersionUtil.isCmServicesHealthCheckAllowed(runtimeVersion);
-        Predicate<InstanceMetadataView> instanceHealthCheck = im -> {
+        Predicate<InstanceMetadataView> instanceHealthCheck;
+        if (failureRecoveryEnabled && servicesHealthCheckAllowed) {
+            instanceHealthCheck = filterByIrrecoverableServiceHealth(detailedHostStatuses);
+        } else {
+            instanceHealthCheck = filterByServicesNotRunning(servicesHealthCheckAllowed, detailedHostStatuses);
+        }
+        return startedInstances.stream().filter(instanceHealthCheck).collect(Collectors.toList());
+    }
+
+    private Predicate<InstanceMetadataView> filterByIrrecoverableServiceHealth(DetailedHostStatuses detailedHostStatuses) {
+        // service irrecoverable health : false,  Services Not Running: True -> Candidate
+        return im -> {
+            HostName hostName = hostName(im.getDiscoveryFQDN());
+            boolean servicesNotRunning = detailedHostStatuses.areServicesNotRunning(hostName);
+            boolean servicesUnHealthy = detailedHostStatuses.areServicesUnhealthy(hostName);
+            boolean servicesIrrecoverable = detailedHostStatuses.areServicesIrrecoverable(hostName, irrecoverableHealthChecks);
+            if (servicesIrrecoverable) {
+                LOGGER.info("Did not collect: {} as recovery candidate as it has services which are unhealthy and irrecoverable.", hostName.getValue());
+                return false;
+            } else if (servicesNotRunning) {
+                LOGGER.info("Collected: {} as recovery candidate with services not running.", hostName.getValue());
+                return true;
+            } else {
+                if (servicesUnHealthy) {
+                    LOGGER.info("Collected: {} as recovery candidate with services unhealthy.", hostName.getValue());
+                }
+                return servicesUnHealthy;
+            }
+        };
+    }
+
+    private Predicate<InstanceMetadataView> filterByServicesNotRunning(boolean servicesHealthCheckAllowed,
+            DetailedHostStatuses detailedHostStatuses) {
+        return im -> {
             HostName hostName = hostName(im.getDiscoveryFQDN());
             boolean hostUnhealthy = detailedHostStatuses.isHostUnHealthy(hostName);
             boolean hostDecommissioned = detailedHostStatuses.isHostDecommissioned(hostName);
@@ -79,7 +116,6 @@ public class RecoveryCandidateCollectionService {
                     ? getCandidacyPost7212(hostUnhealthy, hostDecommissioned, servicesNotRunning)
                     : getCandidacyPre7212(hostUnhealthy, hostDecommissioned);
         };
-        return startedInstances.stream().filter(instanceHealthCheck).collect(Collectors.toList());
     }
 
     public Set<String> collectStartedInstancesFromCloudProvider(CloudConnector connector, AuthenticatedContext ac,

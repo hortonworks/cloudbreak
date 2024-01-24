@@ -105,7 +105,37 @@ class RecoveryCandidateCollectionServiceTest {
         mockDecommissionedHosts(runningInstances);
 
         List<InstanceMetadataView> recoveryCandidates = underTest.getStartedInstancesWithServicesNotRunning(stack, INSTANCE_GROUP_NAME,
-                generateCloudInstanceIds(RUNNING_INSTANCES_COUNT));
+                generateCloudInstanceIds(RUNNING_INSTANCES_COUNT), false);
+
+        verify(clusterHealthService, times(1)).getDetailedHostStatuses(any(Optional.class));
+        assertThat(recoveryCandidates).hasSize(RECOVERY_CANDIDATES_COUNT);
+    }
+
+    @Test
+    void testGetInstancesWithServicesUnhealthyWhenHostsInUnhealthy() {
+        List<InstanceMetadataView> allInstancesInHg = generateInstanceMetadata(ALL_INSTANCES_IN_HG_COUNT);
+        List<InstanceMetadataView> runningInstances = generateInstanceMetadata(RUNNING_INSTANCES_COUNT);
+
+        setupBasicMocks(allInstancesInHg, runningInstances);
+        mockHostsWithServicesUnhealthyAndUnhealthyHosts(runningInstances);
+
+        List<InstanceMetadataView> recoveryCandidates = underTest.getStartedInstancesWithServicesNotRunning(stack, INSTANCE_GROUP_NAME,
+                generateCloudInstanceIds(RUNNING_INSTANCES_COUNT), true);
+
+        verify(clusterHealthService, times(1)).getDetailedHostStatuses(any(Optional.class));
+        assertThat(recoveryCandidates).isEmpty();
+    }
+
+    @Test
+    void testGetInstancesWithServicesHealthyWhenHostsInUnhealthy() {
+        List<InstanceMetadataView> allInstancesInHg = generateInstanceMetadata(ALL_INSTANCES_IN_HG_COUNT);
+        List<InstanceMetadataView> runningInstances = generateInstanceMetadata(RUNNING_INSTANCES_COUNT);
+
+        setupBasicMocks(allInstancesInHg, runningInstances);
+        mockHostsWithServicesHealthyAndUnhealthyHosts(runningInstances);
+
+        List<InstanceMetadataView> recoveryCandidates = underTest.getStartedInstancesWithServicesNotRunning(stack, INSTANCE_GROUP_NAME,
+                generateCloudInstanceIds(RUNNING_INSTANCES_COUNT), true);
 
         verify(clusterHealthService, times(1)).getDetailedHostStatuses(any(Optional.class));
         assertThat(recoveryCandidates).hasSize(RECOVERY_CANDIDATES_COUNT);
@@ -120,7 +150,7 @@ class RecoveryCandidateCollectionServiceTest {
         mockUnhealthyHosts(runningInstances);
 
         List<InstanceMetadataView> recoveryCandidates = underTest.getStartedInstancesWithServicesNotRunning(stack, INSTANCE_GROUP_NAME,
-                generateCloudInstanceIds(RUNNING_INSTANCES_COUNT));
+                generateCloudInstanceIds(RUNNING_INSTANCES_COUNT), false);
 
         verify(clusterHealthService, times(1)).getDetailedHostStatuses(any(Optional.class));
         assertThat(recoveryCandidates).isEmpty();
@@ -135,7 +165,7 @@ class RecoveryCandidateCollectionServiceTest {
         mockHostsWithServicesRunning(runningInstances);
 
         List<InstanceMetadataView> recoveryCandidates = underTest.getStartedInstancesWithServicesNotRunning(stack, INSTANCE_GROUP_NAME,
-                generateCloudInstanceIds(RUNNING_INSTANCES_COUNT));
+                generateCloudInstanceIds(RUNNING_INSTANCES_COUNT), false);
 
         verify(clusterHealthService, times(1)).getDetailedHostStatuses(any(Optional.class));
         assertThat(recoveryCandidates).isEmpty();
@@ -148,7 +178,7 @@ class RecoveryCandidateCollectionServiceTest {
         doReturn(Boolean.FALSE).when(clusterHealthService).isClusterManagerRunning();
 
         List<InstanceMetadataView> recoveryCandidates = underTest.getStartedInstancesWithServicesNotRunning(stack, INSTANCE_GROUP_NAME,
-                generateCloudInstanceIds(RUNNING_INSTANCES_COUNT));
+                generateCloudInstanceIds(RUNNING_INSTANCES_COUNT), false);
 
         assertThat(recoveryCandidates).isEmpty();
         verify(clusterHealthService, never()).getDetailedHostStatuses(any(Optional.class));
@@ -258,6 +288,22 @@ class RecoveryCandidateCollectionServiceTest {
             doReturn(Boolean.FALSE).when(detailedHostStatuses).isHostUnHealthy(hostName(i.getDiscoveryFQDN()));
             doReturn(Boolean.TRUE).when(detailedHostStatuses).isHostDecommissioned(hostName(i.getDiscoveryFQDN()));
             doReturn(Boolean.FALSE).when(detailedHostStatuses).areServicesNotRunning(hostName(i.getDiscoveryFQDN()));
+        });
+    }
+
+    private void mockHostsWithServicesUnhealthyAndUnhealthyHosts(List<InstanceMetadataView> instances) {
+        Collections.shuffle(instances);
+        instances.subList(0, RECOVERY_CANDIDATES_COUNT).forEach(i -> {
+            doReturn(Boolean.TRUE).when(detailedHostStatuses).areServicesIrrecoverable(hostName(i.getDiscoveryFQDN()), null);
+        });
+    }
+
+    private void mockHostsWithServicesHealthyAndUnhealthyHosts(List<InstanceMetadataView> instances) {
+        Collections.shuffle(instances);
+        instances.subList(0, RECOVERY_CANDIDATES_COUNT).forEach(i -> {
+            doReturn(Boolean.FALSE).when(detailedHostStatuses).areServicesIrrecoverable(hostName(i.getDiscoveryFQDN()), null);
+            doReturn(Boolean.FALSE).when(detailedHostStatuses).areServicesNotRunning(hostName(i.getDiscoveryFQDN()));
+            doReturn(Boolean.TRUE).when(detailedHostStatuses).areServicesUnhealthy(hostName(i.getDiscoveryFQDN()));
         });
     }
 }

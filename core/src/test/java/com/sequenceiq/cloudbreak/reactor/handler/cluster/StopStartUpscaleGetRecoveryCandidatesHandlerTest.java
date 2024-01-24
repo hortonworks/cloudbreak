@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -164,7 +165,7 @@ class StopStartUpscaleGetRecoveryCandidatesHandlerTest {
 
         setupBasicMocks(stackDto, recoveryCandidates, RECOVERY_CANDIDATES_COUNT);
         doReturn(Collections.emptyList()).when(recoveryCandidateCollectionService).getStartedInstancesWithServicesNotRunning(any(StackDto.class),
-                anyString(), anySet());
+                anyString(), anySet(), anyBoolean());
 
         underTest.accept(event);
         verify(eventBus).notify(any(), argumentCaptor.capture());
@@ -228,7 +229,7 @@ class StopStartUpscaleGetRecoveryCandidatesHandlerTest {
         doReturn(stack).when(stackDtoService).getById(anyLong());
         lenient().doReturn(stackView).when(stack).getStack();
         lenient().doReturn(recoveryCandidates).when(recoveryCandidateCollectionService).getStartedInstancesWithServicesNotRunning(any(StackDto.class),
-                anyString(), anySet());
+                anyString(), anySet(), anyBoolean());
         lenient().doReturn(generateCloudInstances(unhealthyCount))
                 .when(instanceMetaDataToCloudInstanceConverter).convert(anyList(), any(StackView.class));
     }

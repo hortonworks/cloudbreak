@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cluster.status;
 
-
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.model.stopstart.DetailedCertHealthCheck;
@@ -42,6 +42,11 @@ public class DetailedHostStatuses {
     public boolean areServicesNotRunning(HostName hostname) {
         return servicesHealth.get(hostname).stream()
                 .anyMatch(dhc -> !dhc.getServicesNotRunning().isEmpty());
+    }
+
+    public boolean areServicesIrrecoverable(HostName hostname, Set<String> irrecoverableHealthChecks) {
+        Set<String> serviceRolesUnHealthy = servicesHealth.get(hostname).get().getServicesWithBadHealth();
+        return serviceRolesUnHealthy.stream().anyMatch(irrecoverableHealthChecks::contains);
     }
 
     public boolean isCertExpiring(HostName hostName) {
