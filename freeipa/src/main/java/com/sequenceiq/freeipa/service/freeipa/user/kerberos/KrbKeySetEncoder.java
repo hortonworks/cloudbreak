@@ -5,12 +5,11 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Integer;
-import org.bouncycastle.asn1.DEROctetString;
-import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERTaggedObject;
-
+import com.cloudera.crypto.provider.shaded.org.bouncycastle.asn1.ASN1Encodable;
+import com.cloudera.crypto.provider.shaded.org.bouncycastle.asn1.ASN1Integer;
+import com.cloudera.crypto.provider.shaded.org.bouncycastle.asn1.DEROctetString;
+import com.cloudera.crypto.provider.shaded.org.bouncycastle.asn1.DERSequence;
+import com.cloudera.crypto.provider.shaded.org.bouncycastle.asn1.DERTaggedObject;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
 import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 
