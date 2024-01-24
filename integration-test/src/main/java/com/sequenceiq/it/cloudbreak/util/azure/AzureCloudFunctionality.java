@@ -171,4 +171,9 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     public Map<String, Set<String>> listAvailabilityZonesForVms(String clusterName, List<String> instanceIds) {
         return azureClientActions.listAvailabilityZonesForVms(clusterName, instanceIds);
     }
+
+    @Override
+    public List<com.sequenceiq.cloudbreak.cloud.model.Volume> describeVolumes(List<String> volumeIds) {
+        return azureClientActions.describeVolumes(volumeIds);
+    }
 }

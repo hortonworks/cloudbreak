@@ -18,14 +18,26 @@ public class SdxDiskUpdateAction implements Action<SdxInternalTestDto, SdxClient
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxDiskUpdateAction.class);
 
+    private int size;
+
+    private String volumeType;
+
+    private String instanceGroup;
+
+    public SdxDiskUpdateAction(int size, String volumeType, String instanceGroup) {
+        this.size = size;
+        this.volumeType = volumeType;
+        this.instanceGroup = instanceGroup;
+    }
+
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
         Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
-        Log.whenJson(LOGGER, " SDX create request: ", testDto.getRequest());
+        Log.whenJson(LOGGER, " SDX disk update request: ", testDto.getRequest());
         DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
-        diskUpdateRequest.setVolumeType("gp3");
-        diskUpdateRequest.setSize(500);
-        diskUpdateRequest.setGroup("master");
+        diskUpdateRequest.setVolumeType(volumeType);
+        diskUpdateRequest.setSize(size);
+        diskUpdateRequest.setGroup(instanceGroup);
         FlowIdentifier flowIdentifier = client.getDefaultClient()
                 .sdxEndpoint()
                 .diskUpdateByName(testDto.getResponse().getStackV4Response().getName(), diskUpdateRequest);

@@ -287,8 +287,8 @@ public class SdxTestClient {
         return new SdxRotateSecretInternalAction(secretTypes, additionalProperties);
     }
 
-    public Action<SdxInternalTestDto, SdxClient> updateDisks() {
-        return new SdxDiskUpdateAction();
+    public Action<SdxInternalTestDto, SdxClient> updateDisks(int size, String volumeType, String instanceGroup) {
+        return new SdxDiskUpdateAction(size, volumeType, instanceGroup);
     }
 
     public Action<SdxScaleTestDto, SdxClient> scale() {
