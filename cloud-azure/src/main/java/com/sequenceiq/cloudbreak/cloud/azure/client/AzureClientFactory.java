@@ -139,7 +139,10 @@ public class AzureClientFactory {
                 new IdentityClientBuilder()
                         .tenantId(credentialView.getTenantId())
                         .clientId(credentialView.getAccessKey())
-                        .certificate(new ByteArrayInputStream((credentialView.getPrivateKeyForCertificate() + credentialView.getCertificate()).getBytes()))
+                        .certificate(new ByteArrayInputStream(
+                                (credentialView.getPrivateKeyForCertificate() + credentialView.getCertificate())
+                                        .getBytes())
+                                .readAllBytes())
                         .identityClientOptions(identityClientOptions)
                         .build());
     }
