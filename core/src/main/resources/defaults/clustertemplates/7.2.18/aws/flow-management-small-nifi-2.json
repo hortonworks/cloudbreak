@@ -1,7 +1,8 @@
 {
-  "name": "7.2.18 - Flow Management - NiFi 2 - Light Duty for AWS - PREVIEW",
+  "name": "7.2.18 - Flow Management - NiFi 2 - Light Duty for AWS",
   "description": "",
   "type": "FLOW_MANAGEMENT",
+  "featureState": "PREVIEW",
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {
