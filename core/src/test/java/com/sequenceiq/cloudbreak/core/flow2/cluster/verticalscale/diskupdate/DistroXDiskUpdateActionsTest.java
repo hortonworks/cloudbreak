@@ -14,7 +14,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -30,15 +29,16 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
-import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
-import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskResizeFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
-import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
@@ -50,6 +50,9 @@ class DistroXDiskUpdateActionsTest {
 
     @Mock
     private CloudbreakFlowMessageService flowMessageService;
+
+    @Mock
+    private StackUpdater stackUpdater;
 
     @InjectMocks
     private DistroXDiskUpdateActions underTest;
@@ -69,21 +72,20 @@ class DistroXDiskUpdateActionsTest {
     @Mock
     private ErrorHandlerAwareReactorEventFactory reactorEventFactory;
 
-    private CommonContext context;
+    private ClusterViewContext context;
 
     @Mock
     private FlowParameters flowParameters;
 
-    private Json json;
+    @Mock
+    private StackView stackView;
+
+    @Mock
+    private ClusterView clusterView;
 
     @BeforeEach
     void setUp() {
-        context = new CommonContext(flowParameters);
-        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("vol-07d2212c81d1b8b00", "/dev/xvdb", 50, "standard",
-                CloudVolumeUsageType.GENERAL);
-        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("us-west-2a", true, "", List.of(volume),
-                512, "standard");
-        json = new Json(volumeSetAttributes);
+        context = new ClusterViewContext(flowParameters, stackView, clusterView);
     }
 
     @Test
@@ -94,8 +96,8 @@ class DistroXDiskUpdateActionsTest {
         doReturn(request).when(event).getDiskUpdateRequest();
         doReturn("test").when(request).getGroup();
         doReturn("gp2").when(request).getVolumeType();
-        AbstractDistroXDiskUpdateAction<DistroXDiskUpdateEvent> action =
-                (AbstractDistroXDiskUpdateAction<DistroXDiskUpdateEvent>) underTest.datahubDiskUpdateValidationAction();
+        AbstractClusterAction<DistroXDiskUpdateEvent> action =
+                (AbstractClusterAction<DistroXDiskUpdateEvent>) underTest.datahubDiskUpdateValidationAction();
         initActionPrivateFields(action);
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
         verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), captor.capture(), any(), anyString(), anyString(), any());
@@ -112,8 +114,8 @@ class DistroXDiskUpdateActionsTest {
         doReturn(request).when(event).getDiskUpdateRequest();
         doReturn("test").when(request).getGroup();
         doReturn("gp2").when(request).getVolumeType();
-        AbstractDistroXDiskUpdateAction<DistroXDiskUpdateEvent> action =
-                (AbstractDistroXDiskUpdateAction<DistroXDiskUpdateEvent>) underTest.diskUpdateInDatahubAction();
+        AbstractClusterAction<DistroXDiskUpdateEvent> action =
+                (AbstractClusterAction<DistroXDiskUpdateEvent>) underTest.diskUpdateInDatahubAction();
         initActionPrivateFields(action);
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
         verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), captor.capture(), any(), anyString(), anyString(), any());
@@ -127,9 +129,10 @@ class DistroXDiskUpdateActionsTest {
         DistroXDiskUpdateEvent event = mock(DistroXDiskUpdateEvent.class);
         doReturn(1L).when(event).getResourceId();
         DiskUpdateRequest request = mock(DiskUpdateRequest.class);
+        doReturn("TEST").when(request).getGroup();
         doReturn(request).when(event).getDiskUpdateRequest();
-        AbstractDistroXDiskUpdateAction<DistroXDiskUpdateEvent> action =
-                (AbstractDistroXDiskUpdateAction<DistroXDiskUpdateEvent>) underTest.diskResizeInDatahubAction();
+        AbstractClusterAction<DistroXDiskUpdateEvent> action =
+                (AbstractClusterAction<DistroXDiskUpdateEvent>) underTest.diskResizeInDatahubAction();
         initActionPrivateFields(action);
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
         verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), captor.capture(), any(), anyString());
@@ -142,8 +145,8 @@ class DistroXDiskUpdateActionsTest {
     void testFinishedAction() throws Exception {
         DistroXDiskResizeFinishedEvent event = mock(DistroXDiskResizeFinishedEvent.class);
         doReturn(1L).when(event).getResourceId();
-        AbstractDistroXDiskUpdateAction<DistroXDiskResizeFinishedEvent> action =
-                (AbstractDistroXDiskUpdateAction<DistroXDiskResizeFinishedEvent>) underTest.finishedAction();
+        AbstractClusterAction<DistroXDiskResizeFinishedEvent> action =
+                (AbstractClusterAction<DistroXDiskResizeFinishedEvent>) underTest.finishedAction();
         initActionPrivateFields(action);
         new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
         verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), captor.capture(), any());

@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskResizeFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
@@ -18,11 +19,11 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.datalake.DiskUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.flow.reactor.api.event.EventSender;
-import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
-public class DistroXDiskUpdateResizeHandler extends EventSenderAwareHandler<DistroXDiskUpdateEvent> {
+public class DistroXDiskUpdateResizeHandler extends ExceptionCatcherEventHandler<DistroXDiskUpdateEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXDiskUpdateResizeHandler.class);
 
@@ -35,19 +36,20 @@ public class DistroXDiskUpdateResizeHandler extends EventSenderAwareHandler<Dist
     @Inject
     private ResourceAttributeUtil resourceAttributeUtil;
 
-    protected DistroXDiskUpdateResizeHandler(EventSender eventSender) {
-        super(eventSender);
-    }
-
     @Override
     public String selector() {
         return "DATAHUB_DISK_RESIZE_HANDLER_EVENT";
     }
 
     @Override
-    public void accept(Event<DistroXDiskUpdateEvent> diskResizeHandlerRequestEvent) {
-        LOGGER.debug("Starting resizeDisks on DiskUpdateService");
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<DistroXDiskUpdateEvent> event) {
+        return new DistroXDiskUpdateFailedEvent(event.getData(), e, DATAHUB_DISK_UPDATE_RESIZE_FAILED);
+    }
+
+    @Override
+    public Selectable doAccept(HandlerEvent<DistroXDiskUpdateEvent> diskResizeHandlerRequestEvent) {
         DistroXDiskUpdateEvent payload = diskResizeHandlerRequestEvent.getData();
+        LOGGER.debug("Starting resizeDisks on DiskUpdateService with request {}", payload);
         Long stackId = payload.getResourceId();
         String instanceGroup = payload.getDiskUpdateRequest().getGroup();
         try {
@@ -55,16 +57,14 @@ public class DistroXDiskUpdateResizeHandler extends EventSenderAwareHandler<Dist
             ResourceType diskResourceType = stack.getDiskResourceType();
             if (diskResourceType != null && diskResourceType.toString().contains("VOLUMESET")) {
                 diskUpdateService.resizeDisksAndUpdateFstab(stack, instanceGroup);
-                eventSender().sendEvent(new DistroXDiskResizeFinishedEvent(stackId), diskResizeHandlerRequestEvent.getHeaders());
+                return new DistroXDiskResizeFinishedEvent(stackId);
             } else {
-                LOGGER.error("Failed to resize disks - No disks to resize");
-                eventSender().sendEvent(new DistroXDiskUpdateFailedEvent(payload, new NotFoundException("No disk found to resize!"),
-                        DATAHUB_DISK_UPDATE_RESIZE_FAILED), diskResizeHandlerRequestEvent.getHeaders());
+                LOGGER.warn("Failed to resize disks - No disks to resize");
+                return new DistroXDiskUpdateFailedEvent(payload, new NotFoundException("No disk found to resize!"), DATAHUB_DISK_UPDATE_RESIZE_FAILED);
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to resize disks", e);
-            eventSender().sendEvent(new DistroXDiskUpdateFailedEvent(payload, e, DATAHUB_DISK_UPDATE_RESIZE_FAILED),
-                    diskResizeHandlerRequestEvent.getHeaders());
+            LOGGER.warn("Failed to resize disks", e);
+            return new DistroXDiskUpdateFailedEvent(payload, e, DATAHUB_DISK_UPDATE_RESIZE_FAILED);
         }
     }
 }

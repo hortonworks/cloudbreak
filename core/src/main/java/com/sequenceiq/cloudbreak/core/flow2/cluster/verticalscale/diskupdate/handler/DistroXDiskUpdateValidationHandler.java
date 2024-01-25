@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateFailedEvent;
@@ -29,11 +30,11 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.datalake.DiskUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.flow.reactor.api.event.EventSender;
-import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
-public class DistroXDiskUpdateValidationHandler extends EventSenderAwareHandler<DistroXDiskUpdateEvent> {
+public class DistroXDiskUpdateValidationHandler extends ExceptionCatcherEventHandler<DistroXDiskUpdateEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXDiskUpdateValidationHandler.class);
 
@@ -46,17 +47,18 @@ public class DistroXDiskUpdateValidationHandler extends EventSenderAwareHandler<
     @Inject
     private DiskUpdateService diskUpdateService;
 
-    public DistroXDiskUpdateValidationHandler(EventSender eventSender) {
-        super(eventSender);
-    }
-
     @Override
     public String selector() {
         return DATAHUB_DISK_UPDATE_VALIDATION_HANDLER_EVENT.selector();
     }
 
     @Override
-    public void accept(Event<DistroXDiskUpdateEvent> distroXDiskUpdateEvent) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<DistroXDiskUpdateEvent> event) {
+        return new DistroXDiskUpdateFailedEvent(event.getData(), e, DATAHUB_DISK_UPDATE_VALIDATION_FAILED);
+    }
+
+    @Override
+    public Selectable doAccept(HandlerEvent<DistroXDiskUpdateEvent> distroXDiskUpdateEvent) {
         LOGGER.debug("In DistroXDiskUpdateValidationHandler.accept");
         DistroXDiskUpdateEvent payload = distroXDiskUpdateEvent.getData();
         try {
@@ -72,8 +74,7 @@ public class DistroXDiskUpdateValidationHandler extends EventSenderAwareHandler<
                 throw new CloudbreakException("Validation Failed: " + exceptionMessage);
             } else {
                 List<Volume> volumesToBeUpdated = convertVolumeSetAttributesVolumesToVolumes(attachedVolumes);
-                DistroXDiskUpdateEvent diskUpdateEvent = DistroXDiskUpdateEvent.builder()
-                        .withResourceCrn(payload.getResourceCrn())
+                return DistroXDiskUpdateEvent.builder()
                         .withResourceId(payload.getResourceId())
                         .withDiskUpdateRequest(payload.getDiskUpdateRequest())
                         .withClusterName(payload.getClusterName())
@@ -83,13 +84,10 @@ public class DistroXDiskUpdateValidationHandler extends EventSenderAwareHandler<
                         .withCloudPlatform(stack.getCloudPlatform())
                         .withStackId(stack.getId())
                         .build();
-                eventSender().sendEvent(diskUpdateEvent, distroXDiskUpdateEvent.getHeaders());
             }
         } catch (Exception e) {
-            DistroXDiskUpdateFailedEvent failedEvent =
-                    new DistroXDiskUpdateFailedEvent(payload, e, DATAHUB_DISK_UPDATE_VALIDATION_FAILED);
-            LOGGER.error("Validation of disk update failed on stack {}, because: {}", payload.getResourceCrn(), e.getMessage());
-            eventSender().sendEvent(failedEvent, distroXDiskUpdateEvent.getHeaders());
+            LOGGER.warn("Validation of disk update failed on stack {}.", payload.getStackId(), e);
+            return new DistroXDiskUpdateFailedEvent(payload, e, DATAHUB_DISK_UPDATE_VALIDATION_FAILED);
         }
     }
 

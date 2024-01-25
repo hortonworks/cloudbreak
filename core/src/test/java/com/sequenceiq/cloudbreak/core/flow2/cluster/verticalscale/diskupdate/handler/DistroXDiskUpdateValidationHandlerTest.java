@@ -4,12 +4,9 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupd
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors.DATAHUB_DISK_UPDATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors.FAILED_DATAHUB_DISK_UPDATE_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 import java.util.List;
 import java.util.Set;
@@ -17,26 +14,24 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateFailedEvent;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.datalake.DiskUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.flow.reactor.api.event.EventSender;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
 class DistroXDiskUpdateValidationHandlerTest {
@@ -53,21 +48,13 @@ class DistroXDiskUpdateValidationHandlerTest {
     @Mock
     private DiskUpdateService diskUpdateService;
 
+    @InjectMocks
     private DistroXDiskUpdateValidationHandler underTest;
-
-    @Mock
-    private EventSender eventSender;
-
-    @Captor
-    private ArgumentCaptor<DistroXDiskUpdateFailedEvent> failureCaptor;
 
     private Json json;
 
     @BeforeEach
     void setUp() {
-        underTest = new DistroXDiskUpdateValidationHandler(eventSender);
-        ReflectionTestUtils.setField(underTest, null, stackDtoService, StackDtoService.class);
-        ReflectionTestUtils.setField(underTest, null, diskUpdateService, DiskUpdateService.class);
         VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume("vol-1", "/dev/xvdb", 50, "standard",
                 CloudVolumeUsageType.GENERAL);
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("us-west-2a", true, "", List.of(volume),
@@ -105,11 +92,9 @@ class DistroXDiskUpdateValidationHandlerTest {
         doReturn(CloudPlatform.AWS.toString()).when(stack).getCloudPlatform();
         doReturn(true).when(diskUpdateService).isDiskTypeChangeSupported(CloudPlatform.AWS.toString());
         doReturn(stack).when(stackDtoService).getById(anyLong());
-        ArgumentCaptor<DistroXDiskUpdateEvent> captor = ArgumentCaptor.forClass(DistroXDiskUpdateEvent.class);
-        underTest.accept(new Event<>(event));
-        verify(eventSender, times(1)).sendEvent(captor.capture(), any());
-        DistroXDiskUpdateEvent eventCaptured = captor.getValue();
-        assertEquals(DATAHUB_DISK_UPDATE_EVENT.selector(), captor.getValue().getSelector());
+        Selectable selectable = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
+        DistroXDiskUpdateEvent eventCaptured = (DistroXDiskUpdateEvent) selectable;
+        assertEquals(DATAHUB_DISK_UPDATE_EVENT.selector(), eventCaptured.getSelector());
         assertEquals(1, eventCaptured.getVolumesToBeUpdated().size());
         assertEquals("vol-1", eventCaptured.getVolumesToBeUpdated().get(0).getId());
     }
@@ -135,8 +120,7 @@ class DistroXDiskUpdateValidationHandlerTest {
         doReturn("compute").when(resource).getInstanceGroup();
         doReturn(Set.of(resource)).when(stack).getResources();
         doReturn(stack).when(stackDtoService).getById(anyLong());
-        underTest.accept(new Event<>(event));
-        verify(eventSender, times(1)).sendEvent(failureCaptor.capture(), any());
-        assertEquals(FAILED_DATAHUB_DISK_UPDATE_EVENT.selector(), failureCaptor.getValue().getSelector());
+        Selectable selectable = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
+        assertEquals(FAILED_DATAHUB_DISK_UPDATE_EVENT.selector(), selectable.getSelector());
     }
 }

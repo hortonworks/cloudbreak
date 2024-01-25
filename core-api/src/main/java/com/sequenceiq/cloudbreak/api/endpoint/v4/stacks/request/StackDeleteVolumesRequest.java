@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request;
 
+import java.util.StringJoiner;
+
 import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -35,5 +37,12 @@ public class StackDeleteVolumesRequest implements JsonEntity {
     @JsonIgnore
     public void setStackId(Long stackId) {
         this.stackId = stackId;
+    }
+
+    public String toString() {
+        return new StringJoiner(", ", StackDeleteVolumesRequest.class.getSimpleName() + "[", "]")
+            .add("group=" + group)
+            .add("stackId=" + stackId)
+            .toString();
     }
 }

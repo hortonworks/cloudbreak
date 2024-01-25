@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesFinishedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesHandlerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesRequest;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
 @Configuration
@@ -43,6 +45,9 @@ public class DeleteVolumesActions {
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
 
+    @Inject
+    private StackUpdater stackUpdater;
+
     @Bean(name = "DELETE_VOLUMES_VALIDATION_STATE")
     public Action<?, ?> deleteVolumesValidationAction() {
         return new AbstractClusterAction<>(DeleteVolumesTriggerEvent.class) {
@@ -50,8 +55,11 @@ public class DeleteVolumesActions {
             @Override
             protected void doExecute(ClusterViewContext context, DeleteVolumesTriggerEvent payload, Map<Object, Object> variables) {
                 StackDeleteVolumesRequest stackDeleteVolumesRequest = payload.getStackDeleteVolumesRequest();
+                Long stackId = stackDeleteVolumesRequest.getStackId();
+                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DELETE_BLOCK_STORAGES, String.format("Validating delete volumes  request " +
+                                "on the host group %s ", stackDeleteVolumesRequest.getGroup()));
                 flowMessageService.fireEventAndLog(stackDeleteVolumesRequest.getStackId(), Status.UPDATE_IN_PROGRESS.name(),
-                        CLUSTER_DELETE_VOLUMES_VALIDATION_START, stackDeleteVolumesRequest.getGroup(), stackDeleteVolumesRequest.getStackId().toString());
+                        CLUSTER_DELETE_VOLUMES_VALIDATION_START, stackDeleteVolumesRequest.getGroup());
                 String selector = EventSelectorUtil.selector(DeleteVolumesValidationRequest.class);
                 DeleteVolumesValidationRequest deleteVolumesValidationRequest = DeleteVolumesValidationRequest.Builder.builder()
                         .withSelector(selector)
@@ -70,8 +78,10 @@ public class DeleteVolumesActions {
             @Override
             protected void doExecute(ClusterViewContext context, DeleteVolumesRequest payload, Map<Object, Object> variables) {
                 StackDeleteVolumesRequest stackDeleteVolumesRequest = payload.getStackDeleteVolumesRequest();
+                stackUpdater.updateStackStatus(stackDeleteVolumesRequest.getStackId(), DetailedStackStatus.DELETE_BLOCK_STORAGES,
+                        String.format("Unmounting Volumes on the host group %s ", stackDeleteVolumesRequest.getGroup()));
                 flowMessageService.fireEventAndLog(stackDeleteVolumesRequest.getStackId(), Status.UPDATE_IN_PROGRESS.name(),
-                        CLUSTER_DELETE_VOLUMES_UNMOUNT_START, stackDeleteVolumesRequest.getGroup(), stackDeleteVolumesRequest.getStackId().toString());
+                        CLUSTER_DELETE_VOLUMES_UNMOUNT_START, stackDeleteVolumesRequest.getGroup());
                 DeleteVolumesUnmountEvent deleteVolumesUnmountEvent = new DeleteVolumesUnmountEvent(payload.getResourceId(),
                         stackDeleteVolumesRequest.getGroup(), payload.getResourcesToBeDeleted(), stackDeleteVolumesRequest, payload.getCloudPlatform(),
                         payload.getHostTemplateServiceComponents());
@@ -87,8 +97,10 @@ public class DeleteVolumesActions {
             @Override
             protected void doExecute(ClusterViewContext context, DeleteVolumesUnmountFinishedEvent payload, Map<Object, Object> variables) {
                 StackDeleteVolumesRequest stackDeleteVolumesRequest = payload.getStackDeleteVolumesRequest();
+                stackUpdater.updateStackStatus(stackDeleteVolumesRequest.getStackId(), DetailedStackStatus.DELETE_BLOCK_STORAGES,
+                        String.format("Deleting block storages on the host group %s ", stackDeleteVolumesRequest.getGroup()));
                 flowMessageService.fireEventAndLog(stackDeleteVolumesRequest.getStackId(), Status.UPDATE_IN_PROGRESS.name(),
-                        CLUSTER_DELETE_VOLUMES_START, stackDeleteVolumesRequest.getGroup(), stackDeleteVolumesRequest.getStackId().toString());
+                        CLUSTER_DELETE_VOLUMES_START, stackDeleteVolumesRequest.getGroup());
                 DeleteVolumesHandlerRequest deleteVolumesHandlerRequest = new DeleteVolumesHandlerRequest(payload.getResourcesToBeDeleted(),
                         payload.getStackDeleteVolumesRequest(), payload.getCloudPlatform(), payload.getHostTemplateServiceComponents());
                 sendEvent(context, EventSelectorUtil.selector(DeleteVolumesHandlerRequest.class), deleteVolumesHandlerRequest);
@@ -103,8 +115,10 @@ public class DeleteVolumesActions {
             @Override
             protected void doExecute(ClusterViewContext context, DeleteVolumesFinishedEvent payload, Map<Object, Object> variables) {
                 StackDeleteVolumesRequest stackDeleteVolumesRequest = payload.getStackDeleteVolumesRequest();
+                stackUpdater.updateStackStatus(stackDeleteVolumesRequest.getStackId(), DetailedStackStatus.DELETE_BLOCK_STORAGES,
+                        String.format("Configuring CM after deleting block storages on the host group %s ", stackDeleteVolumesRequest.getGroup()));
                 flowMessageService.fireEventAndLog(stackDeleteVolumesRequest.getStackId(), Status.UPDATE_IN_PROGRESS.name(),
-                        CLUSTER_DELETE_VOLUMES_CM_CONFIG_START, stackDeleteVolumesRequest.getGroup(), stackDeleteVolumesRequest.getStackId().toString());
+                        CLUSTER_DELETE_VOLUMES_CM_CONFIG_START, stackDeleteVolumesRequest.getGroup());
                 DeleteVolumesCMConfigEvent deleteVolumesCMConfigEvent = new DeleteVolumesCMConfigEvent(payload.getResourceId(),
                         stackDeleteVolumesRequest.getGroup());
                 sendEvent(context, deleteVolumesCMConfigEvent);
@@ -118,9 +132,12 @@ public class DeleteVolumesActions {
 
             @Override
             protected void doExecute(ClusterViewContext context, DeleteVolumesCMConfigFinishedEvent payload, Map<Object, Object> variables) {
-                flowMessageService.fireEventAndLog(payload.getResourceId(), Status.AVAILABLE.name(), CLUSTER_DELETE_VOLUMES_FINISHED,
-                        payload.getRequestGroup(), payload.getResourceId().toString());
-                DeleteVolumesFinalizedEvent deleteVolumesHandlerRequest = new DeleteVolumesFinalizedEvent(payload.getResourceId());
+                Long stackId = payload.getResourceId();
+                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE,
+                        String.format("Finished Deleting Volumes and CM config update on the host group %s", payload.getRequestGroup()));
+                flowMessageService.fireEventAndLog(stackId, Status.AVAILABLE.name(), CLUSTER_DELETE_VOLUMES_FINISHED,
+                        payload.getRequestGroup());
+                DeleteVolumesFinalizedEvent deleteVolumesHandlerRequest = new DeleteVolumesFinalizedEvent(stackId);
                 sendEvent(context, deleteVolumesHandlerRequest);
             }
         };
@@ -133,7 +150,9 @@ public class DeleteVolumesActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Exception during vertical scaling!: {}", payload.getException().getMessage());
-                flowMessageService.fireEventAndLog(payload.getResourceId(),
+                Long stackId = payload.getResourceId();
+                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Failed Deleting Volumes");
+                flowMessageService.fireEventAndLog(stackId,
                         DELETE_FAILED.name(),
                         CLUSTER_DELETE_VOLUMES_FAILED,
                         payload.getException().getMessage());

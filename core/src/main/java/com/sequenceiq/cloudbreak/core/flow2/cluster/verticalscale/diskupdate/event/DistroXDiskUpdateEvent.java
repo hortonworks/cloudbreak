@@ -1,17 +1,17 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event;
 
 import java.util.List;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 @JsonDeserialize(builder = DistroXDiskUpdateEvent.Builder.class)
-public class DistroXDiskUpdateEvent  extends BaseFlowEvent implements Selectable {
+public class DistroXDiskUpdateEvent  extends StackEvent {
 
     private final DiskUpdateRequest diskUpdateRequest;
 
@@ -25,18 +25,16 @@ public class DistroXDiskUpdateEvent  extends BaseFlowEvent implements Selectable
 
     private final String cloudPlatform;
 
-    //CHECKSTYLE:OFF:ExecutableStatementCount
     public DistroXDiskUpdateEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
-            @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("clusterName") String clusterName,
             @JsonProperty("accountId") String accountId,
             @JsonProperty("diskUpdateRequest") DiskUpdateRequest diskUpdateRequest,
             @JsonProperty("volumesToBeUpdated") List<Volume> volumesToBeUpdated,
             @JsonProperty("cloudPlatform") String cloudPlatform,
             @JsonProperty("stackId") Long stackId) {
-        super(selector, resourceId, resourceCrn);
+        super(selector, resourceId);
         this.diskUpdateRequest = diskUpdateRequest;
         this.clusterName = clusterName;
         this.accountId = accountId;
@@ -44,7 +42,6 @@ public class DistroXDiskUpdateEvent  extends BaseFlowEvent implements Selectable
         this.cloudPlatform = cloudPlatform;
         this.stackId = stackId;
     }
-    //CHECKSTYLE:ON:ExecutableStatementCount
 
     public DiskUpdateRequest getDiskUpdateRequest() {
         return diskUpdateRequest;
@@ -70,6 +67,15 @@ public class DistroXDiskUpdateEvent  extends BaseFlowEvent implements Selectable
         return stackId;
     }
 
+    public String toString() {
+        return new StringJoiner(", ", DistroXDiskUpdateEvent.class.getSimpleName() + "[", "]")
+            .add("diskUpdateRequest=" + diskUpdateRequest.toString())
+            .add("clusterName=" + clusterName)
+            .add("volumesToBeUpdated=" + volumesToBeUpdated)
+            .add("cloudPlatform=" + cloudPlatform)
+            .toString();
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -78,8 +84,6 @@ public class DistroXDiskUpdateEvent  extends BaseFlowEvent implements Selectable
     public static final class Builder {
 
         private DiskUpdateRequest diskUpdateRequest;
-
-        private String resourceCrn;
 
         private String selector;
 
@@ -105,11 +109,6 @@ public class DistroXDiskUpdateEvent  extends BaseFlowEvent implements Selectable
 
         public Builder withResourceId(Long resourceId) {
             this.resourceId = resourceId;
-            return this;
-        }
-
-        public Builder withResourceCrn(String resourceCrn) {
-            this.resourceCrn = resourceCrn;
             return this;
         }
 
@@ -144,7 +143,7 @@ public class DistroXDiskUpdateEvent  extends BaseFlowEvent implements Selectable
         }
 
         public DistroXDiskUpdateEvent build() {
-            return new DistroXDiskUpdateEvent(selector, resourceId, resourceCrn, clusterName, accountId,
+            return new DistroXDiskUpdateEvent(selector, resourceId, clusterName, accountId,
                     diskUpdateRequest, volumesToBeUpdated, cloudPlatform, stackId);
         }
     }

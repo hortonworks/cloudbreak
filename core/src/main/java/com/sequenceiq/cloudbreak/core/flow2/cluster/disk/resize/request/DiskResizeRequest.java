@@ -5,11 +5,10 @@ import java.util.StringJoiner;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 @JsonDeserialize(builder = DiskResizeRequest.Builder.class)
-public class DiskResizeRequest extends BaseFlowEvent implements Selectable {
+public class DiskResizeRequest extends StackEvent {
 
     private final String instanceGroup;
 

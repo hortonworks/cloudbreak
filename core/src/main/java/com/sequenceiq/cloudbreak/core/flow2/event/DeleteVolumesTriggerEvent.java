@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.event;
 
+import java.util.StringJoiner;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
@@ -21,6 +23,12 @@ public class DeleteVolumesTriggerEvent extends StackEvent {
 
     public StackDeleteVolumesRequest getStackDeleteVolumesRequest() {
         return stackDeleteVolumesRequest;
+    }
+
+    public String toString() {
+        return new StringJoiner(", ", DeleteVolumesTriggerEvent.class.getSimpleName() + "[", "]")
+            .add("stackDeleteVolumesRequest=" + stackDeleteVolumesRequest.toString())
+            .toString();
     }
 
     @JsonPOJOBuilder

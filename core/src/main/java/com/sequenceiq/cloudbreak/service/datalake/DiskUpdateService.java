@@ -34,9 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
-import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
-import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -212,7 +210,6 @@ public class DiskUpdateService {
         Set<Node> allNodesInTargetGroup = stackUtil.collectNodes(stack).stream().filter(node -> node.getHostGroup().equals(instanceGroup))
                 .collect(Collectors.toSet());
         Cluster cluster = stack.getCluster();
-        InMemoryStateStore.putStack(stackId, PollGroup.POLLABLE);
         Set<Node> nodesWithDiskDataInTargetGroup = stackUtil.collectNodesWithDiskData(stack).stream().filter(node -> node.getHostGroup()
                 .equals(instanceGroup)).collect(Collectors.toSet());
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
@@ -222,8 +219,6 @@ public class DiskUpdateService {
                 allNodesInTargetGroup, exitCriteriaModel);
 
         parseFstabAndPersistDiskInformation(fstabInformation, stack);
-
-        InMemoryStateStore.deleteStack(stackId);
     }
 
     private void parseFstabAndPersistDiskInformation(Map<String, Map<String, String>> fstabInformation, Stack stack) {

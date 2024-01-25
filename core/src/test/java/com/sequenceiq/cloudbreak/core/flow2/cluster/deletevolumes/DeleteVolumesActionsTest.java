@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesFinishedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesRequest;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
@@ -49,6 +50,9 @@ class DeleteVolumesActionsTest {
 
     @Mock
     private CloudbreakFlowMessageService flowMessageService;
+
+    @Mock
+    private StackUpdater stackUpdater;
 
     @InjectMocks
     private DeleteVolumesActions underTest;

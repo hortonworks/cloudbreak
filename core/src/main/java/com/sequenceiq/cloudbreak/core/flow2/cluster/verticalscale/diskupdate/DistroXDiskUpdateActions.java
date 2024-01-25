@@ -22,12 +22,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskResizeFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateFailedEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
-import com.sequenceiq.flow.core.CommonContext;
+import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 
 @Configuration
 public class DistroXDiskUpdateActions {
@@ -37,16 +43,23 @@ public class DistroXDiskUpdateActions {
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
 
+    @Inject
+    private StackUpdater stackUpdater;
+
     @Bean(name = "DATAHUB_DISK_UPDATE_VALIDATION_STATE")
     public Action<?, ?> datahubDiskUpdateValidationAction() {
-        return new AbstractDistroXDiskUpdateAction<>(DistroXDiskUpdateEvent.class) {
+        return new AbstractClusterAction<>(DistroXDiskUpdateEvent.class) {
             @Override
-            protected void doExecute(CommonContext context, DistroXDiskUpdateEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterViewContext context, DistroXDiskUpdateEvent payload, Map<Object, Object> variables) {
                 LOGGER.debug("Starting validations for datahub disk update.");
-                flowMessageService.fireEventAndLog(payload.getResourceId(),
+                Long stackId = payload.getResourceId();
+                String targetInstanceGroup = payload.getDiskUpdateRequest().getGroup();
+                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPDATE_ATTACHED_VOLUMES, String.format("Validating volume update on the host " +
+                                "group %s", targetInstanceGroup));
+                flowMessageService.fireEventAndLog(stackId,
                         Status.DATAHUB_DISK_UPDATE_VALIDATION_IN_PROGRESS.name(),
                         DATAHUB_DISK_UPDATE_VALIDATION_IN_PROGRESS,
-                        payload.getDiskUpdateRequest().getGroup(),
+                        targetInstanceGroup,
                         payload.getDiskUpdateRequest().getVolumeType(),
                         String.valueOf(payload.getDiskUpdateRequest().getSize()));
                 sendEvent(context, DATAHUB_DISK_UPDATE_VALIDATION_HANDLER_EVENT.selector(), payload);
@@ -56,16 +69,20 @@ public class DistroXDiskUpdateActions {
 
     @Bean(name = "DATAHUB_DISK_UPDATE_STATE")
     public Action<?, ?> diskUpdateInDatahubAction() {
-        return new AbstractDistroXDiskUpdateAction<>(DistroXDiskUpdateEvent.class) {
+        return new AbstractClusterAction<>(DistroXDiskUpdateEvent.class) {
             @Override
-            protected void doExecute(CommonContext context, DistroXDiskUpdateEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Starting datahub disk update.");
-                flowMessageService.fireEventAndLog(payload.getResourceId(),
+            protected void doExecute(ClusterViewContext context, DistroXDiskUpdateEvent payload, Map<Object, Object> variables) {
+                LOGGER.debug("Starting datahub disk update with request {}", payload);
+                Long stackId = payload.getResourceId();
+                DiskUpdateRequest diskUpdateRequest = payload.getDiskUpdateRequest();
+                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPDATE_ATTACHED_VOLUMES, String.format("Updating volumes on the host group %s",
+                        diskUpdateRequest.getGroup()));
+                flowMessageService.fireEventAndLog(stackId,
                         Status.UPDATE_IN_PROGRESS.name(),
                         DATAHUB_DISK_UPDATE_IN_PROGRESS,
-                        payload.getDiskUpdateRequest().getGroup(),
-                        payload.getDiskUpdateRequest().getVolumeType(),
-                        String.valueOf(payload.getDiskUpdateRequest().getSize()));
+                        diskUpdateRequest.getGroup(),
+                        diskUpdateRequest.getVolumeType(),
+                        String.valueOf(diskUpdateRequest.getSize()));
                 sendEvent(context, DATAHUB_DISK_UPDATE_HANDLER_EVENT.selector(), payload);
             }
         };
@@ -73,19 +90,22 @@ public class DistroXDiskUpdateActions {
 
     @Bean(name = "DISK_RESIZE_STATE")
     public Action<?, ?> diskResizeInDatahubAction() {
-        return new AbstractDistroXDiskUpdateAction<>(DistroXDiskUpdateEvent.class) {
+        return new AbstractClusterAction<>(DistroXDiskUpdateEvent.class) {
             @Override
-            protected void doExecute(CommonContext ctx, DistroXDiskUpdateEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Starting disk resize for stack: {}", payload.getResourceId());
-                flowMessageService.fireEventAndLog(payload.getResourceId(),
+            protected void doExecute(ClusterViewContext ctx, DistroXDiskUpdateEvent payload, Map<Object, Object> variables) {
+                Long stackId = payload.getResourceId();
+                DiskUpdateRequest diskUpdateRequest = payload.getDiskUpdateRequest();
+                LOGGER.debug("Starting disk resize for stack: {}", stackId);
+                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPDATE_ATTACHED_VOLUMES, String.format("Resizing volumes on the host group %s",
+                        diskUpdateRequest.getGroup()));
+                flowMessageService.fireEventAndLog(stackId,
                         UPDATE_IN_PROGRESS.name(),
                         DISK_RESIZE_STARTED,
-                        String.valueOf(payload.getResourceId()));
+                        payload.getDiskUpdateRequest().getGroup());
                 DistroXDiskUpdateEvent handlerRequest = DistroXDiskUpdateEvent.builder()
-                        .withResourceCrn(payload.getResourceCrn())
-                        .withResourceId(payload.getResourceId())
+                        .withResourceId(stackId)
                         .withStackId(payload.getStackId())
-                        .withDiskUpdateRequest(payload.getDiskUpdateRequest())
+                        .withDiskUpdateRequest(diskUpdateRequest)
                         .withClusterName(payload.getClusterName())
                         .withAccountId(payload.getAccountId())
                         .withSelector(DATAHUB_DISK_RESIZE_HANDLER_EVENT.selector())
@@ -97,11 +117,13 @@ public class DistroXDiskUpdateActions {
 
     @Bean(name = "DATAHUB_DISK_UPDATE_FINISHED_STATE")
     public Action<?, ?> finishedAction() {
-        return new AbstractDistroXDiskUpdateAction<>(DistroXDiskResizeFinishedEvent.class) {
+        return new AbstractClusterAction<>(DistroXDiskResizeFinishedEvent.class) {
             @Override
-            protected void doExecute(CommonContext context, DistroXDiskResizeFinishedEvent payload, Map<Object, Object> variables) {
-                LOGGER.debug("Sending finalize event after disk resize for stack: {}", payload.getResourceId());
-                flowMessageService.fireEventAndLog(payload.getResourceId(),
+            protected void doExecute(ClusterViewContext context, DistroXDiskResizeFinishedEvent payload, Map<Object, Object> variables) {
+                Long stackId = payload.getResourceId();
+                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Updating volumes is complete");
+                LOGGER.debug("Sending finalize event after disk resize for stack: {}", stackId);
+                flowMessageService.fireEventAndLog(stackId,
                             Status.AVAILABLE.name(),
                             DATAHUB_DISK_UPDATE_FINISHED);
                 sendEvent(context, DATAHUB_DISK_UPDATE_FINALIZE_EVENT.selector(), payload);
@@ -111,12 +133,14 @@ public class DistroXDiskUpdateActions {
 
     @Bean(name = "DATAHUB_DISK_UPDATE_FAILED_STATE")
     public Action<?, ?> failedAction() {
-        return new AbstractDistroXDiskUpdateAction<>(DistroXDiskUpdateFailedEvent.class) {
+        return new AbstractStackFailureAction<DistroXDiskUpdateState, DistroXDiskUpdateStateSelectors>() {
+
             @Override
-            protected void doExecute(CommonContext context, DistroXDiskUpdateFailedEvent payload, Map<Object, Object> variables) {
-                LOGGER.error("Failed to update disks in Datahub {}. Status: {}.",
-                        payload.getDiskUpdateEvent(), payload.getStatus(), payload.getException());
-                flowMessageService.fireEventAndLog(payload.getResourceId(),
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
+                Long stackId = payload.getResourceId();
+                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Failed Updating volumes");
+                LOGGER.warn("Failed to update disks in Datahub for stack {}. Reason: {}.", stackId, payload.getException());
+                flowMessageService.fireEventAndLog(stackId,
                         Status.UPDATE_FAILED.name(),
                         DATAHUB_DISK_UPDATE_FAILED,
                         payload.getException().getMessage());

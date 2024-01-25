@@ -4,10 +4,9 @@ import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.flow.reactor.api.event.BaseFailedFlowEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 
-public class DiskResizeFailedEvent extends BaseFailedFlowEvent implements Selectable {
+public class DiskResizeFailedEvent extends StackFailureEvent {
 
     private final Exception errorDetails;
 
@@ -15,10 +14,8 @@ public class DiskResizeFailedEvent extends BaseFailedFlowEvent implements Select
     public DiskResizeFailedEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
-            @JsonProperty("resourceName") String resourceName,
-            @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("errorDetails") Exception errorDetails) {
-        super(selector, resourceId, null, resourceName, resourceCrn, errorDetails);
+        super(selector, resourceId, errorDetails);
         this.errorDetails = errorDetails;
     }
 

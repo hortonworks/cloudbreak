@@ -514,7 +514,6 @@ public class ReactorFlowManager {
         String selector = DistroXDiskUpdateStateSelectors.DATAHUB_DISK_UPDATE_VALIDATION_EVENT.selector();
         LOGGER.info("Datahub Vertical Scale flow triggered for datahub {}", stack.getName());
         DistroXDiskUpdateEvent datahubDiskUpdateTriggerEvent = DistroXDiskUpdateEvent.builder()
-                .withResourceCrn(stack.getResourceCrn())
                 .withResourceId(stackId)
                 .withStackId(stackId)
                 .withDiskUpdateRequest(updateRequest)

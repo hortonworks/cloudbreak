@@ -41,8 +41,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
-import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
-import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -219,7 +217,6 @@ public class DeleteVolumesService {
         StackDto stackDto = stackDtoService.getById(stack.getId());
         stopClouderaManagerService(stackDto, hostTemplateServiceComponents);
         Set<Node> allNodes = stackUtil.collectNodes(stack).stream().filter(node -> node.getHostGroup().equals(requestGroup)).collect(Collectors.toSet());
-        InMemoryStateStore.putStack(stack.getId(), PollGroup.POLLABLE);
         LOGGER.info("RE-Bootstrap machines - This is required for pushing script to nodes.");
         clusterBootstrapper.reBootstrapMachines(stack.getId());
         Set<Node> nodesWithDiskData = stackUtil.collectNodesWithDiskData(stack).stream().filter(node -> node.getHostGroup().equals(requestGroup))
@@ -276,7 +273,6 @@ public class DeleteVolumesService {
         LOGGER.debug("Getting fstab information. Using poller so that it will wait for the mount scripts to finish.");
         List<Map<String, String>> fstabResponse = Lists.newArrayList();
         pollingFstab(gatewayConfigs, requestGroupHostnames, fstabResponse);
-        InMemoryStateStore.deleteStack(stack.getId());
         Map<String, Map<String, String>> fstabInformation = nodesWithDiskData.stream()
             .map(node -> {
                 String fstab = fstabResponse.get(0).getOrDefault(node.getHostname(), "");

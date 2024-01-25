@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request;
 
+import java.util.StringJoiner;
+
 import jakarta.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.Range;
@@ -47,5 +49,13 @@ public class DiskUpdateRequest implements JsonEntity {
 
     public void setGroup(String group) {
         this.group = group;
+    }
+
+    public String toString() {
+        return new StringJoiner(", ", DiskUpdateRequest.class.getSimpleName() + "[", "]")
+                .add("volumeType=" + volumeType)
+                .add("size=" + size)
+                .add("group=" + group)
+                .toString();
     }
 }

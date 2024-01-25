@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.disk.resize.request.DiskResizeFailedEvent;
@@ -39,11 +40,11 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.event.EventSelectorUtil;
-import com.sequenceiq.flow.reactor.api.event.EventSender;
-import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
-public class DiskResizeHandler extends EventSenderAwareHandler<DiskResizeHandlerRequest> {
+public class DiskResizeHandler extends ExceptionCatcherEventHandler<DiskResizeHandlerRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiskResizeHandler.class);
 
@@ -64,10 +65,6 @@ public class DiskResizeHandler extends EventSenderAwareHandler<DiskResizeHandler
 
     @Inject
     private ResourceAttributeUtil resourceAttributeUtil;
-
-    protected DiskResizeHandler(EventSender eventSender) {
-        super(eventSender);
-    }
 
     @Override
     public String selector() {
@@ -110,7 +107,12 @@ public class DiskResizeHandler extends EventSenderAwareHandler<DiskResizeHandler
     }
 
     @Override
-    public void accept(Event<DiskResizeHandlerRequest> diskResizeHandlerRequestEvent) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<DiskResizeHandlerRequest> event) {
+        return new DiskResizeFailedEvent(FAILURE_EVENT.event(), resourceId, e);
+    }
+
+    @Override
+    public Selectable doAccept(HandlerEvent<DiskResizeHandlerRequest> diskResizeHandlerRequestEvent) {
         LOGGER.debug("Starting resizeDisks on DiskUpdateService");
         DiskResizeHandlerRequest payload = diskResizeHandlerRequestEvent.getData();
         Long stackId = payload.getResourceId();
@@ -137,16 +139,14 @@ public class DiskResizeHandler extends EventSenderAwareHandler<DiskResizeHandler
                 parseFstabAndPersistDiskInformation(fstabInformation, stack);
 
                 InMemoryStateStore.deleteStack(stackId);
-                eventSender().sendEvent(new DiskResizeFinishedEvent(stackId), diskResizeHandlerRequestEvent.getHeaders());
+                return new DiskResizeFinishedEvent(stackId);
             } else {
-                LOGGER.error("Failed to resize disks - No disks to resize");
-                eventSender().sendEvent(new DiskResizeFailedEvent(FAILURE_EVENT.event(), stackId, null, null,
-                                new NotFoundException("No disk found to resize!")), diskResizeHandlerRequestEvent.getHeaders());
+                LOGGER.warn("Failed to resize disks - No disks to resize");
+                return new DiskResizeFailedEvent(FAILURE_EVENT.event(), stackId, new NotFoundException("No disk found to resize!"));
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to resize disks", e);
-            eventSender().sendEvent(new DiskResizeFailedEvent(FAILURE_EVENT.event(), stackId, null, null, e),
-                    diskResizeHandlerRequestEvent.getHeaders());
+            LOGGER.warn("Failed to resize disks", e);
+            return new DiskResizeFailedEvent(FAILURE_EVENT.event(), stackId, e);
         }
     }
 }

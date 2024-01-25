@@ -14,24 +14,21 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateFailedEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.datalake.DiskUpdateService;
-import com.sequenceiq.flow.reactor.api.event.EventSender;
-import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
-public class DistroXDiskUpdateHandler extends EventSenderAwareHandler<DistroXDiskUpdateEvent> {
+public class DistroXDiskUpdateHandler extends ExceptionCatcherEventHandler<DistroXDiskUpdateEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXDiskUpdateHandler.class);
 
     @Inject
     private DiskUpdateService diskUpdateService;
-
-    public DistroXDiskUpdateHandler(EventSender eventSender) {
-        super(eventSender);
-    }
 
     @Override
     public String selector() {
@@ -39,18 +36,20 @@ public class DistroXDiskUpdateHandler extends EventSenderAwareHandler<DistroXDis
     }
 
     @Override
-    public void accept(Event<DistroXDiskUpdateEvent> datahubDiskUpdateEventEvent) {
-        LOGGER.debug("In DistroXDiskUpdateHandler.accept");
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<DistroXDiskUpdateEvent> event) {
+        return new DistroXDiskUpdateFailedEvent(event.getData(), e, DATAHUB_DISK_UPDATE_FAILED);
+    }
+
+    @Override
+    public Selectable doAccept(HandlerEvent<DistroXDiskUpdateEvent> datahubDiskUpdateEventEvent) {
         DistroXDiskUpdateEvent payload = datahubDiskUpdateEventEvent.getData();
         List<Volume> volumesToBeUpdated = payload.getVolumesToBeUpdated();
         Long stackId = payload.getStackId();
         DiskUpdateRequest diskUpdateRequest = payload.getDiskUpdateRequest();
         try {
-            LOGGER.debug("Starting Disk Update for datahub.");
-            LOGGER.debug("Calling updateDiskTypeAndSize with request :: {}", diskUpdateRequest);
+            LOGGER.debug("Starting Disk Update for datahub. Calling updateDiskTypeAndSize with request :: {}", diskUpdateRequest);
             diskUpdateService.updateDiskTypeAndSize(diskUpdateRequest, volumesToBeUpdated, stackId);
-            DistroXDiskUpdateEvent datahubDiskUpdateEvent = DistroXDiskUpdateEvent.builder()
-                .withResourceCrn(payload.getResourceCrn())
+            return DistroXDiskUpdateEvent.builder()
                 .withResourceId(payload.getResourceId())
                 .withDiskUpdateRequest(payload.getDiskUpdateRequest())
                 .withClusterName(payload.getClusterName())
@@ -60,12 +59,9 @@ public class DistroXDiskUpdateHandler extends EventSenderAwareHandler<DistroXDis
                 .withCloudPlatform(payload.getCloudPlatform())
                 .withStackId(stackId)
                 .build();
-            eventSender().sendEvent(datahubDiskUpdateEvent, datahubDiskUpdateEventEvent.getHeaders());
         } catch (Exception ex) {
-            DistroXDiskUpdateFailedEvent failedEvent =
-                    new DistroXDiskUpdateFailedEvent(payload, ex, DATAHUB_DISK_UPDATE_FAILED);
-            LOGGER.error("FAILED_DATAHUB_DISK_UPDATE_EVENT event sent with error: {} on stack {}", ex.getMessage(), payload.getResourceCrn());
-            eventSender().sendEvent(failedEvent, datahubDiskUpdateEventEvent.getHeaders());
+            LOGGER.warn("FAILED_DATAHUB_DISK_UPDATE_EVENT event sent on stack {}", payload.getStackId(), ex);
+            return new DistroXDiskUpdateFailedEvent(payload, ex, DATAHUB_DISK_UPDATE_FAILED);
         }
     }
 }

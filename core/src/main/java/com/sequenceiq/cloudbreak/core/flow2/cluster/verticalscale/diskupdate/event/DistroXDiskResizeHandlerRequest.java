@@ -4,10 +4,9 @@ import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
-public class DistroXDiskResizeHandlerRequest extends BaseFlowEvent implements Selectable {
+public class DistroXDiskResizeHandlerRequest extends StackEvent {
 
     private final String instanceGroup;
 
@@ -16,7 +15,7 @@ public class DistroXDiskResizeHandlerRequest extends BaseFlowEvent implements Se
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("instanceGroup") String instanceGroup) {
-        super(selector, stackId, null);
+        super(selector, stackId);
         this.instanceGroup = instanceGroup;
     }
 
