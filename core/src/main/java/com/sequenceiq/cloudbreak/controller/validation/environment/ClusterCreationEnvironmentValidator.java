@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.controller.validation.environment;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static java.util.Optional.ofNullable;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,7 +27,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
-import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.type.KerberosType;
@@ -36,7 +35,6 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Component
 public class ClusterCreationEnvironmentValidator {
@@ -59,7 +57,7 @@ public class ClusterCreationEnvironmentValidator {
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Inject
-    private SdxClientService sdxClientService;
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     public void validate(Stack stack, DetailedEnvironmentResponse environment, boolean distroxRequest,
             ValidationResult.ValidationResultBuilder validationBuilder) {
@@ -77,7 +75,7 @@ public class ClusterCreationEnvironmentValidator {
                         environment.getName(), environment.getRegions().getNames().stream().sorted().collect(Collectors.joining(","))));
             }
         }
-        validateDatalakeConfig(stack, validationBuilder, distroxRequest);
+        validateDatalakeConfig(stack, environment, validationBuilder, distroxRequest);
     }
 
     public void validateRdsConfigNames(Set<String> rdsConfigNames, ValidationResultBuilder resultBuilder, Long workspaceId) {
@@ -133,12 +131,12 @@ public class ClusterCreationEnvironmentValidator {
                 .orElse(Boolean.FALSE);
     }
 
-    private void validateDatalakeConfig(Stack stack, ValidationResultBuilder resultBuilder, boolean distroxRequest) {
+    private void validateDatalakeConfig(Stack stack, DetailedEnvironmentResponse environment, ValidationResultBuilder resultBuilder, boolean distroxRequest) {
         if (CloudPlatform.MOCK.name().equalsIgnoreCase(stack.cloudPlatform())) {
             LOGGER.info("No Data Lake validation for MOCK provider");
         } else if (validateDatalakeAvailability && distroxRequest) {
-            List<SdxClusterResponse> datalakes = sdxClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
-            if (datalakes.isEmpty()) {
+            Set<String> crns = platformAwareSdxConnector.listSdxCrns(environment.getName(), environment.getCrn());
+            if (crns.isEmpty()) {
                 resultBuilder.error("Data Lake is not available in your environment!");
             }
         }

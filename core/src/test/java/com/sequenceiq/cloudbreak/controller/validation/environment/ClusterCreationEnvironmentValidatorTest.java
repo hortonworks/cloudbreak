@@ -8,8 +8,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig.KerberosConfigBuilder;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
-import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.type.KerberosType;
@@ -45,7 +45,6 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterCreationEnvironmentValidatorTest {
@@ -72,7 +71,7 @@ class ClusterCreationEnvironmentValidatorTest {
     private PlatformParameters platformParameters;
 
     @Mock
-    private SdxClientService sdxClientService;
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @InjectMocks
     private ClusterCreationEnvironmentValidator underTest;
@@ -92,7 +91,7 @@ class ClusterCreationEnvironmentValidatorTest {
         // GIVEN
         Stack stack = getStack();
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
-        when(sdxClientService.getByEnvironmentCrn(any())).thenReturn(Arrays.asList(new SdxClusterResponse()));
+        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of("crn"));
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validate(stack, environment, true, validationBuilder);
@@ -106,7 +105,7 @@ class ClusterCreationEnvironmentValidatorTest {
         // GIVEN
         Stack stack = getStack();
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
-        when(sdxClientService.getByEnvironmentCrn(any())).thenReturn(Arrays.asList());
+        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of());
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validate(stack, environment, true, validationBuilder);
@@ -145,7 +144,7 @@ class ClusterCreationEnvironmentValidatorTest {
         environment.setRegions(regions);
         when(connector.displayNameToRegion(any())).thenReturn(westUs2RegionName);
         when(connector.regionToDisplayName(any())).thenReturn(westUs2RegionDisplayName);
-        when(sdxClientService.getByEnvironmentCrn(any())).thenReturn(Arrays.asList(new SdxClusterResponse()));
+        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of("crn"));
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validate(stack, environment, true, validationBuilder);
@@ -168,7 +167,7 @@ class ClusterCreationEnvironmentValidatorTest {
         environment.setRegions(regions);
         when(connector.displayNameToRegion(any())).thenReturn(westUs2RegionName);
         when(connector.regionToDisplayName(any())).thenReturn(westUs2RegionDisplayName);
-        when(sdxClientService.getByEnvironmentCrn(any())).thenReturn(Arrays.asList(new SdxClusterResponse()));
+        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of("crn"));
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validate(stack, environment, true, validationBuilder);
@@ -191,7 +190,7 @@ class ClusterCreationEnvironmentValidatorTest {
         environment.setRegions(regions);
         when(connector.displayNameToRegion(any())).thenReturn(westUs2RegionName);
         when(connector.regionToDisplayName(any())).thenReturn(westUs2RegionDisplayName);
-        when(sdxClientService.getByEnvironmentCrn(any())).thenReturn(Arrays.asList(new SdxClusterResponse()));
+        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of("crn"));
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validate(stack, environment, true, validationBuilder);
@@ -214,7 +213,7 @@ class ClusterCreationEnvironmentValidatorTest {
         environment.setRegions(regions);
         when(connector.displayNameToRegion(any())).thenReturn(westUs2RegionName);
         when(connector.regionToDisplayName(any())).thenReturn(westUs2RegionDisplayName);
-        when(sdxClientService.getByEnvironmentCrn(any())).thenReturn(Arrays.asList(new SdxClusterResponse()));
+        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of("crn"));
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validate(stack, environment, true, validationBuilder);
@@ -229,7 +228,7 @@ class ClusterCreationEnvironmentValidatorTest {
         Stack stack = getStack();
         stack.setEnvironmentCrn(null);
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
-        when(sdxClientService.getByEnvironmentCrn(any())).thenReturn(Arrays.asList(new SdxClusterResponse()));
+        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of("crn"));
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validate(stack, environment, true, validationBuilder);
@@ -243,7 +242,7 @@ class ClusterCreationEnvironmentValidatorTest {
         // GIVEN
         Stack stack = getStack();
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
-        when(sdxClientService.getByEnvironmentCrn(any())).thenReturn(Arrays.asList(new SdxClusterResponse()));
+        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of("crn"));
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validate(stack, environment, true, validationBuilder);
@@ -261,7 +260,7 @@ class ClusterCreationEnvironmentValidatorTest {
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
         environment.getRegions().setNames(Lists.newArrayList("region1", "region2"));
         environment.setName("env1");
-        when(sdxClientService.getByEnvironmentCrn(any())).thenReturn(Arrays.asList(new SdxClusterResponse()));
+        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of("crn"));
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validate(stack, environment, true, validationBuilder);
@@ -279,7 +278,7 @@ class ClusterCreationEnvironmentValidatorTest {
         Stack stack = getStack();
         stack.setEnvironmentCrn(null);
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
-        when(sdxClientService.getByEnvironmentCrn(any())).thenReturn(Arrays.asList(new SdxClusterResponse()));
+        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of("crn"));
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validate(stack, environment, true, validationBuilder);
@@ -331,7 +330,7 @@ class ClusterCreationEnvironmentValidatorTest {
         clusterRequest.setCm(cmRequest);
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
         when(platformParameters.isAutoTlsSupported()).thenReturn(providerAutoTls);
-        when(sdxClientService.getByEnvironmentCrn(any())).thenReturn(Arrays.asList(new SdxClusterResponse()));
+        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of("crn"));
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validateAutoTls(clusterRequest, stack, validationBuilder, environment.getParentEnvironmentCloudPlatform());
