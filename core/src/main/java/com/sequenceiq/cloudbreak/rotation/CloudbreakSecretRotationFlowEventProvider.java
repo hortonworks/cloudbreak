@@ -35,12 +35,12 @@ public class CloudbreakSecretRotationFlowEventProvider implements SecretRotation
                 .collect(Collectors.toSet());
     }
 
-    private static Function<CloudbreakSecretType, ClusterCertificatesRotationTriggerEvent> secretTypeToPostFlowEvent(
+    private static Function<CloudbreakSecretType, StackEvent> secretTypeToPostFlowEvent(
             SecretRotationFlowChainTriggerEvent event) {
         return cloudbreakSecretType -> switch (cloudbreakSecretType) {
             case DATAHUB_CM_INTERMEDIATE_CA_CERT ->
                     new ClusterCertificatesRotationTriggerEvent(ClusterCertificatesRotationEvent.CLUSTER_CMCA_ROTATION_EVENT.event(),
-                            event.getResourceId(), CertificateRotationType.HOST_CERTS, Boolean.TRUE);
+                            event.getResourceId(), CertificateRotationType.ALL, Boolean.TRUE);
             default -> null;
         };
     }

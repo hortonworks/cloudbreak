@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.CertificateRotationType;
 import com.sequenceiq.cloudbreak.converter.util.ExceptionMessageFormatterUtil;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -28,8 +29,11 @@ public class ClusterCertificatesRotationService {
     @Inject
     private ClusterService clusterService;
 
-    void initClusterCertificatesRotation(long stackId) {
+    void initClusterCertificatesRotation(long stackId, CertificateRotationType certificateRotationType) {
         String statusReason = "Rotating the certificates of the cluster.";
+        if (CertificateRotationType.ALL.equals(certificateRotationType)) {
+            statusReason = "The rotation of the intermediate CA certificate of the cluster has been started.";
+        }
         LOGGER.debug(statusReason);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CERTIFICATES_ROTATION_IN_PROGRESS, statusReason);
         clusterService.updateClusterCertExpirationState(stackId, false);

@@ -7,12 +7,14 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.CertificateRotationType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeFlag;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowEventProvider;
+import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.cert.rotation.event.SdxCertRotationEvent;
 import com.sequenceiq.datalake.flow.cert.rotation.event.SdxStartCertRotationEvent;
 import com.sequenceiq.datalake.flow.salt.update.SaltUpdateEvent;
@@ -38,11 +40,12 @@ public class DatalakeSecretRotationFlowEventProvider implements SecretRotationFl
                 .collect(Collectors.toSet());
     }
 
-    private static Function<DatalakeSecretType, SdxStartCertRotationEvent> secretTypeToPostFlowEvent(SecretRotationFlowChainTriggerEvent event) {
+    private static Function<DatalakeSecretType, SdxEvent> secretTypeToPostFlowEvent(SecretRotationFlowChainTriggerEvent event) {
         return datalakeSecretType -> switch (datalakeSecretType) {
             case DATALAKE_CM_INTERMEDIATE_CA_CERT -> {
                 CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
                 certificatesRotationV4Request.setSkipSaltUpdate(Boolean.TRUE);
+                certificatesRotationV4Request.setCertificateRotationType(CertificateRotationType.ALL);
                 yield new SdxStartCertRotationEvent(SdxCertRotationEvent.ROTATE_CERT_EVENT.event(), event.getResourceId(),
                         ThreadBasedUserCrnProvider.getUserCrn(), certificatesRotationV4Request);
             }

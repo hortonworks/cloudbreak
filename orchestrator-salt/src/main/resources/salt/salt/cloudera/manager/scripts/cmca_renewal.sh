@@ -32,9 +32,9 @@ kinit -kt ${CM_KEYTAB_FILE} ${CM_PRINCIPAL}
 /opt/cloudera/cm-agent/bin/certmanager --location ${CERTMANAGER_DIR} setup --skip-invalid-ca-certs --configure-services ${CERTMANAGER_ARGS} ${OVERRIDES} --signed-ca-cert=${OUT_FILE} --skip-cm-init ${ALTNAME} --trusted-ca-certs ${CACERTS_DIR}/cacerts.pem > ${CERTMANAGER_DIR}/auto-tls.init.txt
 
 echo "$(date '+%d/%m/%Y %H:%M:%S') - Updating cm.settings."
-source_file=${CERTMANAGER_DIR}/auto-tls.init.txt
-target_file=/etc/cloudera-scm-server/cm.settings
-cp ${target_file} ${target_file}.bkp.$(date '+%d%m%Y%H%M%S')
+AUTO_TLS_INIT_FILE=${CERTMANAGER_DIR}/auto-tls.init.txt
+CM_SETTINGS_FILE=/etc/cloudera-scm-server/cm.settings
+cp ${CM_SETTINGS_FILE} ${CM_SETTINGS_FILE}.bkp.$(date '+%d%m%Y%H%M%S')
 while IFS= read -r line
 do
   stringarray=($line)
@@ -43,9 +43,13 @@ do
 {% endraw %}
     variable=${stringarray[1]}
     newvalue=${stringarray[2]}
-    if ! grep -q "setsettings ${variable} ${newvalue}" ${target_file}; then
+    if ! grep -q "setsettings ${variable} ${newvalue}" ${CM_SETTINGS_FILE}; then
       echo "updating value of ${variable} in cm.settings"
-      sed -i 's/^.*setsettings '"$variable"' .*$/setsettings '"$variable"' '"$newvalue"'/' ${target_file}
+      sed -i 's/^.*setsettings '"$variable"' .*$/setsettings '"$variable"' '"$newvalue"'/' ${CM_SETTINGS_FILE}
     fi
   fi
-done < "$source_file"
+done < "$AUTO_TLS_INIT_FILE"
+
+echo "$(date '+%d/%m/%Y %H:%M:%S') - Cleaning up leftover after CMCA renewal."
+rm -rf ${CERTMANAGER_DIR}_bkp_*
+rm -f ${CM_SETTINGS_FILE}.bkp.*
