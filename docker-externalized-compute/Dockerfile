@@ -15,11 +15,11 @@ WORKDIR /
 RUN microdnf install unzip
 
 # install the externalized compute app
-ADD ${REPO_URL}/com/sequenceiq/externalizedcompute/$VERSION/externalizedcompute-$VERSION.jar /externalizedcompute.jar
+ADD ${REPO_URL}/com/sequenceiq/externalized-compute/$VERSION/externalized-compute-$VERSION.jar /externalized-compute.jar
 
 # extract schema files
-RUN ( unzip externalizedcompute.jar schema/* -d / ) || \
-    ( unzip externalizedcompute.jar BOOT-INF/classes/schema/* -d /tmp/ && mv /tmp/BOOT-INF/classes/schema/ /schema/ )
+RUN ( unzip externalized-compute.jar schema/* -d / ) || \
+    ( unzip externalized-compute.jar BOOT-INF/classes/schema/* -d /tmp/ && mv /tmp/BOOT-INF/classes/schema/ /schema/ )
 
 # Install starter script for the Externalized Compute application
 COPY bootstrap/start_externalizedcompute_app.sh /
