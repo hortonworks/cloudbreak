@@ -68,7 +68,7 @@ freeipa:
       cert.file: database.crt
       ssl: false
   image.catalog:
-    default.os: centos7
+    default.os: redhat8
     cache.ttl: 15
   platform.default.instanceType:
     AWS: m5.large

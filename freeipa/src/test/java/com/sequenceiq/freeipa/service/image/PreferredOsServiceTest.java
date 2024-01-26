@@ -2,7 +2,6 @@ package com.sequenceiq.freeipa.service.image;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 
@@ -38,7 +37,7 @@ public class PreferredOsServiceTest {
 
     @BeforeEach
     public void initTest() {
-        ReflectionTestUtils.setField(victim, PreferredOsService.class, "defaultOs", CENTOS7, null);
+        ReflectionTestUtils.setField(victim, PreferredOsService.class, "defaultOs", REDHAT8, null);
     }
 
     @Test
@@ -50,28 +49,10 @@ public class PreferredOsServiceTest {
     }
 
     @Test
-    public void shouldPreferTheDefaultOsInCaseOfMissingRequestedOsAndNotGrantedRhel8Support() {
-        when(entitlementService.isRhel8ImagePreferred(ACCOUNT_ID)).thenReturn(false);
-
+    public void getDefaultOs() {
         String actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> victim.getPreferredOs(null));
-        assertEquals(CENTOS7, actual);
-        verifyNoMoreInteractions(entitlementService);
-    }
 
-    @Test
-    public void shouldPreferTheDefaultOsInCaseOfMissingRequestedOsAndNotGrantedRhel8Preference() {
-        when(entitlementService.isRhel8ImagePreferred(ACCOUNT_ID)).thenReturn(false);
-
-        String actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> victim.getPreferredOs(null));
-        assertEquals(CENTOS7, actual);
-        verifyNoMoreInteractions(entitlementService);
-    }
-
-    @Test
-    public void shouldPreferRhel8InCaseOfMissingRequestedOsAndGrantedRhel8SupportAndPreference() {
-        when(entitlementService.isRhel8ImagePreferred(ACCOUNT_ID)).thenReturn(true);
-
-        String actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> victim.getPreferredOs(null));
         assertEquals(REDHAT8, actual);
+        verifyNoMoreInteractions(entitlementService);
     }
 }

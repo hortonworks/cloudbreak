@@ -1,10 +1,8 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
 import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static com.sequenceiq.common.model.OsType.RHEL8;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.stream.Stream;
@@ -12,9 +10,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -78,16 +74,6 @@ class ImageOsServiceTest {
             boolean result = underTest.isSupported(os.getOsType());
             assertThat(result).isTrue();
         }
-    }
-
-    @ParameterizedTest
-    @MethodSource("preferredOsArguments")
-    void preferredOs(String requestedOs, boolean rhel8ImagePreferred, String expectedOs) {
-        lenient().when(entitlementService.isRhel8ImagePreferred(ACCOUNT_ID)).thenReturn(rhel8ImagePreferred);
-
-        String result = doAs(USER_CRN, () -> underTest.getPreferredOs(requestedOs));
-
-        assertThat(result).isEqualTo(expectedOs);
     }
 
     static Stream<Arguments> preferredOsArguments() {
