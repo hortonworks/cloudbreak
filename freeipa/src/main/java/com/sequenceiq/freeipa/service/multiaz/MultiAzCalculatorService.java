@@ -230,10 +230,14 @@ public class MultiAzCalculatorService {
                             instanceGroup.getTemplate().getInstanceType(), Region.region(environment.getLocation().getName()));
                     if (CollectionUtils.isEmpty(availabilityZones)) {
                         LOGGER.warn("There are no availability zones configured");
-                        throw new BadRequestException(String.format("Based on configured availability zones and instance type, " +
-                                        "there are no availability zones for instance group %s and instance type %s. " +
-                                        "Please configure at least one zone for Multi Az deployment",
-                                instanceGroup.getGroupName(), instanceGroup.getTemplate().getInstanceType()));
+                        throw new BadRequestException(String.format("The %s region does not support Multi AZ configuration. " +
+                                        "Please check https://learn.microsoft.com/en-us/azure/reliability/availability-zones-service-support " +
+                                        "for more details. " +
+                                        "It is also possible that the given %s instances on %s group are not supported in any specified %s zones.",
+                                environment.getLocation().getName(),
+                                instanceGroup.getTemplate().getInstanceType(),
+                                instanceGroup.getGroupName(),
+                                environmentZones.stream().sorted().collect(Collectors.toList())));
                     }
                     LOGGER.debug("Availability Zones for instance group are  {}", availabilityZones);
                     instanceGroup.getInstanceGroupNetwork().setAttributes(availabilityZoneConverter.getJsonAttributesWithAvailabilityZones(availabilityZones,
@@ -251,7 +255,6 @@ public class MultiAzCalculatorService {
         } else {
             LOGGER.debug("Multi AZ is not enabled for {}", stack.getName());
         }
-
     }
 
     public void populateAvailabilityZonesForInstances(Stack stack, InstanceGroup instanceGroup) {
