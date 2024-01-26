@@ -38,7 +38,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -56,6 +59,10 @@ import com.sequenceiq.freeipa.util.RecipeAttachmentChecker;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaRecipeServiceTest {
+
+    private static final String INTERNAL_CRN = "crn:cdp:iam:us-west-1:altus:user:__internal__actor__";
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:cloudera:user:test@cloudera.com";
 
     @Mock
     private RecipeV4Endpoint recipeV4Endpoint;
@@ -81,6 +88,9 @@ class FreeIpaRecipeServiceTest {
     @Mock
     private RecipeAttachmentChecker recipeAttachmentChecker;
 
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory internalCrnGeneratorFactory;
+
     @InjectMocks
     private FreeIpaRecipeService freeIpaRecipeService;
 
@@ -88,6 +98,9 @@ class FreeIpaRecipeServiceTest {
     public void setup() {
         lenient().doNothing().when(recipeUsageService).sendAttachedUsageReport(anyString(), any(), any(), anyString(), any());
         lenient().doNothing().when(recipeUsageService).sendDetachedUsageReport(anyString(), any(), any(), anyString(), any());
+        RegionAwareInternalCrnGenerator internalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
+        lenient().when(internalCrnGeneratorFactory.iam()).thenReturn(internalCrnGenerator);
+        lenient().when(internalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_CRN);
     }
 
     @Test
@@ -110,7 +123,7 @@ class FreeIpaRecipeServiceTest {
         recipe2Request.setType(RecipeV4Type.PRE_TERMINATION);
         recipe2Request.setContent("YmFzaDI=");
         ArgumentCaptor<Set<String>> recipeSet = ArgumentCaptor.forClass(Set.class);
-        when(recipeV4Endpoint.getRequestsByNames(anyLong(), recipeSet.capture())).thenReturn(Set.of(recipe1Request, recipe2Request));
+        when(recipeV4Endpoint.getRequestsByNames(anyLong(), recipeSet.capture(), any())).thenReturn(Set.of(recipe1Request, recipe2Request));
         List<FreeIpaStackRecipe> freeIpaStackRecipes = List.of(new FreeIpaStackRecipe(1L, "recipe1"), new FreeIpaStackRecipe(1L, "recipe2"));
         when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
         List<RecipeModel> recipes = freeIpaRecipeService.getRecipes(1L);
@@ -146,7 +159,7 @@ class FreeIpaRecipeServiceTest {
         Response response = mock(Response.class);
         when(response.readEntity(ExceptionResponse.class)).thenReturn(new ExceptionResponse("recipe2 not found"));
         when(notFoundException.getResponse()).thenReturn(response);
-        when(recipeV4Endpoint.getRequestsByNames(eq(0L), anySet())).thenThrow(notFoundException);
+        when(recipeV4Endpoint.getRequestsByNames(eq(0L), anySet(), any())).thenThrow(notFoundException);
         List<FreeIpaStackRecipe> freeIpaStackRecipes = List.of(new FreeIpaStackRecipe(1L, "recipe1"), new FreeIpaStackRecipe(1L, "recipe2"));
         when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
         CloudbreakServiceException cloudbreakServiceException = Assertions.assertThrows(CloudbreakServiceException.class,
@@ -168,7 +181,7 @@ class FreeIpaRecipeServiceTest {
         when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
         List<RecipeModel> recipes = freeIpaRecipeService.getRecipes(1L);
         assertThat(recipes).isEmpty();
-        verify(recipeV4Endpoint, times(0)).getRequestsByNames(any(), anySet());
+        verify(recipeV4Endpoint, times(0)).getRequestsByNames(any(), anySet(), any());
     }
 
     @Test
@@ -198,17 +211,18 @@ class FreeIpaRecipeServiceTest {
         recipe2Request.setType(RecipeV4Type.PRE_TERMINATION);
         recipe2Request.setContent("YmFzaDI=");
         ArgumentCaptor<Set<String>> recipeSet = ArgumentCaptor.forClass(Set.class);
-        when(recipeV4Endpoint.getRequestsByNames(anyLong(), recipeSet.capture())).thenReturn(Set.of(recipe1Request, recipe2Request));
+        when(recipeV4Endpoint.getRequestsByNames(anyLong(), recipeSet.capture(), any())).thenReturn(Set.of(recipe1Request, recipe2Request));
         List<FreeIpaStackRecipe> freeIpaStackRecipes = List.of(new FreeIpaStackRecipe(1L, "recipe1"), new FreeIpaStackRecipe(1L, "recipe2"));
         when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
-        List<RecipeModel> recipes = freeIpaRecipeService.getRecipes(1L);
+        List<RecipeModel> recipes = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> freeIpaRecipeService.getRecipes(1L));
         RecipeModel recipeModel1 = recipes.stream().filter(recipeModel -> "recipe1".equals(recipeModel.getName())).findFirst().get();
         RecipeModel recipeModel2 = recipes.stream().filter(recipeModel -> "recipe2".equals(recipeModel.getName())).findFirst().get();
         Assertions.assertEquals(RecipeType.PRE_SERVICE_DEPLOYMENT, recipeModel1.getRecipeType());
         Assertions.assertEquals(RecipeType.PRE_TERMINATION, recipeModel2.getRecipeType());
         Assertions.assertEquals("bash1", recipeModel1.getGeneratedScript());
         Assertions.assertEquals("bash2", recipeModel2.getGeneratedScript());
-        boolean hasRecipeType = freeIpaRecipeService.hasRecipeType(1L, RecipeType.PRE_TERMINATION);
+        boolean hasRecipeType = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                freeIpaRecipeService.hasRecipeType(1L, RecipeType.PRE_TERMINATION));
         assertTrue(hasRecipeType);
         assertThat(recipeSet.getValue()).containsExactlyInAnyOrder("recipe1", "recipe2");
     }
@@ -220,7 +234,7 @@ class FreeIpaRecipeServiceTest {
         recipe1Request.setType(RecipeV4Type.PRE_CLOUDERA_MANAGER_START);
         recipe1Request.setContent("YmFzaDE=");
         ArgumentCaptor<Set<String>> recipeSet = ArgumentCaptor.forClass(Set.class);
-        when(recipeV4Endpoint.getRequestsByNames(anyLong(), recipeSet.capture())).thenReturn(Set.of(recipe1Request));
+        when(recipeV4Endpoint.getRequestsByNames(anyLong(), recipeSet.capture(), any())).thenReturn(Set.of(recipe1Request));
         List<FreeIpaStackRecipe> freeIpaStackRecipes = List.of(new FreeIpaStackRecipe(1L, "recipe1"));
         when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
         List<RecipeModel> recipes = freeIpaRecipeService.getRecipes(1L);

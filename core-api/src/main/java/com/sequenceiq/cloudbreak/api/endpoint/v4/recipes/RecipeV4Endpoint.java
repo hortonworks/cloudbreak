@@ -130,5 +130,6 @@ public interface RecipeV4Endpoint {
     @Operation(summary = RecipeOpDescription.GET_REQUESTS_BY_NAMES, description = Notes.RECIPE_NOTES,
             operationId = "getRecipeRequestsFromNamesInWorkspace",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    Set<RecipeV4Request> getRequestsByNames(@PathParam("workspaceId") Long workspaceId, @NotNull @QueryParam("names") Set<String> names);
+    Set<RecipeV4Request> getRequestsByNames(@PathParam("workspaceId") Long workspaceId, @NotNull @QueryParam("names") Set<String> names,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

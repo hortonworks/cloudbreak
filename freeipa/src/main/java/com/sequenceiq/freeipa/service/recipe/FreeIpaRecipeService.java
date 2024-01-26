@@ -23,7 +23,9 @@ import com.sequenceiq.authorization.service.AuthorizationResourceCrnListProvider
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -68,6 +70,9 @@ public class FreeIpaRecipeService implements AuthorizationResourceCrnListProvide
     @Inject
     private RecipeAttachmentChecker recipeAttachmentChecker;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory internalCrnGeneratorFactory;
+
     @Override
     public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
         return recipeCrnListProviderService.getResourceCrnListByResourceNameList(resourceNames);
@@ -96,7 +101,10 @@ public class FreeIpaRecipeService implements AuthorizationResourceCrnListProvide
         LOGGER.info("Get recipes from core: {}", recipes);
         try {
             if (!recipes.isEmpty()) {
-                Set<RecipeV4Request> recipesByNames = recipeV4Endpoint.getRequestsByNames(0L, recipes);
+                String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+                Set<RecipeV4Request> recipesByNames = ThreadBasedUserCrnProvider.doAsInternalActor(
+                        internalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                        () -> recipeV4Endpoint.getRequestsByNames(0L, recipes, initiatorUserCrn));
                 return recipesByNames.stream().map(recipe ->
                                 new RecipeModel(recipe.getName(), recipeType(recipe.getType()), new String(Base64.decodeBase64(recipe.getContent()))))
                         .collect(Collectors.toList());
