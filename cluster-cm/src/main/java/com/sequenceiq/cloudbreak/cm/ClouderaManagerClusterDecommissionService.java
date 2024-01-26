@@ -56,6 +56,8 @@ public class ClouderaManagerClusterDecommissionService implements ClusterDecomis
 
     private ApiClient v51Client;
 
+    private ApiClient v53Client;
+
     public ClouderaManagerClusterDecommissionService(StackDtoDelegate stack, HttpClientConfig clientConfig) {
         this.stack = stack;
         this.clientConfig = clientConfig;
@@ -80,6 +82,12 @@ public class ClouderaManagerClusterDecommissionService implements ClusterDecomis
             v51Client = clouderaManagerApiClientProvider.getV51Client(stack.getGatewayPort(), user, password, clientConfig);
         } catch (ClouderaManagerClientInitException e) {
             LOGGER.warn("Client init failed for V51 client!");
+        }
+
+        try {
+            v53Client = clouderaManagerApiClientProvider.getV53Client(stack.getGatewayPort(), user, password, clientConfig);
+        } catch (ClouderaManagerClientInitException e) {
+            LOGGER.warn("Client init failed for V53 client!");
         }
     }
 
@@ -151,8 +159,8 @@ public class ClouderaManagerClusterDecommissionService implements ClusterDecomis
     }
 
     @Override
-    public void stopRolesOnHosts(Set<String> hosts) throws CloudbreakException {
-        clouderaManagerDecomissioner.stopRolesOnHosts(stack, v51Client, hosts);
+    public void stopRolesOnHosts(Set<String> hosts, boolean stopServicesGracefully) throws CloudbreakException {
+        clouderaManagerDecomissioner.stopRolesOnHosts(stack, v53Client, v51Client, hosts, stopServicesGracefully);
     }
 
     @Override

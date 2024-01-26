@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.StopCmServicesOnHost
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -29,6 +30,9 @@ public class StopCmServicesOnHostsInsteadOfDecommissionHandler extends Exception
 
     @Inject
     private StackDtoService stackDtoService;
+
+    @Inject
+    private DistroXUpgradeService distroXUpgradeService;
 
     @Override
     public String selector() {
@@ -47,11 +51,16 @@ public class StopCmServicesOnHostsInsteadOfDecommissionHandler extends Exception
         ClusterDecomissionService clusterDecomissionService = clusterApiConnectors.getConnector(stackDto).clusterDecomissionService();
         try {
             LOGGER.info("Stop roles on hosts: {}", stopCmServicesOnHostsRequest.getHostNamesToStop());
-            clusterDecomissionService.stopRolesOnHosts(stopCmServicesOnHostsRequest.getHostNamesToStop());
+            clusterDecomissionService.stopRolesOnHosts(stopCmServicesOnHostsRequest.getHostNamesToStop(),
+                    isStopServicesGracefully(stopCmServicesOnHostsRequest, stackDto));
         } catch (CloudbreakException e) {
             LOGGER.error("Stop roles failed on hosts: {}", stopCmServicesOnHostsRequest.getHostNamesToStop(), e);
             return new DecommissionResult("Stop roles failed on hosts: " + e.getMessage(), e, event.getData());
         }
         return new DecommissionResult(stopCmServicesOnHostsRequest, stopCmServicesOnHostsRequest.getHostNamesToStop());
+    }
+
+    private boolean isStopServicesGracefully(StopCmServicesOnHostsRequest stopCmServicesOnHostsRequest, StackDto stackDto) {
+        return stopCmServicesOnHostsRequest.getHostNamesToStop().size() == 1 && distroXUpgradeService.isGracefulStopServicesNeeded(stackDto);
     }
 }

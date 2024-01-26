@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
@@ -25,6 +26,8 @@ import com.sequenceiq.cloudbreak.auth.PaywallAccessChecker;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -89,6 +92,12 @@ public class DistroXUpgradeService {
     @Inject
     private StackUpgradeService stackUpgradeService;
 
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Value("${cb.cm.gracefulservicestopnodecountthreshold}")
+    private int gracefulServiceStopNodeCountThreshold;
+
     public FlowIdentifier triggerOsUpgradeByUpgradeSets(NameOrCrn nameOrCrn, Long workspaceId, String imageId, List<OrderedOSUpgradeSet> upgradeSets) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         Crn crn = Crn.safeFromString(stack.getResourceCrn());
@@ -131,10 +140,37 @@ public class DistroXUpgradeService {
         boolean replaceVms = determineReplaceVmsParam(upgradeDto.getUpgradeV4Response(), upgradeDto.isLockComponents(), upgradeDto.getStackDto().getStack());
         LOGGER.debug("Initializing cluster upgrade. Target image: {}, lockComponents: {}, replaceVms: {}, rollingUpgradeEnabled: {}",
                 upgradeDto.getImageChangeDto().getImageId(), upgradeDto.isLockComponents(), replaceVms, rollingUpgradeEnabled);
+        if (replaceVms && rollingUpgradeEnabled) {
+            validateRollingUpgradeNodeCountAndRuntime(upgradeDto.getStackDto());
+        }
         String upgradeVariant = stackUpgradeService.calculateUpgradeVariant(upgradeDto.getStackDto().getStack(), userCrn, keepVariant);
         FlowIdentifier flowIdentifier = reactorFlowManager.triggerDistroXUpgrade(upgradeDto.getStackDto().getStack().getId(), upgradeDto.getImageChangeDto(),
                 replaceVms, upgradeDto.isLockComponents(), upgradeVariant, rollingUpgradeEnabled);
         return new UpgradeV4Response("Upgrade started with Image: " + upgradeDto.getImageChangeDto().getImageId(), flowIdentifier, replaceVms);
+    }
+
+    private void validateRollingUpgradeNodeCountAndRuntime(StackDto stackDto) {
+        if (isGracefulStopServicesNeeded(stackDto)) {
+            if (stackDto.getFullNodeCount() > gracefulServiceStopNodeCountThreshold) {
+                throw new BadRequestException(String.format(
+                        "Rolling upgrade with VM replacement (zero downtime upgrade) is only supported if the cluster doesn't contain more nodes than %s.",
+                        gracefulServiceStopNodeCountThreshold));
+            }
+        }
+    }
+
+    public boolean isGracefulStopServicesNeeded(StackDto stackDto) {
+        return StackType.WORKLOAD.equals(stackDto.getType()) && clusterComponentConfigProvider.getCdhProduct(stackDto.getCluster().getId())
+                .filter(clouderaManagerProduct -> {
+                    if (CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(clouderaManagerProduct.getVersion(),
+                            CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_18)) {
+                        return true;
+                    } else {
+                        LOGGER.info("Skipping graceful service stop on {} CM version.", clouderaManagerProduct.getVersion());
+                        return false;
+                    }
+                })
+                .isPresent();
     }
 
     private UpgradeV4Response initUpgradePreparation(DistroXUpgradeDto upgradeDto, List<ImageInfoV4Response> upgradeCandidates) {

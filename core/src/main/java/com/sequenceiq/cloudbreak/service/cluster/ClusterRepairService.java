@@ -144,8 +144,14 @@ public class ClusterRepairService {
         }
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         String upgradeVariant = stackUpgradeService.calculateUpgradeVariant(stackView, userCrn, keepVariant);
-        return triggerRepairOrThrowBadRequest(stackView.getId(), repairStart, RepairType.ONE_FROM_EACH_HOSTGROUP, false, repairableHostGroups,
-                upgradeVariant, upgrade);
+        return triggerRepairOrThrowBadRequest(
+                stackView.getId(),
+                repairStart,
+                RepairType.ONE_FROM_EACH_HOSTGROUP,
+                false,
+                repairableHostGroups,
+                upgradeVariant,
+                upgrade);
     }
 
     public FlowIdentifier repairHostGroups(Long stackId, Set<String> hostGroups, boolean restartServices) {
@@ -213,8 +219,8 @@ public class ClusterRepairService {
             return Optional.of(RepairValidation.of("Action cannot be performed because the Environment isn't available. Please check the Environment state."));
         } else if (!stoppedInstanceIds.isEmpty()) {
             return Optional.of(RepairValidation.of("Action cannot be performed because there are stopped nodes in the cluster. " +
-                            "Stopped nodes: [" + String.join(", ", stoppedInstanceIds) + "]. " +
-                            "Please select them for node replacement or start the stopped nodes."));
+                    "Stopped nodes: [" + String.join(", ", stoppedInstanceIds) + "]. " +
+                    "Please select them for node replacement or start the stopped nodes."));
         } else if (hasNotAvailableDatabase(stack)) {
             return Optional.of(RepairValidation.of(String.format("Database %s is not in AVAILABLE status, could not start node replacement.",
                     stack.getCluster().getDatabaseServerCrn())));

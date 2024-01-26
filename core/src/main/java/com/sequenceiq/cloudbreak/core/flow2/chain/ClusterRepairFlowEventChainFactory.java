@@ -226,7 +226,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                                     new CoreVerticalScalingTriggerEvent(STACK_VERTICALSCALE_EVENT.event(), event.getStackId(), stackVerticalScaleV4Request);
                             flowTriggers.add(coreVerticalScalingTriggerEvent);
                         }
-            });
+                    });
         }
     }
 
@@ -244,8 +244,8 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     private boolean fillRepairableGroupsWithHostNames(RepairConfig repairConfig, Map<String, Set<String>> repairableGroupsWithHostNames) {
         boolean singlePrimaryGW = addGatewayGroupWithHostNames(repairConfig, repairableGroupsWithHostNames);
-        repairableGroupsWithHostNames.putAll(repairConfig.getRepairs().stream().collect(Collectors.toMap(Repair::getHostGroupName,
-                repair -> new HashSet<>(repair.getHostNames()))));
+        repairableGroupsWithHostNames.putAll(repairConfig.getRepairs().stream().collect(Collectors.toMap(Repair::hostGroupName,
+                repair -> new HashSet<>(repair.hostNames()))));
         return singlePrimaryGW;
     }
 
@@ -271,10 +271,19 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         switch (repairType) {
             case ONE_FROM_EACH_HOSTGROUP ->
                     addRepairFlowsForEachGroupsWithOneNode(event, flowTriggers, hostsByHostGroupAndSortedByPgw, primaryGwFQDN, stackView);
+            case ONE_BY_ONE -> addRepairFlowsForEachNode(event, flowTriggers, hostsByHostGroupAndSortedByPgw, primaryGwFQDN, stackView);
             case BATCH -> addBatchedRepairFlows(event, flowTriggers, hostsByHostGroupAndSortedByPgw, primaryGwFQDN, stackView);
             default -> throw new IllegalStateException("Unknown repair type:" + repairType);
         }
+    }
 
+    private void addRepairFlowsForEachNode(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers,
+            LinkedHashMultimap<String, String> hostsByHostGroupAndSortedByPgw, Optional<String> primaryGwFQDN, StackView stackView) {
+        hostsByHostGroupAndSortedByPgw.asMap().forEach((hostGroupName, instances) -> {
+            LinkedHashMultimap<String, String> hostGroup = LinkedHashMultimap.create();
+            hostGroup.putAll(hostGroupName, List.copyOf(instances));
+            addRepairFlowsForEachGroupsWithOneNode(event, flowTriggers, hostGroup, primaryGwFQDN, stackView);
+        });
     }
 
     private LinkedHashMultimap<String, String> collectHostsByHostGroupAndSortByPgwAndName(Optional<String> primaryGwFQDN,
@@ -350,7 +359,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         if (repairConfig.getSinglePrimaryGateway().isPresent()) {
             LOGGER.info("Single primary GW flag true");
             Repair repair = repairConfig.getSinglePrimaryGateway().get();
-            Map<String, Set<String>> gatewayGroupWithHostNames = Collections.singletonMap(repair.getHostGroupName(), new HashSet<>(repair.getHostNames()));
+            Map<String, Set<String>> gatewayGroupWithHostNames = Collections.singletonMap(repair.hostGroupName(), new HashSet<>(repair.hostNames()));
             groupsWithHostNames.putAll(gatewayGroupWithHostNames);
             LOGGER.info("GW group with hostnames are added: {}", gatewayGroupWithHostNames);
             return true;
@@ -487,30 +496,6 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         }
     }
 
-    private static class Repair {
-
-        private final String instanceGroupName;
-
-        private final String hostGroupName;
-
-        private final List<String> hostNames;
-
-        Repair(String instanceGroupName, String hostGroupName, List<String> hostNames) {
-            this.instanceGroupName = instanceGroupName;
-            this.hostGroupName = hostGroupName;
-            this.hostNames = hostNames;
-        }
-
-        public String getInstanceGroupName() {
-            return instanceGroupName;
-        }
-
-        public String getHostGroupName() {
-            return hostGroupName;
-        }
-
-        public List<String> getHostNames() {
-            return hostNames;
-        }
+    private record Repair(String instanceGroupName, String hostGroupName, List<String> hostNames) {
     }
 }

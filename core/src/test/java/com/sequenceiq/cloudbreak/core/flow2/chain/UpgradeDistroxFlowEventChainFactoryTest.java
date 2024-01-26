@@ -80,7 +80,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testChainQueueForReplaceVms() {
+    public void testChainQueueForRollingUpgradeWithReplaceVms() {
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
         ReflectionTestUtils.setField(underTest, "upgradeValidationEnabled", true);
@@ -94,7 +94,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertUpdateValidationEvent(flowChainQueue);
         assertSaltUpdateEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
-        assertRepairEvent(flowChainQueue, RepairType.ONE_FROM_EACH_HOSTGROUP);
+        assertRepairEvent(flowChainQueue, RepairType.ONE_BY_ONE);
     }
 
     @Test

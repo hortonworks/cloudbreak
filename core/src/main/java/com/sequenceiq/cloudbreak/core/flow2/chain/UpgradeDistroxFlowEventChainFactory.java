@@ -7,7 +7,7 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCluste
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_INIT_EVENT;
 import static com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType.ALL_AT_ONCE;
 import static com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType.BATCH;
-import static com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType.ONE_FROM_EACH_HOSTGROUP;
+import static com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType.ONE_BY_ONE;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -156,7 +156,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         LOGGER.info("Batch repair enabled: {}, node count: {}, max upscale step: {}",
                 batchRepairEnabled, nodeCount, maxUpscaleStepInNodeCount);
         if (event.isRollingUpgradeEnabled()) {
-            return ONE_FROM_EACH_HOSTGROUP;
+            return ONE_BY_ONE;
         } else if (batchRepairEnabled && nodeCount > maxUpscaleStepInNodeCount) {
             return BATCH;
         } else {

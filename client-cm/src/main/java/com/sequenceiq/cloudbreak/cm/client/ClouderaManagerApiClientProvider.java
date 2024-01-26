@@ -39,6 +39,8 @@ public class ClouderaManagerApiClientProvider {
 
     public static final String API_V_52 = API_ROOT + "/v52";
 
+    public static final String API_V_53 = API_ROOT + "/v53";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerApiClientProvider.class);
 
     @Value("${cb.cm.client.cluster.proxy.timeout}")
@@ -167,5 +169,9 @@ public class ClouderaManagerApiClientProvider {
 
     public ApiClient getV52Client(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
         return getApiClientByApiVersion(gatewayPort, user, password, clientConfig, API_V_52);
+    }
+
+    public ApiClient getV53Client(Integer gatewayPort, String user, String password, HttpClientConfig clientConfig) throws ClouderaManagerClientInitException {
+        return getApiClientByApiVersion(gatewayPort, user, password, clientConfig, API_V_53);
     }
 }

@@ -115,7 +115,8 @@ public class ClusterRepairTriggerEvent extends StackEvent {
     public enum RepairType {
         ALL_AT_ONCE,
         BATCH,
-        ONE_FROM_EACH_HOSTGROUP
+        ONE_FROM_EACH_HOSTGROUP,
+        ONE_BY_ONE
     }
 
     @Override

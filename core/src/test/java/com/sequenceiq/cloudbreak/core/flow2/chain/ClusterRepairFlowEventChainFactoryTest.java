@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -11,8 +12,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,9 +39,11 @@ import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.event.AwsVariantMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.CoreVerticalScalingTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -54,6 +57,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RescheduleStatusCheckTriggerEvent;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
@@ -66,16 +70,12 @@ import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
+import com.sequenceiq.flow.core.chain.finalize.flowevents.FlowChainFinalizePayload;
+import com.sequenceiq.flow.core.chain.init.flowevents.FlowChainInitPayload;
 
 public class ClusterRepairFlowEventChainFactoryTest {
 
     private static final long INSTANCE_GROUP_ID = 1L;
-
-    private static final String FAILED_NODE_FQDN_PRIMARY_GATEWAY = "failedNode-FQDN-primary-gateway";
-
-    private static final String FAILED_NODE_FQDN_SECONDARY_GATEWAY = "failedNode-FQDN-secondary-gateway";
-
-    private static final String FAILED_NODE_FQDN_CORE = "failedNode-FQDN-core";
 
     private static final long STACK_ID = 1L;
 
@@ -85,7 +85,17 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     private static final boolean NOT_MULTIPLE_GATEWAY = false;
 
-    private static final StackIdView ATTACHED_WORKLOAD = mock(StackIdView.class);
+    private static final String HG_MASTER = "hostGroup-master";
+
+    private static final String HG_CORE = "hostGroup-core";
+
+    private static final String HG_AUXILIARY = "hostGroup-auxiliary";
+
+    private static final String FAILED_PRIMARY_GATEWAY_FQDN = "failedNode-FQDN-primary-gateway";
+
+    private static final String FAILED_SECONDARY_GATEWAY_FQDN = "failedNode-FQDN-secondary-gateway";
+
+    private static final String FAILED_CORE_FQDN = "failedNode-FQDN-core";
 
     @Mock
     private StackService stackService;
@@ -132,6 +142,9 @@ public class ClusterRepairFlowEventChainFactoryTest {
     @InjectMocks
     private ClusterRepairFlowEventChainFactory underTest;
 
+    @Mock
+    private StackIdView attachedWorkload;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -144,178 +157,169 @@ public class ClusterRepairFlowEventChainFactoryTest {
     @Test
     public void testRepairSingleGatewayWithNoAttached() {
         Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
-        when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
-        setupHostGroup(true);
+        setupNoConnectedCluster();
+        setupHostGroup(InstanceGroupType.GATEWAY);
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
 
-        List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
-        assertEquals(List.of("FLOWCHAIN_INIT_TRIGGER_EVENT",
+        assertEvents(eventQueues, List.of(
+                "FLOWCHAIN_INIT_TRIGGER_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
-                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"), triggeredOperations);
+                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
     }
 
     @Test
     public void testRepairSingleGatewayWithNoAttachedWithEmbeddedDBUpgrade() {
         Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
-        when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
+        setupNoConnectedCluster();
         when(entitlementService.isEmbeddedPostgresUpgradeEnabled(anyString())).thenReturn(true);
         when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stackDto)).thenReturn(true);
-        setupHostGroup(true);
+        setupHostGroup(InstanceGroupType.GATEWAY);
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(
                 new TriggerEventBuilder(stack).withFailedPrimaryGateway().withUpgrade().build());
 
-        List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
-        assertEquals(List.of("FLOWCHAIN_INIT_TRIGGER_EVENT",
+        assertEvents(eventQueues, List.of(
+                "FLOWCHAIN_INIT_TRIGGER_EVENT",
                 "UPGRADE_EMBEDDEDDB_PREPARATION_TRIGGER_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "UPGRADE_RDS_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
-                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"), triggeredOperations);
+                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
     }
 
     @Test
     public void testRepairSingleGatewayWithAttached() {
         Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
-        when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of(ATTACHED_WORKLOAD));
-        setupHostGroup(true);
+        setupConnectedCluster();
+        setupHostGroup(InstanceGroupType.GATEWAY);
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
 
-        List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
-        assertEquals(List.of("FLOWCHAIN_INIT_TRIGGER_EVENT",
+        assertEvents(eventQueues, List.of(
+                "FLOWCHAIN_INIT_TRIGGER_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
-                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"), triggeredOperations);
+                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
     }
 
     @Test
     public void testRepairSingleGatewayMultipleNodes() {
         Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
-        when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
-
-        HostGroup masterHostGroup = setupHostGroup("hostGroup-master", setupInstanceGroup(InstanceGroupType.GATEWAY));
-        when(hostGroupService.findHostGroupInClusterByName(anyLong(), eq("hostGroup-master"))).thenReturn(Optional.of(masterHostGroup));
-        HostGroup coreHostGroup = setupHostGroup("hostGroup-core", setupInstanceGroup(InstanceGroupType.CORE));
-        when(hostGroupService.findHostGroupInClusterByName(anyLong(), eq("hostGroup-core"))).thenReturn(Optional.of(coreHostGroup));
+        setupNoConnectedCluster();
+        setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
+        setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
         setupPrimaryGateway();
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(
                 new TriggerEventBuilder(stack).withFailedPrimaryGateway().withFailedCore().build());
 
-        List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
-        assertEquals(List.of("FLOWCHAIN_INIT_TRIGGER_EVENT",
+        assertEvents(eventQueues, List.of(
+                "FLOWCHAIN_INIT_TRIGGER_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
-                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"),
-                triggeredOperations);
+                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
     }
 
     @Test
     public void testRepairMultipleGatewayWithNoAttached() {
         Stack stack = getStack(MULTIPLE_GATEWAY);
-        when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
-        InstanceGroupView ig = mock(InstanceGroupView.class);
-        when(ig.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
-        when(ig.getNodeCount()).thenReturn(5);
-        when(instanceGroupService.findViewByStackId(STACK_ID)).thenReturn(Set.of(ig));
-        setupHostGroup(true);
+        setupNoConnectedCluster();
+        setupInstanceGroup(InstanceGroupType.GATEWAY, 5);
+        setupHostGroup(InstanceGroupType.GATEWAY);
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
 
-        List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
-        assertEquals(List.of(
+        assertEvents(eventQueues, List.of(
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
-                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"), triggeredOperations);
+                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
     }
 
     @Test
     public void testRepairMultipleGatewayWithAttached() {
         Stack stack = getStack(MULTIPLE_GATEWAY);
-        when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of(ATTACHED_WORKLOAD));
-        InstanceGroupView ig = mock(InstanceGroupView.class);
-        when(ig.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
-        when(ig.getNodeCount()).thenReturn(5);
-        when(instanceGroupService.findViewByStackId(STACK_ID)).thenReturn(Set.of(ig));
-        setupHostGroup(true);
+        setupConnectedCluster();
+        setupInstanceGroup(InstanceGroupType.GATEWAY, 5);
+        setupHostGroup(InstanceGroupType.GATEWAY);
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
 
-        List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
-        assertEquals(List.of(
+        assertEvents(eventQueues, List.of(
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
-                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"), triggeredOperations);
+                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
     }
 
     @Test
     public void testRepairCoreNodes() {
         Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
-        when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of(ATTACHED_WORKLOAD));
-        setupHostGroup(false);
+        setupConnectedCluster();
+        setupHostGroup(InstanceGroupType.CORE);
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
 
-        List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
-        assertEquals(List.of("FLOWCHAIN_INIT_TRIGGER_EVENT",
+        assertEvents(eventQueues, List.of(
+                "FLOWCHAIN_INIT_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
-                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"), triggeredOperations);
+                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
     }
 
     @Test
     public void testRepairNotGatewayInstanceGroup() {
         Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
-        when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
-        setupHostGroup(false);
+        setupNoConnectedCluster();
+        setupHostGroup(InstanceGroupType.CORE);
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
 
-        List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
-        assertEquals(List.of("FLOWCHAIN_INIT_TRIGGER_EVENT",
+        assertEvents(eventQueues, List.of(
+                "FLOWCHAIN_INIT_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
-                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"), triggeredOperations);
+                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
     }
 
     @Test
     public void testRepairOneNodeFromEachHostGroupAtOnce() {
         Stack stack = getStack(MULTIPLE_GATEWAY);
-        when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
-        HostGroup masterHostGroup = setupHostGroup("hostGroup-master", setupInstanceGroup(InstanceGroupType.GATEWAY));
-        when(hostGroupService.findHostGroupInClusterByName(anyLong(), eq("hostGroup-master"))).thenReturn(Optional.of(masterHostGroup));
-        HostGroup coreHostGroup = setupHostGroup("hostGroup-core", setupInstanceGroup(InstanceGroupType.CORE));
-        when(hostGroupService.findHostGroupInClusterByName(anyLong(), eq("hostGroup-core"))).thenReturn(Optional.of(coreHostGroup));
-        HostGroup auxiliaryHostGroup = setupHostGroup("hostGroup-auxiliary", setupInstanceGroup(InstanceGroupType.CORE));
-        when(hostGroupService.findHostGroupInClusterByName(anyLong(), eq("hostGroup-auxiliary"))).thenReturn(Optional.of(auxiliaryHostGroup));
+        setupNoConnectedCluster();
+        setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
+        setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
+        setupHostGroup(HG_AUXILIARY, setupInstanceGroup(InstanceGroupType.CORE));
         when(entitlementService.isDatalakeZduOSUpgradeEnabled(anyString())).thenReturn(true);
         setupPrimaryGateway();
 
         InstanceMetaData primaryGWInstanceMetadata = new InstanceMetaData();
-        primaryGWInstanceMetadata.setDiscoveryFQDN("failedNode-FQDN-primary-gateway");
+        primaryGWInstanceMetadata.setDiscoveryFQDN(FAILED_PRIMARY_GATEWAY_FQDN);
         when(instanceMetaDataService.getPrimaryGatewayInstanceMetadata(STACK_ID)).thenReturn(Optional.of(primaryGWInstanceMetadata));
         Crn crn = mock(Crn.class);
         when(crn.getAccountId()).thenReturn("accountid");
         when(stackService.getCrnById(anyLong())).thenReturn(crn);
-        ClusterRepairTriggerEvent triggerEvent = new TriggerEventBuilder(stack).withFailedPrimaryGateway().withFailedSecondaryGateway()
-                .with3FailedCore().withFailedAuxiliary().withRepairType(RepairType.ONE_FROM_EACH_HOSTGROUP).build();
-        FlowTriggerEventQueue eventQueues =
-                underTest.createFlowTriggerEventQueue(triggerEvent);
-        List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
-        assertEquals(List.of("FLOWCHAIN_INIT_TRIGGER_EVENT",
+        ClusterRepairTriggerEvent triggerEvent = new TriggerEventBuilder(stack)
+                .withFailedPrimaryGateway()
+                .withFailedSecondaryGateway()
+                .with3FailedCore()
+                .withFailedAuxiliary()
+                .withRepairType(RepairType.ONE_FROM_EACH_HOSTGROUP)
+                .build();
+
+        FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(triggerEvent);
+
+        assertEvents(eventQueues, List.of(
+                "FLOWCHAIN_INIT_TRIGGER_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT",
@@ -323,191 +327,185 @@ public class ClusterRepairFlowEventChainFactoryTest {
                 "FULL_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
-                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"), triggeredOperations);
+                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
 
-        Set<String> downscaledMasterHosts = new HashSet<>();
-        Set<String> downscaledCoreHosts = new HashSet<>();
-        Set<String> downscaledAuxHosts = new HashSet<>();
-        Set<String> upscaledMasterHosts = new HashSet<>();
-        Set<String> upscaledCoreHosts = new HashSet<>();
-        Set<String> upscaledAuxHosts = new HashSet<>();
+        assertThat(eventQueues.getQueue(), hasSize(9));
+        FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) eventQueues.getQueue().poll();
+        assertNotNull(flowChainInitPayload);
 
-        eventQueues.getQueue().remove();
         StackDownscaleTriggerEvent downscale1 = (StackDownscaleTriggerEvent) eventQueues.getQueue().poll();
-        Set<String> firstDownscaledHostsInMaster = downscale1.getHostGroupsWithHostNames().get("hostGroup-master");
-        assertEquals(1, firstDownscaledHostsInMaster.size());
-        String firstDownscaledMasterHost = firstDownscaledHostsInMaster.iterator().next();
-        downscaledMasterHosts.add(firstDownscaledMasterHost);
-        assertEquals("failedNode-FQDN-primary-gateway", firstDownscaledMasterHost);
-        Set<String> firstDownscaledHostsInCore = downscale1.getHostGroupsWithHostNames().get("hostGroup-core");
-        assertEquals(1, firstDownscaledHostsInCore.size());
-        String firstDownscaleCoreHost = firstDownscaledHostsInCore.iterator().next();
-        downscaledCoreHosts.add(firstDownscaleCoreHost);
-        Set<String> firstDownscaledHostsInAux = downscale1.getHostGroupsWithHostNames().get("hostGroup-auxiliary");
-        assertEquals(1, firstDownscaledHostsInAux.size());
-        String downscaledAuxHost = firstDownscaledHostsInAux.iterator().next();
-        downscaledAuxHosts.add(downscaledAuxHost);
+        assertGroupWithHost(downscale1, HG_MASTER, FAILED_PRIMARY_GATEWAY_FQDN);
+        assertGroupWithHost(downscale1, HG_CORE, "core1");
+        assertGroupWithHost(downscale1, HG_AUXILIARY, "aux1");
+
         StackAndClusterUpscaleTriggerEvent upscale1 = (StackAndClusterUpscaleTriggerEvent) eventQueues.getQueue().poll();
-        Set<String> firstUpscaledHostsInMaster = upscale1.getHostGroupsWithHostNames().get("hostGroup-master");
-        assertEquals(1, firstUpscaledHostsInMaster.size());
-        String firstUpscaledMasterHost = firstUpscaledHostsInMaster.iterator().next();
-        assertEquals("failedNode-FQDN-primary-gateway", firstUpscaledMasterHost);
-        upscaledMasterHosts.add(firstUpscaledMasterHost);
-        Set<String> firstUpscaledHostsInCore = upscale1.getHostGroupsWithHostNames().get("hostGroup-core");
-        assertEquals(1, firstUpscaledHostsInCore.size());
-        upscaledCoreHosts.add(firstUpscaledHostsInCore.iterator().next());
-        Set<String> firstUpscaledHostsInAux = upscale1.getHostGroupsWithHostNames().get("hostGroup-auxiliary");
-        assertEquals(1, firstUpscaledHostsInAux.size());
-        upscaledAuxHosts.add(firstUpscaledHostsInAux.iterator().next());
+        assertGroupWithHost(upscale1, HG_MASTER, FAILED_PRIMARY_GATEWAY_FQDN);
+        assertGroupWithHost(upscale1, HG_CORE, "core1");
+        assertGroupWithHost(upscale1, HG_AUXILIARY, "aux1");
 
         ClusterAndStackDownscaleTriggerEvent downscale2 = (ClusterAndStackDownscaleTriggerEvent) eventQueues.getQueue().poll();
-        Set<String> secondDownscaledHostsInMaster = downscale2.getHostGroupsWithHostNames().get("hostGroup-master");
-        assertEquals(1, secondDownscaledHostsInMaster.size());
-        String secondDownscaledMasterHost = secondDownscaledHostsInMaster.iterator().next();
-        downscaledMasterHosts.add(secondDownscaledMasterHost);
-        assertEquals("failedNode-FQDN-secondary-gateway", secondDownscaledMasterHost);
-        Set<String> secondDownscaledHostsInCore = downscale2.getHostGroupsWithHostNames().get("hostGroup-core");
-        assertEquals(1, secondDownscaledHostsInCore.size());
-        String secondDownscaleCoreHost = secondDownscaledHostsInCore.iterator().next();
-        downscaledCoreHosts.add(secondDownscaleCoreHost);
+        assertGroupWithHost(downscale2, HG_MASTER, FAILED_SECONDARY_GATEWAY_FQDN);
+        assertGroupWithHost(downscale2, HG_CORE, "core2");
+
         StackAndClusterUpscaleTriggerEvent upscale2 = (StackAndClusterUpscaleTriggerEvent) eventQueues.getQueue().poll();
-        Set<String> secondUpscaledHostsInMaster = upscale2.getHostGroupsWithHostNames().get("hostGroup-master");
-        assertEquals(1, secondUpscaledHostsInMaster.size());
-        String secondUpscaledMasterHost = secondUpscaledHostsInMaster.iterator().next();
-        assertEquals("failedNode-FQDN-secondary-gateway", secondUpscaledMasterHost);
-        upscaledMasterHosts.add(secondUpscaledMasterHost);
-        Set<String> secondUpscaledHostsInCore = upscale2.getHostGroupsWithHostNames().get("hostGroup-core");
-        assertEquals(1, secondUpscaledHostsInCore.size());
-        upscaledCoreHosts.add(secondUpscaledHostsInCore.iterator().next());
+        assertGroupWithHost(upscale2, HG_MASTER, FAILED_SECONDARY_GATEWAY_FQDN);
+        assertGroupWithHost(upscale2, HG_CORE, "core2");
 
         ClusterAndStackDownscaleTriggerEvent downscale3 = (ClusterAndStackDownscaleTriggerEvent) eventQueues.getQueue().poll();
-        Set<String> thirdDownscaledHostsInCore = downscale3.getHostGroupsWithHostNames().get("hostGroup-core");
-        assertEquals(1, thirdDownscaledHostsInCore.size());
-        String thirdDownscaleCoreHost = thirdDownscaledHostsInCore.iterator().next();
-        downscaledCoreHosts.add(thirdDownscaleCoreHost);
-        StackAndClusterUpscaleTriggerEvent upscale3 = (StackAndClusterUpscaleTriggerEvent) eventQueues.getQueue().poll();
-        Set<String> thirdUpscaledHostsInCore = upscale3.getHostGroupsWithHostNames().get("hostGroup-core");
-        assertEquals(1, thirdUpscaledHostsInCore.size());
-        upscaledCoreHosts.add(thirdUpscaledHostsInCore.iterator().next());
+        assertGroupWithHost(downscale3, HG_CORE, "core3");
 
-        assertThat(downscaledCoreHosts, containsInAnyOrder("core1", "core2", "core3"));
-        assertThat(downscaledMasterHosts, containsInAnyOrder(FAILED_NODE_FQDN_PRIMARY_GATEWAY, FAILED_NODE_FQDN_SECONDARY_GATEWAY));
-        assertThat(downscaledAuxHosts, containsInAnyOrder("aux1"));
-        assertThat(upscaledCoreHosts, containsInAnyOrder("core1", "core2", "core3"));
-        assertThat(upscaledMasterHosts, containsInAnyOrder(FAILED_NODE_FQDN_PRIMARY_GATEWAY, FAILED_NODE_FQDN_SECONDARY_GATEWAY));
-        assertThat(upscaledAuxHosts, containsInAnyOrder("aux1"));
+        StackAndClusterUpscaleTriggerEvent upscale3 = (StackAndClusterUpscaleTriggerEvent) eventQueues.getQueue().poll();
+        assertGroupWithHost(upscale3, HG_CORE, "core3");
+
+        RescheduleStatusCheckTriggerEvent statusCheckTriggerEvent = (RescheduleStatusCheckTriggerEvent) eventQueues.getQueue().poll();
+        assertNotNull(statusCheckTriggerEvent);
+
+        FlowChainFinalizePayload flowChainFinalizePayload = (FlowChainFinalizePayload) eventQueues.getQueue().poll();
+        assertNotNull(flowChainFinalizePayload);
+    }
+
+    @Test
+    public void testRepairNodesOneByOne() {
+        Stack stack = getStack(MULTIPLE_GATEWAY);
+        setupNoConnectedCluster();
+        setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
+        setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
+        setupHostGroup(HG_AUXILIARY, setupInstanceGroup(InstanceGroupType.CORE));
+        when(entitlementService.isDatalakeZduOSUpgradeEnabled(anyString())).thenReturn(true);
+        setupPrimaryGateway();
+
+        InstanceMetaData primaryGWInstanceMetadata = new InstanceMetaData();
+        primaryGWInstanceMetadata.setDiscoveryFQDN(FAILED_PRIMARY_GATEWAY_FQDN);
+        when(instanceMetaDataService.getPrimaryGatewayInstanceMetadata(STACK_ID)).thenReturn(Optional.of(primaryGWInstanceMetadata));
+        Crn crn = mock(Crn.class);
+        when(crn.getAccountId()).thenReturn("accountid");
+        when(stackService.getCrnById(anyLong())).thenReturn(crn);
+        ClusterRepairTriggerEvent triggerEvent = new TriggerEventBuilder(stack)
+                .withFailedPrimaryGateway()
+                .withFailedSecondaryGateway()
+                .with3FailedCore()
+                .withFailedAuxiliary()
+                .withRepairType(RepairType.ONE_BY_ONE)
+                .build();
+
+        FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(triggerEvent);
+
+        assertEvents(eventQueues, List.of(
+                "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "STACK_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT",
+                "FULL_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT",
+                "FULL_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT",
+                "FULL_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT",
+                "FULL_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT",
+                "FULL_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT",
+                "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
+                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
+
+        assertThat(eventQueues.getQueue(), hasSize(15));
+        FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) eventQueues.getQueue().poll();
+        assertNotNull(flowChainInitPayload);
+
+        StackDownscaleTriggerEvent downscaleMaster1 = (StackDownscaleTriggerEvent) eventQueues.getQueue().poll();
+        assertGroupWithHost(downscaleMaster1, HG_MASTER, FAILED_PRIMARY_GATEWAY_FQDN);
+        StackAndClusterUpscaleTriggerEvent upscaleMaster1 = (StackAndClusterUpscaleTriggerEvent) eventQueues.getQueue().poll();
+        assertGroupWithHost(upscaleMaster1, HG_MASTER, FAILED_PRIMARY_GATEWAY_FQDN);
+
+        ClusterAndStackDownscaleTriggerEvent downscaleMaster2 = (ClusterAndStackDownscaleTriggerEvent) eventQueues.getQueue().poll();
+        assertGroupWithHost(downscaleMaster2, HG_MASTER, FAILED_SECONDARY_GATEWAY_FQDN);
+        StackAndClusterUpscaleTriggerEvent upscaleMaster2 = (StackAndClusterUpscaleTriggerEvent) eventQueues.getQueue().poll();
+        assertGroupWithHost(upscaleMaster2, HG_MASTER, FAILED_SECONDARY_GATEWAY_FQDN);
+
+        ClusterAndStackDownscaleTriggerEvent downscale5 = (ClusterAndStackDownscaleTriggerEvent) eventQueues.getQueue().poll();
+        assertGroupWithHost(downscale5, HG_AUXILIARY, "aux1");
+        StackAndClusterUpscaleTriggerEvent upscale5 = (StackAndClusterUpscaleTriggerEvent) eventQueues.getQueue().poll();
+        assertGroupWithHost(upscale5, HG_AUXILIARY, "aux1");
+
+        ClusterAndStackDownscaleTriggerEvent downscale2 = (ClusterAndStackDownscaleTriggerEvent) eventQueues.getQueue().poll();
+        assertGroupWithHost(downscale2, HG_CORE, "core1");
+        StackAndClusterUpscaleTriggerEvent upscale2 = (StackAndClusterUpscaleTriggerEvent) eventQueues.getQueue().poll();
+        assertGroupWithHost(upscale2, HG_CORE, "core1");
+
+        ClusterAndStackDownscaleTriggerEvent downscale3 = (ClusterAndStackDownscaleTriggerEvent) eventQueues.getQueue().poll();
+        assertGroupWithHost(downscale3, HG_CORE, "core2");
+        StackAndClusterUpscaleTriggerEvent upscale3 = (StackAndClusterUpscaleTriggerEvent) eventQueues.getQueue().poll();
+        assertGroupWithHost(upscale3, HG_CORE, "core2");
+
+        ClusterAndStackDownscaleTriggerEvent downscale4 = (ClusterAndStackDownscaleTriggerEvent) eventQueues.getQueue().poll();
+        assertGroupWithHost(downscale4, HG_CORE, "core3");
+        StackAndClusterUpscaleTriggerEvent upscale4 = (StackAndClusterUpscaleTriggerEvent) eventQueues.getQueue().poll();
+        assertGroupWithHost(upscale4, HG_CORE, "core3");
+
+        RescheduleStatusCheckTriggerEvent statusCheckTriggerEvent = (RescheduleStatusCheckTriggerEvent) eventQueues.getQueue().poll();
+        assertNotNull(statusCheckTriggerEvent);
+
+        FlowChainFinalizePayload flowChainFinalizePayload = (FlowChainFinalizePayload) eventQueues.getQueue().poll();
+        assertNotNull(flowChainFinalizePayload);
     }
 
     @Test
     public void testBatchRepair() {
         Stack stack = getStack(MULTIPLE_GATEWAY);
-        when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
-        HostGroup masterHostGroup = setupHostGroup("hostGroup-master", setupInstanceGroup(InstanceGroupType.GATEWAY));
-        when(hostGroupService.findHostGroupInClusterByName(anyLong(), eq("hostGroup-master"))).thenReturn(Optional.of(masterHostGroup));
-        HostGroup coreHostGroup = setupHostGroup("hostGroup-core", setupInstanceGroup(InstanceGroupType.CORE));
-        when(hostGroupService.findHostGroupInClusterByName(anyLong(), eq("hostGroup-core"))).thenReturn(Optional.of(coreHostGroup));
-        HostGroup auxiliaryHostGroup = setupHostGroup("hostGroup-auxiliary", setupInstanceGroup(InstanceGroupType.CORE));
-        when(hostGroupService.findHostGroupInClusterByName(anyLong(), eq("hostGroup-auxiliary"))).thenReturn(Optional.of(auxiliaryHostGroup));
+        setupNoConnectedCluster();
+        setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
+        setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
+        setupHostGroup(HG_AUXILIARY, setupInstanceGroup(InstanceGroupType.CORE));
         when(entitlementService.isDatalakeZduOSUpgradeEnabled(anyString())).thenReturn(true);
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         setupPrimaryGateway();
 
         InstanceMetaData primaryGWInstanceMetadata = new InstanceMetaData();
-        primaryGWInstanceMetadata.setDiscoveryFQDN("failedNode-FQDN-primary-gateway");
+        primaryGWInstanceMetadata.setDiscoveryFQDN(FAILED_PRIMARY_GATEWAY_FQDN);
         when(instanceMetaDataService.getPrimaryGatewayInstanceMetadata(STACK_ID)).thenReturn(Optional.of(primaryGWInstanceMetadata));
         Crn crn = mock(Crn.class);
         when(crn.getAccountId()).thenReturn("accountid");
         when(stackService.getCrnById(anyLong())).thenReturn(crn);
-        ClusterRepairTriggerEvent triggerEvent = new TriggerEventBuilder(stack).withFailedPrimaryGateway().withFailedSecondaryGateway()
-                .with320FailedCore().withFailedAuxiliary().withRepairType(RepairType.BATCH).build();
-        FlowTriggerEventQueue eventQueues =
-                underTest.createFlowTriggerEventQueue(triggerEvent);
-        List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
-        assertEquals(List.of("FLOWCHAIN_INIT_TRIGGER_EVENT",
+        ClusterRepairTriggerEvent triggerEvent = new TriggerEventBuilder(stack)
+                .withFailedPrimaryGateway()
+                .withFailedSecondaryGateway()
+                .with320FailedCore()
+                .withFailedAuxiliary()
+                .withRepairType(RepairType.BATCH)
+                .build();
+
+        FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(triggerEvent);
+
+        assertEvents(eventQueues, List.of(
+                "FLOWCHAIN_INIT_TRIGGER_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT", "FULL_UPSCALE_TRIGGER_EVENT",
-                "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT", "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"), triggeredOperations);
-
-        Set<String> downscaledCoreHosts = new HashSet<>();
-        Set<String> downscaledAuxHosts = new HashSet<>();
-        Set<String> upscaledCoreHosts = new HashSet<>();
-        Set<String> upscaledAuxHosts = new HashSet<>();
+                "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT", "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
 
         eventQueues.getQueue().remove();
+
         StackDownscaleTriggerEvent downscale1 = (StackDownscaleTriggerEvent) eventQueues.getQueue().poll();
-        Set<String> firstDownscaledHostsInMaster = downscale1.getHostGroupsWithHostNames().get("hostGroup-master");
-        assertEquals(1, firstDownscaledHostsInMaster.size());
-        String firstDownscaledMasterHost = firstDownscaledHostsInMaster.iterator().next();
-        assertEquals("failedNode-FQDN-primary-gateway", firstDownscaledMasterHost);
-        Set<String> firstDownscaledHostsInCore = downscale1.getHostGroupsWithHostNames().get("hostGroup-core");
-        assertEquals(98, firstDownscaledHostsInCore.size());
-        String firstDownscaleCoreHost = firstDownscaledHostsInCore.iterator().next();
-        downscaledCoreHosts.add(firstDownscaleCoreHost);
-        Set<String> firstDownscaledHostsInAux = downscale1.getHostGroupsWithHostNames().get("hostGroup-auxiliary");
-        assertEquals(1, firstDownscaledHostsInAux.size());
-        String downscaledAuxHost = firstDownscaledHostsInAux.iterator().next();
-        downscaledAuxHosts.add(downscaledAuxHost);
+        assertGroupWithHost(downscale1, HG_MASTER, FAILED_PRIMARY_GATEWAY_FQDN);
+        assertGroupWithHosts(downscale1, HG_CORE, hosts("core-", 0, 98));
+        assertGroupWithHost(downscale1, HG_AUXILIARY, "aux1");
+
         StackAndClusterUpscaleTriggerEvent upscale1 = (StackAndClusterUpscaleTriggerEvent) eventQueues.getQueue().poll();
-        Set<String> firstUpscaledHostsInMaster = upscale1.getHostGroupsWithHostNames().get("hostGroup-master");
-        assertEquals(1, firstUpscaledHostsInMaster.size());
-        String firstUpscaledMasterHost = firstUpscaledHostsInMaster.iterator().next();
-        assertEquals("failedNode-FQDN-primary-gateway", firstUpscaledMasterHost);
-        Set<String> firstUpscaledHostsInCore = upscale1.getHostGroupsWithHostNames().get("hostGroup-core");
-        assertEquals(98, firstUpscaledHostsInCore.size());
-        upscaledCoreHosts.add(firstUpscaledHostsInCore.iterator().next());
-        Set<String> firstUpscaledHostsInAux = upscale1.getHostGroupsWithHostNames().get("hostGroup-auxiliary");
-        assertEquals(1, firstUpscaledHostsInAux.size());
-        upscaledAuxHosts.add(firstUpscaledHostsInAux.iterator().next());
+        assertGroupWithHost(upscale1, HG_MASTER, FAILED_PRIMARY_GATEWAY_FQDN);
+        assertGroupWithHosts(upscale1, HG_CORE, hosts("core-", 0, 98));
+        assertGroupWithHost(upscale1, HG_AUXILIARY, "aux1");
 
         ClusterAndStackDownscaleTriggerEvent downscaleEvent = (ClusterAndStackDownscaleTriggerEvent) eventQueues.getQueue().poll();
+        assertGroupWithHosts(downscaleEvent, HG_CORE, hosts("core-", 98, 198));
         StackAndClusterUpscaleTriggerEvent upscaleEvent = (StackAndClusterUpscaleTriggerEvent) eventQueues.getQueue().poll();
-        checkGroup(downscaleEvent, upscaleEvent, "hostGroup-core", downscaledCoreHosts, upscaledCoreHosts, 100);
-        assertHosts(upscaledCoreHosts, 98, 100);
+        assertGroupWithHosts(upscaleEvent, HG_CORE, hosts("core-", 98, 198));
+
         downscaleEvent = (ClusterAndStackDownscaleTriggerEvent) eventQueues.getQueue().poll();
+        assertGroupWithHosts(downscaleEvent, HG_CORE, hosts("core-", 198, 298));
         upscaleEvent = (StackAndClusterUpscaleTriggerEvent) eventQueues.getQueue().poll();
-        checkGroup(downscaleEvent, upscaleEvent, "hostGroup-core", downscaledCoreHosts, upscaledCoreHosts, 100);
-        assertHosts(upscaledCoreHosts, 198, 100);
+        assertGroupWithHosts(upscaleEvent, HG_CORE, hosts("core-", 198, 298));
+
         downscaleEvent = (ClusterAndStackDownscaleTriggerEvent) eventQueues.getQueue().poll();
+        assertGroupWithHost(downscaleEvent, HG_MASTER, FAILED_SECONDARY_GATEWAY_FQDN);
+        assertGroupWithHosts(downscaleEvent, HG_CORE, hosts("core-", 298, 320));
+
         upscaleEvent = (StackAndClusterUpscaleTriggerEvent) eventQueues.getQueue().poll();
-        checkGroup(downscaleEvent, upscaleEvent, "hostGroup-core", downscaledCoreHosts, upscaledCoreHosts, 22);
-        assertHosts(upscaledCoreHosts, 298, 22);
-        Set<String> downscaledMasterHosts = new HashSet<>();
-        Set<String> upscaledMasterHosts = new HashSet<>();
-        checkGroup(downscaleEvent, upscaleEvent, "hostGroup-master", downscaledMasterHosts, upscaledMasterHosts, 1);
-        assertThat(downscaledMasterHosts, containsInAnyOrder(FAILED_NODE_FQDN_SECONDARY_GATEWAY));
-        assertThat(upscaledMasterHosts, containsInAnyOrder(FAILED_NODE_FQDN_SECONDARY_GATEWAY));
-    }
-
-    private static void assertHosts(Set<String> upscaledCoreHosts, int startNodeNumber, int nodeCount) {
-        Set<String> coreHosts = new HashSet<>();
-        for (int i = 0; i < nodeCount; i++) {
-            coreHosts.add("core-" + (startNodeNumber + i));
-        }
-        assertEquals(upscaledCoreHosts, coreHosts);
-    }
-
-    private static void checkGroup(ClusterAndStackDownscaleTriggerEvent downscaleTriggerEvent, StackAndClusterUpscaleTriggerEvent upscaleTriggerEvent,
-            String group, Set<String> downscaledHosts, Set<String> upscaledHosts, int size) {
-        checkDownscale(downscaleTriggerEvent, group, size, downscaledHosts);
-        checkUpscale(upscaleTriggerEvent, group, size, upscaledHosts);
-    }
-
-    private static void checkDownscale(ClusterAndStackDownscaleTriggerEvent downscaleEvent,
-            String key, int size, Set<String> downscaledHosts) {
-        Set<String> downscaledHostsFromGroup = downscaleEvent.getHostGroupsWithHostNames().get(key);
-        assertEquals(size, downscaledHostsFromGroup.size());
-        downscaledHosts.clear();
-        downscaledHosts.addAll(downscaledHostsFromGroup);
-    }
-
-    private static void checkUpscale(StackAndClusterUpscaleTriggerEvent upscaleEvent,
-            String key, int size, Set<String> upscaledHosts) {
-        Set<String> upscaledHostsFromGroup = upscaleEvent.getHostGroupsWithHostNames().get(key);
-        assertEquals(size, upscaledHostsFromGroup.size());
-        upscaledHosts.clear();
-        upscaledHosts.addAll(upscaledHostsFromGroup);
+        assertGroupWithHost(upscaleEvent, HG_MASTER, FAILED_SECONDARY_GATEWAY_FQDN);
+        assertGroupWithHosts(upscaleEvent, HG_CORE, hosts("core-", 298, 320));
     }
 
     @Test
@@ -586,8 +584,8 @@ public class ClusterRepairFlowEventChainFactoryTest {
         ReflectionTestUtils.setField(underTest, "rootDiskRepairMigrationEnabled", true);
         when(rootVolumeSizeProvider.getForPlatform(any())).thenReturn(200);
         Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
-        when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of(ATTACHED_WORKLOAD));
-        setupHostGroup(false);
+        setupConnectedCluster();
+        setupHostGroup(InstanceGroupType.CORE);
         InstanceGroupDto instanceGroupDto = mock(InstanceGroupDto.class);
         com.sequenceiq.cloudbreak.view.InstanceGroupView instanceGroupView = mock(com.sequenceiq.cloudbreak.view.InstanceGroupView.class);
         when(instanceGroupView.getGroupName()).thenReturn("core");
@@ -598,29 +596,55 @@ public class ClusterRepairFlowEventChainFactoryTest {
         when(stackDto.getInstanceGroupDtos()).thenReturn(List.of(instanceGroupDto));
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
-        List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
-        assertEquals(List.of("FLOWCHAIN_INIT_TRIGGER_EVENT",
+
+        assertEvents(eventQueues, List.of("FLOWCHAIN_INIT_TRIGGER_EVENT",
                 "STACK_VERTICAL_SCALE_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
-                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"), triggeredOperations);
+                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
 
         eventQueues.getQueue().remove();
         CoreVerticalScalingTriggerEvent coreVerticalScalingTriggerEvent = (CoreVerticalScalingTriggerEvent) eventQueues.getQueue().poll();
         assertEquals(200, coreVerticalScalingTriggerEvent.getRequest().getTemplate().getRootVolume().getSize().intValue());
     }
 
-    private void setupHostGroup(boolean gatewayInstanceGroup) {
-        String hostGroupName = gatewayInstanceGroup ? "gateway" : "core";
-        HostGroup hostGroup = setupHostGroup(hostGroupName, setupInstanceGroup(gatewayInstanceGroup ? InstanceGroupType.GATEWAY : InstanceGroupType.CORE));
+    private void assertGroupWithHost(StackScaleTriggerEvent scaleTriggerEvent, String group, String expectedInstanceFqdn) {
+        assertGroupWithHosts(scaleTriggerEvent, group, Set.of(expectedInstanceFqdn));
+    }
+
+    private void assertGroupWithHost(ClusterScaleTriggerEvent scaleTriggerEvent, String group, String expectedInstanceFqdn) {
+        assertGroupWithHosts(scaleTriggerEvent, group, Set.of(expectedInstanceFqdn));
+    }
+
+    private void assertGroupWithHosts(StackScaleTriggerEvent scaleTriggerEvent, String group, Set<String> expectedHosts) {
+        Set<String> hosts = scaleTriggerEvent.getHostGroupsWithHostNames().get(group);
+        assertEquals(expectedHosts, hosts);
+    }
+
+    private void assertGroupWithHosts(ClusterScaleTriggerEvent scaleTriggerEvent, String group, Set<String> expectedHosts) {
+        Set<String> hosts = scaleTriggerEvent.getHostGroupsWithHostNames().get(group);
+        assertEquals(expectedHosts, hosts);
+    }
+
+    private Set<String> hosts(String prefix, int startNumber, int endNumber) {
+        Set<String> hosts = new HashSet<>();
+        for (int i = startNumber; i < endNumber; i++) {
+            hosts.add(prefix + i);
+        }
+        return hosts;
+    }
+
+    private void setupHostGroup(InstanceGroupType instanceGroupType) {
+        String hostGroupName = instanceGroupType.name().toLowerCase();
+        HostGroup hostGroup = setupHostGroup(hostGroupName, setupInstanceGroup(instanceGroupType));
         when(hostGroupService.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(Optional.of(hostGroup));
         setupPrimaryGateway();
     }
 
     private void setupPrimaryGateway() {
         when(instanceMetaDataService.getPrimaryGatewayDiscoveryFQDNByInstanceGroup(anyLong(), anyLong()))
-                .thenReturn(Optional.of(FAILED_NODE_FQDN_PRIMARY_GATEWAY));
+                .thenReturn(Optional.of(FAILED_PRIMARY_GATEWAY_FQDN));
     }
 
     private Stack getStack(boolean multipleGateway) {
@@ -660,6 +684,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
         HostGroup hostGroup = mock(HostGroup.class);
         when(hostGroup.getName()).thenReturn(hostGroupName);
         when(hostGroup.getInstanceGroup()).thenReturn(instanceGroup);
+        when(hostGroupService.findHostGroupInClusterByName(anyLong(), eq(hostGroupName))).thenReturn(Optional.of(hostGroup));
         return hostGroup;
     }
 
@@ -668,6 +693,25 @@ public class ClusterRepairFlowEventChainFactoryTest {
         when(instanceGroup.getId()).thenReturn(INSTANCE_GROUP_ID);
         when(instanceGroup.getInstanceGroupType()).thenReturn(instanceGroupType);
         return instanceGroup;
+    }
+
+    private void setupInstanceGroup(InstanceGroupType instanceGroupType, int nodeCount) {
+        InstanceGroupView ig = mock(InstanceGroupView.class);
+        when(ig.getInstanceGroupType()).thenReturn(instanceGroupType);
+        when(ig.getNodeCount()).thenReturn(nodeCount);
+        when(instanceGroupService.findViewByStackId(STACK_ID)).thenReturn(Set.of(ig));
+    }
+
+    private void setupNoConnectedCluster() {
+        when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
+    }
+
+    private void setupConnectedCluster() {
+        when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of(attachedWorkload));
+    }
+
+    private void assertEvents(FlowTriggerEventQueue eventQueues, List<String> expectedEvents) {
+        assertEquals(expectedEvents, eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList()));
     }
 
     private static class TriggerEventBuilder {
@@ -689,17 +733,17 @@ public class ClusterRepairFlowEventChainFactoryTest {
         }
 
         private TriggerEventBuilder withFailedPrimaryGateway() {
-            failedGatewayNodes.add(FAILED_NODE_FQDN_PRIMARY_GATEWAY);
+            failedGatewayNodes.add(FAILED_PRIMARY_GATEWAY_FQDN);
             return this;
         }
 
         private TriggerEventBuilder withFailedSecondaryGateway() {
-            failedGatewayNodes.add(FAILED_NODE_FQDN_SECONDARY_GATEWAY);
+            failedGatewayNodes.add(FAILED_SECONDARY_GATEWAY_FQDN);
             return this;
         }
 
         private TriggerEventBuilder withFailedCore() {
-            failedCoreNodes.add(FAILED_NODE_FQDN_CORE);
+            failedCoreNodes.add(FAILED_CORE_FQDN);
             return this;
         }
 
@@ -733,15 +777,15 @@ public class ClusterRepairFlowEventChainFactoryTest {
         }
 
         private ClusterRepairTriggerEvent build() {
-            Map<String, List<String>> failedNodes = new HashMap<>();
+            Map<String, List<String>> failedNodes = new LinkedHashMap<>();
             if (!failedGatewayNodes.isEmpty()) {
-                failedNodes.put("hostGroup-master", failedGatewayNodes);
+                failedNodes.put(HG_MASTER, failedGatewayNodes);
             }
             if (!failedCoreNodes.isEmpty()) {
-                failedNodes.put("hostGroup-core", failedCoreNodes);
+                failedNodes.put(HG_CORE, failedCoreNodes);
             }
             if (!failedAuxiliaryNodes.isEmpty()) {
-                failedNodes.put("hostGroup-auxiliary", failedAuxiliaryNodes);
+                failedNodes.put(HG_AUXILIARY, failedAuxiliaryNodes);
             }
 
             return new ClusterRepairTriggerEvent(stack.getId(), failedNodes, repairType, false, "variant", upgrade);

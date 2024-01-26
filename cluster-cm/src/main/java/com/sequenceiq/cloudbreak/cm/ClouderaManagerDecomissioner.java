@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -110,7 +112,7 @@ public class ClouderaManagerDecomissioner {
 
                     List<InstanceMetadataView> runningInstances = instanceGroupDto.getRunningInstanceMetaData();
                     int removableSizeFromTheRunning = Math.toIntExact(removableHostsInHostGroup.stream()
-                            .filter(instance -> runningInstances.contains(instance))
+                            .filter(runningInstances::contains)
                             .count());
                     verifyNodeCount(replication, removableSizeFromTheRunning, runningInstances.size(),
                             0, stack);
@@ -141,7 +143,7 @@ public class ClouderaManagerDecomissioner {
         Map<HostName, HostServiceStatus> hostStates = apiHostList.stream()
                 .filter(apiHost -> checkHosts.contains(apiHost.getHostname()))
                 .collect(Collectors.toMap(
-                        apiHost -> hostName(apiHost.getHostname()), apiHost -> getHostServiceStatusAggregate(apiHost)));
+                        apiHost -> hostName(apiHost.getHostname()), this::getHostServiceStatusAggregate));
         LOGGER.debug("Query aggregated host service states: {}", hostStates);
         return new HostServiceStatuses(hostStates);
     }
@@ -185,7 +187,7 @@ public class ClouderaManagerDecomissioner {
                     .filter(host -> instancesForHostGroup.stream()
                             .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                             .anyMatch(instanceMetaData -> instanceMetaData.getDiscoveryFQDN().equals(host.getHostname())))
-                    .collect(Collectors.toList());
+                    .toList();
             int numInstanceToRemove = Math.abs(scalingAdjustment) - instancesToRemove.size();
             if (numInstanceToRemove > 0) {
                 Set<String> healthyHosts = apiHosts.stream().filter(host -> ApiHealthSummary.GOOD.equals(host.getHealthSummary()))
@@ -264,12 +266,12 @@ public class ClouderaManagerDecomissioner {
             ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, SUMMARY_REQUEST_VIEW);
             List<String> runningHosts = hostRefList.getItems().stream()
                     .map(ApiHost::getHostname)
-                    .collect(Collectors.toList());
+                    .toList();
             // TODO: what if i remove a node from CM manually?
 
             List<String> matchingCmHosts = hostsToRemove.keySet().stream()
-                    .filter(hostName -> runningHosts.contains(hostName))
-                    .collect(Collectors.toList());
+                    .filter(runningHosts::contains)
+                    .toList();
             Set<String> matchingCmHostSet = new HashSet<>(matchingCmHosts);
 
             if (matchingCmHosts.size() != hostsToRemove.size()) {
@@ -344,7 +346,7 @@ public class ClouderaManagerDecomissioner {
             Set<String> hostsAvailableForDecommissionSet = new HashSet<>(stillAvailableRemovableHosts);
             List<String> cmHostsUnavailableForDecommission = hostsToRemove.keySet().stream()
                     .filter(h -> !hostsAvailableForDecommissionSet.contains(h)).collect(Collectors.toList());
-            if (cmHostsUnavailableForDecommission.size() != 0) {
+            if (!cmHostsUnavailableForDecommission.isEmpty()) {
                 LOGGER.info("Some decommission targets are unavailable in CM: TotalDecommissionTargetCount={}, unavailableInCMCount={}, unavailableInCm=[{}]",
                         hostsToRemove.size(), cmHostsUnavailableForDecommission.size(), cmHostsUnavailableForDecommission);
             }
@@ -576,31 +578,60 @@ public class ClouderaManagerDecomissioner {
         }
     }
 
-    public void stopRolesOnHosts(StackDtoDelegate stack, ApiClient client, Set<String> hosts) throws CloudbreakException {
+    public void stopRolesOnHosts(StackDtoDelegate stack, ApiClient v53Client, ApiClient v51Client, Set<String> hosts,
+            boolean stopServicesGracefully)
+            throws CloudbreakException {
         try {
             LOGGER.info("Stop roles on hosts: {}", hosts);
-            HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
-            ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, FULL_REQUEST_VIEW);
-            LOGGER.info("Hosts from CM: {}", hostRefList);
-            List<ApiHost> stillAvailableHostsForStopRolesCommand = hostRefList.getItems().stream()
-                    .filter(apiHost -> hosts.contains(apiHost.getHostname()))
-                    .collect(Collectors.toList());
-            if (!stillAvailableHostsForStopRolesCommand.isEmpty()) {
-                List<String> hostsInGoodHealthForStopRolesCommand = stillAvailableHostsForStopRolesCommand.stream()
-                        .filter(apiHost -> ApiHealthSummary.GOOD.equals(apiHost.getHealthSummary()))
-                        .map(ApiHost::getHostname).collect(Collectors.toList());
-                if (!hostsInGoodHealthForStopRolesCommand.isEmpty()) {
-                    stopRolesOnHosts(stack, client, hostsInGoodHealthForStopRolesCommand);
-                } else {
-                    LOGGER.info("Don't run stop roles command because instances are filtered out based on host health result");
+            List<String> hostsSelectedForStopping = getExistingHostsWithGoodHealth(v51Client, hosts);
+            if (CollectionUtils.isNotEmpty(hostsSelectedForStopping)) {
+                if (stopServicesGracefully && v53Client != null) {
+                    stopServicesOnHosts(stack, v53Client, hostsSelectedForStopping);
                 }
-            } else {
-                LOGGER.info("Don't run stop roles command because instances are filtered out based on host list result");
+                stopRolesOnHosts(stack, v51Client, hostsSelectedForStopping);
             }
         } catch (ApiException e) {
             LOGGER.error("Failed to stop roles on nodes: {}", hosts, e);
             throw new CloudbreakException("Failed to stop roles on nodes: " + hosts, e);
         }
+    }
+
+    private List<String> getExistingHostsWithGoodHealth(ApiClient apiClient, Set<String> hosts) throws ApiException {
+        HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(apiClient);
+        ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, FULL_REQUEST_VIEW);
+        LOGGER.info("Hosts from CM: {}", hostRefList);
+        List<ApiHost> selectedHosts = hostRefList.getItems().stream()
+                .filter(apiHost -> hosts.contains(apiHost.getHostname()))
+                .toList();
+        if (CollectionUtils.isEmpty(selectedHosts)) {
+            LOGGER.info("No host is selected to stop services and roles.");
+            return List.of();
+        } else {
+            List<String> hostsWithGoodHealth = selectedHosts
+                    .stream()
+                    .filter(apiHost -> ApiHealthSummary.GOOD.equals(apiHost.getHealthSummary()))
+                    .map(ApiHost::getHostname)
+                    .toList();
+            if (CollectionUtils.isEmpty(hostsWithGoodHealth)) {
+                LOGGER.info("No host is in good health therefore stopping services and roles will be skipped.");
+            }
+            return hostsWithGoodHealth;
+        }
+    }
+
+    private void stopServicesOnHosts(StackDtoDelegate stack, ApiClient apiClient, List<String> hostsSelectedForStopping)
+            throws ApiException {
+        LOGGER.info("Stopping services gracefully on hosts {}", hostsSelectedForStopping);
+        HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(apiClient);
+        List<BigDecimal> commands = new ArrayList<>();
+        for (String hostName : hostsSelectedForStopping) {
+            try {
+                commands.add(hostsResourceApi.stopAllRolesOnNodeGracefully(hostName).getId());
+            } catch (Exception e) {
+                LOGGER.warn("Error while tried to stop services gracefully on host '{}'.", hostName, e);
+            }
+        }
+        clouderaManagerPollingServiceProvider.startPollingCommandList(stack, apiClient, commands, "Stop services gracefully.");
     }
 
     private void stopRolesOnHosts(StackDtoDelegate stack, ApiClient client, List<String> hostsInGoodHealthForStopRolesCommand) throws ApiException {
@@ -645,7 +676,7 @@ public class ClouderaManagerDecomissioner {
                 .collect(Multimaps.toMultimap(
                         InstanceMetadataView::getAvailabilityZone,
                         Function.identity(),
-                ArrayListMultimap::create)).asMap();
+                        ArrayListMultimap::create)).asMap();
         LOGGER.debug("Availability Zone to Nodes mapping is {}", availabilityZoneToNodesMap);
         Set<InstanceMetadataView> instancesToRemove = new HashSet<>();
         for (int instanceCountToRemove = numInstancesToRemove; !availabilityZoneToNodesMap.isEmpty() && instanceCountToRemove > 0; instanceCountToRemove--) {

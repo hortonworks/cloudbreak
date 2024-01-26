@@ -79,7 +79,10 @@ class ClouderaManagerDecomissionerTest {
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
     @Mock
-    private ApiClient client;
+    private ApiClient v51Client;
+
+    @Mock
+    private ApiClient v53Client;
 
     @Mock
     private ClustersResourceApi clustersResourceApi;
@@ -106,7 +109,7 @@ class ClouderaManagerDecomissionerTest {
         mockAbortCommand(BigDecimal.ONE);
         InstanceMetaData deletedInstanceMetadata = createDeletedInstanceMetadata();
 
-        underTest.decommissionNodes(getStack(), Map.of(deletedInstanceMetadata.getDiscoveryFQDN(), deletedInstanceMetadata), client);
+        underTest.decommissionNodes(getStack(), Map.of(deletedInstanceMetadata.getDiscoveryFQDN(), deletedInstanceMetadata), v51Client);
 
         verifyNoInteractions(commandsResourceApi);
         verify(clouderaManagerResourceApi, times(1)).hostsDecommissionCommand(any());
@@ -120,7 +123,7 @@ class ClouderaManagerDecomissionerTest {
         mockAbortCommand(BigDecimal.ONE);
         InstanceMetaData deletedInstanceMetadata = createDeletedInstanceMetadata();
 
-        underTest.decommissionNodes(getStack(), Map.of(deletedInstanceMetadata.getDiscoveryFQDN(), deletedInstanceMetadata), client);
+        underTest.decommissionNodes(getStack(), Map.of(deletedInstanceMetadata.getDiscoveryFQDN(), deletedInstanceMetadata), v51Client);
 
         verify(commandsResourceApi, times(1)).abortCommand(eq(BigDecimal.ONE));
         verify(clouderaManagerResourceApi, times(2)).hostsDecommissionCommand(any());
@@ -135,7 +138,7 @@ class ClouderaManagerDecomissionerTest {
         doNothing().when(flowMessageService).fireInstanceGroupEventAndLog(any(), any(), any(), any(), any());
         InstanceMetaData deletedInstanceMetadata = createDeletedInstanceMetadata();
 
-        underTest.decommissionNodes(getStack(), Map.of(deletedInstanceMetadata.getDiscoveryFQDN(), deletedInstanceMetadata), client);
+        underTest.decommissionNodes(getStack(), Map.of(deletedInstanceMetadata.getDiscoveryFQDN(), deletedInstanceMetadata), v51Client);
 
         verify(commandsResourceApi, times(1)).abortCommand(eq(BigDecimal.ONE));
         verify(commandsResourceApi, times(1)).abortCommand(eq(BigDecimal.TEN));
@@ -152,7 +155,7 @@ class ClouderaManagerDecomissionerTest {
         String groupName = "hgName";
         instanceGroup.setGroupName(groupName);
         stack.setInstanceGroups(Set.of(instanceGroup));
-        Map<String, InstanceMetadataView> result = underTest.collectHostsToRemove(stack, groupName, hostNames, client);
+        Map<String, InstanceMetadataView> result = underTest.collectHostsToRemove(stack, groupName, hostNames, v51Client);
 
         assertThat(result.keySet())
                 .contains(createDeletedInstanceMetadata().getDiscoveryFQDN(),
@@ -165,10 +168,10 @@ class ClouderaManagerDecomissionerTest {
         ApiHostTemplateList apiHostTemplateList = new ApiHostTemplateList();
         apiHostTemplateList.setItems(new ArrayList<>());
         when(hostTemplatesResourceApi.readHostTemplates(any())).thenReturn(apiHostTemplateList);
-        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(client)).thenReturn(hostTemplatesResourceApi);
+        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(v51Client)).thenReturn(hostTemplatesResourceApi);
 
         HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
-        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        when(clouderaManagerApiFactory.getHostsResourceApi(v51Client)).thenReturn(hostsResourceApi);
         ApiHostList apiHostList = new ApiHostList();
         apiHostList.addItemsItem(createApiHostRef("host1.example.com", ApiHealthSummary.GOOD));
         apiHostList.addItemsItem(createApiHostRef("host2.example.com", ApiHealthSummary.BAD));
@@ -184,7 +187,7 @@ class ClouderaManagerDecomissionerTest {
         Set<InstanceMetadataView> instanceMetaDataSet = Set.of(unknown1, unknown2, healthy1, healthy2, bad1);
         StackDtoDelegate stack = getStack();
 
-        Set<InstanceMetadataView> removableInstances = underTest.collectDownscaleCandidates(client, stack, "compute", 2, instanceMetaDataSet);
+        Set<InstanceMetadataView> removableInstances = underTest.collectDownscaleCandidates(v51Client, stack, "compute", 2, instanceMetaDataSet);
         assertEquals(2, removableInstances.size());
         assertTrue(removableInstances.contains(unknown1));
         assertTrue(removableInstances.contains(unknown2));
@@ -196,10 +199,10 @@ class ClouderaManagerDecomissionerTest {
         ApiHostTemplateList apiHostTemplateList = new ApiHostTemplateList();
         apiHostTemplateList.setItems(new ArrayList<>());
         when(hostTemplatesResourceApi.readHostTemplates(any())).thenReturn(apiHostTemplateList);
-        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(client)).thenReturn(hostTemplatesResourceApi);
+        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(v51Client)).thenReturn(hostTemplatesResourceApi);
 
         HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
-        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        when(clouderaManagerApiFactory.getHostsResourceApi(v51Client)).thenReturn(hostsResourceApi);
         ApiHostList apiHostList = new ApiHostList();
         apiHostList.addItemsItem(createApiHostRef("host1.example.com", ApiHealthSummary.GOOD));
         apiHostList.addItemsItem(createApiHostRef("host2.example.com", ApiHealthSummary.BAD));
@@ -215,7 +218,7 @@ class ClouderaManagerDecomissionerTest {
         Set<InstanceMetadataView> instanceMetaDataSet = Set.of(unknown1, unknown2, healthy1, healthy2, bad1);
         StackDtoDelegate stack = getStack();
 
-        Set<InstanceMetadataView> removableInstances = underTest.collectDownscaleCandidates(client, stack, "compute", 3, instanceMetaDataSet);
+        Set<InstanceMetadataView> removableInstances = underTest.collectDownscaleCandidates(v51Client, stack, "compute", 3, instanceMetaDataSet);
         assertEquals(3, removableInstances.size());
         assertTrue(removableInstances.contains(unknown1));
         assertTrue(removableInstances.contains(unknown2));
@@ -228,10 +231,10 @@ class ClouderaManagerDecomissionerTest {
         ApiHostTemplateList apiHostTemplateList = new ApiHostTemplateList();
         apiHostTemplateList.setItems(new ArrayList<>());
         when(hostTemplatesResourceApi.readHostTemplates(any())).thenReturn(apiHostTemplateList);
-        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(client)).thenReturn(hostTemplatesResourceApi);
+        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(v51Client)).thenReturn(hostTemplatesResourceApi);
 
         HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
-        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        when(clouderaManagerApiFactory.getHostsResourceApi(v51Client)).thenReturn(hostsResourceApi);
         ApiHostList apiHostList = new ApiHostList();
         apiHostList.addItemsItem(createApiHostRef("host1.example.com", ApiHealthSummary.GOOD));
         apiHostList.addItemsItem(createApiHostRef("host2.example.com", ApiHealthSummary.BAD));
@@ -247,7 +250,7 @@ class ClouderaManagerDecomissionerTest {
         Set<InstanceMetadataView> instanceMetaDataSet = Set.of(failed1, failed2, healthy1, healthy2, bad1);
         StackDtoDelegate stack = getStack();
 
-        Set<InstanceMetadataView> removableInstances = underTest.collectDownscaleCandidates(client, stack, "compute", 4, instanceMetaDataSet);
+        Set<InstanceMetadataView> removableInstances = underTest.collectDownscaleCandidates(v51Client, stack, "compute", 4, instanceMetaDataSet);
         assertEquals(4, removableInstances.size());
         assertTrue(removableInstances.contains(failed1));
         assertTrue(removableInstances.contains(failed2));
@@ -256,7 +259,7 @@ class ClouderaManagerDecomissionerTest {
     }
 
     static Object[][] testDataMultiAz() {
-        return new Object[][]{
+        return new Object[][] {
                 {
                         "collectDownscaleCandidatesMultiAz_NotKnownInCmOnly",
                         List.of(List.of("host1.example.com", "BAD", "1"),
@@ -369,10 +372,10 @@ class ClouderaManagerDecomissionerTest {
         ApiHostTemplateList apiHostTemplateList = new ApiHostTemplateList();
         apiHostTemplateList.setItems(new ArrayList<>());
         when(hostTemplatesResourceApi.readHostTemplates(any())).thenReturn(apiHostTemplateList);
-        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(client)).thenReturn(hostTemplatesResourceApi);
+        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(v51Client)).thenReturn(hostTemplatesResourceApi);
 
         HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
-        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        when(clouderaManagerApiFactory.getHostsResourceApi(v51Client)).thenReturn(hostsResourceApi);
         ApiHostList apiHostList = new ApiHostList();
         for (List<String> hostInfo : input) {
             if (!hostInfo.get(1).equals("NA")) {
@@ -389,7 +392,7 @@ class ClouderaManagerDecomissionerTest {
         }
 
         StackDtoDelegate stack = getStack(true);
-        Set<InstanceMetadataView> removableInstances = underTest.collectDownscaleCandidates(client, stack, "compute",
+        Set<InstanceMetadataView> removableInstances = underTest.collectDownscaleCandidates(v51Client, stack, "compute",
                 scalingAdjustment, instanceMetaDataSet);
         assertEquals(expectedHosts.size(), removableInstances.size());
 
@@ -403,7 +406,7 @@ class ClouderaManagerDecomissionerTest {
 
     private boolean matchExpectedHosts(Set<String> removableHosts, List<String> expectedHosts) {
         for (String host : expectedHosts) {
-            String [] anyHosts = host.split(":");
+            String[] anyHosts = host.split(":");
             boolean anyHostMatch = false;
             for (String anyHost : anyHosts) {
                 if (removableHosts.contains(anyHost)) {
@@ -427,10 +430,10 @@ class ClouderaManagerDecomissionerTest {
         ApiHostTemplateList apiHostTemplateList = new ApiHostTemplateList();
         apiHostTemplateList.setItems(new ArrayList<>());
         when(hostTemplatesResourceApi.readHostTemplates(any())).thenReturn(apiHostTemplateList);
-        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(client)).thenReturn(hostTemplatesResourceApi);
+        when(clouderaManagerApiFactory.getHostTemplatesResourceApi(v51Client)).thenReturn(hostTemplatesResourceApi);
 
         HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
-        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        when(clouderaManagerApiFactory.getHostsResourceApi(v51Client)).thenReturn(hostsResourceApi);
         ApiHostList apiHostList = new ApiHostList();
         Set<InstanceMetadataView> instanceMetaDataSet = new HashSet<>();
 
@@ -445,7 +448,7 @@ class ClouderaManagerDecomissionerTest {
 
         StackDtoDelegate stack = getStack();
 
-        Set<InstanceMetadataView> removableInstances = underTest.collectDownscaleCandidates(client, stack, "compute", nodeCount, instanceMetaDataSet);
+        Set<InstanceMetadataView> removableInstances = underTest.collectDownscaleCandidates(v51Client, stack, "compute", nodeCount, instanceMetaDataSet);
         assertEquals(nodeCount, removableInstances.size());
     }
 
@@ -454,14 +457,14 @@ class ClouderaManagerDecomissionerTest {
         StackDtoDelegate stack = getStack();
         InstanceMetaData instanceMetaData = createInstanceMetadata(InstanceStatus.SERVICES_HEALTHY, null, "compute");
         ServicesResourceApi servicesResourceApi = mock(ServicesResourceApi.class);
-        when(clouderaManagerApiFactory.getServicesResourceApi(eq(client))).thenReturn(servicesResourceApi);
+        when(clouderaManagerApiFactory.getServicesResourceApi(eq(v51Client))).thenReturn(servicesResourceApi);
         when(servicesResourceApi.readServices(eq(stack.getName()), any())).thenReturn(new ApiServiceList().items(new ArrayList<>()));
-        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        when(clouderaManagerApiFactory.getHostsResourceApi(v51Client)).thenReturn(hostsResourceApi);
         ApiHostList apiHostList = new ApiHostList();
         apiHostList.addItemsItem(createApiHostRef("host1.example.com"));
         when(hostsResourceApi.readHosts(any(), any(), any())).thenReturn(apiHostList);
 
-        underTest.deleteHost(stack, instanceMetaData, client);
+        underTest.deleteHost(stack, instanceMetaData, v51Client);
 
         verify(hostsResourceApi, times(1)).readHosts(any(), any(), any());
         verify(hostsResourceApi, never()).deleteHost(any());
@@ -470,21 +473,24 @@ class ClouderaManagerDecomissionerTest {
     @Test
     public void testStopRolesOnHosts() throws CloudbreakException, ApiException {
         StackDtoDelegate stack = getStack();
-        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        when(clouderaManagerApiFactory.getHostsResourceApi(v51Client)).thenReturn(hostsResourceApi);
+        when(clouderaManagerApiFactory.getHostsResourceApi(v53Client)).thenReturn(hostsResourceApi);
         ApiHostList apiHostList = new ApiHostList();
         apiHostList.addItemsItem(createApiHostRef("host1.example.com"));
         apiHostList.addItemsItem(createApiHostRef("host2.example.com"));
         apiHostList.addItemsItem(createApiHostRef("host3.example.com"));
         apiHostList.addItemsItem(createApiHostRef("host4.example.com"));
         when(hostsResourceApi.readHosts(isNull(), isNull(), any())).thenReturn(apiHostList);
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(eq(client))).thenReturn(clouderaManagerResourceApi);
+        when(hostsResourceApi.stopAllRolesOnNodeGracefully(any())).thenReturn(new ApiCommand().id(BigDecimal.ONE));
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(eq(v51Client))).thenReturn(clouderaManagerResourceApi);
         ArgumentCaptor<ApiHostNameList> apiHostNameListArgumentCaptor = ArgumentCaptor.forClass(ApiHostNameList.class);
         BigDecimal apiCommandId = BigDecimal.ONE;
         when(clouderaManagerResourceApi.hostsStopRolesCommand(apiHostNameListArgumentCaptor.capture())).thenReturn(getApiCommand(apiCommandId));
         ExtendedPollingResult extendedPollingResult = mock(ExtendedPollingResult.class);
-        when(pollingServiceProvider.startPollingStopRolesCommand(any(), eq(client), eq(apiCommandId))).thenReturn(extendedPollingResult);
+        when(pollingServiceProvider.startPollingStopRolesCommand(any(), eq(v51Client), eq(apiCommandId))).thenReturn(extendedPollingResult);
 
-        underTest.stopRolesOnHosts(stack, client, Set.of("host1.example.com", "host2.example.com"));
+        underTest.stopRolesOnHosts(stack, v53Client, v51Client, Set.of("host1.example.com", "host2.example.com"), true);
+        verify(hostsResourceApi, times(2)).stopAllRolesOnNodeGracefully(any());
         verify(clouderaManagerResourceApi, times(1)).hostsStopRolesCommand(any());
         assertThat(apiHostNameListArgumentCaptor.getValue().getItems()).containsOnly("host1.example.com", "host2.example.com");
     }
@@ -492,21 +498,22 @@ class ClouderaManagerDecomissionerTest {
     @Test
     public void testStopRolesOnHostsBadNodeFilteredOut() throws CloudbreakException, ApiException {
         StackDtoDelegate stack = getStack();
-        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        when(clouderaManagerApiFactory.getHostsResourceApi(v51Client)).thenReturn(hostsResourceApi);
+        when(clouderaManagerApiFactory.getHostsResourceApi(v53Client)).thenReturn(hostsResourceApi);
         ApiHostList apiHostList = new ApiHostList();
         apiHostList.addItemsItem(createApiHostRef("host1.example.com"));
         apiHostList.addItemsItem(createApiHostRef("host2.example.com", ApiHealthSummary.BAD));
         apiHostList.addItemsItem(createApiHostRef("host3.example.com"));
         apiHostList.addItemsItem(createApiHostRef("host4.example.com"));
         when(hostsResourceApi.readHosts(isNull(), isNull(), any())).thenReturn(apiHostList);
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(eq(client))).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(eq(v51Client))).thenReturn(clouderaManagerResourceApi);
         ArgumentCaptor<ApiHostNameList> apiHostNameListArgumentCaptor = ArgumentCaptor.forClass(ApiHostNameList.class);
         BigDecimal apiCommandId = BigDecimal.ONE;
         when(clouderaManagerResourceApi.hostsStopRolesCommand(apiHostNameListArgumentCaptor.capture())).thenReturn(getApiCommand(apiCommandId));
         ExtendedPollingResult extendedPollingResult = mock(ExtendedPollingResult.class);
-        when(pollingServiceProvider.startPollingStopRolesCommand(any(), eq(client), eq(apiCommandId))).thenReturn(extendedPollingResult);
+        when(pollingServiceProvider.startPollingStopRolesCommand(any(), eq(v51Client), eq(apiCommandId))).thenReturn(extendedPollingResult);
 
-        underTest.stopRolesOnHosts(stack, client, Set.of("host1.example.com"));
+        underTest.stopRolesOnHosts(stack, v53Client, v51Client, Set.of("host1.example.com"), true);
         verify(clouderaManagerResourceApi, times(1)).hostsStopRolesCommand(any());
         assertThat(apiHostNameListArgumentCaptor.getValue().getItems()).containsOnly("host1.example.com");
     }
@@ -514,20 +521,21 @@ class ClouderaManagerDecomissionerTest {
     @Test
     public void testStopRolesOnHostsOneNodeFilteredOut() throws CloudbreakException, ApiException {
         StackDtoDelegate stack = getStack();
-        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        when(clouderaManagerApiFactory.getHostsResourceApi(v51Client)).thenReturn(hostsResourceApi);
+        when(clouderaManagerApiFactory.getHostsResourceApi(v53Client)).thenReturn(hostsResourceApi);
         ApiHostList apiHostList = new ApiHostList();
         apiHostList.addItemsItem(createApiHostRef("host1.example.com"));
         apiHostList.addItemsItem(createApiHostRef("host3.example.com"));
         apiHostList.addItemsItem(createApiHostRef("host4.example.com"));
         when(hostsResourceApi.readHosts(isNull(), isNull(), any())).thenReturn(apiHostList);
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(eq(client))).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(eq(v51Client))).thenReturn(clouderaManagerResourceApi);
         ArgumentCaptor<ApiHostNameList> apiHostNameListArgumentCaptor = ArgumentCaptor.forClass(ApiHostNameList.class);
         BigDecimal apiCommandId = BigDecimal.ONE;
         when(clouderaManagerResourceApi.hostsStopRolesCommand(apiHostNameListArgumentCaptor.capture())).thenReturn(getApiCommand(apiCommandId));
         ExtendedPollingResult extendedPollingResult = mock(ExtendedPollingResult.class);
-        when(pollingServiceProvider.startPollingStopRolesCommand(any(), eq(client), eq(apiCommandId))).thenReturn(extendedPollingResult);
+        when(pollingServiceProvider.startPollingStopRolesCommand(any(), eq(v51Client), eq(apiCommandId))).thenReturn(extendedPollingResult);
 
-        underTest.stopRolesOnHosts(stack, client, Set.of("host1.example.com", "host2.example.com"));
+        underTest.stopRolesOnHosts(stack, v53Client, v51Client, Set.of("host1.example.com", "host2.example.com"), true);
         verify(clouderaManagerResourceApi, times(1)).hostsStopRolesCommand(any());
         assertThat(apiHostNameListArgumentCaptor.getValue().getItems()).containsOnly("host1.example.com");
     }
@@ -535,26 +543,26 @@ class ClouderaManagerDecomissionerTest {
     @Test
     public void testStopRolesOnHostsAllNodeFilteredOut() throws CloudbreakException, ApiException {
         StackDtoDelegate stack = getStack();
-        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        when(clouderaManagerApiFactory.getHostsResourceApi(v51Client)).thenReturn(hostsResourceApi);
         ApiHostList apiHostList = new ApiHostList();
         apiHostList.addItemsItem(createApiHostRef("host3.example.com"));
         apiHostList.addItemsItem(createApiHostRef("host4.example.com"));
         when(hostsResourceApi.readHosts(isNull(), isNull(), any())).thenReturn(apiHostList);
 
-        underTest.stopRolesOnHosts(stack, client, Set.of("host1.example.com", "host2.example.com"));
+        underTest.stopRolesOnHosts(stack, v53Client, v51Client, Set.of("host1.example.com", "host2.example.com"), true);
         verify(clouderaManagerResourceApi, times(0)).hostsStopRolesCommand(any());
     }
 
     @Test
     public void testStopRolesOnHostsAllNodeFilteredOutBecauseOfBadState() throws CloudbreakException, ApiException {
         StackDtoDelegate stack = getStack();
-        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        when(clouderaManagerApiFactory.getHostsResourceApi(v51Client)).thenReturn(hostsResourceApi);
         ApiHostList apiHostList = new ApiHostList();
         apiHostList.addItemsItem(createApiHostRef("host1.example.com", ApiHealthSummary.BAD));
         apiHostList.addItemsItem(createApiHostRef("host2.example.com", ApiHealthSummary.BAD));
         when(hostsResourceApi.readHosts(isNull(), isNull(), any())).thenReturn(apiHostList);
 
-        underTest.stopRolesOnHosts(stack, client, Set.of("host1.example.com", "host2.example.com"));
+        underTest.stopRolesOnHosts(stack, v53Client, v51Client, Set.of("host1.example.com", "host2.example.com"), true);
         verify(clouderaManagerResourceApi, times(0)).hostsStopRolesCommand(any());
     }
 
@@ -570,7 +578,7 @@ class ClouderaManagerDecomissionerTest {
         when(hostsResourceApi.readHosts(null, null, "SUMMARY")).thenReturn(hostListResponse);
         when(hostsResourceApi.enterMaintenanceMode(any())).thenReturn(null);
 
-        underTest.enterMaintenanceMode(hostList, client);
+        underTest.enterMaintenanceMode(hostList, v51Client);
 
         verify(hostsResourceApi, times(2)).enterMaintenanceMode(any());
     }
@@ -583,7 +591,7 @@ class ClouderaManagerDecomissionerTest {
         when(clouderaManagerApiFactory.getHostsResourceApi(any())).thenReturn(hostsResourceApi);
         when(hostsResourceApi.readHosts(null, null, "SUMMARY")).thenReturn(hostListResponse);
 
-        underTest.enterMaintenanceMode(hostList, client);
+        underTest.enterMaintenanceMode(hostList, v51Client);
 
         verify(hostsResourceApi, times(0)).enterMaintenanceMode(any());
     }
@@ -596,15 +604,15 @@ class ClouderaManagerDecomissionerTest {
 
     private void mockDecommission(Pair<BigDecimal, ExtendedPollingResult> resultPair, Pair<BigDecimal, ExtendedPollingResult>... resultPairs)
             throws ApiException {
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(eq(client))).thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(eq(v51Client))).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.hostsDecommissionCommand(any())).thenReturn(getApiCommand(resultPair.getLeft()),
                 Arrays.stream(resultPairs).map(resultPairItem -> getApiCommand(resultPairItem.getLeft())).toArray(ApiCommand[]::new));
-        when(pollingServiceProvider.startPollingCmHostDecommissioning(any(), eq(client), any(), anyBoolean(), anyInt())).thenReturn(resultPair.getRight(),
+        when(pollingServiceProvider.startPollingCmHostDecommissioning(any(), eq(v51Client), any(), anyBoolean(), anyInt())).thenReturn(resultPair.getRight(),
                 Arrays.stream(resultPairs).map(resultPairItem -> resultPairItem.getRight()).toArray(ExtendedPollingResult[]::new));
     }
 
     private void mockAbortCommand(BigDecimal commandId, BigDecimal... commandIds) throws ApiException {
-        lenient().when(clouderaManagerApiFactory.getCommandsResourceApi(eq(client))).thenReturn(commandsResourceApi);
+        lenient().when(clouderaManagerApiFactory.getCommandsResourceApi(eq(v51Client))).thenReturn(commandsResourceApi);
         lenient().when(commandsResourceApi.abortCommand(any())).thenReturn(getApiCommand(commandId),
                 Arrays.stream(commandIds).map(commandIdItem -> getApiCommand(commandIdItem)).toArray(ApiCommand[]::new));
     }
@@ -613,7 +621,7 @@ class ClouderaManagerDecomissionerTest {
         ApiHostList apiHostRefList = new ApiHostList();
         apiHostRefList.setItems(List.of(createApiHostRef(DELETED_INSTANCE_FQDN), createApiHostRef(RUNNING_INSTANCE_FQDN)));
         when(hostsResourceApi.readHosts(null, null, "SUMMARY")).thenReturn(apiHostRefList);
-        when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        when(clouderaManagerApiFactory.getHostsResourceApi(v51Client)).thenReturn(hostsResourceApi);
     }
 
     private InstanceMetaData createRunningInstanceMetadata() {
@@ -669,6 +677,7 @@ class ClouderaManagerDecomissionerTest {
         Stack stack = new Stack();
         stack.setName(STACK_NAME);
         stack.setPlatformVariant("AWS");
+        stack.setStackVersion("7.2.18");
         stack.setMultiAz(multiAz);
         return stack;
     }

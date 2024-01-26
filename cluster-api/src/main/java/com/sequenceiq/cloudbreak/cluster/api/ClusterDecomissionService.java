@@ -36,7 +36,7 @@ public interface ClusterDecomissionService {
 
     void restartStaleServices(boolean forced) throws CloudbreakException;
 
-    void stopRolesOnHosts(Set<String> hosts) throws CloudbreakException;
+    void stopRolesOnHosts(Set<String> hosts, boolean stopServicesGracefully) throws CloudbreakException;
 
     Map<String, Map<String, String>> getStatusOfComponentsForHost(String host);
 }
