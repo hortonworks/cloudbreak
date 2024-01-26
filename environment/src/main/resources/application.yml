@@ -97,6 +97,9 @@ environment:
   sdx:
     url: http://localhost:8086
     contextPath: /dl
+  externalizedCompute:
+      url: http://localhost:8091
+      contextPath: /externalizedcompute
   db:
     host: localhost
     port: 5432

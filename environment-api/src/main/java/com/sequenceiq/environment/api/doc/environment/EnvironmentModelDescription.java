@@ -48,6 +48,7 @@ public class EnvironmentModelDescription {
     public static final String AZURE_NO_PUBLIC_IP = "Azure Network is private if this flag is true";
 
     public static final String CREATE_FREEIPA = "Create freeipa in environment";
+
     public static final String FREEIPA = "The FreeIPA paramaters";
     public static final String FREEIPA_INSTANCE_COUNT_BY_GROUP = "The number of FreeIPA instances to create per group when creating FreeIPA in environment";
     public static final String FREEIPA_INSTANCE_TYPE = "Override default FreeIPA instance type";
@@ -85,6 +86,7 @@ public class EnvironmentModelDescription {
 
     public static final String AUTHENTICATION = "SSH key for accessing cluster node instances.";
     public static final String FREE_IPA = "Properties for FreeIpa which can be attached to the given environment";
+    public static final String EXTERNALIZED_COMPUTE_CLUSTER = "Properties for Externalized compute cluster";
     public static final String PUBLIC_KEY = "SSH Public key string.";
     public static final String PUBLIC_KEY_ID = "Public key ID registered at the cloud provider.";
     public static final String LOGIN_USER_NAME = "User name created on the nodes for SSH access";
@@ -148,6 +150,8 @@ public class EnvironmentModelDescription {
     public static final String FREEIPA_IMAGE_CATALOG = "Image catalog for FreeIpa instance creation.";
     public static final String FREEIPA_IMAGE_ID = "Image ID for FreeIpa instance creation.";
     public static final String FREEIPA_IMAGE_OS_TYPE = "OS type to be chosen from the image catalog";
+    public static final String CREATE_EXTERNALIZED_COMPUTE_CLUSTER = "Create externalized compute cluster for environment";
+    public static final String EXTERNALIZED_COMPUTE_CLUSTER_NAME = "Name of the created k8s cluster";
 
     public static final String PROXYCONFIG_NAME = "Name of the proxyconfig of the environment.";
     public static final String PROXYCONFIG_RESPONSE = "ProxyConfig attached to the environment.";

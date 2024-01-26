@@ -53,6 +53,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
+import com.sequenceiq.environment.environment.dto.ExternalizedClusterCreateDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
@@ -131,6 +132,7 @@ public class EnvironmentApiConverter {
                 .withCredential(request)
                 .withCreated(System.currentTimeMillis())
                 .withFreeIpaCreation(freeIpaConverter.convert(request.getFreeIpa(), accountId, cloudPlatform))
+                .withExternalizedCompute(getExternalizedClusterCreationIfPresent(request))
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),
                         accountTelemetryService.getOrDefault(accountId).getFeatures(), accountId))
@@ -168,6 +170,13 @@ public class EnvironmentApiConverter {
             builder.withSecurityAccess(securityAccess);
         }
         return builder.build();
+    }
+
+    private static ExternalizedClusterCreateDto getExternalizedClusterCreationIfPresent(EnvironmentRequest request) {
+        if (Objects.isNull(request.getExternalizedComputeCreateRequest()) || !request.getExternalizedComputeCreateRequest().isCreate()) {
+            return null;
+        }
+        return ExternalizedClusterCreateDto.builder().withEnvName(request.getName()).build();
     }
 
     private NetworkDto networkRequestToDto(EnvironmentNetworkRequest network) {
@@ -231,7 +240,7 @@ public class EnvironmentApiConverter {
                         .orElse(null))
                 .withAwsDiskEncryptionParametersDto(Optional.ofNullable(aws)
                         .map(AwsEnvironmentParameters::getAwsDiskEncryptionParameters)
-                        .filter(awsDiskEncryptionParameters ->  Objects.nonNull(awsDiskEncryptionParameters.getEncryptionKeyArn()))
+                        .filter(awsDiskEncryptionParameters -> Objects.nonNull(awsDiskEncryptionParameters.getEncryptionKeyArn()))
                         .map(this::awsDiskEncryptionParametersToAwsDiskEncryptionParametersDto)
                         .orElse(null));
         Optional.ofNullable(awsFreeIpa)
@@ -288,7 +297,7 @@ public class EnvironmentApiConverter {
             AzureResourceEncryptionParameters azureResourceEncryptionParameters) {
         AzureResourceEncryptionParametersDto.Builder azureResourceEncryptionParametersDto =
                 AzureResourceEncryptionParametersDto.builder()
-                .withEnableHostEncryption(azureResourceEncryptionParameters.isEnableHostEncryption());
+                        .withEnableHostEncryption(azureResourceEncryptionParameters.isEnableHostEncryption());
         if (Objects.nonNull(azureResourceEncryptionParameters.getEncryptionKeyUrl())) {
             azureResourceEncryptionParametersDto
                     .withEncryptionKeyUrl(azureResourceEncryptionParameters.getEncryptionKeyUrl())

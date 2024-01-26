@@ -59,6 +59,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.environment.environment.service.externalizedcompute.ExternalizedComputeClusterCreationService;
 import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.network.CloudNetworkService;
@@ -119,6 +120,9 @@ class EnvironmentCreationServiceTest {
 
     @MockBean
     private OwnerAssignmentService ownerAssignmentService;
+
+    @MockBean
+    private ExternalizedComputeClusterCreationService externalizedComputeClusterCreationService;
 
     @MockBean
     private EntitlementService entitlementService;

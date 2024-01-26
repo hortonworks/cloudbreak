@@ -44,6 +44,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEd
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLoadBalancerUpdateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.ExternalizedComputeCreateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
@@ -181,6 +182,7 @@ class EnvironmentApiConverterTest {
         assertEquals(networkDto, actual.getNetwork());
         assertSecurityAccess(request.getSecurityAccess(), actual.getSecurityAccess());
         assertEquals(dataServices, actual.getDataServices());
+        assertEquals(String.format("default-%s-compute-cluster", request.getName()), actual.getExternalizedClusterCreation().getName());
 
         verify(credentialService).getCloudPlatformByCredential(anyString(), anyString(), any());
         verify(freeIpaConverter).convert(request.getFreeIpa(), "test-aws", cloudPlatform.name());
@@ -518,6 +520,9 @@ class EnvironmentApiConverterTest {
         request.setTags(Map.of("owner", "cloudbreak"));
         request.setParentEnvironmentName("parent-env");
         request.setCcmV2TlsType(CcmV2TlsType.ONE_WAY_TLS);
+        ExternalizedComputeCreateRequest extClusterCreateReq = new ExternalizedComputeCreateRequest();
+        extClusterCreateReq.setCreate(true);
+        request.setExternalizedComputeCreateRequest(extClusterCreateReq);
         setParameters(request, cloudPlatform);
         return request;
     }

@@ -77,6 +77,10 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     private AttachedFreeIpaRequest freeIpa;
 
     @Valid
+    @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_CLUSTER)
+    private ExternalizedComputeCreateRequest externalizedComputeCreateRequest;
+
+    @Valid
     @Schema(description = EnvironmentModelDescription.SECURITY_ACCESS)
     private SecurityAccessRequest securityAccess;
 
@@ -132,6 +136,14 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setFreeIpa(AttachedFreeIpaRequest freeIpa) {
         this.freeIpa = freeIpa;
+    }
+
+    public ExternalizedComputeCreateRequest getExternalizedComputeCreateRequest() {
+        return externalizedComputeCreateRequest;
+    }
+
+    public void setExternalizedComputeCreateRequest(ExternalizedComputeCreateRequest externalizedComputeCreateRequest) {
+        this.externalizedComputeCreateRequest = externalizedComputeCreateRequest;
     }
 
     public String getName() {
@@ -346,6 +358,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
                 ", backup=" + backup +
                 ", authentication=" + authentication +
                 ", freeIpa=" + freeIpa +
+                ", externalizedCluster=" + externalizedComputeCreateRequest +
                 ", securityAccess=" + securityAccess +
                 ", tunnel=" + tunnel +
                 ", overrideTunnel=" + overrideTunnel +

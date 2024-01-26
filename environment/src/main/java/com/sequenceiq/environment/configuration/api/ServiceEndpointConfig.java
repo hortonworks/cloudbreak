@@ -60,6 +60,15 @@ public class ServiceEndpointConfig {
     @Value("${environment.sdx.contextPath}")
     private String sdxRootContextPath;
 
+    @Value("${environment.externalizedCompute.url:}")
+    private String externalizedComputeServiceUrl;
+
+    @Value("${environment.externalizedCompute.serviceId:}")
+    private String externalizedComputeServiceId;
+
+    @Value("${environment.externalizedCompute.contextPath}")
+    private String externalizedComputeRootContextPath;
+
     @Bean
     public ServiceAddressResolver serviceAddressResolver() {
         return new RetryingServiceAddressResolver(new DNSServiceAddressResolver(), resolvingTimeout);
@@ -90,4 +99,8 @@ public class ServiceEndpointConfig {
         return serviceAddressResolver().resolveUrl(sdxServiceUrl + sdxRootContextPath, "http", sdxServiceId);
     }
 
+    @Bean
+    public String externalizedComputeServerUrl() throws ServiceAddressResolvingException {
+        return serviceAddressResolver().resolveUrl(externalizedComputeServiceUrl + externalizedComputeRootContextPath, "http", externalizedComputeServiceId);
+    }
 }

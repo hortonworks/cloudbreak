@@ -40,6 +40,8 @@ public class EnvironmentCreationDto {
 
     private final Set<String> regions;
 
+    private final ExternalizedClusterCreateDto externalizedClusterCreation;
+
     private final FreeIpaCreationDto freeIpaCreation;
 
     private final AuthenticationDto authentication;
@@ -78,6 +80,7 @@ public class EnvironmentCreationDto {
         network = builder.network;
         credential = builder.credential;
         freeIpaCreation = builder.freeIpaCreation;
+        externalizedClusterCreation = builder.externalizedClusterCreation;
         created = builder.created;
         if (CollectionUtils.isEmpty(builder.regions)) {
             regions = new HashSet<>();
@@ -153,6 +156,10 @@ public class EnvironmentCreationDto {
 
     public FreeIpaCreationDto getFreeIpaCreation() {
         return freeIpaCreation;
+    }
+
+    public ExternalizedClusterCreateDto getExternalizedClusterCreation() {
+        return externalizedClusterCreation;
     }
 
     public AuthenticationDto getAuthentication() {
@@ -240,6 +247,8 @@ public class EnvironmentCreationDto {
 
         private FreeIpaCreationDto freeIpaCreation;
 
+        private ExternalizedClusterCreateDto externalizedClusterCreation;
+
         private AuthenticationDto authentication;
 
         private Long created;
@@ -317,6 +326,11 @@ public class EnvironmentCreationDto {
 
         public Builder withFreeIpaCreation(FreeIpaCreationDto freeIpaCreation) {
             this.freeIpaCreation = freeIpaCreation;
+            return this;
+        }
+
+        public Builder withExternalizedCompute(ExternalizedClusterCreateDto externalizedClusterCreation) {
+            this.externalizedClusterCreation = externalizedClusterCreation;
             return this;
         }
 
