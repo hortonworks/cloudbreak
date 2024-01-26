@@ -154,7 +154,7 @@ public class DiskUpdateService {
         clusterApi.clusterModificationService().startCluster();
     }
 
-    public FlowIdentifier resizeDisks(long stackId, String instanceGroup) {
+    public FlowIdentifier resizeDisks(long stackId, String instanceGroup, DiskUpdateRequest diskUpdateRequest, List<Volume> volumesToUpdate) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Stack Resize Flow triggered for stack {}", stack.getName());
@@ -162,6 +162,8 @@ public class DiskUpdateService {
                 .withSelector(DISK_RESIZE_TRIGGER_EVENT.selector())
                 .withStackId(stackId)
                 .withInstanceGroup(instanceGroup)
+                .withDiskUpdateRequest(diskUpdateRequest)
+                .withVolumesToUpdate(volumesToUpdate)
                 .build();
         FlowIdentifier flowIdentifier = reactorNotifier.notify(stackId, diskResizeRequest.selector(), diskResizeRequest);
         LOGGER.info("DiskResizeRequest event is triggered for stack {}", stack.getName());

@@ -11,6 +11,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +21,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
@@ -30,6 +33,7 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.datalake.DiskUpdateService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -59,6 +63,9 @@ public class DiskResizeHandlerTest {
     @Mock
     private ResourceAttributeUtil resourceAttributeUtil;
 
+    @Mock
+    private DiskUpdateService diskUpdateService;
+
     @InjectMocks
     private DiskResizeHandler underTest;
 
@@ -74,14 +81,20 @@ public class DiskResizeHandlerTest {
         Cluster cluster = mock(Cluster.class);
         doReturn(cluster).when(stack).getCluster();
         String selector = DISK_RESIZE_HANDLER_EVENT.selector();
-        handlerRequest = new DiskResizeHandlerRequest(selector, STACK_ID, "compute");
+        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
+        diskUpdateRequest.setVolumeType("GP3");
+        diskUpdateRequest.setGroup("compute");
+        diskUpdateRequest.setSize(500);
+        List<Volume> volumesToUpdate = List.of(mock(Volume.class));
+        handlerRequest = new DiskResizeHandlerRequest(selector, STACK_ID, "compute", diskUpdateRequest, volumesToUpdate);
     }
 
     @Test
-    public void testResizeDisks() {
+    public void testResizeDisks() throws Exception {
         Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(handlerRequest)));
         assertEquals(DiskResizeEvent.DISK_RESIZE_FINISHED_EVENT.event(), response.getSelector());
         assertEquals(STACK_ID, response.getResourceId());
+        verify(diskUpdateService, times(1)).updateDiskTypeAndSize(handlerRequest.getDiskUpdateRequest(), handlerRequest.getVolumesToUpdate(), STACK_ID);
     }
 
     @Test

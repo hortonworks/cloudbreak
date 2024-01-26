@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.controller.v4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -51,25 +50,24 @@ public class DiskUpdateControllerTest {
         diskModificationRequest.setVolumesToUpdate(List.of(mock(Volume.class)));
         diskModificationRequest.setStackId(1L);
         underTest.updateDiskTypeAndSize(diskModificationRequest);
-        verify(diskUpdateService, times(1)).updateDiskTypeAndSize(diskModificationRequest.getDiskUpdateRequest(),
-                diskModificationRequest.getVolumesToUpdate(), diskModificationRequest.getStackId());
-        verify(diskUpdateService, times(1)).resizeDisks(1L, "TEST");
+        verify(diskUpdateService, times(1)).resizeDisks(1L, "TEST", diskModificationRequest.getDiskUpdateRequest(),
+                diskModificationRequest.getVolumesToUpdate());
     }
 
     @Test
     void testUpdateDiskTypeAndSizeThrowsException() throws Exception {
         DiskModificationRequest diskModificationRequest = new DiskModificationRequest();
-        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
-        diskModificationRequest.setDiskUpdateRequest(diskUpdateRequest);
-        diskModificationRequest.setVolumesToUpdate(List.of(mock(Volume.class)));
+        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
+        diskUpdateRequest.setGroup("compute");
         diskModificationRequest.setStackId(1L);
-        doThrow(new Exception("TEST EXCEPTION")).when(diskUpdateService).updateDiskTypeAndSize(eq(diskModificationRequest.getDiskUpdateRequest()),
-                eq(diskModificationRequest.getVolumesToUpdate()), eq(diskModificationRequest.getStackId()));
-        Exception exception = assertThrows(Exception.class, () -> underTest.updateDiskTypeAndSize(diskModificationRequest));
-        verify(diskUpdateService, times(1)).updateDiskTypeAndSize(diskModificationRequest.getDiskUpdateRequest(),
-                diskModificationRequest.getVolumesToUpdate(), diskModificationRequest.getStackId());
+        diskModificationRequest.setVolumesToUpdate(List.of(mock(Volume.class)));
+        diskModificationRequest.setDiskUpdateRequest(diskUpdateRequest);
+        doThrow(new RuntimeException("TEST EXCEPTION")).when(diskUpdateService).resizeDisks(eq(1L), eq("compute"),
+                eq(diskModificationRequest.getDiskUpdateRequest()), eq(diskModificationRequest.getVolumesToUpdate()));
+        Exception exception = assertThrows(RuntimeException.class, () -> underTest.updateDiskTypeAndSize(diskModificationRequest));
         assertEquals("TEST EXCEPTION", exception.getMessage());
-        verify(diskUpdateService, times(0)).resizeDisks(anyLong(), anyString());
+        verify(diskUpdateService, times(1)).resizeDisks(eq(1L), eq("compute"),
+                eq(diskModificationRequest.getDiskUpdateRequest()), eq(diskModificationRequest.getVolumesToUpdate()));
     }
 
     @Test

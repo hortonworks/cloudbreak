@@ -190,13 +190,17 @@ class DiskUpdateServiceTest {
     void testResizeDisks() throws Exception {
         Stack stack = mock(Stack.class);
         doReturn(stack).when(stackService).getByIdWithListsInTransaction(STACK_ID);
-        underTest.resizeDisks(STACK_ID, "test");
+        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
+        List<Volume> volumeListToUpdate = List.of(mock(Volume.class));
+        underTest.resizeDisks(STACK_ID, "test", diskUpdateRequest, volumeListToUpdate);
 
         ArgumentCaptor<DiskResizeRequest> captor = ArgumentCaptor.forClass(DiskResizeRequest.class);
         verify(reactorNotifier).notify(any(), any(), captor.capture());
         assertEquals("test", captor.getValue().getInstanceGroup());
         assertEquals(DISK_RESIZE_TRIGGER_EVENT.selector(), captor.getValue().getSelector());
         assertEquals(STACK_ID, captor.getValue().getResourceId());
+        assertEquals(diskUpdateRequest, captor.getValue().getDiskUpdateRequest());
+        assertEquals(volumeListToUpdate, captor.getValue().getVolumesToUpdate());
     }
 
     @Test

@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.datalake.DiskUpdateService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -65,6 +66,9 @@ public class DiskResizeHandler extends ExceptionCatcherEventHandler<DiskResizeHa
 
     @Inject
     private ResourceAttributeUtil resourceAttributeUtil;
+
+    @Inject
+    private DiskUpdateService diskUpdateService;
 
     @Override
     public String selector() {
@@ -118,6 +122,7 @@ public class DiskResizeHandler extends ExceptionCatcherEventHandler<DiskResizeHa
         Long stackId = payload.getResourceId();
         String instanceGroup = payload.getInstanceGroup();
         try {
+            diskUpdateService.updateDiskTypeAndSize(payload.getDiskUpdateRequest(), payload.getVolumesToUpdate(), stackId);
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             ResourceType diskResourceType = stack.getDiskResourceType();
             if (diskResourceType != null && diskResourceType.toString().contains("VOLUMESET")) {

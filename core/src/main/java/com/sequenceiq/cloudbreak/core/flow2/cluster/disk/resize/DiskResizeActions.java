@@ -56,7 +56,7 @@ public class DiskResizeActions {
                         DISK_RESIZE_STARTED,
                         targetInstanceGroup);
                 DiskResizeHandlerRequest handlerRequest = new DiskResizeHandlerRequest(DISK_RESIZE_HANDLER_EVENT.selector(), stackId,
-                        targetInstanceGroup);
+                        targetInstanceGroup, payload.getDiskUpdateRequest(), payload.getVolumesToUpdate());
                 sendEvent(ctx, DISK_RESIZE_HANDLER_EVENT.event(), handlerRequest);
             }
         };
