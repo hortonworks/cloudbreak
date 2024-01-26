@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.service.image;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 
@@ -59,20 +58,19 @@ public class SupportedOsServiceTest {
     }
 
     @Test
-    public void shouldSupportRhel8OsInCaseOfGrantedSupport() {
-        when(entitlementService.isRhel8ImageSupportEnabled(ACCOUNT_ID)).thenReturn(true);
-
+    public void shouldSupportRhel8Os() {
         boolean actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> victim.isSupported(REDHAT8));
+        assertTrue(actual);
 
+        actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> victim.isRhel8Supported());
         assertTrue(actual);
     }
 
     @Test
-    public void shouldNotSupportRhel8OsInCaseOfNonGrantedRhel8Support() {
-        when(entitlementService.isRhel8ImageSupportEnabled(ACCOUNT_ID)).thenReturn(false);
-
-        boolean actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> victim.isSupported(REDHAT8));
+    public void shouldNotSupportRandomOs() {
+        boolean actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> victim.isSupported("ubuntu"));
 
         assertFalse(actual);
     }
+
 }

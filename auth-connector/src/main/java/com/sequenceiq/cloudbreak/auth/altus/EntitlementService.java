@@ -94,7 +94,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATALAKE_HORIZONTAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_RHEL8_IMAGES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_RMS_ON_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
@@ -525,12 +524,8 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, DATALAKE_HORIZONTAL_SCALE);
     }
 
-    public boolean isRhel8ImageSupportEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, ENABLE_RHEL8_IMAGES);
-    }
-
     public boolean isRhel8ImagePreferred(String accountId) {
-        return isRhel8ImageSupportEnabled(accountId) && isEntitlementRegistered(accountId, PREFER_RHEL8_IMAGES);
+        return isEntitlementRegistered(accountId, PREFER_RHEL8_IMAGES);
     }
 
     public boolean isAzureMultiAzEnabled(String accountId) {

@@ -44,18 +44,16 @@ public class SupportedOperatingSystemService {
             response.setDefaultOs(RHEL8.getOs());
             LOGGER.info("List of supported OS for gov cloud response: {}", response);
         } else {
-            boolean rhel8Enabled = entitlementService.isRhel8ImageSupportEnabled(accountId);
-            List<OsTypeResponse> supportedOs = Arrays.stream(OsType.values()).filter(r -> rhel8Enabled || r != RHEL8)
-                    .map(osTypeToOsTypeResponseConverter::convert).collect(Collectors.toList());
+            List<OsTypeResponse> supportedOs = Arrays.stream(OsType.values()).map(osTypeToOsTypeResponseConverter::convert).collect(Collectors.toList());
             response.setOsTypes(supportedOs);
 
             boolean rhel8Default = entitlementService.isRhel8ImagePreferred(accountId);
-            if (rhel8Enabled && rhel8Default) {
+            if (rhel8Default) {
                 response.setDefaultOs(RHEL8.getOs());
             } else {
                 response.setDefaultOs(CENTOS7.getOs());
             }
-            LOGGER.info("List of supported OS. rhel8Enabled: {}, rhel8Default: {}, response: {}", rhel8Enabled, rhel8Default, response);
+            LOGGER.info("List of supported OS. rhel8Default: {}, response: {}", rhel8Default, response);
         }
 
         return response;

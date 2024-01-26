@@ -37,36 +37,8 @@ class SupportedOperatingSystemServiceTest {
     private SupportedOperatingSystemService underTest;
 
     @Test
-    void listSupportedOperatingSystemNoRHEL8() {
-        when(providerPreferencesService.isGovCloudDeployment()).thenReturn(false);
-        when(entitlementService.isRhel8ImageSupportEnabled((any()))).thenReturn(false);
-        when(entitlementService.isRhel8ImagePreferred((any()))).thenReturn(false);
-
-        SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", null);
-
-        assertEquals("centos7", response.getDefaultOs());
-        assertEquals(CENTOS7.getOs(), response.getDefaultOs());
-        assertEquals(List.of(osTypeToOsTypeResponseConverter.convert(CENTOS7)), response.getOsTypes());
-    }
-
-    @Test
-    void listSupportedOperatingSystemRHEL8InvalidConfig() {
-        // this should not occure, since RHEL8 can't be preferred if it is not even enabled
-        when(providerPreferencesService.isGovCloudDeployment()).thenReturn(false);
-        when(entitlementService.isRhel8ImageSupportEnabled((any()))).thenReturn(false);
-        when(entitlementService.isRhel8ImagePreferred((any()))).thenReturn(true);
-
-        SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", null);
-
-        assertEquals("centos7", response.getDefaultOs());
-        assertEquals(CENTOS7.getOs(), response.getDefaultOs());
-        assertEquals(List.of(osTypeToOsTypeResponseConverter.convert(CENTOS7)), response.getOsTypes());
-    }
-
-    @Test
     void listSupportedOperatingSystemRHEL8Enabled() {
         when(providerPreferencesService.isGovCloudDeployment()).thenReturn(false);
-        when(entitlementService.isRhel8ImageSupportEnabled((any()))).thenReturn(true);
         when(entitlementService.isRhel8ImagePreferred((any()))).thenReturn(false);
 
         SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", null);
@@ -79,7 +51,6 @@ class SupportedOperatingSystemServiceTest {
     @Test
     void listSupportedOperatingSystemRHEL8Default() {
         when(providerPreferencesService.isGovCloudDeployment()).thenReturn(false);
-        when(entitlementService.isRhel8ImageSupportEnabled((any()))).thenReturn(true);
         when(entitlementService.isRhel8ImagePreferred((any()))).thenReturn(true);
 
         SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", null);
@@ -101,21 +72,8 @@ class SupportedOperatingSystemServiceTest {
     }
 
     @Test
-    void listSupportedOperatingSystemRHEL8EnabledOnAzure() {
-        when(providerPreferencesService.isGovCloudDeployment()).thenReturn(false);
-        when(entitlementService.isRhel8ImagePreferred((any()))).thenReturn(false);
-
-        SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", "Azure");
-
-        assertEquals("centos7", response.getDefaultOs());
-        assertEquals(CENTOS7.getOs(), response.getDefaultOs());
-        assertEquals(List.of(osTypeToOsTypeResponseConverter.convert(CENTOS7)), response.getOsTypes());
-    }
-
-    @Test
     void listSupportedOperatingSystemInternalTenant() {
         when(providerPreferencesService.isGovCloudDeployment()).thenReturn(false);
-        when(entitlementService.isRhel8ImageSupportEnabled((any()))).thenReturn(true);
         when(entitlementService.isRhel8ImagePreferred((any()))).thenReturn(false);
 
         SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", "Azure");
@@ -128,7 +86,6 @@ class SupportedOperatingSystemServiceTest {
     @Test
     void listSupportedOperatingSystemRHEL8EnabledOnAWS() {
         when(providerPreferencesService.isGovCloudDeployment()).thenReturn(false);
-        when(entitlementService.isRhel8ImageSupportEnabled((any()))).thenReturn(true);
         when(entitlementService.isRhel8ImagePreferred((any()))).thenReturn(false);
 
         SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", "AWS");

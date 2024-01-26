@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static com.sequenceiq.common.model.OsType.RHEL8;
 
 import jakarta.inject.Inject;
@@ -21,10 +22,8 @@ public class ImageOsService {
     private String defaultOs;
 
     public boolean isSupported(String os) {
-        if (!defaultOs.equalsIgnoreCase(os) && RHEL8.getOs().equalsIgnoreCase(os)) {
-            return entitlementService.isRhel8ImageSupportEnabled(ThreadBasedUserCrnProvider.getAccountId());
-        }
-        return true;
+        //since os is not mandatory in the request, we should return true if it's not present
+        return os == null || CENTOS7.getOs().equalsIgnoreCase(os) || CENTOS7.getOsType().equalsIgnoreCase(os) || RHEL8.getOs().equalsIgnoreCase(os);
     }
 
     public String getPreferredOs() {

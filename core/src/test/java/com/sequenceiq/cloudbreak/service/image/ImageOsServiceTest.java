@@ -5,7 +5,6 @@ import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static com.sequenceiq.common.model.OsType.RHEL8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.stream.Stream;
@@ -22,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.common.model.OsType;
 
 @ExtendWith(MockitoExtension.class)
 class ImageOsServiceTest {
@@ -51,14 +51,6 @@ class ImageOsServiceTest {
     }
 
     @Test
-    void isSupportedRedhat8() {
-        boolean result = doAs(USER_CRN, () -> underTest.isSupported(RHEL8.getOs()));
-
-        assertThat(result).isFalse();
-        verify(entitlementService).isRhel8ImageSupportEnabled(ACCOUNT_ID);
-    }
-
-    @Test
     void isSupportedDefaultRedhat8Os() {
         setDefaultOs(RHEL8.getOs());
 
@@ -70,9 +62,22 @@ class ImageOsServiceTest {
 
     @Test
     void isSupportedRandomOs() {
+        // We only support CentOS7 and RHEL8
         boolean result = underTest.isSupported("random");
 
-        assertThat(result).isTrue();
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void isAllOsSupported() {
+        for (OsType os : OsType.values()) {
+            boolean result = underTest.isSupported(os.getOs());
+            assertThat(result).isTrue();
+        }
+        for (OsType os : OsType.values()) {
+            boolean result = underTest.isSupported(os.getOsType());
+            assertThat(result).isTrue();
+        }
     }
 
     @ParameterizedTest
