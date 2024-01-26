@@ -40,4 +40,4 @@ fi
 
 EXTERNALIZED_COMPUTE_JAVA_OPTS="$EXTERNALIZED_COMPUTE_JAVA_OPTS -Djavax.net.ssl.keyStore=NONE -Djavax.net.ssl.keyStoreType=PKCS11 -Djavax.net.ssl.trustStore=NONE -Djavax.net.ssl.trustStoreType=PKCS11"
 
-eval "(java $EXTERNALIZED_COMPUTE_JAVA_OPTS -jar /externalizedcompute.jar) & JAVAPID=\$!; trap \"kill \$JAVAPID; wait \$JAVAPID\" SIGINT SIGTERM; wait \$JAVAPID"
+eval "(java $EXTERNALIZED_COMPUTE_JAVA_OPTS -jar /externalized-compute.jar) & JAVAPID=\$!; trap \"kill \$JAVAPID; wait \$JAVAPID\" SIGINT SIGTERM; wait \$JAVAPID"
