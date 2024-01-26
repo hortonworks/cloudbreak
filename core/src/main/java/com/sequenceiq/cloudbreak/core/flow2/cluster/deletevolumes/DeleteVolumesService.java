@@ -5,28 +5,19 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 
-import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.dyngr.Polling;
-import com.dyngr.core.AttemptResult;
-import com.dyngr.core.AttemptResults;
-import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
@@ -40,7 +31,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -50,15 +40,12 @@ import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.ClouderaManagerPollingUtilService;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
@@ -66,7 +53,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.DeleteVolumesHandler
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.externaldatabase.PollingConfig;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -94,9 +80,6 @@ public class DeleteVolumesService {
 
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
-
-    @Inject
-    private ClouderaManagerPollingUtilService clouderaManagerPollingUtilService;
 
     @Inject
     private TemplateService templateService;
@@ -155,12 +138,7 @@ public class DeleteVolumesService {
                 .contains("VOLUMESET")).collect(Collectors.toList());
         LOGGER.debug("Deleting volumeset attributes of resources from CBDB. Updated resources: {}", resourcesToBeDeleted);
         if (!resourcesToBeDeleted.isEmpty()) {
-            resourceService.saveAll(resourcesToBeDeleted.stream()
-                .peek(volumeSet -> resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class).ifPresent(volumeSetAttributes -> {
-                    volumeSetAttributes.setVolumes(List.of());
-                    resourceAttributeUtil.setTypedAttributes(volumeSet, volumeSetAttributes);
-                }))
-                .collect(Collectors.toList()));
+            resourceService.deleteAll(resourcesToBeDeleted);
         }
         updateTemplate(stackDto.getId(), stackDeleteVolumesRequest.getGroup());
     }
@@ -170,8 +148,7 @@ public class DeleteVolumesService {
         for (ServiceComponent serviceComponent : hostTemplateServiceComponents) {
             try {
                 LOGGER.debug("Stopping CM service {}, in stack {}", serviceComponent.getService(), stackDto.getId());
-                clusterApi.clusterModificationService().stopClouderaManagerService(serviceComponent.getService(), false);
-                clouderaManagerPollingUtilService.pollClouderaManagerServices(clusterApi, serviceComponent.getService(), "STOPPED");
+                clusterApi.clusterModificationService().stopClouderaManagerService(serviceComponent.getService(), true);
             } catch (Exception e) {
                 LOGGER.error("Unable to stop CM services for service {}, in stack {}", serviceComponent.getService(), stackDto.getId());
                 throw new CloudbreakException(String.format("Unable to stop CM services for " +
@@ -185,8 +162,7 @@ public class DeleteVolumesService {
         for (ServiceComponent serviceComponent : hostTemplateServiceComponents) {
             try {
                 LOGGER.debug("Starting CM service {}, in stack {}", serviceComponent.getService(), stackDto.getId());
-                clusterApi.clusterModificationService().startClouderaManagerService(serviceComponent.getService(), false);
-                clouderaManagerPollingUtilService.pollClouderaManagerServices(clusterApi, serviceComponent.getService(), "STARTED");
+                clusterApi.clusterModificationService().startClouderaManagerService(serviceComponent.getService(), true);
             } catch (Exception e) {
                 LOGGER.error("Unable to start CM services for service {}, in stack {}", serviceComponent.getService(), stackDto.getId());
                 throw new CloudbreakException(String.format("Unable to start CM services for " +
@@ -247,7 +223,6 @@ public class DeleteVolumesService {
         AuthenticatedContext ac = cloudConnector.authentication().authenticate(cloudContext, cloudCredential);
         LOGGER.debug("Rebooting cloud instances to run mount scripts.");
         cloudConnector.instances().reboot(ac, null, cloudInstances);
-        getFstabAndPersist(stack, requestGroup);
     }
 
     private CloudContext getCloudContext(Stack stack) {
@@ -262,80 +237,5 @@ public class DeleteVolumesService {
             .withWorkspaceId(stack.getWorkspace().getId())
             .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
             .build();
-    }
-
-    private void getFstabAndPersist(Stack stack, String requestGroup) {
-        Set<Node> nodesWithDiskData = stackUtil.collectNodesWithDiskData(stack).stream().filter(node -> node.getHostGroup().equals(requestGroup))
-                .collect(Collectors.toSet());
-        List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-        Set<String> requestGroupHostnames = nodesWithDiskData.stream().map(Node::getHostname)
-                .filter(Objects::nonNull).collect(Collectors.toSet());
-        LOGGER.debug("Getting fstab information. Using poller so that it will wait for the mount scripts to finish.");
-        List<Map<String, String>> fstabResponse = Lists.newArrayList();
-        pollingFstab(gatewayConfigs, requestGroupHostnames, fstabResponse);
-        Map<String, Map<String, String>> fstabInformation = nodesWithDiskData.stream()
-            .map(node -> {
-                String fstab = fstabResponse.get(0).getOrDefault(node.getHostname(), "");
-                return new AbstractMap.SimpleImmutableEntry<>(node.getHostname(), Map.of("uuids", "", "fstab", fstab));
-            })
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        parseFstabAndPersistDiskInformation(fstabInformation, stack);
-    }
-
-    private void pollingFstab(List<GatewayConfig> gatewayConfigs, Set<String> requestGroupHostnames, List<Map<String, String>> fstabResponse) {
-        PollingConfig pollingConfig = PollingConfig.builder().withSleepTime(SLEEP_INTERVAL)
-                .withSleepTimeUnit(TimeUnit.SECONDS).withTimeout(TIMEOUT_DURATION).withTimeoutTimeUnit(TimeUnit.MINUTES).build();
-        Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                .stopIfException(false)
-                .stopAfterDelay(pollingConfig.getTimeout(), pollingConfig.getTimeoutTimeUnit())
-                .run(() -> getAttemptResult(gatewayConfigs, requestGroupHostnames, fstabResponse));
-    }
-
-    private AttemptResult<Void> getAttemptResult(List<GatewayConfig> gatewayConfigs, Set<String> requestGroupHostnames,
-            List<Map<String, String>> fstabResponse) throws CloudbreakOrchestratorFailedException {
-        LOGGER.debug("Getting instance fstabs for hostnames - {}", requestGroupHostnames);
-        Map<String, String> response = hostOrchestrator.runCommandOnHosts(gatewayConfigs, requestGroupHostnames, "cat /etc/fstab");
-        boolean mountComplete = response.values().stream().filter(str -> str.isEmpty() || "false".equals(str)).toList().size() == 0;
-        if (mountComplete) {
-            LOGGER.debug("Returned instance fstabs - {}", response);
-            fstabResponse.add(response);
-            return AttemptResults.justFinish();
-        }
-        return AttemptResults.justContinue();
-    }
-
-    private void parseFstabAndPersistDiskInformation(Map<String, Map<String, String>> fstabInformation, Stack stack) {
-        LOGGER.debug("Parsing fstab information from host orchestrator mounting additional volumes - {}", fstabInformation);
-        fstabInformation.forEach((hostname, value) -> {
-            Optional<String> instanceIdOptional = stack.getInstanceMetaDataAsList().stream()
-                    .filter(instanceMetaData -> hostname.equals(instanceMetaData.getDiscoveryFQDN()))
-                    .map(InstanceMetaData::getInstanceId)
-                    .findFirst();
-
-            if (instanceIdOptional.isPresent()) {
-                String uuids = value.getOrDefault("uuids", "");
-                String fstab = value.getOrDefault("fstab", "");
-                if (!StringUtils.isEmpty(fstab)) {
-                    LOGGER.debug("Persisting resources for instance id - {}, hostname - {}, uuids - {}, fstab - {}.", instanceIdOptional.get(), hostname,
-                            uuids, fstab);
-                    persistUuidAndFstab(stack, instanceIdOptional.get(), hostname, uuids, fstab);
-                }
-            }
-        });
-    }
-
-    private void persistUuidAndFstab(Stack stack, String instanceId, String discoveryFQDN, String uuids, String fstab) {
-        resourceService.saveAll(stack.getDiskResources().stream()
-                .filter(volumeSet -> instanceId.equals(volumeSet.getInstanceId()))
-                .peek(volumeSet -> resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class).ifPresent(volumeSetAttributes -> {
-                    volumeSetAttributes.setUuids(uuids);
-                    volumeSetAttributes.setFstab(fstab);
-                    if (!discoveryFQDN.equals(volumeSetAttributes.getDiscoveryFQDN())) {
-                        LOGGER.info("DiscoveryFQDN is updated for {} to {}", volumeSet.getResourceName(), discoveryFQDN);
-                    }
-                    volumeSetAttributes.setDiscoveryFQDN(discoveryFQDN);
-                    resourceAttributeUtil.setTypedAttributes(volumeSet, volumeSetAttributes);
-                }))
-                .collect(Collectors.toList()));
     }
 }

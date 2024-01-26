@@ -14,7 +14,6 @@ import static org.mockito.Mockito.verify;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -34,7 +33,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
@@ -45,13 +43,11 @@ import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.ClouderaManagerPollingUtilService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -85,9 +81,6 @@ class DeleteVolumesServiceTest {
 
     @Mock
     private ClusterApiConnectors clusterApiConnectors;
-
-    @Mock
-    private ClouderaManagerPollingUtilService clouderaManagerPollingUtilService;
 
     @Mock
     private InstanceGroupService instanceGroupService;
@@ -204,8 +197,7 @@ class DeleteVolumesServiceTest {
         doReturn(Set.of(resource)).when(stackDto).getResources();
         doReturn("COMPUTE").when(resource).getInstanceGroup();
         doReturn(ResourceType.AWS_VOLUMESET).when(resource).getResourceType();
-        doReturn(Optional.of(mock(VolumeSetAttributes.class))).when(resourceAttributeUtil).getTypedAttributes(any(), eq(VolumeSetAttributes.class));
-        doThrow(new RuntimeException("TEST")).when(resourceService).saveAll(anyList());
+        doThrow(new RuntimeException("TEST")).when(resourceService).deleteAll(anyList());
         Exception exception = assertThrows(Exception.class, () -> underTest.deleteVolumeResources(stackDto, deleteVolumesRequest));
         assertEquals("TEST", exception.getMessage());
         assertEquals(exception.getClass(), RuntimeException.class);
@@ -221,7 +213,7 @@ class DeleteVolumesServiceTest {
         hostTemplateServiceComponents.add(serviceComponent);
 
         underTest.startClouderaManagerService(stackDto, hostTemplateServiceComponents);
-        verify(clusterModificationService, times(1)).startClouderaManagerService("yarn", false);
+        verify(clusterModificationService, times(1)).startClouderaManagerService("yarn", true);
     }
 
     @Test
@@ -232,7 +224,7 @@ class DeleteVolumesServiceTest {
         Set<ServiceComponent> hostTemplateServiceComponents = new HashSet<>();
         ServiceComponent serviceComponent = ServiceComponent.of("yarn", "yarn");
         hostTemplateServiceComponents.add(serviceComponent);
-        doThrow(new Exception("Test")).when(clusterModificationService).startClouderaManagerService("yarn", false);
+        doThrow(new Exception("Test")).when(clusterModificationService).startClouderaManagerService("yarn", true);
 
         Exception exception = assertThrows(Exception.class, () -> underTest.startClouderaManagerService(stackDto, hostTemplateServiceComponents));
         assertEquals("Unable to start CM services for service yarn, in stack 1: Test", exception.getMessage());
@@ -248,7 +240,7 @@ class DeleteVolumesServiceTest {
         hostTemplateServiceComponents.add(serviceComponent);
 
         underTest.stopClouderaManagerService(stackDto, hostTemplateServiceComponents);
-        verify(clusterModificationService, times(1)).stopClouderaManagerService("yarn", false);
+        verify(clusterModificationService, times(1)).stopClouderaManagerService("yarn", true);
     }
 
     @Test
@@ -259,7 +251,7 @@ class DeleteVolumesServiceTest {
         Set<ServiceComponent> hostTemplateServiceComponents = new HashSet<>();
         ServiceComponent serviceComponent = ServiceComponent.of("yarn", "yarn");
         hostTemplateServiceComponents.add(serviceComponent);
-        doThrow(new Exception("Test")).when(clusterModificationService).stopClouderaManagerService("yarn", false);
+        doThrow(new Exception("Test")).when(clusterModificationService).stopClouderaManagerService("yarn", true);
 
         Exception exception = assertThrows(Exception.class, () -> underTest.stopClouderaManagerService(stackDto, hostTemplateServiceComponents));
         assertEquals("Unable to stop CM services for service yarn, in stack 1: Test", exception.getMessage());
@@ -293,7 +285,7 @@ class DeleteVolumesServiceTest {
         doReturn(nodes).when(stackUtil).collectNodes(stack);
         doReturn(nodes).when(stackUtil).collectNodesWithDiskData(stack);
         underTest.unmountBlockStorageDisks(stack, "test");
-        verify(clusterModificationService, times(1)).stopClouderaManagerService("yarn", false);
+        verify(clusterModificationService, times(1)).stopClouderaManagerService("yarn", true);
         verify(clusterBootstrapper, times(1)).reBootstrapMachines(1L);
         verify(hostOrchestrator, times(1)).unmountBlockStorageDisks(anyList(), eq(nodes), eq(nodes), any());
     }
@@ -360,12 +352,8 @@ class DeleteVolumesServiceTest {
         InstanceConnector ic = mock(InstanceConnector.class);
         doReturn(ic).when(cloudConnector).instances();
 
-        doReturn(Map.of("test", "fstab")).when(hostOrchestrator).runCommandOnHosts(any(), any(), any());
-
         underTest.updateScriptsAndRebootInstances(1L, "test");
         verify(clusterHostServiceRunner, times(1)).updateClusterConfigs(stackDto, true);
-        verify(hostOrchestrator, times(1)).runCommandOnHosts(any(), any(), eq("cat /etc/fstab"));
-        verify(resourceService).saveAll(anyList());
         verify(ic, times(1)).reboot(ac, null, List.of(cloudInstance));
     }
 
@@ -389,9 +377,7 @@ class DeleteVolumesServiceTest {
         doReturn(ResourceType.AWS_VOLUMESET).when(stack).getDiskResourceType();
 
         doReturn(List.of(resource)).when(resourceService).findAllByStackIdAndResourceTypeIn(1L, List.of(ResourceType.AWS_VOLUMESET));
-        doReturn(List.of(resource)).when(stack).getDiskResources();
         doReturn("test-instance-id").when(resource).getInstanceId();
-        doReturn(Optional.of(mock(VolumeSetAttributes.class))).when(resourceAttributeUtil).getTypedAttributes(any(), eq(VolumeSetAttributes.class));
         doReturn("test-stack").when(stack).getName();
         Workspace workspace = mock(Workspace.class);
         doReturn(1L).when(workspace).getId();
@@ -400,16 +386,6 @@ class DeleteVolumesServiceTest {
         doReturn("us-west-1").when(stack).getRegion();
         doReturn("us-west-1a").when(stack).getAvailabilityZone();
 
-        Node node = mock(Node.class);
-        doReturn("test").when(node).getHostGroup();
-        doReturn("test").when(node).getHostname();
-        Set<Node> nodes = Set.of(node);
-        doReturn(nodes).when(stackUtil).collectNodesWithDiskData(stack);
-
-        InstanceMetaData instanceMetaData = mock(InstanceMetaData.class);
-        doReturn("test").when(instanceMetaData).getDiscoveryFQDN();
-        doReturn("test-instance-id").when(instanceMetaData).getInstanceId();
-        doReturn(List.of(instanceMetaData)).when(stack).getInstanceMetaDataAsList();
         return stack;
     }
 }

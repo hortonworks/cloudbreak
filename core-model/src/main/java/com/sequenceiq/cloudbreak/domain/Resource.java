@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.StringJoiner;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -162,5 +164,16 @@ public class Resource implements ProvisionEntity {
 
     public void setAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
+    }
+
+    public String toString() {
+        return new StringJoiner(", ", Resource.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("instanceGroup=" + instanceGroup)
+                .add("resourceType=" + resourceType)
+                .add("resourceName=" + resourceName)
+                .add("instanceId=" + instanceId)
+                .add("attributes=" + attributes.toString())
+                .toString();
     }
 }

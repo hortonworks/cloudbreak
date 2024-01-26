@@ -64,8 +64,8 @@ public class DeleteVolumesUnmountHandler extends ExceptionCatcherEventHandler<De
             return new DeleteVolumesUnmountFinishedEvent(stackId, requestGroup, payload.getResourcesToBeDeleted(),
                     payload.getStackDeleteVolumesRequest(), payload.getCloudPlatform(), payload.getHostTemplateServiceComponents());
         } catch (Exception ex) {
-            LOGGER.error("Unmounting disks after deleting block storage failed for stack: {}, and group: {}, Exception:: {}", stackId, requestGroup,
-                    ex.getCause());
+            LOGGER.warn("Unmounting disks after deleting block storage failed for stack: {}, and group: {}, Exception:: {}", stackId, requestGroup,
+                    ex);
             return new DeleteVolumesFailedEvent(ex.getMessage(), ex, stackId);
         }
     }

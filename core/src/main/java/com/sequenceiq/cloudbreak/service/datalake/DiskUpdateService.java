@@ -126,19 +126,23 @@ public class DiskUpdateService {
         AuthenticatedContext ac = getAuthenticatedContext(cloudConnector, stackDto);
         List<String> volumeIds = volumesToUpdate.stream().map(Volume::getId).toList();
         cloudConnector.volumeConnector().updateDiskVolumes(ac, volumeIds, diskUpdateRequest.getVolumeType(), diskUpdateRequest.getSize());
-        resourceService.saveAll(stackDto.getDiskResources().stream()
-            .filter(volumeSet -> diskUpdateRequest.getGroup().equals(volumeSet.getInstanceGroup()))
-            .peek(volumeSet -> resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class).ifPresent(volumeSetAttributes -> {
-                volumeSetAttributes.setVolumes(volumeSetAttributes.getVolumes().stream()
-                        .peek(attr -> {
-                            if (volumeIds.contains(attr.getId())) {
-                                attr.setSize(diskUpdateRequest.getSize());
-                                attr.setType(diskUpdateRequest.getVolumeType());
-                            }
-                        }).toList());
-                resourceAttributeUtil.setTypedAttributes(volumeSet, volumeSetAttributes);
-            }))
-            .collect(Collectors.toList()));
+        for (Resource resource : stackDto.getDiskResources()) {
+            Optional<VolumeSetAttributes> optionalVolumeSetAttributes = resourceAttributeUtil.getTypedAttributes(resource, VolumeSetAttributes.class);
+            if (diskUpdateRequest.getGroup().equals(resource.getInstanceGroup()) && optionalVolumeSetAttributes.isPresent()) {
+                VolumeSetAttributes volumeSetAttributes = optionalVolumeSetAttributes.get();
+                List<VolumeSetAttributes.Volume> volumes = volumeSetAttributes.getVolumes();
+                for (VolumeSetAttributes.Volume volume : volumes) {
+                    if (volumeIds.contains(volume.getId())) {
+                        volume.setSize(diskUpdateRequest.getSize());
+                        volume.setType(diskUpdateRequest.getVolumeType());
+                    }
+                }
+                volumeSetAttributes.setVolumes(volumes);
+                resourceAttributeUtil.setTypedAttributes(resource, volumeSetAttributes);
+            }
+        }
+        LOGGER.info("Updated resources for disk update flow::{}", stackDto.getDiskResources());
+        resourceService.saveAll(stackDto.getDiskResources());
         updateTemplate(stackId, diskUpdateRequest);
     }
 

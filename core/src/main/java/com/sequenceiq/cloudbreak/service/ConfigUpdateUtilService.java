@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static com.sequenceiq.cloudbreak.common.type.TemporaryStorage.EPHEMERAL_VOLUMES_ONLY;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +27,8 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
@@ -45,6 +50,10 @@ public class ConfigUpdateUtilService {
 
     private static final String IMPALA_DATACACHE_DIR = "datacache_dirs";
 
+    private static final String MOUNT_PATH_PREFIX_EPHFS = "/hadoopfs/ephfs";
+
+    private static final String MOUNT_PATH_PREFIX_FS = "/hadoopfs/fs";
+
     private static final String YARN = "YARN";
 
     private static final String IMPALA = "IMPALA";
@@ -62,21 +71,29 @@ public class ConfigUpdateUtilService {
             try {
                 LOGGER.debug("Updating CM service config for service {}, in stack {} for roles {}", serviceComponent.getService(),
                         stackDto.getId(), roleGroupNames);
+                Map<String, String> configMap = new HashMap<>();
+                List<String> allMountPoints = new ArrayList<>();
+                Optional<InstanceGroupDto> requestInstanceGroupOptional = stackDto.getInstanceGroupDtos().stream()
+                        .filter(group -> group.getInstanceGroup().getGroupName().equals(requestGroup)).findFirst();
+                if (requestInstanceGroupOptional.isPresent()) {
+                    List<String> mountPointsForEphemeralVolumes = getEphemeralMountPoints(requestInstanceGroupOptional.get());
+                    allMountPoints.addAll(mountPointsForEphemeralVolumes);
+                }
                 Optional<Resource> optionalResource = stackDto.getResources().stream().filter(resource -> null != resource.getInstanceGroup()
                         && resource.getInstanceGroup().equals(requestGroup) && resource.getResourceType().toString()
                         .contains("VOLUMESET")).findFirst();
-                Map<String, String> configMap = new HashMap<>();
                 if (optionalResource.isPresent()) {
                     Resource resource = optionalResource.get();
                     LOGGER.info("Updating config for resources: {}", resource);
                     VolumeSetAttributes volumeSetAttributes = resourceAttributeUtil.getTypedAttributes(resource, VolumeSetAttributes.class)
                             .orElseThrow(() -> new CloudbreakServiceException("Unable to find fstab information on resource"));
                     String fstab = volumeSetAttributes.getFstab();
-                    List<String> mountPoints = Arrays.stream(StringUtils.substringsBetween(fstab, "/hadoopfs/", " "))
+                    List<String> mountPointsFromFstab = Arrays.stream(StringUtils.substringsBetween(fstab, "/hadoopfs/", " "))
                             .map(str -> "/hadoopfs/" + str).toList();
-                    configMap = getConfigsForService(serviceComponent.getService(), mountPoints);
+                    allMountPoints.addAll(mountPointsFromFstab);
                 }
-                if (!CollectionUtils.isEmpty(configMap)) {
+                if (!CollectionUtils.isEmpty(allMountPoints)) {
+                    configMap = getConfigsForService(serviceComponent.getService(), allMountPoints);
                     clusterApi.clusterModificationService().updateServiceConfig(serviceComponent.getService(), configMap, roleGroupNames);
                 }
                 LOGGER.debug("Starting CM service {}, in stack {}", serviceComponent.getService(), stackDto.getId());
@@ -151,5 +168,18 @@ public class ConfigUpdateUtilService {
                 }
                 return AttemptResults.justContinue();
             });
+    }
+
+    private List<String> getEphemeralMountPoints(InstanceGroupDto instanceGroup) {
+        List<String> mountPointsForEphemeralVolumes = new ArrayList<>();
+        Template template = instanceGroup.getInstanceGroup().getTemplate();
+        if (null != template.getInstanceStorageCount() && template.getInstanceStorageCount() > 0) {
+            for (int i = 1; i <= template.getInstanceStorageCount(); i++) {
+                String mountPoint = null != template.getTemporaryStorage() && EPHEMERAL_VOLUMES_ONLY.equals(template.getTemporaryStorage()) ?
+                        MOUNT_PATH_PREFIX_FS : MOUNT_PATH_PREFIX_EPHFS;
+                mountPointsForEphemeralVolumes.add(mountPoint + i);
+            }
+        }
+        return mountPointsForEphemeralVolumes;
     }
 }
