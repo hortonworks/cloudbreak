@@ -380,6 +380,25 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         }
     }
 
+    protected void detachVolumes(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources) {
+        AzureClient client = getAzureClient(authenticatedContext);
+        for (CloudResource cloudResource : cloudResources) {
+            List<String> volumeIds = getVolumeIds(cloudResource);
+            LOGGER.info("VolumeIds to detach: {}", String.join(", ", volumeIds));
+            detachVolumes(client, cloudResource, volumeIds);
+        }
+    }
+
+    protected void deleteVolumes(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources) {
+        AzureClient client = getAzureClient(authenticatedContext);
+        for (CloudResource cloudResource : cloudResources) {
+            List<String> volumeIds = getVolumeIds(cloudResource);
+            LOGGER.info("Going to attempt to delete the following managed disks (based on the following IDs) on Azure: {}",
+                    String.join(",", volumeIds));
+            azureUtils.deleteManagedDisks(client, volumeIds);
+        }
+    }
+
     private ResourceStatus getResourceStatus(List<Disk> existingDisks, List<CloudResource> volumeResources) {
         List<String> expectedIdList = volumeResources.stream()
                 .map(this::getVolumeSetAttributes)

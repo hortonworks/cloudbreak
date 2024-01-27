@@ -17,13 +17,17 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -95,6 +99,8 @@ public class AzureVolumeResourceBuilderTest {
     private static final String DEVICE_DEV_SDC = "/dev/sdc";
 
     private static final String DISK_ENCRYPTION_SET_ID = "diskEncryptionSetId";
+
+    private static final String INSTANCE_ID = "instance1";
 
     @Mock
     private AzureContext context;
@@ -518,5 +524,148 @@ public class AzureVolumeResourceBuilderTest {
         List<String> volumeIds = List.of();
         underTest.modifyVolumes(auth, volumeIds, "test-disk", 100);
         verify(azureClient, times(0)).modifyDisk(any(), any(), eq(100), eq("test-disk"));
+    }
+
+    static Object[][] detachVolumes() {
+        return new Object[][]{
+                {
+                        List.of()
+                },
+                {
+                        List.of(List.of())
+                },
+                {
+                        List.of(List.of(), List.of())
+                },
+                {
+                        List.of(List.of(), List.of(true))
+                },
+                {
+                        List.of(List.of(false), List.of())
+                },
+                {
+                        List.of(List.of(true))
+                },
+                {
+                        List.of(List.of(false))
+                },
+                {
+                        List.of(List.of(true, true, true))
+                },
+                {
+                        List.of(List.of(false, false, false))
+                },
+                {
+                        List.of(List.of(true, true, true), List.of(true, true, true))
+                },
+                {
+                        List.of(List.of(false, false, false), List.of(false, false, false))
+                },
+                {
+                        List.of(List.of(true, false, true), List.of(false, true, false))
+                }
+        };
+    }
+
+    @ParameterizedTest()
+    @MethodSource("detachVolumes")
+    void testDetachVolumes(List<List<Boolean>> volumeSets) {
+        Map<String, List<String>> attachedVolumes = new HashMap<>();
+        when(auth.getParameter(AzureClient.class)).thenReturn(azureClient);
+        List<CloudResource> volumeSetResources = new ArrayList<>();
+        for (int volumeSetCounter = 0; volumeSetCounter < volumeSets.size(); volumeSetCounter++) {
+            String volumeSetName = String.format("%s%d", "VolumeSet", volumeSetCounter);
+            ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
+            for (int volumeCounter = 0; volumeCounter < volumeSets.get(volumeSetCounter).size(); volumeCounter++) {
+                String volumeId = String.format("%s%s%d", volumeSetName, "Volume", volumeCounter);
+                Disk disk = mock(Disk.class);
+                boolean attached = volumeSets.get(volumeSetCounter).get(volumeCounter);
+                when(disk.isAttachedToVirtualMachine()).thenReturn(attached);
+                when(disk.virtualMachineId()).thenReturn(INSTANCE_ID);
+                when(azureClient.getDiskById(volumeId)).thenReturn(disk);
+                volumes.add(new VolumeSetAttributes.Volume(volumeId, DEVICE, VOLUME_SIZE, "ssd", CloudVolumeUsageType.GENERAL));
+                if (attached) {
+                    attachedVolumes.putIfAbsent(volumeSetName, new ArrayList<>());
+                    attachedVolumes.get(volumeSetName).add(volumeId);
+                }
+            }
+            CloudResource volumeSetResource = CloudResource.builder().withType(ResourceType.AZURE_VOLUMESET).withStatus(CommonStatus.CREATED)
+                    .withParameters(Map.of(
+                            CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, "", volumes, VOLUME_SIZE, "ssd")
+                    ))
+                    .withInstanceId(INSTANCE_ID)
+                    .withName(volumeSetName).build();
+            volumeSetResources.add(volumeSetResource);
+        }
+
+        VirtualMachine virtualMachine = mock(VirtualMachine.class);
+        when(azureClient.getVirtualMachine(eq(INSTANCE_ID))).thenReturn(virtualMachine);
+        when(virtualMachine.name()).thenReturn(INSTANCE_ID);
+
+        underTest.detachVolumes(auth, volumeSetResources);
+
+        verify(azureClient, times(attachedVolumes.size())).getVirtualMachine(eq(INSTANCE_ID));
+        verify(azureClient, times(attachedVolumes.size())).detachDisksFromVm(collectionCaptor.capture(), eq(virtualMachine));
+        List<Collection<String>> allDetachedVolumes = collectionCaptor.getAllValues();
+        attachedVolumes.values().stream().forEach(attachedVols -> assertEquals(true,
+                allDetachedVolumes.stream().anyMatch(detachedVolumes -> CollectionUtils.isEqualCollection(detachedVolumes, attachedVols))));
+    }
+
+    static Object[][] deleteVolumes() {
+        return new Object[][]{
+                {
+                        List.of()
+                },
+                {
+                        List.of(0)
+                },
+                {
+                        List.of(0, 0)
+                },
+                {
+                        List.of(0, 2)
+                },
+                {
+                        List.of(1)
+                },
+                {
+                        List.of(1, 2)
+                },
+                {
+                        List.of(3, 4)
+                }
+        };
+    }
+
+    @ParameterizedTest()
+    @MethodSource("deleteVolumes")
+    void testDeleteVolumes(List<Integer> volumeSets) {
+        Map<String, List<String>> deletedVolumes = new HashMap<>();
+        when(auth.getParameter(AzureClient.class)).thenReturn(azureClient);
+        List<CloudResource> volumeSetResources = new ArrayList<>();
+        for (int volumeSetCounter = 0; volumeSetCounter < volumeSets.size(); volumeSetCounter++) {
+            String volumeSetName = String.format("%s%d", "VolumeSet", volumeSetCounter);
+            ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
+            deletedVolumes.putIfAbsent(volumeSetName, new ArrayList<>());
+            for (int volumeCounter = 0; volumeCounter < volumeSets.get(volumeSetCounter); volumeCounter++) {
+                String volumeId = String.format("%s%s%d", volumeSetName, "Volume", volumeCounter);
+                volumes.add(new VolumeSetAttributes.Volume(volumeId, DEVICE, VOLUME_SIZE, "ssd", CloudVolumeUsageType.GENERAL));
+                deletedVolumes.get(volumeSetName).add(volumeId);
+            }
+            CloudResource volumeSetResource = CloudResource.builder().withType(ResourceType.AZURE_VOLUMESET).withStatus(CommonStatus.CREATED)
+                    .withParameters(Map.of(
+                            CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, "", volumes, VOLUME_SIZE, "ssd")
+                    ))
+                    .withInstanceId(INSTANCE_ID)
+                    .withName(volumeSetName).build();
+            volumeSetResources.add(volumeSetResource);
+        }
+
+        underTest.deleteVolumes(auth, volumeSetResources);
+
+        verify(azureUtils, times(deletedVolumes.size())).deleteManagedDisks(eq(azureClient), collectionCaptor.capture());
+        List<Collection<String>> allDeletedVolumes = collectionCaptor.getAllValues();
+        deletedVolumes.values().stream().forEach(deletedVols -> assertEquals(true,
+                allDeletedVolumes.stream().anyMatch(deletedVolumesAtAzure -> CollectionUtils.isEqualCollection(deletedVols, deletedVolumesAtAzure))));
     }
 }
