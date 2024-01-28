@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.logger;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.AdditionalMatchers.not;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -17,9 +18,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
+import org.slf4j.event.Level;
+import org.slf4j.spi.LoggingEventBuilder;
 
 import com.sequenceiq.cloudbreak.util.StaticFieldManipulationTestHelper;
 
@@ -30,6 +34,9 @@ class RestLoggerFilterTest {
 
     @Mock
     private Logger logger;
+
+    @Mock
+    private LoggingEventBuilder loggingEventBuilder;
 
     @Mock
     private HttpServletRequest request;
@@ -48,31 +55,62 @@ class RestLoggerFilterTest {
 
     @Test
     void doFilterCredential() throws ServletException, IOException {
+        ArgumentCaptor<Level> requestArgumentCaptor = ArgumentCaptor.forClass(Level.class);
+
         when(request.getRequestURI()).thenReturn("env/credential");
+        when(request.getMethod()).thenReturn("post");
         when(request.getCharacterEncoding()).thenReturn("UTF8");
+        when(logger.atLevel(requestArgumentCaptor.capture())).thenReturn(loggingEventBuilder);
         underTest.doFilterInternal(request, response, filterChain);
 
-        verify(logger, times(1)).debug(any());
-        verify(logger).debug(contains("REDACTED COMPLETELY"));
+        verify(loggingEventBuilder, times(1)).log(anyString());
+        verify(loggingEventBuilder).log(contains("REDACTED COMPLETELY"));
+        assertEquals(Level.DEBUG, requestArgumentCaptor.getValue());
     }
 
     @Test
     void doFilterOther() throws ServletException, IOException {
+        ArgumentCaptor<Level> requestArgumentCaptor = ArgumentCaptor.forClass(Level.class);
+
         when(request.getRequestURI()).thenReturn("env/something");
+        when(request.getMethod()).thenReturn("post");
         when(request.getCharacterEncoding()).thenReturn("UTF8");
+        when(logger.atLevel(requestArgumentCaptor.capture())).thenReturn(loggingEventBuilder);
         underTest.doFilterInternal(request, response, filterChain);
 
-        verify(logger, times(1)).debug(any());
-        verify(logger).debug(not(contains("REDACTED COMPLETELY")));
+        verify(loggingEventBuilder, times(1)).log(anyString());
+        verify(loggingEventBuilder).log(not(contains("REDACTED COMPLETELY")));
+        assertEquals(Level.DEBUG, requestArgumentCaptor.getValue());
+    }
+
+    @Test
+    void doFilterWhenGetSuccessMustReturnTraceLogging() throws ServletException, IOException {
+        ArgumentCaptor<Level> requestArgumentCaptor = ArgumentCaptor.forClass(Level.class);
+
+        when(request.getRequestURI()).thenReturn("env/something");
+        when(request.getMethod()).thenReturn("get");
+        when(response.getStatus()).thenReturn(200);
+        when(request.getCharacterEncoding()).thenReturn("UTF8");
+        when(logger.atLevel(requestArgumentCaptor.capture())).thenReturn(loggingEventBuilder);
+        underTest.doFilterInternal(request, response, filterChain);
+
+        verify(loggingEventBuilder, times(1)).log(anyString());
+        verify(loggingEventBuilder).log(not(contains("REDACTED COMPLETELY")));
+        assertEquals(Level.TRACE, requestArgumentCaptor.getValue());
     }
 
     @Test
     void doFilterUnsupportedEncoding() throws ServletException, IOException {
+        ArgumentCaptor<Level> requestArgumentCaptor = ArgumentCaptor.forClass(Level.class);
+
         when(request.getRequestURI()).thenReturn("env/something");
+        when(request.getMethod()).thenReturn("post");
         when(request.getCharacterEncoding()).thenReturn("WRONG");
+        when(logger.atLevel(requestArgumentCaptor.capture())).thenReturn(loggingEventBuilder);
         underTest.doFilterInternal(request, response, filterChain);
 
-        verify(logger, times(1)).debug(any());
-        verify(logger).debug(contains("We were not able to encode the content"));
+        verify(loggingEventBuilder, times(1)).log(anyString());
+        verify(loggingEventBuilder).log(contains("We were not able to encode the content"));
+        assertEquals(Level.DEBUG, requestArgumentCaptor.getValue());
     }
 }

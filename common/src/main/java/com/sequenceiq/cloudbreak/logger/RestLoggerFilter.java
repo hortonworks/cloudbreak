@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
@@ -24,9 +25,13 @@ public class RestLoggerFilter extends OncePerRequestFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RestLoggerFilter.class);
 
+    private static final DateFormat FORMATTER = new SimpleDateFormat("HH:mm:ss.SSS");
+
     private static final int MAX_SIZE = 30000;
 
     private static final String REDACTED = "REDACTED COMPLETELY";
+
+    private static final int SUCCESS = 200;
 
     private final boolean restLoggerEnabled;
 
@@ -44,12 +49,11 @@ public class RestLoggerFilter extends OncePerRequestFilter {
 
         String requestPath = request.getRequestURI();
         if (restLoggerEnabled && !excludePathPattern(requestPath)) {
-            DateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
-            formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+            FORMATTER.setTimeZone(TimeZone.getTimeZone("UTC"));
             Date end = new Date(System.currentTimeMillis());
             String log = new StringBuilder(MAX_SIZE)
-                    .append(appendLine(RestLoggerField.START_TIME, formatter.format(start)))
-                    .append(appendLine(RestLoggerField.END_TIME, formatter.format(end)))
+                    .append(appendLine(RestLoggerField.START_TIME, FORMATTER.format(start)))
+                    .append(appendLine(RestLoggerField.END_TIME, FORMATTER.format(end)))
                     .append(appendLine(RestLoggerField.DURATION, Math.abs(end.getTime() - start.getTime()) + " ms"))
                     .append(appendLine(RestLoggerField.HTTP_METHOD, request.getMethod()))
                     .append(appendLine(RestLoggerField.PATH, request.getRequestURI()))
@@ -61,9 +65,38 @@ public class RestLoggerFilter extends OncePerRequestFilter {
                     .append(appendLine(RestLoggerField.RESPONSE,
                             logContent(wrappedResponse.getContentAsByteArray(), request.getCharacterEncoding(), isUberSensitive(requestPath))))
                     .toString();
-            LOGGER.debug(log);
+            LOGGER.atLevel(calculateLogLevel(request, response)).log(log);
         }
         wrappedResponse.copyBodyToResponse();
+    }
+
+    private Level calculateLogLevel(HttpServletRequest request, HttpServletResponse response) {
+        if (isGet(request) && response.getStatus() != SUCCESS) {
+            return Level.DEBUG;
+        } else if (isPost(request) || isPut(request) || isDelete(request)) {
+            return Level.DEBUG;
+        }
+        return Level.TRACE;
+    }
+
+    private boolean isPut(HttpServletRequest request) {
+        return isRequestMethodEqualWith(request, "PUT");
+    }
+
+    private boolean isDelete(HttpServletRequest request) {
+        return isRequestMethodEqualWith(request, "DELETE");
+    }
+
+    private boolean isGet(HttpServletRequest request) {
+        return isRequestMethodEqualWith(request, "GET");
+    }
+
+    private boolean isPost(HttpServletRequest request) {
+        return isRequestMethodEqualWith(request, "POST");
+    }
+
+    private boolean isRequestMethodEqualWith(HttpServletRequest request, String method) {
+        return request.getMethod().equalsIgnoreCase(method);
     }
 
     private boolean excludePathPattern(String requestPath) {
