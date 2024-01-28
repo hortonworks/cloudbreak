@@ -58,7 +58,7 @@ public class PermissionCheckService {
     public Object hasPermission(ProceedingJoinPoint proceedingJoinPoint) {
         long startTime = System.currentTimeMillis();
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
-        LOGGER.debug("Permission check started at {} (method: {})", startTime,
+        LOGGER.trace("Permission check started at {} (method: {})", startTime,
                 methodSignature.getMethod().getDeclaringClass().getSimpleName() + '#' + methodSignature.getMethod().getName());
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         boolean internalUser = userCrn != null && RegionAwareInternalCrnGeneratorUtil.isInternalCrn(userCrn);
