@@ -114,6 +114,7 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
@@ -560,7 +561,8 @@ public class EntitlementService {
                 .stream()
                 .map(String::toUpperCase)
                 .anyMatch(e -> e.equalsIgnoreCase(entitlement.name()));
-        LOGGER.debug("Entitlement result {}={}", entitlement, entitled);
+        LOGGER.atLevel(entitled ? Level.TRACE : Level.DEBUG)
+                .log("Entitlement result {}={}", entitlement, entitled);
         return entitled;
     }
 
