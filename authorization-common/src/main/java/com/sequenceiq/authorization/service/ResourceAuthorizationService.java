@@ -48,15 +48,15 @@ public class ResourceAuthorizationService {
     public void authorize(String userCrn, ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
         Function<AuthorizationResourceAction, String> rightMapper = umsRightProvider.getRightMapper();
         getAuthorization(userCrn, proceedingJoinPoint, methodSignature).ifPresent(authorization -> {
-            LOGGER.debug("Resource authorization rule: {}", authorization.toString(rightMapper));
+            LOGGER.trace("Resource authorization rule: {}", authorization.toString(rightMapper));
             List<Boolean> rightCheckResults = checkWithUms(userCrn, rightMapper, authorization);
-            LOGGER.debug("Ums resource right check result: {}", rightCheckResults);
+            LOGGER.trace("Ums resource right check result: {}", rightCheckResults);
             Iterator<Boolean> iterator = rightCheckResults.iterator();
             authorization.evaluateAndGetFailed(iterator).ifPresentOrElse(failedAuthorization -> {
                 LOGGER.debug("Resource authorization failed: {}", failedAuthorization.toString(rightMapper));
                 Map<String, Optional<String>> crnNameMap = resourceNameFactoryService.getNames(collectResourceCrns(failedAuthorization));
                 throw new AccessDeniedException(failedAuthorization.getAsFailureMessage(rightMapper, getNameOrDefault(crnNameMap)));
-            }, () -> LOGGER.debug("Resource authorization was successful."));
+            }, () -> LOGGER.trace("Resource authorization was successful."));
         });
     }
 
@@ -72,7 +72,7 @@ public class ResourceAuthorizationService {
 
     private List<Boolean> checkWithUms(String userCrn, Function<AuthorizationResourceAction, String> rightMapper, AuthorizationRule authorization) {
         List<RightCheck> rightChecks = convertToRightChecks(authorization, rightMapper);
-        LOGGER.debug("Ums resource right check request: {}", rightChecks);
+        LOGGER.trace("Ums resource right check request: {}", rightChecks);
         return grpcUmsClient.hasRights(userCrn, rightChecks);
     }
 
