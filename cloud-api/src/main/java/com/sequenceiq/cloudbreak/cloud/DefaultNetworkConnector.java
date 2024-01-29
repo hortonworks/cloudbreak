@@ -29,7 +29,7 @@ public interface DefaultNetworkConnector extends NetworkConnector {
 
     @Override
     default SubnetSelectionResult chooseSubnets(Collection<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
-        LOGGER.debug("Trying to choose subnets from: {}.", subnetMetas);
+        LOGGER.trace("Trying to choose subnets from: {}.", subnetMetas);
         SubnetSelectionResult subnetSelectionResult;
         List<CloudSubnet> subnetsFilteredByRequestedAZ = filterSubnetsByRequiredAZs(subnetMetas, subnetSelectionParameters);
         if (subnetsFilteredByRequestedAZ.isEmpty()) {
