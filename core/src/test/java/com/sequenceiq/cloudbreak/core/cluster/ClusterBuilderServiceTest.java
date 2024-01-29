@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.cluster;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -21,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
@@ -32,6 +34,7 @@ import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -121,6 +124,9 @@ class ClusterBuilderServiceTest {
     @Mock
     private ProxyConfigDtoService proxyConfigDtoService;
 
+    @Mock
+    private ComponentConfigProviderService componentConfigProviderService;
+
     @BeforeEach
     void setUp() {
         lenient().when(mockBlueprint.getBlueprintJsonText()).thenReturn(BLUEPRINT_TEXT);
@@ -145,6 +151,7 @@ class ClusterBuilderServiceTest {
         when(mockClusterSetupService.prepareTemplate(any(), any(), any(), any(), any())).thenReturn(BLUEPRINT_TEXT);
         when(stackToTemplatePreparationObjectConverter.convert(any()))
                 .thenReturn(new TemplatePreparationObject.Builder().build());
+        when(stackView.getType()).thenReturn(StackType.DATALAKE);
         underTest.prepareExtendedTemplate(STACK_ID);
 
         verify(mockClusterService, times(2)).updateExtendedBlueprintText(any(), anyString());
@@ -158,6 +165,7 @@ class ClusterBuilderServiceTest {
         String blueprintWithHandlebars = String.format("{\"some\":\"thing\",\"other\":\"{{{ %s }}}\",\"some2\":\"thingie\",\"rehto\":\"{{{ %s }}}\"}",
                 firstHandlebarProperty, secondHandlebarProperty);
 
+        when(stackView.getType()).thenReturn(StackType.WORKLOAD);
         when(mockClusterSetupService.prepareTemplate(any(), any(), any(), any(), any())).thenReturn(blueprintWithHandlebars);
 
         IllegalStateException expectedException = Assertions.assertThrows(IllegalStateException.class, () ->
@@ -203,6 +211,54 @@ class ClusterBuilderServiceTest {
         underTest.modifyProxyConfig(STACK_ID);
 
         verify(mockClusterSetupService).setupProxy(proxyConfig);
+    }
+
+    @Test
+    void configureManagementServiceCDLDatalake() {
+        when(proxyConfigDtoService.getByCrnWithEnvironmentFallback(PROXY_CRN, ENV_CRN)).thenReturn(Optional.of(proxyConfig));
+        when(mockStackDtoService.getById(eq(STACK_ID))).thenReturn(mockStack);
+        when(mockStack.getStack()).thenReturn(stackView);
+        when(mockStack.getDatalakeCrn()).thenReturn(null);
+        when(mockStack.getEnvironmentCrn()).thenReturn("envcrn");
+        when(stackView.getType()).thenReturn(StackType.WORKLOAD);
+        underTest.configureManagementServices(STACK_ID);
+        verify(platformAwareSdxConnector, times(1)).getSdxCrnByEnvironmentCrn(anyString());
+    }
+
+    @Test
+    void configureManagementServicePaaSDatalake() {
+        when(proxyConfigDtoService.getByCrnWithEnvironmentFallback(PROXY_CRN, ENV_CRN)).thenReturn(Optional.of(proxyConfig));
+        when(mockStackDtoService.getById(eq(STACK_ID))).thenReturn(mockStack);
+        when(mockStack.getStack()).thenReturn(stackView);
+        when(mockStack.getDatalakeCrn()).thenReturn("dlCrn");
+        when(stackView.getType()).thenReturn(StackType.WORKLOAD);
+        underTest.configureManagementServices(STACK_ID);
+        verify(platformAwareSdxConnector, times(1)).getRemoteDataContext(any());
+        verify(platformAwareSdxConnector, times(0)).getSdxCrnByEnvironmentCrn(anyString());
+    }
+
+    @Test
+    void configureManagementServiceWorkloadPaaSDatalake() {
+        when(proxyConfigDtoService.getByCrnWithEnvironmentFallback(PROXY_CRN, ENV_CRN)).thenReturn(Optional.of(proxyConfig));
+        when(mockStackDtoService.getById(eq(STACK_ID))).thenReturn(mockStack);
+        when(mockStack.getStack()).thenReturn(stackView);
+        when(mockStack.getDatalakeCrn()).thenReturn("dlCrn");
+        when(stackView.getType()).thenReturn(StackType.DATALAKE);
+        underTest.configureManagementServices(STACK_ID);
+        verify(platformAwareSdxConnector, times(1)).getRemoteDataContext(any());
+        verify(platformAwareSdxConnector, times(0)).getSdxCrnByEnvironmentCrn(anyString());
+    }
+
+    @Test
+    void configureManagementServiceWorkloadPaaSDatalakeNoCRN() {
+        when(proxyConfigDtoService.getByCrnWithEnvironmentFallback(PROXY_CRN, ENV_CRN)).thenReturn(Optional.of(proxyConfig));
+        when(mockStackDtoService.getById(eq(STACK_ID))).thenReturn(mockStack);
+        when(mockStack.getStack()).thenReturn(stackView);
+        when(mockStack.getDatalakeCrn()).thenReturn(null);
+        when(stackView.getType()).thenReturn(StackType.DATALAKE);
+        underTest.configureManagementServices(STACK_ID);
+        verify(platformAwareSdxConnector, times(0)).getRemoteDataContext(any());
+        verify(platformAwareSdxConnector, times(0)).getSdxCrnByEnvironmentCrn(anyString());
     }
 
 }

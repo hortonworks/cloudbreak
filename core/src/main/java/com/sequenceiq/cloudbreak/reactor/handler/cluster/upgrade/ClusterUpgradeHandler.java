@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeSuccess;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -64,6 +65,9 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
 
     @Inject
     private FlowMessageService flowMessageService;
+
+    @Inject
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Override
     public String selector() {
@@ -104,9 +108,17 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
 
     private Optional<String> getRemoteDataContext(StackView stack) {
         Optional<String> remoteDataContext = Optional.empty();
-        if (!stack.isDatalake() && StringUtils.isNotEmpty(stack.getDatalakeCrn())) {
-            LOGGER.info("Fetch the Remote Data Context from {} to update the Data Hub", stack.getName());
-            remoteDataContext = clusterBuilderService.getSdxContextOptional(stack.getDatalakeCrn());
+        if (!stack.isDatalake()) {
+            String datalakeCrn = null;
+            if (StringUtils.isNotEmpty(stack.getDatalakeCrn())) {
+                datalakeCrn = stack.getDatalakeCrn();
+            } else {
+                datalakeCrn = platformAwareSdxConnector.getSdxCrnByEnvironmentCrn(stack.getEnvironmentCrn()).orElse(null);
+            }
+            if (StringUtils.isNotEmpty(datalakeCrn)) {
+                LOGGER.info("Fetch the Remote Data Context from {} to update the Data Hub", stack.getName());
+                remoteDataContext = clusterBuilderService.getSdxContextOptional(datalakeCrn);
+            }
         }
         return remoteDataContext;
     }

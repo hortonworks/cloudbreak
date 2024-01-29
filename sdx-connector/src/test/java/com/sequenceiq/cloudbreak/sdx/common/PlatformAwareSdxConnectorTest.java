@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.sdx.common;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -103,5 +105,30 @@ public class PlatformAwareSdxConnectorTest {
         assertThrows(IllegalStateException.class, () ->
                 underTest.getAttemptResultForDeletion("envCrn", "env", Set.of(PAAS_CRN, SAAS_CRN)));
         verifyNoInteractions(paasSdxService, cdlSdxService);
+    }
+
+    @Test
+    public void testGetSdxCrnByEnvironmentCrnBothTypes() {
+        when(paasSdxService.getSdxCrnByEnvironmentCrn(anyString())).thenReturn(Optional.of(PAAS_CRN));
+        when(cdlSdxService.getSdxCrnByEnvironmentCrn(anyString())).thenReturn(Optional.of(SAAS_CRN));
+        assertThrows(IllegalStateException.class, () -> underTest.getSdxCrnByEnvironmentCrn("envCrn"));
+    }
+
+    @Test
+    public void testGetSdxCrnByEnvironmentCrnCDL() {
+        when(paasSdxService.getSdxCrnByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
+        when(cdlSdxService.getSdxCrnByEnvironmentCrn(anyString())).thenReturn(Optional.of(SAAS_CRN));
+        underTest.getSdxCrnByEnvironmentCrn("envCrn");
+        Optional<String> crn = underTest.getSdxCrnByEnvironmentCrn("envCrn");
+        assertEquals(SAAS_CRN, crn.get());
+    }
+
+    @Test
+    public void testGetSdxCrnByEnvironmentCrnPaaS() {
+        when(paasSdxService.getSdxCrnByEnvironmentCrn(anyString())).thenReturn(Optional.of(PAAS_CRN));
+        when(cdlSdxService.getSdxCrnByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
+        underTest.getSdxCrnByEnvironmentCrn("envCrn");
+        Optional<String> crn = underTest.getSdxCrnByEnvironmentCrn("envCrn");
+        assertEquals(PAAS_CRN, crn.get());
     }
 }

@@ -52,6 +52,18 @@ public class PlatformAwareSdxConnector {
         return Sets.union(saasSdxCrns, paasSdxCrns);
     }
 
+    public Optional<String> getSdxCrnByEnvironmentCrn(String environmentCrn) {
+        Optional<String> cdlCrn = platformDependentServiceMap.get(TargetPlatform.CDL).getSdxCrnByEnvironmentCrn(environmentCrn);
+        Optional<String> paasSdxCrn = platformDependentServiceMap.get(TargetPlatform.PAAS).getSdxCrnByEnvironmentCrn(environmentCrn);
+        if (!paasSdxCrn.isEmpty() && !cdlCrn.isEmpty()) {
+            throw new IllegalStateException(String.format("Environment %s should not have SDX from both PaaS and SaaS platform", environmentCrn));
+        } else if (!paasSdxCrn.isEmpty()) {
+            return paasSdxCrn;
+        } else {
+            return cdlCrn;
+        }
+    }
+
     public Set<Pair<String, StatusCheckResult>> listSdxCrnsWithAvailability(String environmentName, String environmentCrn, Set<String> sdxCrns) {
         return platformDependentServiceMap.get(calculatePlatform(sdxCrns)).listSdxCrnStatusCheckPair(environmentCrn, environmentName, sdxCrns);
     }

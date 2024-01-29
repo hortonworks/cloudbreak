@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudera.thunderhead.service.cdlcrud.CdlCrudGrpc;
 import com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -50,6 +51,7 @@ public class SdxCdlClient {
         CdlCrudProto.FindDatalakeRequest request = CdlCrudProto.FindDatalakeRequest.newBuilder()
                 .setEnvironment(environmentNameOrCrn)
                 .setDatalake(datalakeNameOrCrn)
+                .setAccountID(ThreadBasedUserCrnProvider.getAccountId())
                 .build();
         return newStub().findDatalake(request);
     }

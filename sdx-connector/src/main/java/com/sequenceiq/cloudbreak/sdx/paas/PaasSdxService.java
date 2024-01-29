@@ -58,6 +58,13 @@ public class PaasSdxService extends AbstractSdxService<SdxClusterStatusResponse>
     }
 
     @Override
+    public Optional<String> getSdxCrnByEnvironmentCrn(String environmentCrn) {
+        return sdxEndpoint.getByEnvCrn(environmentCrn).stream()
+                .map(SdxClusterResponse::getCrn)
+                .findFirst();
+    }
+
+    @Override
     public Set<Pair<String, SdxClusterStatusResponse>> listSdxCrnStatusPair(String environmentCrn, String environmentName, Set<String> sdxCrns) {
         return sdxEndpoint.list(environmentName, true).stream()
                 .filter(sdxResponse -> sdxCrns.contains(sdxResponse.getCrn()))

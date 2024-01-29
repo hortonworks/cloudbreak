@@ -24,6 +24,8 @@ public interface SdxService<S> {
 
     Set<String> listSdxCrns(String environmentName, String environmentCrn);
 
+    Optional<String> getSdxCrnByEnvironmentCrn(String environmentCrn);
+
     Set<Pair<String, S>> listSdxCrnStatusPair(String environmentCrn, String environmentName, Set<String> sdxCrns);
 
     default Set<Pair<String, StatusCheckResult>> listSdxCrnStatusCheckPair(String environmentCrn, String environmentName, Set<String> sdxCrns) {

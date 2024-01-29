@@ -136,12 +136,24 @@ public class ClusterBuilderService implements PaasRemoteDataContextSupplier {
                 stackDto.getCluster().getProxyConfigCrn(),
                 stackDto.getCluster().getEnvironmentCrn());
 
+        String datalakeCrn = getDatalakeCrn(stackDto);
         getClusterSetupService(stackDto).configureManagementServices(
                 stackToTemplatePreparationObjectConverter.convert(stackDto),
-                getSdxContextOptional(stackDto.getDatalakeCrn()).orElse(null),
+                getSdxContextOptional(datalakeCrn).orElse(null),
                 stackDto.getDatalakeCrn(),
                 componentConfigProviderService.getTelemetry(stackId),
                 proxyConfig.orElse(null));
+    }
+
+    private String getDatalakeCrn(StackDto stackDto) {
+        if (!stackDto.getStack().getType().equals(StackType.DATALAKE)) {
+            if (StringUtils.isNotEmpty(stackDto.getDatalakeCrn())) {
+                return stackDto.getDatalakeCrn();
+            } else {
+                return platformAwareSdxConnector.getSdxCrnByEnvironmentCrn(stackDto.getEnvironmentCrn()).orElse(null);
+            }
+        }
+        return stackDto.getDatalakeCrn();
     }
 
     public void configureSupportTags(Long stackId) {
@@ -225,13 +237,13 @@ public class ClusterBuilderService implements PaasRemoteDataContextSupplier {
         Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(cluster.getId());
 
         setInitialBlueprintText(stackDto);
-
+        String datalakeCrn = getDatalakeCrn(stackDto);
         String template = getClusterSetupService(stackDto)
                 .prepareTemplate(
                         loadInstanceMetadataForHostGroups(hostGroups),
                         stackToTemplatePreparationObjectConverter.convert(stackDto),
-                        getSdxContextOptional(stackDto.getDatalakeCrn()).orElse(null),
-                        stackDto.getDatalakeCrn(),
+                        getSdxContextOptional(datalakeCrn).orElse(null),
+                        datalakeCrn,
                         kerberosConfigService.get(
                                 stack.getEnvironmentCrn(),
                                 stack.getName()

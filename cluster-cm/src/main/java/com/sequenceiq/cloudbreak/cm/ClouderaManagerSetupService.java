@@ -470,7 +470,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             ApiClient rootClient = clouderaManagerApiClientProvider.getRootClient(stack.getGatewayPort(), user, password, clientConfig);
             CdpResourceApi cdpResourceApi = clouderaManagerApiFactory.getCdpResourceApi(rootClient);
             ApiRemoteDataContext apiRemoteDataContext = JsonUtil.readValue(sdxContext, ApiRemoteDataContext.class);
-            LOGGER.debug("Posting remote context to workload. EndpointId: {}", apiRemoteDataContext.getEndPointId());
+            LOGGER.info("Posting remote context to workload. EndpointId: {}", apiRemoteDataContext.getEndPointId());
             return cdpResourceApi.postRemoteContext(apiRemoteDataContext).getEndPointId();
         } catch (ApiException | ClouderaManagerClientInitException e) {
             LOGGER.info("Error while creating data context using: {}", sdxContext, e);
