@@ -32,7 +32,7 @@ public class ControllerLogContextAspects {
     @Before("com.sequenceiq.redbeams.aspect.ControllerLogContextAspects.interceptControllerMethodCalls()")
     public void buildLogContextForControllerCalls(JoinPoint joinPoint) {
 
-        LOGGER.debug("Intercepted controller method {}", joinPoint.toShortString());
+        LOGGER.trace("Intercepted controller method {}", joinPoint.toShortString());
 
         try {
             Object[] args = joinPoint.getArgs();
@@ -48,7 +48,7 @@ public class ControllerLogContextAspects {
             }
             logContextService.buildMDCParams(joinPoint.getTarget(), paramNames, args);
 
-            LOGGER.debug("A controller method has been intercepted: {} with params {}, {}, MDC logger context is built.", joinPoint.toShortString(),
+            LOGGER.trace("A controller method has been intercepted: {} with params {}, {}, MDC logger context is built.", joinPoint.toShortString(),
                     sig.getParameterNames(), AnonymizerUtil.anonymize(Arrays.toString(args)));
         } catch (Exception e) {
             LOGGER.warn("Failed to add controller method parameters to MDC, continuing with call", e);
