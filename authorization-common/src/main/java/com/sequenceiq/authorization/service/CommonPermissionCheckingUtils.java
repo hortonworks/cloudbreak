@@ -17,6 +17,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +32,8 @@ import com.sequenceiq.authorization.utils.AuthorizationMessageUtilsService;
 public class CommonPermissionCheckingUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonPermissionCheckingUtils.class);
+
+    private static final int ONE_AND_HALF_SECOND = 1500;
 
     @Inject
     private UmsAccountAuthorizationService umsAccountAuthorizationService;
@@ -95,12 +98,14 @@ public class CommonPermissionCheckingUtils {
     }
 
     public Object proceed(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
-        LOGGER.debug("Permission check took {} ms (method: {})", System.currentTimeMillis() - startTime,
+        long spentTime = System.currentTimeMillis() - startTime;
+        Level level = spentTime > ONE_AND_HALF_SECOND ? Level.DEBUG : Level.TRACE;
+        LOGGER.atLevel(level).log("Permission check took {} ms (method: {})", spentTime,
                 methodSignature.getMethod().getDeclaringClass().getSimpleName() + "#" + methodSignature.getMethod().getName());
         try {
             Object proceed = proceedingJoinPoint.proceed();
             if (proceed == null) {
-                LOGGER.debug("Return value is null, method signature: {}", methodSignature.toLongString());
+                LOGGER.trace("Return value is null, method signature: {}", methodSignature.toLongString());
             }
             return proceed;
         } catch (Error | RuntimeException unchecked) {
