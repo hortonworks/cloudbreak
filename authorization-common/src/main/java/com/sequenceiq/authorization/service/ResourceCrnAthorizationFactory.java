@@ -39,7 +39,7 @@ public class ResourceCrnAthorizationFactory extends TypedAuthorizationFactory<Ch
         String resourceCrn = commonPermissionCheckingUtils.getParameter(proceedingJoinPoint, methodSignature, ResourceCrn.class, String.class);
         crnAccountValidator.validateSameAccount(userCrn, resourceCrn);
         AuthorizationResourceAction action = methodAnnotation.action();
-        LOGGER.debug("Getting authorization rule to authorize user [{}] for action [{}] over resource [{}]", userCrn, action, resourceCrn);
+        LOGGER.trace("Getting authorization rule to authorize user [{}] for action [{}] over resource [{}]", userCrn, action, resourceCrn);
         return calcAuthorization(resourceCrn, action);
     }
 
