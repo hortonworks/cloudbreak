@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialDetails;
@@ -35,7 +36,13 @@ public class CredentialDetailsConverter {
 
     private Optional<CredentialAttributes> getCredentialAttributes(Credential credential) {
         try {
-            return Optional.of(new Json(credential.getAttributes()).get(CredentialAttributes.class));
+            if (credential.getAttributes() == null) {
+                LOGGER.error("Credential attribute is null from Vault. Probably a connection " +
+                        "issue or misconfiguration. The affected credential is: {}", credential.getResourceCrn());
+                throw new CloudbreakServiceException("Connection issue on CDP control plane please contact with the support.");
+            } else {
+                return Optional.of(new Json(credential.getAttributes()).get(CredentialAttributes.class));
+            }
         } catch (IOException ex) {
             return Optional.empty();
         }
