@@ -206,7 +206,7 @@ public class EnvironmentCreationService {
         validationBuilder.merge(validatorService.validatePublicKey(creationDto.getAuthentication().getPublicKey()));
         validationBuilder.merge(validatorService.validateTags(creationDto));
         if (creationDto.getCloudPlatform() != null) {
-            validationBuilder.merge(validateEncryptionKey(creationDto));
+            validationBuilder.merge(validateEncryptionKey(creationDto, environment.isEnableSecretEncryption()));
         }
         ValidationResult parentChildValidation = validatorService.validateParentChildRelation(environment, creationDto.getParentEnvironmentName());
         validationBuilder.merge(parentChildValidation);
@@ -222,40 +222,36 @@ public class EnvironmentCreationService {
         }
     }
 
-    private ValidationResult validateEncryptionKey(EnvironmentCreationDto creationDto) {
-        ValidationResultBuilder resultBuilder = ValidationResult.builder();
+    private ValidationResult validateEncryptionKey(EnvironmentCreationDto creationDto, boolean secretEncryptionEnabled) {
         String cloudPlatform = creationDto.getCloudPlatform().toLowerCase(Locale.ROOT);
         switch (cloudPlatform) {
-            case "azure":
+            case "azure" -> {
                 String encryptionKeyUrl = Optional.ofNullable(creationDto.getParameters())
                         .map(ParametersDto::getAzureParametersDto)
                         .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
-                        .map(AzureResourceEncryptionParametersDto::getEncryptionKeyUrl).orElse(null);
-                if (encryptionKeyUrl != null) {
-                    resultBuilder.merge(validatorService.validateEncryptionKeyUrl(encryptionKeyUrl, creationDto.getAccountId()));
-                }
-                break;
-            case "gcp":
+                        .map(AzureResourceEncryptionParametersDto::getEncryptionKeyUrl)
+                        .orElse(null);
+                return encryptionKeyUrl != null ? validatorService.validateEncryptionKeyUrl(encryptionKeyUrl) : ValidationResult.empty();
+            }
+            case "gcp" -> {
                 String encryptionKey = Optional.ofNullable(creationDto.getParameters())
                         .map(ParametersDto::getGcpParametersDto)
                         .map(GcpParametersDto::getGcpResourceEncryptionParametersDto)
-                        .map(GcpResourceEncryptionParametersDto::getEncryptionKey).orElse(null);
-                if (encryptionKey != null) {
-                    resultBuilder.merge(validatorService.validateEncryptionKey(encryptionKey, creationDto.getAccountId()));
-                }
-                break;
-            case "aws":
+                        .map(GcpResourceEncryptionParametersDto::getEncryptionKey)
+                        .orElse(null);
+                return encryptionKey != null ? validatorService.validateEncryptionKey(encryptionKey) : ValidationResult.empty();
+            }
+            case "aws" -> {
                 String encryptionKeyArn = Optional.ofNullable(creationDto.getParameters())
                         .map(ParametersDto::getAwsParametersDto)
                         .map(AwsParametersDto::getAwsDiskEncryptionParametersDto)
-                        .map(AwsDiskEncryptionParametersDto::getEncryptionKeyArn).orElse(null);
-                if (encryptionKeyArn != null) {
-                    resultBuilder.merge(validatorService.validateEncryptionKeyArn(encryptionKeyArn, creationDto.getAccountId()));
-                }
-                break;
-            default:
-                break;
+                        .map(AwsDiskEncryptionParametersDto::getEncryptionKeyArn)
+                        .orElse(null);
+                return validatorService.validateEncryptionKeyArn(encryptionKeyArn, secretEncryptionEnabled);
+            }
+            default -> {
+                return ValidationResult.empty();
+            }
         }
-        return resultBuilder.build();
     }
 }

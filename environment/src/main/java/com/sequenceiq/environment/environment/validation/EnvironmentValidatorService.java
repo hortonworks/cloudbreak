@@ -297,24 +297,15 @@ public class EnvironmentValidatorService {
         return resultBuilder.build();
     }
 
-    public ValidationResult validateEncryptionKeyUrl(String encryptionKeyUrl, String accountId) {
-        ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        ValidationResult validationResult = encryptionKeyUrlValidator.validateEncryptionKeyUrl(encryptionKeyUrl);
-        resultBuilder.merge(validationResult);
-        return resultBuilder.build();
+    public ValidationResult validateEncryptionKeyUrl(String encryptionKeyUrl) {
+        return encryptionKeyUrlValidator.validateEncryptionKeyUrl(encryptionKeyUrl);
     }
 
-    public ValidationResult validateEncryptionKeyArn(String encryptionKeyArn, String accountId) {
-        ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        ValidationResult validationResult = encryptionKeyArnValidator.validateEncryptionKeyArn(encryptionKeyArn);
-        resultBuilder.merge(validationResult);
-        return resultBuilder.build();
+    public ValidationResult validateEncryptionKeyArn(String encryptionKeyArn, boolean secretEncryptionEnabled) {
+        return encryptionKeyArnValidator.validateEncryptionKeyArn(encryptionKeyArn, secretEncryptionEnabled);
     }
 
-    public ValidationResult validateEncryptionKey(String encryptionKey, String accountId) {
-        ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        ValidationResult validationResult = encryptionKeyValidator.validateEncryptionKey(encryptionKey);
-        resultBuilder.merge(validationResult);
-        return resultBuilder.build();
+    public ValidationResult validateEncryptionKey(String encryptionKey) {
+        return encryptionKeyValidator.validateEncryptionKey(encryptionKey);
     }
 }

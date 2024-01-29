@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.validation.validators;
 
+import static com.sequenceiq.environment.environment.validation.validators.EncryptionKeyArnValidator.NULL_ARN_WITH_SECRET_ENCRYPTION_ENABLED_ERROR_MESSAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -76,7 +77,7 @@ class EncryptionKeyArnValidatorTest {
     void testEncryptionKeyArnValidationWithValidKeyAndCommentIsValid() {
         String validKey = "arn:aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab";
 
-        ValidationResult validationResult = underTest.validateEncryptionKeyArn(validKey);
+        ValidationResult validationResult = underTest.validateEncryptionKeyArn(validKey, false);
         assertFalse(validationResult.hasError());
 
     }
@@ -85,7 +86,7 @@ class EncryptionKeyArnValidatorTest {
     void testEncryptionKeyUrlValidationWithInValidKeyAndCommentIsValid() {
         String invalidKey = "aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab";
 
-        ValidationResult validationResult = underTest.validateEncryptionKeyArn(invalidKey);
+        ValidationResult validationResult = underTest.validateEncryptionKeyArn(invalidKey, false);
         assertTrue(validationResult.hasError());
         assertEquals(String.format("The identifier of the AWS Key Management Service (AWS KMS)" +
                         "customer master key (CMK) to use for Amazon EBS encryption.%n" +
@@ -154,8 +155,8 @@ class EncryptionKeyArnValidatorTest {
                 .withCloudPlatform("AWS")
                 .withParameters(ParametersDto.builder()
                         .withAwsParametersDto(null)
-                                .build())
-                    .build();
+                        .build())
+                .build();
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
         ValidationResult validationResult = underTest.validate(environmentValidationDto);
         assertFalse(validationResult.hasError());
@@ -167,6 +168,12 @@ class EncryptionKeyArnValidatorTest {
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
         ValidationResult validationResult = underTest.validate(environmentValidationDto);
         assertFalse(validationResult.hasError());
+    }
+
+    @Test
+    public void testWithEmptyEncryptionKeyAndSecretEncryptionEnabled() {
+        ValidationResult validationResult = underTest.validateEncryptionKeyArn(null, true);
+        assertEquals(NULL_ARN_WITH_SECRET_ENCRYPTION_ENABLED_ERROR_MESSAGE, validationResult.getFormattedErrors());
     }
 
     private EnvironmentDto createEnvironmentDto(String encryptionKeyArn) {

@@ -409,7 +409,7 @@ class EnvironmentModificationServiceTest {
         baseParameters.setId(123L);
         ValidationResult validationResultError = ValidationResult.builder().error("Wrong key format").build();
         when(environmentService.getValidatorService()).thenReturn(validatorService);
-        when(validatorService.validateEncryptionKey("dummyEncryptionKey", ACCOUNT_ID)).thenReturn(validationResultError);
+        when(validatorService.validateEncryptionKey("dummyEncryptionKey")).thenReturn(validationResultError);
         when(parametersService.findByEnvironment(any())).thenReturn(Optional.of(baseParameters));
         assertThrows(BadRequestException.class, () -> environmentModificationServiceUnderTest.edit(environmentMock(), environmentDto));
 
@@ -437,7 +437,7 @@ class EnvironmentModificationServiceTest {
         BaseParameters baseParameters = gcpParameters;
         baseParameters.setId(123L);
         when(environmentService.getValidatorService()).thenReturn(validatorService);
-        when(validatorService.validateEncryptionKey("dummyEncryptionKey", ACCOUNT_ID)).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateEncryptionKey("dummyEncryptionKey")).thenReturn(ValidationResult.builder().build());
         when(parametersService.findByEnvironment(any())).thenReturn(Optional.of(baseParameters));
         when(parametersService.saveParameters(environment, parameters)).thenReturn(baseParameters);
 
@@ -735,7 +735,7 @@ class EnvironmentModificationServiceTest {
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(environmentService
                 .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(env));
-        when(validatorService.validateEncryptionKeyUrl(any(String.class), any(String.class))).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateEncryptionKeyUrl(any(String.class))).thenReturn(ValidationResult.builder().build());
         when(environmentDtoConverter.environmentToDto(env)).thenReturn(new EnvironmentDto());
         when(environmentEncryptionService.createEncryptionResources(any(EnvironmentDto.class))).thenReturn(createdDiskEncryptionSet);
 
@@ -764,7 +764,7 @@ class EnvironmentModificationServiceTest {
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(environmentService
                 .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(env));
-        when(validatorService.validateEncryptionKeyUrl(any(String.class), any(String.class))).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateEncryptionKeyUrl(any(String.class))).thenReturn(ValidationResult.builder().build());
         when(environmentDtoConverter.environmentToDto(env)).thenReturn(new EnvironmentDto());
         when(environmentEncryptionService.createEncryptionResources(any(EnvironmentDto.class))).thenReturn(createdDiskEncryptionSet);
 
@@ -817,7 +817,7 @@ class EnvironmentModificationServiceTest {
         when(environmentService.getValidatorService()).thenReturn(validatorService);
         when(environmentService
                 .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(env));
-        when(validatorService.validateEncryptionKeyUrl(any(String.class), any(String.class))).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateEncryptionKeyUrl(any(String.class))).thenReturn(ValidationResult.builder().build());
         when(environmentDtoConverter.environmentToDto(env)).thenReturn(new EnvironmentDto());
 
         environmentModificationServiceUnderTest.updateAzureResourceEncryptionParametersByEnvironmentCrn(ACCOUNT_ID,

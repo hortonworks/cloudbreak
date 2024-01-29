@@ -215,8 +215,7 @@ public class EnvironmentModificationService {
             Environment environment) {
         AzureParameters azureParameters = (AzureParameters) environment.getParameters();
         if (azureParameters.getEncryptionKeyUrl() == null) {
-            ValidationResult validateKey = environmentService.getValidatorService().validateEncryptionKeyUrl(dto.getEncryptionKeyUrl(),
-                    accountId);
+            ValidationResult validateKey = environmentService.getValidatorService().validateEncryptionKeyUrl(dto.getEncryptionKeyUrl());
             if (!validateKey.hasError()) {
                 azureParameters.setEncryptionKeyUrl(dto.getEncryptionKeyUrl());
                 azureParameters.setEncryptionKeyResourceGroupName(dto.getEncryptionKeyResourceGroupName());
@@ -455,7 +454,7 @@ public class EnvironmentModificationService {
                         .map(GcpParametersDto::getGcpResourceEncryptionParametersDto)
                         .map(GcpResourceEncryptionParametersDto::getEncryptionKey)
                         .orElse(null);
-                ValidationResult validationResult = environmentService.getValidatorService().validateEncryptionKey(encryptionKey, editDto.getAccountId());
+                ValidationResult validationResult = environmentService.getValidatorService().validateEncryptionKey(encryptionKey);
                 if (validationResult.hasError()) {
                     throw new BadRequestException(validationResult.getFormattedErrors());
                 }

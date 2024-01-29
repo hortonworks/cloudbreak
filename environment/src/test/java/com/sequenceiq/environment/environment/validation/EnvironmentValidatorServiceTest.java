@@ -1,12 +1,12 @@
 package com.sequenceiq.environment.environment.validation;
 
-import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
 import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -377,16 +378,18 @@ class EnvironmentValidatorServiceTest {
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         validationResultBuilder.error("error");
         when(encryptionKeyUrlValidator.validateEncryptionKeyUrl(any())).thenReturn(validationResultBuilder.build());
-        ValidationResult validationResult = underTest.validateEncryptionKeyUrl(encryptionKeyUrl, ACCOUNT_ID);
+        ValidationResult validationResult = underTest.validateEncryptionKeyUrl(encryptionKeyUrl);
         assertTrue(validationResult.hasError());
     }
 
-    @Test
-    void testValidateEncryptionKeyArnSpecified() {
+    @ParameterizedTest(name = "{0}")
+    @ValueSource(booleans = {true, false})
+    void testValidateEncryptionKeyArnSpecified(boolean secretEncryptionEnabled) {
         String encryptionKeyArn = "dummy-key-arn";
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
-        when(encryptionKeyArnValidator.validateEncryptionKeyArn(any())).thenReturn(validationResultBuilder.build());
-        ValidationResult validationResult = underTest.validateEncryptionKeyArn(encryptionKeyArn, ACCOUNT_ID);
+        when(encryptionKeyArnValidator.validateEncryptionKeyArn(eq("dummy-key-arn"), eq(secretEncryptionEnabled)))
+                .thenReturn(validationResultBuilder.build());
+        ValidationResult validationResult = underTest.validateEncryptionKeyArn(encryptionKeyArn, secretEncryptionEnabled);
         assertFalse(validationResult.hasError());
     }
 
@@ -396,7 +399,7 @@ class EnvironmentValidatorServiceTest {
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         validationResultBuilder.error("error");
         when(encryptionKeyValidator.validateEncryptionKey(any())).thenReturn(validationResultBuilder.build());
-        ValidationResult validationResult = underTest.validateEncryptionKey(encryptionKey, ACCOUNT_ID);
+        ValidationResult validationResult = underTest.validateEncryptionKey(encryptionKey);
         assertTrue(validationResult.hasError());
     }
 

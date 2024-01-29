@@ -10,6 +10,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -327,7 +328,14 @@ class EnvironmentCreationServiceTest {
     @ParameterizedTest(name = "{0}")
     @ValueSource(booleans = {false, true})
     void testCreateWhenSecretEncryptionAndGovCloud(boolean secretEncryptionEnabled) {
-        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
+        ParametersDto parametersDto = ParametersDto.builder()
+                .withAwsParametersDto(AwsParametersDto.builder()
+                        .withDynamoDbTableName("dynamo")
+                        .withAwsDiskEncryptionParametersDto(AwsDiskEncryptionParametersDto.builder()
+                                .withEncryptionKeyArn("dummy-key-arn")
+                                .build())
+                        .build())
+                .build();
         String environmentCrn = "crn";
         EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
                 .withName(ENVIRONMENT_NAME)
@@ -336,6 +344,7 @@ class EnvironmentCreationServiceTest {
                 .withCrn(environmentCrn)
                 .withAuthentication(AuthenticationDto.builder().build())
                 .withParameters(parametersDto)
+                .withCloudPlatform(CloudPlatform.AWS.name())
                 .withLocation(LocationDto.builder()
                         .withName("test")
                         .withDisplayName("test")
@@ -365,6 +374,7 @@ class EnvironmentCreationServiceTest {
         environmentCreationServiceUnderTest.create(environmentCreationDto);
 
         verify(validatorService, times(1)).validatePublicKey(any());
+        verify(validatorService, times(1)).validateEncryptionKeyArn(eq("dummy-key-arn"), eq(secretEncryptionEnabled));
         verify(environmentService, times(2)).save(any());
         verify(parametersService).saveParameters(eq(environment), eq(parametersDto));
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any(), any());
@@ -597,7 +607,7 @@ class EnvironmentCreationServiceTest {
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         validationResultBuilder.error("error");
-        when(validatorService.validateEncryptionKey(any(), any())).thenReturn(validationResultBuilder.build());
+        when(validatorService.validateEncryptionKey(eq("dummyKey"))).thenReturn(validationResultBuilder.build());
 
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
@@ -636,7 +646,7 @@ class EnvironmentCreationServiceTest {
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         validationResultBuilder.error("error");
-        when(validatorService.validateEncryptionKeyArn(any(), any())).thenReturn(validationResultBuilder.build());
+        when(validatorService.validateEncryptionKeyArn(eq("dummy-key-arn"), anyBoolean())).thenReturn(validationResultBuilder.build());
 
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
@@ -675,7 +685,7 @@ class EnvironmentCreationServiceTest {
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         validationResultBuilder.error("error");
-        when(validatorService.validateEncryptionKeyUrl(any(), any())).thenReturn(validationResultBuilder.build());
+        when(validatorService.validateEncryptionKeyUrl(eq("dummy-key-url"))).thenReturn(validationResultBuilder.build());
 
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
