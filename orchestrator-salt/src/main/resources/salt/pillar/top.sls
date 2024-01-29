@@ -1,41 +1,33 @@
+{% macro include_if_exists(directory, file='init') %}
+{%- if salt['file.file_exists']('/srv/pillar/' ~ directory ~ '/' ~ file ~ '.sls') %}
+    - {{ directory }}.{{ file }}
+{%- endif %}
+{% endmacro %}
+
 base:
   '*':
-    - postgresql.rotation
-    - nodes.hosts
-{%- if salt['file.file_exists']('/srv/pillar/nodes/hostattrs.sls') %}
-    - nodes.hostattrs
-{%- endif %}
-    - discovery.init
-{%- if salt['file.file_exists']('/srv/pillar/recipes/init.sls') %}
-    - recipes.init
-{%- endif %}
-{%- if salt['file.file_exists']('/srv/pillar/unbound/forwarders.sls') %}
-    - unbound.forwarders
-{%- endif %}
-    - unbound.elimination
+{{ include_if_exists('postgresql', 'rotation') }}
+{{ include_if_exists('nodes', 'hosts') }}
+{{ include_if_exists('nodes', 'hostattrs') }}
+{{ include_if_exists('discovery') }}
+{{ include_if_exists('recipes') }}
+{{ include_if_exists('unbound', 'forwarders') }}
+{{ include_if_exists('unbound', 'elimination') }}
     - docker
-    - metadata.init
+{{ include_if_exists('metadata') }}
     - tags
     - proxy.proxy
     - telemetry.init
     - databus
-{%- if salt['file.file_exists']('/srv/pillar/cloudera-manager/csd.sls') %}
-    - cloudera-manager.csd
-{%- endif %}
-    - cloudera-manager.settings
+{{ include_if_exists('cloudera-manager', 'csd') }}
+{{ include_if_exists('cloudera-manager', 'settings') }}
     - fluent
     - metering
     - monitoring.init
-{%- if salt['file.file_exists']('/srv/pillar/mount/disk.sls') %}
-    - mount.disk
-{%- endif %}
-{%- if salt['file.file_exists']('/srv/pillar/postgresql/root-certs.sls') %}
-    - postgresql.root-certs
-{%- endif %}
-{%- if salt['file.file_exists']('/srv/pillar/java/init.sls') %}
-    - java.init
-{%- endif %}
-    - paywall
+{{ include_if_exists('mount', 'disk') }}
+{{ include_if_exists('postgresql', 'root-certs') }}
+{{ include_if_exists('java') }}
+{{ include_if_exists('paywall') }}
 
   'G@roles:ad_member or G@roles:ad_leave':
     - match: compound
@@ -52,9 +44,7 @@ base:
   'G@roles:gateway or G@roles:knox':
     - match: compound
     - gateway.init
-{%- if salt['file.file_exists']('/srv/pillar/gateway/ldap.sls') %}
-    - gateway.ldap
-{%- endif %}
+{{ include_if_exists('gateway', 'ldap') }}
     - gateway.settings
 
   'roles:kerberized':
@@ -76,22 +66,14 @@ base:
 
   'roles:manager_server':
     - match: grain
-{%- if salt['file.file_exists']('/srv/pillar/cloudera-manager/license.sls') %}
-    - cloudera-manager.license
-{%- endif %}
-{%- if salt['file.file_exists']('/srv/pillar/cloudera-manager/cme.sls') %}
-    - cloudera-manager.cme
-{%- endif %}
+{{ include_if_exists('cloudera-manager', 'license') }}
+{{ include_if_exists('cloudera-manager', 'cme') }}
     - cloudera-manager.repo
     - cloudera-manager.database
     - cloudera-manager.communication
-{%- if salt['file.file_exists']('/srv/pillar/cloudera-manager/autotls.sls') %}
-    - cloudera-manager.autotls
-{%- endif %}
+{{ include_if_exists('cloudera-manager', 'autotls') }}
     - gateway.init
-{%- if salt['file.file_exists']('/srv/pillar/gateway/ldap.sls') %}
-    - gateway.ldap
-{%- endif %}
+{{ include_if_exists('gateway', 'ldap') }}
     - gateway.settings
     - postgresql.disaster_recovery
     - postgresql.upgrade
