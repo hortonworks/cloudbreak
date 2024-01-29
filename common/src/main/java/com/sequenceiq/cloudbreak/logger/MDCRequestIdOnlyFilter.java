@@ -34,7 +34,7 @@ public class MDCRequestIdOnlyFilter extends OncePerRequestFilter {
         HttpServletRequestWrapper wrapper = new RequestIdHeaderInjectingHttpRequestWrapper(request);
         Builder builder = MdcContext.builder().requestId(wrapper.getHeader(REQUEST_ID_HEADER));
         builder.buildMdc();
-        LOGGER.debug("Request id has been added to MDC context for request, method: {}, path: {}",
+        LOGGER.trace("Request id has been added to MDC context for request, method: {}, path: {}",
                 request.getMethod().toUpperCase(Locale.ROOT),
                 request.getRequestURI());
         try {
