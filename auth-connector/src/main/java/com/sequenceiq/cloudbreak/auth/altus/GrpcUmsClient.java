@@ -115,9 +115,9 @@ public class GrpcUmsClient {
      * @return                   the new or existing user group.
      */
     public Group createGroup(String accountId, String groupName) {
-        LOGGER.debug("Creating new user group '{}', for account '{}'.", groupName, accountId);
+        LOGGER.trace("Creating new user group '{}', for account '{}'.", groupName, accountId);
         Group newGroup = makeClient().createGroup(accountId, groupName);
-        LOGGER.debug("New user group '{}' has been created for account '{}'.", groupName, accountId);
+        LOGGER.trace("New user group '{}' has been created for account '{}'.", groupName, accountId);
         return newGroup;
     }
 
@@ -128,9 +128,9 @@ public class GrpcUmsClient {
      * @param groupName          the newly created group name
      */
     public void deleteGroup(String accountId, String groupName) {
-        LOGGER.debug("Deleting user group '{}', from account '{}'.", groupName, accountId);
+        LOGGER.trace("Deleting user group '{}', from account '{}'.", groupName, accountId);
         makeClient().deleteGroup(accountId, groupName);
-        LOGGER.debug("User group '{}' has been deleted from account '{}'.", groupName, accountId);
+        LOGGER.trace("User group '{}' has been deleted from account '{}'.", groupName, accountId);
     }
 
     /**
@@ -141,9 +141,9 @@ public class GrpcUmsClient {
      * @param memberCrn          member (e.g., user) CRN
      */
     public void addMemberToGroup(String accountId, String groupName, String memberCrn) {
-        LOGGER.debug("Assigning user '{}' to '{}' group, at account '{}'.", memberCrn, groupName, accountId);
+        LOGGER.trace("Assigning user '{}' to '{}' group, at account '{}'.", memberCrn, groupName, accountId);
         makeClient().addMemberToGroup(accountId, groupName, memberCrn);
-        LOGGER.debug("User '{}' has been added to '{}' group successfully.", groupName, accountId);
+        LOGGER.trace("User '{}' has been added to '{}' group successfully.", groupName, accountId);
     }
 
     /**
@@ -154,9 +154,9 @@ public class GrpcUmsClient {
      * @param memberCrn          member (e.g., user) CRN
      */
     public void removeMemberFromGroup(String accountId, String groupName, String memberCrn) {
-        LOGGER.debug("Removing user '{}' from '{}' group, at account '{}'.", memberCrn, groupName, accountId);
+        LOGGER.trace("Removing user '{}' from '{}' group, at account '{}'.", memberCrn, groupName, accountId);
         makeClient().removeMemberFromGroup(accountId, groupName, memberCrn);
-        LOGGER.debug("User '{}' has been removed from '{}' group successfully.", groupName, accountId);
+        LOGGER.trace("User '{}' has been removed from '{}' group successfully.", groupName, accountId);
     }
 
     /**
@@ -167,9 +167,9 @@ public class GrpcUmsClient {
      * @return                   list of user group member CRNs or NULL if the user group does not exist.
      */
     public List<String> listMembersFromGroup(String accountId, String groupName) {
-        LOGGER.debug("Listing members from '{}' group, at account '{}'.", groupName, accountId);
+        LOGGER.trace("Listing members from '{}' group, at account '{}'.", groupName, accountId);
         List<String> members = makeClient().listMembersFromGroup(accountId, groupName);
-        LOGGER.debug("User group '{}' contains [{}] members at account '{}'.", groupName, members, accountId);
+        LOGGER.trace("User group '{}' contains [{}] members at account '{}'.", groupName, members, accountId);
         return members;
     }
 
@@ -191,9 +191,9 @@ public class GrpcUmsClient {
      * @return the list of groups associated with this account
      */
     public List<Group> listGroups(String accountId, List<String> groupCrns) {
-        LOGGER.debug("Listing group information for account {}.", accountId);
+        LOGGER.trace("Listing group information for account {}.", accountId);
         List<Group> groups = makeClient().listGroups(accountId, groupCrns);
-        LOGGER.debug("{} Groups found for account {}", groups.size(), accountId);
+        LOGGER.trace("{} Groups found for account {}", groups.size(), accountId);
         return groups;
     }
 
@@ -205,9 +205,9 @@ public class GrpcUmsClient {
      * @return the list of group crns associated with this member
      */
     public List<String> listGroupsForMember(String accountId, String memberCrn) {
-        LOGGER.debug("Listing group information for member {} in account {}.", memberCrn, accountId);
+        LOGGER.trace("Listing group information for member {} in account {}.", memberCrn, accountId);
         List<String> groups = makeClient().listGroupsForMembers(accountId, memberCrn);
-        LOGGER.debug("{} Groups found for member {} in account {}", groups.size(), memberCrn, accountId);
+        LOGGER.trace("{} Groups found for member {} in account {}", groups.size(), memberCrn, accountId);
         return groups;
     }
 
@@ -219,9 +219,9 @@ public class GrpcUmsClient {
      */
     @Cacheable(cacheNames = "umsUserCache", key = "{ #userCrn }")
     public User getUserDetails(String userCrn) {
-        LOGGER.debug("Getting user information for {}.", userCrn);
+        LOGGER.trace("Getting user information for {}.", userCrn);
         User user = makeClient().getUser(userCrn);
-        LOGGER.debug("User information retrieved for userCrn: {}", user.getCrn());
+        LOGGER.trace("User information retrieved for userCrn: {}", user.getCrn());
         return user;
     }
 
@@ -233,9 +233,9 @@ public class GrpcUmsClient {
      */
     public UserManagementProto.SetActorWorkloadCredentialsResponse setActorWorkloadPassword(String userCrn, String password) {
         String workloadUserName = getUserDetails(userCrn).getWorkloadUsername();
-        LOGGER.debug("Setting workload password for user {} with workload name {}", userCrn, workloadUserName);
+        LOGGER.trace("Setting workload password for user {} with workload name {}", userCrn, workloadUserName);
         UserManagementProto.SetActorWorkloadCredentialsResponse response = makeClient().setActorWorkloadPassword(userCrn, password);
-        LOGGER.debug("Workload password has been set for user {} with workload name {}", userCrn, workloadUserName);
+        LOGGER.trace("Workload password has been set for user {} with workload name {}", userCrn, workloadUserName);
         return response;
     }
 
@@ -246,9 +246,9 @@ public class GrpcUmsClient {
      * @return the workload credentials associated with this user CRN
      */
     public UserManagementProto.GetActorWorkloadCredentialsResponse getActorWorkloadCredentials(String userCrn) {
-        LOGGER.debug("Getting workload credentials for user {}", userCrn);
+        LOGGER.trace("Getting workload credentials for user {}", userCrn);
         UserManagementProto.GetActorWorkloadCredentialsResponse response = makeClient().getActorWorkloadCredentials(userCrn);
-        LOGGER.debug("Got workload credentials for user {}", userCrn);
+        LOGGER.trace("Got workload credentials for user {}", userCrn);
         return response;
     }
 
@@ -270,9 +270,9 @@ public class GrpcUmsClient {
      * @return the list of users associated with this account
      */
     public List<User> listUsers(String accountId, List<String> userCrns) {
-        LOGGER.debug("Listing user information for account {}.", accountId);
+        LOGGER.trace("Listing user information for account {}.", accountId);
         List<User> users = makeClient().listUsers(accountId, userCrns);
-        LOGGER.debug("{} Users found for account {}", users.size(), accountId);
+        LOGGER.trace("{} Users found for account {}", users.size(), accountId);
         return users;
     }
 
@@ -284,9 +284,9 @@ public class GrpcUmsClient {
      */
     @Cacheable(cacheNames = "umsMachineUserCache", key = "{ #userCrn, #accountId }")
     public MachineUser getMachineUserDetails(String userCrn, String accountId) {
-        LOGGER.debug("Getting machine user information for {}.", userCrn);
+        LOGGER.trace("Getting machine user information for {}.", userCrn);
         MachineUser machineUser = makeClient().getMachineUser(userCrn, accountId);
-        LOGGER.debug("MachineUser information retrieved for userCrn: {}", machineUser.getCrn());
+        LOGGER.trace("MachineUser information retrieved for userCrn: {}", machineUser.getCrn());
         return machineUser;
     }
 
@@ -298,9 +298,9 @@ public class GrpcUmsClient {
      */
     public UserManagementProto.SetActorWorkloadCredentialsResponse setMachineUserWorkloadPassword(String userCrn, String accountId, String password) {
         String workloadUserName = getMachineUserDetails(userCrn, accountId).getWorkloadUsername();
-        LOGGER.debug("Setting workload password for machine user {} with workload name {}", userCrn, workloadUserName);
+        LOGGER.trace("Setting workload password for machine user {} with workload name {}", userCrn, workloadUserName);
         UserManagementProto.SetActorWorkloadCredentialsResponse response = makeClient().setActorWorkloadPassword(userCrn, password);
-        LOGGER.debug("Workload password has been set for machine user {} with workload name {}", userCrn, workloadUserName);
+        LOGGER.trace("Workload password has been set for machine user {} with workload name {}", userCrn, workloadUserName);
         return response;
     }
 
@@ -326,9 +326,9 @@ public class GrpcUmsClient {
      * @return the user associated with this user CRN
      */
     public List<MachineUser> listMachineUsers(String accountId, List<String> machineUserCrns, boolean includeInternal, boolean includeWorkloadMachineUsers) {
-        LOGGER.debug("Listing machine user information for account {}.", accountId);
+        LOGGER.trace("Listing machine user information for account {}.", accountId);
         List<MachineUser> machineUsers = makeClient().listMachineUsers(accountId, machineUserCrns, includeInternal, includeWorkloadMachineUsers);
-        LOGGER.debug("{} Machine users found for account {}", machineUsers.size(), accountId);
+        LOGGER.trace("{} Machine users found for account {}", machineUsers.size(), accountId);
         return machineUsers;
     }
 
@@ -343,23 +343,23 @@ public class GrpcUmsClient {
     public Optional<String> createMachineUser(String machineUserName, String userCrn, String accountId) {
         try {
             UmsClient client = makeClient();
-            LOGGER.debug("Creating machine user {} for {}.", machineUserName, userCrn);
+            LOGGER.trace("Creating machine user {} for {}.", machineUserName, userCrn);
             Optional<String> machineUserCrn = client.createMachineUser(accountId, machineUserName);
             if (machineUserCrn.isEmpty()) {
                 MachineUser machineUser = client.getMachineUserForUser(accountId, machineUserName, true, true);
                 machineUserCrn = Optional.of(machineUser.getCrn());
             }
-            LOGGER.debug("Machine User information retrieved for userCrn: {}", machineUserCrn.orElse(null));
+            LOGGER.trace("Machine User information retrieved for userCrn: {}", machineUserCrn.orElse(null));
             return machineUserCrn;
         } catch (StatusRuntimeException ex) {
             if (Status.NOT_FOUND.getCode().equals(ex.getStatus().getCode())) {
                 String errMessage = String.format("Machine user with name %s is not found yet", machineUserName);
-                LOGGER.debug(errMessage, ex);
+                LOGGER.trace(errMessage, ex);
                 throw new UmsOperationException(errMessage, ex);
             } else if (Status.UNAVAILABLE.getCode().equals(ex.getStatus().getCode())) {
                 String errMessage = String.format("Cannot create machinue user '%s' for '%s' as " +
                         "UMS API is UNAVAILABLE at the moment", machineUserName, userCrn);
-                LOGGER.debug(errMessage, ex);
+                LOGGER.trace(errMessage, ex);
                 throw new UmsOperationException(errMessage, ex);
             } else {
                 throw ex;
@@ -377,15 +377,15 @@ public class GrpcUmsClient {
     @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
     public MachineUser getOrCreateMachineUserWithoutAccessKey(String machineUserName, String accountId) {
         try {
-            LOGGER.debug("Creating machine user {} for accountId {}.", machineUserName, accountId);
+            LOGGER.trace("Creating machine user {} for accountId {}.", machineUserName, accountId);
             MachineUser machineUser = makeClient().getOrCreateMachineUserWithoutAccessKey(accountId, machineUserName);
-            LOGGER.debug("Machine User retrieved for machineUserName: {}, machineUser: {}", machineUserName, machineUser);
+            LOGGER.trace("Machine User retrieved for machineUserName: {}, machineUser: {}", machineUserName, machineUser);
             return machineUser;
         } catch (StatusRuntimeException ex) {
             if (Status.UNAVAILABLE.getCode().equals(ex.getStatus().getCode())) {
                 String errMessage = String.format("Cannot create machine user '%s' for '%s' as " +
                         "UMS API is UNAVAILABLE at the moment", machineUserName, accountId);
-                LOGGER.debug(errMessage, ex);
+                LOGGER.trace(errMessage, ex);
                 throw new UmsOperationException(errMessage, ex);
             } else {
                 throw ex;
@@ -400,7 +400,7 @@ public class GrpcUmsClient {
      * @param accountId      the account Id
      */
     public void deleteMachineUser(String machineUserName, String accountId) {
-        LOGGER.debug("Deleting machine user {} for accountId: {}", machineUserName, accountId);
+        LOGGER.trace("Deleting machine user {} for accountId: {}", machineUserName, accountId);
         makeClient().deleteMachineUser(accountId, machineUserName);
     }
 
@@ -417,7 +417,7 @@ public class GrpcUmsClient {
      */
     public List<ServicePrincipalCloudIdentities> listServicePrincipalCloudIdentities(String accountId, String environmentCrn) {
         List<ServicePrincipalCloudIdentities> spCloudIds = new ArrayList<>();
-        LOGGER.debug("Listing service principal cloud identities for account {}.", accountId);
+        LOGGER.trace("Listing service principal cloud identities for account {}.", accountId);
         ListServicePrincipalCloudIdentitiesResponse response;
         Optional<PageToken> pageToken = Optional.empty();
         do {
@@ -425,7 +425,7 @@ public class GrpcUmsClient {
             spCloudIds.addAll(response.getServicePrincipalCloudIdentitiesList());
             pageToken = Optional.ofNullable(response.getNextPageToken());
         } while (response.hasNextPageToken());
-        LOGGER.debug("{} ServicePrincipalCloudIdentities found for account {}", spCloudIds.size(), accountId);
+        LOGGER.trace("{} ServicePrincipalCloudIdentities found for account {}", spCloudIds.size(), accountId);
         return spCloudIds;
     }
 
@@ -438,7 +438,7 @@ public class GrpcUmsClient {
     public List<String> listWorkloadAdministrationGroupsForMember(String memberCrn) {
         requireNonNull(memberCrn);
         List<String> wags = new ArrayList<>();
-        LOGGER.debug("Getting workload administration groups for member {}", memberCrn);
+        LOGGER.trace("Getting workload administration groups for member {}", memberCrn);
         ListWorkloadAdministrationGroupsForMemberResponse response;
         Optional<PageToken> pageToken = Optional.empty();
         do {
@@ -446,7 +446,7 @@ public class GrpcUmsClient {
             wags.addAll(response.getWorkloadAdministrationGroupNameList());
             pageToken = Optional.ofNullable(response.getNextPageToken());
         } while (response.hasNextPageToken());
-        LOGGER.debug("{} workload administration groups found for member {}", wags.size(), memberCrn);
+        LOGGER.trace("{} workload administration groups found for member {}", wags.size(), memberCrn);
         return wags;
     }
 
@@ -458,7 +458,7 @@ public class GrpcUmsClient {
      */
     @Cacheable(cacheNames = "umsAccountCache", key = "{ #accountId }")
     public Account getAccountDetails(String accountId) {
-        LOGGER.debug("Getting information for account ID {}.", accountId);
+        LOGGER.trace("Getting information for account ID {}.", accountId);
         return makeClient().getAccount(accountId);
     }
 
@@ -615,7 +615,7 @@ public class GrpcUmsClient {
                         .setRight(right)
                         .build())
                 .collect(Collectors.toList());
-        LOGGER.debug("Check if {} has rights to resources {}", memberCrn, rightChecks);
+        LOGGER.trace("Check if {} has rights to resources {}", memberCrn, rightChecks);
         List<Boolean> result = hasRights(memberCrn, rightChecks);
         return resources.stream().collect(
                 Collectors.toMap(resource -> resource, resource -> result.get(resources.indexOf(resource))));
@@ -631,7 +631,7 @@ public class GrpcUmsClient {
         if (RegionAwareInternalCrnGeneratorUtil.isInternalCrn(memberCrn)) {
             return resourceCrns.stream().map(r -> true).collect(Collectors.toList());
         }
-        LOGGER.debug("Check if {} has rights on resources {}", memberCrn, resourceCrns);
+        LOGGER.trace("Check if {} has rights on resources {}", memberCrn, resourceCrns);
         List<Boolean> retVal = makePersonalResourceViewClient(memberCrn).hasRightOnResources(memberCrn, right, resourceCrns);
         LOGGER.info("member {} has rights {}", memberCrn, retVal);
         return retVal;
@@ -652,7 +652,7 @@ public class GrpcUmsClient {
             if (Status.UNAVAILABLE.getCode().equals(ex.getStatus().getCode())) {
                 String errMessage = String.format("Cannot assign role '%s' to machine user '%s' as " +
                         "UMS API is UNAVAILABLE at the moment", machineUserCrn, roleCrn);
-                LOGGER.debug(errMessage, ex);
+                LOGGER.trace(errMessage, ex);
                 throw new UmsOperationException(errMessage, ex);
             } else {
                 throw ex;
@@ -668,7 +668,7 @@ public class GrpcUmsClient {
             if (Status.UNAVAILABLE.getCode().equals(ex.getStatus().getCode())) {
                 String errMessage = String.format("Cannot assign resource role '%s' to machine user '%s' and resource '%s' as " +
                         "UMS API is UNAVAILABLE at the moment", machineUserCrn, resourceRoleCrn, resourceCrn);
-                LOGGER.debug(errMessage, ex);
+                LOGGER.trace(errMessage, ex);
                 throw new UmsOperationException(errMessage, ex);
             } else {
                 throw ex;
@@ -693,7 +693,7 @@ public class GrpcUmsClient {
             if (Status.UNAVAILABLE.getCode().equals(ex.getStatus().getCode())) {
                 String errMessage = String.format("Cannot generate access key pair for machine user '%s' as UMS API is UNAVAILABLE at the moment",
                         machineUserCrn);
-                LOGGER.debug(errMessage, ex);
+                LOGGER.trace(errMessage, ex);
                 throw new UmsOperationException(errMessage, ex);
             } else {
                 throw ex;
@@ -777,7 +777,7 @@ public class GrpcUmsClient {
      * @return a list of anonymization rules for an UMS account
      */
     public List<AnonymizationRule> getAnonymizationRules(String accountId, String actorCrn) {
-        LOGGER.debug("Try getting anonymization rules for {} by {}", accountId, actorCrn);
+        LOGGER.trace("Try getting anonymization rules for {} by {}", accountId, actorCrn);
         return new ArrayList<>();
     }
 
@@ -802,7 +802,7 @@ public class GrpcUmsClient {
      * @return metadata as string
      */
     public String getIdentityProviderMetadataXml(String accountId) {
-        LOGGER.debug("Getting IdP metadata through account ID: {}", accountId);
+        LOGGER.trace("Getting IdP metadata through account ID: {}", accountId);
         return makeClient().getIdentityProviderMetadataXml(accountId);
     }
 
@@ -834,7 +834,7 @@ public class GrpcUmsClient {
 
     public void notifyResourceDeleted(String resourceCrn) {
         try {
-            LOGGER.debug("Notify UMS about resource ('{}') was deleted", resourceCrn);
+            LOGGER.trace("Notify UMS about resource ('{}') was deleted", resourceCrn);
             makeClient().notifyResourceDeleted(resourceCrn);
             LOGGER.info("Notified UMS about deletion of resource {}", resourceCrn);
         } catch (Exception e) {
@@ -865,7 +865,7 @@ public class GrpcUmsClient {
      * @return the user associated with this user CRN
      */
     public GetEventGenerationIdsResponse getEventGenerationIds(String accountId) {
-        LOGGER.debug("Getting event generation ids for account {}.", accountId);
+        LOGGER.trace("Getting event generation ids for account {}.", accountId);
         return makeClient().getEventGenerationIds(accountId);
     }
 
@@ -878,7 +878,7 @@ public class GrpcUmsClient {
      * @return the user sync state for this account and rights checks
      */
     public GetUserSyncStateModelResponse getUserSyncStateModel(String accountId, List<RightsCheck> rightsChecks, boolean skipCredentials) {
-        LOGGER.debug("Retrieving user sync state model for account {}.", accountId);
+        LOGGER.trace("Retrieving user sync state model for account {}.", accountId);
         return makeClient().getUserSyncStateModel(accountId, rightsChecks, skipCredentials);
     }
 
