@@ -36,7 +36,7 @@ public class TriggerMetricsListener extends TriggerListenerSupport {
         TriggerKey triggerKey = trigger.getKey();
         Date triggerTime = trigger.getPreviousFireTime() == null ? trigger.getStartTime() : trigger.getPreviousFireTime();
         Duration triggerDelay = Duration.between(triggerTime.toInstant(), Instant.now());
-        getLog().debug("Trigger fired with group: {}, name: {}, delay: {} ms", triggerKey.getGroup(), triggerKey.getName(), triggerDelay.toMillis());
+        getLog().trace("Trigger fired with group: {}, name: {}, delay: {} ms", triggerKey.getGroup(), triggerKey.getName(), triggerDelay.toMillis());
         metricService.incrementMetricCounter(QuartzMetricType.TRIGGER_FIRED,
                 TRIGGER_GROUP.name(), triggerKey.getGroup(),
                 PROVIDER.name(), QuartzMetricUtil.getProvider(context.getJobDetail().getJobDataMap()));
@@ -58,7 +58,7 @@ public class TriggerMetricsListener extends TriggerListenerSupport {
     @Override
     public void triggerComplete(Trigger trigger, JobExecutionContext context, CompletedExecutionInstruction triggerInstructionCode) {
         TriggerKey triggerKey = trigger.getKey();
-        getLog().debug("Trigger completed with group: {}, name: {}, triggerInstructionCode: {}",
+        getLog().trace("Trigger completed with group: {}, name: {}, triggerInstructionCode: {}",
                 triggerKey.getGroup(), triggerKey.getName(), triggerInstructionCode);
         metricService.incrementMetricCounter(QuartzMetricType.TRIGGER_COMPLETED,
                 TRIGGER_GROUP.name(), triggerKey.getGroup(),
