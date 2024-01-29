@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class ClusterCertificatesRotationService {
@@ -66,14 +65,9 @@ public class ClusterCertificatesRotationService {
         flowMessageService.fireEventAndLog(stackId, Status.AVAILABLE.name(), ResourceEvent.CLUSTER_CERTIFICATES_ROTATION_FINISHED);
     }
 
-    void certificatesRotationFailed(StackView stack, Exception exception) {
-        if (stack.getClusterId() != null) {
-            Long stackId = stack.getId();
-            String errorMessage = ExceptionMessageFormatterUtil.getErrorMessageFromException(exception);
-            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CERTIFICATES_ROTATION_FAILED, errorMessage);
-            flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), ResourceEvent.CLUSTER_CERTIFICATES_ROTATION_FAILED, errorMessage);
-        } else {
-            LOGGER.info("Cluster was null. Flow action was not required.");
-        }
+    void certificatesRotationFailed(long stackId, Exception exception) {
+        String errorMessage = ExceptionMessageFormatterUtil.getErrorMessageFromException(exception);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CERTIFICATES_ROTATION_FAILED, errorMessage);
+        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), ResourceEvent.CLUSTER_CERTIFICATES_ROTATION_FAILED, errorMessage);
     }
 }

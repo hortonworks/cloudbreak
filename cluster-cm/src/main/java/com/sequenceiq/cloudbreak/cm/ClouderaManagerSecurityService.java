@@ -332,7 +332,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     }
 
     @Override
-    public String getTrustStore() throws CloudbreakException {
+    public Optional<String> getTrustStoreForValidation() throws CloudbreakException {
         try {
             ClusterView cluster = stack.getCluster();
             String user = cluster.getCloudbreakAmbariUser();
@@ -340,7 +340,15 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
             ApiClient client = clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig,
                     stack.getGatewayPort(), user, password, ClouderaManagerApiClientProvider.API_V_45);
             CertManagerResourceApi certManagerResourceApi = clouderaManagerApiFactory.getCertManagerResourceApi(client);
-            return FileUtils.readFileToString(certManagerResourceApi.getTruststore("PEM"), Charset.defaultCharset());
+            return Optional.of(FileUtils.readFileToString(certManagerResourceApi.getTruststore("PEM"), Charset.defaultCharset()));
+        } catch (ApiException ae) {
+            HttpStatus status = HttpStatus.resolve(ae.getCode());
+            if (status != null && status.is4xxClientError()) {
+                LOGGER.error("Couldn't get trust store from CM, though trust store validation is not a hard requirement, skipping.", ae);
+                return Optional.empty();
+            } else {
+                throw new CloudbreakException(ae);
+            }
         } catch (Exception e) {
             throw new CloudbreakException(e);
         }

@@ -53,5 +53,5 @@ public interface ClusterSecurityService {
 
     void rotateHostCertificates(String sshUser, KeyPair sshKeyPair, String subAltName) throws CloudbreakException;
 
-    String getTrustStore() throws CloudbreakException;
+    Optional<String> getTrustStoreForValidation() throws CloudbreakException;
 }

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import com.cloudera.api.swagger.BatchResourceApi;
+import com.cloudera.api.swagger.CertManagerResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.ToolsResourceApi;
 import com.cloudera.api.swagger.UsersResourceApi;
@@ -575,6 +577,30 @@ public class ClouderaManagerSecurityServiceTest {
         CloudbreakException exception = assertThrows(CloudbreakException.class, () -> underTest.rotateHostCertificates(null, null, null));
         // THEN exception
         assertThat(exception).hasMessage("Can't rotate the host certificates due to: Serious problem");
+    }
+
+    @Test
+    void testGetTrustStoreIfBadRequest() throws ClouderaManagerClientInitException, ApiException, CloudbreakException {
+        initTestInput("user");
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
+                stack.getCluster().getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_45)).thenReturn(apiClient);
+        CertManagerResourceApi certManagerResourceApi = mock(CertManagerResourceApi.class);
+        when(clouderaManagerApiFactory.getCertManagerResourceApi(any())).thenReturn(certManagerResourceApi);
+        when(certManagerResourceApi.getTruststore(any())).thenThrow(new ApiException(400, "bad"));
+
+        assertTrue(underTest.getTrustStoreForValidation().isEmpty());
+    }
+
+    @Test
+    void testGetTrustStoreIfBadGateway() throws ClouderaManagerClientInitException, ApiException {
+        initTestInput("user");
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
+                stack.getCluster().getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_45)).thenReturn(apiClient);
+        CertManagerResourceApi certManagerResourceApi = mock(CertManagerResourceApi.class);
+        when(clouderaManagerApiFactory.getCertManagerResourceApi(any())).thenReturn(certManagerResourceApi);
+        when(certManagerResourceApi.getTruststore(any())).thenThrow(new ApiException(500, "server issue"));
+
+        assertThrows(CloudbreakException.class, () -> underTest.getTrustStoreForValidation());
     }
 
     private Stack createStack(String userName) {

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,19 +43,23 @@ public class CMCAValidationService {
         try {
             StackDto stack = stackDtoService.getById(stackId);
             ClusterApi connector = clusterApiConnectors.getConnector(stack);
-            String trustStoreFromCM = connector.clusterSecurityService().getTrustStore();
-            String rootCertFromFMS = freeipaClientService.getRootCertificateByEnvironmentCrn(stack.getEnvironmentCrn());
-            List<X509Certificate> x509CertificatesFromCM = readPEMCertificatesFromString(trustStoreFromCM);
-            List<X509Certificate> x509CertificatesFromFMS = readPEMCertificatesFromString(rootCertFromFMS);
-            X509Certificate latestRootCertFromFMS = x509CertificatesFromFMS.stream()
-                    .min(Comparator.comparing(X509Certificate::getNotAfter, Comparator.nullsLast(Comparator.reverseOrder())))
-                    .orElseThrow(() -> new CloudbreakServiceException("FreeIPA root cert cannot be found!"));
-            X509Certificate cmcaCertificate = x509CertificatesFromCM.stream()
-                    .filter(cert -> cert.getSubjectX500Principal().getName().contains(stack.getResourceName()))
-                    .findFirst()
-                    .orElseThrow(() ->
-                            new CloudbreakServiceException(String.format("CM intermediate certificate cannot be found for stack %S", stack.getResourceName())));
-            cmcaCertificate.verify(latestRootCertFromFMS.getPublicKey());
+            Optional<String> trustStoreFromCM = connector.clusterSecurityService().getTrustStoreForValidation();
+            if (trustStoreFromCM.isPresent()) {
+                String rootCertFromFMS = freeipaClientService.getRootCertificateByEnvironmentCrn(stack.getEnvironmentCrn());
+                List<X509Certificate> x509CertificatesFromCM = readPEMCertificatesFromString(trustStoreFromCM.get());
+                List<X509Certificate> x509CertificatesFromFMS = readPEMCertificatesFromString(rootCertFromFMS);
+                X509Certificate latestRootCertFromFMS = x509CertificatesFromFMS.stream()
+                        .min(Comparator.comparing(X509Certificate::getNotAfter, Comparator.nullsLast(Comparator.reverseOrder())))
+                        .orElseThrow(() -> new CloudbreakServiceException("FreeIPA root cert cannot be found!"));
+                X509Certificate cmcaCertificate = x509CertificatesFromCM.stream()
+                        .filter(cert -> cert.getSubjectX500Principal().getName().contains(stack.getResourceName()))
+                        .findFirst()
+                        .orElseThrow(() -> new CloudbreakServiceException(String.format("CM intermediate certificate cannot be found for stack %S",
+                                stack.getResourceName())));
+                cmcaCertificate.verify(latestRootCertFromFMS.getPublicKey());
+            } else {
+                LOGGER.info("Couldn't get trust store from CM, thus skipping validation.");
+            }
         } catch (Exception e) {
             throw new CloudbreakServiceException(e);
         }
