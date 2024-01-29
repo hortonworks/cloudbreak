@@ -101,7 +101,7 @@ public class InternalCrnModifier {
         MDCBuilder.addTenant(accountId);
         Crn userCrn = Crn.fromString(userCrnString);
         Crn newUserCrn = Crn.copyWithDifferentAccountId(userCrn, accountId);
-        LOGGER.debug("Changing internal CRN to {}", newUserCrn);
+        LOGGER.trace("Changing internal CRN to {}", newUserCrn);
         createNewUser(newUserCrn);
         return newUserCrn.toString();
     }
