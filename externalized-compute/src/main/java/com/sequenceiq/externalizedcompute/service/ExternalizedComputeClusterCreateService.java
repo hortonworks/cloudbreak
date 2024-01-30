@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.DefaultApi;
@@ -33,6 +34,9 @@ import com.sequenceiq.externalizedcompute.util.TagUtil;
 public class ExternalizedComputeClusterCreateService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExternalizedComputeClusterCreateService.class);
+
+    @Value("${externalizedcompute.create.kubernetes.version:1.28}")
+    private String kubernetesVersion;
 
     @Inject
     private LiftieService liftieService;
@@ -75,7 +79,7 @@ public class ExternalizedComputeClusterCreateService {
 
         CommonClusterSpec spec = new CommonClusterSpec();
         CommonKubernetes kubernetes = new CommonKubernetes();
-        kubernetes.setVersion("1.25");
+        kubernetes.setVersion(kubernetesVersion);
         spec.kubernetes(kubernetes);
 
         DetailedEnvironmentResponse environment = environmentEndpoint.getByCrn(externalizedComputeCluster.getEnvironmentCrn());

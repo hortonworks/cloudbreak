@@ -15,15 +15,20 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.api.DefaultApi;
 import com.cloudera.model.CommonDeleteClusterResponse;
+import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.tag.CostTagging;
+import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.externalizedcompute.ApiException;
@@ -58,6 +63,18 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
     @Inject
     private LiftieService liftieService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
+    private CrnUserDetailsService crnUserDetailsService;
+
+    @Inject
+    private AccountTagService accountTagService;
+
+    @Inject
+    private CostTagging costTagging;
+
     @Override
     public Long getResourceIdByResourceCrn(String resourceCrn) {
         return externalizedComputeClusterRepository.findByResourceCrnAndAccountId(resourceCrn, ThreadBasedUserCrnProvider.getAccountId())
@@ -90,7 +107,7 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
         externalizedComputeCluster.setAccountId(userCrn.getAccountId());
         String crn = regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.EXTERNALIZED_COMPUTE, userCrn.getAccountId());
         externalizedComputeCluster.setResourceCrn(crn);
-        setTagsSafe(externalizedComputeClusterRequest.getTags(), externalizedComputeCluster);
+        setTagsSafe(environment, externalizedComputeClusterRequest.getTags(), externalizedComputeCluster);
         // TODO: add check if exists
         ExternalizedComputeCluster savedExternalizedComputeCluster = externalizedComputeClusterRepository.save(externalizedComputeCluster);
         LOGGER.info("Saved ExternalizedComputeCluster entity: {}", savedExternalizedComputeCluster);
@@ -147,8 +164,34 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
         return externalizedComputeClusterRepository.findAllByEnvironmentCrnAndAccountId(environmentCrn, accountId);
     }
 
-    private void setTagsSafe(Map<String, String> tags, ExternalizedComputeCluster externalizedComputeCluster) {
+    private void setTagsSafe(DetailedEnvironmentResponse environment, Map<String, String> userDefinedTags,
+            ExternalizedComputeCluster externalizedComputeCluster) {
         try {
+            CrnUser crnUser = crnUserDetailsService.loadUserByUsername(ThreadBasedUserCrnProvider.getUserCrn());
+            boolean internalTenant = entitlementService.internalTenant(ThreadBasedUserCrnProvider.getAccountId());
+            Map<String, String> tags = new HashMap<>();
+            if (environment.getTags().getUserDefined() != null) {
+                tags.putAll(environment.getTags().getUserDefined());
+            }
+            if (environment.getTags().getDefaults() != null) {
+                tags.putAll(environment.getTags().getDefaults());
+            }
+            CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder
+                .builder()
+                .withCreatorCrn(ThreadBasedUserCrnProvider.getUserCrn())
+                .withEnvironmentCrn(environment.getCrn())
+                .withPlatform(environment.getCloudPlatform())
+                .withAccountId(ThreadBasedUserCrnProvider.getAccountId())
+                .withResourceCrn(externalizedComputeCluster.getResourceCrn())
+                .withIsInternalTenant(internalTenant)
+                .withUserName(crnUser.getUsername())
+                .withAccountTags(accountTagService.list())
+                .withUserDefinedTags(userDefinedTags)
+                .build();
+
+            Map<String, String> prepareDefaultTags = costTagging.prepareDefaultTags(request);
+            tags.putAll(prepareDefaultTags);
+
             externalizedComputeCluster.setTags(new Json(Objects.requireNonNullElseGet(tags, HashMap::new)));
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("Can not convert tags", e);
