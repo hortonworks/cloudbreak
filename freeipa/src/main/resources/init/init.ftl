@@ -75,6 +75,10 @@ export CCM_V2_AGENT_HMAC_FOR_PRIVATE_KEY="${ccmV2AgentHmacForPrivateKey}"
 <#else>
 export IS_CCM_V2_JUMPGATE_ENABLED=false
 </#if>
+<#if secretEncryptionEnabled!false>
+export SECRET_ENCRYPTION_ENABLED=true
+export SECRET_ENCRYPTION_KEY_SOURCE="${secretEncryptionKeySource}"
+</#if>
 
 ${customUserData}
 

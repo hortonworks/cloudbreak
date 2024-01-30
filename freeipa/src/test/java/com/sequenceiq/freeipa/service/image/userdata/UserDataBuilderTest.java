@@ -1,12 +1,20 @@
 package com.sequenceiq.freeipa.service.image.userdata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -39,12 +47,16 @@ import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.CcmV2TlsType;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.freeipa.encryption.EncryptionUtil;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -59,6 +71,9 @@ class UserDataBuilderTest {
 
     @Mock
     private CcmV2TlsTypeDecider ccmV2TlsTypeDecider;
+
+    @Mock
+    private EncryptionUtil encryptionUtil;
 
     @InjectMocks
     private UserDataBuilder underTest;
@@ -183,4 +198,55 @@ class UserDataBuilderTest {
         assertEquals(expectedUserData, userData);
     }
 
+    @Test
+    @DisplayName("test if secret encryption is enabled, then it is reflected in the user data (boolean and key arn are passed, secrets are encrypted)")
+    void testBuildUserDataWithSecretEncryptionEnabled() {
+        configureEnvironment(true);
+        PlatformParameters platformParameters = mock(PlatformParameters.class);
+        ScriptParams scriptParams = mock(ScriptParams.class);
+        when(platformParameters.scriptParams()).thenReturn(scriptParams);
+        when(scriptParams.getDiskPrefix()).thenReturn("sd");
+        when(scriptParams.getStartLabel()).thenReturn(98);
+        when(encryptionUtil.encrypt(CloudPlatform.AWS, "pass", environment, "SALT_BOOT_PASSWORD"))
+                .thenReturn("encrypted-pass");
+
+        String userData = underTest.buildUserData(ACCOUNT_ID, environment, Platform.platform("AZURE"), "priv-key".getBytes(),
+                "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null);
+
+        verify(encryptionUtil, times(1))
+                .encrypt(eq(CloudPlatform.AWS), eq("pass"), eq(environment), eq("SALT_BOOT_PASSWORD"));
+        assertTrue(userData.contains("SALT_BOOT_PASSWORD=encrypted-pass"));
+        assertTrue(userData.contains("SECRET_ENCRYPTION_ENABLED=true"));
+        assertTrue(userData.contains("SECRET_ENCRYPTION_KEY_SOURCE=\"keyArn\""));
+    }
+
+    @Test
+    @DisplayName("test if secret encryption is disabled, then user data does not contain secret encryption related variables, and secrets are not encrypted")
+    void testBuildUserDataWithSecretEncryptionDisabled() {
+        configureEnvironment(false);
+        PlatformParameters platformParameters = mock(PlatformParameters.class);
+        ScriptParams scriptParams = mock(ScriptParams.class);
+        when(platformParameters.scriptParams()).thenReturn(scriptParams);
+        when(scriptParams.getDiskPrefix()).thenReturn("sd");
+        when(scriptParams.getStartLabel()).thenReturn(98);
+
+        String userData = underTest.buildUserData(ACCOUNT_ID, environment, Platform.platform("AZURE"), "priv-key".getBytes(),
+                "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null);
+
+        verify(encryptionUtil, never()).encrypt(any(), any(), any(), any());
+        assertTrue(userData.contains("SALT_BOOT_PASSWORD=pass"));
+        assertFalse(userData.contains("SECRET_ENCRYPTION_ENABLED"));
+        assertFalse(userData.contains("SECRET_ENCRYPTION_KEY_SOURCE"));
+    }
+
+    private void configureEnvironment(boolean secretEncryptionEnabled) {
+        ReflectionTestUtils.setField(underTest, "secretKeysAndNames", Map.of("saltBootPassword", "SALT_BOOT_PASSWORD"));
+        AwsDiskEncryptionParameters awsDiskEncryptionParameters = new AwsDiskEncryptionParameters();
+        awsDiskEncryptionParameters.setEncryptionKeyArn("keyArn");
+        AwsEnvironmentParameters awsEnvironmentParameters = new AwsEnvironmentParameters();
+        awsEnvironmentParameters.setAwsDiskEncryptionParameters(awsDiskEncryptionParameters);
+        environment.setCloudPlatform(CloudPlatform.AWS.name());
+        environment.setAws(awsEnvironmentParameters);
+        environment.setEnableSecretEncryption(secretEncryptionEnabled);
+    }
 }

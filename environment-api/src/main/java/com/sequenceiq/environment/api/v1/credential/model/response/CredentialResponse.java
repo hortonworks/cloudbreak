@@ -11,7 +11,11 @@ import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.credential.CredentialDescriptor;
 import com.sequenceiq.environment.api.doc.credential.CredentialModelDescription;
 import com.sequenceiq.environment.api.v1.credential.model.CredentialBase;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialResponseParameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.GcpCredentialParameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.mock.MockParameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.yarn.YarnParameters;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -133,6 +137,10 @@ public class CredentialResponse extends CredentialBase {
         this.accountId = accountId;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     @Override
     public String toString() {
         return super.toString() + ", " + "CredentialResponse{" +
@@ -145,5 +153,160 @@ public class CredentialResponse extends CredentialBase {
                 ", govCloud=" + govCloud +
                 ", type=" + type +
                 '}';
+    }
+
+    public static final class Builder {
+
+        private String cloudPlatform;
+
+        private AwsCredentialParameters aws;
+
+        private GcpCredentialParameters gcp;
+
+        private YarnParameters yarn;
+
+        private MockParameters mock;
+
+        private String description;
+
+        private String verificationStatusText;
+
+        private boolean verifyPermissions;
+
+        private boolean skipOrgPolicyDecisions;
+
+        private String name;
+
+        private SecretResponse attributes;
+
+        private AzureCredentialResponseParameters azure;
+
+        private String crn;
+
+        private String creator;
+
+        private String accountId;
+
+        private Long created;
+
+        private CredentialType type;
+
+        private Boolean govCloud;
+
+        private Builder() {
+        }
+
+        public Builder withCloudPlatform(String cloudPlatform) {
+            this.cloudPlatform = cloudPlatform;
+            return this;
+        }
+
+        public Builder withAws(AwsCredentialParameters aws) {
+            this.aws = aws;
+            return this;
+        }
+
+        public Builder withGcp(GcpCredentialParameters gcp) {
+            this.gcp = gcp;
+            return this;
+        }
+
+        public Builder withYarn(YarnParameters yarn) {
+            this.yarn = yarn;
+            return this;
+        }
+
+        public Builder withMock(MockParameters mock) {
+            this.mock = mock;
+            return this;
+        }
+
+        public Builder withDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder withVerificationStatusText(String verificationStatusText) {
+            this.verificationStatusText = verificationStatusText;
+            return this;
+        }
+
+        public Builder withVerifyPermissions(boolean verifyPermissions) {
+            this.verifyPermissions = verifyPermissions;
+            return this;
+        }
+
+        public Builder withSkipOrgPolicyDecisions(boolean skipOrgPolicyDecisions) {
+            this.skipOrgPolicyDecisions = skipOrgPolicyDecisions;
+            return this;
+        }
+
+        public Builder withName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder withAttributes(SecretResponse attributes) {
+            this.attributes = attributes;
+            return this;
+        }
+
+        public Builder withAzure(AzureCredentialResponseParameters azure) {
+            this.azure = azure;
+            return this;
+        }
+
+        public Builder withCrn(String crn) {
+            this.crn = crn;
+            return this;
+        }
+
+        public Builder withCreator(String creator) {
+            this.creator = creator;
+            return this;
+        }
+
+        public Builder withAccountId(String accountId) {
+            this.accountId = accountId;
+            return this;
+        }
+
+        public Builder withCreated(Long created) {
+            this.created = created;
+            return this;
+        }
+
+        public Builder withType(CredentialType type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder withGovCloud(Boolean govCloud) {
+            this.govCloud = govCloud;
+            return this;
+        }
+
+        public CredentialResponse build() {
+            CredentialResponse credentialResponse = new CredentialResponse();
+            credentialResponse.setCloudPlatform(cloudPlatform);
+            credentialResponse.setAws(aws);
+            credentialResponse.setGcp(gcp);
+            credentialResponse.setYarn(yarn);
+            credentialResponse.setMock(mock);
+            credentialResponse.setDescription(description);
+            credentialResponse.setVerificationStatusText(verificationStatusText);
+            credentialResponse.setVerifyPermissions(verifyPermissions);
+            credentialResponse.setSkipOrgPolicyDecisions(skipOrgPolicyDecisions);
+            credentialResponse.setName(name);
+            credentialResponse.setAttributes(attributes);
+            credentialResponse.setAzure(azure);
+            credentialResponse.setCrn(crn);
+            credentialResponse.setCreator(creator);
+            credentialResponse.setAccountId(accountId);
+            credentialResponse.setCreated(created);
+            credentialResponse.setType(type);
+            credentialResponse.setGovCloud(govCloud);
+            return credentialResponse;
+        }
     }
 }

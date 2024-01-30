@@ -177,4 +177,13 @@ public interface CloudConnector extends CloudPlatformAware {
      * @return the {@link ResourceVolumeConnector} object
      */
     ResourceVolumeConnector volumeConnector();
+
+    /**
+     * Access to the {@link CryptoConnector} object.
+     *
+     * @return the {@link CryptoConnector} object
+     */
+    default CryptoConnector cryptoConnector() {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
 }

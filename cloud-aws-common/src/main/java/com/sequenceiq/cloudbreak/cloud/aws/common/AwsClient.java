@@ -54,7 +54,6 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalanci
 import software.amazon.awssdk.services.iam.IamClient;
 import software.amazon.awssdk.services.iam.IamClientBuilder;
 import software.amazon.awssdk.services.kms.KmsClient;
-import software.amazon.awssdk.services.kms.KmsClientBuilder;
 import software.amazon.awssdk.services.pricing.PricingClient;
 import software.amazon.awssdk.services.pricing.PricingClientBuilder;
 import software.amazon.awssdk.services.rds.RdsClient;
@@ -180,11 +179,21 @@ public abstract class AwsClient {
     }
 
     public AmazonKmsClient createAWSKMS(AwsCredentialView awsCredential, String regionName) {
-        KmsClientBuilder kmsClientBuilder = KmsClient.builder()
+        KmsClient kmsClient = getAwsKmsClient(awsCredential, regionName);
+        return new AmazonKmsClient(proxy(kmsClient, awsCredential, regionName));
+    }
+
+    public KmsClient createKmsClient(AwsCredentialView awsCredential, String regionName) {
+        KmsClient kmsClient = getAwsKmsClient(awsCredential, regionName);
+        return proxy(kmsClient, awsCredential, regionName);
+    }
+
+    private KmsClient getAwsKmsClient(AwsCredentialView awsCredential, String regionName) {
+        return KmsClient.builder()
                 .httpClient(awsApacheClient.getApacheHttpClient())
                 .credentialsProvider(getCredentialProvider(awsCredential))
-                .region(Region.of(regionName));
-        return new AmazonKmsClient(proxy(kmsClientBuilder.build(), awsCredential, regionName));
+                .region(Region.of(regionName))
+                .build();
     }
 
     public AmazonElasticLoadBalancingClient createElasticLoadBalancingClient(AwsCredentialView awsCredential, String regionName) {
