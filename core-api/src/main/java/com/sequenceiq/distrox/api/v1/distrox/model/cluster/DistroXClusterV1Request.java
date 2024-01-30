@@ -30,7 +30,7 @@ public class DistroXClusterV1Request implements Serializable {
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
             message = "The username may only contain lowercase alphanumeric characters and hyphens, has to start with a letter and end with an " +
                     "alphanumeric character")
-    @Schema(description = StackModelDescription.USERNAME, required = true)
+    @Schema(description = StackModelDescription.USERNAME)
     private String userName;
 
     @Pattern.List({
@@ -38,7 +38,7 @@ public class DistroXClusterV1Request implements Serializable {
             @Pattern(regexp = "^.*[0-9].*$", message = "The password should contain at least one number.")
     })
     @Size(max = 100, min = 8, message = "The length of the password has to be in the range of 8 to 100 characters")
-    @Schema(description = StackModelDescription.PASSWORD, required = true)
+    @Schema(description = StackModelDescription.PASSWORD)
     private String password;
 
     @Schema(description = ClusterModelDescription.RDSCONFIG_NAMES)
