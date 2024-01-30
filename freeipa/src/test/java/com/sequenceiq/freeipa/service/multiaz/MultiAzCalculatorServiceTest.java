@@ -253,9 +253,10 @@ class MultiAzCalculatorServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.populateAvailabilityZones(stack, detailedEnvironmentResponse, instanceGroup));
 
-        assertEquals("Based on configured availability zones and instance type, " +
-                        "there are no availability zones for instance group master and instance type instance0. " +
-                        "Please configure at least one zone for Multi Az deployment", badRequestException.getMessage());
+        assertEquals("The westus2 region does not support Multi AZ configuration. " +
+                "Please check https://learn.microsoft.com/en-us/azure/reliability/availability-zones-service-support " +
+                "for more details. It is also possible that the given instance0 instances " +
+                "on master group are not supported in any specified [1, 2, 3] zones.", badRequestException.getMessage());
         verify(availabilityZoneConnector).getAvailabilityZones(any(), any(), any(), any());
     }
 

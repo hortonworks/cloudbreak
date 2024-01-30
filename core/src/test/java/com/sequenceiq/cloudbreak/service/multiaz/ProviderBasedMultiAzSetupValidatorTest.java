@@ -49,8 +49,9 @@ import com.sequenceiq.environment.api.v1.environment.model.response.LocationResp
 @ExtendWith(MockitoExtension.class)
 class ProviderBasedMultiAzSetupValidatorTest {
 
-    private static final String INVALID_NUMBER_OF_ZONES_PATTERN = "Based on configured availability zones and instance type, there are no availability zones " +
-                    "for instance group %s and instance type %s. Please configure at least one Availability zone for Multi Az deployment";
+    private static final String INVALID_NUMBER_OF_ZONES_PATTERN = "The aRegion region does not support Multi AZ configuration. " +
+            "Please check https://learn.microsoft.com/en-us/azure/reliability/availability-zones-service-support for more details. " +
+            "It is also possible that the given %s instances on %s group are not supported in any specified [1, 2] zones.";
 
     private static final String NO_AVAILABILITY_ZONE_CONFIGURED_ON_ENV = "No availability zone configured on the environment, " +
             "multi/targeted availability zone could not be requested.";
@@ -189,8 +190,8 @@ class ProviderBasedMultiAzSetupValidatorTest {
         underTest.validate(resultBuilder, stack);
 
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            verify(resultBuilder).error(String.format(INVALID_NUMBER_OF_ZONES_PATTERN, instanceGroup.getGroupName(),
-                    instanceGroup.getTemplate().getInstanceType()));
+            verify(resultBuilder).error(String.format(INVALID_NUMBER_OF_ZONES_PATTERN,
+                    instanceGroup.getTemplate().getInstanceType(), instanceGroup.getGroupName()));
         }
     }
 
