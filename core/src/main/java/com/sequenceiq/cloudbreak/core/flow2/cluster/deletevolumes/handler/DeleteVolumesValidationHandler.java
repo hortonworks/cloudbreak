@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Enums;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -74,7 +75,7 @@ public class DeleteVolumesValidationHandler extends ExceptionCatcherEventHandler
             }
         }
         if (!computeInstance) {
-            LOGGER.error("Deleting volumes flow is being stopped, as instance being scaled is not a compute instance.");
+            LOGGER.warn("Deleting volumes flow is being stopped, as instance being scaled is not a compute instance.");
             return new DeleteVolumesFailedEvent(
                     "BadRequestException: Instance group being scaled isn't a compute instance",
                     new BadRequestException("BadRequestException: Instance group being scaled isn't a compute instance"),
@@ -84,10 +85,27 @@ public class DeleteVolumesValidationHandler extends ExceptionCatcherEventHandler
                             && resource.getInstanceGroup().equals(requestGroup)
                             && resource.getResourceType().name().contains("VOLUMESET"))
                     .map(s -> cloudResourceConverter.convert(s)).collect(toList());
+            long numVolumesToDelete = cloudResourcesToBeDeleted.stream()
+                    .map(this::getVolumeSetAttributes)
+                    .map(VolumeSetAttributes::getVolumes)
+                    .flatMap(List::stream)
+                    .count();
+            if (numVolumesToDelete == 0) {
+                String errorMessage = String.format("BadRequestException: There are no volumes attached to %s instance group", requestGroup);
+                LOGGER.warn(errorMessage);
+                return new DeleteVolumesFailedEvent(
+                        errorMessage,
+                        new BadRequestException(errorMessage),
+                        stack.getId());
+            }
             String cloudPlatform = stack.getCloudPlatform();
             return new DeleteVolumesRequest(cloudResourcesToBeDeleted, stackDeleteVolumesRequest, cloudPlatform,
                         hostTemplateServiceComponents);
         }
+    }
+
+    private VolumeSetAttributes getVolumeSetAttributes(CloudResource volumeSet) {
+        return volumeSet.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
     }
 
     @Override

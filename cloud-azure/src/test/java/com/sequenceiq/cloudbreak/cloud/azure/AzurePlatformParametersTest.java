@@ -69,6 +69,11 @@ public class AzurePlatformParametersTest {
         assertTrue(underTest.specialParameters().getSpecialParameters().get(PlatformParametersConsts.DISK_TYPE_CHANGE_SUPPORTED));
     }
 
+    @Test
+    public void testDeleteDiskSupported() {
+        assertTrue(underTest.specialParameters().getSpecialParameters().get(PlatformParametersConsts.DELETE_VOLUMES_SUPPORTED));
+    }
+
     private InstanceGroupParameterRequest getRequestWithoutAs(String groupName) {
         InstanceGroupParameterRequest rq = new InstanceGroupParameterRequest();
         rq.setGroupName(groupName);

@@ -519,6 +519,27 @@ class StackCommonServiceTest {
     }
 
     @Test
+    public void testPutDeleteVolumesInWorkspaceFailureNotEntitled() {
+        Stack stack = mock(Stack.class);
+        StackView stackView = mock(StackView.class);
+        when(stackView.getId()).thenReturn(STACK_ID);
+        when(stackView.getResourceCrn()).thenReturn("CRN");
+        when(stackService.getByIdWithLists(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getStackViewByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stackView);
+        String errorMessage = "Deleting Disk for Azure is not enabled for this account";
+        doThrow(new BadRequestException(errorMessage)).when(verticalScalingValidatorService)
+                .validateEntitlementForDelete(stack);
+        StackDeleteVolumesRequest stackDeleteVolumesRequest = new StackDeleteVolumesRequest();
+        stackDeleteVolumesRequest.setStackId(1L);
+        stackDeleteVolumesRequest.setGroup("COMPUTE");
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.putDeleteVolumesInWorkspace(STACK_NAME,
+                ACCOUNT_ID, stackDeleteVolumesRequest));
+
+        assertEquals(errorMessage, exception.getMessage());
+    }
+
+    @Test
     void syncInWorkspaceTestWhenSuccess() {
         NameOrCrn nameOrCrn = NameOrCrn.ofName("myStack");
         StackDto stack = mock(StackDto.class);

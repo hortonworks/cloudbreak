@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -222,6 +224,13 @@ class EntitlementServiceTest {
     void isRhel8ImagePreferredWhenEnabledAndPreferred() {
         setUpUmsClient(true, "ENABLE_RHEL8_IMAGES", "PREFER_RHEL8_IMAGES");
         assertThat(underTest.isRhel8ImagePreferred(ACCOUNT_ID)).isTrue();
+    }
+
+    @ParameterizedTest()
+    @ValueSource(booleans = {true, false})
+    void testAzureDeleteDiskEnabled(boolean entitled) {
+        setUpUmsClient(entitled, "CDP_CB_AZURE_DELETE_DISK", "CDP_CB_AZURE_DELETE_DISK");
+        assertEquals(entitled, underTest.azureDeleteDiskEnabled(ACCOUNT_ID));
     }
 
     @Test

@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureAvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -42,6 +45,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -54,6 +58,8 @@ import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProv
 
 @ExtendWith(MockitoExtension.class)
 public class VerticalScalingValidatorServiceTest {
+
+    private static final String RESOURCE_CRN = "crn:cdp:datahub:us-west-1:default:cluster:b30acd9c-ef27-4ef5-9adf-205e87bd61f6";
 
     @Mock
     private CloudParameterService cloudParameterService;
@@ -72,6 +78,9 @@ public class VerticalScalingValidatorServiceTest {
 
     @Mock
     private ProviderBasedMultiAzSetupValidator providerBasedMultiAzSetupValidator;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @InjectMocks
     private VerticalScalingValidatorService underTest;
@@ -326,6 +335,28 @@ public class VerticalScalingValidatorServiceTest {
         verify(credentialToExtendedCloudCredentialConverter, times(0)).convert(any());
         verify(cloudParameterService, times(0)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
         verify(verticalScaleInstanceProvider, never()).validateInstanceTypeForVerticalScaling(any(), any(), isNull(), any());
+    }
+
+    @ParameterizedTest()
+    @EnumSource(CloudPlatform.class)
+    public void testValidateEntitlementForDelete(CloudPlatform cloudPlatform) {
+        when(stack.getCloudPlatform()).thenReturn(cloudPlatform.name());
+        if (cloudPlatform == CloudPlatform.AZURE) {
+            when(stack.getResourceCrn()).thenReturn(RESOURCE_CRN);
+            when(entitlementService.azureDeleteDiskEnabled("default")).thenReturn(true);
+        }
+        underTest.validateEntitlementForDelete(stack);
+    }
+
+    @Test
+    public void testValidateEntitlementForDeleteThrowsException() {
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AZURE.name());
+        when(stack.getResourceCrn()).thenReturn(RESOURCE_CRN);
+        when(entitlementService.azureDeleteDiskEnabled("default")).thenReturn(false);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
+            underTest.validateEntitlementForDelete(stack);
+        });
+        assertEquals("Deleting Disk for Azure is not enabled for this account", badRequestException.getMessage());
     }
 
     private Credential credential() {

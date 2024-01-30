@@ -497,6 +497,7 @@ public class StackCommonService {
 
     private void validateDeleteVolumesRequest(Stack stack, StackDeleteVolumesRequest deleteRequest) {
         verticalScalingValidatorService.validateProviderForDelete(stack, "Deleting volumes", false);
+        verticalScalingValidatorService.validateEntitlementForDelete(stack);
         verticalScalingValidatorService.validateInstanceTypeForDeletingDisks(stack, deleteRequest);
     }
 

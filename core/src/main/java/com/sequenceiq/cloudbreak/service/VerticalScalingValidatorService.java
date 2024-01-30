@@ -14,6 +14,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
@@ -22,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -61,6 +64,9 @@ public class VerticalScalingValidatorService {
 
     @Inject
     private ProviderBasedMultiAzSetupValidator providerBasedMultiAzSetupValidator;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public void validateProviderForDelete(Stack stack, String message, boolean checkStackStopped) {
         if (!cloudParameterCache.isDeleteVolumesSupported(stack.getCloudPlatform())) {
@@ -170,6 +176,13 @@ public class VerticalScalingValidatorService {
                             .map(InstanceGroup::getGroupName)
                             .collect(Collectors.joining(", ")))
             );
+        }
+    }
+
+    public void validateEntitlementForDelete(Stack stack) {
+        if (CloudPlatform.valueOf(stack.getCloudPlatform()) == CloudPlatform.AZURE
+                && !entitlementService.azureDeleteDiskEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId())) {
+            throw new BadRequestException("Deleting Disk for Azure is not enabled for this account");
         }
     }
 }
