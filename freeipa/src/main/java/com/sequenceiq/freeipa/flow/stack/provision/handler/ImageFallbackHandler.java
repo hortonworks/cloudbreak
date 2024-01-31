@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -53,6 +54,7 @@ public class ImageFallbackHandler extends ExceptionCatcherEventHandler<ImageFall
     @Override
     protected Selectable doAccept(HandlerEvent<ImageFallbackRequest> event) {
         Long stackId = event.getData().getResourceId();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Stack stack = stackService.getStackById(stackId);
         ImageEntity currentImage = imageService.getByStack(stack);
         if (!CloudPlatform.AZURE.name().equals(stack.getCloudPlatform())) {
@@ -60,21 +62,22 @@ public class ImageFallbackHandler extends ExceptionCatcherEventHandler<ImageFall
                     currentImage.getImageName());
             LOGGER.warn(msg);
             return new ImageFallbackFailed(stackId, new CloudbreakServiceException(msg));
-        } else if (entitlementService.azureOnlyMarketplaceImagesEnabled(stack.getAccountId())) {
+        }
+        if (entitlementService.azureOnlyMarketplaceImagesEnabled(accountId)) {
             String message = String.format("Azure Marketplace image terms were not accepted, cannot start instances with image: %s. " +
-                            "Fallback to VHD image is not possible, only Azure Marketplace images allowed. " +
-                            "Please accept image terms or turn on automatic image terms acceptance.",
+                    "Fallback to VHD image is not possible, only Azure Marketplace images allowed. " +
+                    "Please accept image terms or turn on automatic image terms acceptance.",
                     currentImage.getImageName()
             );
             return new ImageFallbackFailed(stackId, new CloudbreakServiceException(message));
-        } else {
-            try {
-                imageFallbackService.performImageFallback(currentImage, stack);
-                return new ImageFallbackSuccess(stackId);
-            } catch (Exception e) {
-                LOGGER.error("Image fallback failed", e);
-                return new ImageFallbackFailed(stackId, e);
-            }
         }
+        try {
+            imageFallbackService.performImageFallback(currentImage, stack);
+        } catch (Exception e) {
+            LOGGER.error("Image fallback failed", e);
+            return new ImageFallbackFailed(stackId, e);
+        }
+
+        return new ImageFallbackSuccess(stackId);
     }
 }
