@@ -2,11 +2,13 @@ package com.sequenceiq.cloudbreak.service.upgrade.image;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,6 +30,11 @@ class CdhPackageLocationFilterTest {
 
     @Mock
     private Image image;
+
+    @BeforeEach
+    public void setUp() {
+        lenient().when(image.getOsType()).thenReturn("redhat7");
+    }
 
     @Test
     public void testImageNull() {
@@ -63,7 +70,6 @@ class CdhPackageLocationFilterTest {
     @Test
     public void testCurrentImageOsTypeEmpty() {
         when(image.getStackDetails()).thenReturn(new ImageStackDetails("1", new StackRepoDetails(Map.of(), Map.of()), "1"));
-        when(imageFilterParams.getCurrentImage()).thenReturn(createModelImage(" "));
 
         assertFalse(underTest.filterImage(image, imageFilterParams));
     }
@@ -71,7 +77,6 @@ class CdhPackageLocationFilterTest {
     @Test
     public void testOsTypeMissing() {
         when(image.getStackDetails()).thenReturn(new ImageStackDetails("1", new StackRepoDetails(Map.of(), Map.of()), "1"));
-        when(imageFilterParams.getCurrentImage()).thenReturn(createModelImage("redhat7"));
 
         assertFalse(underTest.filterImage(image, imageFilterParams));
     }
@@ -79,7 +84,6 @@ class CdhPackageLocationFilterTest {
     @Test
     public void testNotMatching() {
         when(image.getStackDetails()).thenReturn(new ImageStackDetails("1", new StackRepoDetails(Map.of("redhat7", "http://random.org/asdf/"), Map.of()), "1"));
-        when(imageFilterParams.getCurrentImage()).thenReturn(createModelImage("redhat7"));
 
         assertFalse(underTest.filterImage(image, imageFilterParams));
     }
@@ -88,12 +92,7 @@ class CdhPackageLocationFilterTest {
     public void testMatching() {
         when(image.getStackDetails())
                 .thenReturn(new ImageStackDetails("1", new StackRepoDetails(Map.of("redhat7", "http://archive.cloudera.com/asdf/"), Map.of()), "1"));
-        when(imageFilterParams.getCurrentImage()).thenReturn(createModelImage("redhat7"));
 
         assertTrue(underTest.filterImage(image, imageFilterParams));
-    }
-
-    private com.sequenceiq.cloudbreak.cloud.model.Image createModelImage(String osType) {
-        return new com.sequenceiq.cloudbreak.cloud.model.Image(null, null, null, osType, null, null, null, null, null, null);
     }
 }

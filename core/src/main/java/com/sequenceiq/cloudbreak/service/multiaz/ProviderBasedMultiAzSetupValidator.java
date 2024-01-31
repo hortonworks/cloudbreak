@@ -143,9 +143,13 @@ public class ProviderBasedMultiAzSetupValidator {
                         instanceType, region.getRegionName(), availabilityZones);
                 if (CollectionUtils.isEmpty(availabilityZones)) {
                     LOGGER.warn("There are no availability zones configured");
-                    validationBuilder.error(String.format("Based on configured availability zones and instance type, there are no availability zones " +
-                            "for instance group %s and instance type %s. Please configure at least one Availability zone for Multi Az deployment",
-                            groupName, instanceType));
+                    validationBuilder.error(String.format("The %s region does not support Multi AZ configuration. " +
+                                    "Please check https://learn.microsoft.com/en-us/azure/reliability/availability-zones-service-support for more details. " +
+                                    "It is also possible that the given %s instances on %s group are not supported in any specified %s zones.",
+                            region.getRegionName(),
+                            instanceType,
+                            groupName,
+                            environmentZones.stream().sorted().collect(Collectors.toList())));
                 }
             } else {
                 LOGGER.debug("Validation is disabled because either the stack is not multi-AZ: '{}' or the zones set to check is empty: '{}'",

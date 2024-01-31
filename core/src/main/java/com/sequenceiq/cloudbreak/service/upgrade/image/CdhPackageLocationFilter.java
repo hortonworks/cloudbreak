@@ -14,22 +14,21 @@ public class CdhPackageLocationFilter implements PackageLocationFilter {
 
     @Override
     public boolean filterImage(Image image, ImageFilterParams imageFilterParams) {
-        if (isRelevantFieldNull(image, imageFilterParams.getCurrentImage())) {
+        if (isRelevantFieldNull(image)) {
             LOGGER.debug("Image or some part of it is null: {}", image);
             return false;
         } else {
-            String repoUrl = image.getStackDetails().getRepo().getStack().getOrDefault(imageFilterParams.getCurrentImage().getOsType(), "");
+            String repoUrl = image.getStackDetails().getRepo().getStack().getOrDefault(image.getOsType(), "");
             LOGGER.debug("Matching URL: [{}]", repoUrl);
             return URL_PATTERN.matcher(repoUrl).find();
         }
     }
 
-    private boolean isRelevantFieldNull(Image image, com.sequenceiq.cloudbreak.cloud.model.Image currentImage) {
+    private boolean isRelevantFieldNull(Image image) {
         return image == null
                 || image.getStackDetails() == null
                 || image.getStackDetails().getRepo() == null
                 || image.getStackDetails().getRepo().getStack() == null
-                || currentImage == null
-                || StringUtils.isBlank(currentImage.getOsType());
+                || StringUtils.isBlank(image.getOsType());
     }
 }

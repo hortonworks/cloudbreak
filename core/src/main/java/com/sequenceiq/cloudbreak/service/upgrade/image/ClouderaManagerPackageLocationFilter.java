@@ -14,12 +14,11 @@ public class ClouderaManagerPackageLocationFilter implements PackageLocationFilt
 
     @Override
     public boolean filterImage(Image image, ImageFilterParams imageFilterParams) {
-        com.sequenceiq.cloudbreak.cloud.model.Image currentImage = imageFilterParams.getCurrentImage();
-        if (image == null || image.getRepo() == null || currentImage == null || StringUtils.isBlank(currentImage.getOsType())) {
+        if (image == null || image.getRepo() == null || StringUtils.isBlank(image.getOsType())) {
             LOGGER.debug("Image or repo is null: {}", image);
             return false;
         } else {
-            String repoUrl = image.getRepo().getOrDefault(currentImage.getOsType(), "");
+            String repoUrl = image.getRepo().getOrDefault(image.getOsType(), "");
             LOGGER.debug("Matching URL: [{}]", repoUrl);
             return URL_PATTERN.matcher(repoUrl).find();
         }
