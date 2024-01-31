@@ -14,7 +14,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -54,7 +53,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.controller.validation.ParametersValidator;
@@ -83,6 +81,7 @@ import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.multiaz.DataLakeMultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
+import com.sequenceiq.cloudbreak.service.recipe.RecipeValidatorService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -208,30 +207,13 @@ public class StackCreatorServiceTest {
     @Mock
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
+    @Mock
+    private RecipeValidatorService recipeValidatorService;
+
     @BeforeEach
     void before() {
         underTestSpy = spy(new StackCreatorService());
         MockitoAnnotations.openMocks(this);
-    }
-
-    @Test
-    public void shouldThrowBadRequestWhenRecipeIsMissing() {
-        User user = new User();
-        Workspace workspace = new Workspace();
-        workspace.setId(WORKSPACE_ID);
-        StackV4Request stackRequest = new StackV4Request();
-        InstanceGroupV4Request instanceGroupV4Request = new InstanceGroupV4Request();
-        instanceGroupV4Request.setName(INSTANCE_GROUP);
-        instanceGroupV4Request.setRecipeNames(Set.of(RECIPE_NAME));
-        stackRequest.setInstanceGroups(List.of(instanceGroupV4Request));
-
-        doNothing().when(nodeCountLimitValidator).validateProvision(any());
-        doThrow(new NotFoundException("missing recipe"))
-                .when(recipeService).get(NameOrCrn.ofName(RECIPE_NAME), WORKSPACE_ID);
-
-        assertThrows(BadRequestException.class, () ->
-                        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, false)),
-                "The given recipe does not exist for the instance group \"INSTANCE_GROUP\": RECIPE_NAME");
     }
 
     @Test
@@ -253,7 +235,7 @@ public class StackCreatorServiceTest {
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, false)),
                 "Cluster already exists: STACK_NAME");
 
-        verify(recipeService).get(NameOrCrn.ofName(RECIPE_NAME), WORKSPACE_ID);
+        verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
         verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
     }
 

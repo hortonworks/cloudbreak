@@ -280,6 +280,10 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements C
         return recipeViewRepository.findAllResourceCrnsByNamesAndTenantId(resourceNames, ThreadBasedUserCrnProvider.getAccountId());
     }
 
+    public Set<String> getResourceNamesByNamesAndWorkspaceId(List<String> resourceNames, long workspaceId) {
+        return recipeViewRepository.findAllNamesByNamesAndWorkspaceId(resourceNames, workspaceId);
+    }
+
     @Override
     public AuthorizationResourceType getSupportedAuthorizationResourceType() {
         return AuthorizationResourceType.RECIPE;
