@@ -18,7 +18,8 @@ public class BlueprintUpgradeOptionCondition {
         if (imageFilterParams.isLockComponents()) {
             return createResult(upgradeOption.isOsUpgradeEnabled(), "The OS upgrade is not enabled for this blueprint.");
         } else if (imageFilterParams.isRollingUpgradeEnabled()) {
-            return createResult(validateForRollingUpgrade(upgradeOption), "The rolling upgrade is not enabled for this blueprint");
+            return createResult(validateForRollingUpgrade(upgradeOption), "Rolling upgrade is not supported for this cluster. For details please see the rolling"
+                    + " upgrade documentation. To check whether rolling upgrade could be enabled for this cluster please reach out to Cloudera Support.");
         } else {
             return new BlueprintValidationResult(true);
         }

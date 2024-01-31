@@ -26,7 +26,8 @@ class BlueprintUpgradeOptionConditionTest {
 
     private static final String OS_UPGRADE_ERROR_MESSAGE = "The OS upgrade is not enabled for this blueprint.";
 
-    private static final String ROLLING_UPGRADE_ERROR_MESSAGE = "The rolling upgrade is not enabled for this blueprint";
+    private static final String ROLLING_UPGRADE_ERROR_MESSAGE = "Rolling upgrade is not supported for this cluster. For details please see the rolling upgrade "
+            + "documentation. To check whether rolling upgrade could be enabled for this cluster please reach out to Cloudera Support.";
 
     @InjectMocks
     private BlueprintUpgradeOptionCondition underTest;
