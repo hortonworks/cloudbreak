@@ -28,8 +28,6 @@ public class ScalingPolicyBase implements Json {
     @Schema(description = ScalingPolicyJsonProperties.HOSTGROUP)
     @NotEmpty
     @Size(max = 250)
-    @Pattern(regexp = "(^[a-zA-Z][-a-zA-Z0-9]*$)",
-            message = "The hostGroup can only contain alphanumeric characters and hyphens and has to start with an alphabetic character")
     private String hostGroup;
 
     public String getName() {
