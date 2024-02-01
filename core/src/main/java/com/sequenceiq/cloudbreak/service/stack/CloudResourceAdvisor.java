@@ -358,33 +358,7 @@ public class CloudResourceAdvisor {
             return new AutoscaleRecommendation(Set.of(), Set.of());
         }
 
-        AutoscaleRecommendation autoscaleRecommendation = blueprintTextProcessor.recommendAutoscale(blueprintVersion, entitlements);
-
-        if (autoscaleRecommendation.getTimeBasedHostGroups().isEmpty()) {
-            Set<String> autoscaleGroups = filterHostGroupByPredicate(blueprintTextProcessor, this::fallbackTimeBasedAutoscaleFilter);
-            if (!autoscaleGroups.isEmpty()) {
-                autoscaleRecommendation.setTimeBasedHostGroups(autoscaleGroups);
-            }
-        }
-
-        if (autoscaleRecommendation.getLoadBasedHostGroups().isEmpty()) {
-            Set<String> autoscaleGroups = filterHostGroupByPredicate(blueprintTextProcessor, this::fallbackLoadBasedAutoscaleFilter);
-            if (!autoscaleGroups.isEmpty()) {
-                autoscaleRecommendation.setLoadBasedHostGroups(autoscaleGroups);
-            }
-        }
-
-        return autoscaleRecommendation;
-    }
-
-    private boolean fallbackTimeBasedAutoscaleFilter(String hostGroupName) {
-        String lowerCaseName = hostGroupName.toLowerCase(Locale.ROOT);
-        return lowerCaseName.contains("compute");
-    }
-
-    private boolean fallbackLoadBasedAutoscaleFilter(String hostGroupName) {
-        String lowerCaseName = hostGroupName.toLowerCase(Locale.ROOT);
-        return lowerCaseName.contains("compute");
+        return blueprintTextProcessor.recommendAutoscale(blueprintVersion, entitlements);
     }
 
     private Map<String, InstanceCount> recommendInstanceCounts(BlueprintTextProcessor blueprintProcessor) {

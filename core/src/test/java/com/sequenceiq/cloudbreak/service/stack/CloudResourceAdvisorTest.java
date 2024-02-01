@@ -86,6 +86,18 @@ public class CloudResourceAdvisorTest {
     }
 
     @Test
+    public void testRecommendAutoscaleWhenComputeHasBlackListedRole() {
+        when(blueprintTextProcessor.getVersion()).thenReturn(Optional.of(VERSION_7_2_1));
+        when(entitlementService.getEntitlements(anyString())).thenReturn(Collections.emptyList());
+        Blueprint blueprint = createBlueprint();
+        when(blueprintTextProcessorFactory.createBlueprintTextProcessor("{\"Blueprints\":{123:2}}")).thenReturn(blueprintTextProcessor);
+        when(blueprintTextProcessor.recommendAutoscale(any(), any())).thenReturn(new AutoscaleRecommendation(Set.of(), Set.of()));
+        when(blueprintService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(blueprint);
+        assertEquals(new AutoscaleRecommendation(Set.of(), Set.of()),
+                underTest.getAutoscaleRecommendation(workspace.getId(), TEST_BLUEPRINT_NAME));
+    }
+
+    @Test
     public void testReturnEmptyScaleRecommendationForBlueprintWhenCloudManagerVersionLessThanEqualTo720() {
         when(blueprintTextProcessor.getVersion()).thenReturn(java.util.Optional.of(VERSION_7_2_0));
         when(entitlementService.getEntitlements(anyString())).thenReturn(Collections.emptyList());
