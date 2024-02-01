@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackCollectResourcesRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.action.FreeIpaDownscaleActions;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
@@ -38,8 +39,8 @@ public class RebuildCollectResourcesAction extends AbstractRebuildAction<StackEv
 
     @Override
     protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+        stackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.REBUILD_IN_PROGRESS, "Collecting resources");
         List<CloudResource> cloudResources = resourceService.getAllCloudResource(context.getStack());
-        // TODO check if this right
         List<CloudInstance> cloudInstances = context.getStack().getAllInstanceMetaDataList().stream()
                 .filter(im -> !im.isTerminated())
                 .map(instanceMetaData -> instanceConverter.convert(instanceMetaData))

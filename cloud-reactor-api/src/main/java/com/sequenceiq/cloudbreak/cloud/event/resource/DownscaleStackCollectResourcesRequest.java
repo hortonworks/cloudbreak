@@ -28,4 +28,12 @@ public class DownscaleStackCollectResourcesRequest extends CloudStackRequest<Dow
     public List<CloudInstance> getInstances() {
         return instances;
     }
+
+    @Override
+    public String toString() {
+        return "DownscaleStackCollectResourcesRequest{" +
+                "cloudResources=" + cloudResources +
+                ", instances=" + instances +
+                "} " + super.toString();
+    }
 }

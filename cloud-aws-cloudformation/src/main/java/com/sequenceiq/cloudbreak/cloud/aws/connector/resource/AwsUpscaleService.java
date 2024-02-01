@@ -206,39 +206,42 @@ public class AwsUpscaleService {
             Map<String, Group> desiredAutoscalingGroupsByName,
             Map<String, Integer> originalAutoScalingGroupsBySize,
             Exception originalException) {
-        LOGGER.info("Recover original state of the autoscaling group", originalException);
-        LOGGER.debug("Collecting info about desired and achieved instance counts");
+        LOGGER.info("Recover original state of the autoscaling group. Collecting info about desired and achieved instance counts", originalException);
 
         try {
             awsAutoScalingService.suspendAutoScaling(ac, stack);
-            List<Instance> instancesFromASGs = getInstancesInAutoscalingGroups(amazonASClient, desiredAutoscalingGroupsByName.keySet());
-            LOGGER.info("Instances from ASGs: {}", instancesFromASGs);
-            List<String> knownInstanceIdsByCloudbreak = getKnownInstancesByCloudbreak(stack);
-            LOGGER.info("Known instance ids by cloudbreak: {}", knownInstanceIdsByCloudbreak);
-            List<String> unknownInstancesByCloudbreak = getUnknownInstancesFromASGs(instancesFromASGs, knownInstanceIdsByCloudbreak);
-            LOGGER.info("Unknown instances by cloudbreak: {}", unknownInstancesByCloudbreak);
-            if (!unknownInstancesByCloudbreak.isEmpty()) {
-                for (String unknownInstance : unknownInstancesByCloudbreak) {
-                    LOGGER.info("Terminate unknown instance: {}", unknownInstance);
-                    try {
-                        awsAutoScalingService.terminateInstance(amazonASClient, unknownInstance);
-                    } catch (AwsServiceException e) {
-                        if (e.getMessage().contains("Instance Id not found")) {
-                            LOGGER.info("{} was not found on AWS, it was terminated previously", unknownInstance, e);
-                        } else {
-                            throw e;
+            if (desiredAutoscalingGroupsByName.isEmpty()) {
+                throw new CloudConnectorException("'Desired autoscaling groups' is empty, cannot decide what to recover!");
+            } else {
+                List<Instance> instancesFromASGs = getInstancesInAutoscalingGroups(amazonASClient, desiredAutoscalingGroupsByName.keySet());
+                LOGGER.info("Instances from ASGs: {}", instancesFromASGs);
+                List<String> knownInstanceIdsByCloudbreak = getKnownInstancesByCloudbreak(stack);
+                LOGGER.info("Known instance ids by cloudbreak: {}", knownInstanceIdsByCloudbreak);
+                List<String> unknownInstancesByCloudbreak = getUnknownInstancesFromASGs(instancesFromASGs, knownInstanceIdsByCloudbreak);
+                LOGGER.info("Unknown instances by cloudbreak: {}", unknownInstancesByCloudbreak);
+                if (!unknownInstancesByCloudbreak.isEmpty()) {
+                    for (String unknownInstance : unknownInstancesByCloudbreak) {
+                        LOGGER.info("Terminate unknown instance: {}", unknownInstance);
+                        try {
+                            awsAutoScalingService.terminateInstance(amazonASClient, unknownInstance);
+                        } catch (AwsServiceException e) {
+                            if (e.getMessage().contains("Instance Id not found")) {
+                                LOGGER.info("{} was not found on AWS, it was terminated previously", unknownInstance, e);
+                            } else {
+                                throw e;
+                            }
                         }
                     }
                 }
-            }
-            for (Entry<String, Group> desiredAutoscalingGroup : desiredAutoscalingGroupsByName.entrySet()) {
-                String autoscalingGroupName = desiredAutoscalingGroup.getKey();
-                Integer originalInstanceSizeForTheGroup = originalAutoScalingGroupsBySize.get(autoscalingGroupName);
-                LOGGER.info("Original instance size for the group: {}", originalInstanceSizeForTheGroup);
-                Integer desiredInstanceSize = desiredAutoscalingGroup.getValue().getInstancesSize();
-                if (originalInstanceSizeForTheGroup < desiredInstanceSize) {
-                    LOGGER.info("Restore original instance size [{}] for autoscaling group: {}", originalInstanceSizeForTheGroup, autoscalingGroupName);
-                    awsAutoScalingService.updateAutoscalingGroup(amazonASClient, autoscalingGroupName, originalInstanceSizeForTheGroup);
+                for (Entry<String, Group> desiredAutoscalingGroup : desiredAutoscalingGroupsByName.entrySet()) {
+                    String autoscalingGroupName = desiredAutoscalingGroup.getKey();
+                    Integer originalInstanceSizeForTheGroup = originalAutoScalingGroupsBySize.get(autoscalingGroupName);
+                    LOGGER.info("Original instance size for the group: {}", originalInstanceSizeForTheGroup);
+                    Integer desiredInstanceSize = desiredAutoscalingGroup.getValue().getInstancesSize();
+                    if (originalInstanceSizeForTheGroup < desiredInstanceSize) {
+                        LOGGER.info("Restore original instance size [{}] for autoscaling group: {}", originalInstanceSizeForTheGroup, autoscalingGroupName);
+                        awsAutoScalingService.updateAutoscalingGroup(amazonASClient, autoscalingGroupName, originalInstanceSizeForTheGroup);
+                    }
                 }
             }
         } catch (RuntimeException recoverFailedException) {

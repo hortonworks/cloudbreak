@@ -4,6 +4,8 @@ import static com.sequenceiq.environment.environment.EnvironmentStatus.ENV_STOPP
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_DELETED_ON_PROVIDER_SIDE;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_DELETE_IN_PROGRESS;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_REBUILD_FAILED;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_REBUILD_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_UNHEALTHY;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_UNREACHABLE;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_FREEIPA_FAILED;
@@ -28,6 +30,8 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.MA
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.MODIFY_PROXY_CONFIG_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.MODIFY_PROXY_CONFIG_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.MODIFY_PROXY_CONFIG_REQUESTED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REBUILD_FAILED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REBUILD_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REPAIR_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.REQUESTED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STACK_AVAILABLE;
@@ -103,7 +107,9 @@ public class EnvironmentSyncService {
             Map.entry(UNREACHABLE, FREEIPA_UNREACHABLE),
             Map.entry(UNHEALTHY, FREEIPA_UNHEALTHY),
             Map.entry(UNKNOWN, FREEIPA_UNHEALTHY),
-            Map.entry(UPGRADE_FAILED, EnvironmentStatus.AVAILABLE)
+            Map.entry(UPGRADE_FAILED, EnvironmentStatus.AVAILABLE),
+            Map.entry(REBUILD_IN_PROGRESS, FREEIPA_REBUILD_IN_PROGRESS),
+            Map.entry(REBUILD_FAILED, FREEIPA_REBUILD_FAILED)
     );
 
     private final FreeIpaService freeIpaService;

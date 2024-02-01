@@ -86,6 +86,7 @@ import com.sequenceiq.freeipa.flow.freeipa.rebuild.handler.RebuildValidateHealth
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.handler.ValidateBackupHandler;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.handler.FreeipaUpscaleStackHandler;
 import com.sequenceiq.freeipa.flow.stack.provision.handler.ClusterProxyRegistrationHandler;
+import com.sequenceiq.freeipa.flow.stack.termination.action.TerminationService;
 import com.sequenceiq.freeipa.service.BootstrapService;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaCloudStorageValidationService;
@@ -96,6 +97,7 @@ import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaPostInstallService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @ActiveProfiles("integration-test")
@@ -168,6 +170,12 @@ class RebuildFlowIntegrationTest {
 
     @MockBean
     private FreeIpaPostInstallService freeIpaPostInstallService;
+
+    @MockBean
+    private StackUpdater stackUpdater;
+
+    @MockBean
+    private TerminationService terminationService;
 
     @BeforeEach
     public void setup() {

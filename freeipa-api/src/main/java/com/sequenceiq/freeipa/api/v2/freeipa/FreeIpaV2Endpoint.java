@@ -28,5 +28,6 @@ public interface FreeIpaV2Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = FreeIpaOperationDescriptions.REBUILD, description = FreeIpaNotes.FREEIPA_NOTES, operationId = "rebuildV2",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    // TODO revisit return value
     DescribeFreeIpaResponse rebuildv2(@Valid RebuildV2Request request) throws Exception;
 }

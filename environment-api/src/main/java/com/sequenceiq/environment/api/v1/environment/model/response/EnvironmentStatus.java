@@ -80,6 +80,8 @@ public enum EnvironmentStatus {
     FREEIPA_DELETED_ON_PROVIDER_SIDE("FreeIPA deleted on cloud provider side"),
     FREEIPA_UNHEALTHY("FreeIPA is unhealthy"),
     FREEIPA_UNREACHABLE("FreeIPA is unreachable"),
+    FREEIPA_REBUILD_IN_PROGRESS("Rebuilding FreeIPA"),
+    FREEIPA_REBUILD_FAILED("Rebuilding FreeIPA failed"),
 
     LOAD_BALANCER_ENV_UPDATE_STARTED("Starting load balancer update for environment"),
     LOAD_BALANCER_ENV_UPDATE_FAILED("Failed to update environment with load balancer"),

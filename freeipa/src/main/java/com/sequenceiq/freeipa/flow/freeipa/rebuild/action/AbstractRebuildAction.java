@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -27,8 +28,15 @@ import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
 public abstract class AbstractRebuildAction<P extends Payload> extends AbstractStackAction<FreeIpaRebuildState, FreeIpaRebuildFlowEvent, StackContext, P> {
+
+    private static final String INSTANCE_TO_RESTORE = "INSTANCE_TO_RESTORE";
+
+    private static final String FULL_BACKUP_LOCATION = "FULL_BACKUP_LOCATION";
+
+    private static final String DATA_BACKUP_LOCATION = "DATA_BACKUP_LOCATION";
 
     @Inject
     private StackService stackService;
@@ -41,6 +49,9 @@ public abstract class AbstractRebuildAction<P extends Payload> extends AbstractS
 
     @Inject
     private CredentialService credentialService;
+
+    @Inject
+    private StackUpdater stackUpdater;
 
     protected AbstractRebuildAction(Class<P> payloadClass) {
         super(payloadClass);
@@ -72,4 +83,31 @@ public abstract class AbstractRebuildAction<P extends Payload> extends AbstractS
         return new RebuildFailureEvent(payload.getResourceId(), ex);
     }
 
+    protected void setInstanceToRestoreFqdn(Map<Object, Object> variables, String fqdn) {
+        variables.put(INSTANCE_TO_RESTORE, fqdn);
+    }
+
+    protected void setFullBackupStorageLocation(Map<Object, Object> variables, String location) {
+        variables.put(FULL_BACKUP_LOCATION, location);
+    }
+
+    protected void setDataBackupStorageLocation(Map<Object, Object> variables, String location) {
+        variables.put(DATA_BACKUP_LOCATION, location);
+    }
+
+    protected String getInstanceToRestoreFqdn(Map<Object, Object> variables) {
+        return (String) variables.get(INSTANCE_TO_RESTORE);
+    }
+
+    protected String getFullBackupStorageLocation(Map<Object, Object> variables) {
+        return (String) variables.get(FULL_BACKUP_LOCATION);
+    }
+
+    protected String getDataBackupStorageLocation(Map<Object, Object> variables) {
+        return (String) variables.get(DATA_BACKUP_LOCATION);
+    }
+
+    protected StackUpdater stackUpdater() {
+        return stackUpdater;
+    }
 }

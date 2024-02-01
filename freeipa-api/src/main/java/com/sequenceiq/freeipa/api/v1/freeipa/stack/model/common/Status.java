@@ -46,7 +46,9 @@ public enum Status {
     MODIFY_PROXY_CONFIG_REQUESTED,
     MODIFY_PROXY_CONFIG_IN_PROGRESS,
     MODIFY_PROXY_CONFIG_FAILED,
-    UPGRADE_FAILED;
+    UPGRADE_FAILED,
+    REBUILD_IN_PROGRESS,
+    REBUILD_FAILED;
 
     public static final Collection<Status> REMOVABLE_STATUSES = List.of(AVAILABLE, UPDATE_FAILED, CREATE_FAILED, DELETE_FAILED,
             DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED, REPAIR_FAILED, UPSCALE_FAILED, DOWNSCALE_FAILED, UPGRADE_CCM_FAILED,
@@ -92,6 +94,7 @@ public enum Status {
             .put(UPGRADE_CCM_REQUESTED, UPGRADE_CCM_FAILED)
             .put(UPGRADE_CCM_IN_PROGRESS, UPGRADE_CCM_FAILED)
             .put(WAIT_FOR_SYNC, AVAILABLE)
+            .put(REBUILD_IN_PROGRESS, REBUILD_FAILED)
             .build();
 
     public boolean isRemovableStatus() {
@@ -152,26 +155,12 @@ public enum Status {
 
     //CHECKSTYLE:OFF: CyclomaticComplexity
     public boolean isInProgress() {
-        switch (this) {
-            case REQUESTED:
-            case UPDATE_REQUESTED:
-            case STOP_REQUESTED:
-            case START_REQUESTED:
-            case MODIFY_PROXY_CONFIG_REQUESTED:
-            case CREATE_IN_PROGRESS:
-            case UPDATE_IN_PROGRESS:
-            case DELETE_IN_PROGRESS:
-            case MODIFY_PROXY_CONFIG_IN_PROGRESS:
-            case STOP_IN_PROGRESS:
-            case DIAGNOSTICS_COLLECTION_IN_PROGRESS:
-            case UPGRADE_CCM_REQUESTED:
-            case UPGRADE_CCM_IN_PROGRESS:
-            case START_IN_PROGRESS:
-            case WAIT_FOR_SYNC:
-                return true;
-            default:
-                return false;
-        }
+        return switch (this) {
+            case REQUESTED, UPDATE_REQUESTED, STOP_REQUESTED, START_REQUESTED, MODIFY_PROXY_CONFIG_REQUESTED, CREATE_IN_PROGRESS, UPDATE_IN_PROGRESS,
+                    DELETE_IN_PROGRESS, MODIFY_PROXY_CONFIG_IN_PROGRESS, STOP_IN_PROGRESS, DIAGNOSTICS_COLLECTION_IN_PROGRESS, UPGRADE_CCM_REQUESTED,
+                    UPGRADE_CCM_IN_PROGRESS, START_IN_PROGRESS, WAIT_FOR_SYNC, REBUILD_IN_PROGRESS -> true;
+            default -> false;
+        };
     }
     //CHECKSTYLE:ON: CyclomaticComplexity
 
