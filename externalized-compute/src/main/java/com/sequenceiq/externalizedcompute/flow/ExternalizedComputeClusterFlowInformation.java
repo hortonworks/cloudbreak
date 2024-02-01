@@ -1,5 +1,7 @@
 package com.sequenceiq.externalizedcompute.flow;
 
+import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_INITIATED_EVENT;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -16,7 +18,7 @@ public class ExternalizedComputeClusterFlowInformation implements ApplicationFlo
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExternalizedComputeClusterFlowInformation.class);
 
-    private static final List<String> ALLOWED_PARALLEL_FLOWS = Collections.emptyList();
+    private static final List<String> ALLOWED_PARALLEL_FLOWS = Collections.singletonList(EXTERNALIZED_COMPUTE_CLUSTER_DELETE_INITIATED_EVENT.event());
 
     @Override
     public List<String> getAllowedParallelFlows() {

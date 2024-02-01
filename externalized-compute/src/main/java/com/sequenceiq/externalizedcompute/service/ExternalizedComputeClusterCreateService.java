@@ -49,8 +49,26 @@ public class ExternalizedComputeClusterCreateService {
     public void initiateCreation(Long id, String userCrn) {
         ExternalizedComputeCluster externalizedComputeCluster = externalizedComputeClusterRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Can't find externalized compute cluster in DB"));
-        DefaultApi defaultApi = liftieService.getDefaultApi();
+        if (externalizedComputeCluster.getLiftieName() == null) {
+            createLiftieCluster(userCrn, externalizedComputeCluster);
+        }
+    }
 
+    private void createLiftieCluster(String userCrn, ExternalizedComputeCluster externalizedComputeCluster) {
+        DefaultApi defaultApi = liftieService.getDefaultApi();
+        CommonCreateClusterRequest cluster = setupLiftieCluster(userCrn, externalizedComputeCluster);
+        try {
+            CommonCreateClusterResponse clusterResponse = defaultApi.createCluster(cluster);
+            externalizedComputeCluster.setLiftieName(clusterResponse.getClusterId());
+            externalizedComputeClusterRepository.save(externalizedComputeCluster);
+            LOGGER.info("Liftie create response: {}", clusterResponse);
+        } catch (Exception e) {
+            LOGGER.error("Externalized compute cluster creation failed", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private CommonCreateClusterRequest setupLiftieCluster(String userCrn, ExternalizedComputeCluster externalizedComputeCluster) {
         CommonCreateClusterRequest cluster = new CommonCreateClusterRequest();
         CommonClusterMetadata metadata = getMetadata(externalizedComputeCluster, userCrn);
         cluster.setMetadata(metadata);
@@ -68,15 +86,7 @@ public class ExternalizedComputeClusterCreateService {
         cluster.setSpec(spec);
         cluster.setKind("ManagedK8sCluster");
         cluster.setApiVersion("compute.cloud.cloudera.io/v1alpha1");
-        try {
-            CommonCreateClusterResponse clusterResponse = defaultApi.createCluster(cluster);
-            externalizedComputeCluster.setLiftieName(clusterResponse.getClusterId());
-            externalizedComputeClusterRepository.save(externalizedComputeCluster);
-            LOGGER.info("Liftie create response: {}", clusterResponse);
-        } catch (Exception e) {
-            LOGGER.error("Externalized compute cluster creation failed", e);
-            throw new RuntimeException(e);
-        }
+        return cluster;
     }
 
     private CommonClusterMetadata getMetadata(ExternalizedComputeCluster externalizedComputeCluster, String userCrn) {

@@ -2,7 +2,6 @@ package com.sequenceiq.externalizedcompute.flow.create;
 
 import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FINALIZED_EVENT;
-import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_STARTED_EVENT;
 
 import java.util.Map;
 import java.util.Optional;
@@ -29,14 +28,15 @@ public class ExternalizedComputeClusterCreateActions {
     @Inject
     private ExternalizedComputeClusterCreateService externalizedComputeClusterCreateService;
 
-    @Bean(name = "EXTERNALIZED_COMPUTE_CLUSTER_CREATE_STATE")
+    @Bean(name = "EXTERNALIZED_COMPUTE_CLUSTER_CREATE_WAIT_ENV_STATE")
     public Action<?, ?> externalizedComputeClusterCreate() {
         return new AbstractExternalizedComputeClusterAction<>(ExternalizedComputeClusterEvent.class) {
 
             @Override
             protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterEvent payload, Map<Object, Object> variables) {
-                externalizedComputeClusterCreateService.initiateCreation(context.getExternalizedComputeId(), context.getUserId());
-                sendEvent(context, EXTERNALIZED_COMPUTE_CLUSTER_CREATE_STARTED_EVENT.event(), payload);
+                ExternalizedComputeClusterCreateEnvWaitRequest externalizedComputeClusterCreateEnvWaitRequest =
+                        new ExternalizedComputeClusterCreateEnvWaitRequest(context.getExternalizedComputeId(), context.getUserId());
+                sendEvent(context, externalizedComputeClusterCreateEnvWaitRequest.selector(), externalizedComputeClusterCreateEnvWaitRequest);
             }
 
             @Override
@@ -48,17 +48,20 @@ public class ExternalizedComputeClusterCreateActions {
 
     @Bean(name = "EXTERNALIZED_COMPUTE_CLUSTER_CREATE_IN_PROGRESS_STATE")
     public Action<?, ?> externalizedComputeClusterCreateWait() {
-        return new AbstractExternalizedComputeClusterAction<>(ExternalizedComputeClusterEvent.class) {
+        return new AbstractExternalizedComputeClusterAction<>(ExternalizedComputeClusterCreateEnvWaitSuccessResponse.class) {
 
             @Override
-            protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterCreateEnvWaitSuccessResponse payload,
+                    Map<Object, Object> variables) {
+                externalizedComputeClusterCreateService.initiateCreation(context.getExternalizedComputeId(), context.getUserId());
                 ExternalizedComputeClusterCreateWaitRequest externalizedComputeClusterCreateWaitRequest =
                         new ExternalizedComputeClusterCreateWaitRequest(context.getExternalizedComputeId(), context.getUserId());
                 sendEvent(context, externalizedComputeClusterCreateWaitRequest.selector(), externalizedComputeClusterCreateWaitRequest);
             }
 
             @Override
-            protected Object getFailurePayload(ExternalizedComputeClusterEvent payload, Optional<ExternalizedComputeClusterContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(ExternalizedComputeClusterCreateEnvWaitSuccessResponse payload,
+                    Optional<ExternalizedComputeClusterContext> flowContext, Exception ex) {
                 return ExternalizedComputeClusterCreateFailedEvent.from(payload, ex);
             }
         };

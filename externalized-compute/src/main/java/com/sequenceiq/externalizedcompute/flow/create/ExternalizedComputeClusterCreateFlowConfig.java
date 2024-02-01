@@ -4,11 +4,11 @@ import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedCompute
 import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FINALIZED_EVENT;
 import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FINISHED_EVENT;
 import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_INITIATED_EVENT;
-import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_STARTED_EVENT;
+import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_WAIT_FINISHED_EVENT;
 import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateState.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FAILED_STATE;
 import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateState.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FINISHED_STATE;
 import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateState.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_IN_PROGRESS_STATE;
-import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateState.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_STATE;
+import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateState.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_WAIT_ENV_STATE;
 import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateState.FINAL_STATE;
 import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateState.INIT_STATE;
 
@@ -29,12 +29,12 @@ public class ExternalizedComputeClusterCreateFlowConfig
             new Transition.Builder<ExternalizedComputeClusterCreateState, ExternalizedComputeClusterCreateEvent>()
                     .defaultFailureEvent(ExternalizedComputeClusterCreateEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FAILED_EVENT)
                     .from(INIT_STATE)
-                    .to(EXTERNALIZED_COMPUTE_CLUSTER_CREATE_STATE)
+                    .to(EXTERNALIZED_COMPUTE_CLUSTER_CREATE_WAIT_ENV_STATE)
                     .event(EXTERNALIZED_COMPUTE_CLUSTER_CREATE_INITIATED_EVENT).defaultFailureEvent()
 
-                    .from(EXTERNALIZED_COMPUTE_CLUSTER_CREATE_STATE)
+                    .from(EXTERNALIZED_COMPUTE_CLUSTER_CREATE_WAIT_ENV_STATE)
                     .to(EXTERNALIZED_COMPUTE_CLUSTER_CREATE_IN_PROGRESS_STATE)
-                    .event(EXTERNALIZED_COMPUTE_CLUSTER_CREATE_STARTED_EVENT).defaultFailureEvent()
+                    .event(EXTERNALIZED_COMPUTE_CLUSTER_CREATE_WAIT_FINISHED_EVENT).defaultFailureEvent()
 
                     .from(EXTERNALIZED_COMPUTE_CLUSTER_CREATE_IN_PROGRESS_STATE)
                     .to(EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FINISHED_STATE)
