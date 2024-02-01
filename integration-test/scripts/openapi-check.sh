@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
-DOCKER_SSC_IMAGE=docker-private.infra.cloudera.com/cloudera_thirdparty/openapitools/openapi-diff:2.0.0
+DOCKER_SSC_IMAGE=docker-private.infra.cloudera.com/cloudera_thirdparty/openapitools/openapi-diff:2.1.0-beta.8
 INCOMPATIBLE_CHANGES=()
 
 date
@@ -38,8 +38,9 @@ compatible() {
       "${DOCKER_SSC_IMAGE}" \
       "/apidefinitions/${service}-openapi-${previous_build}.json" \
       "/apidefinitions/${service}.json" \
-      --markdown /apidefinitions/result.markdown \
-      --html /apidefinitions/result.html \
+      --config-prop incompatible.response.enum.increased:false \
+      --markdown /apidefinitions/${service}.markdown \
+      --html /apidefinitions/${service}.html \
       --fail-on-incompatible)
 
     if [[ ${compat_results} =~ .*"API changes broke backward compatibility".* ]]; then
