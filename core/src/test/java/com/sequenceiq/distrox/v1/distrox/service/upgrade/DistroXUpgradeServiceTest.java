@@ -29,6 +29,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
@@ -40,6 +41,8 @@ import com.sequenceiq.cloudbreak.auth.ClouderaManagerLicenseProvider;
 import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
 import com.sequenceiq.cloudbreak.auth.PaywallAccessChecker;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -52,6 +55,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -113,17 +117,23 @@ class DistroXUpgradeServiceTest {
     @Mock
     private ClusterUpgradeAvailabilityService clusterUpgradeAvailabilityService;
 
+    @Mock
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
     @InjectMocks
     private DistroXUpgradeService underTest;
 
+    @Mock
     private StackDto stack;
+
+    @Mock
+    private ClusterView clusterView;
 
     @Mock
     private StackView stackView;
 
     @BeforeEach
     public void setup() {
-        stack = mock(StackDto.class);
         lenient().when(stack.getId()).thenReturn(STACK_ID);
         lenient().when(stack.getPlatformVariant()).thenReturn("variant");
         lenient().when(stack.getWorkspaceId()).thenReturn(WS_ID);
@@ -131,6 +141,8 @@ class DistroXUpgradeServiceTest {
         lenient().when(stackView.getPlatformVariant()).thenReturn("variant");
         lenient().when(stackView.getWorkspaceId()).thenReturn(WS_ID);
         lenient().when(stack.getStack()).thenReturn(stackView);
+        lenient().when(stack.getCluster()).thenReturn(clusterView);
+        lenient().when(clusterView.getId()).thenReturn(STACK_ID);
     }
 
     @Test
@@ -348,6 +360,53 @@ class DistroXUpgradeServiceTest {
         verify(upgradeService, times(1)).upgradeOsByUpgradeSets(eq(stack), imageChangeDtoCaptor.capture(), eq(upgradeSets));
         assertEquals("imageID", imageChangeDtoCaptor.getValue().getImageId());
         assertEquals("imageID", imageChangeRequestArgumentCaptor.getValue().getImageId());
+    }
+
+    @Test
+    public void testGracefulStopServiceIsNotSupportedWhenStackTypeIsDataLake() {
+        when(stack.getType()).thenReturn(StackType.DATALAKE);
+
+        assertFalse(underTest.isGracefulStopServicesNeeded(stack));
+    }
+
+    @Test
+    public void testGracefulStopServiceIsNotSupportedBefore7218() {
+        when(stack.getType()).thenReturn(StackType.WORKLOAD);
+        ClouderaManagerProduct clouderaManagerProduct = new ClouderaManagerProduct();
+        clouderaManagerProduct.setVersion("7.2.17");
+        when(clusterComponentConfigProvider.getCdhProduct(any())).thenReturn(Optional.of(clouderaManagerProduct));
+
+        assertFalse(underTest.isGracefulStopServicesNeeded(stack));
+    }
+
+    @Test
+    public void testGracefulStopServiceIsNotSupportedBefore7218WhenVersionIsPatchVersion() {
+        when(stack.getType()).thenReturn(StackType.WORKLOAD);
+        ClouderaManagerProduct clouderaManagerProduct = new ClouderaManagerProduct();
+        clouderaManagerProduct.setVersion("7.2.17-1.cdh7.2.18.p0.49779745");
+        when(clusterComponentConfigProvider.getCdhProduct(any())).thenReturn(Optional.of(clouderaManagerProduct));
+
+        assertFalse(underTest.isGracefulStopServicesNeeded(stack));
+    }
+
+    @Test
+    public void testGracefulStopServiceIsSupportedAfter7218() {
+        when(stack.getType()).thenReturn(StackType.WORKLOAD);
+        ClouderaManagerProduct clouderaManagerProduct = new ClouderaManagerProduct();
+        clouderaManagerProduct.setVersion("7.2.18");
+        when(clusterComponentConfigProvider.getCdhProduct(any())).thenReturn(Optional.of(clouderaManagerProduct));
+
+        assertTrue(underTest.isGracefulStopServicesNeeded(stack));
+    }
+
+    @Test
+    public void testGracefulStopServiceIsSupportedAfter7218WhenVersionIsPatchVersion() {
+        when(stack.getType()).thenReturn(StackType.WORKLOAD);
+        ClouderaManagerProduct clouderaManagerProduct = new ClouderaManagerProduct();
+        clouderaManagerProduct.setVersion("7.2.18-1.cdh7.2.18.p0.49779745");
+        when(clusterComponentConfigProvider.getCdhProduct(any())).thenReturn(Optional.of(clouderaManagerProduct));
+
+        assertTrue(underTest.isGracefulStopServicesNeeded(stack));
     }
 
     private UpgradeV4Request createRequest(boolean osUpgradeEnabled, boolean rollingUpgradeEnabled) {

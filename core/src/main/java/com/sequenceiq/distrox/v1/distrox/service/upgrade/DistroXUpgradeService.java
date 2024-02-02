@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
+import com.sequenceiq.cloudbreak.util.VersionNormalizer;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.dto.DistroXUpgradeDto;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -162,7 +163,7 @@ public class DistroXUpgradeService {
     public boolean isGracefulStopServicesNeeded(StackDto stackDto) {
         return StackType.WORKLOAD.equals(stackDto.getType()) && clusterComponentConfigProvider.getCdhProduct(stackDto.getCluster().getId())
                 .filter(clouderaManagerProduct -> {
-                    if (CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(clouderaManagerProduct.getVersion(),
+                    if (CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(VersionNormalizer.normalizeCdhVersion(clouderaManagerProduct.getVersion()),
                             CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_18)) {
                         return true;
                     } else {
