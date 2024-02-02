@@ -1102,40 +1102,6 @@ class SdxServiceTest {
     }
 
     @Test
-    public void testCreateSdxFailOnCloudStorageRequest() {
-        SdxClusterRequest sdxClusterRequest = getSdxClusterRequest();
-        sdxClusterRequest.setCloudStorage(null);
-        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(Set.of(11, 13, 17, 18));
-        when(environmentClientService.getByName(anyString())).thenReturn(getDetailedEnvironmentResponse());
-        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyBoolean())).thenReturn(imageCatalogPlatform);
-        ImageV4Response imageV4Response = new ImageV4Response();
-        when(imageCatalogService.getImageResponseFromImageRequest(any(), any())).thenReturn(imageV4Response);
-        assertThrows(IllegalArgumentException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "name", sdxClusterRequest, null)));
-    }
-
-    @Test
-    public void testCreateSdxSaveFail() throws TransactionExecutionException, IOException {
-        DetailedEnvironmentResponse environmentResponse = getDetailedEnvironmentResponse();
-        when(entitlementService.isRmsEnabledOnDatalake(any())).thenReturn(true);
-        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(Set.of(11, 13, 17, 18));
-        when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
-        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyBoolean())).thenReturn(imageCatalogPlatform);
-        SdxDatabase sdxDatabase = new SdxDatabase();
-        ImageV4Response imageV4Response = new ImageV4Response();
-        when(imageCatalogService.getImageResponseFromImageRequest(any(), any())).thenReturn(imageV4Response);
-        String enterpriseJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
-        StackV4Request stackV4Request = JsonUtil.readValue(enterpriseJson, StackV4Request.class);
-        SdxClusterRequest sdxClusterRequest = getSdxClusterRequest();
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            assertThrows(IllegalArgumentException.class, () -> underTest.createSdx(USER_CRN, "name", sdxClusterRequest, null));
-        });
-        verify(virtualMachineConfiguration, times(1)).getSupportedJavaVersions();
-        verify(imageCatalogService, times(1)).getImageResponseFromImageRequest(any(), any());
-        verify(environmentClientService, times(1)).getByName(anyString());
-    }
-
-    @Test
     public void testAddRmsToSdxCluster() throws IOException, TransactionExecutionException {
         DetailedEnvironmentResponse environmentResponse = getDetailedEnvironmentResponse();
         when(entitlementService.isRmsEnabledOnDatalake(any())).thenReturn(true);

@@ -656,8 +656,15 @@ class SdxServiceCreateSdxTest {
         sdxClusterRequest.setEnableMultiAz(true);
         when(platformConfig.getMultiAzSupportedPlatforms()).thenReturn(EnumSet.of(AWS, AZURE));
 
+        StackV4Request internalStackV4Request;
+        if (CUSTOM.equals(clusterShape)) {
+            internalStackV4Request = new StackV4Request();
+            internalStackV4Request.setCluster(new ClusterV4Request());
+        } else {
+            internalStackV4Request = null;
+        }
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, internalStackV4Request)));
 
         assertThat(badRequestException).hasMessage(String.format("Provisioning a multi AZ cluster on Azure is not supported for cluster shape %s.",
                 clusterShape.name()));

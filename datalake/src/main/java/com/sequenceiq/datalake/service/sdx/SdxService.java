@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.MOCK;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
-import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
@@ -62,6 +61,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
@@ -474,10 +475,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         validateInternalSdxRequest(internalStackV4Request, sdxClusterRequest);
         validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);
         String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request, imageV4Response);
-        String os = Optional.ofNullable(sdxClusterRequest.getOs())
-                .or(() -> Optional.ofNullable(imageV4Response).map(ImageV4Response::getOs))
-                .or(() -> Optional.ofNullable(internalStackV4Request).map(StackV4Request::getImage).map(ImageSettingsV4Request::getOs))
-                .orElse(null);
+        String os = getOs(sdxClusterRequest, internalStackV4Request, imageV4Response);
 
         validateCcmV2Requirement(environment, runtimeVersion);
 
@@ -510,7 +508,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         overrideDefaultTemplateValues(stackRequest, sdxClusterRequest.getCustomInstanceGroups());
         validateRecipes(sdxClusterRequest, stackRequest, userCrn);
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
-        prepareDefaultSecurityConfigs(internalStackV4Request, stackRequest, cloudPlatform);
+        prepareDefaultSecurityConfigs(sdxClusterRequest.getClusterShape(), stackRequest, cloudPlatform);
         prepareProviderSpecificParameters(stackRequest, sdxClusterRequest, cloudPlatform);
         updateStackV4RequestWithRecipes(sdxClusterRequest, stackRequest);
         String resourceCrn = sdxCluster.getCrn();
@@ -643,7 +641,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         stackRequest.setCustomDomain(customDomainSettingsV4Request);
 
         prepareCloudStorageForStack(stackRequest, stackV4Response, newSdxCluster, environment);
-        prepareDefaultSecurityConfigs(null, stackRequest, cloudPlatform);
+        prepareDefaultSecurityConfigs(shape, stackRequest, cloudPlatform);
         try {
             if (!StringUtils.isBlank(sdxCluster.getStackRequestToCloudbreak())) {
                 StackV4Request stackV4RequestOrig = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class);
@@ -773,32 +771,52 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private StackV4Request getStackRequest(SdxClusterShape shape, StackV4Request internalStackV4Request,
             CloudPlatform cloudPlatform, String runtimeVersion, ImageSettingsV4Request imageSettingsV4Request) {
         StackV4Request stackV4Request = internalStackV4Request;
-        if (internalStackV4Request == null) {
-            stackV4Request = cdpConfigService.getConfigForKey(
-                    new CDPConfigKey(cloudPlatform, shape, runtimeVersion));
+        if (!SdxClusterShape.CUSTOM.equals(shape)) {
+            CDPConfigKey cdpConfigKey = new CDPConfigKey(cloudPlatform, shape, runtimeVersion);
+            stackV4Request = cdpConfigService.getConfigForKey(cdpConfigKey);
             if (stackV4Request == null) {
-                LOGGER.error("Can't find template for cloudplatform: {}, shape {}, cdp version: {}", cloudPlatform, shape, runtimeVersion);
-                throw new BadRequestException("Can't find template for cloudplatform: " + cloudPlatform + ", shape: " + shape +
-                        ", runtime version: " + runtimeVersion);
+                String message = "Can't find template for " + cdpConfigKey;
+                LOGGER.error(message);
+                throw new BadRequestException(message);
             }
             if (imageSettingsV4Request != null) {
                 stackV4Request.setImage(imageSettingsV4Request);
             }
+            ClouderaManagerV4Request clouderaManagerV4Request = Optional.ofNullable(internalStackV4Request)
+                    .map(StackV4Request::getCluster)
+                    .map(ClusterV4Request::getCm)
+                    .orElse(null);
+            if (clouderaManagerV4Request != null) {
+                stackV4Request.getCluster().setCm(clouderaManagerV4Request);
+            }
         }
-
         return stackV4Request;
     }
 
     private String getRuntime(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request, ImageV4Response imageV4Response) {
-        if (imageV4Response != null) {
-            return getRuntimeVersionFromImageResponse(imageV4Response);
-        } else if (sdxClusterRequest.getRuntime() != null) {
-            return sdxClusterRequest.getRuntime();
-        } else if (stackV4Request != null) {
-            return null;
-        } else {
-            return cdpConfigService.getDefaultRuntime();
-        }
+        return Optional.ofNullable(getRuntimeVersionFromImageResponse(imageV4Response))
+                .or(() -> Optional.ofNullable(sdxClusterRequest.getRuntime()))
+                .or(() -> extractRuntimeFromCdhProductVersion(stackV4Request))
+                .orElse(cdpConfigService.getDefaultRuntime());
+    }
+
+    private Optional<String> extractRuntimeFromCdhProductVersion(StackV4Request stackV4Request) {
+        return Optional.ofNullable(stackV4Request)
+                .map(StackV4Request::getCluster)
+                .map(ClusterV4Request::getCm)
+                .map(ClouderaManagerV4Request::getProducts)
+                .stream()
+                .flatMap(List::stream)
+                .filter(product -> "CDH".equalsIgnoreCase(product.getName()))
+                .map(product -> StringUtils.substringBefore(product.getVersion(), "-"))
+                .findFirst();
+    }
+
+    private String getOs(SdxClusterRequest sdxClusterRequest, StackV4Request internalStackV4Request, ImageV4Response imageV4Response) {
+        return Optional.ofNullable(sdxClusterRequest.getOs())
+                .or(() -> Optional.ofNullable(imageV4Response).map(ImageV4Response::getOs))
+                .or(() -> Optional.ofNullable(internalStackV4Request).map(StackV4Request::getImage).map(ImageSettingsV4Request::getOs))
+                .orElse(null);
     }
 
     private void updateStackV4RequestWithRecipes(SdxClusterRequest clusterRequest, StackV4Request stackV4Request) {
@@ -862,8 +880,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     }
 
-    protected StackV4Request prepareDefaultSecurityConfigs(StackV4Request internalRequest, StackV4Request stackV4Request, CloudPlatform cloudPlatform) {
-        if (internalRequest == null && !List.of("MOCK", "YARN").contains(cloudPlatform.name())) {
+    private void prepareDefaultSecurityConfigs(SdxClusterShape shape, StackV4Request stackV4Request, CloudPlatform cloudPlatform) {
+        if (!SdxClusterShape.CUSTOM.equals(shape) && !List.of(CloudPlatform.MOCK, CloudPlatform.YARN).contains(cloudPlatform)) {
             stackV4Request.getInstanceGroups().forEach(instance -> {
                 SecurityGroupV4Request groupRequest = new SecurityGroupV4Request();
                 if (InstanceGroupType.CORE.equals(instance.getType())) {
@@ -876,7 +894,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 instance.setSecurityGroup(groupRequest);
             });
         }
-        return stackV4Request;
     }
 
     private List<SecurityRuleV4Request> rulesWithPorts(String... ports) {
@@ -1210,19 +1227,18 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return imageSettingsV4Request != null && !StringUtils.isBlank(imageSettingsV4Request.getId());
     }
 
-    private void validateInternalSdxRequest(StackV4Request stackv4Request, SdxClusterRequest sdxClusterRequest) {
+    @VisibleForTesting
+    void validateInternalSdxRequest(StackV4Request stackv4Request, SdxClusterRequest sdxClusterRequest) {
         ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
         if (stackv4Request != null) {
-            SdxClusterShape clusterShape = sdxClusterRequest.getClusterShape();
-            if (!clusterShape.equals(CUSTOM)) {
-                validationResultBuilder.error("Cluster shape '" + clusterShape + "' is not accepted on SDX Internal API. Use 'CUSTOM' cluster shape");
-            }
             if (stackv4Request.getCluster() == null) {
                 validationResultBuilder.error("Cluster cannot be null.");
             }
             if (CollectionUtils.isNotEmpty(sdxClusterRequest.getCustomInstanceGroups())) {
                 validationResultBuilder.error("Custom instance group is not accepted on SDX Internal API.");
             }
+        } else if (SdxClusterShape.CUSTOM.equals(sdxClusterRequest.getClusterShape())) {
+            validationResultBuilder.error("CUSTOM cluster shape requires stack request.");
         }
         ValidationResult validationResult = validationResultBuilder.build();
         if (validationResult.hasError()) {
