@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventTyp
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -17,6 +18,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
@@ -65,6 +68,9 @@ public class BaseLegacyStructuredFlowEventFactory implements LegacyStructuredFlo
     @Inject
     private StackToStackDetailsConverter stackToStackDetailsConverter;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     @Value("${info.app.version:}")
     private String cbVersion;
 
@@ -81,9 +87,7 @@ public class BaseLegacyStructuredFlowEventFactory implements LegacyStructuredFlo
         String resourceType = (stack.getType() == null || stack.getType().equals(StackType.WORKLOAD))
                 ? CloudbreakEventService.DATAHUB_RESOURCE_TYPE
                 : CloudbreakEventService.DATALAKE_RESOURCE_TYPE;
-        OperationDetails operationDetails = new OperationDetails(clock.getCurrentTimeMillis(), FLOW, resourceType, stackId, stack.getName(),
-                nodeConfig.getId(), cbVersion, stack.getWorkspaceId(), stack.getCreator().getUserId(), stack.getCreator().getUserName(),
-                stack.getTenantName(), stack.getResourceCrn(), stack.getCreator().getUserCrn(), stack.getEnvironmentCrn(), null);
+        OperationDetails operationDetails = getOperationDetails(stackId, resourceType, stack);
         StackDetails stackDetails = null;
         ClusterDetails clusterDetails = null;
         BlueprintDetails blueprintDetails = null;
@@ -147,9 +151,32 @@ public class BaseLegacyStructuredFlowEventFactory implements LegacyStructuredFlo
         String resourceType = (stack.getType() == null || stack.getType().equals(StackType.WORKLOAD))
                 ? CloudbreakEventService.DATAHUB_RESOURCE_TYPE
                 : CloudbreakEventService.DATALAKE_RESOURCE_TYPE;
+        String userCrn = Optional.ofNullable(ThreadBasedUserCrnProvider.getUserCrn())
+                .orElse(stack.getCreator().getUserCrn());
         OperationDetails operationDetails = new OperationDetails(clock.getCurrentTimeMillis(), NOTIFICATION, resourceType, stackId, stackName,
                 nodeConfig.getInstanceUUID(), cbVersion, stack.getWorkspace().getId(), userId, userName,
-                stack.getTenant().getName(), stack.getResourceCrn(), stack.getCreator().getUserCrn(), stack.getEnvironmentCrn(), null);
+                stack.getTenant().getName(), stack.getResourceCrn(), userCrn, stack.getEnvironmentCrn(), null);
         return new StructuredNotificationEvent(operationDetails, notificationDetails);
+    }
+
+    private OperationDetails getOperationDetails(Long stackId, String resourceType, StackView stack) {
+        String userCrn = Optional.ofNullable(ThreadBasedUserCrnProvider.getUserCrn())
+                .orElseGet(() -> regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString());
+        return new OperationDetails(
+                clock.getCurrentTimeMillis(),
+                FLOW,
+                resourceType,
+                stackId,
+                stack.getName(),
+                nodeConfig.getId(),
+                cbVersion,
+                stack.getWorkspaceId(),
+                stack.getCreator().getUserId(),
+                stack.getCreator().getUserName(),
+                stack.getTenantName(),
+                stack.getResourceCrn(),
+                userCrn,
+                stack.getEnvironmentCrn(),
+                null);
     }
 }
