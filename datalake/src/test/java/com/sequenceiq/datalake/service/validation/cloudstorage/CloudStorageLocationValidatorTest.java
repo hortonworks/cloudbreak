@@ -172,4 +172,25 @@ public class CloudStorageLocationValidatorTest {
                 OTHER_REGION, BUCKET_NAME, ENV_REGION),
                 result.getErrors().get(0));
     }
+
+    @Test
+    public void validateErrorNotFound() {
+        ObjectStorageMetadataRequest request = ObjectStorageMetadataRequest.builder()
+                .withCloudPlatform(CLOUD_PLATFORM)
+                .withCredential(CLOUD_CREDENTIAL)
+                .withObjectStoragePath(BUCKET_NAME)
+                .withRegion(ENV_REGION)
+                .build();
+        ObjectStorageMetadataResponse response = ObjectStorageMetadataResponse.builder().withStatus(ResponseStatus.RESOURCE_NOT_FOUND).build();
+        when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        underTest.validate(OBJECT_PATH, FileSystemType.S3, environment, validationResultBuilder);
+        ValidationResult result = validationResultBuilder.build();
+
+        assertTrue(result.hasError());
+        assertEquals(String.format("Object storage cannot be found at location: %s.", BUCKET_NAME),
+                result.getErrors().get(0));
+    }
 }

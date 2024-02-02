@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResultFactory;
+import com.sequenceiq.cloudbreak.cloud.azure.service.AzureClientCachedOperations;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
@@ -69,6 +70,9 @@ public class AzureIDBrokerObjectStorageValidator {
     @Inject
     private AzureListResultFactory azureListResultFactory;
 
+    @Inject
+    private AzureClientCachedOperations azureClientCachedOperations;
+
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
     public ValidationResult validateObjectStorage(AzureClient client, String accountId,
             SpiFileSystem spiFileSystem,
@@ -78,7 +82,7 @@ public class AzureIDBrokerObjectStorageValidator {
             ValidationResultBuilder resultBuilder) {
         LOGGER.info("Validating Azure identities...");
         List<CloudFileSystemView> cloudFileSystems = spiFileSystem.getCloudFileSystems();
-        validateHierarchicalNamespace(client, spiFileSystem, logsLocationBase, backupLocationBase, resultBuilder);
+        validateHierarchicalNamespace(client, spiFileSystem, logsLocationBase, backupLocationBase, accountId, resultBuilder);
         if (Objects.nonNull(cloudFileSystems) && cloudFileSystems.size() > 0) {
             for (CloudFileSystemView cloudFileSystemView : cloudFileSystems) {
                 CloudAdlsGen2View cloudFileSystem = (CloudAdlsGen2View) cloudFileSystemView;
@@ -98,17 +102,17 @@ public class AzureIDBrokerObjectStorageValidator {
                             singleResourceGroup = Optional.empty();
                         }
 
-                        validateIDBroker(client, roleAssignments, identity, cloudFileSystem, singleResourceGroup, resultBuilder);
+                        validateIDBroker(client, roleAssignments, identity, cloudFileSystem, singleResourceGroup, accountId, resultBuilder);
                         if (entitlementService.isDatalakeBackupRestorePrechecksEnabled(accountId)) {
                             Set<Identity> allMappedExistingIdentity = validateAllMappedIdentities(client, cloudFileSystem, resultBuilder);
                             validateLocation(client, allMappedExistingIdentity,
                                     (StringUtils.isNotEmpty(backupLocationBase)) ? backupLocationBase : logsLocationBase,
-                                    resultBuilder);
+                                    accountId, resultBuilder);
                         }
                     } else if (LOG.equals(cloudIdentityType)) {
-                        validateLocation(client, identity, logsLocationBase, resultBuilder);
+                        validateLocation(client, identity, logsLocationBase, accountId, resultBuilder);
                         if (entitlementService.isDatalakeBackupRestorePrechecksEnabled(accountId)) {
-                            validateLocation(client, identity, backupLocationBase, resultBuilder);
+                            validateLocation(client, identity, backupLocationBase, accountId, resultBuilder);
                         }
                     }
                 } else {
@@ -122,9 +126,9 @@ public class AzureIDBrokerObjectStorageValidator {
 
     private void validateHierarchicalNamespace(AzureClient client, SpiFileSystem spiFileSystem,
             String logsLocationBase, String backupLocationBase,
-            ValidationResultBuilder resultBuilder) {
+            String accountId, ValidationResultBuilder resultBuilder) {
         for (String storageAccountName : getStorageAccountNames(spiFileSystem, logsLocationBase, backupLocationBase)) {
-            Optional<StorageAccount> storageAccount = client.getStorageAccount(storageAccountName, Kind.STORAGE_V2);
+            Optional<StorageAccount> storageAccount = azureClientCachedOperations.getStorageAccount(client, accountId, storageAccountName, Kind.STORAGE_V2);
             boolean hierarchical = storageAccount.map(StorageAccount::isHnsEnabled).orElse(false);
             if (storageAccount.isPresent() && !hierarchical) {
                 addError(resultBuilder, String.format("Hierarchical namespace is not allowed for Storage Account '%s'.", storageAccountName));
@@ -158,7 +162,7 @@ public class AzureIDBrokerObjectStorageValidator {
     }
 
     private void validateIDBroker(AzureClient client, List<RoleAssignmentInner> roleAssignments, Identity identity,
-            CloudAdlsGen2View cloudFileSystem, Optional<ResourceGroup> singleResourceGroup, ValidationResultBuilder resultBuilder) {
+            CloudAdlsGen2View cloudFileSystem, Optional<ResourceGroup> singleResourceGroup, String accountId, ValidationResultBuilder resultBuilder) {
         LOGGER.debug(String.format("Validating IDBroker identity %s", identity.name()));
 
         Set<Identity> allMappedExistingIdentity = validateAllMappedIdentities(client, cloudFileSystem, resultBuilder);
@@ -170,7 +174,7 @@ public class AzureIDBrokerObjectStorageValidator {
 
         List<StorageLocationBase> locations = cloudFileSystem.getLocations();
         if (Objects.nonNull(locations) && !locations.isEmpty()) {
-            validateStorageAccount(client, allMappedExistingIdentity, locations.get(0).getValue(), ID_BROKER, resultBuilder);
+            validateStorageAccount(client, allMappedExistingIdentity, locations.get(0).getValue(), ID_BROKER, accountId, resultBuilder);
         } else {
             LOGGER.debug("There is no storage location set for logger identity, this should not happen!");
         }
@@ -186,15 +190,15 @@ public class AzureIDBrokerObjectStorageValidator {
         return scopes;
     }
 
-    private void validateLocation(AzureClient client, Set<Identity> identities, String locationBase, ValidationResultBuilder resultBuilder) {
+    private void validateLocation(AzureClient client, Set<Identity> identities, String locationBase, String accountId, ValidationResultBuilder resultBuilder) {
         identities.stream().forEach(identity -> {
-            validateLocation(client, identity, locationBase, resultBuilder);
+            validateLocation(client, identity, locationBase, accountId, resultBuilder);
         });
     }
 
-    private void validateLocation(AzureClient client, Identity identity, String locationBase, ValidationResultBuilder resultBuilder) {
+    private void validateLocation(AzureClient client, Identity identity, String locationBase, String accountId, ValidationResultBuilder resultBuilder) {
         if (StringUtils.isNotEmpty(locationBase)) {
-            validateStorageAccount(client, Set.of(identity), locationBase, LOG, resultBuilder);
+            validateStorageAccount(client, Set.of(identity), locationBase, LOG, accountId, resultBuilder);
         } else {
             LOGGER.debug("There is no storage location set for identity, this should not happen!");
         }
@@ -202,13 +206,13 @@ public class AzureIDBrokerObjectStorageValidator {
     }
 
     private void validateStorageAccount(AzureClient client, Set<Identity> identities, String location, CloudIdentityType cloudIdentityType,
-            ValidationResultBuilder resultBuilder) {
+            String accountId, ValidationResultBuilder resultBuilder) {
         identities.stream().forEach(identity -> {
             LOGGER.debug(String.format("Validating identity on %s Location: %s", identity.name(), location));
         });
         AdlsGen2Config adlsGen2Config = adlsGen2ConfigGenerator.generateStorageConfig(location);
         String storageAccountName = adlsGen2Config.getAccount();
-        Optional<String> storageAccountIdOptional = azureStorage.findStorageAccountIdInVisibleSubscriptions(client, storageAccountName);
+        Optional<String> storageAccountIdOptional = azureStorage.findStorageAccountIdInVisibleSubscriptions(client, storageAccountName, accountId);
         if (storageAccountIdOptional.isEmpty()) {
             LOGGER.debug("Storage account {} not found or insufficient permission to list subscriptions and / or storage accounts.", storageAccountName);
             addError(resultBuilder, String.format("Storage account with name %s not found in the given Azure subscription. %s",

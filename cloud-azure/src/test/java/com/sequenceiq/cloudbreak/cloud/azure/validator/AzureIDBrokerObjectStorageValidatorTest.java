@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
+import com.sequenceiq.cloudbreak.cloud.azure.service.AzureClientCachedOperations;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
@@ -124,6 +125,9 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Spy
+    private AzureClientCachedOperations azureClientCachedOperations;
+
     @InjectMocks
     private AzureIDBrokerObjectStorageValidator underTest;
 
@@ -149,7 +153,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         lenient().when(logger.principalId()).thenReturn(LOG_IDENTITY_PRINCIPAL_ID);
         lenient().when(assumer.id()).thenReturn(ASSUMER_IDENTITY);
         lenient().when(assumer.principalId()).thenReturn(ASSUMER_IDENTITY_PRINCIPAL_ID);
-        lenient().when(azureStorage.findStorageAccountIdInVisibleSubscriptions(any(), anyString())).thenReturn(Optional.of(ABFS_STORAGE_ACCOUNT_ID));
+        lenient().when(azureStorage.findStorageAccountIdInVisibleSubscriptions(any(), anyString(), any())).thenReturn(Optional.of(ABFS_STORAGE_ACCOUNT_ID));
         lenient().when(entitlementService.isDatalakeBackupRestorePrechecksEnabled(any())).thenReturn(true);
     }
 
@@ -445,7 +449,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         new RoleAssignmentBuilder(client)
                 .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
                 .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
-        when(azureStorage.findStorageAccountIdInVisibleSubscriptions(any(), anyString())).thenReturn(Optional.empty());
+        when(azureStorage.findStorageAccountIdInVisibleSubscriptions(any(), anyString(), any())).thenReturn(Optional.empty());
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
         underTest.validateObjectStorage(client, ACCOUNT_ID, fileSystem, "", null, null, resultBuilder);

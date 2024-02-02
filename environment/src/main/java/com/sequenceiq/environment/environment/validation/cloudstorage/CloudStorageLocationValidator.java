@@ -104,6 +104,8 @@ public class CloudStorageLocationValidator {
                         bucketName,
                         environment.getLocation(),
                         getDocLink(environment.getCloudPlatform())));
+        resultBuilder.ifError(() -> response.getStatus() == ResponseStatus.RESOURCE_NOT_FOUND,
+                String.format("Object storage cannot be found at location: %s.", bucketName));
     }
 
     private Optional<FileSystemType> getBackupFileSystemType(Environment environment) {

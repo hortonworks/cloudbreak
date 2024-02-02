@@ -17,7 +17,9 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
+import com.sequenceiq.cloudbreak.cloud.azure.service.AzureClientCachedOperations;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureStorageAccountNameExtractor;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureIDBrokerObjectStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
@@ -54,11 +56,19 @@ public class AzureObjectStorageConnector implements ObjectStorageConnector {
     @Inject
     private AzureExceptionHandler azureExceptionHandler;
 
+    @Inject
+    private AzureClientCachedOperations azureClientCachedOperations;
+
+    @Inject
+    private AzureStorageAccountNameExtractor azureStorageAccountNameExtractor;
+
     @Override
     public ObjectStorageMetadataResponse getObjectStorageMetadata(ObjectStorageMetadataRequest request) {
         AzureClient client = azureClientService.getClient(request.getCredential());
-
-        Optional<StorageAccount> storageAccount = client.getStorageAccount(request.getObjectStoragePath(), Kind.STORAGE_V2);
+        String accountId = request.getCredential().getAccountId();
+        Optional<StorageAccount> storageAccount = azureClientCachedOperations.getStorageAccount(client, accountId,
+                azureStorageAccountNameExtractor.extractStorageAccountNameIfNecessary(request.getObjectStoragePath()),
+                Kind.STORAGE_V2);
         if (storageAccount.isPresent()) {
             return ObjectStorageMetadataResponse.builder()
                     .withStatus(ResponseStatus.OK)

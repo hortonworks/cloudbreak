@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.StorageAccountPa
 import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageInfo;
 import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageInfoService;
 import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageService;
+import com.sequenceiq.cloudbreak.cloud.azure.service.AzureClientCachedOperations;
 import com.sequenceiq.cloudbreak.cloud.azure.storage.SkuTypeResolver;
 import com.sequenceiq.cloudbreak.cloud.azure.util.RegionUtil;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
@@ -77,6 +78,9 @@ public class AzureStorage {
 
     @Inject
     private AzureImageInfoService azureImageInfoService;
+
+    @Inject
+    private AzureClientCachedOperations azureClientCachedOperations;
 
     public ArmAttachedStorageOption getArmAttachedStorageOption(Map<String, String> parameters) {
         String attachedStorageOption = parameters.get("attachedStorageOption");
@@ -201,8 +205,8 @@ public class AzureStorage {
         return Optional.empty();
     }
 
-    public Optional<String> findStorageAccountIdInVisibleSubscriptions(AzureClient client, String account) {
-        Optional<StorageAccount> storageAccount = client.getStorageAccount(account, Kind.STORAGE_V2);
+    public Optional<String> findStorageAccountIdInVisibleSubscriptions(AzureClient client, String storageAccountName, String accountId) {
+        Optional<StorageAccount> storageAccount = azureClientCachedOperations.getStorageAccount(client, accountId, storageAccountName, Kind.STORAGE_V2);
         LOGGER.debug("checking current subscription for storage account");
         if (storageAccount.isPresent()) {
             return storageAccount.map(HasId::id);
@@ -211,7 +215,7 @@ public class AzureStorage {
         List<String> subscriptionIds = client.listSubscriptions().getStream().map(Subscription::subscriptionId).collect(Collectors.toList());
         LOGGER.debug("Checking other subscriptions for storage account: {}", String.join(",", subscriptionIds));
         for (String subscriptionId : subscriptionIds) {
-            Optional<StorageAccountInner> storageAccountInner = client.getStorageAccountBySubscription(account, subscriptionId, Kind.STORAGE_V2);
+            Optional<StorageAccountInner> storageAccountInner = client.getStorageAccountBySubscription(storageAccountName, subscriptionId, Kind.STORAGE_V2);
             if (storageAccountInner.isPresent()) {
                 return storageAccountInner.map(ProxyResource::id);
             }

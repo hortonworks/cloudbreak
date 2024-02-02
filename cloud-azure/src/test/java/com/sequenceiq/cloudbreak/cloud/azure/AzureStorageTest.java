@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.azure.resourcemanager.resources.models.Subscription;
@@ -27,6 +28,7 @@ import com.azure.resourcemanager.storage.models.Kind;
 import com.azure.resourcemanager.storage.models.StorageAccount;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
+import com.sequenceiq.cloudbreak.cloud.azure.service.AzureClientCachedOperations;
 import com.sequenceiq.cloudbreak.cloud.azure.storage.SkuTypeResolver;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -64,6 +66,9 @@ public class AzureStorageTest {
     @Mock
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
 
+    @Spy
+    private AzureClientCachedOperations azureClientCachedOperations;
+
     @InjectMocks
     private AzureStorage underTest;
 
@@ -79,7 +84,7 @@ public class AzureStorageTest {
         when(storageAccount.id()).thenReturn("storageAccountOneId");
         when(client.getStorageAccount(STORAGE_ACCOUNT_IN_CURRENT_SUBSCRIPTION, Kind.STORAGE_V2)).thenReturn(Optional.of(storageAccount));
 
-        Optional<String> storageAccountId = underTest.findStorageAccountIdInVisibleSubscriptions(client, "storageAccountOne");
+        Optional<String> storageAccountId = underTest.findStorageAccountIdInVisibleSubscriptions(client, "storageAccountOne", "");
 
         assertTrue(storageAccountId.isPresent());
         assertEquals("storageAccountOneId", storageAccountId.get());
@@ -99,7 +104,7 @@ public class AzureStorageTest {
         when(client.getStorageAccountBySubscription(STORAGE_ACCOUNT_IN_ANOTHER_SUBSCRIPTION, SUBSCRIPTION_ANOTHER, Kind.STORAGE_V2))
                 .thenReturn(Optional.of(storageAccount));
 
-        Optional<String> storageAccountId = underTest.findStorageAccountIdInVisibleSubscriptions(client, "storageAccountAnother");
+        Optional<String> storageAccountId = underTest.findStorageAccountIdInVisibleSubscriptions(client, "storageAccountAnother", "");
 
         assertTrue(storageAccountId.isPresent());
         assertEquals(STORAGE_ACCOUNT_IN_ANOTHER_SUBSCRIPTION, storageAccountId.get());

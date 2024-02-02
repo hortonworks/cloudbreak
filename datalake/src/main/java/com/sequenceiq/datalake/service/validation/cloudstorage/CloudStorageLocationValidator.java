@@ -50,6 +50,8 @@ public class CloudStorageLocationValidator {
                         response.getRegion(),
                         bucketName,
                         environment.getLocation().getName()));
+        resultBuilder.ifError(() -> response.getStatus() == ResponseStatus.RESOURCE_NOT_FOUND,
+                String.format("Object storage cannot be found at location: %s.", bucketName));
     }
 
     private String getBucketName(FileSystemType fileSystemType, String storageLocation) {
