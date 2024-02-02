@@ -591,18 +591,14 @@ public class SshJClientActions extends SshJClient {
     }
 
     private <T extends CloudbreakTestDto> T checkFluentdStatus(T testDto, List<String> instanceIps) {
-        String fluentdStatusCommand =
-                "sudo cdp-doctor fluentd status --format json";
-        String fluentdNokStatusCommand =
-                "sudo cdp-doctor fluentd status --format json | jq -r '.. | objects | to_entries | map(select(.value == \"NOK\"))[] | \"\\(.key) \\(.value)\"'";
+        String fluentdNokStatusCommand = "sudo cdp-doctor fluentd status --format json | tail -1 | " +
+                "jq -r '.. | objects | to_entries | map(select(.value == \"NOK\"))[] | \"\\(.key) \\(.value)\"'";
         Map<String, Pair<Integer, String>> fluentdNokStatusReportByIp = instanceIps.stream()
                 .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, fluentdNokStatusCommand)));
 
         for (Entry<String, Pair<Integer, String>> statusReport : fluentdNokStatusReportByIp.entrySet()) {
             String fluentdNotOkStatuses = StringUtils.trimToNull(statusReport.getValue().getValue());
             if (StringUtils.isNotBlank(fluentdNotOkStatuses)) {
-                Map<String, Pair<Integer, String>> fluentdStatusReportByIp = instanceIps.stream()
-                        .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, fluentdStatusCommand)));
                 Log.error(LOGGER, format(" There is 'Not OK' CDP Fluentd status %s is present on '%s' instance! ", fluentdNotOkStatuses,
                         statusReport.getKey()));
                 throw new TestFailException(format("There is 'Not OK' CDP Fluentd status %s is present on '%s' instance!", fluentdNotOkStatuses,
