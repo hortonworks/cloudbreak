@@ -164,7 +164,7 @@ integrationtest:
     hybridCloudSecurityGroupID: sg-02bf7840fc64073fa
     freeipa:
       upgrade:
-        imageId: 9c1c8959-86a7-4b7d-af5a-be252f8b395d
+        imageId: ee52a28a-7551-4f56-8b08-a23f155316ba
         catalog: https://cloudbreak-imagecatalog.s3.us-west-1.amazonaws.com/freeipa-upgrade-test-catalog.json
     diskEncryption:
       environmentKey:
@@ -408,4 +408,3 @@ loadtest:
     minNodes: 1
     maxNodes: 5
     imageCatalogId: f6e778fc-7f17-4535-9021-515351df3691
-
