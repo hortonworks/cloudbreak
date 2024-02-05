@@ -8,6 +8,7 @@ import java.util.Set;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -45,6 +46,29 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
             + "WHERE e.id IN :ids "
             + "AND e.archived = false")
     Set<Environment> findAllByIdNotArchived(@Param("ids") List<Long> ids);
+
+    @Query("SELECT e.resourceCrn FROM Environment e WHERE e.deletionTimestamp > :date AND e.archived = true")
+    Set<String> findAllArchivedAndDeletionOlderThan(Long date);
+
+    @Modifying
+    @Query("DELETE FROM Environment e WHERE e.resourceCrn = :crn AND e.archived = true")
+    void deleteByResourceCrn(String crn);
+
+    @Modifying
+    @Query(value = "DELETE FROM environment_network e WHERE e.environment_id = :environmentId", nativeQuery = true)
+    void deleteEnvironmentNetwork(@Param("environmentId") Long environmentId);
+
+    @Query("SELECT e FROM Environment e "
+            + "LEFT JOIN FETCH e.network n "
+            + "LEFT JOIN FETCH n.environment ev "
+            + "LEFT JOIN FETCH e.credential c "
+            + "LEFT JOIN FETCH e.authentication a "
+            + "LEFT JOIN FETCH e.parameters p "
+            + "LEFT JOIN FETCH e.proxyConfig pc "
+            + "LEFT JOIN FETCH e.parentEnvironment pe "
+            + "WHERE e.resourceCrn = :resourceCrn "
+            + "AND e.archived = true")
+    Optional<Environment> findByResourceCrnArchivedIsTrue(@Param("resourceCrn") String resourceCrn);
 
     @Query("SELECT e.resourceCrn FROM Environment e " +
             "WHERE e.name in (:names) " +

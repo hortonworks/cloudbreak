@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.sync;
+package com.sequenceiq.environment.environment.scheduled.sync;
 
 import static com.sequenceiq.environment.environment.EnvironmentStatus.ENV_STOPPED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS;

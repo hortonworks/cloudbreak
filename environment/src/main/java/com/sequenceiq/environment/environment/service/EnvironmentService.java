@@ -446,4 +446,27 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         save(environment);
     }
 
+    public Set<String> getAllForArchive(long dateFrom) {
+        return environmentRepository.findAllArchivedAndDeletionOlderThan(dateFrom);
+    }
+
+    public void deleteByResourceCrn(String crn) {
+        Optional<Environment> environmentOptional = environmentRepository.findByResourceCrnArchivedIsTrue(crn);
+        if (environmentOptional.isPresent()) {
+            // detaching all related entity on environment and orphan removal must delete all of them
+            Environment environment = environmentOptional.get();
+            environment.setAuthentication(null);
+            environment.setParameters(null);
+            if (environment.getNetwork() != null) {
+                environment.getNetwork().setEnvironment(null);
+            }
+            environment.setNetwork(null);
+            environment.setParentEnvironment(null);
+            environment.setProxyConfig(null);
+            environmentRepository.save(environment);
+            environmentRepository.deleteEnvironmentNetwork(environment.getId());
+        }
+        environmentRepository.deleteByResourceCrn(crn);
+    }
+
 }

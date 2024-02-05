@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.sync;
+package com.sequenceiq.environment.environment.scheduled.sync;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SYNC_FINISHED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.AVAILABLE;

@@ -18,7 +18,7 @@ import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentViewDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
-import com.sequenceiq.environment.environment.sync.EnvironmentJobService;
+import com.sequenceiq.environment.environment.scheduled.sync.EnvironmentJobService;
 import com.sequenceiq.environment.exception.ExperienceOperationFailedException;
 
 @Service

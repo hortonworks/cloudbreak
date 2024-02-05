@@ -14,7 +14,7 @@ public class EnvironmentStructuredEventCleanupService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentStructuredEventCleanupService.class);
 
-    private static final int THREE_MONTHS = 3;
+    private static final int ONE_MONTH = 1;
 
     private final TimeUtil timeUtil;
 
@@ -27,10 +27,10 @@ public class EnvironmentStructuredEventCleanupService {
 
     public void cleanUpStructuredEvents(String resourceCrn) {
         if (isNotEmpty(resourceCrn)) {
-            long timestampsThreeMonthsAgo = timeUtil.getTimestampThatMonthsBeforeNow(THREE_MONTHS);
+            long timestampOneMonthAgo = timeUtil.getTimestampThatMonthsBeforeNow(ONE_MONTH);
             LOGGER.debug("About to request deletion for environment [CRN: {}] structured events where the timestamp is smaller than {}", resourceCrn,
-                    timestampsThreeMonthsAgo);
-            structuredEventService.deleteStructuredEventByResourceCrnThatIsOlderThan(resourceCrn, timestampsThreeMonthsAgo)
+                    timestampOneMonthAgo);
+            structuredEventService.deleteStructuredEventByResourceCrnThatIsOlderThan(resourceCrn, timestampOneMonthAgo)
                     .ifPresent(exception -> LOGGER.warn("Cleaning up structured events for environment [CRN: " + resourceCrn + "] has failed due to: "
                             + exception.getMessage(), exception));
         } else {

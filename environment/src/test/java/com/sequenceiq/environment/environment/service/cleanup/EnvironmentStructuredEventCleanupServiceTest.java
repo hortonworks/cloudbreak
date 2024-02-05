@@ -48,10 +48,10 @@ class EnvironmentStructuredEventCleanupServiceTest {
     }
 
     @Test
-    @DisplayName("Test cleanUpStructuredEvents method with proper content. This way the expected resoult should be that the cleanup is requested")
+    @DisplayName("Test cleanUpStructuredEvents method with proper content. This way the expected result should be that the cleanup is requested")
     void testCleanUpStructuredEventsWithContent() {
         String resourceCrn = "resourceCrn";
-        when(mockTimeUtil.getTimestampThatMonthsBeforeNow(3)).thenReturn(1L);
+        when(mockTimeUtil.getTimestampThatMonthsBeforeNow(1)).thenReturn(1L);
 
         underTest.cleanUpStructuredEvents(resourceCrn);
 

@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.sync;
+package com.sequenceiq.environment.environment.scheduled.sync;
 
 import java.util.Optional;
 

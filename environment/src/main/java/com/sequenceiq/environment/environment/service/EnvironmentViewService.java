@@ -77,6 +77,10 @@ public class EnvironmentViewService {
         return environmentViewRepository.findByIdAndArchivedIsFalse(id);
     }
 
+    public Optional<EnvironmentView> getByIdOptForArchiver(Long id) {
+        return environmentViewRepository.findById(id);
+    }
+
     public EnvironmentView getByNameAndAccountId(String name, String accountId) {
         return environmentViewRepository
                 .findByNameAndAccountIdAndArchivedIsFalse(name, accountId)

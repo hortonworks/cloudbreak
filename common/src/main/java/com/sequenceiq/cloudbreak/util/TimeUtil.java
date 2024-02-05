@@ -18,4 +18,7 @@ public class TimeUtil {
         return Instant.now().getEpochSecond() * MILLISEC_MULTIPLIER - Duration.ofDays(THIRTY_DAYS * amountOfMonths).toMillis();
     }
 
+    public Long getTimestampThatDaysBeforeNow(int amountOfDays) {
+        return Instant.now().getEpochSecond() * MILLISEC_MULTIPLIER - Duration.ofDays(amountOfDays).toMillis();
+    }
 }
