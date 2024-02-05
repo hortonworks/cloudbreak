@@ -48,6 +48,8 @@ public class PlatformParametersConsts {
 
     public static final String ADD_VOLUMES_SUPPORTED = "addVolumesSupported";
 
+    public static final String DELAY_DATABASE_START = "delayDatabaseStart";
+
     private PlatformParametersConsts() {
 
     }

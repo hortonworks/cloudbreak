@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus.UPDAT
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -13,6 +14,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +26,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -31,11 +36,13 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
+import com.sequenceiq.cloudbreak.cloud.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.cloudbreak.service.executor.DelayedExecutorService;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerSuccess;
@@ -65,6 +72,9 @@ class StartDatabaseServerHandlerTest {
     private CloudConnector cloudConnector;
 
     @Mock
+    private PlatformParameters platformParameters;
+
+    @Mock
     private Authenticator authenticator;
 
     @Mock
@@ -82,6 +92,9 @@ class StartDatabaseServerHandlerTest {
     @Mock
     private PollTask<ExternalDatabaseStatus> externalDatabaseStatusPollTask;
 
+    @Mock
+    private Optional<DelayedExecutorService> delayedExecutorService;
+
     @InjectMocks
     private StartDatabaseServerHandler victim;
 
@@ -92,6 +105,10 @@ class StartDatabaseServerHandlerTest {
         when(cloudConnector.authentication()).thenReturn(authenticator);
         when(authenticator.authenticate(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
         when(cloudConnector.resources()).thenReturn(resourceConnector);
+        lenient().when(delayedExecutorService.isPresent()).thenReturn(Boolean.FALSE);
+        lenient().when(cloudConnector.parameters()).thenReturn(platformParameters);
+        lenient().when(platformParameters.specialParameters())
+                .thenReturn(new SpecialParameters(Map.of(PlatformParametersConsts.DELAY_DATABASE_START, Boolean.FALSE)));
     }
 
     @Test

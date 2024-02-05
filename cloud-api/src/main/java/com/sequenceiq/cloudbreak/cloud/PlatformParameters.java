@@ -125,6 +125,7 @@ public interface PlatformParameters {
         specialParameters.put(PlatformParametersConsts.DB_SUBNETS_UPDATE_ENABLED, Boolean.FALSE);
         specialParameters.put(PlatformParametersConsts.DELETE_VOLUMES_SUPPORTED, Boolean.TRUE);
         specialParameters.put(PlatformParametersConsts.DISK_TYPE_CHANGE_SUPPORTED, Boolean.TRUE);
+        specialParameters.put(PlatformParametersConsts.DELAY_DATABASE_START, Boolean.FALSE);
         return new SpecialParameters(specialParameters);
     }
 

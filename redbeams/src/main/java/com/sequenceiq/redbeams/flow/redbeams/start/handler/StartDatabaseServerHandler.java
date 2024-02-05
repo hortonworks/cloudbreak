@@ -2,6 +2,9 @@ package com.sequenceiq.redbeams.flow.redbeams.start.handler;
 
 import static com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus.STARTED;
 
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -9,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -19,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.cloudbreak.service.executor.DelayedExecutorService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.redbeams.exception.DatabaseStartFailedException;
@@ -44,6 +49,9 @@ public class StartDatabaseServerHandler implements EventHandler<StartDatabaseSer
     @Inject
     private SyncPollingScheduler<ExternalDatabaseStatus> externalDatabaseStatusPollingScheduler;
 
+    @Inject
+    private Optional<DelayedExecutorService> delayedExecutorServiceProvider;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(StartDatabaseServerRequest.class);
@@ -68,7 +76,13 @@ public class StartDatabaseServerHandler implements EventHandler<StartDatabaseSer
                 LOGGER.debug("Database server '{}' is in '{}' status. Calling for '{}' status.",
                         request.getDbStack(), status, STARTED);
                 connector.resources().startDatabaseServer(ac, request.getDbStack());
-                status = pollAndGetDatabaseStatus(ac, request.getDbStack());
+                if (connector.parameters().specialParameters().getSpecialParameters().get(PlatformParametersConsts.DELAY_DATABASE_START)
+                        && delayedExecutorServiceProvider.isPresent()) {
+                    status = delayedExecutorServiceProvider.get()
+                            .runWithDelay(() -> pollAndGetDatabaseStatus(ac, request.getDbStack()), 1L, TimeUnit.MINUTES);
+                } else {
+                    status = pollAndGetDatabaseStatus(ac, request.getDbStack());
+                }
             } else {
                 LOGGER.debug("Database server '{}' is already in '{}' status.", request.getDbStack(), STARTED);
             }
