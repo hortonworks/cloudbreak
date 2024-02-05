@@ -9,6 +9,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
@@ -50,9 +51,7 @@ public class EnvironmentStructuredFlowEventFactory implements CDPStructuredFlowE
     public CDPStructuredFlowEvent createStructuredFlowEvent(Long resourceId, FlowDetails flowDetails, Exception exception) {
         Environment environment = environmentService.findEnvironmentByIdOrThrow(resourceId);
         String resourceType = CloudbreakEventService.ENVIRONMENT_RESOURCE_TYPE;
-        CDPOperationDetails operationDetails = new CDPOperationDetails(clock.getCurrentTimeMillis(), FLOW, resourceType, environment.getId(),
-                environment.getName(), nodeConfig.getId(), serviceVersion, environment.getAccountId(), environment.getResourceCrn(), environment.getCreator(),
-                environment.getResourceCrn(), null);
+        CDPOperationDetails operationDetails = getOperationDetails(resourceType, environment);
 
         EnvironmentDetails environmentDetails = environmentDtoConverter.environmentToDto(environment);
 
@@ -62,6 +61,22 @@ public class EnvironmentStructuredFlowEventFactory implements CDPStructuredFlowE
             event.setException(ExceptionUtils.getStackTrace(exception));
         }
         return event;
+    }
+
+    private CDPOperationDetails getOperationDetails(String resourceType, Environment environment) {
+        return new CDPOperationDetails(
+                clock.getCurrentTimeMillis(),
+                FLOW,
+                resourceType,
+                environment.getId(),
+                environment.getName(),
+                nodeConfig.getId(),
+                serviceVersion,
+                environment.getAccountId(),
+                environment.getResourceCrn(),
+                ThreadBasedUserCrnProvider.getUserCrn(),
+                environment.getResourceCrn(),
+                null);
     }
 
     private String getReason(Environment environment) {
