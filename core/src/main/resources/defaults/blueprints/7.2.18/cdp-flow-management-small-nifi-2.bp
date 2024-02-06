@@ -271,7 +271,7 @@
               },
               {
                 "name": "nifi.python.command",
-                "value": "python3.9"
+                "value": "python3.11"
               }
             ]
           }
