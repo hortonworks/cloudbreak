@@ -264,7 +264,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Query("SELECT s FROM Stack s WHERE s.resourceCrn = :crn")
     Optional<Stack> findByResourceCrn(@Param("crn") String crn);
 
-    @Query("SELECT s.environmentCrn FROM Stack s WHERE s.resourceCrn = :crn")
+    @Query(value = "SELECT environmentcrn FROM stack WHERE resourcecrn = :crn", nativeQuery = true)
     Optional<String> findEnvCrnByResourceCrn(@Param("crn") String crn);
 
     @Query("SELECT s.resourceCrn as resourceCrn, s.environmentCrn as environmentCrn FROM Stack s WHERE s.resourceCrn IN (:crns)")

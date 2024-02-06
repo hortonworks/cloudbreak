@@ -20,6 +20,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.envers.repository.support.EnversRevisionRepositoryFactoryBean;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.repository.support.Repositories;
 
@@ -52,7 +53,7 @@ public class JpaTest {
             Object repositoryInstance = repositories.getRepositoryFor(domainType).get();
             Method[] methods = repoInterface.getDeclaredMethods();
             for (Method method : methods) {
-                if (method.getName().startsWith("find")) {
+                if (method.getName().startsWith("find") && !nativeQuery(method)) {
                     tests.add(
                             DynamicTest.dynamicTest(
                                     repoInterface.getSimpleName() + "." + method.getName(),
@@ -61,6 +62,11 @@ public class JpaTest {
             }
         }
         return tests;
+    }
+
+    private boolean nativeQuery(Method method) {
+        Query annotation = method.getAnnotation(Query.class);
+        return annotation != null && annotation.nativeQuery();
     }
 
     private Object[] methodArgs(Method method) {
