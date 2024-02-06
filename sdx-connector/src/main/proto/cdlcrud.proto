@@ -32,6 +32,22 @@ service CdlCrud {
   // Describe Datalake Services
   rpc DescribeServices (DescribeServicesRequest)
       returns (DescribeServicesResponse) {}
+
+  // Start DataLake diagnostics collection
+  rpc CollectDatalakeDiagnostics (CollectDatalakeDiagnosticsRequest)
+      returns (CollectDatalakeDiagnosticsResponse) {}
+
+  // List recent Datalake diagnostics collections
+  rpc ListDatalakeDiagnostics (ListDatalakeDiagnosticsRequest)
+      returns (ListDatalakeDiagnosticsResponse) {}
+
+  // Cancel running Datalake diagnostics collections
+  rpc CancelDatalakeDiagnostics (CancelDatalakeDiagnosticsRequest)
+      returns (CancelDatalakeDiagnosticsResponse) {}
+
+  // List all Datalakes of an environment or datalake
+  rpc ListDatalakes (ListDatalakesRequest)
+      returns (ListDatalakesResponse) {}
 }
 // Database availability type
 message DatabaseAvailabilityType {
@@ -62,6 +78,10 @@ message StatusType {
     DELETED = 9;
     DELETE_FAILED = 10;
     UNKNOWN = 11;
+    // non-critical services failing
+    LIMITED_FUNCTIONALITY = 12;
+    // datalake is unavailable due to hardware or network failure or core services unhealthy
+    UNAVAILABLE = 13;
   }
 }
 
@@ -92,12 +112,18 @@ message Instance {
   string availabilityZone = 8;
 }
 
-// Information on each Endpoint
+// Information on each Endpoint for DescribeDatalake
 message Endpoint {
   // Service Name of the Endpoint
   string serviceName = 1;
   // Service URL of the Endpoint
   string serviceURL = 2;
+  // Display Name of the Endpoint
+  string displayName = 3;
+  // Knox Service of the Endpoint
+  string knoxService = 4;
+  // Mode of the Endpoint
+  string mode = 5;
 }
 
 // Network information of the Datalake
@@ -158,6 +184,14 @@ message Config {
   string value = 2;
 }
 
+// Definition of the config key-value pairs
+message ProductVersion {
+  // Name of the Product
+  string name = 1;
+  // Version of the Product
+  string version = 2;
+}
+
 // Definition of the endpoint host structure
 message EndpointHost {
   // URI to access the endpoint host
@@ -177,7 +211,7 @@ message CreateDatalakeRequest {
   // The database availability type
   optional DatabaseAvailabilityType.Value databaseAvailabilityType = 3;
   // Tags in key / value format
-  map<string,string> tags = 4;
+  map<string, string> tags = 4;
   // The database engine version
   optional string databaseEngineVersion = 5;
   // Whether Ranger raz is enabled or not
@@ -210,6 +244,8 @@ message CreateDatalakeResponse {
   bool enableRangerRaz = 7;
   // Whether multi availability zones is enabled or not
   bool enableMultiAz = 8;
+  // Tags associated with Datalake in key / value format
+  map<string, string> tags = 9;
 }
 
 // Delete Datalake request
@@ -230,6 +266,8 @@ message DeleteDatalakeResponse {
 message DescribeDatalakeRequest {
   // Name or CRN of the Datalake
   string datalake = 1;
+  // Account id if not internal actor
+  string accountID = 2;
 }
 
 // Describe Datalake response
@@ -267,11 +305,13 @@ message DescribeDatalakeResponse {
   // Database Details of Datalake
   DatabaseInfo databaseDetails = 16;
   // Status reason
-  string statusReason = 17;
+  repeated string statusReason = 17;
   // Whether multi availability zones is enabled or not
   bool multiAzEnabled = 18;
   // Geographic location code where cluster was created
   string region = 19;
+  // Product Version
+  ProductVersion productVersion = 20;
 }
 
 // Find Datalake Request
@@ -290,12 +330,24 @@ message DatalakeResponse {
   string name = 2;
   // Status of the Datalake
   string status = 3;
+  // Environment CRN of the Datalake
+  string environmentCrn = 4;
+  // Creation time of the Datalake
+  int64 created = 5 [(options.FieldExtension.datetime) = true];
+  // Status reason of the Datalake
+  string statusReason = 6;
+  // Ranger RAZ enabled or not of the Datalake
+  bool rangerRazEnabled = 7;
+  // MultiAZ enabled or not of the Datalake
+  bool multiAzEnabled = 8;
 }
 
 // Describe Services Request
 message DescribeServicesRequest {
   // CRN or Name of the Datalake
   string datalake = 1;
+  // Account id if not internal actor
+  string accountID = 2;
 }
 
 // Describe Services Response
@@ -316,4 +368,94 @@ message DescribeServicesResponse {
 message AwsConfiguration {
   // AWS bucket path
   string storageBucketLocation = 1;
+}
+
+message CollectDatalakeDiagnosticsRequest {
+  // Name or CRN of the Datalake
+  string datalake = 1;
+  // Destination of the diagnostics collection
+  Destination.Value destination = 2;
+  // Additional information / title for the diagnostics collection
+  optional string description = 3;
+  // Support case number in case of SUPPORT destination, otherwise only act as additional data
+  string caseNumber = 4;
+  // Date timestamp - collect files only for diagnostics that has higher last modified timestamp value than this
+  int64 startDate = 5 [(options.FieldExtension.datetime) = true];
+  // Date timestamp - collect files only for diagnostics that has lower created timestamp value than this
+  int64 endDate = 6 [(options.FieldExtension.datetime) = true];
+}
+
+// Destination of the diagnostics collection (Support, Own cloud storage)
+message Destination {
+  enum Value {
+    // Field is not set
+    UNSET = 0;
+    SUPPORT = 1;
+  }
+}
+
+// Response object for collecting DataLake diagnostics
+message CollectDatalakeDiagnosticsResponse {
+  // Details of a diagnostic collection
+  DiagnosticsCollection  diagnostics = 1;
+}
+
+message DiagnosticsCollection {
+  // Unique ID to track diagnostic collection
+  string collectionId = 1;
+  // Creation time of the diagnostics collection
+  int64 created = 2 [(options.FieldExtension.datetime) = true];
+  // Status of the diagnostics collection flow
+  DiagnosticsCollectionStatus.Value status = 3;
+}
+
+// Status of the diagnostics collection flow
+message DiagnosticsCollectionStatus {
+  enum Value {
+    RUNNING = 0;
+    FAILED = 1;
+    FINISHED = 2;
+    CANCELLED = 3;
+  }
+}
+
+// Request object for listing recent Datalake diagnostics collections. In no window provided, defaults will be used.
+message ListDatalakeDiagnosticsRequest {
+  // Name or CRN of the Datalake
+  string datalake = 1;
+  // Date timestamp - collect files only for diagnostics that has higher last modified timestamp value than this
+  optional int64 startDate = 2 [(options.FieldExtension.datetime) = true];
+  // Date timestamp - collect files only for diagnostics that has lower created timestamp value than this
+  optional int64 endDate = 3 [(options.FieldExtension.datetime) = true];
+}
+
+// Response object for listing recent Datalake diagnostics collections
+message ListDatalakeDiagnosticsResponse {
+  // Update of each diagnostic collection, in a given window of time.
+  repeated DiagnosticsCollection diagnostics = 1;
+}
+
+
+// Request object for cancel running Datalake diagnostics collections
+message CancelDatalakeDiagnosticsRequest {
+  // Name or CRN of the Datalake
+  string datalake = 1;
+}
+
+// Response object for cancel running Datalake diagnostics collections
+message CancelDatalakeDiagnosticsResponse {
+}
+
+// List Datalakes Request
+message ListDatalakesRequest {
+  // Name or CRN of the Environment
+  string environment = 1;
+  string accountID = 2;
+  // Name or CRN of the Datalake
+  string datalake = 3;
+}
+
+// Response object for listing datalakes
+message ListDatalakesResponse {
+  repeated DatalakeResponse datalakeResponse = 1;
 }

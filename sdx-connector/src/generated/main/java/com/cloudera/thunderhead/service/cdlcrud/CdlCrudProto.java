@@ -681,6 +681,22 @@ public final class CdlCrudProto {
        * <code>UNKNOWN = 11;</code>
        */
       UNKNOWN(11),
+      /**
+       * <pre>
+       * non-critical services failing
+       * </pre>
+       *
+       * <code>LIMITED_FUNCTIONALITY = 12;</code>
+       */
+      LIMITED_FUNCTIONALITY(12),
+      /**
+       * <pre>
+       * datalake is unavailable due to hardware or network failure or core services unhealthy
+       * </pre>
+       *
+       * <code>UNAVAILABLE = 13;</code>
+       */
+      UNAVAILABLE(13),
       UNRECOGNIZED(-1),
       ;
 
@@ -732,6 +748,22 @@ public final class CdlCrudProto {
        * <code>UNKNOWN = 11;</code>
        */
       public static final int UNKNOWN_VALUE = 11;
+      /**
+       * <pre>
+       * non-critical services failing
+       * </pre>
+       *
+       * <code>LIMITED_FUNCTIONALITY = 12;</code>
+       */
+      public static final int LIMITED_FUNCTIONALITY_VALUE = 12;
+      /**
+       * <pre>
+       * datalake is unavailable due to hardware or network failure or core services unhealthy
+       * </pre>
+       *
+       * <code>UNAVAILABLE = 13;</code>
+       */
+      public static final int UNAVAILABLE_VALUE = 13;
 
 
       public final int getNumber() {
@@ -770,6 +802,8 @@ public final class CdlCrudProto {
           case 9: return DELETED;
           case 10: return DELETE_FAILED;
           case 11: return UNKNOWN;
+          case 12: return LIMITED_FUNCTIONALITY;
+          case 13: return UNAVAILABLE;
           default: return null;
         }
       }
@@ -4189,10 +4223,70 @@ public final class CdlCrudProto {
      */
     com.google.protobuf.ByteString
         getServiceURLBytes();
+
+    /**
+     * <pre>
+     * Display Name of the Endpoint
+     * </pre>
+     *
+     * <code>string displayName = 3;</code>
+     * @return The displayName.
+     */
+    java.lang.String getDisplayName();
+    /**
+     * <pre>
+     * Display Name of the Endpoint
+     * </pre>
+     *
+     * <code>string displayName = 3;</code>
+     * @return The bytes for displayName.
+     */
+    com.google.protobuf.ByteString
+        getDisplayNameBytes();
+
+    /**
+     * <pre>
+     * Knox Service of the Endpoint
+     * </pre>
+     *
+     * <code>string knoxService = 4;</code>
+     * @return The knoxService.
+     */
+    java.lang.String getKnoxService();
+    /**
+     * <pre>
+     * Knox Service of the Endpoint
+     * </pre>
+     *
+     * <code>string knoxService = 4;</code>
+     * @return The bytes for knoxService.
+     */
+    com.google.protobuf.ByteString
+        getKnoxServiceBytes();
+
+    /**
+     * <pre>
+     * Mode of the Endpoint
+     * </pre>
+     *
+     * <code>string mode = 5;</code>
+     * @return The mode.
+     */
+    java.lang.String getMode();
+    /**
+     * <pre>
+     * Mode of the Endpoint
+     * </pre>
+     *
+     * <code>string mode = 5;</code>
+     * @return The bytes for mode.
+     */
+    com.google.protobuf.ByteString
+        getModeBytes();
   }
   /**
    * <pre>
-   * Information on each Endpoint
+   * Information on each Endpoint for DescribeDatalake
    * </pre>
    *
    * Protobuf type {@code cdlcrud.Endpoint}
@@ -4209,6 +4303,9 @@ public final class CdlCrudProto {
     private Endpoint() {
       serviceName_ = "";
       serviceURL_ = "";
+      displayName_ = "";
+      knoxService_ = "";
+      mode_ = "";
     }
 
     @java.lang.Override
@@ -4328,6 +4425,144 @@ public final class CdlCrudProto {
       }
     }
 
+    public static final int DISPLAYNAME_FIELD_NUMBER = 3;
+    private volatile java.lang.Object displayName_;
+    /**
+     * <pre>
+     * Display Name of the Endpoint
+     * </pre>
+     *
+     * <code>string displayName = 3;</code>
+     * @return The displayName.
+     */
+    @java.lang.Override
+    public java.lang.String getDisplayName() {
+      java.lang.Object ref = displayName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        displayName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Display Name of the Endpoint
+     * </pre>
+     *
+     * <code>string displayName = 3;</code>
+     * @return The bytes for displayName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDisplayNameBytes() {
+      java.lang.Object ref = displayName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        displayName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int KNOXSERVICE_FIELD_NUMBER = 4;
+    private volatile java.lang.Object knoxService_;
+    /**
+     * <pre>
+     * Knox Service of the Endpoint
+     * </pre>
+     *
+     * <code>string knoxService = 4;</code>
+     * @return The knoxService.
+     */
+    @java.lang.Override
+    public java.lang.String getKnoxService() {
+      java.lang.Object ref = knoxService_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        knoxService_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Knox Service of the Endpoint
+     * </pre>
+     *
+     * <code>string knoxService = 4;</code>
+     * @return The bytes for knoxService.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getKnoxServiceBytes() {
+      java.lang.Object ref = knoxService_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        knoxService_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int MODE_FIELD_NUMBER = 5;
+    private volatile java.lang.Object mode_;
+    /**
+     * <pre>
+     * Mode of the Endpoint
+     * </pre>
+     *
+     * <code>string mode = 5;</code>
+     * @return The mode.
+     */
+    @java.lang.Override
+    public java.lang.String getMode() {
+      java.lang.Object ref = mode_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        mode_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Mode of the Endpoint
+     * </pre>
+     *
+     * <code>string mode = 5;</code>
+     * @return The bytes for mode.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getModeBytes() {
+      java.lang.Object ref = mode_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        mode_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -4348,6 +4583,15 @@ public final class CdlCrudProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceURL_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, serviceURL_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(displayName_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, displayName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(knoxService_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, knoxService_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(mode_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, mode_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -4362,6 +4606,15 @@ public final class CdlCrudProto {
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceURL_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, serviceURL_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(displayName_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, displayName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(knoxService_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, knoxService_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(mode_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, mode_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -4382,6 +4635,12 @@ public final class CdlCrudProto {
           .equals(other.getServiceName())) return false;
       if (!getServiceURL()
           .equals(other.getServiceURL())) return false;
+      if (!getDisplayName()
+          .equals(other.getDisplayName())) return false;
+      if (!getKnoxService()
+          .equals(other.getKnoxService())) return false;
+      if (!getMode()
+          .equals(other.getMode())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -4397,6 +4656,12 @@ public final class CdlCrudProto {
       hash = (53 * hash) + getServiceName().hashCode();
       hash = (37 * hash) + SERVICEURL_FIELD_NUMBER;
       hash = (53 * hash) + getServiceURL().hashCode();
+      hash = (37 * hash) + DISPLAYNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getDisplayName().hashCode();
+      hash = (37 * hash) + KNOXSERVICE_FIELD_NUMBER;
+      hash = (53 * hash) + getKnoxService().hashCode();
+      hash = (37 * hash) + MODE_FIELD_NUMBER;
+      hash = (53 * hash) + getMode().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -4494,7 +4759,7 @@ public final class CdlCrudProto {
     }
     /**
      * <pre>
-     * Information on each Endpoint
+     * Information on each Endpoint for DescribeDatalake
      * </pre>
      *
      * Protobuf type {@code cdlcrud.Endpoint}
@@ -4533,6 +4798,12 @@ public final class CdlCrudProto {
 
         serviceURL_ = "";
 
+        displayName_ = "";
+
+        knoxService_ = "";
+
+        mode_ = "";
+
         return this;
       }
 
@@ -4561,6 +4832,9 @@ public final class CdlCrudProto {
         com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Endpoint result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Endpoint(this);
         result.serviceName_ = serviceName_;
         result.serviceURL_ = serviceURL_;
+        result.displayName_ = displayName_;
+        result.knoxService_ = knoxService_;
+        result.mode_ = mode_;
         onBuilt();
         return result;
       }
@@ -4617,6 +4891,18 @@ public final class CdlCrudProto {
           serviceURL_ = other.serviceURL_;
           onChanged();
         }
+        if (!other.getDisplayName().isEmpty()) {
+          displayName_ = other.displayName_;
+          onChanged();
+        }
+        if (!other.getKnoxService().isEmpty()) {
+          knoxService_ = other.knoxService_;
+          onChanged();
+        }
+        if (!other.getMode().isEmpty()) {
+          mode_ = other.mode_;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -4653,6 +4939,21 @@ public final class CdlCrudProto {
 
                 break;
               } // case 18
+              case 26: {
+                displayName_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              case 34: {
+                knoxService_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 42: {
+                mode_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -4857,6 +5158,294 @@ public final class CdlCrudProto {
   checkByteStringIsUtf8(value);
         
         serviceURL_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object displayName_ = "";
+      /**
+       * <pre>
+       * Display Name of the Endpoint
+       * </pre>
+       *
+       * <code>string displayName = 3;</code>
+       * @return The displayName.
+       */
+      public java.lang.String getDisplayName() {
+        java.lang.Object ref = displayName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          displayName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Display Name of the Endpoint
+       * </pre>
+       *
+       * <code>string displayName = 3;</code>
+       * @return The bytes for displayName.
+       */
+      public com.google.protobuf.ByteString
+          getDisplayNameBytes() {
+        java.lang.Object ref = displayName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          displayName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Display Name of the Endpoint
+       * </pre>
+       *
+       * <code>string displayName = 3;</code>
+       * @param value The displayName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDisplayName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        displayName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Display Name of the Endpoint
+       * </pre>
+       *
+       * <code>string displayName = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDisplayName() {
+        
+        displayName_ = getDefaultInstance().getDisplayName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Display Name of the Endpoint
+       * </pre>
+       *
+       * <code>string displayName = 3;</code>
+       * @param value The bytes for displayName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDisplayNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        displayName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object knoxService_ = "";
+      /**
+       * <pre>
+       * Knox Service of the Endpoint
+       * </pre>
+       *
+       * <code>string knoxService = 4;</code>
+       * @return The knoxService.
+       */
+      public java.lang.String getKnoxService() {
+        java.lang.Object ref = knoxService_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          knoxService_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Knox Service of the Endpoint
+       * </pre>
+       *
+       * <code>string knoxService = 4;</code>
+       * @return The bytes for knoxService.
+       */
+      public com.google.protobuf.ByteString
+          getKnoxServiceBytes() {
+        java.lang.Object ref = knoxService_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          knoxService_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Knox Service of the Endpoint
+       * </pre>
+       *
+       * <code>string knoxService = 4;</code>
+       * @param value The knoxService to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKnoxService(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        knoxService_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Knox Service of the Endpoint
+       * </pre>
+       *
+       * <code>string knoxService = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearKnoxService() {
+        
+        knoxService_ = getDefaultInstance().getKnoxService();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Knox Service of the Endpoint
+       * </pre>
+       *
+       * <code>string knoxService = 4;</code>
+       * @param value The bytes for knoxService to set.
+       * @return This builder for chaining.
+       */
+      public Builder setKnoxServiceBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        knoxService_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object mode_ = "";
+      /**
+       * <pre>
+       * Mode of the Endpoint
+       * </pre>
+       *
+       * <code>string mode = 5;</code>
+       * @return The mode.
+       */
+      public java.lang.String getMode() {
+        java.lang.Object ref = mode_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          mode_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Mode of the Endpoint
+       * </pre>
+       *
+       * <code>string mode = 5;</code>
+       * @return The bytes for mode.
+       */
+      public com.google.protobuf.ByteString
+          getModeBytes() {
+        java.lang.Object ref = mode_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          mode_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Mode of the Endpoint
+       * </pre>
+       *
+       * <code>string mode = 5;</code>
+       * @param value The mode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMode(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        mode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Mode of the Endpoint
+       * </pre>
+       *
+       * <code>string mode = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMode() {
+        
+        mode_ = getDefaultInstance().getMode();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Mode of the Endpoint
+       * </pre>
+       *
+       * <code>string mode = 5;</code>
+       * @param value The bytes for mode to set.
+       * @return This builder for chaining.
+       */
+      public Builder setModeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        mode_ = value;
         onChanged();
         return this;
       }
@@ -10813,6 +11402,784 @@ public final class CdlCrudProto {
 
   }
 
+  public interface ProductVersionOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.ProductVersion)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Name of the Product
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    java.lang.String getName();
+    /**
+     * <pre>
+     * Name of the Product
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+
+    /**
+     * <pre>
+     * Version of the Product
+     * </pre>
+     *
+     * <code>string version = 2;</code>
+     * @return The version.
+     */
+    java.lang.String getVersion();
+    /**
+     * <pre>
+     * Version of the Product
+     * </pre>
+     *
+     * <code>string version = 2;</code>
+     * @return The bytes for version.
+     */
+    com.google.protobuf.ByteString
+        getVersionBytes();
+  }
+  /**
+   * <pre>
+   * Definition of the config key-value pairs
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.ProductVersion}
+   */
+  public static final class ProductVersion extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.ProductVersion)
+      ProductVersionOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ProductVersion.newBuilder() to construct.
+    private ProductVersion(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ProductVersion() {
+      name_ = "";
+      version_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ProductVersion();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ProductVersion_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ProductVersion_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion.Builder.class);
+    }
+
+    public static final int NAME_FIELD_NUMBER = 1;
+    private volatile java.lang.Object name_;
+    /**
+     * <pre>
+     * Name of the Product
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The name.
+     */
+    @java.lang.Override
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        name_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Name of the Product
+     * </pre>
+     *
+     * <code>string name = 1;</code>
+     * @return The bytes for name.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int VERSION_FIELD_NUMBER = 2;
+    private volatile java.lang.Object version_;
+    /**
+     * <pre>
+     * Version of the Product
+     * </pre>
+     *
+     * <code>string version = 2;</code>
+     * @return The version.
+     */
+    @java.lang.Override
+    public java.lang.String getVersion() {
+      java.lang.Object ref = version_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        version_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Version of the Product
+     * </pre>
+     *
+     * <code>string version = 2;</code>
+     * @return The bytes for version.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getVersionBytes() {
+      java.lang.Object ref = version_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        version_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(version_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, version_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(version_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, version_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion) obj;
+
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (!getVersion()
+          .equals(other.getVersion())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + NAME_FIELD_NUMBER;
+      hash = (53 * hash) + getName().hashCode();
+      hash = (37 * hash) + VERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getVersion().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Definition of the config key-value pairs
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.ProductVersion}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.ProductVersion)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersionOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ProductVersion_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ProductVersion_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        name_ = "";
+
+        version_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ProductVersion_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion(this);
+        result.name_ = name_;
+        result.version_ = version_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion.getDefaultInstance()) return this;
+        if (!other.getName().isEmpty()) {
+          name_ = other.name_;
+          onChanged();
+        }
+        if (!other.getVersion().isEmpty()) {
+          version_ = other.version_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                name_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                version_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+
+      private java.lang.Object name_ = "";
+      /**
+       * <pre>
+       * Name of the Product
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The name.
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          name_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name of the Product
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return The bytes for name.
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name of the Product
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        name_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name of the Product
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearName() {
+        
+        name_ = getDefaultInstance().getName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name of the Product
+       * </pre>
+       *
+       * <code>string name = 1;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        name_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object version_ = "";
+      /**
+       * <pre>
+       * Version of the Product
+       * </pre>
+       *
+       * <code>string version = 2;</code>
+       * @return The version.
+       */
+      public java.lang.String getVersion() {
+        java.lang.Object ref = version_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          version_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Version of the Product
+       * </pre>
+       *
+       * <code>string version = 2;</code>
+       * @return The bytes for version.
+       */
+      public com.google.protobuf.ByteString
+          getVersionBytes() {
+        java.lang.Object ref = version_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          version_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Version of the Product
+       * </pre>
+       *
+       * <code>string version = 2;</code>
+       * @param value The version to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVersion(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        version_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version of the Product
+       * </pre>
+       *
+       * <code>string version = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearVersion() {
+        
+        version_ = getDefaultInstance().getVersion();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version of the Product
+       * </pre>
+       *
+       * <code>string version = 2;</code>
+       * @param value The bytes for version to set.
+       * @return This builder for chaining.
+       */
+      public Builder setVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        version_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.ProductVersion)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.ProductVersion)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ProductVersion>
+        PARSER = new com.google.protobuf.AbstractParser<ProductVersion>() {
+      @java.lang.Override
+      public ProductVersion parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ProductVersion> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ProductVersion> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface EndpointHostOrBuilder extends
       // @@protoc_insertion_point(interface_extends:cdlcrud.EndpointHost)
       com.google.protobuf.MessageOrBuilder {
@@ -14724,6 +16091,62 @@ java.lang.String defaultValue);
      * @return The enableMultiAz.
      */
     boolean getEnableMultiAz();
+
+    /**
+     * <pre>
+     * Tags associated with Datalake in key / value format
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; tags = 9;</code>
+     */
+    int getTagsCount();
+    /**
+     * <pre>
+     * Tags associated with Datalake in key / value format
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; tags = 9;</code>
+     */
+    boolean containsTags(
+        java.lang.String key);
+    /**
+     * Use {@link #getTagsMap()} instead.
+     */
+    @java.lang.Deprecated
+    java.util.Map<java.lang.String, java.lang.String>
+    getTags();
+    /**
+     * <pre>
+     * Tags associated with Datalake in key / value format
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; tags = 9;</code>
+     */
+    java.util.Map<java.lang.String, java.lang.String>
+    getTagsMap();
+    /**
+     * <pre>
+     * Tags associated with Datalake in key / value format
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; tags = 9;</code>
+     */
+
+    /* nullable */
+java.lang.String getTagsOrDefault(
+        java.lang.String key,
+        /* nullable */
+java.lang.String defaultValue);
+    /**
+     * <pre>
+     * Tags associated with Datalake in key / value format
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; tags = 9;</code>
+     */
+
+    java.lang.String getTagsOrThrow(
+        java.lang.String key);
   }
   /**
    * <pre>
@@ -14766,6 +16189,18 @@ java.lang.String defaultValue);
       return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CreateDatalakeResponse_descriptor;
     }
 
+    @SuppressWarnings({"rawtypes"})
+    @java.lang.Override
+    protected com.google.protobuf.MapField internalGetMapField(
+        int number) {
+      switch (number) {
+        case 9:
+          return internalGetTags();
+        default:
+          throw new RuntimeException(
+              "Invalid map field number: " + number);
+      }
+    }
     @java.lang.Override
     protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
         internalGetFieldAccessorTable() {
@@ -15049,6 +16484,103 @@ java.lang.String defaultValue);
       return enableMultiAz_;
     }
 
+    public static final int TAGS_FIELD_NUMBER = 9;
+    private static final class TagsDefaultEntryHolder {
+      static final com.google.protobuf.MapEntry<
+          java.lang.String, java.lang.String> defaultEntry =
+              com.google.protobuf.MapEntry
+              .<java.lang.String, java.lang.String>newDefaultInstance(
+                  com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CreateDatalakeResponse_TagsEntry_descriptor, 
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "",
+                  com.google.protobuf.WireFormat.FieldType.STRING,
+                  "");
+    }
+    private com.google.protobuf.MapField<
+        java.lang.String, java.lang.String> tags_;
+    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+    internalGetTags() {
+      if (tags_ == null) {
+        return com.google.protobuf.MapField.emptyMapField(
+            TagsDefaultEntryHolder.defaultEntry);
+      }
+      return tags_;
+    }
+
+    public int getTagsCount() {
+      return internalGetTags().getMap().size();
+    }
+    /**
+     * <pre>
+     * Tags associated with Datalake in key / value format
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; tags = 9;</code>
+     */
+
+    @java.lang.Override
+    public boolean containsTags(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      return internalGetTags().getMap().containsKey(key);
+    }
+    /**
+     * Use {@link #getTagsMap()} instead.
+     */
+    @java.lang.Override
+    @java.lang.Deprecated
+    public java.util.Map<java.lang.String, java.lang.String> getTags() {
+      return getTagsMap();
+    }
+    /**
+     * <pre>
+     * Tags associated with Datalake in key / value format
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; tags = 9;</code>
+     */
+    @java.lang.Override
+
+    public java.util.Map<java.lang.String, java.lang.String> getTagsMap() {
+      return internalGetTags().getMap();
+    }
+    /**
+     * <pre>
+     * Tags associated with Datalake in key / value format
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; tags = 9;</code>
+     */
+    @java.lang.Override
+
+    public java.lang.String getTagsOrDefault(
+        java.lang.String key,
+        java.lang.String defaultValue) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetTags().getMap();
+      return map.containsKey(key) ? map.get(key) : defaultValue;
+    }
+    /**
+     * <pre>
+     * Tags associated with Datalake in key / value format
+     * </pre>
+     *
+     * <code>map&lt;string, string&gt; tags = 9;</code>
+     */
+    @java.lang.Override
+
+    public java.lang.String getTagsOrThrow(
+        java.lang.String key) {
+      if (key == null) { throw new NullPointerException("map key"); }
+      java.util.Map<java.lang.String, java.lang.String> map =
+          internalGetTags().getMap();
+      if (!map.containsKey(key)) {
+        throw new java.lang.IllegalArgumentException();
+      }
+      return map.get(key);
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -15087,6 +16619,12 @@ java.lang.String defaultValue);
       if (enableMultiAz_ != false) {
         output.writeBool(8, enableMultiAz_);
       }
+      com.google.protobuf.GeneratedMessageV3
+        .serializeStringMapTo(
+          output,
+          internalGetTags(),
+          TagsDefaultEntryHolder.defaultEntry,
+          9);
       getUnknownFields().writeTo(output);
     }
 
@@ -15123,6 +16661,16 @@ java.lang.String defaultValue);
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(8, enableMultiAz_);
       }
+      for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
+           : internalGetTags().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+        tags__ = TagsDefaultEntryHolder.defaultEntry.newBuilderForType()
+            .setKey(entry.getKey())
+            .setValue(entry.getValue())
+            .build();
+        size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(9, tags__);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -15154,6 +16702,8 @@ java.lang.String defaultValue);
           != other.getEnableRangerRaz()) return false;
       if (getEnableMultiAz()
           != other.getEnableMultiAz()) return false;
+      if (!internalGetTags().equals(
+          other.internalGetTags())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -15184,6 +16734,10 @@ java.lang.String defaultValue);
       hash = (37 * hash) + ENABLEMULTIAZ_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getEnableMultiAz());
+      if (!internalGetTags().getMap().isEmpty()) {
+        hash = (37 * hash) + TAGS_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetTags().hashCode();
+      }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -15295,6 +16849,28 @@ java.lang.String defaultValue);
         return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CreateDatalakeResponse_descriptor;
       }
 
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapField internalGetMapField(
+          int number) {
+        switch (number) {
+          case 9:
+            return internalGetTags();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
+      @SuppressWarnings({"rawtypes"})
+      protected com.google.protobuf.MapField internalGetMutableMapField(
+          int number) {
+        switch (number) {
+          case 9:
+            return internalGetMutableTags();
+          default:
+            throw new RuntimeException(
+                "Invalid map field number: " + number);
+        }
+      }
       @java.lang.Override
       protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
           internalGetFieldAccessorTable() {
@@ -15332,6 +16908,7 @@ java.lang.String defaultValue);
 
         enableMultiAz_ = false;
 
+        internalGetMutableTags().clear();
         return this;
       }
 
@@ -15358,6 +16935,7 @@ java.lang.String defaultValue);
       @java.lang.Override
       public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CreateDatalakeResponse buildPartial() {
         com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CreateDatalakeResponse result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CreateDatalakeResponse(this);
+        int from_bitField0_ = bitField0_;
         result.crn_ = crn_;
         result.status_ = status_;
         result.datalakeName_ = datalakeName_;
@@ -15366,6 +16944,8 @@ java.lang.String defaultValue);
         result.statusReason_ = statusReason_;
         result.enableRangerRaz_ = enableRangerRaz_;
         result.enableMultiAz_ = enableMultiAz_;
+        result.tags_ = internalGetTags();
+        result.tags_.makeImmutable();
         onBuilt();
         return result;
       }
@@ -15443,6 +17023,8 @@ java.lang.String defaultValue);
         if (other.getEnableMultiAz() != false) {
           setEnableMultiAz(other.getEnableMultiAz());
         }
+        internalGetMutableTags().mergeFrom(
+            other.internalGetTags());
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -15509,6 +17091,14 @@ java.lang.String defaultValue);
 
                 break;
               } // case 64
+              case 74: {
+                com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
+                tags__ = input.readMessage(
+                    TagsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+                internalGetMutableTags().getMutableMap().put(
+                    tags__.getKey(), tags__.getValue());
+                break;
+              } // case 74
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -15524,6 +17114,7 @@ java.lang.String defaultValue);
         } // finally
         return this;
       }
+      private int bitField0_;
 
       private java.lang.Object crn_ = "";
       /**
@@ -16131,6 +17722,165 @@ java.lang.String defaultValue);
         
         enableMultiAz_ = false;
         onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.MapField<
+          java.lang.String, java.lang.String> tags_;
+      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+      internalGetTags() {
+        if (tags_ == null) {
+          return com.google.protobuf.MapField.emptyMapField(
+              TagsDefaultEntryHolder.defaultEntry);
+        }
+        return tags_;
+      }
+      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
+      internalGetMutableTags() {
+        onChanged();;
+        if (tags_ == null) {
+          tags_ = com.google.protobuf.MapField.newMapField(
+              TagsDefaultEntryHolder.defaultEntry);
+        }
+        if (!tags_.isMutable()) {
+          tags_ = tags_.copy();
+        }
+        return tags_;
+      }
+
+      public int getTagsCount() {
+        return internalGetTags().getMap().size();
+      }
+      /**
+       * <pre>
+       * Tags associated with Datalake in key / value format
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; tags = 9;</code>
+       */
+
+      @java.lang.Override
+      public boolean containsTags(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        return internalGetTags().getMap().containsKey(key);
+      }
+      /**
+       * Use {@link #getTagsMap()} instead.
+       */
+      @java.lang.Override
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, java.lang.String> getTags() {
+        return getTagsMap();
+      }
+      /**
+       * <pre>
+       * Tags associated with Datalake in key / value format
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; tags = 9;</code>
+       */
+      @java.lang.Override
+
+      public java.util.Map<java.lang.String, java.lang.String> getTagsMap() {
+        return internalGetTags().getMap();
+      }
+      /**
+       * <pre>
+       * Tags associated with Datalake in key / value format
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; tags = 9;</code>
+       */
+      @java.lang.Override
+
+      public java.lang.String getTagsOrDefault(
+          java.lang.String key,
+          java.lang.String defaultValue) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, java.lang.String> map =
+            internalGetTags().getMap();
+        return map.containsKey(key) ? map.get(key) : defaultValue;
+      }
+      /**
+       * <pre>
+       * Tags associated with Datalake in key / value format
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; tags = 9;</code>
+       */
+      @java.lang.Override
+
+      public java.lang.String getTagsOrThrow(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        java.util.Map<java.lang.String, java.lang.String> map =
+            internalGetTags().getMap();
+        if (!map.containsKey(key)) {
+          throw new java.lang.IllegalArgumentException();
+        }
+        return map.get(key);
+      }
+
+      public Builder clearTags() {
+        internalGetMutableTags().getMutableMap()
+            .clear();
+        return this;
+      }
+      /**
+       * <pre>
+       * Tags associated with Datalake in key / value format
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; tags = 9;</code>
+       */
+
+      public Builder removeTags(
+          java.lang.String key) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        internalGetMutableTags().getMutableMap()
+            .remove(key);
+        return this;
+      }
+      /**
+       * Use alternate mutation accessors instead.
+       */
+      @java.lang.Deprecated
+      public java.util.Map<java.lang.String, java.lang.String>
+      getMutableTags() {
+        return internalGetMutableTags().getMutableMap();
+      }
+      /**
+       * <pre>
+       * Tags associated with Datalake in key / value format
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; tags = 9;</code>
+       */
+      public Builder putTags(
+          java.lang.String key,
+          java.lang.String value) {
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) {
+  throw new NullPointerException("map value");
+}
+
+        internalGetMutableTags().getMutableMap()
+            .put(key, value);
+        return this;
+      }
+      /**
+       * <pre>
+       * Tags associated with Datalake in key / value format
+       * </pre>
+       *
+       * <code>map&lt;string, string&gt; tags = 9;</code>
+       */
+
+      public Builder putAllTags(
+          java.util.Map<java.lang.String, java.lang.String> values) {
+        internalGetMutableTags().getMutableMap()
+            .putAll(values);
         return this;
       }
       @java.lang.Override
@@ -17591,6 +19341,26 @@ java.lang.String defaultValue);
      */
     com.google.protobuf.ByteString
         getDatalakeBytes();
+
+    /**
+     * <pre>
+     * Account id if not internal actor
+     * </pre>
+     *
+     * <code>string accountID = 2;</code>
+     * @return The accountID.
+     */
+    java.lang.String getAccountID();
+    /**
+     * <pre>
+     * Account id if not internal actor
+     * </pre>
+     *
+     * <code>string accountID = 2;</code>
+     * @return The bytes for accountID.
+     */
+    com.google.protobuf.ByteString
+        getAccountIDBytes();
   }
   /**
    * <pre>
@@ -17610,6 +19380,7 @@ java.lang.String defaultValue);
     }
     private DescribeDatalakeRequest() {
       datalake_ = "";
+      accountID_ = "";
     }
 
     @java.lang.Override
@@ -17683,6 +19454,52 @@ java.lang.String defaultValue);
       }
     }
 
+    public static final int ACCOUNTID_FIELD_NUMBER = 2;
+    private volatile java.lang.Object accountID_;
+    /**
+     * <pre>
+     * Account id if not internal actor
+     * </pre>
+     *
+     * <code>string accountID = 2;</code>
+     * @return The accountID.
+     */
+    @java.lang.Override
+    public java.lang.String getAccountID() {
+      java.lang.Object ref = accountID_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountID_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Account id if not internal actor
+     * </pre>
+     *
+     * <code>string accountID = 2;</code>
+     * @return The bytes for accountID.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getAccountIDBytes() {
+      java.lang.Object ref = accountID_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountID_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -17700,6 +19517,9 @@ java.lang.String defaultValue);
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, datalake_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountID_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, accountID_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -17711,6 +19531,9 @@ java.lang.String defaultValue);
       size = 0;
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, datalake_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountID_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, accountID_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -17729,6 +19552,8 @@ java.lang.String defaultValue);
 
       if (!getDatalake()
           .equals(other.getDatalake())) return false;
+      if (!getAccountID()
+          .equals(other.getAccountID())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -17742,6 +19567,8 @@ java.lang.String defaultValue);
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + DATALAKE_FIELD_NUMBER;
       hash = (53 * hash) + getDatalake().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountID().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -17876,6 +19703,8 @@ java.lang.String defaultValue);
         super.clear();
         datalake_ = "";
 
+        accountID_ = "";
+
         return this;
       }
 
@@ -17903,6 +19732,7 @@ java.lang.String defaultValue);
       public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeDatalakeRequest buildPartial() {
         com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeDatalakeRequest result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeDatalakeRequest(this);
         result.datalake_ = datalake_;
+        result.accountID_ = accountID_;
         onBuilt();
         return result;
       }
@@ -17955,6 +19785,10 @@ java.lang.String defaultValue);
           datalake_ = other.datalake_;
           onChanged();
         }
+        if (!other.getAccountID().isEmpty()) {
+          accountID_ = other.accountID_;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -17986,6 +19820,11 @@ java.lang.String defaultValue);
 
                 break;
               } // case 10
+              case 18: {
+                accountID_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -18094,6 +19933,102 @@ java.lang.String defaultValue);
   checkByteStringIsUtf8(value);
         
         datalake_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object accountID_ = "";
+      /**
+       * <pre>
+       * Account id if not internal actor
+       * </pre>
+       *
+       * <code>string accountID = 2;</code>
+       * @return The accountID.
+       */
+      public java.lang.String getAccountID() {
+        java.lang.Object ref = accountID_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountID_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Account id if not internal actor
+       * </pre>
+       *
+       * <code>string accountID = 2;</code>
+       * @return The bytes for accountID.
+       */
+      public com.google.protobuf.ByteString
+          getAccountIDBytes() {
+        java.lang.Object ref = accountID_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountID_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Account id if not internal actor
+       * </pre>
+       *
+       * <code>string accountID = 2;</code>
+       * @param value The accountID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountID(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        accountID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Account id if not internal actor
+       * </pre>
+       *
+       * <code>string accountID = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAccountID() {
+        
+        accountID_ = getDefaultInstance().getAccountID();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Account id if not internal actor
+       * </pre>
+       *
+       * <code>string accountID = 2;</code>
+       * @param value The bytes for accountID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountIDBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        accountID_ = value;
         onChanged();
         return this;
       }
@@ -18567,20 +20502,41 @@ java.lang.String defaultValue);
      * Status reason
      * </pre>
      *
-     * <code>string statusReason = 17;</code>
-     * @return The statusReason.
+     * <code>repeated string statusReason = 17;</code>
+     * @return A list containing the statusReason.
      */
-    java.lang.String getStatusReason();
+    java.util.List<java.lang.String>
+        getStatusReasonList();
     /**
      * <pre>
      * Status reason
      * </pre>
      *
-     * <code>string statusReason = 17;</code>
-     * @return The bytes for statusReason.
+     * <code>repeated string statusReason = 17;</code>
+     * @return The count of statusReason.
+     */
+    int getStatusReasonCount();
+    /**
+     * <pre>
+     * Status reason
+     * </pre>
+     *
+     * <code>repeated string statusReason = 17;</code>
+     * @param index The index of the element to return.
+     * @return The statusReason at the given index.
+     */
+    java.lang.String getStatusReason(int index);
+    /**
+     * <pre>
+     * Status reason
+     * </pre>
+     *
+     * <code>repeated string statusReason = 17;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the statusReason at the given index.
      */
     com.google.protobuf.ByteString
-        getStatusReasonBytes();
+        getStatusReasonBytes(int index);
 
     /**
      * <pre>
@@ -18611,6 +20567,33 @@ java.lang.String defaultValue);
      */
     com.google.protobuf.ByteString
         getRegionBytes();
+
+    /**
+     * <pre>
+     * Product Version
+     * </pre>
+     *
+     * <code>.cdlcrud.ProductVersion productVersion = 20;</code>
+     * @return Whether the productVersion field is set.
+     */
+    boolean hasProductVersion();
+    /**
+     * <pre>
+     * Product Version
+     * </pre>
+     *
+     * <code>.cdlcrud.ProductVersion productVersion = 20;</code>
+     * @return The productVersion.
+     */
+    com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion getProductVersion();
+    /**
+     * <pre>
+     * Product Version
+     * </pre>
+     *
+     * <code>.cdlcrud.ProductVersion productVersion = 20;</code>
+     */
+    com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersionOrBuilder getProductVersionOrBuilder();
   }
   /**
    * <pre>
@@ -18640,7 +20623,7 @@ java.lang.String defaultValue);
       accountID_ = "";
       runtimeVersion_ = "";
       deleted_ = "";
-      statusReason_ = "";
+      statusReason_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       region_ = "";
     }
 
@@ -19400,49 +21383,54 @@ java.lang.String defaultValue);
     }
 
     public static final int STATUSREASON_FIELD_NUMBER = 17;
-    private volatile java.lang.Object statusReason_;
+    private com.google.protobuf.LazyStringList statusReason_;
     /**
      * <pre>
      * Status reason
      * </pre>
      *
-     * <code>string statusReason = 17;</code>
-     * @return The statusReason.
+     * <code>repeated string statusReason = 17;</code>
+     * @return A list containing the statusReason.
      */
-    @java.lang.Override
-    public java.lang.String getStatusReason() {
-      java.lang.Object ref = statusReason_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        statusReason_ = s;
-        return s;
-      }
+    public com.google.protobuf.ProtocolStringList
+        getStatusReasonList() {
+      return statusReason_;
     }
     /**
      * <pre>
      * Status reason
      * </pre>
      *
-     * <code>string statusReason = 17;</code>
-     * @return The bytes for statusReason.
+     * <code>repeated string statusReason = 17;</code>
+     * @return The count of statusReason.
      */
-    @java.lang.Override
+    public int getStatusReasonCount() {
+      return statusReason_.size();
+    }
+    /**
+     * <pre>
+     * Status reason
+     * </pre>
+     *
+     * <code>repeated string statusReason = 17;</code>
+     * @param index The index of the element to return.
+     * @return The statusReason at the given index.
+     */
+    public java.lang.String getStatusReason(int index) {
+      return statusReason_.get(index);
+    }
+    /**
+     * <pre>
+     * Status reason
+     * </pre>
+     *
+     * <code>repeated string statusReason = 17;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the statusReason at the given index.
+     */
     public com.google.protobuf.ByteString
-        getStatusReasonBytes() {
-      java.lang.Object ref = statusReason_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        statusReason_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+        getStatusReasonBytes(int index) {
+      return statusReason_.getByteString(index);
     }
 
     public static final int MULTIAZENABLED_FIELD_NUMBER = 18;
@@ -19504,6 +21492,44 @@ java.lang.String defaultValue);
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
+    }
+
+    public static final int PRODUCTVERSION_FIELD_NUMBER = 20;
+    private com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion productVersion_;
+    /**
+     * <pre>
+     * Product Version
+     * </pre>
+     *
+     * <code>.cdlcrud.ProductVersion productVersion = 20;</code>
+     * @return Whether the productVersion field is set.
+     */
+    @java.lang.Override
+    public boolean hasProductVersion() {
+      return productVersion_ != null;
+    }
+    /**
+     * <pre>
+     * Product Version
+     * </pre>
+     *
+     * <code>.cdlcrud.ProductVersion productVersion = 20;</code>
+     * @return The productVersion.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion getProductVersion() {
+      return productVersion_ == null ? com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion.getDefaultInstance() : productVersion_;
+    }
+    /**
+     * <pre>
+     * Product Version
+     * </pre>
+     *
+     * <code>.cdlcrud.ProductVersion productVersion = 20;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersionOrBuilder getProductVersionOrBuilder() {
+      return getProductVersion();
     }
 
     private byte memoizedIsInitialized = -1;
@@ -19571,14 +21597,17 @@ java.lang.String defaultValue);
       if (databaseDetails_ != null) {
         output.writeMessage(16, getDatabaseDetails());
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(statusReason_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 17, statusReason_);
+      for (int i = 0; i < statusReason_.size(); i++) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 17, statusReason_.getRaw(i));
       }
       if (multiAzEnabled_ != false) {
         output.writeBool(18, multiAzEnabled_);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(region_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 19, region_);
+      }
+      if (productVersion_ != null) {
+        output.writeMessage(20, getProductVersion());
       }
       getUnknownFields().writeTo(output);
     }
@@ -19651,8 +21680,13 @@ java.lang.String defaultValue);
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(16, getDatabaseDetails());
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(statusReason_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(17, statusReason_);
+      {
+        int dataSize = 0;
+        for (int i = 0; i < statusReason_.size(); i++) {
+          dataSize += computeStringSizeNoTag(statusReason_.getRaw(i));
+        }
+        size += dataSize;
+        size += 2 * getStatusReasonList().size();
       }
       if (multiAzEnabled_ != false) {
         size += com.google.protobuf.CodedOutputStream
@@ -19660,6 +21694,10 @@ java.lang.String defaultValue);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(region_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(19, region_);
+      }
+      if (productVersion_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(20, getProductVersion());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -19713,12 +21751,17 @@ java.lang.String defaultValue);
         if (!getDatabaseDetails()
             .equals(other.getDatabaseDetails())) return false;
       }
-      if (!getStatusReason()
-          .equals(other.getStatusReason())) return false;
+      if (!getStatusReasonList()
+          .equals(other.getStatusReasonList())) return false;
       if (getMultiAzEnabled()
           != other.getMultiAzEnabled()) return false;
       if (!getRegion()
           .equals(other.getRegion())) return false;
+      if (hasProductVersion() != other.hasProductVersion()) return false;
+      if (hasProductVersion()) {
+        if (!getProductVersion()
+            .equals(other.getProductVersion())) return false;
+      }
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -19774,13 +21817,19 @@ java.lang.String defaultValue);
         hash = (37 * hash) + DATABASEDETAILS_FIELD_NUMBER;
         hash = (53 * hash) + getDatabaseDetails().hashCode();
       }
-      hash = (37 * hash) + STATUSREASON_FIELD_NUMBER;
-      hash = (53 * hash) + getStatusReason().hashCode();
+      if (getStatusReasonCount() > 0) {
+        hash = (37 * hash) + STATUSREASON_FIELD_NUMBER;
+        hash = (53 * hash) + getStatusReasonList().hashCode();
+      }
       hash = (37 * hash) + MULTIAZENABLED_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getMultiAzEnabled());
       hash = (37 * hash) + REGION_FIELD_NUMBER;
       hash = (53 * hash) + getRegion().hashCode();
+      if (hasProductVersion()) {
+        hash = (37 * hash) + PRODUCTVERSION_FIELD_NUMBER;
+        hash = (53 * hash) + getProductVersion().hashCode();
+      }
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -19984,12 +22033,18 @@ java.lang.String defaultValue);
           databaseDetails_ = null;
           databaseDetailsBuilder_ = null;
         }
-        statusReason_ = "";
-
+        statusReason_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000008);
         multiAzEnabled_ = false;
 
         region_ = "";
 
+        if (productVersionBuilder_ == null) {
+          productVersion_ = null;
+        } else {
+          productVersion_ = null;
+          productVersionBuilder_ = null;
+        }
         return this;
       }
 
@@ -20058,9 +22113,18 @@ java.lang.String defaultValue);
         } else {
           result.databaseDetails_ = databaseDetailsBuilder_.build();
         }
+        if (((bitField0_ & 0x00000008) != 0)) {
+          statusReason_ = statusReason_.getUnmodifiableView();
+          bitField0_ = (bitField0_ & ~0x00000008);
+        }
         result.statusReason_ = statusReason_;
         result.multiAzEnabled_ = multiAzEnabled_;
         result.region_ = region_;
+        if (productVersionBuilder_ == null) {
+          result.productVersion_ = productVersion_;
+        } else {
+          result.productVersion_ = productVersionBuilder_.build();
+        }
         onBuilt();
         return result;
       }
@@ -20210,8 +22274,14 @@ java.lang.String defaultValue);
         if (other.hasDatabaseDetails()) {
           mergeDatabaseDetails(other.getDatabaseDetails());
         }
-        if (!other.getStatusReason().isEmpty()) {
-          statusReason_ = other.statusReason_;
+        if (!other.statusReason_.isEmpty()) {
+          if (statusReason_.isEmpty()) {
+            statusReason_ = other.statusReason_;
+            bitField0_ = (bitField0_ & ~0x00000008);
+          } else {
+            ensureStatusReasonIsMutable();
+            statusReason_.addAll(other.statusReason_);
+          }
           onChanged();
         }
         if (other.getMultiAzEnabled() != false) {
@@ -20220,6 +22290,9 @@ java.lang.String defaultValue);
         if (!other.getRegion().isEmpty()) {
           region_ = other.region_;
           onChanged();
+        }
+        if (other.hasProductVersion()) {
+          mergeProductVersion(other.getProductVersion());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -20351,8 +22424,9 @@ java.lang.String defaultValue);
                 break;
               } // case 130
               case 138: {
-                statusReason_ = input.readStringRequireUtf8();
-
+                java.lang.String s = input.readStringRequireUtf8();
+                ensureStatusReasonIsMutable();
+                statusReason_.add(s);
                 break;
               } // case 138
               case 144: {
@@ -20365,6 +22439,13 @@ java.lang.String defaultValue);
 
                 break;
               } // case 154
+              case 162: {
+                input.readMessage(
+                    getProductVersionFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 162
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -22403,64 +24484,97 @@ java.lang.String defaultValue);
         return databaseDetailsBuilder_;
       }
 
-      private java.lang.Object statusReason_ = "";
-      /**
-       * <pre>
-       * Status reason
-       * </pre>
-       *
-       * <code>string statusReason = 17;</code>
-       * @return The statusReason.
-       */
-      public java.lang.String getStatusReason() {
-        java.lang.Object ref = statusReason_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          statusReason_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      private com.google.protobuf.LazyStringList statusReason_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureStatusReasonIsMutable() {
+        if (!((bitField0_ & 0x00000008) != 0)) {
+          statusReason_ = new com.google.protobuf.LazyStringArrayList(statusReason_);
+          bitField0_ |= 0x00000008;
+         }
       }
       /**
        * <pre>
        * Status reason
        * </pre>
        *
-       * <code>string statusReason = 17;</code>
-       * @return The bytes for statusReason.
+       * <code>repeated string statusReason = 17;</code>
+       * @return A list containing the statusReason.
+       */
+      public com.google.protobuf.ProtocolStringList
+          getStatusReasonList() {
+        return statusReason_.getUnmodifiableView();
+      }
+      /**
+       * <pre>
+       * Status reason
+       * </pre>
+       *
+       * <code>repeated string statusReason = 17;</code>
+       * @return The count of statusReason.
+       */
+      public int getStatusReasonCount() {
+        return statusReason_.size();
+      }
+      /**
+       * <pre>
+       * Status reason
+       * </pre>
+       *
+       * <code>repeated string statusReason = 17;</code>
+       * @param index The index of the element to return.
+       * @return The statusReason at the given index.
+       */
+      public java.lang.String getStatusReason(int index) {
+        return statusReason_.get(index);
+      }
+      /**
+       * <pre>
+       * Status reason
+       * </pre>
+       *
+       * <code>repeated string statusReason = 17;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the statusReason at the given index.
        */
       public com.google.protobuf.ByteString
-          getStatusReasonBytes() {
-        java.lang.Object ref = statusReason_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          statusReason_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
+          getStatusReasonBytes(int index) {
+        return statusReason_.getByteString(index);
       }
       /**
        * <pre>
        * Status reason
        * </pre>
        *
-       * <code>string statusReason = 17;</code>
+       * <code>repeated string statusReason = 17;</code>
+       * @param index The index to set the value at.
        * @param value The statusReason to set.
        * @return This builder for chaining.
        */
       public Builder setStatusReason(
+          int index, java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureStatusReasonIsMutable();
+        statusReason_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status reason
+       * </pre>
+       *
+       * <code>repeated string statusReason = 17;</code>
+       * @param value The statusReason to add.
+       * @return This builder for chaining.
+       */
+      public Builder addStatusReason(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  
-        statusReason_ = value;
+  ensureStatusReasonIsMutable();
+        statusReason_.add(value);
         onChanged();
         return this;
       }
@@ -22469,12 +24583,29 @@ java.lang.String defaultValue);
        * Status reason
        * </pre>
        *
-       * <code>string statusReason = 17;</code>
+       * <code>repeated string statusReason = 17;</code>
+       * @param values The statusReason to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllStatusReason(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureStatusReasonIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, statusReason_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status reason
+       * </pre>
+       *
+       * <code>repeated string statusReason = 17;</code>
        * @return This builder for chaining.
        */
       public Builder clearStatusReason() {
-        
-        statusReason_ = getDefaultInstance().getStatusReason();
+        statusReason_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000008);
         onChanged();
         return this;
       }
@@ -22483,18 +24614,18 @@ java.lang.String defaultValue);
        * Status reason
        * </pre>
        *
-       * <code>string statusReason = 17;</code>
-       * @param value The bytes for statusReason to set.
+       * <code>repeated string statusReason = 17;</code>
+       * @param value The bytes of the statusReason to add.
        * @return This builder for chaining.
        */
-      public Builder setStatusReasonBytes(
+      public Builder addStatusReasonBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
-        
-        statusReason_ = value;
+        ensureStatusReasonIsMutable();
+        statusReason_.add(value);
         onChanged();
         return this;
       }
@@ -22636,6 +24767,161 @@ java.lang.String defaultValue);
         region_ = value;
         onChanged();
         return this;
+      }
+
+      private com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion productVersion_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion.Builder, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersionOrBuilder> productVersionBuilder_;
+      /**
+       * <pre>
+       * Product Version
+       * </pre>
+       *
+       * <code>.cdlcrud.ProductVersion productVersion = 20;</code>
+       * @return Whether the productVersion field is set.
+       */
+      public boolean hasProductVersion() {
+        return productVersionBuilder_ != null || productVersion_ != null;
+      }
+      /**
+       * <pre>
+       * Product Version
+       * </pre>
+       *
+       * <code>.cdlcrud.ProductVersion productVersion = 20;</code>
+       * @return The productVersion.
+       */
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion getProductVersion() {
+        if (productVersionBuilder_ == null) {
+          return productVersion_ == null ? com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion.getDefaultInstance() : productVersion_;
+        } else {
+          return productVersionBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Product Version
+       * </pre>
+       *
+       * <code>.cdlcrud.ProductVersion productVersion = 20;</code>
+       */
+      public Builder setProductVersion(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion value) {
+        if (productVersionBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          productVersion_ = value;
+          onChanged();
+        } else {
+          productVersionBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Product Version
+       * </pre>
+       *
+       * <code>.cdlcrud.ProductVersion productVersion = 20;</code>
+       */
+      public Builder setProductVersion(
+          com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion.Builder builderForValue) {
+        if (productVersionBuilder_ == null) {
+          productVersion_ = builderForValue.build();
+          onChanged();
+        } else {
+          productVersionBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Product Version
+       * </pre>
+       *
+       * <code>.cdlcrud.ProductVersion productVersion = 20;</code>
+       */
+      public Builder mergeProductVersion(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion value) {
+        if (productVersionBuilder_ == null) {
+          if (productVersion_ != null) {
+            productVersion_ =
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion.newBuilder(productVersion_).mergeFrom(value).buildPartial();
+          } else {
+            productVersion_ = value;
+          }
+          onChanged();
+        } else {
+          productVersionBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Product Version
+       * </pre>
+       *
+       * <code>.cdlcrud.ProductVersion productVersion = 20;</code>
+       */
+      public Builder clearProductVersion() {
+        if (productVersionBuilder_ == null) {
+          productVersion_ = null;
+          onChanged();
+        } else {
+          productVersion_ = null;
+          productVersionBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Product Version
+       * </pre>
+       *
+       * <code>.cdlcrud.ProductVersion productVersion = 20;</code>
+       */
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion.Builder getProductVersionBuilder() {
+        
+        onChanged();
+        return getProductVersionFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Product Version
+       * </pre>
+       *
+       * <code>.cdlcrud.ProductVersion productVersion = 20;</code>
+       */
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersionOrBuilder getProductVersionOrBuilder() {
+        if (productVersionBuilder_ != null) {
+          return productVersionBuilder_.getMessageOrBuilder();
+        } else {
+          return productVersion_ == null ?
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion.getDefaultInstance() : productVersion_;
+        }
+      }
+      /**
+       * <pre>
+       * Product Version
+       * </pre>
+       *
+       * <code>.cdlcrud.ProductVersion productVersion = 20;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion.Builder, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersionOrBuilder> 
+          getProductVersionFieldBuilder() {
+        if (productVersionBuilder_ == null) {
+          productVersionBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersion.Builder, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ProductVersionOrBuilder>(
+                  getProductVersion(),
+                  getParentForChildren(),
+                  isClean());
+          productVersion_ = null;
+        }
+        return productVersionBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -23655,6 +25941,76 @@ java.lang.String defaultValue);
      */
     com.google.protobuf.ByteString
         getStatusBytes();
+
+    /**
+     * <pre>
+     * Environment CRN of the Datalake
+     * </pre>
+     *
+     * <code>string environmentCrn = 4;</code>
+     * @return The environmentCrn.
+     */
+    java.lang.String getEnvironmentCrn();
+    /**
+     * <pre>
+     * Environment CRN of the Datalake
+     * </pre>
+     *
+     * <code>string environmentCrn = 4;</code>
+     * @return The bytes for environmentCrn.
+     */
+    com.google.protobuf.ByteString
+        getEnvironmentCrnBytes();
+
+    /**
+     * <pre>
+     * Creation time of the Datalake
+     * </pre>
+     *
+     * <code>int64 created = 5 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The created.
+     */
+    long getCreated();
+
+    /**
+     * <pre>
+     * Status reason of the Datalake
+     * </pre>
+     *
+     * <code>string statusReason = 6;</code>
+     * @return The statusReason.
+     */
+    java.lang.String getStatusReason();
+    /**
+     * <pre>
+     * Status reason of the Datalake
+     * </pre>
+     *
+     * <code>string statusReason = 6;</code>
+     * @return The bytes for statusReason.
+     */
+    com.google.protobuf.ByteString
+        getStatusReasonBytes();
+
+    /**
+     * <pre>
+     * Ranger RAZ enabled or not of the Datalake
+     * </pre>
+     *
+     * <code>bool rangerRazEnabled = 7;</code>
+     * @return The rangerRazEnabled.
+     */
+    boolean getRangerRazEnabled();
+
+    /**
+     * <pre>
+     * MultiAZ enabled or not of the Datalake
+     * </pre>
+     *
+     * <code>bool multiAzEnabled = 8;</code>
+     * @return The multiAzEnabled.
+     */
+    boolean getMultiAzEnabled();
   }
   /**
    * <pre>
@@ -23676,6 +26032,8 @@ java.lang.String defaultValue);
       crn_ = "";
       name_ = "";
       status_ = "";
+      environmentCrn_ = "";
+      statusReason_ = "";
     }
 
     @java.lang.Override
@@ -23841,6 +26199,143 @@ java.lang.String defaultValue);
       }
     }
 
+    public static final int ENVIRONMENTCRN_FIELD_NUMBER = 4;
+    private volatile java.lang.Object environmentCrn_;
+    /**
+     * <pre>
+     * Environment CRN of the Datalake
+     * </pre>
+     *
+     * <code>string environmentCrn = 4;</code>
+     * @return The environmentCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getEnvironmentCrn() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        environmentCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Environment CRN of the Datalake
+     * </pre>
+     *
+     * <code>string environmentCrn = 4;</code>
+     * @return The bytes for environmentCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getEnvironmentCrnBytes() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        environmentCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CREATED_FIELD_NUMBER = 5;
+    private long created_;
+    /**
+     * <pre>
+     * Creation time of the Datalake
+     * </pre>
+     *
+     * <code>int64 created = 5 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The created.
+     */
+    @java.lang.Override
+    public long getCreated() {
+      return created_;
+    }
+
+    public static final int STATUSREASON_FIELD_NUMBER = 6;
+    private volatile java.lang.Object statusReason_;
+    /**
+     * <pre>
+     * Status reason of the Datalake
+     * </pre>
+     *
+     * <code>string statusReason = 6;</code>
+     * @return The statusReason.
+     */
+    @java.lang.Override
+    public java.lang.String getStatusReason() {
+      java.lang.Object ref = statusReason_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        statusReason_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Status reason of the Datalake
+     * </pre>
+     *
+     * <code>string statusReason = 6;</code>
+     * @return The bytes for statusReason.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getStatusReasonBytes() {
+      java.lang.Object ref = statusReason_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        statusReason_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int RANGERRAZENABLED_FIELD_NUMBER = 7;
+    private boolean rangerRazEnabled_;
+    /**
+     * <pre>
+     * Ranger RAZ enabled or not of the Datalake
+     * </pre>
+     *
+     * <code>bool rangerRazEnabled = 7;</code>
+     * @return The rangerRazEnabled.
+     */
+    @java.lang.Override
+    public boolean getRangerRazEnabled() {
+      return rangerRazEnabled_;
+    }
+
+    public static final int MULTIAZENABLED_FIELD_NUMBER = 8;
+    private boolean multiAzEnabled_;
+    /**
+     * <pre>
+     * MultiAZ enabled or not of the Datalake
+     * </pre>
+     *
+     * <code>bool multiAzEnabled = 8;</code>
+     * @return The multiAzEnabled.
+     */
+    @java.lang.Override
+    public boolean getMultiAzEnabled() {
+      return multiAzEnabled_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -23864,6 +26359,21 @@ java.lang.String defaultValue);
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(status_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, status_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, environmentCrn_);
+      }
+      if (created_ != 0L) {
+        output.writeInt64(5, created_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(statusReason_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, statusReason_);
+      }
+      if (rangerRazEnabled_ != false) {
+        output.writeBool(7, rangerRazEnabled_);
+      }
+      if (multiAzEnabled_ != false) {
+        output.writeBool(8, multiAzEnabled_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -23881,6 +26391,24 @@ java.lang.String defaultValue);
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(status_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, status_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, environmentCrn_);
+      }
+      if (created_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(5, created_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(statusReason_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, statusReason_);
+      }
+      if (rangerRazEnabled_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(7, rangerRazEnabled_);
+      }
+      if (multiAzEnabled_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(8, multiAzEnabled_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -23903,6 +26431,16 @@ java.lang.String defaultValue);
           .equals(other.getName())) return false;
       if (!getStatus()
           .equals(other.getStatus())) return false;
+      if (!getEnvironmentCrn()
+          .equals(other.getEnvironmentCrn())) return false;
+      if (getCreated()
+          != other.getCreated()) return false;
+      if (!getStatusReason()
+          .equals(other.getStatusReason())) return false;
+      if (getRangerRazEnabled()
+          != other.getRangerRazEnabled()) return false;
+      if (getMultiAzEnabled()
+          != other.getMultiAzEnabled()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -23920,6 +26458,19 @@ java.lang.String defaultValue);
       hash = (53 * hash) + getName().hashCode();
       hash = (37 * hash) + STATUS_FIELD_NUMBER;
       hash = (53 * hash) + getStatus().hashCode();
+      hash = (37 * hash) + ENVIRONMENTCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getEnvironmentCrn().hashCode();
+      hash = (37 * hash) + CREATED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getCreated());
+      hash = (37 * hash) + STATUSREASON_FIELD_NUMBER;
+      hash = (53 * hash) + getStatusReason().hashCode();
+      hash = (37 * hash) + RANGERRAZENABLED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getRangerRazEnabled());
+      hash = (37 * hash) + MULTIAZENABLED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getMultiAzEnabled());
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -24058,6 +26609,16 @@ java.lang.String defaultValue);
 
         status_ = "";
 
+        environmentCrn_ = "";
+
+        created_ = 0L;
+
+        statusReason_ = "";
+
+        rangerRazEnabled_ = false;
+
+        multiAzEnabled_ = false;
+
         return this;
       }
 
@@ -24087,6 +26648,11 @@ java.lang.String defaultValue);
         result.crn_ = crn_;
         result.name_ = name_;
         result.status_ = status_;
+        result.environmentCrn_ = environmentCrn_;
+        result.created_ = created_;
+        result.statusReason_ = statusReason_;
+        result.rangerRazEnabled_ = rangerRazEnabled_;
+        result.multiAzEnabled_ = multiAzEnabled_;
         onBuilt();
         return result;
       }
@@ -24147,6 +26713,23 @@ java.lang.String defaultValue);
           status_ = other.status_;
           onChanged();
         }
+        if (!other.getEnvironmentCrn().isEmpty()) {
+          environmentCrn_ = other.environmentCrn_;
+          onChanged();
+        }
+        if (other.getCreated() != 0L) {
+          setCreated(other.getCreated());
+        }
+        if (!other.getStatusReason().isEmpty()) {
+          statusReason_ = other.statusReason_;
+          onChanged();
+        }
+        if (other.getRangerRazEnabled() != false) {
+          setRangerRazEnabled(other.getRangerRazEnabled());
+        }
+        if (other.getMultiAzEnabled() != false) {
+          setMultiAzEnabled(other.getMultiAzEnabled());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -24188,6 +26771,31 @@ java.lang.String defaultValue);
 
                 break;
               } // case 26
+              case 34: {
+                environmentCrn_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 40: {
+                created_ = input.readInt64();
+
+                break;
+              } // case 40
+              case 50: {
+                statusReason_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 50
+              case 56: {
+                rangerRazEnabled_ = input.readBool();
+
+                break;
+              } // case 56
+              case 64: {
+                multiAzEnabled_ = input.readBool();
+
+                break;
+              } // case 64
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -24491,6 +27099,327 @@ java.lang.String defaultValue);
         onChanged();
         return this;
       }
+
+      private java.lang.Object environmentCrn_ = "";
+      /**
+       * <pre>
+       * Environment CRN of the Datalake
+       * </pre>
+       *
+       * <code>string environmentCrn = 4;</code>
+       * @return The environmentCrn.
+       */
+      public java.lang.String getEnvironmentCrn() {
+        java.lang.Object ref = environmentCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          environmentCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Environment CRN of the Datalake
+       * </pre>
+       *
+       * <code>string environmentCrn = 4;</code>
+       * @return The bytes for environmentCrn.
+       */
+      public com.google.protobuf.ByteString
+          getEnvironmentCrnBytes() {
+        java.lang.Object ref = environmentCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          environmentCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Environment CRN of the Datalake
+       * </pre>
+       *
+       * <code>string environmentCrn = 4;</code>
+       * @param value The environmentCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnvironmentCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        environmentCrn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Environment CRN of the Datalake
+       * </pre>
+       *
+       * <code>string environmentCrn = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEnvironmentCrn() {
+        
+        environmentCrn_ = getDefaultInstance().getEnvironmentCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Environment CRN of the Datalake
+       * </pre>
+       *
+       * <code>string environmentCrn = 4;</code>
+       * @param value The bytes for environmentCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnvironmentCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        environmentCrn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long created_ ;
+      /**
+       * <pre>
+       * Creation time of the Datalake
+       * </pre>
+       *
+       * <code>int64 created = 5 [(.options.FieldExtension.datetime) = true];</code>
+       * @return The created.
+       */
+      @java.lang.Override
+      public long getCreated() {
+        return created_;
+      }
+      /**
+       * <pre>
+       * Creation time of the Datalake
+       * </pre>
+       *
+       * <code>int64 created = 5 [(.options.FieldExtension.datetime) = true];</code>
+       * @param value The created to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCreated(long value) {
+        
+        created_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Creation time of the Datalake
+       * </pre>
+       *
+       * <code>int64 created = 5 [(.options.FieldExtension.datetime) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCreated() {
+        
+        created_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object statusReason_ = "";
+      /**
+       * <pre>
+       * Status reason of the Datalake
+       * </pre>
+       *
+       * <code>string statusReason = 6;</code>
+       * @return The statusReason.
+       */
+      public java.lang.String getStatusReason() {
+        java.lang.Object ref = statusReason_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          statusReason_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status reason of the Datalake
+       * </pre>
+       *
+       * <code>string statusReason = 6;</code>
+       * @return The bytes for statusReason.
+       */
+      public com.google.protobuf.ByteString
+          getStatusReasonBytes() {
+        java.lang.Object ref = statusReason_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          statusReason_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status reason of the Datalake
+       * </pre>
+       *
+       * <code>string statusReason = 6;</code>
+       * @param value The statusReason to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatusReason(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        statusReason_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status reason of the Datalake
+       * </pre>
+       *
+       * <code>string statusReason = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStatusReason() {
+        
+        statusReason_ = getDefaultInstance().getStatusReason();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status reason of the Datalake
+       * </pre>
+       *
+       * <code>string statusReason = 6;</code>
+       * @param value The bytes for statusReason to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatusReasonBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        statusReason_ = value;
+        onChanged();
+        return this;
+      }
+
+      private boolean rangerRazEnabled_ ;
+      /**
+       * <pre>
+       * Ranger RAZ enabled or not of the Datalake
+       * </pre>
+       *
+       * <code>bool rangerRazEnabled = 7;</code>
+       * @return The rangerRazEnabled.
+       */
+      @java.lang.Override
+      public boolean getRangerRazEnabled() {
+        return rangerRazEnabled_;
+      }
+      /**
+       * <pre>
+       * Ranger RAZ enabled or not of the Datalake
+       * </pre>
+       *
+       * <code>bool rangerRazEnabled = 7;</code>
+       * @param value The rangerRazEnabled to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRangerRazEnabled(boolean value) {
+        
+        rangerRazEnabled_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Ranger RAZ enabled or not of the Datalake
+       * </pre>
+       *
+       * <code>bool rangerRazEnabled = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRangerRazEnabled() {
+        
+        rangerRazEnabled_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean multiAzEnabled_ ;
+      /**
+       * <pre>
+       * MultiAZ enabled or not of the Datalake
+       * </pre>
+       *
+       * <code>bool multiAzEnabled = 8;</code>
+       * @return The multiAzEnabled.
+       */
+      @java.lang.Override
+      public boolean getMultiAzEnabled() {
+        return multiAzEnabled_;
+      }
+      /**
+       * <pre>
+       * MultiAZ enabled or not of the Datalake
+       * </pre>
+       *
+       * <code>bool multiAzEnabled = 8;</code>
+       * @param value The multiAzEnabled to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMultiAzEnabled(boolean value) {
+        
+        multiAzEnabled_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * MultiAZ enabled or not of the Datalake
+       * </pre>
+       *
+       * <code>bool multiAzEnabled = 8;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMultiAzEnabled() {
+        
+        multiAzEnabled_ = false;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -24578,6 +27507,26 @@ java.lang.String defaultValue);
      */
     com.google.protobuf.ByteString
         getDatalakeBytes();
+
+    /**
+     * <pre>
+     * Account id if not internal actor
+     * </pre>
+     *
+     * <code>string accountID = 2;</code>
+     * @return The accountID.
+     */
+    java.lang.String getAccountID();
+    /**
+     * <pre>
+     * Account id if not internal actor
+     * </pre>
+     *
+     * <code>string accountID = 2;</code>
+     * @return The bytes for accountID.
+     */
+    com.google.protobuf.ByteString
+        getAccountIDBytes();
   }
   /**
    * <pre>
@@ -24597,6 +27546,7 @@ java.lang.String defaultValue);
     }
     private DescribeServicesRequest() {
       datalake_ = "";
+      accountID_ = "";
     }
 
     @java.lang.Override
@@ -24670,6 +27620,52 @@ java.lang.String defaultValue);
       }
     }
 
+    public static final int ACCOUNTID_FIELD_NUMBER = 2;
+    private volatile java.lang.Object accountID_;
+    /**
+     * <pre>
+     * Account id if not internal actor
+     * </pre>
+     *
+     * <code>string accountID = 2;</code>
+     * @return The accountID.
+     */
+    @java.lang.Override
+    public java.lang.String getAccountID() {
+      java.lang.Object ref = accountID_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountID_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Account id if not internal actor
+     * </pre>
+     *
+     * <code>string accountID = 2;</code>
+     * @return The bytes for accountID.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getAccountIDBytes() {
+      java.lang.Object ref = accountID_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountID_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -24687,6 +27683,9 @@ java.lang.String defaultValue);
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, datalake_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountID_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, accountID_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -24698,6 +27697,9 @@ java.lang.String defaultValue);
       size = 0;
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, datalake_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountID_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, accountID_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -24716,6 +27718,8 @@ java.lang.String defaultValue);
 
       if (!getDatalake()
           .equals(other.getDatalake())) return false;
+      if (!getAccountID()
+          .equals(other.getAccountID())) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -24729,6 +27733,8 @@ java.lang.String defaultValue);
       hash = (19 * hash) + getDescriptor().hashCode();
       hash = (37 * hash) + DATALAKE_FIELD_NUMBER;
       hash = (53 * hash) + getDatalake().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountID().hashCode();
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -24863,6 +27869,8 @@ java.lang.String defaultValue);
         super.clear();
         datalake_ = "";
 
+        accountID_ = "";
+
         return this;
       }
 
@@ -24890,6 +27898,7 @@ java.lang.String defaultValue);
       public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeServicesRequest buildPartial() {
         com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeServicesRequest result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeServicesRequest(this);
         result.datalake_ = datalake_;
+        result.accountID_ = accountID_;
         onBuilt();
         return result;
       }
@@ -24942,6 +27951,10 @@ java.lang.String defaultValue);
           datalake_ = other.datalake_;
           onChanged();
         }
+        if (!other.getAccountID().isEmpty()) {
+          accountID_ = other.accountID_;
+          onChanged();
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -24973,6 +27986,11 @@ java.lang.String defaultValue);
 
                 break;
               } // case 10
+              case 18: {
+                accountID_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -25081,6 +28099,102 @@ java.lang.String defaultValue);
   checkByteStringIsUtf8(value);
         
         datalake_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object accountID_ = "";
+      /**
+       * <pre>
+       * Account id if not internal actor
+       * </pre>
+       *
+       * <code>string accountID = 2;</code>
+       * @return The accountID.
+       */
+      public java.lang.String getAccountID() {
+        java.lang.Object ref = accountID_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountID_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Account id if not internal actor
+       * </pre>
+       *
+       * <code>string accountID = 2;</code>
+       * @return The bytes for accountID.
+       */
+      public com.google.protobuf.ByteString
+          getAccountIDBytes() {
+        java.lang.Object ref = accountID_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountID_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Account id if not internal actor
+       * </pre>
+       *
+       * <code>string accountID = 2;</code>
+       * @param value The accountID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountID(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        accountID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Account id if not internal actor
+       * </pre>
+       *
+       * <code>string accountID = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAccountID() {
+        
+        accountID_ = getDefaultInstance().getAccountID();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Account id if not internal actor
+       * </pre>
+       *
+       * <code>string accountID = 2;</code>
+       * @param value The bytes for accountID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountIDBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        accountID_ = value;
         onChanged();
         return this;
       }
@@ -27676,6 +30790,8340 @@ java.lang.String defaultValue);
 
   }
 
+  public interface CollectDatalakeDiagnosticsRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.CollectDatalakeDiagnosticsRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The datalake.
+     */
+    java.lang.String getDatalake();
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The bytes for datalake.
+     */
+    com.google.protobuf.ByteString
+        getDatalakeBytes();
+
+    /**
+     * <pre>
+     * Destination of the diagnostics collection
+     * </pre>
+     *
+     * <code>.cdlcrud.Destination.Value destination = 2;</code>
+     * @return The enum numeric value on the wire for destination.
+     */
+    int getDestinationValue();
+    /**
+     * <pre>
+     * Destination of the diagnostics collection
+     * </pre>
+     *
+     * <code>.cdlcrud.Destination.Value destination = 2;</code>
+     * @return The destination.
+     */
+    com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination.Value getDestination();
+
+    /**
+     * <pre>
+     * Additional information / title for the diagnostics collection
+     * </pre>
+     *
+     * <code>optional string description = 3;</code>
+     * @return Whether the description field is set.
+     */
+    boolean hasDescription();
+    /**
+     * <pre>
+     * Additional information / title for the diagnostics collection
+     * </pre>
+     *
+     * <code>optional string description = 3;</code>
+     * @return The description.
+     */
+    java.lang.String getDescription();
+    /**
+     * <pre>
+     * Additional information / title for the diagnostics collection
+     * </pre>
+     *
+     * <code>optional string description = 3;</code>
+     * @return The bytes for description.
+     */
+    com.google.protobuf.ByteString
+        getDescriptionBytes();
+
+    /**
+     * <pre>
+     * Support case number in case of SUPPORT destination, otherwise only act as additional data
+     * </pre>
+     *
+     * <code>string caseNumber = 4;</code>
+     * @return The caseNumber.
+     */
+    java.lang.String getCaseNumber();
+    /**
+     * <pre>
+     * Support case number in case of SUPPORT destination, otherwise only act as additional data
+     * </pre>
+     *
+     * <code>string caseNumber = 4;</code>
+     * @return The bytes for caseNumber.
+     */
+    com.google.protobuf.ByteString
+        getCaseNumberBytes();
+
+    /**
+     * <pre>
+     * Date timestamp - collect files only for diagnostics that has higher last modified timestamp value than this
+     * </pre>
+     *
+     * <code>int64 startDate = 5 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The startDate.
+     */
+    long getStartDate();
+
+    /**
+     * <pre>
+     * Date timestamp - collect files only for diagnostics that has lower created timestamp value than this
+     * </pre>
+     *
+     * <code>int64 endDate = 6 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The endDate.
+     */
+    long getEndDate();
+  }
+  /**
+   * Protobuf type {@code cdlcrud.CollectDatalakeDiagnosticsRequest}
+   */
+  public static final class CollectDatalakeDiagnosticsRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.CollectDatalakeDiagnosticsRequest)
+      CollectDatalakeDiagnosticsRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CollectDatalakeDiagnosticsRequest.newBuilder() to construct.
+    private CollectDatalakeDiagnosticsRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CollectDatalakeDiagnosticsRequest() {
+      datalake_ = "";
+      destination_ = 0;
+      description_ = "";
+      caseNumber_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CollectDatalakeDiagnosticsRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CollectDatalakeDiagnosticsRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CollectDatalakeDiagnosticsRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int DATALAKE_FIELD_NUMBER = 1;
+    private volatile java.lang.Object datalake_;
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The datalake.
+     */
+    @java.lang.Override
+    public java.lang.String getDatalake() {
+      java.lang.Object ref = datalake_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        datalake_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The bytes for datalake.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDatalakeBytes() {
+      java.lang.Object ref = datalake_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        datalake_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DESTINATION_FIELD_NUMBER = 2;
+    private int destination_;
+    /**
+     * <pre>
+     * Destination of the diagnostics collection
+     * </pre>
+     *
+     * <code>.cdlcrud.Destination.Value destination = 2;</code>
+     * @return The enum numeric value on the wire for destination.
+     */
+    @java.lang.Override public int getDestinationValue() {
+      return destination_;
+    }
+    /**
+     * <pre>
+     * Destination of the diagnostics collection
+     * </pre>
+     *
+     * <code>.cdlcrud.Destination.Value destination = 2;</code>
+     * @return The destination.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination.Value getDestination() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination.Value result = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination.Value.valueOf(destination_);
+      return result == null ? com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination.Value.UNRECOGNIZED : result;
+    }
+
+    public static final int DESCRIPTION_FIELD_NUMBER = 3;
+    private volatile java.lang.Object description_;
+    /**
+     * <pre>
+     * Additional information / title for the diagnostics collection
+     * </pre>
+     *
+     * <code>optional string description = 3;</code>
+     * @return Whether the description field is set.
+     */
+    @java.lang.Override
+    public boolean hasDescription() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <pre>
+     * Additional information / title for the diagnostics collection
+     * </pre>
+     *
+     * <code>optional string description = 3;</code>
+     * @return The description.
+     */
+    @java.lang.Override
+    public java.lang.String getDescription() {
+      java.lang.Object ref = description_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        description_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Additional information / title for the diagnostics collection
+     * </pre>
+     *
+     * <code>optional string description = 3;</code>
+     * @return The bytes for description.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDescriptionBytes() {
+      java.lang.Object ref = description_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        description_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CASENUMBER_FIELD_NUMBER = 4;
+    private volatile java.lang.Object caseNumber_;
+    /**
+     * <pre>
+     * Support case number in case of SUPPORT destination, otherwise only act as additional data
+     * </pre>
+     *
+     * <code>string caseNumber = 4;</code>
+     * @return The caseNumber.
+     */
+    @java.lang.Override
+    public java.lang.String getCaseNumber() {
+      java.lang.Object ref = caseNumber_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        caseNumber_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Support case number in case of SUPPORT destination, otherwise only act as additional data
+     * </pre>
+     *
+     * <code>string caseNumber = 4;</code>
+     * @return The bytes for caseNumber.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCaseNumberBytes() {
+      java.lang.Object ref = caseNumber_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        caseNumber_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int STARTDATE_FIELD_NUMBER = 5;
+    private long startDate_;
+    /**
+     * <pre>
+     * Date timestamp - collect files only for diagnostics that has higher last modified timestamp value than this
+     * </pre>
+     *
+     * <code>int64 startDate = 5 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The startDate.
+     */
+    @java.lang.Override
+    public long getStartDate() {
+      return startDate_;
+    }
+
+    public static final int ENDDATE_FIELD_NUMBER = 6;
+    private long endDate_;
+    /**
+     * <pre>
+     * Date timestamp - collect files only for diagnostics that has lower created timestamp value than this
+     * </pre>
+     *
+     * <code>int64 endDate = 6 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The endDate.
+     */
+    @java.lang.Override
+    public long getEndDate() {
+      return endDate_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, datalake_);
+      }
+      if (destination_ != com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination.Value.UNSET.getNumber()) {
+        output.writeEnum(2, destination_);
+      }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, description_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(caseNumber_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, caseNumber_);
+      }
+      if (startDate_ != 0L) {
+        output.writeInt64(5, startDate_);
+      }
+      if (endDate_ != 0L) {
+        output.writeInt64(6, endDate_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, datalake_);
+      }
+      if (destination_ != com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(2, destination_);
+      }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, description_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(caseNumber_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, caseNumber_);
+      }
+      if (startDate_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(5, startDate_);
+      }
+      if (endDate_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(6, endDate_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest) obj;
+
+      if (!getDatalake()
+          .equals(other.getDatalake())) return false;
+      if (destination_ != other.destination_) return false;
+      if (hasDescription() != other.hasDescription()) return false;
+      if (hasDescription()) {
+        if (!getDescription()
+            .equals(other.getDescription())) return false;
+      }
+      if (!getCaseNumber()
+          .equals(other.getCaseNumber())) return false;
+      if (getStartDate()
+          != other.getStartDate()) return false;
+      if (getEndDate()
+          != other.getEndDate()) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + DATALAKE_FIELD_NUMBER;
+      hash = (53 * hash) + getDatalake().hashCode();
+      hash = (37 * hash) + DESTINATION_FIELD_NUMBER;
+      hash = (53 * hash) + destination_;
+      if (hasDescription()) {
+        hash = (37 * hash) + DESCRIPTION_FIELD_NUMBER;
+        hash = (53 * hash) + getDescription().hashCode();
+      }
+      hash = (37 * hash) + CASENUMBER_FIELD_NUMBER;
+      hash = (53 * hash) + getCaseNumber().hashCode();
+      hash = (37 * hash) + STARTDATE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getStartDate());
+      hash = (37 * hash) + ENDDATE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getEndDate());
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code cdlcrud.CollectDatalakeDiagnosticsRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.CollectDatalakeDiagnosticsRequest)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CollectDatalakeDiagnosticsRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CollectDatalakeDiagnosticsRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        datalake_ = "";
+
+        destination_ = 0;
+
+        description_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        caseNumber_ = "";
+
+        startDate_ = 0L;
+
+        endDate_ = 0L;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CollectDatalakeDiagnosticsRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        result.datalake_ = datalake_;
+        result.destination_ = destination_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.description_ = description_;
+        result.caseNumber_ = caseNumber_;
+        result.startDate_ = startDate_;
+        result.endDate_ = endDate_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest.getDefaultInstance()) return this;
+        if (!other.getDatalake().isEmpty()) {
+          datalake_ = other.datalake_;
+          onChanged();
+        }
+        if (other.destination_ != 0) {
+          setDestinationValue(other.getDestinationValue());
+        }
+        if (other.hasDescription()) {
+          bitField0_ |= 0x00000001;
+          description_ = other.description_;
+          onChanged();
+        }
+        if (!other.getCaseNumber().isEmpty()) {
+          caseNumber_ = other.caseNumber_;
+          onChanged();
+        }
+        if (other.getStartDate() != 0L) {
+          setStartDate(other.getStartDate());
+        }
+        if (other.getEndDate() != 0L) {
+          setEndDate(other.getEndDate());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                datalake_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 16: {
+                destination_ = input.readEnum();
+
+                break;
+              } // case 16
+              case 26: {
+                description_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 26
+              case 34: {
+                caseNumber_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 34
+              case 40: {
+                startDate_ = input.readInt64();
+
+                break;
+              } // case 40
+              case 48: {
+                endDate_ = input.readInt64();
+
+                break;
+              } // case 48
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object datalake_ = "";
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return The datalake.
+       */
+      public java.lang.String getDatalake() {
+        java.lang.Object ref = datalake_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          datalake_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return The bytes for datalake.
+       */
+      public com.google.protobuf.ByteString
+          getDatalakeBytes() {
+        java.lang.Object ref = datalake_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          datalake_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @param value The datalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalake(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        datalake_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDatalake() {
+        
+        datalake_ = getDefaultInstance().getDatalake();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @param value The bytes for datalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalakeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        datalake_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int destination_ = 0;
+      /**
+       * <pre>
+       * Destination of the diagnostics collection
+       * </pre>
+       *
+       * <code>.cdlcrud.Destination.Value destination = 2;</code>
+       * @return The enum numeric value on the wire for destination.
+       */
+      @java.lang.Override public int getDestinationValue() {
+        return destination_;
+      }
+      /**
+       * <pre>
+       * Destination of the diagnostics collection
+       * </pre>
+       *
+       * <code>.cdlcrud.Destination.Value destination = 2;</code>
+       * @param value The enum numeric value on the wire for destination to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDestinationValue(int value) {
+        
+        destination_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Destination of the diagnostics collection
+       * </pre>
+       *
+       * <code>.cdlcrud.Destination.Value destination = 2;</code>
+       * @return The destination.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination.Value getDestination() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination.Value result = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination.Value.valueOf(destination_);
+        return result == null ? com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * Destination of the diagnostics collection
+       * </pre>
+       *
+       * <code>.cdlcrud.Destination.Value destination = 2;</code>
+       * @param value The destination to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDestination(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        destination_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Destination of the diagnostics collection
+       * </pre>
+       *
+       * <code>.cdlcrud.Destination.Value destination = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDestination() {
+        
+        destination_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object description_ = "";
+      /**
+       * <pre>
+       * Additional information / title for the diagnostics collection
+       * </pre>
+       *
+       * <code>optional string description = 3;</code>
+       * @return Whether the description field is set.
+       */
+      public boolean hasDescription() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <pre>
+       * Additional information / title for the diagnostics collection
+       * </pre>
+       *
+       * <code>optional string description = 3;</code>
+       * @return The description.
+       */
+      public java.lang.String getDescription() {
+        java.lang.Object ref = description_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          description_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Additional information / title for the diagnostics collection
+       * </pre>
+       *
+       * <code>optional string description = 3;</code>
+       * @return The bytes for description.
+       */
+      public com.google.protobuf.ByteString
+          getDescriptionBytes() {
+        java.lang.Object ref = description_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          description_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Additional information / title for the diagnostics collection
+       * </pre>
+       *
+       * <code>optional string description = 3;</code>
+       * @param value The description to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDescription(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        description_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Additional information / title for the diagnostics collection
+       * </pre>
+       *
+       * <code>optional string description = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDescription() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        description_ = getDefaultInstance().getDescription();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Additional information / title for the diagnostics collection
+       * </pre>
+       *
+       * <code>optional string description = 3;</code>
+       * @param value The bytes for description to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDescriptionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        bitField0_ |= 0x00000001;
+        description_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object caseNumber_ = "";
+      /**
+       * <pre>
+       * Support case number in case of SUPPORT destination, otherwise only act as additional data
+       * </pre>
+       *
+       * <code>string caseNumber = 4;</code>
+       * @return The caseNumber.
+       */
+      public java.lang.String getCaseNumber() {
+        java.lang.Object ref = caseNumber_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          caseNumber_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Support case number in case of SUPPORT destination, otherwise only act as additional data
+       * </pre>
+       *
+       * <code>string caseNumber = 4;</code>
+       * @return The bytes for caseNumber.
+       */
+      public com.google.protobuf.ByteString
+          getCaseNumberBytes() {
+        java.lang.Object ref = caseNumber_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          caseNumber_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Support case number in case of SUPPORT destination, otherwise only act as additional data
+       * </pre>
+       *
+       * <code>string caseNumber = 4;</code>
+       * @param value The caseNumber to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCaseNumber(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        caseNumber_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Support case number in case of SUPPORT destination, otherwise only act as additional data
+       * </pre>
+       *
+       * <code>string caseNumber = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCaseNumber() {
+        
+        caseNumber_ = getDefaultInstance().getCaseNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Support case number in case of SUPPORT destination, otherwise only act as additional data
+       * </pre>
+       *
+       * <code>string caseNumber = 4;</code>
+       * @param value The bytes for caseNumber to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCaseNumberBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        caseNumber_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long startDate_ ;
+      /**
+       * <pre>
+       * Date timestamp - collect files only for diagnostics that has higher last modified timestamp value than this
+       * </pre>
+       *
+       * <code>int64 startDate = 5 [(.options.FieldExtension.datetime) = true];</code>
+       * @return The startDate.
+       */
+      @java.lang.Override
+      public long getStartDate() {
+        return startDate_;
+      }
+      /**
+       * <pre>
+       * Date timestamp - collect files only for diagnostics that has higher last modified timestamp value than this
+       * </pre>
+       *
+       * <code>int64 startDate = 5 [(.options.FieldExtension.datetime) = true];</code>
+       * @param value The startDate to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStartDate(long value) {
+        
+        startDate_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Date timestamp - collect files only for diagnostics that has higher last modified timestamp value than this
+       * </pre>
+       *
+       * <code>int64 startDate = 5 [(.options.FieldExtension.datetime) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStartDate() {
+        
+        startDate_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long endDate_ ;
+      /**
+       * <pre>
+       * Date timestamp - collect files only for diagnostics that has lower created timestamp value than this
+       * </pre>
+       *
+       * <code>int64 endDate = 6 [(.options.FieldExtension.datetime) = true];</code>
+       * @return The endDate.
+       */
+      @java.lang.Override
+      public long getEndDate() {
+        return endDate_;
+      }
+      /**
+       * <pre>
+       * Date timestamp - collect files only for diagnostics that has lower created timestamp value than this
+       * </pre>
+       *
+       * <code>int64 endDate = 6 [(.options.FieldExtension.datetime) = true];</code>
+       * @param value The endDate to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEndDate(long value) {
+        
+        endDate_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Date timestamp - collect files only for diagnostics that has lower created timestamp value than this
+       * </pre>
+       *
+       * <code>int64 endDate = 6 [(.options.FieldExtension.datetime) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEndDate() {
+        
+        endDate_ = 0L;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.CollectDatalakeDiagnosticsRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.CollectDatalakeDiagnosticsRequest)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CollectDatalakeDiagnosticsRequest>
+        PARSER = new com.google.protobuf.AbstractParser<CollectDatalakeDiagnosticsRequest>() {
+      @java.lang.Override
+      public CollectDatalakeDiagnosticsRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<CollectDatalakeDiagnosticsRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CollectDatalakeDiagnosticsRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface DestinationOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.Destination)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * Destination of the diagnostics collection (Support, Own cloud storage)
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.Destination}
+   */
+  public static final class Destination extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.Destination)
+      DestinationOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use Destination.newBuilder() to construct.
+    private Destination(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private Destination() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new Destination();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_Destination_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_Destination_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination.Builder.class);
+    }
+
+    /**
+     * Protobuf enum {@code cdlcrud.Destination.Value}
+     */
+    public enum Value
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <pre>
+       * Field is not set
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      UNSET(0),
+      /**
+       * <code>SUPPORT = 1;</code>
+       */
+      SUPPORT(1),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <pre>
+       * Field is not set
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      public static final int UNSET_VALUE = 0;
+      /**
+       * <code>SUPPORT = 1;</code>
+       */
+      public static final int SUPPORT_VALUE = 1;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static Value valueOf(int value) {
+        return forNumber(value);
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
+      public static Value forNumber(int value) {
+        switch (value) {
+          case 0: return UNSET;
+          case 1: return SUPPORT;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<Value>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          Value> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
+              public Value findValueByNumber(int number) {
+                return Value.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final Value[] VALUES = values();
+
+      public static Value valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private Value(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:cdlcrud.Destination.Value)
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination) obj;
+
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Destination of the diagnostics collection (Support, Own cloud storage)
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.Destination}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.Destination)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DestinationOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_Destination_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_Destination_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_Destination_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.Destination)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.Destination)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<Destination>
+        PARSER = new com.google.protobuf.AbstractParser<Destination>() {
+      @java.lang.Override
+      public Destination parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<Destination> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Destination> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.Destination getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CollectDatalakeDiagnosticsResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.CollectDatalakeDiagnosticsResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Details of a diagnostic collection
+     * </pre>
+     *
+     * <code>.cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+     * @return Whether the diagnostics field is set.
+     */
+    boolean hasDiagnostics();
+    /**
+     * <pre>
+     * Details of a diagnostic collection
+     * </pre>
+     *
+     * <code>.cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+     * @return The diagnostics.
+     */
+    com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection getDiagnostics();
+    /**
+     * <pre>
+     * Details of a diagnostic collection
+     * </pre>
+     *
+     * <code>.cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+     */
+    com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionOrBuilder getDiagnosticsOrBuilder();
+  }
+  /**
+   * <pre>
+   * Response object for collecting DataLake diagnostics
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.CollectDatalakeDiagnosticsResponse}
+   */
+  public static final class CollectDatalakeDiagnosticsResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.CollectDatalakeDiagnosticsResponse)
+      CollectDatalakeDiagnosticsResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CollectDatalakeDiagnosticsResponse.newBuilder() to construct.
+    private CollectDatalakeDiagnosticsResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CollectDatalakeDiagnosticsResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CollectDatalakeDiagnosticsResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CollectDatalakeDiagnosticsResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CollectDatalakeDiagnosticsResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse.Builder.class);
+    }
+
+    public static final int DIAGNOSTICS_FIELD_NUMBER = 1;
+    private com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection diagnostics_;
+    /**
+     * <pre>
+     * Details of a diagnostic collection
+     * </pre>
+     *
+     * <code>.cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+     * @return Whether the diagnostics field is set.
+     */
+    @java.lang.Override
+    public boolean hasDiagnostics() {
+      return diagnostics_ != null;
+    }
+    /**
+     * <pre>
+     * Details of a diagnostic collection
+     * </pre>
+     *
+     * <code>.cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+     * @return The diagnostics.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection getDiagnostics() {
+      return diagnostics_ == null ? com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.getDefaultInstance() : diagnostics_;
+    }
+    /**
+     * <pre>
+     * Details of a diagnostic collection
+     * </pre>
+     *
+     * <code>.cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionOrBuilder getDiagnosticsOrBuilder() {
+      return getDiagnostics();
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (diagnostics_ != null) {
+        output.writeMessage(1, getDiagnostics());
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (diagnostics_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getDiagnostics());
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse) obj;
+
+      if (hasDiagnostics() != other.hasDiagnostics()) return false;
+      if (hasDiagnostics()) {
+        if (!getDiagnostics()
+            .equals(other.getDiagnostics())) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasDiagnostics()) {
+        hash = (37 * hash) + DIAGNOSTICS_FIELD_NUMBER;
+        hash = (53 * hash) + getDiagnostics().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Response object for collecting DataLake diagnostics
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.CollectDatalakeDiagnosticsResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.CollectDatalakeDiagnosticsResponse)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CollectDatalakeDiagnosticsResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CollectDatalakeDiagnosticsResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (diagnosticsBuilder_ == null) {
+          diagnostics_ = null;
+        } else {
+          diagnostics_ = null;
+          diagnosticsBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CollectDatalakeDiagnosticsResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse(this);
+        if (diagnosticsBuilder_ == null) {
+          result.diagnostics_ = diagnostics_;
+        } else {
+          result.diagnostics_ = diagnosticsBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse.getDefaultInstance()) return this;
+        if (other.hasDiagnostics()) {
+          mergeDiagnostics(other.getDiagnostics());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                input.readMessage(
+                    getDiagnosticsFieldBuilder().getBuilder(),
+                    extensionRegistry);
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection diagnostics_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.Builder, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionOrBuilder> diagnosticsBuilder_;
+      /**
+       * <pre>
+       * Details of a diagnostic collection
+       * </pre>
+       *
+       * <code>.cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       * @return Whether the diagnostics field is set.
+       */
+      public boolean hasDiagnostics() {
+        return diagnosticsBuilder_ != null || diagnostics_ != null;
+      }
+      /**
+       * <pre>
+       * Details of a diagnostic collection
+       * </pre>
+       *
+       * <code>.cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       * @return The diagnostics.
+       */
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection getDiagnostics() {
+        if (diagnosticsBuilder_ == null) {
+          return diagnostics_ == null ? com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.getDefaultInstance() : diagnostics_;
+        } else {
+          return diagnosticsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Details of a diagnostic collection
+       * </pre>
+       *
+       * <code>.cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public Builder setDiagnostics(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection value) {
+        if (diagnosticsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          diagnostics_ = value;
+          onChanged();
+        } else {
+          diagnosticsBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Details of a diagnostic collection
+       * </pre>
+       *
+       * <code>.cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public Builder setDiagnostics(
+          com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.Builder builderForValue) {
+        if (diagnosticsBuilder_ == null) {
+          diagnostics_ = builderForValue.build();
+          onChanged();
+        } else {
+          diagnosticsBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Details of a diagnostic collection
+       * </pre>
+       *
+       * <code>.cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public Builder mergeDiagnostics(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection value) {
+        if (diagnosticsBuilder_ == null) {
+          if (diagnostics_ != null) {
+            diagnostics_ =
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.newBuilder(diagnostics_).mergeFrom(value).buildPartial();
+          } else {
+            diagnostics_ = value;
+          }
+          onChanged();
+        } else {
+          diagnosticsBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Details of a diagnostic collection
+       * </pre>
+       *
+       * <code>.cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public Builder clearDiagnostics() {
+        if (diagnosticsBuilder_ == null) {
+          diagnostics_ = null;
+          onChanged();
+        } else {
+          diagnostics_ = null;
+          diagnosticsBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Details of a diagnostic collection
+       * </pre>
+       *
+       * <code>.cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.Builder getDiagnosticsBuilder() {
+        
+        onChanged();
+        return getDiagnosticsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Details of a diagnostic collection
+       * </pre>
+       *
+       * <code>.cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionOrBuilder getDiagnosticsOrBuilder() {
+        if (diagnosticsBuilder_ != null) {
+          return diagnosticsBuilder_.getMessageOrBuilder();
+        } else {
+          return diagnostics_ == null ?
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.getDefaultInstance() : diagnostics_;
+        }
+      }
+      /**
+       * <pre>
+       * Details of a diagnostic collection
+       * </pre>
+       *
+       * <code>.cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.Builder, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionOrBuilder> 
+          getDiagnosticsFieldBuilder() {
+        if (diagnosticsBuilder_ == null) {
+          diagnosticsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.Builder, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionOrBuilder>(
+                  getDiagnostics(),
+                  getParentForChildren(),
+                  isClean());
+          diagnostics_ = null;
+        }
+        return diagnosticsBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.CollectDatalakeDiagnosticsResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.CollectDatalakeDiagnosticsResponse)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CollectDatalakeDiagnosticsResponse>
+        PARSER = new com.google.protobuf.AbstractParser<CollectDatalakeDiagnosticsResponse>() {
+      @java.lang.Override
+      public CollectDatalakeDiagnosticsResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<CollectDatalakeDiagnosticsResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CollectDatalakeDiagnosticsResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface DiagnosticsCollectionOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.DiagnosticsCollection)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Unique ID to track diagnostic collection
+     * </pre>
+     *
+     * <code>string collectionId = 1;</code>
+     * @return The collectionId.
+     */
+    java.lang.String getCollectionId();
+    /**
+     * <pre>
+     * Unique ID to track diagnostic collection
+     * </pre>
+     *
+     * <code>string collectionId = 1;</code>
+     * @return The bytes for collectionId.
+     */
+    com.google.protobuf.ByteString
+        getCollectionIdBytes();
+
+    /**
+     * <pre>
+     * Creation time of the diagnostics collection
+     * </pre>
+     *
+     * <code>int64 created = 2 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The created.
+     */
+    long getCreated();
+
+    /**
+     * <pre>
+     * Status of the diagnostics collection flow
+     * </pre>
+     *
+     * <code>.cdlcrud.DiagnosticsCollectionStatus.Value status = 3;</code>
+     * @return The enum numeric value on the wire for status.
+     */
+    int getStatusValue();
+    /**
+     * <pre>
+     * Status of the diagnostics collection flow
+     * </pre>
+     *
+     * <code>.cdlcrud.DiagnosticsCollectionStatus.Value status = 3;</code>
+     * @return The status.
+     */
+    com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus.Value getStatus();
+  }
+  /**
+   * Protobuf type {@code cdlcrud.DiagnosticsCollection}
+   */
+  public static final class DiagnosticsCollection extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.DiagnosticsCollection)
+      DiagnosticsCollectionOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use DiagnosticsCollection.newBuilder() to construct.
+    private DiagnosticsCollection(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DiagnosticsCollection() {
+      collectionId_ = "";
+      status_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DiagnosticsCollection();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_DiagnosticsCollection_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_DiagnosticsCollection_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.Builder.class);
+    }
+
+    public static final int COLLECTIONID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object collectionId_;
+    /**
+     * <pre>
+     * Unique ID to track diagnostic collection
+     * </pre>
+     *
+     * <code>string collectionId = 1;</code>
+     * @return The collectionId.
+     */
+    @java.lang.Override
+    public java.lang.String getCollectionId() {
+      java.lang.Object ref = collectionId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        collectionId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Unique ID to track diagnostic collection
+     * </pre>
+     *
+     * <code>string collectionId = 1;</code>
+     * @return The bytes for collectionId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCollectionIdBytes() {
+      java.lang.Object ref = collectionId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        collectionId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CREATED_FIELD_NUMBER = 2;
+    private long created_;
+    /**
+     * <pre>
+     * Creation time of the diagnostics collection
+     * </pre>
+     *
+     * <code>int64 created = 2 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The created.
+     */
+    @java.lang.Override
+    public long getCreated() {
+      return created_;
+    }
+
+    public static final int STATUS_FIELD_NUMBER = 3;
+    private int status_;
+    /**
+     * <pre>
+     * Status of the diagnostics collection flow
+     * </pre>
+     *
+     * <code>.cdlcrud.DiagnosticsCollectionStatus.Value status = 3;</code>
+     * @return The enum numeric value on the wire for status.
+     */
+    @java.lang.Override public int getStatusValue() {
+      return status_;
+    }
+    /**
+     * <pre>
+     * Status of the diagnostics collection flow
+     * </pre>
+     *
+     * <code>.cdlcrud.DiagnosticsCollectionStatus.Value status = 3;</code>
+     * @return The status.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus.Value getStatus() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus.Value result = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus.Value.valueOf(status_);
+      return result == null ? com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus.Value.UNRECOGNIZED : result;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(collectionId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, collectionId_);
+      }
+      if (created_ != 0L) {
+        output.writeInt64(2, created_);
+      }
+      if (status_ != com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus.Value.RUNNING.getNumber()) {
+        output.writeEnum(3, status_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(collectionId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, collectionId_);
+      }
+      if (created_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, created_);
+      }
+      if (status_ != com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus.Value.RUNNING.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(3, status_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection) obj;
+
+      if (!getCollectionId()
+          .equals(other.getCollectionId())) return false;
+      if (getCreated()
+          != other.getCreated()) return false;
+      if (status_ != other.status_) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + COLLECTIONID_FIELD_NUMBER;
+      hash = (53 * hash) + getCollectionId().hashCode();
+      hash = (37 * hash) + CREATED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getCreated());
+      hash = (37 * hash) + STATUS_FIELD_NUMBER;
+      hash = (53 * hash) + status_;
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code cdlcrud.DiagnosticsCollection}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.DiagnosticsCollection)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_DiagnosticsCollection_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_DiagnosticsCollection_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        collectionId_ = "";
+
+        created_ = 0L;
+
+        status_ = 0;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_DiagnosticsCollection_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection(this);
+        result.collectionId_ = collectionId_;
+        result.created_ = created_;
+        result.status_ = status_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.getDefaultInstance()) return this;
+        if (!other.getCollectionId().isEmpty()) {
+          collectionId_ = other.collectionId_;
+          onChanged();
+        }
+        if (other.getCreated() != 0L) {
+          setCreated(other.getCreated());
+        }
+        if (other.status_ != 0) {
+          setStatusValue(other.getStatusValue());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                collectionId_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 16: {
+                created_ = input.readInt64();
+
+                break;
+              } // case 16
+              case 24: {
+                status_ = input.readEnum();
+
+                break;
+              } // case 24
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+
+      private java.lang.Object collectionId_ = "";
+      /**
+       * <pre>
+       * Unique ID to track diagnostic collection
+       * </pre>
+       *
+       * <code>string collectionId = 1;</code>
+       * @return The collectionId.
+       */
+      public java.lang.String getCollectionId() {
+        java.lang.Object ref = collectionId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          collectionId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Unique ID to track diagnostic collection
+       * </pre>
+       *
+       * <code>string collectionId = 1;</code>
+       * @return The bytes for collectionId.
+       */
+      public com.google.protobuf.ByteString
+          getCollectionIdBytes() {
+        java.lang.Object ref = collectionId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          collectionId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Unique ID to track diagnostic collection
+       * </pre>
+       *
+       * <code>string collectionId = 1;</code>
+       * @param value The collectionId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCollectionId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        collectionId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Unique ID to track diagnostic collection
+       * </pre>
+       *
+       * <code>string collectionId = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCollectionId() {
+        
+        collectionId_ = getDefaultInstance().getCollectionId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Unique ID to track diagnostic collection
+       * </pre>
+       *
+       * <code>string collectionId = 1;</code>
+       * @param value The bytes for collectionId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCollectionIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        collectionId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long created_ ;
+      /**
+       * <pre>
+       * Creation time of the diagnostics collection
+       * </pre>
+       *
+       * <code>int64 created = 2 [(.options.FieldExtension.datetime) = true];</code>
+       * @return The created.
+       */
+      @java.lang.Override
+      public long getCreated() {
+        return created_;
+      }
+      /**
+       * <pre>
+       * Creation time of the diagnostics collection
+       * </pre>
+       *
+       * <code>int64 created = 2 [(.options.FieldExtension.datetime) = true];</code>
+       * @param value The created to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCreated(long value) {
+        
+        created_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Creation time of the diagnostics collection
+       * </pre>
+       *
+       * <code>int64 created = 2 [(.options.FieldExtension.datetime) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCreated() {
+        
+        created_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private int status_ = 0;
+      /**
+       * <pre>
+       * Status of the diagnostics collection flow
+       * </pre>
+       *
+       * <code>.cdlcrud.DiagnosticsCollectionStatus.Value status = 3;</code>
+       * @return The enum numeric value on the wire for status.
+       */
+      @java.lang.Override public int getStatusValue() {
+        return status_;
+      }
+      /**
+       * <pre>
+       * Status of the diagnostics collection flow
+       * </pre>
+       *
+       * <code>.cdlcrud.DiagnosticsCollectionStatus.Value status = 3;</code>
+       * @param value The enum numeric value on the wire for status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatusValue(int value) {
+        
+        status_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the diagnostics collection flow
+       * </pre>
+       *
+       * <code>.cdlcrud.DiagnosticsCollectionStatus.Value status = 3;</code>
+       * @return The status.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus.Value getStatus() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus.Value result = com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus.Value.valueOf(status_);
+        return result == null ? com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * Status of the diagnostics collection flow
+       * </pre>
+       *
+       * <code>.cdlcrud.DiagnosticsCollectionStatus.Value status = 3;</code>
+       * @param value The status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatus(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        status_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the diagnostics collection flow
+       * </pre>
+       *
+       * <code>.cdlcrud.DiagnosticsCollectionStatus.Value status = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStatus() {
+        
+        status_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.DiagnosticsCollection)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.DiagnosticsCollection)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<DiagnosticsCollection>
+        PARSER = new com.google.protobuf.AbstractParser<DiagnosticsCollection>() {
+      @java.lang.Override
+      public DiagnosticsCollection parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<DiagnosticsCollection> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DiagnosticsCollection> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface DiagnosticsCollectionStatusOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.DiagnosticsCollectionStatus)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * Status of the diagnostics collection flow
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.DiagnosticsCollectionStatus}
+   */
+  public static final class DiagnosticsCollectionStatus extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.DiagnosticsCollectionStatus)
+      DiagnosticsCollectionStatusOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use DiagnosticsCollectionStatus.newBuilder() to construct.
+    private DiagnosticsCollectionStatus(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DiagnosticsCollectionStatus() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DiagnosticsCollectionStatus();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_DiagnosticsCollectionStatus_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_DiagnosticsCollectionStatus_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus.Builder.class);
+    }
+
+    /**
+     * Protobuf enum {@code cdlcrud.DiagnosticsCollectionStatus.Value}
+     */
+    public enum Value
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <code>RUNNING = 0;</code>
+       */
+      RUNNING(0),
+      /**
+       * <code>FAILED = 1;</code>
+       */
+      FAILED(1),
+      /**
+       * <code>FINISHED = 2;</code>
+       */
+      FINISHED(2),
+      /**
+       * <code>CANCELLED = 3;</code>
+       */
+      CANCELLED(3),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <code>RUNNING = 0;</code>
+       */
+      public static final int RUNNING_VALUE = 0;
+      /**
+       * <code>FAILED = 1;</code>
+       */
+      public static final int FAILED_VALUE = 1;
+      /**
+       * <code>FINISHED = 2;</code>
+       */
+      public static final int FINISHED_VALUE = 2;
+      /**
+       * <code>CANCELLED = 3;</code>
+       */
+      public static final int CANCELLED_VALUE = 3;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static Value valueOf(int value) {
+        return forNumber(value);
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
+      public static Value forNumber(int value) {
+        switch (value) {
+          case 0: return RUNNING;
+          case 1: return FAILED;
+          case 2: return FINISHED;
+          case 3: return CANCELLED;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<Value>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          Value> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
+              public Value findValueByNumber(int number) {
+                return Value.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final Value[] VALUES = values();
+
+      public static Value valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private Value(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:cdlcrud.DiagnosticsCollectionStatus.Value)
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus) obj;
+
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Status of the diagnostics collection flow
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.DiagnosticsCollectionStatus}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.DiagnosticsCollectionStatus)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatusOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_DiagnosticsCollectionStatus_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_DiagnosticsCollectionStatus_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_DiagnosticsCollectionStatus_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.DiagnosticsCollectionStatus)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.DiagnosticsCollectionStatus)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<DiagnosticsCollectionStatus>
+        PARSER = new com.google.protobuf.AbstractParser<DiagnosticsCollectionStatus>() {
+      @java.lang.Override
+      public DiagnosticsCollectionStatus parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<DiagnosticsCollectionStatus> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DiagnosticsCollectionStatus> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionStatus getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ListDatalakeDiagnosticsRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.ListDatalakeDiagnosticsRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The datalake.
+     */
+    java.lang.String getDatalake();
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The bytes for datalake.
+     */
+    com.google.protobuf.ByteString
+        getDatalakeBytes();
+
+    /**
+     * <pre>
+     * Date timestamp - collect files only for diagnostics that has higher last modified timestamp value than this
+     * </pre>
+     *
+     * <code>optional int64 startDate = 2 [(.options.FieldExtension.datetime) = true];</code>
+     * @return Whether the startDate field is set.
+     */
+    boolean hasStartDate();
+    /**
+     * <pre>
+     * Date timestamp - collect files only for diagnostics that has higher last modified timestamp value than this
+     * </pre>
+     *
+     * <code>optional int64 startDate = 2 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The startDate.
+     */
+    long getStartDate();
+
+    /**
+     * <pre>
+     * Date timestamp - collect files only for diagnostics that has lower created timestamp value than this
+     * </pre>
+     *
+     * <code>optional int64 endDate = 3 [(.options.FieldExtension.datetime) = true];</code>
+     * @return Whether the endDate field is set.
+     */
+    boolean hasEndDate();
+    /**
+     * <pre>
+     * Date timestamp - collect files only for diagnostics that has lower created timestamp value than this
+     * </pre>
+     *
+     * <code>optional int64 endDate = 3 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The endDate.
+     */
+    long getEndDate();
+  }
+  /**
+   * <pre>
+   * Request object for listing recent Datalake diagnostics collections. In no window provided, defaults will be used.
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.ListDatalakeDiagnosticsRequest}
+   */
+  public static final class ListDatalakeDiagnosticsRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.ListDatalakeDiagnosticsRequest)
+      ListDatalakeDiagnosticsRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ListDatalakeDiagnosticsRequest.newBuilder() to construct.
+    private ListDatalakeDiagnosticsRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ListDatalakeDiagnosticsRequest() {
+      datalake_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ListDatalakeDiagnosticsRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ListDatalakeDiagnosticsRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ListDatalakeDiagnosticsRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int DATALAKE_FIELD_NUMBER = 1;
+    private volatile java.lang.Object datalake_;
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The datalake.
+     */
+    @java.lang.Override
+    public java.lang.String getDatalake() {
+      java.lang.Object ref = datalake_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        datalake_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The bytes for datalake.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDatalakeBytes() {
+      java.lang.Object ref = datalake_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        datalake_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int STARTDATE_FIELD_NUMBER = 2;
+    private long startDate_;
+    /**
+     * <pre>
+     * Date timestamp - collect files only for diagnostics that has higher last modified timestamp value than this
+     * </pre>
+     *
+     * <code>optional int64 startDate = 2 [(.options.FieldExtension.datetime) = true];</code>
+     * @return Whether the startDate field is set.
+     */
+    @java.lang.Override
+    public boolean hasStartDate() {
+      return ((bitField0_ & 0x00000001) != 0);
+    }
+    /**
+     * <pre>
+     * Date timestamp - collect files only for diagnostics that has higher last modified timestamp value than this
+     * </pre>
+     *
+     * <code>optional int64 startDate = 2 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The startDate.
+     */
+    @java.lang.Override
+    public long getStartDate() {
+      return startDate_;
+    }
+
+    public static final int ENDDATE_FIELD_NUMBER = 3;
+    private long endDate_;
+    /**
+     * <pre>
+     * Date timestamp - collect files only for diagnostics that has lower created timestamp value than this
+     * </pre>
+     *
+     * <code>optional int64 endDate = 3 [(.options.FieldExtension.datetime) = true];</code>
+     * @return Whether the endDate field is set.
+     */
+    @java.lang.Override
+    public boolean hasEndDate() {
+      return ((bitField0_ & 0x00000002) != 0);
+    }
+    /**
+     * <pre>
+     * Date timestamp - collect files only for diagnostics that has lower created timestamp value than this
+     * </pre>
+     *
+     * <code>optional int64 endDate = 3 [(.options.FieldExtension.datetime) = true];</code>
+     * @return The endDate.
+     */
+    @java.lang.Override
+    public long getEndDate() {
+      return endDate_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, datalake_);
+      }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        output.writeInt64(2, startDate_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        output.writeInt64(3, endDate_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, datalake_);
+      }
+      if (((bitField0_ & 0x00000001) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, startDate_);
+      }
+      if (((bitField0_ & 0x00000002) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, endDate_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest) obj;
+
+      if (!getDatalake()
+          .equals(other.getDatalake())) return false;
+      if (hasStartDate() != other.hasStartDate()) return false;
+      if (hasStartDate()) {
+        if (getStartDate()
+            != other.getStartDate()) return false;
+      }
+      if (hasEndDate() != other.hasEndDate()) return false;
+      if (hasEndDate()) {
+        if (getEndDate()
+            != other.getEndDate()) return false;
+      }
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + DATALAKE_FIELD_NUMBER;
+      hash = (53 * hash) + getDatalake().hashCode();
+      if (hasStartDate()) {
+        hash = (37 * hash) + STARTDATE_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            getStartDate());
+      }
+      if (hasEndDate()) {
+        hash = (37 * hash) + ENDDATE_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+            getEndDate());
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Request object for listing recent Datalake diagnostics collections. In no window provided, defaults will be used.
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.ListDatalakeDiagnosticsRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.ListDatalakeDiagnosticsRequest)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ListDatalakeDiagnosticsRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ListDatalakeDiagnosticsRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        datalake_ = "";
+
+        startDate_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        endDate_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ListDatalakeDiagnosticsRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        result.datalake_ = datalake_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.startDate_ = startDate_;
+          to_bitField0_ |= 0x00000001;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.endDate_ = endDate_;
+          to_bitField0_ |= 0x00000002;
+        }
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest.getDefaultInstance()) return this;
+        if (!other.getDatalake().isEmpty()) {
+          datalake_ = other.datalake_;
+          onChanged();
+        }
+        if (other.hasStartDate()) {
+          setStartDate(other.getStartDate());
+        }
+        if (other.hasEndDate()) {
+          setEndDate(other.getEndDate());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                datalake_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 16: {
+                startDate_ = input.readInt64();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 16
+              case 24: {
+                endDate_ = input.readInt64();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 24
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object datalake_ = "";
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return The datalake.
+       */
+      public java.lang.String getDatalake() {
+        java.lang.Object ref = datalake_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          datalake_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return The bytes for datalake.
+       */
+      public com.google.protobuf.ByteString
+          getDatalakeBytes() {
+        java.lang.Object ref = datalake_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          datalake_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @param value The datalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalake(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        datalake_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDatalake() {
+        
+        datalake_ = getDefaultInstance().getDatalake();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @param value The bytes for datalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalakeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        datalake_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long startDate_ ;
+      /**
+       * <pre>
+       * Date timestamp - collect files only for diagnostics that has higher last modified timestamp value than this
+       * </pre>
+       *
+       * <code>optional int64 startDate = 2 [(.options.FieldExtension.datetime) = true];</code>
+       * @return Whether the startDate field is set.
+       */
+      @java.lang.Override
+      public boolean hasStartDate() {
+        return ((bitField0_ & 0x00000001) != 0);
+      }
+      /**
+       * <pre>
+       * Date timestamp - collect files only for diagnostics that has higher last modified timestamp value than this
+       * </pre>
+       *
+       * <code>optional int64 startDate = 2 [(.options.FieldExtension.datetime) = true];</code>
+       * @return The startDate.
+       */
+      @java.lang.Override
+      public long getStartDate() {
+        return startDate_;
+      }
+      /**
+       * <pre>
+       * Date timestamp - collect files only for diagnostics that has higher last modified timestamp value than this
+       * </pre>
+       *
+       * <code>optional int64 startDate = 2 [(.options.FieldExtension.datetime) = true];</code>
+       * @param value The startDate to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStartDate(long value) {
+        bitField0_ |= 0x00000001;
+        startDate_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Date timestamp - collect files only for diagnostics that has higher last modified timestamp value than this
+       * </pre>
+       *
+       * <code>optional int64 startDate = 2 [(.options.FieldExtension.datetime) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStartDate() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        startDate_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private long endDate_ ;
+      /**
+       * <pre>
+       * Date timestamp - collect files only for diagnostics that has lower created timestamp value than this
+       * </pre>
+       *
+       * <code>optional int64 endDate = 3 [(.options.FieldExtension.datetime) = true];</code>
+       * @return Whether the endDate field is set.
+       */
+      @java.lang.Override
+      public boolean hasEndDate() {
+        return ((bitField0_ & 0x00000002) != 0);
+      }
+      /**
+       * <pre>
+       * Date timestamp - collect files only for diagnostics that has lower created timestamp value than this
+       * </pre>
+       *
+       * <code>optional int64 endDate = 3 [(.options.FieldExtension.datetime) = true];</code>
+       * @return The endDate.
+       */
+      @java.lang.Override
+      public long getEndDate() {
+        return endDate_;
+      }
+      /**
+       * <pre>
+       * Date timestamp - collect files only for diagnostics that has lower created timestamp value than this
+       * </pre>
+       *
+       * <code>optional int64 endDate = 3 [(.options.FieldExtension.datetime) = true];</code>
+       * @param value The endDate to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEndDate(long value) {
+        bitField0_ |= 0x00000002;
+        endDate_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Date timestamp - collect files only for diagnostics that has lower created timestamp value than this
+       * </pre>
+       *
+       * <code>optional int64 endDate = 3 [(.options.FieldExtension.datetime) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEndDate() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        endDate_ = 0L;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.ListDatalakeDiagnosticsRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.ListDatalakeDiagnosticsRequest)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ListDatalakeDiagnosticsRequest>
+        PARSER = new com.google.protobuf.AbstractParser<ListDatalakeDiagnosticsRequest>() {
+      @java.lang.Override
+      public ListDatalakeDiagnosticsRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ListDatalakeDiagnosticsRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ListDatalakeDiagnosticsRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ListDatalakeDiagnosticsResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.ListDatalakeDiagnosticsResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Update of each diagnostic collection, in a given window of time.
+     * </pre>
+     *
+     * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+     */
+    java.util.List<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection> 
+        getDiagnosticsList();
+    /**
+     * <pre>
+     * Update of each diagnostic collection, in a given window of time.
+     * </pre>
+     *
+     * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+     */
+    com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection getDiagnostics(int index);
+    /**
+     * <pre>
+     * Update of each diagnostic collection, in a given window of time.
+     * </pre>
+     *
+     * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+     */
+    int getDiagnosticsCount();
+    /**
+     * <pre>
+     * Update of each diagnostic collection, in a given window of time.
+     * </pre>
+     *
+     * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+     */
+    java.util.List<? extends com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionOrBuilder> 
+        getDiagnosticsOrBuilderList();
+    /**
+     * <pre>
+     * Update of each diagnostic collection, in a given window of time.
+     * </pre>
+     *
+     * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+     */
+    com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionOrBuilder getDiagnosticsOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * Response object for listing recent Datalake diagnostics collections
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.ListDatalakeDiagnosticsResponse}
+   */
+  public static final class ListDatalakeDiagnosticsResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.ListDatalakeDiagnosticsResponse)
+      ListDatalakeDiagnosticsResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ListDatalakeDiagnosticsResponse.newBuilder() to construct.
+    private ListDatalakeDiagnosticsResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ListDatalakeDiagnosticsResponse() {
+      diagnostics_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ListDatalakeDiagnosticsResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ListDatalakeDiagnosticsResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ListDatalakeDiagnosticsResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse.Builder.class);
+    }
+
+    public static final int DIAGNOSTICS_FIELD_NUMBER = 1;
+    private java.util.List<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection> diagnostics_;
+    /**
+     * <pre>
+     * Update of each diagnostic collection, in a given window of time.
+     * </pre>
+     *
+     * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection> getDiagnosticsList() {
+      return diagnostics_;
+    }
+    /**
+     * <pre>
+     * Update of each diagnostic collection, in a given window of time.
+     * </pre>
+     *
+     * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionOrBuilder> 
+        getDiagnosticsOrBuilderList() {
+      return diagnostics_;
+    }
+    /**
+     * <pre>
+     * Update of each diagnostic collection, in a given window of time.
+     * </pre>
+     *
+     * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+     */
+    @java.lang.Override
+    public int getDiagnosticsCount() {
+      return diagnostics_.size();
+    }
+    /**
+     * <pre>
+     * Update of each diagnostic collection, in a given window of time.
+     * </pre>
+     *
+     * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection getDiagnostics(int index) {
+      return diagnostics_.get(index);
+    }
+    /**
+     * <pre>
+     * Update of each diagnostic collection, in a given window of time.
+     * </pre>
+     *
+     * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionOrBuilder getDiagnosticsOrBuilder(
+        int index) {
+      return diagnostics_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < diagnostics_.size(); i++) {
+        output.writeMessage(1, diagnostics_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < diagnostics_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, diagnostics_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse) obj;
+
+      if (!getDiagnosticsList()
+          .equals(other.getDiagnosticsList())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getDiagnosticsCount() > 0) {
+        hash = (37 * hash) + DIAGNOSTICS_FIELD_NUMBER;
+        hash = (53 * hash) + getDiagnosticsList().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Response object for listing recent Datalake diagnostics collections
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.ListDatalakeDiagnosticsResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.ListDatalakeDiagnosticsResponse)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ListDatalakeDiagnosticsResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ListDatalakeDiagnosticsResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (diagnosticsBuilder_ == null) {
+          diagnostics_ = java.util.Collections.emptyList();
+        } else {
+          diagnostics_ = null;
+          diagnosticsBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ListDatalakeDiagnosticsResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse(this);
+        int from_bitField0_ = bitField0_;
+        if (diagnosticsBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            diagnostics_ = java.util.Collections.unmodifiableList(diagnostics_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.diagnostics_ = diagnostics_;
+        } else {
+          result.diagnostics_ = diagnosticsBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse.getDefaultInstance()) return this;
+        if (diagnosticsBuilder_ == null) {
+          if (!other.diagnostics_.isEmpty()) {
+            if (diagnostics_.isEmpty()) {
+              diagnostics_ = other.diagnostics_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureDiagnosticsIsMutable();
+              diagnostics_.addAll(other.diagnostics_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.diagnostics_.isEmpty()) {
+            if (diagnosticsBuilder_.isEmpty()) {
+              diagnosticsBuilder_.dispose();
+              diagnosticsBuilder_ = null;
+              diagnostics_ = other.diagnostics_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              diagnosticsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getDiagnosticsFieldBuilder() : null;
+            } else {
+              diagnosticsBuilder_.addAllMessages(other.diagnostics_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.parser(),
+                        extensionRegistry);
+                if (diagnosticsBuilder_ == null) {
+                  ensureDiagnosticsIsMutable();
+                  diagnostics_.add(m);
+                } else {
+                  diagnosticsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection> diagnostics_ =
+        java.util.Collections.emptyList();
+      private void ensureDiagnosticsIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          diagnostics_ = new java.util.ArrayList<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection>(diagnostics_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.Builder, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionOrBuilder> diagnosticsBuilder_;
+
+      /**
+       * <pre>
+       * Update of each diagnostic collection, in a given window of time.
+       * </pre>
+       *
+       * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection> getDiagnosticsList() {
+        if (diagnosticsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(diagnostics_);
+        } else {
+          return diagnosticsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * Update of each diagnostic collection, in a given window of time.
+       * </pre>
+       *
+       * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public int getDiagnosticsCount() {
+        if (diagnosticsBuilder_ == null) {
+          return diagnostics_.size();
+        } else {
+          return diagnosticsBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * Update of each diagnostic collection, in a given window of time.
+       * </pre>
+       *
+       * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection getDiagnostics(int index) {
+        if (diagnosticsBuilder_ == null) {
+          return diagnostics_.get(index);
+        } else {
+          return diagnosticsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * Update of each diagnostic collection, in a given window of time.
+       * </pre>
+       *
+       * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public Builder setDiagnostics(
+          int index, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection value) {
+        if (diagnosticsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureDiagnosticsIsMutable();
+          diagnostics_.set(index, value);
+          onChanged();
+        } else {
+          diagnosticsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Update of each diagnostic collection, in a given window of time.
+       * </pre>
+       *
+       * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public Builder setDiagnostics(
+          int index, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.Builder builderForValue) {
+        if (diagnosticsBuilder_ == null) {
+          ensureDiagnosticsIsMutable();
+          diagnostics_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          diagnosticsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Update of each diagnostic collection, in a given window of time.
+       * </pre>
+       *
+       * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public Builder addDiagnostics(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection value) {
+        if (diagnosticsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureDiagnosticsIsMutable();
+          diagnostics_.add(value);
+          onChanged();
+        } else {
+          diagnosticsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Update of each diagnostic collection, in a given window of time.
+       * </pre>
+       *
+       * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public Builder addDiagnostics(
+          int index, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection value) {
+        if (diagnosticsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureDiagnosticsIsMutable();
+          diagnostics_.add(index, value);
+          onChanged();
+        } else {
+          diagnosticsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Update of each diagnostic collection, in a given window of time.
+       * </pre>
+       *
+       * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public Builder addDiagnostics(
+          com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.Builder builderForValue) {
+        if (diagnosticsBuilder_ == null) {
+          ensureDiagnosticsIsMutable();
+          diagnostics_.add(builderForValue.build());
+          onChanged();
+        } else {
+          diagnosticsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Update of each diagnostic collection, in a given window of time.
+       * </pre>
+       *
+       * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public Builder addDiagnostics(
+          int index, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.Builder builderForValue) {
+        if (diagnosticsBuilder_ == null) {
+          ensureDiagnosticsIsMutable();
+          diagnostics_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          diagnosticsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Update of each diagnostic collection, in a given window of time.
+       * </pre>
+       *
+       * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public Builder addAllDiagnostics(
+          java.lang.Iterable<? extends com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection> values) {
+        if (diagnosticsBuilder_ == null) {
+          ensureDiagnosticsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, diagnostics_);
+          onChanged();
+        } else {
+          diagnosticsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Update of each diagnostic collection, in a given window of time.
+       * </pre>
+       *
+       * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public Builder clearDiagnostics() {
+        if (diagnosticsBuilder_ == null) {
+          diagnostics_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          diagnosticsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Update of each diagnostic collection, in a given window of time.
+       * </pre>
+       *
+       * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public Builder removeDiagnostics(int index) {
+        if (diagnosticsBuilder_ == null) {
+          ensureDiagnosticsIsMutable();
+          diagnostics_.remove(index);
+          onChanged();
+        } else {
+          diagnosticsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Update of each diagnostic collection, in a given window of time.
+       * </pre>
+       *
+       * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.Builder getDiagnosticsBuilder(
+          int index) {
+        return getDiagnosticsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * Update of each diagnostic collection, in a given window of time.
+       * </pre>
+       *
+       * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionOrBuilder getDiagnosticsOrBuilder(
+          int index) {
+        if (diagnosticsBuilder_ == null) {
+          return diagnostics_.get(index);  } else {
+          return diagnosticsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * Update of each diagnostic collection, in a given window of time.
+       * </pre>
+       *
+       * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public java.util.List<? extends com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionOrBuilder> 
+           getDiagnosticsOrBuilderList() {
+        if (diagnosticsBuilder_ != null) {
+          return diagnosticsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(diagnostics_);
+        }
+      }
+      /**
+       * <pre>
+       * Update of each diagnostic collection, in a given window of time.
+       * </pre>
+       *
+       * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.Builder addDiagnosticsBuilder() {
+        return getDiagnosticsFieldBuilder().addBuilder(
+            com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * Update of each diagnostic collection, in a given window of time.
+       * </pre>
+       *
+       * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.Builder addDiagnosticsBuilder(
+          int index) {
+        return getDiagnosticsFieldBuilder().addBuilder(
+            index, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * Update of each diagnostic collection, in a given window of time.
+       * </pre>
+       *
+       * <code>repeated .cdlcrud.DiagnosticsCollection diagnostics = 1;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.Builder> 
+           getDiagnosticsBuilderList() {
+        return getDiagnosticsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.Builder, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionOrBuilder> 
+          getDiagnosticsFieldBuilder() {
+        if (diagnosticsBuilder_ == null) {
+          diagnosticsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollection.Builder, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DiagnosticsCollectionOrBuilder>(
+                  diagnostics_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          diagnostics_ = null;
+        }
+        return diagnosticsBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.ListDatalakeDiagnosticsResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.ListDatalakeDiagnosticsResponse)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ListDatalakeDiagnosticsResponse>
+        PARSER = new com.google.protobuf.AbstractParser<ListDatalakeDiagnosticsResponse>() {
+      @java.lang.Override
+      public ListDatalakeDiagnosticsResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ListDatalakeDiagnosticsResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ListDatalakeDiagnosticsResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CancelDatalakeDiagnosticsRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.CancelDatalakeDiagnosticsRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The datalake.
+     */
+    java.lang.String getDatalake();
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The bytes for datalake.
+     */
+    com.google.protobuf.ByteString
+        getDatalakeBytes();
+  }
+  /**
+   * <pre>
+   * Request object for cancel running Datalake diagnostics collections
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.CancelDatalakeDiagnosticsRequest}
+   */
+  public static final class CancelDatalakeDiagnosticsRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.CancelDatalakeDiagnosticsRequest)
+      CancelDatalakeDiagnosticsRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CancelDatalakeDiagnosticsRequest.newBuilder() to construct.
+    private CancelDatalakeDiagnosticsRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CancelDatalakeDiagnosticsRequest() {
+      datalake_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CancelDatalakeDiagnosticsRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CancelDatalakeDiagnosticsRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CancelDatalakeDiagnosticsRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest.Builder.class);
+    }
+
+    public static final int DATALAKE_FIELD_NUMBER = 1;
+    private volatile java.lang.Object datalake_;
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The datalake.
+     */
+    @java.lang.Override
+    public java.lang.String getDatalake() {
+      java.lang.Object ref = datalake_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        datalake_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 1;</code>
+     * @return The bytes for datalake.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDatalakeBytes() {
+      java.lang.Object ref = datalake_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        datalake_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, datalake_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, datalake_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest) obj;
+
+      if (!getDatalake()
+          .equals(other.getDatalake())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + DATALAKE_FIELD_NUMBER;
+      hash = (53 * hash) + getDatalake().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Request object for cancel running Datalake diagnostics collections
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.CancelDatalakeDiagnosticsRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.CancelDatalakeDiagnosticsRequest)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CancelDatalakeDiagnosticsRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CancelDatalakeDiagnosticsRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        datalake_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CancelDatalakeDiagnosticsRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest(this);
+        result.datalake_ = datalake_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest.getDefaultInstance()) return this;
+        if (!other.getDatalake().isEmpty()) {
+          datalake_ = other.datalake_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                datalake_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+
+      private java.lang.Object datalake_ = "";
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return The datalake.
+       */
+      public java.lang.String getDatalake() {
+        java.lang.Object ref = datalake_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          datalake_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return The bytes for datalake.
+       */
+      public com.google.protobuf.ByteString
+          getDatalakeBytes() {
+        java.lang.Object ref = datalake_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          datalake_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @param value The datalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalake(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        datalake_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDatalake() {
+        
+        datalake_ = getDefaultInstance().getDatalake();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 1;</code>
+       * @param value The bytes for datalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalakeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        datalake_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.CancelDatalakeDiagnosticsRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.CancelDatalakeDiagnosticsRequest)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CancelDatalakeDiagnosticsRequest>
+        PARSER = new com.google.protobuf.AbstractParser<CancelDatalakeDiagnosticsRequest>() {
+      @java.lang.Override
+      public CancelDatalakeDiagnosticsRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<CancelDatalakeDiagnosticsRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CancelDatalakeDiagnosticsRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CancelDatalakeDiagnosticsResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.CancelDatalakeDiagnosticsResponse)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * Response object for cancel running Datalake diagnostics collections
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.CancelDatalakeDiagnosticsResponse}
+   */
+  public static final class CancelDatalakeDiagnosticsResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.CancelDatalakeDiagnosticsResponse)
+      CancelDatalakeDiagnosticsResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CancelDatalakeDiagnosticsResponse.newBuilder() to construct.
+    private CancelDatalakeDiagnosticsResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CancelDatalakeDiagnosticsResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CancelDatalakeDiagnosticsResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CancelDatalakeDiagnosticsResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CancelDatalakeDiagnosticsResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse.Builder.class);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse) obj;
+
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Response object for cancel running Datalake diagnostics collections
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.CancelDatalakeDiagnosticsResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.CancelDatalakeDiagnosticsResponse)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CancelDatalakeDiagnosticsResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CancelDatalakeDiagnosticsResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_CancelDatalakeDiagnosticsResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.CancelDatalakeDiagnosticsResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.CancelDatalakeDiagnosticsResponse)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CancelDatalakeDiagnosticsResponse>
+        PARSER = new com.google.protobuf.AbstractParser<CancelDatalakeDiagnosticsResponse>() {
+      @java.lang.Override
+      public CancelDatalakeDiagnosticsResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<CancelDatalakeDiagnosticsResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CancelDatalakeDiagnosticsResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ListDatalakesRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.ListDatalakesRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Name or CRN of the Environment
+     * </pre>
+     *
+     * <code>string environment = 1;</code>
+     * @return The environment.
+     */
+    java.lang.String getEnvironment();
+    /**
+     * <pre>
+     * Name or CRN of the Environment
+     * </pre>
+     *
+     * <code>string environment = 1;</code>
+     * @return The bytes for environment.
+     */
+    com.google.protobuf.ByteString
+        getEnvironmentBytes();
+
+    /**
+     * <code>string accountID = 2;</code>
+     * @return The accountID.
+     */
+    java.lang.String getAccountID();
+    /**
+     * <code>string accountID = 2;</code>
+     * @return The bytes for accountID.
+     */
+    com.google.protobuf.ByteString
+        getAccountIDBytes();
+
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 3;</code>
+     * @return The datalake.
+     */
+    java.lang.String getDatalake();
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 3;</code>
+     * @return The bytes for datalake.
+     */
+    com.google.protobuf.ByteString
+        getDatalakeBytes();
+  }
+  /**
+   * <pre>
+   * List Datalakes Request
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.ListDatalakesRequest}
+   */
+  public static final class ListDatalakesRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.ListDatalakesRequest)
+      ListDatalakesRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ListDatalakesRequest.newBuilder() to construct.
+    private ListDatalakesRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ListDatalakesRequest() {
+      environment_ = "";
+      accountID_ = "";
+      datalake_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ListDatalakesRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ListDatalakesRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ListDatalakesRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest.Builder.class);
+    }
+
+    public static final int ENVIRONMENT_FIELD_NUMBER = 1;
+    private volatile java.lang.Object environment_;
+    /**
+     * <pre>
+     * Name or CRN of the Environment
+     * </pre>
+     *
+     * <code>string environment = 1;</code>
+     * @return The environment.
+     */
+    @java.lang.Override
+    public java.lang.String getEnvironment() {
+      java.lang.Object ref = environment_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        environment_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Name or CRN of the Environment
+     * </pre>
+     *
+     * <code>string environment = 1;</code>
+     * @return The bytes for environment.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getEnvironmentBytes() {
+      java.lang.Object ref = environment_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        environment_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ACCOUNTID_FIELD_NUMBER = 2;
+    private volatile java.lang.Object accountID_;
+    /**
+     * <code>string accountID = 2;</code>
+     * @return The accountID.
+     */
+    @java.lang.Override
+    public java.lang.String getAccountID() {
+      java.lang.Object ref = accountID_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountID_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string accountID = 2;</code>
+     * @return The bytes for accountID.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getAccountIDBytes() {
+      java.lang.Object ref = accountID_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountID_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DATALAKE_FIELD_NUMBER = 3;
+    private volatile java.lang.Object datalake_;
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 3;</code>
+     * @return The datalake.
+     */
+    @java.lang.Override
+    public java.lang.String getDatalake() {
+      java.lang.Object ref = datalake_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        datalake_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Name or CRN of the Datalake
+     * </pre>
+     *
+     * <code>string datalake = 3;</code>
+     * @return The bytes for datalake.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getDatalakeBytes() {
+      java.lang.Object ref = datalake_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        datalake_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environment_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, environment_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountID_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, accountID_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, datalake_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environment_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, environment_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountID_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, accountID_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalake_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, datalake_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest) obj;
+
+      if (!getEnvironment()
+          .equals(other.getEnvironment())) return false;
+      if (!getAccountID()
+          .equals(other.getAccountID())) return false;
+      if (!getDatalake()
+          .equals(other.getDatalake())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ENVIRONMENT_FIELD_NUMBER;
+      hash = (53 * hash) + getEnvironment().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountID().hashCode();
+      hash = (37 * hash) + DATALAKE_FIELD_NUMBER;
+      hash = (53 * hash) + getDatalake().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * List Datalakes Request
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.ListDatalakesRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.ListDatalakesRequest)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ListDatalakesRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ListDatalakesRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        environment_ = "";
+
+        accountID_ = "";
+
+        datalake_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ListDatalakesRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest(this);
+        result.environment_ = environment_;
+        result.accountID_ = accountID_;
+        result.datalake_ = datalake_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest.getDefaultInstance()) return this;
+        if (!other.getEnvironment().isEmpty()) {
+          environment_ = other.environment_;
+          onChanged();
+        }
+        if (!other.getAccountID().isEmpty()) {
+          accountID_ = other.accountID_;
+          onChanged();
+        }
+        if (!other.getDatalake().isEmpty()) {
+          datalake_ = other.datalake_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                environment_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 10
+              case 18: {
+                accountID_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 18
+              case 26: {
+                datalake_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+
+      private java.lang.Object environment_ = "";
+      /**
+       * <pre>
+       * Name or CRN of the Environment
+       * </pre>
+       *
+       * <code>string environment = 1;</code>
+       * @return The environment.
+       */
+      public java.lang.String getEnvironment() {
+        java.lang.Object ref = environment_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          environment_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Environment
+       * </pre>
+       *
+       * <code>string environment = 1;</code>
+       * @return The bytes for environment.
+       */
+      public com.google.protobuf.ByteString
+          getEnvironmentBytes() {
+        java.lang.Object ref = environment_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          environment_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Environment
+       * </pre>
+       *
+       * <code>string environment = 1;</code>
+       * @param value The environment to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnvironment(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        environment_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Environment
+       * </pre>
+       *
+       * <code>string environment = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearEnvironment() {
+        
+        environment_ = getDefaultInstance().getEnvironment();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Environment
+       * </pre>
+       *
+       * <code>string environment = 1;</code>
+       * @param value The bytes for environment to set.
+       * @return This builder for chaining.
+       */
+      public Builder setEnvironmentBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        environment_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object accountID_ = "";
+      /**
+       * <code>string accountID = 2;</code>
+       * @return The accountID.
+       */
+      public java.lang.String getAccountID() {
+        java.lang.Object ref = accountID_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountID_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string accountID = 2;</code>
+       * @return The bytes for accountID.
+       */
+      public com.google.protobuf.ByteString
+          getAccountIDBytes() {
+        java.lang.Object ref = accountID_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountID_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string accountID = 2;</code>
+       * @param value The accountID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountID(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        accountID_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string accountID = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAccountID() {
+        
+        accountID_ = getDefaultInstance().getAccountID();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string accountID = 2;</code>
+       * @param value The bytes for accountID to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountIDBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        accountID_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object datalake_ = "";
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 3;</code>
+       * @return The datalake.
+       */
+      public java.lang.String getDatalake() {
+        java.lang.Object ref = datalake_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          datalake_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 3;</code>
+       * @return The bytes for datalake.
+       */
+      public com.google.protobuf.ByteString
+          getDatalakeBytes() {
+        java.lang.Object ref = datalake_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          datalake_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 3;</code>
+       * @param value The datalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalake(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        datalake_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDatalake() {
+        
+        datalake_ = getDefaultInstance().getDatalake();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Name or CRN of the Datalake
+       * </pre>
+       *
+       * <code>string datalake = 3;</code>
+       * @param value The bytes for datalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDatalakeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        datalake_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.ListDatalakesRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.ListDatalakesRequest)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ListDatalakesRequest>
+        PARSER = new com.google.protobuf.AbstractParser<ListDatalakesRequest>() {
+      @java.lang.Override
+      public ListDatalakesRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ListDatalakesRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ListDatalakesRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ListDatalakesResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdlcrud.ListDatalakesResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+     */
+    java.util.List<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse> 
+        getDatalakeResponseList();
+    /**
+     * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+     */
+    com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse getDatalakeResponse(int index);
+    /**
+     * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+     */
+    int getDatalakeResponseCount();
+    /**
+     * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+     */
+    java.util.List<? extends com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponseOrBuilder> 
+        getDatalakeResponseOrBuilderList();
+    /**
+     * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+     */
+    com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponseOrBuilder getDatalakeResponseOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * Response object for listing datalakes
+   * </pre>
+   *
+   * Protobuf type {@code cdlcrud.ListDatalakesResponse}
+   */
+  public static final class ListDatalakesResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdlcrud.ListDatalakesResponse)
+      ListDatalakesResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ListDatalakesResponse.newBuilder() to construct.
+    private ListDatalakesResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ListDatalakesResponse() {
+      datalakeResponse_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ListDatalakesResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ListDatalakesResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ListDatalakesResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse.Builder.class);
+    }
+
+    public static final int DATALAKERESPONSE_FIELD_NUMBER = 1;
+    private java.util.List<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse> datalakeResponse_;
+    /**
+     * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse> getDatalakeResponseList() {
+      return datalakeResponse_;
+    }
+    /**
+     * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponseOrBuilder> 
+        getDatalakeResponseOrBuilderList() {
+      return datalakeResponse_;
+    }
+    /**
+     * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+     */
+    @java.lang.Override
+    public int getDatalakeResponseCount() {
+      return datalakeResponse_.size();
+    }
+    /**
+     * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse getDatalakeResponse(int index) {
+      return datalakeResponse_.get(index);
+    }
+    /**
+     * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponseOrBuilder getDatalakeResponseOrBuilder(
+        int index) {
+      return datalakeResponse_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < datalakeResponse_.size(); i++) {
+        output.writeMessage(1, datalakeResponse_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < datalakeResponse_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, datalakeResponse_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse other = (com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse) obj;
+
+      if (!getDatalakeResponseList()
+          .equals(other.getDatalakeResponseList())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getDatalakeResponseCount() > 0) {
+        hash = (37 * hash) + DATALAKERESPONSE_FIELD_NUMBER;
+        hash = (53 * hash) + getDatalakeResponseList().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Response object for listing datalakes
+     * </pre>
+     *
+     * Protobuf type {@code cdlcrud.ListDatalakesResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdlcrud.ListDatalakesResponse)
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ListDatalakesResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ListDatalakesResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse.class, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (datalakeResponseBuilder_ == null) {
+          datalakeResponse_ = java.util.Collections.emptyList();
+        } else {
+          datalakeResponse_ = null;
+          datalakeResponseBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.internal_static_cdlcrud_ListDatalakesResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse build() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse buildPartial() {
+        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse result = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse(this);
+        int from_bitField0_ = bitField0_;
+        if (datalakeResponseBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) != 0)) {
+            datalakeResponse_ = java.util.Collections.unmodifiableList(datalakeResponse_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.datalakeResponse_ = datalakeResponse_;
+        } else {
+          result.datalakeResponse_ = datalakeResponseBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse other) {
+        if (other == com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse.getDefaultInstance()) return this;
+        if (datalakeResponseBuilder_ == null) {
+          if (!other.datalakeResponse_.isEmpty()) {
+            if (datalakeResponse_.isEmpty()) {
+              datalakeResponse_ = other.datalakeResponse_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureDatalakeResponseIsMutable();
+              datalakeResponse_.addAll(other.datalakeResponse_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.datalakeResponse_.isEmpty()) {
+            if (datalakeResponseBuilder_.isEmpty()) {
+              datalakeResponseBuilder_.dispose();
+              datalakeResponseBuilder_ = null;
+              datalakeResponse_ = other.datalakeResponse_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              datalakeResponseBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getDatalakeResponseFieldBuilder() : null;
+            } else {
+              datalakeResponseBuilder_.addAllMessages(other.datalakeResponse_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse.parser(),
+                        extensionRegistry);
+                if (datalakeResponseBuilder_ == null) {
+                  ensureDatalakeResponseIsMutable();
+                  datalakeResponse_.add(m);
+                } else {
+                  datalakeResponseBuilder_.addMessage(m);
+                }
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse> datalakeResponse_ =
+        java.util.Collections.emptyList();
+      private void ensureDatalakeResponseIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          datalakeResponse_ = new java.util.ArrayList<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse>(datalakeResponse_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse.Builder, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponseOrBuilder> datalakeResponseBuilder_;
+
+      /**
+       * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse> getDatalakeResponseList() {
+        if (datalakeResponseBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(datalakeResponse_);
+        } else {
+          return datalakeResponseBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+       */
+      public int getDatalakeResponseCount() {
+        if (datalakeResponseBuilder_ == null) {
+          return datalakeResponse_.size();
+        } else {
+          return datalakeResponseBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse getDatalakeResponse(int index) {
+        if (datalakeResponseBuilder_ == null) {
+          return datalakeResponse_.get(index);
+        } else {
+          return datalakeResponseBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+       */
+      public Builder setDatalakeResponse(
+          int index, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse value) {
+        if (datalakeResponseBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureDatalakeResponseIsMutable();
+          datalakeResponse_.set(index, value);
+          onChanged();
+        } else {
+          datalakeResponseBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+       */
+      public Builder setDatalakeResponse(
+          int index, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse.Builder builderForValue) {
+        if (datalakeResponseBuilder_ == null) {
+          ensureDatalakeResponseIsMutable();
+          datalakeResponse_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          datalakeResponseBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+       */
+      public Builder addDatalakeResponse(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse value) {
+        if (datalakeResponseBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureDatalakeResponseIsMutable();
+          datalakeResponse_.add(value);
+          onChanged();
+        } else {
+          datalakeResponseBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+       */
+      public Builder addDatalakeResponse(
+          int index, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse value) {
+        if (datalakeResponseBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureDatalakeResponseIsMutable();
+          datalakeResponse_.add(index, value);
+          onChanged();
+        } else {
+          datalakeResponseBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+       */
+      public Builder addDatalakeResponse(
+          com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse.Builder builderForValue) {
+        if (datalakeResponseBuilder_ == null) {
+          ensureDatalakeResponseIsMutable();
+          datalakeResponse_.add(builderForValue.build());
+          onChanged();
+        } else {
+          datalakeResponseBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+       */
+      public Builder addDatalakeResponse(
+          int index, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse.Builder builderForValue) {
+        if (datalakeResponseBuilder_ == null) {
+          ensureDatalakeResponseIsMutable();
+          datalakeResponse_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          datalakeResponseBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+       */
+      public Builder addAllDatalakeResponse(
+          java.lang.Iterable<? extends com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse> values) {
+        if (datalakeResponseBuilder_ == null) {
+          ensureDatalakeResponseIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, datalakeResponse_);
+          onChanged();
+        } else {
+          datalakeResponseBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+       */
+      public Builder clearDatalakeResponse() {
+        if (datalakeResponseBuilder_ == null) {
+          datalakeResponse_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          datalakeResponseBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+       */
+      public Builder removeDatalakeResponse(int index) {
+        if (datalakeResponseBuilder_ == null) {
+          ensureDatalakeResponseIsMutable();
+          datalakeResponse_.remove(index);
+          onChanged();
+        } else {
+          datalakeResponseBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse.Builder getDatalakeResponseBuilder(
+          int index) {
+        return getDatalakeResponseFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponseOrBuilder getDatalakeResponseOrBuilder(
+          int index) {
+        if (datalakeResponseBuilder_ == null) {
+          return datalakeResponse_.get(index);  } else {
+          return datalakeResponseBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+       */
+      public java.util.List<? extends com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponseOrBuilder> 
+           getDatalakeResponseOrBuilderList() {
+        if (datalakeResponseBuilder_ != null) {
+          return datalakeResponseBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(datalakeResponse_);
+        }
+      }
+      /**
+       * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse.Builder addDatalakeResponseBuilder() {
+        return getDatalakeResponseFieldBuilder().addBuilder(
+            com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse.Builder addDatalakeResponseBuilder(
+          int index) {
+        return getDatalakeResponseFieldBuilder().addBuilder(
+            index, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .cdlcrud.DatalakeResponse datalakeResponse = 1;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse.Builder> 
+           getDatalakeResponseBuilderList() {
+        return getDatalakeResponseFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse.Builder, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponseOrBuilder> 
+          getDatalakeResponseFieldBuilder() {
+        if (datalakeResponseBuilder_ == null) {
+          datalakeResponseBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse.Builder, com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponseOrBuilder>(
+                  datalakeResponse_,
+                  ((bitField0_ & 0x00000001) != 0),
+                  getParentForChildren(),
+                  isClean());
+          datalakeResponse_ = null;
+        }
+        return datalakeResponseBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdlcrud.ListDatalakesResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdlcrud.ListDatalakesResponse)
+    private static final com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ListDatalakesResponse>
+        PARSER = new com.google.protobuf.AbstractParser<ListDatalakesResponse>() {
+      @java.lang.Override
+      public ListDatalakesResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ListDatalakesResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ListDatalakesResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_cdlcrud_DatabaseAvailabilityType_descriptor;
   private static final 
@@ -27722,6 +39170,11 @@ java.lang.String defaultValue);
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_cdlcrud_Config_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_ProductVersion_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_ProductVersion_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_cdlcrud_EndpointHost_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -27741,6 +39194,11 @@ java.lang.String defaultValue);
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_cdlcrud_CreateDatalakeResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_CreateDatalakeResponse_TagsEntry_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_CreateDatalakeResponse_TagsEntry_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_cdlcrud_DeleteDatalakeRequest_descriptor;
   private static final 
@@ -27791,6 +39249,61 @@ java.lang.String defaultValue);
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_cdlcrud_AwsConfiguration_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_CollectDatalakeDiagnosticsRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_CollectDatalakeDiagnosticsRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_Destination_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_Destination_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_CollectDatalakeDiagnosticsResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_CollectDatalakeDiagnosticsResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_DiagnosticsCollection_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_DiagnosticsCollection_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_DiagnosticsCollectionStatus_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_DiagnosticsCollectionStatus_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_ListDatalakeDiagnosticsRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_ListDatalakeDiagnosticsRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_ListDatalakeDiagnosticsResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_ListDatalakeDiagnosticsResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_CancelDatalakeDiagnosticsRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_CancelDatalakeDiagnosticsRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_CancelDatalakeDiagnosticsResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_CancelDatalakeDiagnosticsResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_ListDatalakesRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_ListDatalakesRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdlcrud_ListDatalakesResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdlcrud_ListDatalakesResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -27803,98 +39316,146 @@ java.lang.String defaultValue);
       "\n\rcdlcrud.proto\022\007cdlcrud\032\rversion.proto\032" +
       "\roptions.proto\032\017resources.proto\"L\n\030Datab" +
       "aseAvailabilityType\"0\n\005Value\022\t\n\005UNSET\020\000\022" +
-      "\010\n\004NONE\020\001\022\n\n\006NON_HA\020\002\022\006\n\002HA\020\003\"\320\001\n\nStatus" +
-      "Type\"\301\001\n\005Value\022\t\n\005UNSET\020\000\022\r\n\tREQUESTED\020\001" +
+      "\010\n\004NONE\020\001\022\n\n\006NON_HA\020\002\022\006\n\002HA\020\003\"\374\001\n\nStatus" +
+      "Type\"\355\001\n\005Value\022\t\n\005UNSET\020\000\022\r\n\tREQUESTED\020\001" +
       "\022\020\n\014PROVISIONING\020\002\022\017\n\013PROVISIONED\020\003\022\027\n\023P" +
       "ROVISIONING_FAILED\020\004\022\013\n\007RUNNING\020\005\022\013\n\007STO" +
       "PPED\020\006\022\r\n\tUPGRADING\020\007\022\014\n\010DELETING\020\010\022\013\n\007D" +
       "ELETED\020\t\022\021\n\rDELETE_FAILED\020\n\022\013\n\007UNKNOWN\020\013" +
-      "\"C\n\rInstanceGroup\022\014\n\004name\030\001 \001(\t\022$\n\tinsta" +
-      "nces\030\002 \003(\0132\021.cdlcrud.Instance\"\235\001\n\010Instan" +
-      "ce\022\n\n\002id\030\001 \001(\t\022\r\n\005state\030\002 \001(\t\022\025\n\rdiscove" +
-      "ryFQDN\030\003 \001(\t\022\021\n\tprivateIP\030\004 \001(\t\022\020\n\010publi" +
-      "cIP\030\005 \001(\t\022\016\n\006rackID\030\006 \001(\t\022\020\n\010subnetID\030\007 " +
-      "\001(\t\022\030\n\020availabilityZone\030\010 \001(\t\"3\n\010Endpoin" +
-      "t\022\023\n\013serviceName\030\001 \001(\t\022\022\n\nserviceURL\030\002 \001" +
-      "(\t\"n\n\013NetworkInfo\022\026\n\016securityGroups\030\001 \003(" +
-      "\t\022\026\n\016virtualNetwork\030\002 \001(\t\022\017\n\007subnets\030\003 \003" +
-      "(\t\022\036\n\026existingVirtualNetwork\030\004 \001(\010\"\231\002\n\014D" +
-      "atabaseInfo\022\013\n\003crn\030\001 \001(\t\022\024\n\014databaseName" +
-      "\030\002 \001(\t\022\025\n\007created\030\003 \001(\003B\004\260\265\030\001\022\026\n\016sslMode" +
-      "Enabled\030\004 \001(\010\022A\n\020availabilityType\030\005 \001(\0162" +
-      "\'.cdlcrud.DatabaseAvailabilityType.Value" +
-      "\022\014\n\004host\030\007 \001(\t\022\014\n\004port\030\010 \001(\r\022\030\n\020secretEn" +
-      "ginePath\030\t \001(\t\022\036\n\026connectionUsernamePath" +
-      "\030\n \001(\t\022\036\n\026connectionPasswordPath\030\013 \001(\t\"\237" +
-      "\001\n\014EndpointInfo\022\014\n\004name\030\001 \001(\t\022\017\n\007version" +
-      "\030\002 \001(\t\022-\n\016serviceConfigs\030\003 \003(\0132\017.cdlcrud" +
-      ".ConfigB\004\200\265\030\001\022,\n\rendpointHosts\030\004 \003(\0132\025.c" +
-      "dlcrud.EndpointHost\022\023\n\013serviceType\030\005 \001(\t" +
-      "\"$\n\006Config\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t\"]" +
-      "\n\014EndpointHost\022\013\n\003uri\030\001 \001(\t\0222\n\023endPointH" +
-      "ostConfigs\030\002 \003(\0132\017.cdlcrud.ConfigB\004\200\265\030\001\022" +
-      "\014\n\004type\030\003 \001(\t\"\305\004\n\025CreateDatalakeRequest\022" +
-      "\024\n\014datalakeName\030\001 \001(\t\022\027\n\017environmentName" +
-      "\030\002 \001(\t\022N\n\030databaseAvailabilityType\030\003 \001(\016" +
-      "2\'.cdlcrud.DatabaseAvailabilityType.Valu" +
-      "eH\000\210\001\001\0226\n\004tags\030\004 \003(\0132(.cdlcrud.CreateDat" +
-      "alakeRequest.TagsEntry\022\"\n\025databaseEngine" +
-      "Version\030\005 \001(\tH\001\210\001\001\022\034\n\017enableRangerRaz\030\006 " +
-      "\001(\010H\002\210\001\001\022\032\n\renableMultiAz\030\007 \001(\010H\003\210\001\001\022\036\n\026" +
-      "clouderaRuntimeVersion\030\010 \001(\t\022\023\n\006layout\030\t" +
-      " \001(\tH\004\210\001\001\0228\n\020awsConfiguration\030\n \001(\0132\031.cd" +
-      "lcrud.AwsConfigurationH\005\210\001\001\032+\n\tTagsEntry" +
-      "\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001B\033\n\031_dat" +
-      "abaseAvailabilityTypeB\030\n\026_databaseEngine" +
-      "VersionB\022\n\020_enableRangerRazB\020\n\016_enableMu" +
-      "ltiAzB\t\n\007_layoutB\023\n\021_awsConfiguration\"\301\001" +
-      "\n\026CreateDatalakeResponse\022\013\n\003crn\030\001 \001(\t\022\016\n" +
-      "\006status\030\002 \001(\t\022\024\n\014datalakeName\030\003 \001(\t\022\026\n\016e" +
-      "nvironmentCrn\030\004 \001(\t\022\026\n\016creationDateMs\030\005 " +
-      "\001(\004\022\024\n\014statusReason\030\006 \001(\t\022\027\n\017enableRange" +
-      "rRaz\030\007 \001(\010\022\025\n\renableMultiAz\030\010 \001(\010\")\n\025Del" +
-      "eteDatalakeRequest\022\020\n\010datalake\030\001 \001(\t\"5\n\026" +
-      "DeleteDatalakeResponse\022\013\n\003crn\030\001 \001(\t\022\016\n\006s" +
-      "tatus\030\002 \001(\t\"+\n\027DescribeDatalakeRequest\022\020" +
-      "\n\010datalake\030\001 \001(\t\"\336\004\n\030DescribeDatalakeRes" +
-      "ponse\022\013\n\003crn\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022)\n\006stat" +
-      "us\030\003 \001(\0162\031.cdlcrud.StatusType.Value\022\r\n\005s" +
-      "hape\030\004 \001(\t\022\026\n\016environmentCrn\030\005 \001(\t\022\025\n\rcl" +
-      "oudPlatform\030\006 \001(\t\022.\n\016instanceGroups\030\007 \003(" +
-      "\0132\026.cdlcrud.InstanceGroup\022$\n\tendpoints\030\010" +
-      " \003(\0132\021.cdlcrud.Endpoint\022%\n\007network\030\t \001(\013" +
-      "2\024.cdlcrud.NetworkInfo\022\021\n\taccountID\030\n \001(" +
-      "\t\022\026\n\016runtimeVersion\030\013 \001(\t\0229\n\004tags\030\014 \003(\0132" +
-      "+.cdlcrud.DescribeDatalakeResponse.TagsE" +
-      "ntry\022\025\n\007created\030\r \001(\003B\004\260\265\030\001\022\017\n\007deleted\030\016" +
-      " \001(\t\022\030\n\020rangerRazEnabled\030\017 \001(\010\022.\n\017databa" +
-      "seDetails\030\020 \001(\0132\025.cdlcrud.DatabaseInfo\022\024" +
-      "\n\014statusReason\030\021 \001(\t\022\026\n\016multiAzEnabled\030\022" +
-      " \001(\010\022\016\n\006region\030\023 \001(\t\032+\n\tTagsEntry\022\013\n\003key" +
-      "\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"O\n\023FindDatalak" +
-      "eRequest\022\020\n\010datalake\030\001 \001(\t\022\021\n\taccountID\030" +
-      "\002 \001(\t\022\023\n\013environment\030\003 \001(\t\"=\n\020DatalakeRe" +
+      "\022\031\n\025LIMITED_FUNCTIONALITY\020\014\022\017\n\013UNAVAILAB" +
+      "LE\020\r\"C\n\rInstanceGroup\022\014\n\004name\030\001 \001(\t\022$\n\ti" +
+      "nstances\030\002 \003(\0132\021.cdlcrud.Instance\"\235\001\n\010In" +
+      "stance\022\n\n\002id\030\001 \001(\t\022\r\n\005state\030\002 \001(\t\022\025\n\rdis" +
+      "coveryFQDN\030\003 \001(\t\022\021\n\tprivateIP\030\004 \001(\t\022\020\n\010p" +
+      "ublicIP\030\005 \001(\t\022\016\n\006rackID\030\006 \001(\t\022\020\n\010subnetI" +
+      "D\030\007 \001(\t\022\030\n\020availabilityZone\030\010 \001(\t\"k\n\010End" +
+      "point\022\023\n\013serviceName\030\001 \001(\t\022\022\n\nserviceURL" +
+      "\030\002 \001(\t\022\023\n\013displayName\030\003 \001(\t\022\023\n\013knoxServi" +
+      "ce\030\004 \001(\t\022\014\n\004mode\030\005 \001(\t\"n\n\013NetworkInfo\022\026\n" +
+      "\016securityGroups\030\001 \003(\t\022\026\n\016virtualNetwork\030" +
+      "\002 \001(\t\022\017\n\007subnets\030\003 \003(\t\022\036\n\026existingVirtua" +
+      "lNetwork\030\004 \001(\010\"\231\002\n\014DatabaseInfo\022\013\n\003crn\030\001" +
+      " \001(\t\022\024\n\014databaseName\030\002 \001(\t\022\025\n\007created\030\003 " +
+      "\001(\003B\004\260\265\030\001\022\026\n\016sslModeEnabled\030\004 \001(\010\022A\n\020ava" +
+      "ilabilityType\030\005 \001(\0162\'.cdlcrud.DatabaseAv" +
+      "ailabilityType.Value\022\014\n\004host\030\007 \001(\t\022\014\n\004po" +
+      "rt\030\010 \001(\r\022\030\n\020secretEnginePath\030\t \001(\t\022\036\n\026co" +
+      "nnectionUsernamePath\030\n \001(\t\022\036\n\026connection" +
+      "PasswordPath\030\013 \001(\t\"\237\001\n\014EndpointInfo\022\014\n\004n" +
+      "ame\030\001 \001(\t\022\017\n\007version\030\002 \001(\t\022-\n\016serviceCon" +
+      "figs\030\003 \003(\0132\017.cdlcrud.ConfigB\004\200\265\030\001\022,\n\rend" +
+      "pointHosts\030\004 \003(\0132\025.cdlcrud.EndpointHost\022" +
+      "\023\n\013serviceType\030\005 \001(\t\"$\n\006Config\022\013\n\003key\030\001 " +
+      "\001(\t\022\r\n\005value\030\002 \001(\t\"/\n\016ProductVersion\022\014\n\004" +
+      "name\030\001 \001(\t\022\017\n\007version\030\002 \001(\t\"]\n\014EndpointH" +
+      "ost\022\013\n\003uri\030\001 \001(\t\0222\n\023endPointHostConfigs\030" +
+      "\002 \003(\0132\017.cdlcrud.ConfigB\004\200\265\030\001\022\014\n\004type\030\003 \001" +
+      "(\t\"\305\004\n\025CreateDatalakeRequest\022\024\n\014datalake" +
+      "Name\030\001 \001(\t\022\027\n\017environmentName\030\002 \001(\t\022N\n\030d" +
+      "atabaseAvailabilityType\030\003 \001(\0162\'.cdlcrud." +
+      "DatabaseAvailabilityType.ValueH\000\210\001\001\0226\n\004t" +
+      "ags\030\004 \003(\0132(.cdlcrud.CreateDatalakeReques" +
+      "t.TagsEntry\022\"\n\025databaseEngineVersion\030\005 \001" +
+      "(\tH\001\210\001\001\022\034\n\017enableRangerRaz\030\006 \001(\010H\002\210\001\001\022\032\n" +
+      "\renableMultiAz\030\007 \001(\010H\003\210\001\001\022\036\n\026clouderaRun" +
+      "timeVersion\030\010 \001(\t\022\023\n\006layout\030\t \001(\tH\004\210\001\001\0228" +
+      "\n\020awsConfiguration\030\n \001(\0132\031.cdlcrud.AwsCo" +
+      "nfigurationH\005\210\001\001\032+\n\tTagsEntry\022\013\n\003key\030\001 \001" +
+      "(\t\022\r\n\005value\030\002 \001(\t:\0028\001B\033\n\031_databaseAvaila" +
+      "bilityTypeB\030\n\026_databaseEngineVersionB\022\n\020" +
+      "_enableRangerRazB\020\n\016_enableMultiAzB\t\n\007_l" +
+      "ayoutB\023\n\021_awsConfiguration\"\247\002\n\026CreateDat" +
+      "alakeResponse\022\013\n\003crn\030\001 \001(\t\022\016\n\006status\030\002 \001" +
+      "(\t\022\024\n\014datalakeName\030\003 \001(\t\022\026\n\016environmentC" +
+      "rn\030\004 \001(\t\022\026\n\016creationDateMs\030\005 \001(\004\022\024\n\014stat" +
+      "usReason\030\006 \001(\t\022\027\n\017enableRangerRaz\030\007 \001(\010\022" +
+      "\025\n\renableMultiAz\030\010 \001(\010\0227\n\004tags\030\t \003(\0132).c" +
+      "dlcrud.CreateDatalakeResponse.TagsEntry\032" +
+      "+\n\tTagsEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t" +
+      ":\0028\001\")\n\025DeleteDatalakeRequest\022\020\n\010datalak" +
+      "e\030\001 \001(\t\"5\n\026DeleteDatalakeResponse\022\013\n\003crn" +
+      "\030\001 \001(\t\022\016\n\006status\030\002 \001(\t\">\n\027DescribeDatala" +
+      "keRequest\022\020\n\010datalake\030\001 \001(\t\022\021\n\taccountID" +
+      "\030\002 \001(\t\"\217\005\n\030DescribeDatalakeResponse\022\013\n\003c" +
+      "rn\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022)\n\006status\030\003 \001(\0162\031" +
+      ".cdlcrud.StatusType.Value\022\r\n\005shape\030\004 \001(\t" +
+      "\022\026\n\016environmentCrn\030\005 \001(\t\022\025\n\rcloudPlatfor" +
+      "m\030\006 \001(\t\022.\n\016instanceGroups\030\007 \003(\0132\026.cdlcru" +
+      "d.InstanceGroup\022$\n\tendpoints\030\010 \003(\0132\021.cdl" +
+      "crud.Endpoint\022%\n\007network\030\t \001(\0132\024.cdlcrud" +
+      ".NetworkInfo\022\021\n\taccountID\030\n \001(\t\022\026\n\016runti" +
+      "meVersion\030\013 \001(\t\0229\n\004tags\030\014 \003(\0132+.cdlcrud." +
+      "DescribeDatalakeResponse.TagsEntry\022\025\n\007cr" +
+      "eated\030\r \001(\003B\004\260\265\030\001\022\017\n\007deleted\030\016 \001(\t\022\030\n\020ra" +
+      "ngerRazEnabled\030\017 \001(\010\022.\n\017databaseDetails\030" +
+      "\020 \001(\0132\025.cdlcrud.DatabaseInfo\022\024\n\014statusRe" +
+      "ason\030\021 \003(\t\022\026\n\016multiAzEnabled\030\022 \001(\010\022\016\n\006re" +
+      "gion\030\023 \001(\t\022/\n\016productVersion\030\024 \001(\0132\027.cdl" +
+      "crud.ProductVersion\032+\n\tTagsEntry\022\013\n\003key\030" +
+      "\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"O\n\023FindDatalake" +
+      "Request\022\020\n\010datalake\030\001 \001(\t\022\021\n\taccountID\030\002" +
+      " \001(\t\022\023\n\013environment\030\003 \001(\t\"\264\001\n\020DatalakeRe" +
       "sponse\022\013\n\003crn\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\016\n\006sta" +
-      "tus\030\003 \001(\t\"+\n\027DescribeServicesRequest\022\020\n\010" +
-      "datalake\030\001 \001(\t\"\230\001\n\030DescribeServicesRespo" +
-      "nse\022\014\n\004name\030\001 \001(\t\022\013\n\003crn\030\002 \001(\t\022(\n\tendpoi" +
-      "nts\030\003 \003(\0132\025.cdlcrud.EndpointInfo\022&\n\007conf" +
-      "igs\030\004 \003(\0132\017.cdlcrud.ConfigB\004\200\265\030\001\022\017\n\007vers" +
-      "ion\030\005 \001(\t\"1\n\020AwsConfiguration\022\035\n\025storage" +
-      "BucketLocation\030\001 \001(\t2\264\003\n\007CdlCrud\022S\n\016Crea" +
-      "teDatalake\022\036.cdlcrud.CreateDatalakeReque" +
-      "st\032\037.cdlcrud.CreateDatalakeResponse\"\000\022S\n" +
-      "\016DeleteDatalake\022\036.cdlcrud.DeleteDatalake" +
-      "Request\032\037.cdlcrud.DeleteDatalakeResponse" +
-      "\"\000\022Y\n\020DescribeDatalake\022 .cdlcrud.Describ" +
-      "eDatalakeRequest\032!.cdlcrud.DescribeDatal" +
-      "akeResponse\"\000\022I\n\014FindDatalake\022\034.cdlcrud." +
-      "FindDatalakeRequest\032\031.cdlcrud.DatalakeRe" +
-      "sponse\"\000\022Y\n\020DescribeServices\022 .cdlcrud.D" +
-      "escribeServicesRequest\032!.cdlcrud.Describ" +
-      "eServicesResponse\"\000B8\n(com.cloudera.thun" +
-      "derhead.service.cdlcrudB\014CdlCrudProtob\006p" +
-      "roto3"
+      "tus\030\003 \001(\t\022\026\n\016environmentCrn\030\004 \001(\t\022\025\n\007cre" +
+      "ated\030\005 \001(\003B\004\260\265\030\001\022\024\n\014statusReason\030\006 \001(\t\022\030" +
+      "\n\020rangerRazEnabled\030\007 \001(\010\022\026\n\016multiAzEnabl" +
+      "ed\030\010 \001(\010\">\n\027DescribeServicesRequest\022\020\n\010d" +
+      "atalake\030\001 \001(\t\022\021\n\taccountID\030\002 \001(\t\"\230\001\n\030Des" +
+      "cribeServicesResponse\022\014\n\004name\030\001 \001(\t\022\013\n\003c" +
+      "rn\030\002 \001(\t\022(\n\tendpoints\030\003 \003(\0132\025.cdlcrud.En" +
+      "dpointInfo\022&\n\007configs\030\004 \003(\0132\017.cdlcrud.Co" +
+      "nfigB\004\200\265\030\001\022\017\n\007version\030\005 \001(\t\"1\n\020AwsConfig" +
+      "uration\022\035\n\025storageBucketLocation\030\001 \001(\t\"\324" +
+      "\001\n!CollectDatalakeDiagnosticsRequest\022\020\n\010" +
+      "datalake\030\001 \001(\t\022/\n\013destination\030\002 \001(\0162\032.cd" +
+      "lcrud.Destination.Value\022\030\n\013description\030\003" +
+      " \001(\tH\000\210\001\001\022\022\n\ncaseNumber\030\004 \001(\t\022\027\n\tstartDa" +
+      "te\030\005 \001(\003B\004\260\265\030\001\022\025\n\007endDate\030\006 \001(\003B\004\260\265\030\001B\016\n" +
+      "\014_description\".\n\013Destination\"\037\n\005Value\022\t\n" +
+      "\005UNSET\020\000\022\013\n\007SUPPORT\020\001\"Y\n\"CollectDatalake" +
+      "DiagnosticsResponse\0223\n\013diagnostics\030\001 \001(\013" +
+      "2\036.cdlcrud.DiagnosticsCollection\"\200\001\n\025Dia" +
+      "gnosticsCollection\022\024\n\014collectionId\030\001 \001(\t" +
+      "\022\025\n\007created\030\002 \001(\003B\004\260\265\030\001\022:\n\006status\030\003 \001(\0162" +
+      "*.cdlcrud.DiagnosticsCollectionStatus.Va" +
+      "lue\"\\\n\033DiagnosticsCollectionStatus\"=\n\005Va" +
+      "lue\022\013\n\007RUNNING\020\000\022\n\n\006FAILED\020\001\022\014\n\010FINISHED" +
+      "\020\002\022\r\n\tCANCELLED\020\003\"\206\001\n\036ListDatalakeDiagno" +
+      "sticsRequest\022\020\n\010datalake\030\001 \001(\t\022\034\n\tstartD" +
+      "ate\030\002 \001(\003B\004\260\265\030\001H\000\210\001\001\022\032\n\007endDate\030\003 \001(\003B\004\260" +
+      "\265\030\001H\001\210\001\001B\014\n\n_startDateB\n\n\010_endDate\"V\n\037Li" +
+      "stDatalakeDiagnosticsResponse\0223\n\013diagnos" +
+      "tics\030\001 \003(\0132\036.cdlcrud.DiagnosticsCollecti" +
+      "on\"4\n CancelDatalakeDiagnosticsRequest\022\020" +
+      "\n\010datalake\030\001 \001(\t\"#\n!CancelDatalakeDiagno" +
+      "sticsResponse\"P\n\024ListDatalakesRequest\022\023\n" +
+      "\013environment\030\001 \001(\t\022\021\n\taccountID\030\002 \001(\t\022\020\n" +
+      "\010datalake\030\003 \001(\t\"L\n\025ListDatalakesResponse" +
+      "\0223\n\020datalakeResponse\030\001 \003(\0132\031.cdlcrud.Dat" +
+      "alakeResponse2\345\006\n\007CdlCrud\022S\n\016CreateDatal" +
+      "ake\022\036.cdlcrud.CreateDatalakeRequest\032\037.cd" +
+      "lcrud.CreateDatalakeResponse\"\000\022S\n\016Delete" +
+      "Datalake\022\036.cdlcrud.DeleteDatalakeRequest" +
+      "\032\037.cdlcrud.DeleteDatalakeResponse\"\000\022Y\n\020D" +
+      "escribeDatalake\022 .cdlcrud.DescribeDatala" +
+      "keRequest\032!.cdlcrud.DescribeDatalakeResp" +
+      "onse\"\000\022I\n\014FindDatalake\022\034.cdlcrud.FindDat" +
+      "alakeRequest\032\031.cdlcrud.DatalakeResponse\"" +
+      "\000\022Y\n\020DescribeServices\022 .cdlcrud.Describe" +
+      "ServicesRequest\032!.cdlcrud.DescribeServic" +
+      "esResponse\"\000\022w\n\032CollectDatalakeDiagnosti" +
+      "cs\022*.cdlcrud.CollectDatalakeDiagnosticsR" +
+      "equest\032+.cdlcrud.CollectDatalakeDiagnost" +
+      "icsResponse\"\000\022n\n\027ListDatalakeDiagnostics" +
+      "\022\'.cdlcrud.ListDatalakeDiagnosticsReques" +
+      "t\032(.cdlcrud.ListDatalakeDiagnosticsRespo" +
+      "nse\"\000\022t\n\031CancelDatalakeDiagnostics\022).cdl" +
+      "crud.CancelDatalakeDiagnosticsRequest\032*." +
+      "cdlcrud.CancelDatalakeDiagnosticsRespons" +
+      "e\"\000\022P\n\rListDatalakes\022\035.cdlcrud.ListDatal" +
+      "akesRequest\032\036.cdlcrud.ListDatalakesRespo" +
+      "nse\"\000B8\n(com.cloudera.thunderhead.servic" +
+      "e.cdlcrudB\014CdlCrudProtob\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -27932,7 +39493,7 @@ java.lang.String defaultValue);
     internal_static_cdlcrud_Endpoint_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_Endpoint_descriptor,
-        new java.lang.String[] { "ServiceName", "ServiceURL", });
+        new java.lang.String[] { "ServiceName", "ServiceURL", "DisplayName", "KnoxService", "Mode", });
     internal_static_cdlcrud_NetworkInfo_descriptor =
       getDescriptor().getMessageTypes().get(5);
     internal_static_cdlcrud_NetworkInfo_fieldAccessorTable = new
@@ -27957,14 +39518,20 @@ java.lang.String defaultValue);
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_Config_descriptor,
         new java.lang.String[] { "Key", "Value", });
-    internal_static_cdlcrud_EndpointHost_descriptor =
+    internal_static_cdlcrud_ProductVersion_descriptor =
       getDescriptor().getMessageTypes().get(9);
+    internal_static_cdlcrud_ProductVersion_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_ProductVersion_descriptor,
+        new java.lang.String[] { "Name", "Version", });
+    internal_static_cdlcrud_EndpointHost_descriptor =
+      getDescriptor().getMessageTypes().get(10);
     internal_static_cdlcrud_EndpointHost_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_EndpointHost_descriptor,
         new java.lang.String[] { "Uri", "EndPointHostConfigs", "Type", });
     internal_static_cdlcrud_CreateDatalakeRequest_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_cdlcrud_CreateDatalakeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_CreateDatalakeRequest_descriptor,
@@ -27976,35 +39543,41 @@ java.lang.String defaultValue);
         internal_static_cdlcrud_CreateDatalakeRequest_TagsEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
     internal_static_cdlcrud_CreateDatalakeResponse_descriptor =
-      getDescriptor().getMessageTypes().get(11);
+      getDescriptor().getMessageTypes().get(12);
     internal_static_cdlcrud_CreateDatalakeResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_CreateDatalakeResponse_descriptor,
-        new java.lang.String[] { "Crn", "Status", "DatalakeName", "EnvironmentCrn", "CreationDateMs", "StatusReason", "EnableRangerRaz", "EnableMultiAz", });
+        new java.lang.String[] { "Crn", "Status", "DatalakeName", "EnvironmentCrn", "CreationDateMs", "StatusReason", "EnableRangerRaz", "EnableMultiAz", "Tags", });
+    internal_static_cdlcrud_CreateDatalakeResponse_TagsEntry_descriptor =
+      internal_static_cdlcrud_CreateDatalakeResponse_descriptor.getNestedTypes().get(0);
+    internal_static_cdlcrud_CreateDatalakeResponse_TagsEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_CreateDatalakeResponse_TagsEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
     internal_static_cdlcrud_DeleteDatalakeRequest_descriptor =
-      getDescriptor().getMessageTypes().get(12);
+      getDescriptor().getMessageTypes().get(13);
     internal_static_cdlcrud_DeleteDatalakeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_DeleteDatalakeRequest_descriptor,
         new java.lang.String[] { "Datalake", });
     internal_static_cdlcrud_DeleteDatalakeResponse_descriptor =
-      getDescriptor().getMessageTypes().get(13);
+      getDescriptor().getMessageTypes().get(14);
     internal_static_cdlcrud_DeleteDatalakeResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_DeleteDatalakeResponse_descriptor,
         new java.lang.String[] { "Crn", "Status", });
     internal_static_cdlcrud_DescribeDatalakeRequest_descriptor =
-      getDescriptor().getMessageTypes().get(14);
+      getDescriptor().getMessageTypes().get(15);
     internal_static_cdlcrud_DescribeDatalakeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_DescribeDatalakeRequest_descriptor,
-        new java.lang.String[] { "Datalake", });
+        new java.lang.String[] { "Datalake", "AccountID", });
     internal_static_cdlcrud_DescribeDatalakeResponse_descriptor =
-      getDescriptor().getMessageTypes().get(15);
+      getDescriptor().getMessageTypes().get(16);
     internal_static_cdlcrud_DescribeDatalakeResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_DescribeDatalakeResponse_descriptor,
-        new java.lang.String[] { "Crn", "Name", "Status", "Shape", "EnvironmentCrn", "CloudPlatform", "InstanceGroups", "Endpoints", "Network", "AccountID", "RuntimeVersion", "Tags", "Created", "Deleted", "RangerRazEnabled", "DatabaseDetails", "StatusReason", "MultiAzEnabled", "Region", });
+        new java.lang.String[] { "Crn", "Name", "Status", "Shape", "EnvironmentCrn", "CloudPlatform", "InstanceGroups", "Endpoints", "Network", "AccountID", "RuntimeVersion", "Tags", "Created", "Deleted", "RangerRazEnabled", "DatabaseDetails", "StatusReason", "MultiAzEnabled", "Region", "ProductVersion", });
     internal_static_cdlcrud_DescribeDatalakeResponse_TagsEntry_descriptor =
       internal_static_cdlcrud_DescribeDatalakeResponse_descriptor.getNestedTypes().get(0);
     internal_static_cdlcrud_DescribeDatalakeResponse_TagsEntry_fieldAccessorTable = new
@@ -28012,35 +39585,101 @@ java.lang.String defaultValue);
         internal_static_cdlcrud_DescribeDatalakeResponse_TagsEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
     internal_static_cdlcrud_FindDatalakeRequest_descriptor =
-      getDescriptor().getMessageTypes().get(16);
+      getDescriptor().getMessageTypes().get(17);
     internal_static_cdlcrud_FindDatalakeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_FindDatalakeRequest_descriptor,
         new java.lang.String[] { "Datalake", "AccountID", "Environment", });
     internal_static_cdlcrud_DatalakeResponse_descriptor =
-      getDescriptor().getMessageTypes().get(17);
+      getDescriptor().getMessageTypes().get(18);
     internal_static_cdlcrud_DatalakeResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_DatalakeResponse_descriptor,
-        new java.lang.String[] { "Crn", "Name", "Status", });
+        new java.lang.String[] { "Crn", "Name", "Status", "EnvironmentCrn", "Created", "StatusReason", "RangerRazEnabled", "MultiAzEnabled", });
     internal_static_cdlcrud_DescribeServicesRequest_descriptor =
-      getDescriptor().getMessageTypes().get(18);
+      getDescriptor().getMessageTypes().get(19);
     internal_static_cdlcrud_DescribeServicesRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_DescribeServicesRequest_descriptor,
-        new java.lang.String[] { "Datalake", });
+        new java.lang.String[] { "Datalake", "AccountID", });
     internal_static_cdlcrud_DescribeServicesResponse_descriptor =
-      getDescriptor().getMessageTypes().get(19);
+      getDescriptor().getMessageTypes().get(20);
     internal_static_cdlcrud_DescribeServicesResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_DescribeServicesResponse_descriptor,
         new java.lang.String[] { "Name", "Crn", "Endpoints", "Configs", "Version", });
     internal_static_cdlcrud_AwsConfiguration_descriptor =
-      getDescriptor().getMessageTypes().get(20);
+      getDescriptor().getMessageTypes().get(21);
     internal_static_cdlcrud_AwsConfiguration_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdlcrud_AwsConfiguration_descriptor,
         new java.lang.String[] { "StorageBucketLocation", });
+    internal_static_cdlcrud_CollectDatalakeDiagnosticsRequest_descriptor =
+      getDescriptor().getMessageTypes().get(22);
+    internal_static_cdlcrud_CollectDatalakeDiagnosticsRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_CollectDatalakeDiagnosticsRequest_descriptor,
+        new java.lang.String[] { "Datalake", "Destination", "Description", "CaseNumber", "StartDate", "EndDate", "Description", });
+    internal_static_cdlcrud_Destination_descriptor =
+      getDescriptor().getMessageTypes().get(23);
+    internal_static_cdlcrud_Destination_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_Destination_descriptor,
+        new java.lang.String[] { });
+    internal_static_cdlcrud_CollectDatalakeDiagnosticsResponse_descriptor =
+      getDescriptor().getMessageTypes().get(24);
+    internal_static_cdlcrud_CollectDatalakeDiagnosticsResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_CollectDatalakeDiagnosticsResponse_descriptor,
+        new java.lang.String[] { "Diagnostics", });
+    internal_static_cdlcrud_DiagnosticsCollection_descriptor =
+      getDescriptor().getMessageTypes().get(25);
+    internal_static_cdlcrud_DiagnosticsCollection_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_DiagnosticsCollection_descriptor,
+        new java.lang.String[] { "CollectionId", "Created", "Status", });
+    internal_static_cdlcrud_DiagnosticsCollectionStatus_descriptor =
+      getDescriptor().getMessageTypes().get(26);
+    internal_static_cdlcrud_DiagnosticsCollectionStatus_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_DiagnosticsCollectionStatus_descriptor,
+        new java.lang.String[] { });
+    internal_static_cdlcrud_ListDatalakeDiagnosticsRequest_descriptor =
+      getDescriptor().getMessageTypes().get(27);
+    internal_static_cdlcrud_ListDatalakeDiagnosticsRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_ListDatalakeDiagnosticsRequest_descriptor,
+        new java.lang.String[] { "Datalake", "StartDate", "EndDate", "StartDate", "EndDate", });
+    internal_static_cdlcrud_ListDatalakeDiagnosticsResponse_descriptor =
+      getDescriptor().getMessageTypes().get(28);
+    internal_static_cdlcrud_ListDatalakeDiagnosticsResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_ListDatalakeDiagnosticsResponse_descriptor,
+        new java.lang.String[] { "Diagnostics", });
+    internal_static_cdlcrud_CancelDatalakeDiagnosticsRequest_descriptor =
+      getDescriptor().getMessageTypes().get(29);
+    internal_static_cdlcrud_CancelDatalakeDiagnosticsRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_CancelDatalakeDiagnosticsRequest_descriptor,
+        new java.lang.String[] { "Datalake", });
+    internal_static_cdlcrud_CancelDatalakeDiagnosticsResponse_descriptor =
+      getDescriptor().getMessageTypes().get(30);
+    internal_static_cdlcrud_CancelDatalakeDiagnosticsResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_CancelDatalakeDiagnosticsResponse_descriptor,
+        new java.lang.String[] { });
+    internal_static_cdlcrud_ListDatalakesRequest_descriptor =
+      getDescriptor().getMessageTypes().get(31);
+    internal_static_cdlcrud_ListDatalakesRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_ListDatalakesRequest_descriptor,
+        new java.lang.String[] { "Environment", "AccountID", "Datalake", });
+    internal_static_cdlcrud_ListDatalakesResponse_descriptor =
+      getDescriptor().getMessageTypes().get(32);
+    internal_static_cdlcrud_ListDatalakesResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdlcrud_ListDatalakesResponse_descriptor,
+        new java.lang.String[] { "DatalakeResponse", });
     com.google.protobuf.ExtensionRegistry registry =
         com.google.protobuf.ExtensionRegistry.newInstance();
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.datetime);

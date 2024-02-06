@@ -118,6 +118,7 @@ message DescribeDatalakeServicesResponse {
   string id = 1; // The id of the cluster the config is for.
   uint64 last_update = 2; // The RFC3339 timestap of the last change to the SDX Clusters config
   map<string, Application> applications = 3; // The endpoints for the SDX Cluster with the service endpoint name as key
+  DeploymentType.Value deploymentType = 4; // The deployment type of datalake.
 }
 
 /**
@@ -145,6 +146,8 @@ message DatalakeInfo {
   string datalakeName = 2;
   string environmentCrn = 3;
   string envrionmentName = 4;
+  string runtime = 5;
+  DeploymentType.Value deploymentType = 6;
 }
 
 /**
@@ -318,7 +321,7 @@ message ApiRemoteDataContext {
   string endPointId = 1; // A string to uniquely identify the SDX cluster.
   string clusterVersion = 2; // Cluster version
   repeated ApiEndPoint endPoints = 3; // List of endPoints exported by this SDX cluster.
-  repeated ApiMapEntry configs = 4; // SDX cluster specifc options.
+  repeated ApiMapEntry configs = 4 [(options.FieldExtension.sensitive) = true]; // SDX cluster specifc options.
 }
 
 /**
@@ -329,7 +332,7 @@ message ApiEndPoint {
   string serviceType = 2; // Endpoint service type.
   string version = 3; // Endpoint specific version
   repeated ApiEndPointHost endPointHostList = 4; // List hosts (uris) for this endPoint.
-  repeated ApiMapEntry serviceConfigs = 5; // Additional configs for the endPoint.
+  repeated ApiMapEntry serviceConfigs = 5 [(options.FieldExtension.sensitive) = true]; // Additional configs for the endPoint.
 }
 
 /**
@@ -338,7 +341,7 @@ message ApiEndPoint {
 message ApiEndPointHost {
   string uri = 1; // Uri for the endPoint.
   string type = 2; // EndPointHost type.
-  repeated ApiMapEntry endPointConfigs = 3; // EndPointHost specific configs.
+  repeated ApiMapEntry endPointConfigs = 3 [(options.FieldExtension.sensitive) = true]; // EndPointHost specific configs.
 }
 
 /**
@@ -347,4 +350,18 @@ message ApiEndPointHost {
 message ApiMapEntry {
   string key = 1; // key
   string value = 2; // value
+}
+
+/**
+ * Models a datalake deployment type.
+ */
+message DeploymentType {
+  enum Value {
+    // UNSET
+    UNSET = 0;
+    // Classical PaaS Datalake
+    INPAAS = 1;
+    // SDX SaaS Instance
+    SDXSVC = 2;
+  }
 }

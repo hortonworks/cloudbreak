@@ -4061,6 +4061,25 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
 
     com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application getApplicationsOrThrow(
         java.lang.String key);
+
+    /**
+     * <pre>
+     * The deployment type of datalake.
+     * </pre>
+     *
+     * <code>.servicediscovery.DeploymentType.Value deploymentType = 4;</code>
+     * @return The enum numeric value on the wire for deploymentType.
+     */
+    int getDeploymentTypeValue();
+    /**
+     * <pre>
+     * The deployment type of datalake.
+     * </pre>
+     *
+     * <code>.servicediscovery.DeploymentType.Value deploymentType = 4;</code>
+     * @return The deploymentType.
+     */
+    com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value getDeploymentType();
   }
   /**
    * <pre>
@@ -4081,6 +4100,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
     }
     private DescribeDatalakeServicesResponse() {
       id_ = "";
+      deploymentType_ = 0;
     }
 
     @java.lang.Override
@@ -4278,6 +4298,33 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
       return map.get(key);
     }
 
+    public static final int DEPLOYMENTTYPE_FIELD_NUMBER = 4;
+    private int deploymentType_;
+    /**
+     * <pre>
+     * The deployment type of datalake.
+     * </pre>
+     *
+     * <code>.servicediscovery.DeploymentType.Value deploymentType = 4;</code>
+     * @return The enum numeric value on the wire for deploymentType.
+     */
+    @java.lang.Override public int getDeploymentTypeValue() {
+      return deploymentType_;
+    }
+    /**
+     * <pre>
+     * The deployment type of datalake.
+     * </pre>
+     *
+     * <code>.servicediscovery.DeploymentType.Value deploymentType = 4;</code>
+     * @return The deploymentType.
+     */
+    @java.lang.Override public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value getDeploymentType() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value result = com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value.valueOf(deploymentType_);
+      return result == null ? com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value.UNRECOGNIZED : result;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -4304,6 +4351,9 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
           internalGetApplications(),
           ApplicationsDefaultEntryHolder.defaultEntry,
           3);
+      if (deploymentType_ != com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value.UNSET.getNumber()) {
+        output.writeEnum(4, deploymentType_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -4330,6 +4380,10 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
         size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(3, applications__);
       }
+      if (deploymentType_ != com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(4, deploymentType_);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -4351,6 +4405,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
           != other.getLastUpdate()) return false;
       if (!internalGetApplications().equals(
           other.internalGetApplications())) return false;
+      if (deploymentType_ != other.deploymentType_) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -4371,6 +4426,8 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
         hash = (37 * hash) + APPLICATIONS_FIELD_NUMBER;
         hash = (53 * hash) + internalGetApplications().hashCode();
       }
+      hash = (37 * hash) + DEPLOYMENTTYPE_FIELD_NUMBER;
+      hash = (53 * hash) + deploymentType_;
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -4531,6 +4588,8 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
         lastUpdate_ = 0L;
 
         internalGetMutableApplications().clear();
+        deploymentType_ = 0;
+
         return this;
       }
 
@@ -4562,6 +4621,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
         result.lastUpdate_ = lastUpdate_;
         result.applications_ = internalGetApplications();
         result.applications_.makeImmutable();
+        result.deploymentType_ = deploymentType_;
         onBuilt();
         return result;
       }
@@ -4619,6 +4679,9 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
         }
         internalGetMutableApplications().mergeFrom(
             other.internalGetApplications());
+        if (other.deploymentType_ != 0) {
+          setDeploymentTypeValue(other.getDeploymentTypeValue());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -4663,6 +4726,11 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
                     applications__.getKey(), applications__.getValue());
                 break;
               } // case 26
+              case 32: {
+                deploymentType_ = input.readEnum();
+
+                break;
+              } // case 32
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -4975,6 +5043,80 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
           java.util.Map<java.lang.String, com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application> values) {
         internalGetMutableApplications().getMutableMap()
             .putAll(values);
+        return this;
+      }
+
+      private int deploymentType_ = 0;
+      /**
+       * <pre>
+       * The deployment type of datalake.
+       * </pre>
+       *
+       * <code>.servicediscovery.DeploymentType.Value deploymentType = 4;</code>
+       * @return The enum numeric value on the wire for deploymentType.
+       */
+      @java.lang.Override public int getDeploymentTypeValue() {
+        return deploymentType_;
+      }
+      /**
+       * <pre>
+       * The deployment type of datalake.
+       * </pre>
+       *
+       * <code>.servicediscovery.DeploymentType.Value deploymentType = 4;</code>
+       * @param value The enum numeric value on the wire for deploymentType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDeploymentTypeValue(int value) {
+        
+        deploymentType_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The deployment type of datalake.
+       * </pre>
+       *
+       * <code>.servicediscovery.DeploymentType.Value deploymentType = 4;</code>
+       * @return The deploymentType.
+       */
+      @java.lang.Override
+      public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value getDeploymentType() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value result = com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value.valueOf(deploymentType_);
+        return result == null ? com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The deployment type of datalake.
+       * </pre>
+       *
+       * <code>.servicediscovery.DeploymentType.Value deploymentType = 4;</code>
+       * @param value The deploymentType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDeploymentType(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        deploymentType_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The deployment type of datalake.
+       * </pre>
+       *
+       * <code>.servicediscovery.DeploymentType.Value deploymentType = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDeploymentType() {
+        
+        deploymentType_ = 0;
+        onChanged();
         return this;
       }
       @java.lang.Override
@@ -6827,6 +6969,29 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
      */
     com.google.protobuf.ByteString
         getEnvrionmentNameBytes();
+
+    /**
+     * <code>string runtime = 5;</code>
+     * @return The runtime.
+     */
+    java.lang.String getRuntime();
+    /**
+     * <code>string runtime = 5;</code>
+     * @return The bytes for runtime.
+     */
+    com.google.protobuf.ByteString
+        getRuntimeBytes();
+
+    /**
+     * <code>.servicediscovery.DeploymentType.Value deploymentType = 6;</code>
+     * @return The enum numeric value on the wire for deploymentType.
+     */
+    int getDeploymentTypeValue();
+    /**
+     * <code>.servicediscovery.DeploymentType.Value deploymentType = 6;</code>
+     * @return The deploymentType.
+     */
+    com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value getDeploymentType();
   }
   /**
    * <pre>
@@ -6850,6 +7015,8 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
       datalakeName_ = "";
       environmentCrn_ = "";
       envrionmentName_ = "";
+      runtime_ = "";
+      deploymentType_ = 0;
     }
 
     @java.lang.Override
@@ -7029,6 +7196,63 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
       }
     }
 
+    public static final int RUNTIME_FIELD_NUMBER = 5;
+    private volatile java.lang.Object runtime_;
+    /**
+     * <code>string runtime = 5;</code>
+     * @return The runtime.
+     */
+    @java.lang.Override
+    public java.lang.String getRuntime() {
+      java.lang.Object ref = runtime_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        runtime_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string runtime = 5;</code>
+     * @return The bytes for runtime.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getRuntimeBytes() {
+      java.lang.Object ref = runtime_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        runtime_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DEPLOYMENTTYPE_FIELD_NUMBER = 6;
+    private int deploymentType_;
+    /**
+     * <code>.servicediscovery.DeploymentType.Value deploymentType = 6;</code>
+     * @return The enum numeric value on the wire for deploymentType.
+     */
+    @java.lang.Override public int getDeploymentTypeValue() {
+      return deploymentType_;
+    }
+    /**
+     * <code>.servicediscovery.DeploymentType.Value deploymentType = 6;</code>
+     * @return The deploymentType.
+     */
+    @java.lang.Override public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value getDeploymentType() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value result = com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value.valueOf(deploymentType_);
+      return result == null ? com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value.UNRECOGNIZED : result;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -7055,6 +7279,12 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(envrionmentName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, envrionmentName_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtime_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, runtime_);
+      }
+      if (deploymentType_ != com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value.UNSET.getNumber()) {
+        output.writeEnum(6, deploymentType_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -7075,6 +7305,13 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
       }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(envrionmentName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, envrionmentName_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtime_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, runtime_);
+      }
+      if (deploymentType_ != com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(6, deploymentType_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
@@ -7099,6 +7336,9 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
           .equals(other.getEnvironmentCrn())) return false;
       if (!getEnvrionmentName()
           .equals(other.getEnvrionmentName())) return false;
+      if (!getRuntime()
+          .equals(other.getRuntime())) return false;
+      if (deploymentType_ != other.deploymentType_) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -7118,6 +7358,10 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
       hash = (53 * hash) + getEnvironmentCrn().hashCode();
       hash = (37 * hash) + ENVRIONMENTNAME_FIELD_NUMBER;
       hash = (53 * hash) + getEnvrionmentName().hashCode();
+      hash = (37 * hash) + RUNTIME_FIELD_NUMBER;
+      hash = (53 * hash) + getRuntime().hashCode();
+      hash = (37 * hash) + DEPLOYMENTTYPE_FIELD_NUMBER;
+      hash = (53 * hash) + deploymentType_;
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -7259,6 +7503,10 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
 
         envrionmentName_ = "";
 
+        runtime_ = "";
+
+        deploymentType_ = 0;
+
         return this;
       }
 
@@ -7289,6 +7537,8 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
         result.datalakeName_ = datalakeName_;
         result.environmentCrn_ = environmentCrn_;
         result.envrionmentName_ = envrionmentName_;
+        result.runtime_ = runtime_;
+        result.deploymentType_ = deploymentType_;
         onBuilt();
         return result;
       }
@@ -7353,6 +7603,13 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
           envrionmentName_ = other.envrionmentName_;
           onChanged();
         }
+        if (!other.getRuntime().isEmpty()) {
+          runtime_ = other.runtime_;
+          onChanged();
+        }
+        if (other.deploymentType_ != 0) {
+          setDeploymentTypeValue(other.getDeploymentTypeValue());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -7399,6 +7656,16 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
 
                 break;
               } // case 34
+              case 42: {
+                runtime_ = input.readStringRequireUtf8();
+
+                break;
+              } // case 42
+              case 48: {
+                deploymentType_ = input.readEnum();
+
+                break;
+              } // case 48
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -7715,6 +7982,136 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Application defaultValue
   checkByteStringIsUtf8(value);
         
         envrionmentName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object runtime_ = "";
+      /**
+       * <code>string runtime = 5;</code>
+       * @return The runtime.
+       */
+      public java.lang.String getRuntime() {
+        java.lang.Object ref = runtime_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          runtime_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string runtime = 5;</code>
+       * @return The bytes for runtime.
+       */
+      public com.google.protobuf.ByteString
+          getRuntimeBytes() {
+        java.lang.Object ref = runtime_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          runtime_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string runtime = 5;</code>
+       * @param value The runtime to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRuntime(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        runtime_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string runtime = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRuntime() {
+        
+        runtime_ = getDefaultInstance().getRuntime();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string runtime = 5;</code>
+       * @param value The bytes for runtime to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRuntimeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        runtime_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int deploymentType_ = 0;
+      /**
+       * <code>.servicediscovery.DeploymentType.Value deploymentType = 6;</code>
+       * @return The enum numeric value on the wire for deploymentType.
+       */
+      @java.lang.Override public int getDeploymentTypeValue() {
+        return deploymentType_;
+      }
+      /**
+       * <code>.servicediscovery.DeploymentType.Value deploymentType = 6;</code>
+       * @param value The enum numeric value on the wire for deploymentType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDeploymentTypeValue(int value) {
+        
+        deploymentType_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.servicediscovery.DeploymentType.Value deploymentType = 6;</code>
+       * @return The deploymentType.
+       */
+      @java.lang.Override
+      public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value getDeploymentType() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value result = com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value.valueOf(deploymentType_);
+        return result == null ? com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <code>.servicediscovery.DeploymentType.Value deploymentType = 6;</code>
+       * @param value The deploymentType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setDeploymentType(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        deploymentType_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>.servicediscovery.DeploymentType.Value deploymentType = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearDeploymentType() {
+        
+        deploymentType_ = 0;
         onChanged();
         return this;
       }
@@ -28259,7 +28656,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * SDX cluster specifc options.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
      */
     java.util.List<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry> 
         getConfigsList();
@@ -28268,7 +28665,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * SDX cluster specifc options.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
      */
     com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry getConfigs(int index);
     /**
@@ -28276,7 +28673,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * SDX cluster specifc options.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
      */
     int getConfigsCount();
     /**
@@ -28284,7 +28681,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * SDX cluster specifc options.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
      */
     java.util.List<? extends com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntryOrBuilder> 
         getConfigsOrBuilderList();
@@ -28293,7 +28690,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * SDX cluster specifc options.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
      */
     com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntryOrBuilder getConfigsOrBuilder(
         int index);
@@ -28506,7 +28903,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * SDX cluster specifc options.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
      */
     @java.lang.Override
     public java.util.List<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry> getConfigsList() {
@@ -28517,7 +28914,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * SDX cluster specifc options.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
      */
     @java.lang.Override
     public java.util.List<? extends com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntryOrBuilder> 
@@ -28529,7 +28926,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * SDX cluster specifc options.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
      */
     @java.lang.Override
     public int getConfigsCount() {
@@ -28540,7 +28937,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * SDX cluster specifc options.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
      */
     @java.lang.Override
     public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry getConfigs(int index) {
@@ -28551,7 +28948,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * SDX cluster specifc options.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
      */
     @java.lang.Override
     public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntryOrBuilder getConfigsOrBuilder(
@@ -29560,7 +29957,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * SDX cluster specifc options.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public java.util.List<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry> getConfigsList() {
         if (configsBuilder_ == null) {
@@ -29574,7 +29971,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * SDX cluster specifc options.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public int getConfigsCount() {
         if (configsBuilder_ == null) {
@@ -29588,7 +29985,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * SDX cluster specifc options.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry getConfigs(int index) {
         if (configsBuilder_ == null) {
@@ -29602,7 +29999,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * SDX cluster specifc options.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder setConfigs(
           int index, com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry value) {
@@ -29623,7 +30020,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * SDX cluster specifc options.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder setConfigs(
           int index, com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder builderForValue) {
@@ -29641,7 +30038,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * SDX cluster specifc options.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder addConfigs(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry value) {
         if (configsBuilder_ == null) {
@@ -29661,7 +30058,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * SDX cluster specifc options.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder addConfigs(
           int index, com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry value) {
@@ -29682,7 +30079,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * SDX cluster specifc options.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder addConfigs(
           com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder builderForValue) {
@@ -29700,7 +30097,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * SDX cluster specifc options.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder addConfigs(
           int index, com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder builderForValue) {
@@ -29718,7 +30115,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * SDX cluster specifc options.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder addAllConfigs(
           java.lang.Iterable<? extends com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry> values) {
@@ -29737,7 +30134,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * SDX cluster specifc options.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder clearConfigs() {
         if (configsBuilder_ == null) {
@@ -29754,7 +30151,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * SDX cluster specifc options.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder removeConfigs(int index) {
         if (configsBuilder_ == null) {
@@ -29771,7 +30168,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * SDX cluster specifc options.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder getConfigsBuilder(
           int index) {
@@ -29782,7 +30179,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * SDX cluster specifc options.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntryOrBuilder getConfigsOrBuilder(
           int index) {
@@ -29796,7 +30193,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * SDX cluster specifc options.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public java.util.List<? extends com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntryOrBuilder> 
            getConfigsOrBuilderList() {
@@ -29811,7 +30208,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * SDX cluster specifc options.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder addConfigsBuilder() {
         return getConfigsFieldBuilder().addBuilder(
@@ -29822,7 +30219,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * SDX cluster specifc options.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder addConfigsBuilder(
           int index) {
@@ -29834,7 +30231,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * SDX cluster specifc options.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry configs = 4;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry configs = 4 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public java.util.List<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder> 
            getConfigsBuilderList() {
@@ -30031,7 +30428,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * Additional configs for the endPoint.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
      */
     java.util.List<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry> 
         getServiceConfigsList();
@@ -30040,7 +30437,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * Additional configs for the endPoint.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
      */
     com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry getServiceConfigs(int index);
     /**
@@ -30048,7 +30445,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * Additional configs for the endPoint.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
      */
     int getServiceConfigsCount();
     /**
@@ -30056,7 +30453,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * Additional configs for the endPoint.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
      */
     java.util.List<? extends com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntryOrBuilder> 
         getServiceConfigsOrBuilderList();
@@ -30065,7 +30462,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * Additional configs for the endPoint.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
      */
     com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntryOrBuilder getServiceConfigsOrBuilder(
         int index);
@@ -30325,7 +30722,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * Additional configs for the endPoint.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
      */
     @java.lang.Override
     public java.util.List<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry> getServiceConfigsList() {
@@ -30336,7 +30733,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * Additional configs for the endPoint.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
      */
     @java.lang.Override
     public java.util.List<? extends com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntryOrBuilder> 
@@ -30348,7 +30745,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * Additional configs for the endPoint.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
      */
     @java.lang.Override
     public int getServiceConfigsCount() {
@@ -30359,7 +30756,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * Additional configs for the endPoint.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
      */
     @java.lang.Override
     public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry getServiceConfigs(int index) {
@@ -30370,7 +30767,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * Additional configs for the endPoint.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
      */
     @java.lang.Override
     public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntryOrBuilder getServiceConfigsOrBuilder(
@@ -31497,7 +31894,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * Additional configs for the endPoint.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public java.util.List<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry> getServiceConfigsList() {
         if (serviceConfigsBuilder_ == null) {
@@ -31511,7 +31908,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * Additional configs for the endPoint.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public int getServiceConfigsCount() {
         if (serviceConfigsBuilder_ == null) {
@@ -31525,7 +31922,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * Additional configs for the endPoint.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry getServiceConfigs(int index) {
         if (serviceConfigsBuilder_ == null) {
@@ -31539,7 +31936,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * Additional configs for the endPoint.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder setServiceConfigs(
           int index, com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry value) {
@@ -31560,7 +31957,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * Additional configs for the endPoint.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder setServiceConfigs(
           int index, com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder builderForValue) {
@@ -31578,7 +31975,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * Additional configs for the endPoint.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder addServiceConfigs(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry value) {
         if (serviceConfigsBuilder_ == null) {
@@ -31598,7 +31995,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * Additional configs for the endPoint.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder addServiceConfigs(
           int index, com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry value) {
@@ -31619,7 +32016,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * Additional configs for the endPoint.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder addServiceConfigs(
           com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder builderForValue) {
@@ -31637,7 +32034,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * Additional configs for the endPoint.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder addServiceConfigs(
           int index, com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder builderForValue) {
@@ -31655,7 +32052,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * Additional configs for the endPoint.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder addAllServiceConfigs(
           java.lang.Iterable<? extends com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry> values) {
@@ -31674,7 +32071,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * Additional configs for the endPoint.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder clearServiceConfigs() {
         if (serviceConfigsBuilder_ == null) {
@@ -31691,7 +32088,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * Additional configs for the endPoint.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder removeServiceConfigs(int index) {
         if (serviceConfigsBuilder_ == null) {
@@ -31708,7 +32105,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * Additional configs for the endPoint.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder getServiceConfigsBuilder(
           int index) {
@@ -31719,7 +32116,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * Additional configs for the endPoint.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntryOrBuilder getServiceConfigsOrBuilder(
           int index) {
@@ -31733,7 +32130,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * Additional configs for the endPoint.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public java.util.List<? extends com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntryOrBuilder> 
            getServiceConfigsOrBuilderList() {
@@ -31748,7 +32145,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * Additional configs for the endPoint.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder addServiceConfigsBuilder() {
         return getServiceConfigsFieldBuilder().addBuilder(
@@ -31759,7 +32156,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * Additional configs for the endPoint.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder addServiceConfigsBuilder(
           int index) {
@@ -31771,7 +32168,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * Additional configs for the endPoint.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry serviceConfigs = 5 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public java.util.List<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder> 
            getServiceConfigsBuilderList() {
@@ -31904,7 +32301,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * EndPointHost specific configs.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
      */
     java.util.List<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry> 
         getEndPointConfigsList();
@@ -31913,7 +32310,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * EndPointHost specific configs.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
      */
     com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry getEndPointConfigs(int index);
     /**
@@ -31921,7 +32318,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * EndPointHost specific configs.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
      */
     int getEndPointConfigsCount();
     /**
@@ -31929,7 +32326,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * EndPointHost specific configs.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
      */
     java.util.List<? extends com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntryOrBuilder> 
         getEndPointConfigsOrBuilderList();
@@ -31938,7 +32335,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * EndPointHost specific configs.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
      */
     com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntryOrBuilder getEndPointConfigsOrBuilder(
         int index);
@@ -32090,7 +32487,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * EndPointHost specific configs.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
      */
     @java.lang.Override
     public java.util.List<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry> getEndPointConfigsList() {
@@ -32101,7 +32498,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * EndPointHost specific configs.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
      */
     @java.lang.Override
     public java.util.List<? extends com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntryOrBuilder> 
@@ -32113,7 +32510,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * EndPointHost specific configs.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
      */
     @java.lang.Override
     public int getEndPointConfigsCount() {
@@ -32124,7 +32521,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * EndPointHost specific configs.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
      */
     @java.lang.Override
     public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry getEndPointConfigs(int index) {
@@ -32135,7 +32532,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
      * EndPointHost specific configs.
      * </pre>
      *
-     * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+     * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
      */
     @java.lang.Override
     public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntryOrBuilder getEndPointConfigsOrBuilder(
@@ -32764,7 +33161,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * EndPointHost specific configs.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public java.util.List<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry> getEndPointConfigsList() {
         if (endPointConfigsBuilder_ == null) {
@@ -32778,7 +33175,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * EndPointHost specific configs.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public int getEndPointConfigsCount() {
         if (endPointConfigsBuilder_ == null) {
@@ -32792,7 +33189,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * EndPointHost specific configs.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry getEndPointConfigs(int index) {
         if (endPointConfigsBuilder_ == null) {
@@ -32806,7 +33203,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * EndPointHost specific configs.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder setEndPointConfigs(
           int index, com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry value) {
@@ -32827,7 +33224,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * EndPointHost specific configs.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder setEndPointConfigs(
           int index, com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder builderForValue) {
@@ -32845,7 +33242,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * EndPointHost specific configs.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder addEndPointConfigs(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry value) {
         if (endPointConfigsBuilder_ == null) {
@@ -32865,7 +33262,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * EndPointHost specific configs.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder addEndPointConfigs(
           int index, com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry value) {
@@ -32886,7 +33283,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * EndPointHost specific configs.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder addEndPointConfigs(
           com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder builderForValue) {
@@ -32904,7 +33301,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * EndPointHost specific configs.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder addEndPointConfigs(
           int index, com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder builderForValue) {
@@ -32922,7 +33319,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * EndPointHost specific configs.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder addAllEndPointConfigs(
           java.lang.Iterable<? extends com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry> values) {
@@ -32941,7 +33338,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * EndPointHost specific configs.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder clearEndPointConfigs() {
         if (endPointConfigsBuilder_ == null) {
@@ -32958,7 +33355,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * EndPointHost specific configs.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public Builder removeEndPointConfigs(int index) {
         if (endPointConfigsBuilder_ == null) {
@@ -32975,7 +33372,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * EndPointHost specific configs.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder getEndPointConfigsBuilder(
           int index) {
@@ -32986,7 +33383,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * EndPointHost specific configs.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntryOrBuilder getEndPointConfigsOrBuilder(
           int index) {
@@ -33000,7 +33397,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * EndPointHost specific configs.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public java.util.List<? extends com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntryOrBuilder> 
            getEndPointConfigsOrBuilderList() {
@@ -33015,7 +33412,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * EndPointHost specific configs.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder addEndPointConfigsBuilder() {
         return getEndPointConfigsFieldBuilder().addBuilder(
@@ -33026,7 +33423,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * EndPointHost specific configs.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder addEndPointConfigsBuilder(
           int index) {
@@ -33038,7 +33435,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
        * EndPointHost specific configs.
        * </pre>
        *
-       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3;</code>
+       * <code>repeated .servicediscovery.ApiMapEntry endPointConfigs = 3 [(.options.FieldExtension.sensitive) = true];</code>
        */
       public java.util.List<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ApiMapEntry.Builder> 
            getEndPointConfigsBuilderList() {
@@ -33902,6 +34299,557 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
 
   }
 
+  public interface DeploymentTypeOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:servicediscovery.DeploymentType)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   **
+   * Models a datalake deployment type.
+   * </pre>
+   *
+   * Protobuf type {@code servicediscovery.DeploymentType}
+   */
+  public static final class DeploymentType extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:servicediscovery.DeploymentType)
+      DeploymentTypeOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use DeploymentType.newBuilder() to construct.
+    private DeploymentType(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DeploymentType() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DeploymentType();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.internal_static_servicediscovery_DeploymentType_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.internal_static_servicediscovery_DeploymentType_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.class, com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Builder.class);
+    }
+
+    /**
+     * Protobuf enum {@code servicediscovery.DeploymentType.Value}
+     */
+    public enum Value
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <pre>
+       * UNSET
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      UNSET(0),
+      /**
+       * <pre>
+       * Classical PaaS Datalake
+       * </pre>
+       *
+       * <code>INPAAS = 1;</code>
+       */
+      INPAAS(1),
+      /**
+       * <pre>
+       * SDX SaaS Instance
+       * </pre>
+       *
+       * <code>SDXSVC = 2;</code>
+       */
+      SDXSVC(2),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <pre>
+       * UNSET
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      public static final int UNSET_VALUE = 0;
+      /**
+       * <pre>
+       * Classical PaaS Datalake
+       * </pre>
+       *
+       * <code>INPAAS = 1;</code>
+       */
+      public static final int INPAAS_VALUE = 1;
+      /**
+       * <pre>
+       * SDX SaaS Instance
+       * </pre>
+       *
+       * <code>SDXSVC = 2;</code>
+       */
+      public static final int SDXSVC_VALUE = 2;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static Value valueOf(int value) {
+        return forNumber(value);
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
+      public static Value forNumber(int value) {
+        switch (value) {
+          case 0: return UNSET;
+          case 1: return INPAAS;
+          case 2: return SDXSVC;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<Value>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          Value> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
+              public Value findValueByNumber(int number) {
+                return Value.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final Value[] VALUES = values();
+
+      public static Value valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private Value(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:servicediscovery.DeploymentType.Value)
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType)) {
+        return super.equals(obj);
+      }
+      com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType other = (com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType) obj;
+
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     **
+     * Models a datalake deployment type.
+     * </pre>
+     *
+     * Protobuf type {@code servicediscovery.DeploymentType}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:servicediscovery.DeploymentType)
+        com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentTypeOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.internal_static_servicediscovery_DeploymentType_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.internal_static_servicediscovery_DeploymentType_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.class, com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.Builder.class);
+      }
+
+      // Construct using com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.internal_static_servicediscovery_DeploymentType_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType getDefaultInstanceForType() {
+        return com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType build() {
+        com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType buildPartial() {
+        com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType result = new com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType) {
+          return mergeFrom((com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType other) {
+        if (other == com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:servicediscovery.DeploymentType)
+    }
+
+    // @@protoc_insertion_point(class_scope:servicediscovery.DeploymentType)
+    private static final com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType();
+    }
+
+    public static com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<DeploymentType>
+        PARSER = new com.google.protobuf.AbstractParser<DeploymentType>() {
+      @java.lang.Override
+      public DeploymentType parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<DeploymentType> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DeploymentType> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DeploymentType getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_servicediscovery_ServiceEndPoint_descriptor;
   private static final 
@@ -34117,6 +35065,11 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_servicediscovery_ApiMapEntry_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_servicediscovery_DeploymentType_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_servicediscovery_DeploymentType_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -34142,147 +35095,153 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
       "iscovery.Service:\0028\001\032-\n\013ConfigEntry\022\013\n\003k" +
       "ey\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"W\n\037DescribeD" +
       "atalakeServicesRequest\022\n\n\002id\030\001 \001(\t\022\021\n\tau" +
-      "thorize\030\002 \001(\010\022\025\n\rexternal_call\030\003 \001(\010\"\363\001\n" +
+      "thorize\030\002 \001(\010\022\025\n\rexternal_call\030\003 \001(\010\"\263\002\n" +
       " DescribeDatalakeServicesResponse\022\n\n\002id\030" +
       "\001 \001(\t\022\023\n\013last_update\030\002 \001(\004\022Z\n\014applicatio" +
       "ns\030\003 \003(\0132D.servicediscovery.DescribeData" +
-      "lakeServicesResponse.ApplicationsEntry\032R" +
-      "\n\021ApplicationsEntry\022\013\n\003key\030\001 \001(\t\022,\n\005valu" +
-      "e\030\002 \001(\0132\035.servicediscovery.Application:\002" +
-      "8\001\"L\n\"DescribeEnvironmentServicesRequest" +
-      "\022\023\n\013environment\030\001 \001(\t\022\021\n\tauthorize\030\002 \001(\010" +
-      "\"\205\002\n#DescribeEnvironmentServicesResponse" +
-      "\022\026\n\016environmentCrn\030\001 \001(\t\022\023\n\013last_update\030" +
-      "\002 \001(\004\022]\n\014applications\030\003 \003(\0132G.servicedis" +
-      "covery.DescribeEnvironmentServicesRespon" +
-      "se.ApplicationsEntry\032R\n\021ApplicationsEntr" +
-      "y\022\013\n\003key\030\001 \001(\t\022,\n\005value\030\002 \001(\0132\035.serviced" +
-      "iscovery.Application:\0028\001\"j\n\014DatalakeInfo" +
-      "\022\023\n\013datalakeCrn\030\001 \001(\t\022\024\n\014datalakeName\030\002 " +
-      "\001(\t\022\026\n\016environmentCrn\030\003 \001(\t\022\027\n\017envrionme" +
-      "ntName\030\004 \001(\t\"D\n\032ListDatalakesForEnvReque" +
-      "st\022\023\n\013environment\030\001 \001(\t\022\021\n\tauthorize\030\002 \001" +
-      "(\010\"h\n\033ListDatalakesForEnvResponse\022\026\n\016env" +
-      "ironmentCrn\030\001 \001(\t\0221\n\tdatalakes\030\002 \003(\0132\036.s" +
-      "ervicediscovery.DatalakeInfo\"[\n\030Describe" +
-      "WarehouseRequest\022\023\n\013environment\030\001 \001(\t\022\021\n" +
-      "\twarehouse\030\002 \001(\t\022\021\n\tauthorize\030\003 \001(\010:\004\230\227\"" +
-      "\001\"{\n\031DescribeWarehouseResponse\022\023\n\013wareho" +
-      "useId\030\001 \001(\t\022\025\n\renvironmentId\030\002 \001(\t\022,\n\007de" +
-      "tails\030\003 \001(\0132\033.servicediscovery.Warehouse" +
-      ":\004\230\227\"\001\"K\n\033ListWarehousesForEnvRequest\022\023\n" +
-      "\013environment\030\001 \001(\t\022\021\n\tauthorize\030\002 \001(\010:\004\230" +
-      "\227\"\001\"\337\001\n\034ListWarehousesForEnvResponse\022\025\n\r" +
-      "environmentId\030\001 \001(\t\022R\n\nwarehouses\030\002 \003(\0132" +
-      ">.servicediscovery.ListWarehousesForEnvR" +
-      "esponse.WarehousesEntry\032N\n\017WarehousesEnt" +
-      "ry\022\013\n\003key\030\001 \001(\t\022*\n\005value\030\002 \001(\0132\033.service" +
-      "discovery.Warehouse:\0028\001:\004\230\227\"\001\"\330\001\n\010Endpoi" +
-      "nt\022\n\n\002id\030\001 \001(\t\022\023\n\013displayName\030\002 \001(\t\022\017\n\007d" +
-      "efault\030\003 \001(\010\022\013\n\003uri\030\004 \001(\t\022<\n\006config\030\005 \003(" +
-      "\0132&.servicediscovery.Endpoint.ConfigEntr" +
-      "yB\004\200\265\030\001\022\020\n\010hasError\030\006 \001(\010\022\016\n\006status\030\007 \001(" +
-      "\t\032-\n\013ConfigEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002" +
-      " \001(\t:\0028\001\"O\n\020WarehouseService\022\014\n\004type\030\001 \001" +
-      "(\t\022-\n\tendpoints\030\002 \003(\0132\032.servicediscovery" +
-      ".Endpoint\"\317\001\n\tWarehouse\022\n\n\002id\030\001 \001(\t\022\023\n\013d" +
-      "isplayName\030\002 \001(\t\022\017\n\007default\030\003 \001(\010\022;\n\010ser" +
-      "vices\030\004 \003(\0132).servicediscovery.Warehouse" +
-      ".ServicesEntry\032S\n\rServicesEntry\022\013\n\003key\030\001" +
-      " \001(\t\0221\n\005value\030\002 \001(\0132\".servicediscovery.W" +
-      "arehouseService:\0028\001\"\222\002\n\020VirtualWarehouse" +
-      "\022\013\n\003crn\030\001 \001(\t\022\n\n\002id\030\002 \001(\t\022\014\n\004name\030\003 \001(\t\022" +
-      "\014\n\004type\030\004 \001(\t\022\021\n\tclusterId\030\005 \001(\t\022\r\n\005dbcI" +
-      "d\030\006 \001(\t\022\016\n\006status\030\007 \001(\t\022B\n\010services\030\010 \003(" +
-      "\01320.servicediscovery.VirtualWarehouse.Se" +
-      "rvicesEntry\032S\n\rServicesEntry\022\013\n\003key\030\001 \001(" +
-      "\t\0221\n\005value\030\002 \001(\0132\".servicediscovery.Ware" +
-      "houseService:\0028\001\"R\n\"ListVirtualWarehouse" +
-      "sForEnvRequest\022\031\n\013environment\030\001 \001(\tB\004\320\265\030" +
-      "\001\022\021\n\tauthorize\030\002 \001(\010\"\207\001\n#ListVirtualWare" +
-      "housesForEnvResponse\022\023\n\013environment\030\001 \001(" +
-      "\t\022\023\n\013last_update\030\002 \001(\004\0226\n\nwarehouses\030\003 \003" +
-      "(\0132\".servicediscovery.VirtualWarehouse\"\204" +
-      "\001\n\'DescribeVirtualWarehouseServicesReque" +
-      "st\022\031\n\013environment\030\001 \001(\tB\004\320\265\030\001\022\027\n\tcluster" +
-      "Id\030\002 \001(\tB\004\320\265\030\001\022\022\n\004vwId\030\003 \001(\tB\004\320\265\030\001\022\021\n\tau" +
-      "thorize\030\004 \001(\010\"\252\001\n(DescribeVirtualWarehou" +
-      "seServicesResponse\022\023\n\013environment\030\001 \001(\t\022" +
-      "\021\n\tclusterId\030\002 \001(\t\022\014\n\004vwId\030\003 \001(\t\0223\n\007deta" +
-      "ils\030\004 \001(\0132\".servicediscovery.VirtualWare" +
-      "house\022\023\n\013last_update\030\005 \001(\004\"F\n\004OpDB\022\014\n\004na" +
-      "me\030\001 \001(\t\022\013\n\003crn\030\002 \001(\t\022\016\n\006status\030\003 \001(\t\022\023\n" +
-      "\013hueEndpoint\030\004 \001(\t\"F\n\026ListOpdbsForEnvReq" +
-      "uest\022\031\n\013environment\030\001 \001(\tB\004\320\265\030\001\022\021\n\tautho" +
-      "rize\030\002 \001(\010\"j\n\027ListOpdbsForEnvResponse\022\023\n" +
-      "\013environment\030\001 \001(\t\022\023\n\013last_update\030\002 \001(\004\022" +
-      "%\n\005opDBs\030\003 \003(\0132\026.servicediscovery.OpDB\"c" +
-      "\n\033DescribeOpdbServicesRequest\022\031\n\013environ" +
-      "ment\030\001 \001(\tB\004\320\265\030\001\022\026\n\010database\030\002 \001(\tB\004\320\265\030\001" +
-      "\022\021\n\tauthorize\030\003 \001(\010\"\237\002\n\034DescribeOpdbServ" +
-      "icesResponse\022\023\n\013environment\030\001 \001(\t\022\020\n\010dat" +
-      "abase\030\002 \001(\t\022\023\n\013last_update\030\003 \001(\004\022\'\n\007deta" +
-      "ils\030\004 \001(\0132\026.servicediscovery.OpDB\022N\n\010ser" +
-      "vices\030\005 \003(\0132<.servicediscovery.DescribeO" +
-      "pdbServicesResponse.ServicesEntry\032J\n\rSer" +
-      "vicesEntry\022\013\n\003key\030\001 \001(\t\022(\n\005value\030\002 \001(\0132\031" +
-      ".servicediscovery.Service:\0028\001\"Z\n-Describ" +
-      "eDatalakeAsApiRemoteDataContextRequest\022\026" +
-      "\n\010datalake\030\001 \001(\tB\004\320\265\030\001\022\021\n\tauthorize\030\002 \001(" +
-      "\010\"{\n.DescribeDatalakeAsApiRemoteDataCont" +
-      "extResponse\022\020\n\010datalake\030\001 \001(\t\0227\n\007context" +
-      "\030\002 \001(\0132&.servicediscovery.ApiRemoteDataC" +
-      "ontext\"\244\001\n\024ApiRemoteDataContext\022\022\n\nendPo" +
-      "intId\030\001 \001(\t\022\026\n\016clusterVersion\030\002 \001(\t\0220\n\te" +
-      "ndPoints\030\003 \003(\0132\035.servicediscovery.ApiEnd" +
-      "Point\022.\n\007configs\030\004 \003(\0132\035.servicediscover" +
-      "y.ApiMapEntry\"\265\001\n\013ApiEndPoint\022\014\n\004name\030\001 " +
-      "\001(\t\022\023\n\013serviceType\030\002 \001(\t\022\017\n\007version\030\003 \001(" +
-      "\t\022;\n\020endPointHostList\030\004 \003(\0132!.servicedis" +
-      "covery.ApiEndPointHost\0225\n\016serviceConfigs" +
-      "\030\005 \003(\0132\035.servicediscovery.ApiMapEntry\"d\n" +
-      "\017ApiEndPointHost\022\013\n\003uri\030\001 \001(\t\022\014\n\004type\030\002 " +
-      "\001(\t\0226\n\017endPointConfigs\030\003 \003(\0132\035.servicedi" +
-      "scovery.ApiMapEntry\")\n\013ApiMapEntry\022\013\n\003ke" +
-      "y\030\001 \001(\t\022\r\n\005value\030\002 \001(\t2\221\013\n\020ServiceDiscov" +
-      "ery\022A\n\nGetVersion\022\027.version.VersionReque" +
-      "st\032\030.version.VersionResponse\"\000\022\203\001\n\030Descr" +
-      "ibeDatalakeServices\0221.servicediscovery.D" +
-      "escribeDatalakeServicesRequest\0322.service" +
-      "discovery.DescribeDatalakeServicesRespon" +
-      "se\"\000\022\214\001\n\033DescribeEnvironmentServices\0224.s" +
+      "lakeServicesResponse.ApplicationsEntry\022>" +
+      "\n\016deploymentType\030\004 \001(\0162&.servicediscover" +
+      "y.DeploymentType.Value\032R\n\021ApplicationsEn" +
+      "try\022\013\n\003key\030\001 \001(\t\022,\n\005value\030\002 \001(\0132\035.servic" +
+      "ediscovery.Application:\0028\001\"L\n\"DescribeEn" +
+      "vironmentServicesRequest\022\023\n\013environment\030" +
+      "\001 \001(\t\022\021\n\tauthorize\030\002 \001(\010\"\205\002\n#DescribeEnv" +
+      "ironmentServicesResponse\022\026\n\016environmentC" +
+      "rn\030\001 \001(\t\022\023\n\013last_update\030\002 \001(\004\022]\n\014applica" +
+      "tions\030\003 \003(\0132G.servicediscovery.DescribeE" +
+      "nvironmentServicesResponse.ApplicationsE" +
+      "ntry\032R\n\021ApplicationsEntry\022\013\n\003key\030\001 \001(\t\022," +
+      "\n\005value\030\002 \001(\0132\035.servicediscovery.Applica" +
+      "tion:\0028\001\"\273\001\n\014DatalakeInfo\022\023\n\013datalakeCrn" +
+      "\030\001 \001(\t\022\024\n\014datalakeName\030\002 \001(\t\022\026\n\016environm" +
+      "entCrn\030\003 \001(\t\022\027\n\017envrionmentName\030\004 \001(\t\022\017\n" +
+      "\007runtime\030\005 \001(\t\022>\n\016deploymentType\030\006 \001(\0162&" +
+      ".servicediscovery.DeploymentType.Value\"D" +
+      "\n\032ListDatalakesForEnvRequest\022\023\n\013environm" +
+      "ent\030\001 \001(\t\022\021\n\tauthorize\030\002 \001(\010\"h\n\033ListData" +
+      "lakesForEnvResponse\022\026\n\016environmentCrn\030\001 " +
+      "\001(\t\0221\n\tdatalakes\030\002 \003(\0132\036.servicediscover" +
+      "y.DatalakeInfo\"[\n\030DescribeWarehouseReque" +
+      "st\022\023\n\013environment\030\001 \001(\t\022\021\n\twarehouse\030\002 \001" +
+      "(\t\022\021\n\tauthorize\030\003 \001(\010:\004\230\227\"\001\"{\n\031DescribeW" +
+      "arehouseResponse\022\023\n\013warehouseId\030\001 \001(\t\022\025\n" +
+      "\renvironmentId\030\002 \001(\t\022,\n\007details\030\003 \001(\0132\033." +
+      "servicediscovery.Warehouse:\004\230\227\"\001\"K\n\033List" +
+      "WarehousesForEnvRequest\022\023\n\013environment\030\001" +
+      " \001(\t\022\021\n\tauthorize\030\002 \001(\010:\004\230\227\"\001\"\337\001\n\034ListWa" +
+      "rehousesForEnvResponse\022\025\n\renvironmentId\030" +
+      "\001 \001(\t\022R\n\nwarehouses\030\002 \003(\0132>.servicedisco" +
+      "very.ListWarehousesForEnvResponse.Wareho" +
+      "usesEntry\032N\n\017WarehousesEntry\022\013\n\003key\030\001 \001(" +
+      "\t\022*\n\005value\030\002 \001(\0132\033.servicediscovery.Ware" +
+      "house:\0028\001:\004\230\227\"\001\"\330\001\n\010Endpoint\022\n\n\002id\030\001 \001(\t" +
+      "\022\023\n\013displayName\030\002 \001(\t\022\017\n\007default\030\003 \001(\010\022\013" +
+      "\n\003uri\030\004 \001(\t\022<\n\006config\030\005 \003(\0132&.servicedis" +
+      "covery.Endpoint.ConfigEntryB\004\200\265\030\001\022\020\n\010has" +
+      "Error\030\006 \001(\010\022\016\n\006status\030\007 \001(\t\032-\n\013ConfigEnt" +
+      "ry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"O\n\020Wa" +
+      "rehouseService\022\014\n\004type\030\001 \001(\t\022-\n\tendpoint" +
+      "s\030\002 \003(\0132\032.servicediscovery.Endpoint\"\317\001\n\t" +
+      "Warehouse\022\n\n\002id\030\001 \001(\t\022\023\n\013displayName\030\002 \001" +
+      "(\t\022\017\n\007default\030\003 \001(\010\022;\n\010services\030\004 \003(\0132)." +
+      "servicediscovery.Warehouse.ServicesEntry" +
+      "\032S\n\rServicesEntry\022\013\n\003key\030\001 \001(\t\0221\n\005value\030" +
+      "\002 \001(\0132\".servicediscovery.WarehouseServic" +
+      "e:\0028\001\"\222\002\n\020VirtualWarehouse\022\013\n\003crn\030\001 \001(\t\022" +
+      "\n\n\002id\030\002 \001(\t\022\014\n\004name\030\003 \001(\t\022\014\n\004type\030\004 \001(\t\022" +
+      "\021\n\tclusterId\030\005 \001(\t\022\r\n\005dbcId\030\006 \001(\t\022\016\n\006sta" +
+      "tus\030\007 \001(\t\022B\n\010services\030\010 \003(\01320.servicedis" +
+      "covery.VirtualWarehouse.ServicesEntry\032S\n" +
+      "\rServicesEntry\022\013\n\003key\030\001 \001(\t\0221\n\005value\030\002 \001" +
+      "(\0132\".servicediscovery.WarehouseService:\002" +
+      "8\001\"R\n\"ListVirtualWarehousesForEnvRequest" +
+      "\022\031\n\013environment\030\001 \001(\tB\004\320\265\030\001\022\021\n\tauthorize" +
+      "\030\002 \001(\010\"\207\001\n#ListVirtualWarehousesForEnvRe" +
+      "sponse\022\023\n\013environment\030\001 \001(\t\022\023\n\013last_upda" +
+      "te\030\002 \001(\004\0226\n\nwarehouses\030\003 \003(\0132\".servicedi" +
+      "scovery.VirtualWarehouse\"\204\001\n\'DescribeVir" +
+      "tualWarehouseServicesRequest\022\031\n\013environm" +
+      "ent\030\001 \001(\tB\004\320\265\030\001\022\027\n\tclusterId\030\002 \001(\tB\004\320\265\030\001" +
+      "\022\022\n\004vwId\030\003 \001(\tB\004\320\265\030\001\022\021\n\tauthorize\030\004 \001(\010\"" +
+      "\252\001\n(DescribeVirtualWarehouseServicesResp" +
+      "onse\022\023\n\013environment\030\001 \001(\t\022\021\n\tclusterId\030\002" +
+      " \001(\t\022\014\n\004vwId\030\003 \001(\t\0223\n\007details\030\004 \001(\0132\".se" +
+      "rvicediscovery.VirtualWarehouse\022\023\n\013last_" +
+      "update\030\005 \001(\004\"F\n\004OpDB\022\014\n\004name\030\001 \001(\t\022\013\n\003cr" +
+      "n\030\002 \001(\t\022\016\n\006status\030\003 \001(\t\022\023\n\013hueEndpoint\030\004" +
+      " \001(\t\"F\n\026ListOpdbsForEnvRequest\022\031\n\013enviro" +
+      "nment\030\001 \001(\tB\004\320\265\030\001\022\021\n\tauthorize\030\002 \001(\010\"j\n\027" +
+      "ListOpdbsForEnvResponse\022\023\n\013environment\030\001" +
+      " \001(\t\022\023\n\013last_update\030\002 \001(\004\022%\n\005opDBs\030\003 \003(\013" +
+      "2\026.servicediscovery.OpDB\"c\n\033DescribeOpdb" +
+      "ServicesRequest\022\031\n\013environment\030\001 \001(\tB\004\320\265" +
+      "\030\001\022\026\n\010database\030\002 \001(\tB\004\320\265\030\001\022\021\n\tauthorize\030" +
+      "\003 \001(\010\"\237\002\n\034DescribeOpdbServicesResponse\022\023" +
+      "\n\013environment\030\001 \001(\t\022\020\n\010database\030\002 \001(\t\022\023\n" +
+      "\013last_update\030\003 \001(\004\022\'\n\007details\030\004 \001(\0132\026.se" +
+      "rvicediscovery.OpDB\022N\n\010services\030\005 \003(\0132<." +
+      "servicediscovery.DescribeOpdbServicesRes" +
+      "ponse.ServicesEntry\032J\n\rServicesEntry\022\013\n\003" +
+      "key\030\001 \001(\t\022(\n\005value\030\002 \001(\0132\031.servicediscov" +
+      "ery.Service:\0028\001\"Z\n-DescribeDatalakeAsApi" +
+      "RemoteDataContextRequest\022\026\n\010datalake\030\001 \001" +
+      "(\tB\004\320\265\030\001\022\021\n\tauthorize\030\002 \001(\010\"{\n.DescribeD" +
+      "atalakeAsApiRemoteDataContextResponse\022\020\n" +
+      "\010datalake\030\001 \001(\t\0227\n\007context\030\002 \001(\0132&.servi" +
+      "cediscovery.ApiRemoteDataContext\"\252\001\n\024Api" +
+      "RemoteDataContext\022\022\n\nendPointId\030\001 \001(\t\022\026\n" +
+      "\016clusterVersion\030\002 \001(\t\0220\n\tendPoints\030\003 \003(\013" +
+      "2\035.servicediscovery.ApiEndPoint\0224\n\007confi" +
+      "gs\030\004 \003(\0132\035.servicediscovery.ApiMapEntryB" +
+      "\004\200\265\030\001\"\273\001\n\013ApiEndPoint\022\014\n\004name\030\001 \001(\t\022\023\n\013s" +
+      "erviceType\030\002 \001(\t\022\017\n\007version\030\003 \001(\t\022;\n\020end" +
+      "PointHostList\030\004 \003(\0132!.servicediscovery.A" +
+      "piEndPointHost\022;\n\016serviceConfigs\030\005 \003(\0132\035" +
+      ".servicediscovery.ApiMapEntryB\004\200\265\030\001\"j\n\017A" +
+      "piEndPointHost\022\013\n\003uri\030\001 \001(\t\022\014\n\004type\030\002 \001(" +
+      "\t\022<\n\017endPointConfigs\030\003 \003(\0132\035.servicedisc" +
+      "overy.ApiMapEntryB\004\200\265\030\001\")\n\013ApiMapEntry\022\013" +
+      "\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t\"<\n\016Deployment" +
+      "Type\"*\n\005Value\022\t\n\005UNSET\020\000\022\n\n\006INPAAS\020\001\022\n\n\006" +
+      "SDXSVC\020\0022\221\013\n\020ServiceDiscovery\022A\n\nGetVers" +
+      "ion\022\027.version.VersionRequest\032\030.version.V" +
+      "ersionResponse\"\000\022\203\001\n\030DescribeDatalakeSer" +
+      "vices\0221.servicediscovery.DescribeDatalak" +
+      "eServicesRequest\0322.servicediscovery.Desc" +
+      "ribeDatalakeServicesResponse\"\000\022\214\001\n\033Descr" +
+      "ibeEnvironmentServices\0224.servicediscover" +
+      "y.DescribeEnvironmentServicesRequest\0325.s" +
       "ervicediscovery.DescribeEnvironmentServi" +
-      "cesRequest\0325.servicediscovery.DescribeEn" +
-      "vironmentServicesResponse\"\000\022t\n\023ListDatal" +
-      "akesForEnv\022,.servicediscovery.ListDatala" +
-      "kesForEnvRequest\032-.servicediscovery.List" +
-      "DatalakesForEnvResponse\"\000\022r\n\021DescribeWar" +
-      "ehouse\022*.servicediscovery.DescribeWareho" +
-      "useRequest\032+.servicediscovery.DescribeWa" +
-      "rehouseResponse\"\004\270\246\035\001\022{\n\024ListWarehousesF" +
-      "orEnv\022-.servicediscovery.ListWarehousesF" +
-      "orEnvRequest\032..servicediscovery.ListWare" +
-      "housesForEnvResponse\"\004\270\246\035\001\022\214\001\n\033ListVirtu" +
-      "alWarehousesForEnv\0224.servicediscovery.Li" +
-      "stVirtualWarehousesForEnvRequest\0325.servi" +
-      "cediscovery.ListVirtualWarehousesForEnvR" +
-      "esponse\"\000\022\233\001\n DescribeVirtualWarehouseSe" +
-      "rvices\0229.servicediscovery.DescribeVirtua" +
-      "lWarehouseServicesRequest\032:.servicedisco" +
-      "very.DescribeVirtualWarehouseServicesRes" +
-      "ponse\"\000\022h\n\017ListOpdbsForEnv\022(.servicedisc" +
-      "overy.ListOpdbsForEnvRequest\032).servicedi" +
-      "scovery.ListOpdbsForEnvResponse\"\000\022w\n\024Des" +
-      "cribeOpdbServices\022-.servicediscovery.Des" +
-      "cribeOpdbServicesRequest\032..servicediscov" +
-      "ery.DescribeOpdbServicesResponse\"\000\022\255\001\n&D" +
-      "escribeDatalakeAsApiRemoteDataContext\022?." +
-      "servicediscovery.DescribeDatalakeAsApiRe" +
-      "moteDataContextRequest\032@.servicediscover" +
-      "y.DescribeDatalakeAsApiRemoteDataContext" +
-      "Response\"\000BU\n!com.cloudera.cdp.servicedi" +
-      "scoveryB\025ServiceDiscoveryProtoZ\031com/clou" +
-      "dera/cdp/protobufb\006proto3"
+      "cesResponse\"\000\022t\n\023ListDatalakesForEnv\022,.s" +
+      "ervicediscovery.ListDatalakesForEnvReque" +
+      "st\032-.servicediscovery.ListDatalakesForEn" +
+      "vResponse\"\000\022r\n\021DescribeWarehouse\022*.servi" +
+      "cediscovery.DescribeWarehouseRequest\032+.s" +
+      "ervicediscovery.DescribeWarehouseRespons" +
+      "e\"\004\270\246\035\001\022{\n\024ListWarehousesForEnv\022-.servic" +
+      "ediscovery.ListWarehousesForEnvRequest\032." +
+      ".servicediscovery.ListWarehousesForEnvRe" +
+      "sponse\"\004\270\246\035\001\022\214\001\n\033ListVirtualWarehousesFo" +
+      "rEnv\0224.servicediscovery.ListVirtualWareh" +
+      "ousesForEnvRequest\0325.servicediscovery.Li" +
+      "stVirtualWarehousesForEnvResponse\"\000\022\233\001\n " +
+      "DescribeVirtualWarehouseServices\0229.servi" +
+      "cediscovery.DescribeVirtualWarehouseServ" +
+      "icesRequest\032:.servicediscovery.DescribeV" +
+      "irtualWarehouseServicesResponse\"\000\022h\n\017Lis" +
+      "tOpdbsForEnv\022(.servicediscovery.ListOpdb" +
+      "sForEnvRequest\032).servicediscovery.ListOp" +
+      "dbsForEnvResponse\"\000\022w\n\024DescribeOpdbServi" +
+      "ces\022-.servicediscovery.DescribeOpdbServi" +
+      "cesRequest\032..servicediscovery.DescribeOp" +
+      "dbServicesResponse\"\000\022\255\001\n&DescribeDatalak" +
+      "eAsApiRemoteDataContext\022?.servicediscove" +
+      "ry.DescribeDatalakeAsApiRemoteDataContex" +
+      "tRequest\032@.servicediscovery.DescribeData" +
+      "lakeAsApiRemoteDataContextResponse\"\000BU\n!" +
+      "com.cloudera.cdp.servicediscoveryB\025Servi" +
+      "ceDiscoveryProtoZ\031com/cloudera/cdp/proto" +
+      "bufb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -34337,7 +35296,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
     internal_static_servicediscovery_DescribeDatalakeServicesResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_servicediscovery_DescribeDatalakeServicesResponse_descriptor,
-        new java.lang.String[] { "Id", "LastUpdate", "Applications", });
+        new java.lang.String[] { "Id", "LastUpdate", "Applications", "DeploymentType", });
     internal_static_servicediscovery_DescribeDatalakeServicesResponse_ApplicationsEntry_descriptor =
       internal_static_servicediscovery_DescribeDatalakeServicesResponse_descriptor.getNestedTypes().get(0);
     internal_static_servicediscovery_DescribeDatalakeServicesResponse_ApplicationsEntry_fieldAccessorTable = new
@@ -34367,7 +35326,7 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
     internal_static_servicediscovery_DatalakeInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_servicediscovery_DatalakeInfo_descriptor,
-        new java.lang.String[] { "DatalakeCrn", "DatalakeName", "EnvironmentCrn", "EnvrionmentName", });
+        new java.lang.String[] { "DatalakeCrn", "DatalakeName", "EnvironmentCrn", "EnvrionmentName", "Runtime", "DeploymentType", });
     internal_static_servicediscovery_ListDatalakesForEnvRequest_descriptor =
       getDescriptor().getMessageTypes().get(8);
     internal_static_servicediscovery_ListDatalakesForEnvRequest_fieldAccessorTable = new
@@ -34548,6 +35507,12 @@ com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.Service defaultValue);
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_servicediscovery_ApiMapEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
+    internal_static_servicediscovery_DeploymentType_descriptor =
+      getDescriptor().getMessageTypes().get(33);
+    internal_static_servicediscovery_DeploymentType_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_servicediscovery_DeploymentType_descriptor,
+        new java.lang.String[] { });
     com.google.protobuf.ExtensionRegistry registry =
         com.google.protobuf.ExtensionRegistry.newInstance();
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.required);

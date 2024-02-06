@@ -59,6 +59,7 @@ public class SdxCdlClient {
     public CdlCrudProto.DescribeDatalakeResponse describeDatalake(String datalakeNameOrCrn) {
         CdlCrudProto.DescribeDatalakeRequest request = CdlCrudProto.DescribeDatalakeRequest.newBuilder()
                 .setDatalake(datalakeNameOrCrn)
+                .setAccountID(ThreadBasedUserCrnProvider.getAccountId())
                 .build();
         return newStub().describeDatalake(request);
     }
