@@ -149,7 +149,15 @@
     "flexibleServerDelegatedSubnetId": {
       "type": "string",
       "defaultValue": "${flexibleServerDelegatedSubnetId!""}"
-    }
+    }<#if dataEncryption == true>,
+    "encryptionKeyName": {
+      "type": "string",
+      "defaultValue" : "${encryptionKeyName}"
+    },
+    "encryptionUserManagedIdentity": {
+      "type": "string",
+      "defaultValue" : "${encryptionUserManagedIdentity}"
+    }</#if>
   },
   "variables": {
     "geoRedundantBackupString":"[if(parameters('geoRedundantBackup'), 'Enabled', 'Disabled')]"
@@ -164,11 +172,25 @@
         "name": "[parameters('skuName')]",
         "tier": "[parameters('skuTier')]"
       },
+      <#if dataEncryption == true>
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+            "[parameters('encryptionUserManagedIdentity')]": {}
+        }
+      },</#if>
       "tags": "[parameters('serverTags')]",
       "properties": {
         "version": "[parameters('dbVersion')]",
         "administratorLogin": "[parameters('administratorLogin')]",
         "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
+        <#if dataEncryption == true>
+        "dataEncryption": {
+            "primaryEncryptionKeyStatus": "Valid",
+            "type": "AzureKeyVault",
+            "primaryKeyURI": "[parameters('encryptionKeyName')]",
+            "primaryUserAssignedIdentityId": "[parameters('encryptionUserManagedIdentity')]"
+        },</#if>
         "network": {
           <#if existingDatabasePrivateDnsZoneId?has_content && flexibleServerDelegatedSubnetId?has_content>
           "publicNetworkAccess": "Disabled",

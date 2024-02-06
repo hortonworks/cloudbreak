@@ -195,7 +195,10 @@ public class AzureTemplateBuilderDbTest {
         Pair<Map<String, Object>, DatabaseStack> modelDatabasePair = createFlexibleModel(privateSetup);
         Map<String, Object> model = modelDatabasePair.getLeft();
         DatabaseStack databaseStack = modelDatabasePair.getRight();
-        when(azureDatabaseTemplateModelBuilder.buildModel(any(AzureDatabaseServerView.class), any(AzureNetworkView.class), any(DatabaseStack.class)))
+        when(azureDatabaseTemplateModelBuilder.buildModel(
+                any(AzureDatabaseServerView.class),
+                any(AzureNetworkView.class),
+                any(DatabaseStack.class)))
                 .thenReturn(model);
         when(azureDatabaseTemplateProvider.getTemplate(databaseStack)).thenReturn(template);
 
@@ -208,6 +211,8 @@ public class AzureTemplateBuilderDbTest {
             assertEquals("Disabled", networkParams.get("publicNetworkAccess").textValue());
             checkParameter(parameters.get("flexibleServerDelegatedSubnetId"), "string", "subnetId");
             checkParameter(parameters.get("existingDatabasePrivateDnsZoneId"), "string", "zoneId");
+            checkParameter(parameters.get("encryptionKeyName"), "string", "vaultkey");
+            checkParameter(parameters.get("encryptionUserManagedIdentity"), "string", "identity");
         } else {
             assertFalse(networkParams.hasNonNull("publicNetworkAccess"));
             checkParameter(parameters.get("flexibleServerDelegatedSubnetId"), "string", "");
@@ -280,11 +285,17 @@ public class AzureTemplateBuilderDbTest {
     }
 
     public Pair<Map<String, Object>, DatabaseStack> createFlexibleModel(boolean privateSetup) {
+        Map<String, Object> model = new HashMap<>();
         Network network = new Network(null);
         network.putParameter("subnets", "subnet");
         if (privateSetup) {
             network.putParameter("existingDatabasePrivateDnsZoneId", "zoneId");
             network.putParameter("flexibleServerDelegatedSubnetId", "subnetId");
+            model.put("encryptionKeyName", "vaultkey");
+            model.put("encryptionUserManagedIdentity", "identity");
+            model.put("dataEncryption", true);
+        } else {
+            model.put("dataEncryption", false);
         }
         Map<String, Object> serverParams = new HashMap<>();
         serverParams.put("geoRedundantBackup", false);
@@ -304,7 +315,6 @@ public class AzureTemplateBuilderDbTest {
         DatabaseStack databaseStack = new DatabaseStack(network, databaseServer, Map.of("tag1", "tag1"), "");
         AzureDatabaseServerView azureDatabaseServerView = new AzureDatabaseServerView(databaseServer);
         AzureNetworkView azureNetworkView = new AzureNetworkView(network);
-        Map<String, Object> model = new HashMap<>();
         model.put("adminLoginName", azureDatabaseServerView.getAdminLoginName());
         model.put("adminPassword", azureDatabaseServerView.getAdminPassword());
         model.put("backupRetentionDays", azureDatabaseServerView.getBackupRetentionDays());

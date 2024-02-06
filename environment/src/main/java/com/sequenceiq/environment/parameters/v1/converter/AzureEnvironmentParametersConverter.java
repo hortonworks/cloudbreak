@@ -52,6 +52,10 @@ public class AzureEnvironmentParametersConverter extends BaseEnvironmentParamete
                 .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
                 .map(AzureResourceEncryptionParametersDto::getEncryptionKeyResourceGroupName)
                 .orElse(null));
+        azureParameters.setUserManagedIdentity(azureParametersDto
+                .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
+                .map(AzureResourceEncryptionParametersDto::getUserManagedIdentity)
+                .orElse(null));
         azureParameters.setEnableHostEncryption(azureParametersDto
                 .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
                 .map(AzureResourceEncryptionParametersDto::getEnableHostEncryption)
@@ -73,6 +77,7 @@ public class AzureEnvironmentParametersConverter extends BaseEnvironmentParamete
                         AzureResourceEncryptionParametersDto.builder()
                                 .withEncryptionKeyUrl(azureParameters.getEncryptionKeyUrl())
                                 .withDiskEncryptionSetId(azureParameters.getDiskEncryptionSetId())
+                                .withUserManagedIdentity(azureParameters.getUserManagedIdentity())
                                 .withEncryptionKeyResourceGroupName(azureParameters.getEncryptionKeyResourceGroupName())
                                 .withEnableHostEncryption(azureParameters.getEnableHostEncryption())
                                 .build())

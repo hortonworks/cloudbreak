@@ -207,6 +207,7 @@ public class EnvironmentCreationService {
         validationBuilder.merge(validatorService.validateTags(creationDto));
         if (creationDto.getCloudPlatform() != null) {
             validationBuilder.merge(validateEncryptionKey(creationDto, environment.isEnableSecretEncryption()));
+            validationBuilder.merge(validateEncryptionRole(creationDto));
         }
         ValidationResult parentChildValidation = validatorService.validateParentChildRelation(environment, creationDto.getParentEnvironmentName());
         validationBuilder.merge(parentChildValidation);
@@ -253,5 +254,25 @@ public class EnvironmentCreationService {
                 return ValidationResult.empty();
             }
         }
+    }
+
+    private ValidationResult validateEncryptionRole(EnvironmentCreationDto creationDto) {
+        ValidationResultBuilder resultBuilder = ValidationResult.builder();
+        String cloudPlatform = creationDto.getCloudPlatform().toLowerCase(Locale.ROOT);
+        switch (cloudPlatform) {
+            case "azure":
+                String encryptionRole = Optional.ofNullable(creationDto.getParameters())
+                        .map(ParametersDto::getAzureParametersDto)
+                        .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
+                        .map(AzureResourceEncryptionParametersDto::getUserManagedIdentity)
+                        .orElse(null);
+                if (encryptionRole != null) {
+                    resultBuilder.merge(validatorService.validateEncryptionRole(encryptionRole));
+                }
+                break;
+            default:
+                break;
+        }
+        return resultBuilder.build();
     }
 }

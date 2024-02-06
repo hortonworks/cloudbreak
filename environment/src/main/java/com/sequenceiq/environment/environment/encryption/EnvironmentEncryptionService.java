@@ -87,6 +87,7 @@ public class EnvironmentEncryptionService {
                 .withTags(environmentTagProvider.getTags(environment, environment.getResourceCrn()))
                 .withCloudContext(getCloudContext(environment))
                 .withEncryptionKeyUrl(environment.getParameters().getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl())
+                .withUserManagedIdentity(environment.getParameters().getAzureParametersDto().getAzureResourceEncryptionParametersDto().getUserManagedIdentity())
                 .withDiskEncryptionSetResourceGroupName(diskEncryptionSetResourceGroupName);
         if (StringUtils.isNotEmpty(encryptionKeyResourceGroupName)) {
             builder.withEncryptionKeyResourceGroupName(encryptionKeyResourceGroupName);

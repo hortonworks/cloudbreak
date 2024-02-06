@@ -12,6 +12,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.azure.resourcemanager.compute.fluent.models.DiskEncryptionSetInner;
 import com.azure.resourcemanager.compute.models.EncryptionSetIdentity;
@@ -19,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class DiskEncryptionSetCreationCheckerTaskTest {
 
     private static final String RESOURCE_GROUP_NAME = "resourceGroupName";
@@ -38,17 +41,22 @@ class DiskEncryptionSetCreationCheckerTaskTest {
 
     @BeforeEach
     void setUp() {
-        authenticatedContext = createAuthenticatedContext(azureClient);
-        underTest = new DiskEncryptionSetCreationCheckerTask(authenticatedContext, createCheckerContext());
+        authenticatedContext = createAuthenticatedContext(azureClient, false);
+        underTest = new DiskEncryptionSetCreationCheckerTask(authenticatedContext, createCheckerContext(false));
     }
 
-    private static DiskEncryptionSetCreationCheckerContext createCheckerContext() {
-        return new DiskEncryptionSetCreationCheckerContext(RESOURCE_GROUP_NAME, DISK_ENCRYPTION_SET_NAME);
+    private static DiskEncryptionSetCreationCheckerContext createCheckerContext(boolean userManagedIdentityEnabled) {
+        return new DiskEncryptionSetCreationCheckerContext(
+                RESOURCE_GROUP_NAME,
+                DISK_ENCRYPTION_SET_NAME,
+                userManagedIdentityEnabled);
     }
 
-    private static AuthenticatedContext createAuthenticatedContext(AzureClient azureClient) {
+    private static AuthenticatedContext createAuthenticatedContext(AzureClient azureClient, boolean userManagedIdentityConfigured) {
         AuthenticatedContext context = mock(AuthenticatedContext.class);
-        when(context.getParameter(AzureClient.class)).thenReturn(azureClient);
+        if (!userManagedIdentityConfigured) {
+            when(context.getParameter(AzureClient.class)).thenReturn(azureClient);
+        }
         return context;
     }
 
@@ -56,9 +64,11 @@ class DiskEncryptionSetCreationCheckerTaskTest {
         return new Object[][]{
                 // testCaseName authenticatedContext, DiskEncryptionSetCreationCheckerContext checkerContext
                 {"null, null", null, null},
-                {"null, checkerContext", null, createCheckerContext()},
-                {"authenticatedContext(null), checkerContext", createAuthenticatedContext(null), createCheckerContext()},
-                {"authenticatedContext(azureClient), null", createAuthenticatedContext(mock(AzureClient.class)), null},
+                {"null, checkerContext", null, createCheckerContext(false)},
+                {"authenticatedContext(null), checkerContext", createAuthenticatedContext(null, false), createCheckerContext(false)},
+                {"null, checkerContext", null, createCheckerContext(true)},
+                {"authenticatedContext(null), checkerContext", createAuthenticatedContext(null, true), createCheckerContext(true)},
+                {"authenticatedContext(azureClient), null", createAuthenticatedContext(mock(AzureClient.class), false), null},
         };
     }
 
@@ -73,13 +83,15 @@ class DiskEncryptionSetCreationCheckerTaskTest {
         assertThat(underTest.getAuthenticatedContext()).isSameAs(authenticatedContext);
     }
 
-    private static DiskEncryptionSetInner createDes(String id, boolean withIdentity, String principalObjectId) {
+    private static DiskEncryptionSetInner createDes(String id, boolean withIdentity, String principalObjectId, boolean userManagedIdentityConfigured) {
         DiskEncryptionSetInner des = mock(DiskEncryptionSetInner.class);
         when(des.id()).thenReturn(id);
         if (withIdentity) {
             EncryptionSetIdentity identity = mock(EncryptionSetIdentity.class);
             when(des.identity()).thenReturn(identity);
-            when(identity.principalId()).thenReturn(principalObjectId);
+            if (!userManagedIdentityConfigured) {
+                when(identity.principalId()).thenReturn(principalObjectId);
+            }
         }
         return des;
     }
@@ -87,19 +99,25 @@ class DiskEncryptionSetCreationCheckerTaskTest {
     static Object[][] completedDataProvider() {
         return new Object[][]{
                 // testCaseName des completedExpected
-                {"null", null, false},
-                {"DES(null, false, null)", createDes(null, false, null), false},
-                {"DES(ID, false, null)", createDes(ID, false, null), false},
-                {"DES(null, true, null)", createDes(null, true, null), false},
-                {"DES(ID, true, null)", createDes(ID, true, null), false},
-                {"DES(null, true, PRINCIPAL_OBJECT_ID)", createDes(null, true, PRINCIPAL_OBJECT_ID), false},
-                {"DES(ID, true, PRINCIPAL_OBJECT_ID)", createDes(ID, true, PRINCIPAL_OBJECT_ID), true},
+                {"null", null, false, false},
+                {"DES(null, false, null)",  createDes(null, false, null, false), false, false},
+                {"DES(ID, false, null)",    createDes(ID, false, null, false), false, false},
+                {"DES(null, true, null)",   createDes(null, true, null, false), false, false},
+                {"DES(ID, true, null)",     createDes(ID, true, null, false), false, false},
+                {"DES(null, true, PRINCIPAL_OBJECT_ID)", createDes(null, true, PRINCIPAL_OBJECT_ID, false), false, false},
+                {"DES(ID, true, PRINCIPAL_OBJECT_ID)", createDes(ID, true, PRINCIPAL_OBJECT_ID, false), true, false},
+                {"DES(null, false, null)", createDes(null, false, null, true), false, true},
+                {"DES(ID, false, null)", createDes(ID, false, null, true), false, true},
+                {"DES(null, true, null)", createDes(null, true, null, true), false, true},
+                {"DES(ID, true, null)", createDes(ID, true, null, true), false, true},
+                {"DES(null, true, PRINCIPAL_OBJECT_ID)", createDes(null, true, PRINCIPAL_OBJECT_ID, true), false, true}
         };
     }
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "{0} and userManagedIdentity is {3}")
     @MethodSource("completedDataProvider")
-    void completedTest(String testCaseName, DiskEncryptionSetInner des, boolean completedExpected) {
+    void completedTest(String testCaseName, DiskEncryptionSetInner des, boolean completedExpected, boolean userManagedIdentityConfigured) {
+        authenticatedContext = createAuthenticatedContext(azureClient, userManagedIdentityConfigured);
         assertThat(underTest.completed(des)).isEqualTo(completedExpected);
     }
 

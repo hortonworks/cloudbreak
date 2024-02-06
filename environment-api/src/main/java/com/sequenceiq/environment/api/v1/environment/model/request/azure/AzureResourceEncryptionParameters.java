@@ -31,6 +31,9 @@ public class AzureResourceEncryptionParameters implements Serializable {
     @Schema(description = EnvironmentModelDescription.ENCRYPTION_KEY_RESOURCE_GROUP_NAME)
     private String encryptionKeyResourceGroupName;
 
+    @Schema(description = EnvironmentModelDescription.ENCRYPTION_USER_MANAGED_IDENTITY)
+    private String userManagedIdentity;
+
     @Schema(description = EnvironmentModelDescription.DISK_ENCRYPTION_SET_ID)
     private String diskEncryptionSetId;
 
@@ -69,6 +72,14 @@ public class AzureResourceEncryptionParameters implements Serializable {
         this.enableHostEncryption = enableHostEncryption;
     }
 
+    public String getUserManagedIdentity() {
+        return userManagedIdentity;
+    }
+
+    public void setUserManagedIdentity(String userManagedIdentity) {
+        this.userManagedIdentity = userManagedIdentity;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -78,6 +89,7 @@ public class AzureResourceEncryptionParameters implements Serializable {
         return "AzureResourceEncryptionParameters{" +
                 "encryptionKeyUrl='" + encryptionKeyUrl + '\'' +
                 ", encryptionKeyResourceGroupName='" + encryptionKeyResourceGroupName + '\'' +
+                ", userManagedIdentity='" + userManagedIdentity + '\'' +
                 ", diskEncryptionSetId='" + diskEncryptionSetId + '\'' +
                 ", enableHostEncryption='" + enableHostEncryption + '\'' +
                 '}';
@@ -90,6 +102,8 @@ public class AzureResourceEncryptionParameters implements Serializable {
         private String encryptionKeyResourceGroupName;
 
         private String diskEncryptionSetId;
+
+        private String userManagedIdentity;
 
         private boolean enableHostEncryption;
 
@@ -111,6 +125,11 @@ public class AzureResourceEncryptionParameters implements Serializable {
             return this;
         }
 
+        public Builder withUserManagedIdentity(String userManagedIdentity) {
+            this.userManagedIdentity = userManagedIdentity;
+            return this;
+        }
+
         public Builder withEnableHostEncryption(boolean enableHostEncryption) {
             this.enableHostEncryption = enableHostEncryption;
             return this;
@@ -122,6 +141,7 @@ public class AzureResourceEncryptionParameters implements Serializable {
             resourceEncryptionParameters.setEncryptionKeyResourceGroupName(encryptionKeyResourceGroupName);
             resourceEncryptionParameters.setDiskEncryptionSetId(diskEncryptionSetId);
             resourceEncryptionParameters.setEnableHostEncryption(enableHostEncryption);
+            resourceEncryptionParameters.setUserManagedIdentity(userManagedIdentity);
             return resourceEncryptionParameters;
         }
 

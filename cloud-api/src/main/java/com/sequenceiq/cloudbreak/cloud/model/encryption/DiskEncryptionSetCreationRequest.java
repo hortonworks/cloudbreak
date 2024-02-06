@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model.encryption;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.cloud.CloudPlatformAware;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -21,6 +22,8 @@ public class DiskEncryptionSetCreationRequest implements CloudPlatformAware {
 
     private final String encryptionKeyResourceGroupName;
 
+    private final Optional<String> userManagedIdentity;
+
     private final Map<String, String> tags;
 
     private final String encryptionKeyUrl;
@@ -33,6 +36,7 @@ public class DiskEncryptionSetCreationRequest implements CloudPlatformAware {
         this.tags = builder.tags;
         this.encryptionKeyUrl = builder.encryptionKeyUrl;
         this.cloudContext = builder.cloudContext;
+        this.userManagedIdentity = Optional.ofNullable(builder.userManagedIdentity);
     }
 
     public String getId() {
@@ -68,6 +72,10 @@ public class DiskEncryptionSetCreationRequest implements CloudPlatformAware {
         return cloudContext.getPlatform();
     }
 
+    public Optional<String> getUserManagedIdentity() {
+        return userManagedIdentity;
+    }
+
     @Override
     public Variant variant() {
         return cloudContext.getVariant();
@@ -82,6 +90,7 @@ public class DiskEncryptionSetCreationRequest implements CloudPlatformAware {
         sb.append(", cloudCredential=").append(cloudCredential);
         sb.append(", diskEncryptionSetResourceGroupName='").append(diskEncryptionSetResourceGroupName).append('\'');
         sb.append(", encryptionKeyResourceGroupName='").append(encryptionKeyResourceGroupName).append('\'');
+        sb.append(", userManagedIdentity='").append(userManagedIdentity).append('\'');
         sb.append(", tags=").append(tags);
         sb.append('}');
         return sb.toString();
@@ -98,6 +107,8 @@ public class DiskEncryptionSetCreationRequest implements CloudPlatformAware {
         private String diskEncryptionSetResourceGroupName;
 
         private String encryptionKeyResourceGroupName;
+
+        private String userManagedIdentity;
 
         private Map<String, String> tags = new HashMap<>();
 
@@ -138,6 +149,11 @@ public class DiskEncryptionSetCreationRequest implements CloudPlatformAware {
 
         public Builder withEncryptionKeyUrl(String encryptionKeyUrl) {
             this.encryptionKeyUrl = encryptionKeyUrl;
+            return this;
+        }
+
+        public Builder withUserManagedIdentity(String userManagedIdentity) {
+            this.userManagedIdentity = userManagedIdentity;
             return this;
         }
 

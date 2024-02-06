@@ -214,30 +214,43 @@ public class EnvironmentModificationService {
     private EnvironmentDto updateAzureResourceEncryptionParameters(String accountId, String environmentName, AzureResourceEncryptionParametersDto dto,
             Environment environment) {
         AzureParameters azureParameters = (AzureParameters) environment.getParameters();
-        if (azureParameters.getEncryptionKeyUrl() == null) {
-            ValidationResult validateKey = environmentService.getValidatorService().validateEncryptionKeyUrl(dto.getEncryptionKeyUrl());
-            if (!validateKey.hasError()) {
-                azureParameters.setEncryptionKeyUrl(dto.getEncryptionKeyUrl());
-                azureParameters.setEncryptionKeyResourceGroupName(dto.getEncryptionKeyResourceGroupName());
-                azureParameters.setEnableHostEncryption(dto.getEnableHostEncryption());
-                //creating the DES
-                try {
-                    CreatedDiskEncryptionSet createdDiskEncryptionSet = environmentEncryptionService.createEncryptionResources(
-                            environmentDtoConverter.environmentToDto(environment));
-                    azureParameters.setDiskEncryptionSetId(createdDiskEncryptionSet.getDiskEncryptionSetId());
-                    azureParametersRepository.save(azureParameters);
-                } catch (Exception e) {
-                    throw new BadRequestException(e);
-                }
-                LOGGER.debug("Successfully created the Disk encryption set for the environment {}.", environmentName);
-            } else {
-                throw new BadRequestException(validateKey.getFormattedErrors());
+        if (dto.getUserManagedIdentity() != null) {
+            ValidationResult validateRole = environmentService.getValidatorService()
+                    .validateEncryptionRole(dto.getUserManagedIdentity());
+            if (validateRole.hasError()) {
+                throw new BadRequestException(validateRole.getFormattedErrors());
             }
-        } else if (azureParameters.getEncryptionKeyUrl().equals(dto.getEncryptionKeyUrl())) {
-            LOGGER.info("Encryption Key '{}' is already set for the environment '{}'.", azureParameters.getEncryptionKeyUrl(), environmentName);
-        } else {
-            throw new BadRequestException(String.format("Encryption Key '%s' is already set for the environment '%s'. " +
-                    "Modifying the encryption key is not allowed.", azureParameters.getEncryptionKeyUrl(), environmentName));
+            azureParameters.setUserManagedIdentity(dto.getUserManagedIdentity());
+            azureParameters = azureParametersRepository.save(azureParameters);
+        }
+        if (dto.getEncryptionKeyUrl() != null) {
+            if (azureParameters.getEncryptionKeyUrl() == null) {
+                ValidationResult validateKey = environmentService.getValidatorService().validateEncryptionKeyUrl(
+                        dto.getEncryptionKeyUrl());
+                if (!validateKey.hasError()) {
+                    azureParameters.setEncryptionKeyUrl(dto.getEncryptionKeyUrl());
+                    azureParameters.setEncryptionKeyResourceGroupName(dto.getEncryptionKeyResourceGroupName());
+                    azureParameters.setEnableHostEncryption(dto.getEnableHostEncryption());
+                    azureParameters.setUserManagedIdentity(dto.getUserManagedIdentity());
+                    //creating the DES
+                    try {
+                        CreatedDiskEncryptionSet createdDiskEncryptionSet = environmentEncryptionService.createEncryptionResources(
+                                environmentDtoConverter.environmentToDto(environment));
+                        azureParameters.setDiskEncryptionSetId(createdDiskEncryptionSet.getDiskEncryptionSetId());
+                        azureParametersRepository.save(azureParameters);
+                    } catch (Exception e) {
+                        throw new BadRequestException(e);
+                    }
+                    LOGGER.debug("Successfully created the Disk encryption set for the environment {}.", environmentName);
+                } else {
+                    throw new BadRequestException(validateKey.getFormattedErrors());
+                }
+            } else if (azureParameters.getEncryptionKeyUrl().equals(dto.getEncryptionKeyUrl())) {
+                LOGGER.info("Encryption Key '{}' is already set for the environment '{}'.", azureParameters.getEncryptionKeyUrl(), environmentName);
+            } else {
+                throw new BadRequestException(String.format("Encryption Key '%s' is already set for the environment '%s'. " +
+                        "Modifying the encryption key is not allowed.", azureParameters.getEncryptionKeyUrl(), environmentName));
+            }
         }
         return environmentDtoConverter.environmentToDto(environment);
     }
@@ -458,6 +471,15 @@ public class EnvironmentModificationService {
                 if (validationResult.hasError()) {
                     throw new BadRequestException(validationResult.getFormattedErrors());
                 }
+            }
+            if (parametersDto.azureParametersDto() != null && parametersDto.getAzureParametersDto().getAzureResourceEncryptionParametersDto() != null) {
+                UpdateAzureResourceEncryptionDto updateAzureResourceEncryptionDto = UpdateAzureResourceEncryptionDto.builder()
+                        .withAzureResourceEncryptionParametersDto(editDto.getParameters().getAzureParametersDto().getAzureResourceEncryptionParametersDto())
+                        .build();
+                updateAzureResourceEncryptionParametersByEnvironmentName(
+                        environment.getAccountId(),
+                        environment.getName(),
+                        updateAzureResourceEncryptionDto);
             }
             BaseParameters parameters = parametersService.saveParameters(environment, parametersDto);
             if (parameters != null) {

@@ -35,7 +35,10 @@ class AzurePollTaskFactoryTest {
 
     @Test
     void diskEncryptionSetCreationCheckerTaskTest() {
-        DiskEncryptionSetCreationCheckerContext checkerContext = new DiskEncryptionSetCreationCheckerContext(RESOURCE_GROUP_NAME, DISK_ENCRYPTION_SET_NAME);
+        DiskEncryptionSetCreationCheckerContext checkerContext = new DiskEncryptionSetCreationCheckerContext(
+                RESOURCE_GROUP_NAME,
+                DISK_ENCRYPTION_SET_NAME,
+                false);
         PollTask<DiskEncryptionSetInner> checkerTask = mock(PollTask.class);
         when(applicationContext.getBean(DiskEncryptionSetCreationCheckerTask.NAME, authenticatedContext, checkerContext)).thenReturn(checkerTask);
 

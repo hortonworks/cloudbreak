@@ -2,6 +2,7 @@ package com.sequenceiq.redbeams.converter.spi;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ENCRYPTION_KEY_RESOURCE_GROUP_NAME;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ENCRYPTION_KEY_URL;
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ENCRYPTION_USER_MANAGED_IDENTITY;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
@@ -242,6 +243,7 @@ public class DBStackToDatabaseStackConverterTest {
         environmentResponse.setAzure(AzureEnvironmentParameters.builder()
                 .withResourceEncryptionParameters(AzureResourceEncryptionParameters.builder()
                         .withEncryptionKeyUrl(KEY_URL)
+                        .withUserManagedIdentity("identity")
                         .build())
                 .withAzureResourceGroup(AzureResourceGroup.builder()
                         .withName(RESOURCE_GROUP)
@@ -254,8 +256,9 @@ public class DBStackToDatabaseStackConverterTest {
 
         Map<String, Object> parameters = convertedStack.getDatabaseServer().getParameters();
         assertThat(parameters.get(ENCRYPTION_KEY_URL).toString()).isEqualTo(KEY_URL);
+        assertThat(parameters.get(ENCRYPTION_USER_MANAGED_IDENTITY).toString()).isEqualTo("identity");
         assertThat(parameters.get(ENCRYPTION_KEY_RESOURCE_GROUP_NAME).toString()).isEqualTo(RESOURCE_GROUP);
-        assertThat(parameters.size()).isEqualTo(6);
+        assertThat(parameters.size()).isEqualTo(7);
     }
 
     @Test

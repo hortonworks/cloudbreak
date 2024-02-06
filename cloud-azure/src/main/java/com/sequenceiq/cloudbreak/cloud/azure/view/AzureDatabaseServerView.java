@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.view;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ENCRYPTION_USER_MANAGED_IDENTITY;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
@@ -146,6 +148,10 @@ public class AzureDatabaseServerView {
 
     public String getKeyVaultResourceGroupName() {
         return databaseServer.getStringParameter(KEY_VAULT_RESOURCE_GROUP_NAME);
+    }
+
+    public String getEncryptionUserManagedIdentity() {
+        return databaseServer.getStringParameter(ENCRYPTION_USER_MANAGED_IDENTITY);
     }
 
     public AzureDatabaseType getAzureDatabaseType() {

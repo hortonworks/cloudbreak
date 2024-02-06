@@ -303,6 +303,10 @@ public class EnvironmentApiConverter {
                     .withEncryptionKeyUrl(azureResourceEncryptionParameters.getEncryptionKeyUrl())
                     .withEncryptionKeyResourceGroupName(azureResourceEncryptionParameters.getEncryptionKeyResourceGroupName());
         }
+        if (Objects.nonNull(azureResourceEncryptionParameters.getUserManagedIdentity())) {
+            azureResourceEncryptionParametersDto
+                    .withUserManagedIdentity(azureResourceEncryptionParameters.getUserManagedIdentity());
+        }
         return azureResourceEncryptionParametersDto.build();
     }
 
@@ -406,6 +410,7 @@ public class EnvironmentApiConverter {
         NullUtil.doIfNotNull(request.getBackup(), backupRequest -> builder.withBackup(backupConverter.convert(request.getBackup())));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
         NullUtil.doIfNotNull(request.getAws(), awsParams -> builder.withParameters(awsParamsToParametersDto(awsParams, null)));
+        NullUtil.doIfNotNull(request.getAzure(), azureParams -> builder.withParameters(azureParamsToParametersDto(azureParams)));
         NullUtil.doIfNotNull(request.getProxy(), proxyRequest -> builder.withProxyConfig(proxyRequestToProxyConfigConverter.convert(proxyRequest)));
         NullUtil.doIfNotNull(request.getDataServices(), dataServices -> builder.withDataServices(dataServicesConverter.convertToDto(dataServices)));
         return builder.build();

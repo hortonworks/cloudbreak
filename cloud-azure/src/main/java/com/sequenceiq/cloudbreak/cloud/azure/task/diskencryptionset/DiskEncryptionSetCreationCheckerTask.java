@@ -30,19 +30,23 @@ public class DiskEncryptionSetCreationCheckerTask extends PollPredicateStateTask
     private final DiskEncryptionSetCreationCheckerContext checkerContext;
 
     public DiskEncryptionSetCreationCheckerTask(AuthenticatedContext authenticatedContext, DiskEncryptionSetCreationCheckerContext checkerContext) {
-        super(requireNonNull(authenticatedContext), false, DiskEncryptionSetCreationCheckerTask::isDiskEncryptionSetValid);
+        super(requireNonNull(authenticatedContext), false, des -> isDiskEncryptionSetValid(des, checkerContext));
         azureClient = requireNonNull(authenticatedContext.getParameter(AzureClient.class));
         this.checkerContext = requireNonNull(checkerContext);
     }
 
-    private static boolean isDiskEncryptionSetValid(DiskEncryptionSetInner des) {
+    private static boolean isDiskEncryptionSetValid(DiskEncryptionSetInner des, DiskEncryptionSetCreationCheckerContext checkerContext) {
         Optional<DiskEncryptionSetInner> desOptional = Optional.ofNullable(des);
         String id = desOptional.map(ProxyResource::id)
                 .orElse(null);
         String principalObjectId = desOptional.map(DiskEncryptionSetInner::identity)
                 .map(EncryptionSetIdentity::principalId)
                 .orElse(null);
-        return id != null && principalObjectId != null;
+        boolean principalObjectPresent = principalObjectId != null;
+        if (checkerContext.isUserManagedIdentityEnabled()) {
+            principalObjectPresent = true;
+        }
+        return id != null && principalObjectPresent;
     }
 
     @Override

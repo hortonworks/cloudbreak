@@ -127,6 +127,9 @@ public class EnvironmentModelDescription {
 
     public static final String ENCRYPTION_KEY_URL = "URL of the Customer Managed Key to encrypt Azure resources";
     public static final String ENCRYPTION_KEY_RESOURCE_GROUP_NAME = "Name of the Azure resource group of the Customer Managed Key to encrypt Azure resources";
+
+    public static final String ENCRYPTION_USER_MANAGED_IDENTITY = "User managed identity for encryption";
+
     public static final String DISK_ENCRYPTION_SET_ID = "Resource Id of the disk encryption set used to encrypt Azure disks.";
     public static final String RESOURCE_ENCRYPTION_PARAMETERS = "Azure resource encryption parameters.";
 

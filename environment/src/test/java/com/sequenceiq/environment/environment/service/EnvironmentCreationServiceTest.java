@@ -607,7 +607,7 @@ class EnvironmentCreationServiceTest {
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         validationResultBuilder.error("error");
-        when(validatorService.validateEncryptionKey(eq("dummyKey"))).thenReturn(validationResultBuilder.build());
+        when(validatorService.validateEncryptionKey(anyString())).thenReturn(validationResultBuilder.build());
 
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);

@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureNetworkView;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
@@ -53,7 +54,20 @@ public class AzureFlexibleServerDatabaseTemplateModelBuilder implements AzureDat
         model.put("useAvailabilityZone", azureDatabaseServerView.useAvailabilityZone());
         model.put("standbyAvailabilityZone", azureDatabaseServerView.getStandbyAvailabilityZone());
         model.put("useStandbyAvailabilityZone", azureDatabaseServerView.useStandbyAvailabilityZone());
+        addEncryptionParameters(model, azureDatabaseServerView);
         return model;
+    }
+
+    private void addEncryptionParameters(Map<String, Object> model, AzureDatabaseServerView azureDatabaseServerView) {
+        String encryptionUserManagedIdentity = azureDatabaseServerView.getEncryptionUserManagedIdentity();
+        String keyVaultUrl = azureDatabaseServerView.getKeyVaultUrl();
+        if (!Strings.isNullOrEmpty(encryptionUserManagedIdentity) && !Strings.isNullOrEmpty(keyVaultUrl)) {
+            model.put("dataEncryption", true);
+            model.put("encryptionKeyName", keyVaultUrl);
+            model.put("encryptionUserManagedIdentity", encryptionUserManagedIdentity);
+        } else {
+            model.put("dataEncryption", false);
+        }
     }
 
     @Override

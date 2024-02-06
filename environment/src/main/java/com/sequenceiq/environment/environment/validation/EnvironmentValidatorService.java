@@ -45,6 +45,7 @@ import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeSe
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyArnValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyUrlValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyValidator;
+import com.sequenceiq.environment.environment.validation.validators.EncryptionRoleValidator;
 import com.sequenceiq.environment.environment.validation.validators.NetworkValidator;
 import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
 import com.sequenceiq.environment.environment.validation.validators.TagValidator;
@@ -81,6 +82,8 @@ public class EnvironmentValidatorService {
 
     private final EncryptionKeyUrlValidator encryptionKeyUrlValidator;
 
+    private final EncryptionRoleValidator encryptionRoleValidator;
+
     private final EntitlementService entitlementService;
 
     private final EncryptionKeyValidator encryptionKeyValidator;
@@ -102,6 +105,7 @@ public class EnvironmentValidatorService {
             EntitlementService entitlementService,
             EncryptionKeyValidator encryptionKeyValidator,
             EnvironmentRecipeService recipeService,
+            EncryptionRoleValidator encryptionRoleValidator,
             @Value("${environment.freeipa.groupInstanceCount.minimum}") Integer ipaMinimumInstanceCountByGroup) {
         this.networkValidator = networkValidator;
         this.platformParameterService = platformParameterService;
@@ -117,6 +121,7 @@ public class EnvironmentValidatorService {
         this.encryptionKeyValidator = encryptionKeyValidator;
         this.recipeService = recipeService;
         this.ipaMinimumInstanceCountByGroup = ipaMinimumInstanceCountByGroup;
+        this.encryptionRoleValidator = encryptionRoleValidator;
     }
 
     public void validateFreeipaRecipesExistsByName(Set<String> resourceNames) {
@@ -301,8 +306,18 @@ public class EnvironmentValidatorService {
         return encryptionKeyUrlValidator.validateEncryptionKeyUrl(encryptionKeyUrl);
     }
 
+    public ValidationResult validateEncryptionRole(String encryptionKeyRole) {
+        ValidationResultBuilder resultBuilder = ValidationResult.builder();
+        ValidationResult validationResult = encryptionRoleValidator.validateEncryptionRole(encryptionKeyRole);
+        resultBuilder.merge(validationResult);
+        return resultBuilder.build();
+    }
+
     public ValidationResult validateEncryptionKeyArn(String encryptionKeyArn, boolean secretEncryptionEnabled) {
-        return encryptionKeyArnValidator.validateEncryptionKeyArn(encryptionKeyArn, secretEncryptionEnabled);
+        ValidationResultBuilder resultBuilder = ValidationResult.builder();
+        ValidationResult validationResult = encryptionKeyArnValidator.validateEncryptionKeyArn(encryptionKeyArn, secretEncryptionEnabled);
+        resultBuilder.merge(validationResult);
+        return resultBuilder.build();
     }
 
     public ValidationResult validateEncryptionKey(String encryptionKey) {

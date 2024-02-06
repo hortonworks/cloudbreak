@@ -45,6 +45,7 @@ import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeSe
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyArnValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyUrlValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyValidator;
+import com.sequenceiq.environment.environment.validation.validators.EncryptionRoleValidator;
 import com.sequenceiq.environment.environment.validation.validators.NetworkValidator;
 import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
 import com.sequenceiq.environment.environment.validation.validators.TagValidator;
@@ -90,6 +91,9 @@ class EnvironmentValidatorServiceTest {
     private EncryptionKeyValidator encryptionKeyValidator;
 
     @Mock
+    private EncryptionRoleValidator encryptionRoleValidator;
+
+    @Mock
     private EnvironmentRecipeService recipeService;
 
     private EnvironmentValidatorService underTest;
@@ -110,6 +114,7 @@ class EnvironmentValidatorServiceTest {
                 entitlementService,
                 encryptionKeyValidator,
                 recipeService,
+                encryptionRoleValidator,
                 1);
     }
 
@@ -448,6 +453,31 @@ class EnvironmentValidatorServiceTest {
         assertTrue(validationResult.hasError());
         assertEquals("FreeIpa deployment requests can not have both image id and image os parameters set.",
                 validationResult.getErrors().get(0));
+    }
+
+    @Test
+    public void testValidateEncryptionRoleValidRole() {
+        String encryptionKeyRole = "validRole";
+        when(encryptionRoleValidator.validateEncryptionRole(any()))
+                .thenReturn(ValidationResult.builder().build());
+
+        ValidationResult result = underTest.validateEncryptionRole(encryptionKeyRole);
+
+        assertFalse(result.hasError());
+        assertEquals(0, result.getErrors().size());
+    }
+
+    @Test
+    public void testValidateEncryptionRoleInvalidRole() {
+        String encryptionKeyRole = "invalidRole";
+        when(encryptionRoleValidator.validateEncryptionRole(any()))
+                .thenReturn(ValidationResult.builder().error("Invalid role").build());
+
+        ValidationResult result = underTest.validateEncryptionRole(encryptionKeyRole);
+
+        assertTrue(result.hasError());
+        assertEquals(1, result.getErrors().size());
+        assertEquals("Invalid role", result.getErrors().get(0));
     }
 
     private Environment aValidEnvirontmentWithParent() {

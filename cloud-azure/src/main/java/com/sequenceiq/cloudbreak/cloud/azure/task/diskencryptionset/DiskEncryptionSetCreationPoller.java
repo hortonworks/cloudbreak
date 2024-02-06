@@ -21,7 +21,7 @@ public class DiskEncryptionSetCreationPoller {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiskEncryptionSetCreationPoller.class);
 
-    @Value("${cb.azure.poller.des.checkinterval:1000}")
+    @Value("${cb.azure.poller.des.checkinterval:5000}")
     private int creationCheckInterval;
 
     @Value("${cb.azure.poller.des.maxattempt:30}")

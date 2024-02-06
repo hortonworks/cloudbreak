@@ -63,6 +63,7 @@ import com.azure.resourcemanager.compute.models.SourceVault;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.azure.resourcemanager.compute.models.VirtualMachineCustomImage;
 import com.azure.resourcemanager.compute.models.VirtualMachineDataDisk;
+import com.azure.resourcemanager.compute.models.VirtualMachineIdentityUserAssignedIdentities;
 import com.azure.resourcemanager.compute.models.VirtualMachineInstanceView;
 import com.azure.resourcemanager.compute.models.VirtualMachineSize;
 import com.azure.resourcemanager.keyvault.models.AccessPolicy;
@@ -911,16 +912,29 @@ public class AzureClient {
         return handleException(() -> azure.genericResources().deleteByIdAsync(id));
     }
 
-    private DiskEncryptionSetInner createDiskEncryptionSetInner(String sourceVaultId, String encryptionKeyUrl, String location, Map<String, String> tags) {
+    private DiskEncryptionSetInner createDiskEncryptionSetInner(String sourceVaultId, String encryptionKeyUrl,
+        Optional<String> optionalManagedIdentity, String location, Map<String, String> tags) {
         SourceVault sourceVault = new SourceVault().withId(sourceVaultId);
         KeyForDiskEncryptionSet keyForDiskEncryptionSet = new KeyForDiskEncryptionSet().withKeyUrl(encryptionKeyUrl).withSourceVault(sourceVault);
-        EncryptionSetIdentity eSetId = new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED);
         return new DiskEncryptionSetInner()
                 .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
                 .withActiveKey(keyForDiskEncryptionSet)
-                .withIdentity(eSetId)
+                .withIdentity(getEncryptionSetIdentity(optionalManagedIdentity))
                 .withLocation(location)
                 .withTags(tags);
+    }
+
+    private EncryptionSetIdentity getEncryptionSetIdentity(Optional<String> optionalManagedIdentity) {
+        EncryptionSetIdentity eSetId;
+        if (optionalManagedIdentity.isPresent()) {
+            String managedIdentity = optionalManagedIdentity.get();
+            eSetId = new EncryptionSetIdentity()
+                    .withUserAssignedIdentities(Map.of(managedIdentity, new VirtualMachineIdentityUserAssignedIdentities()))
+                    .withType(DiskEncryptionSetIdentityType.USER_ASSIGNED);
+        } else {
+            eSetId = new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED);
+        }
+        return eSetId;
     }
 
     public DiskEncryptionSetInner getDiskEncryptionSetByName(String resourceGroupName, String diskEncryptionSetName) {
@@ -930,10 +944,10 @@ public class AzureClient {
                         .getByResourceGroup(resourceGroupName, diskEncryptionSetName));
     }
 
-    public DiskEncryptionSetInner createDiskEncryptionSet(String diskEncryptionSetName, String encryptionKeyUrl, String location,
-            String resourceGroupName, String sourceVaultId, Map<String, String> tags) {
+    public DiskEncryptionSetInner createDiskEncryptionSet(String diskEncryptionSetName, Optional<String> managedIdentity,
+            String encryptionKeyUrl, String location, String resourceGroupName, String sourceVaultId, Map<String, String> tags) {
         return handleException(() -> {
-            DiskEncryptionSetInner encryptionSet = createDiskEncryptionSetInner(sourceVaultId, encryptionKeyUrl, location, tags);
+            DiskEncryptionSetInner encryptionSet = createDiskEncryptionSetInner(sourceVaultId, encryptionKeyUrl, managedIdentity, location, tags);
             return computeManager.serviceClient()
                     .getDiskEncryptionSets()
                     .createOrUpdate(resourceGroupName, diskEncryptionSetName, encryptionSet);

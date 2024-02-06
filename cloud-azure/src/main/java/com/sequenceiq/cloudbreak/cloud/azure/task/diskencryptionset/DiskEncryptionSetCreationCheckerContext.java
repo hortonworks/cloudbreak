@@ -6,9 +6,12 @@ public class DiskEncryptionSetCreationCheckerContext {
 
     private final String diskEncryptionSetName;
 
-    public DiskEncryptionSetCreationCheckerContext(String resourceGroupName, String diskEncryptionSetName) {
+    private final boolean userManagedIdentityEnabled;
+
+    public DiskEncryptionSetCreationCheckerContext(String resourceGroupName, String diskEncryptionSetName, boolean userManagedIdentityEnabled) {
         this.resourceGroupName = resourceGroupName;
         this.diskEncryptionSetName = diskEncryptionSetName;
+        this.userManagedIdentityEnabled = userManagedIdentityEnabled;
     }
 
     public String getResourceGroupName() {
@@ -19,11 +22,16 @@ public class DiskEncryptionSetCreationCheckerContext {
         return diskEncryptionSetName;
     }
 
+    public boolean isUserManagedIdentityEnabled() {
+        return userManagedIdentityEnabled;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("DiskEncryptionSetCreationCheckerContext{");
         sb.append("resourceGroupName='").append(resourceGroupName).append('\'');
         sb.append(", diskEncryptionSetName='").append(diskEncryptionSetName).append('\'');
+        sb.append(", userManagedIdentityEnabled='").append(userManagedIdentityEnabled).append('\'');
         sb.append('}');
         return sb.toString();
     }

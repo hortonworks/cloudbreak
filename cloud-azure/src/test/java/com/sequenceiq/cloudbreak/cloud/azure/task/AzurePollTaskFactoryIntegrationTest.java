@@ -41,7 +41,10 @@ class AzurePollTaskFactoryIntegrationTest {
     @Test
     void diskEncryptionSetCreationCheckerTaskTest() {
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
-        DiskEncryptionSetCreationCheckerContext checkerContext = new DiskEncryptionSetCreationCheckerContext(RESOURCE_GROUP_NAME, DISK_ENCRYPTION_SET_NAME);
+        DiskEncryptionSetCreationCheckerContext checkerContext = new DiskEncryptionSetCreationCheckerContext(
+                RESOURCE_GROUP_NAME,
+                DISK_ENCRYPTION_SET_NAME,
+                false);
 
         PollTask<DiskEncryptionSetInner> result = underTest.diskEncryptionSetCreationCheckerTask(authenticatedContext, checkerContext);
 

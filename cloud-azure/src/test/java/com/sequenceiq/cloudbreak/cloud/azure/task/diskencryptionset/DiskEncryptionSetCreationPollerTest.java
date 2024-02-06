@@ -67,7 +67,10 @@ class DiskEncryptionSetCreationPollerTest {
         ReflectionTestUtils.setField(underTest, "creationCheckMaxAttempt", CREATION_CHECK_MAX_ATTEMPT);
         ReflectionTestUtils.setField(underTest, "maxTolerableFailureNumber", MAX_TOLERABLE_FAILURE_NUMBER);
 
-        checkerContext = new DiskEncryptionSetCreationCheckerContext(RESOURCE_GROUP_NAME, DISK_ENCRYPTION_SET_NAME);
+        checkerContext = new DiskEncryptionSetCreationCheckerContext(
+                RESOURCE_GROUP_NAME,
+                DISK_ENCRYPTION_SET_NAME,
+                false);
     }
 
     @Test

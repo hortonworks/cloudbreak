@@ -2,6 +2,7 @@ package com.sequenceiq.redbeams.converter.spi;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ENCRYPTION_KEY_RESOURCE_GROUP_NAME;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ENCRYPTION_KEY_URL;
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ENCRYPTION_USER_MANAGED_IDENTITY;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
@@ -11,6 +12,7 @@ import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.S
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -163,9 +165,19 @@ public class DBStackToDatabaseStackConverter {
                 }
             }
             if (azureEncryptionParametersPresent(environment)) {
-                Map<String, Object> encryptionParameters = Map.of(
-                        ENCRYPTION_KEY_URL, getEncryptionKeyUrlFromEnv(environment),
-                        ENCRYPTION_KEY_RESOURCE_GROUP_NAME, getEncryptionKeyResourceGroupNameFromEnv(environment));
+                Map<String, Object> encryptionParameters = new HashMap<>();
+                String encryptionKeyUrlFromEnv = getEncryptionKeyUrlFromEnv(environment);
+                if (encryptionKeyUrlFromEnv != null) {
+                    encryptionParameters.put(ENCRYPTION_KEY_URL, encryptionKeyUrlFromEnv);
+                }
+                String encryptionKeyResourceGroupNameFromEnv = getEncryptionKeyResourceGroupNameFromEnv(environment);
+                if (encryptionKeyResourceGroupNameFromEnv != null) {
+                    encryptionParameters.put(ENCRYPTION_KEY_RESOURCE_GROUP_NAME, encryptionKeyResourceGroupNameFromEnv);
+                }
+                String encryptionManagedIdentity = getEncryptionManagedIdentity(environment);
+                if (encryptionManagedIdentity != null) {
+                    encryptionParameters.put(ENCRYPTION_USER_MANAGED_IDENTITY, encryptionManagedIdentity);
+                }
                 params = getMergedMap(params, encryptionParameters);
             }
         } else if (CloudPlatform.GCP.name().equals(stack.getCloudPlatform())) {
@@ -218,6 +230,13 @@ public class DBStackToDatabaseStackConverter {
                 .map(DetailedEnvironmentResponse::getAzure)
                 .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
                 .map(AzureResourceEncryptionParameters::getEncryptionKeyUrl).orElse(null);
+    }
+
+    private String getEncryptionManagedIdentity(DetailedEnvironmentResponse environment) {
+        return Optional.ofNullable(environment)
+                .map(DetailedEnvironmentResponse::getAzure)
+                .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
+                .map(AzureResourceEncryptionParameters::getUserManagedIdentity).orElse(null);
     }
 
     private Optional<String> getGcpEncryptionKeyFromEnv(DetailedEnvironmentResponse environment) {

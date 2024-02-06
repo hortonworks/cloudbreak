@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.validation.cloudstorage;
 
+import static com.sequenceiq.environment.environment.validation.validators.EncryptionRoleValidator.USER_MANAGED_IDENTITY;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +33,7 @@ public abstract class EnvironmentStorageConfigurationValidator {
 
     protected void validateAdlsGen2Config(Environment environment, ValidationResult.ValidationResultBuilder resultBuilder, String managedIdentity) {
         if (StringUtils.isNotBlank(managedIdentity)) {
-            if (!managedIdentity.matches("^/subscriptions/[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}/"
-                    + "(resourceGroups|resourcegroups)/[-\\w._()]+/providers/Microsoft.ManagedIdentity/userAssignedIdentities/[A-Za-z0-9-_]*$")) {
+            if (!managedIdentity.matches(USER_MANAGED_IDENTITY)) {
                 String error = "Must be a full valid managed identity resource ID in the format of /subscriptions/[your-subscription-id]/resourceGroups/" +
                         "[your-resource-group]/providers/Microsoft.ManagedIdentity/userAssignedIdentities/[name-of-your-identity]. " +
                         getDocLink(environment.getCloudPlatform());

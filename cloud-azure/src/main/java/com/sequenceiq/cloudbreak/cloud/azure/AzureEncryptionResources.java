@@ -125,8 +125,14 @@ public class AzureEncryptionResources implements EncryptionResources {
             // The existence of the DES SP cannot be easily checked. That would need powerful special AD API permissions for the credential app itself that
             // most customers would never grant. Though there is a system assigned managed identity as well sitting behind the SP, querying the properties of
             // this identity (in order to check its existence) would also need an additional powerful Action for the role assigned to the credential app.
-            grantKeyVaultAccessPolicyToDiskEncryptionSetServicePrincipal(azureClient, vaultResourceGroupName, vaultName, desResourceGroupName,
-                    diskEncryptionSet.getDiskEncryptionSetName(), diskEncryptionSet.getDiskEncryptionSetPrincipalObjectId());
+            if (diskEncryptionSetCreationRequest.getUserManagedIdentity().isEmpty()) {
+                grantKeyVaultAccessPolicyToDiskEncryptionSetServicePrincipal(azureClient,
+                        vaultResourceGroupName,
+                        vaultName,
+                        desResourceGroupName,
+                        diskEncryptionSet.getDiskEncryptionSetName(),
+                        diskEncryptionSet.getDiskEncryptionSetPrincipalObjectId());
+            }
             return diskEncryptionSet;
         } catch (Exception e) {
             LOGGER.error("Disk Encryption Set creation failed, request=" + diskEncryptionSetCreationRequest, e);
@@ -213,7 +219,7 @@ public class AzureEncryptionResources implements EncryptionResources {
     }
 
     private CreatedDiskEncryptionSet getOrCreateDiskEncryptionSetOnCloud(AuthenticatedContext authenticatedContext, AzureClient azureClient,
-            String desResourceGroupName, String sourceVaultId, DiskEncryptionSetCreationRequest diskEncryptionSetCreationRequest, boolean singleResourceGroup) {
+        String desResourceGroupName, String sourceVaultId, DiskEncryptionSetCreationRequest diskEncryptionSetCreationRequest, boolean singleResourceGroup) {
         CloudContext cloudContext = diskEncryptionSetCreationRequest.getCloudContext();
         String region = cloudContext.getLocation().getRegion().getRegionName();
         Map<String, String> tags = diskEncryptionSetCreationRequest.getTags();
@@ -227,12 +233,22 @@ public class AzureEncryptionResources implements EncryptionResources {
                 checkAndCreateDesResourceGroupByName(cloudContext, azureClient, desResourceGroupName, region, tags);
             }
             LOGGER.info("Creating Disk Encryption Set \"{}\" in resource group \"{}\"", diskEncryptionSetName, desResourceGroupName);
-            createdSet = azureClient.createDiskEncryptionSet(diskEncryptionSetName, diskEncryptionSetCreationRequest.getEncryptionKeyUrl(),
-                    region, desResourceGroupName, sourceVaultId, tags);
+            createdSet = azureClient.createDiskEncryptionSet(diskEncryptionSetName,
+                    diskEncryptionSetCreationRequest.getUserManagedIdentity(),
+                    diskEncryptionSetCreationRequest.getEncryptionKeyUrl(),
+                    region,
+                    desResourceGroupName,
+                    sourceVaultId,
+                    tags);
         } else {
             LOGGER.info("Disk Encryption Set \"{}\" already exists, proceeding with the same", diskEncryptionSetName);
         }
-        createdSet = pollDiskEncryptionSetCreation(authenticatedContext, desResourceGroupName, diskEncryptionSetName, createdSet);
+        createdSet = pollDiskEncryptionSetCreation(
+                authenticatedContext,
+                desResourceGroupName,
+                diskEncryptionSetName,
+                createdSet,
+                diskEncryptionSetCreationRequest.getUserManagedIdentity().isPresent());
         // Neither of createdSet, createdSet.id() or createdSet.identity().principalId() can be null at this point; polling will fail otherwise
 
         CloudResource desCloudResource = CloudResource.builder()
@@ -254,14 +270,17 @@ public class AzureEncryptionResources implements EncryptionResources {
     }
 
     private DiskEncryptionSetInner pollDiskEncryptionSetCreation(AuthenticatedContext authenticatedContext, String desResourceGroupName, String desName,
-            DiskEncryptionSetInner desInitial) {
+            DiskEncryptionSetInner desInitial, boolean userManagedIdentityEnabled) {
         LOGGER.info("Initializing poller for the creation of Disk Encryption Set \"{}\" in Resource Group \"{}\".", desName, desResourceGroupName);
-        DiskEncryptionSetCreationCheckerContext checkerContext = new DiskEncryptionSetCreationCheckerContext(desResourceGroupName, desName);
+        DiskEncryptionSetCreationCheckerContext checkerContext = new DiskEncryptionSetCreationCheckerContext(
+                desResourceGroupName,
+                desName,
+                userManagedIdentityEnabled);
         return diskEncryptionSetCreationPoller.startPolling(authenticatedContext, checkerContext, desInitial);
     }
 
     private void grantKeyVaultAccessPolicyToDiskEncryptionSetServicePrincipal(AzureClient azureClient, String vaultResourceGroupName, String vaultName,
-            String desResourceGroupName, String desName, String desPrincipalObjectId) {
+        String desResourceGroupName, String desName, String desPrincipalObjectId) {
         String description = String.format("access to Key Vault \"%s\" in Resource Group \"%s\" for Service Principal having object ID \"%s\" " +
                         "associated with Disk Encryption Set \"%s\" in Resource Group \"%s\"", vaultName, vaultResourceGroupName, desPrincipalObjectId,
                 desName, desResourceGroupName);
@@ -270,7 +289,8 @@ public class AzureEncryptionResources implements EncryptionResources {
                 LOGGER.info("Granting {}.", description);
                 azureClient.grantKeyVaultAccessPolicyToServicePrincipal(vaultResourceGroupName, vaultName, desPrincipalObjectId);
                 if (!azureClient.checkKeyVaultAccessPolicyForServicePrincipal(vaultResourceGroupName, vaultName, desPrincipalObjectId)) {
-                    throw new CloudConnectorException(String.format("Access policy has not been granted to object Id: %s, Retrying ...", desPrincipalObjectId));
+                    throw new CloudConnectorException(
+                            String.format("Access policy has not been granted to object Id: %s, Retrying ...", desPrincipalObjectId));
                 }
                 LOGGER.info("Granted {}.", description);
                 return true;
@@ -304,7 +324,7 @@ public class AzureEncryptionResources implements EncryptionResources {
     }
 
     private void removeKeyVaultAccessPolicyFromDiskEncryptionSetServicePrincipal(AzureClient azureClient, String desResourceGroupName, String desName,
-            String encryptionKeyUrl, String desPrincipalObjectId, String sourceVaultId) {
+        String encryptionKeyUrl, String desPrincipalObjectId, String sourceVaultId) {
         String vaultResourceGroupName;
         String vaultName = azureClient.getVaultNameFromEncryptionKeyUrl(encryptionKeyUrl);
         if (vaultName == null) {

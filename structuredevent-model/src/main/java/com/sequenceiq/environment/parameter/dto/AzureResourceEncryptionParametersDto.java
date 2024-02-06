@@ -11,6 +11,8 @@ public class AzureResourceEncryptionParametersDto {
 
     private final String diskEncryptionSetId;
 
+    private final String userManagedIdentity;
+
     private final boolean enableHostEncryption;
 
     private AzureResourceEncryptionParametersDto(Builder builder) {
@@ -18,6 +20,7 @@ public class AzureResourceEncryptionParametersDto {
         encryptionKeyResourceGroupName = builder.encryptionKeyResourceGroupName;
         diskEncryptionSetId = builder.diskEncryptionSetId;
         enableHostEncryption = builder.enableHostEncryption;
+        userManagedIdentity = builder.userManagedIdentity;
     }
 
     public String getEncryptionKeyUrl() {
@@ -30,6 +33,10 @@ public class AzureResourceEncryptionParametersDto {
 
     public String getDiskEncryptionSetId() {
         return diskEncryptionSetId;
+    }
+
+    public String getUserManagedIdentity() {
+        return userManagedIdentity;
     }
 
     public boolean getEnableHostEncryption() {
@@ -47,6 +54,7 @@ public class AzureResourceEncryptionParametersDto {
                 ", encryptionKeyResourceGroupName=" + encryptionKeyResourceGroupName +
                 ", diskEncryptionSetId=" + diskEncryptionSetId +
                 ", enableHostEncryption=" + enableHostEncryption +
+                ", userManagedIdentity=" + userManagedIdentity +
                 '}';
     }
 
@@ -57,6 +65,8 @@ public class AzureResourceEncryptionParametersDto {
         private String diskEncryptionSetId;
 
         private String encryptionKeyResourceGroupName;
+
+        private String userManagedIdentity;
 
         private boolean enableHostEncryption;
 
@@ -75,6 +85,11 @@ public class AzureResourceEncryptionParametersDto {
 
         public AzureResourceEncryptionParametersDto.Builder withDiskEncryptionSetId(String diskEncryptionSetId) {
             this.diskEncryptionSetId = diskEncryptionSetId;
+            return this;
+        }
+
+        public AzureResourceEncryptionParametersDto.Builder withUserManagedIdentity(String userManagedIdentity) {
+            this.userManagedIdentity = userManagedIdentity;
             return this;
         }
 
