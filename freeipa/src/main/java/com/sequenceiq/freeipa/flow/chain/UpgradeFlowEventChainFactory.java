@@ -29,12 +29,14 @@ import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.core.chain.finalize.config.FlowChainFinalizeState;
+import com.sequenceiq.flow.core.chain.finalize.flowevents.FlowChainFinalizePayload;
+import com.sequenceiq.flow.core.chain.init.config.FlowChainInitState;
+import com.sequenceiq.flow.core.chain.init.flowevents.FlowChainInitPayload;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayEvent;
-import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateState;
 import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateTriggerEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upgrade.UpgradeEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
@@ -69,6 +71,7 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(UpgradeEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
+        flowEventChain.add(new FlowChainInitPayload(getName(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), true, false, event.getOperationId()));
         if (event.getVerticalScaleRequest() != null) {
             flowEventChain.add(new FreeIpaVerticalScalingTriggerEvent(STACK_VERTICALSCALE_EVENT.event(), event.getResourceId(),
@@ -84,12 +87,13 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
         flowEventChain.addAll(createScaleEventsForNonPgwInstances(event, instanceCountForUpscale, instanceCountForDownscale, groupNames));
         flowEventChain.addAll(createScaleEventsAndChangePgw(event, instanceCountForUpscale, instanceCountForDownscale, groupNames));
         flowEventChain.add(new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), true, true, event.getOperationId()));
+        flowEventChain.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 
     @Override
     public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
-        if (SaltUpdateState.INIT_STATE.equals(flowState)) {
+        if (FlowChainInitState.INIT_STATE.equals(flowState)) {
             return UPGRADE_STARTED;
         } else if (FlowChainFinalizeState.FLOWCHAIN_FINALIZE_FINISHED_STATE.equals(flowState)) {
             return UPGRADE_FINISHED;

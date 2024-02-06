@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
+import com.sequenceiq.flow.core.chain.init.flowevents.FlowChainInitPayload;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
@@ -57,7 +58,10 @@ class UpgradeFlowEventChainFactoryTest {
 
         assertEquals("UpgradeFlowEventChainFactory", eventQueue.getFlowChainName());
         Queue<Selectable> queue = eventQueue.getQueue();
-        assertEquals(10, queue.size());
+        assertEquals(12, queue.size());
+
+        FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) queue.poll();
+        assertEquals(STACK_ID, flowChainInitPayload.getResourceId());
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
@@ -161,7 +165,10 @@ class UpgradeFlowEventChainFactoryTest {
 
         assertEquals("UpgradeFlowEventChainFactory", eventQueue.getFlowChainName());
         Queue<Selectable> queue = eventQueue.getQueue();
-        assertEquals(5, queue.size());
+        assertEquals(7, queue.size());
+
+        FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) queue.poll();
+        assertEquals(STACK_ID, flowChainInitPayload.getResourceId());
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
@@ -214,7 +221,10 @@ class UpgradeFlowEventChainFactoryTest {
 
         assertEquals("UpgradeFlowEventChainFactory", eventQueue.getFlowChainName());
         Queue<Selectable> queue = eventQueue.getQueue();
-        assertEquals(6, queue.size());
+        assertEquals(8, queue.size());
+
+        FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) queue.poll();
+        assertEquals(STACK_ID, flowChainInitPayload.getResourceId());
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
@@ -274,7 +284,10 @@ class UpgradeFlowEventChainFactoryTest {
 
         assertEquals("UpgradeFlowEventChainFactory", eventQueue.getFlowChainName());
         Queue<Selectable> queue = eventQueue.getQueue();
-        assertEquals(8, queue.size());
+        assertEquals(10, queue.size());
+
+        FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) queue.poll();
+        assertEquals(STACK_ID, flowChainInitPayload.getResourceId());
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
@@ -355,7 +368,10 @@ class UpgradeFlowEventChainFactoryTest {
 
         assertEquals("UpgradeFlowEventChainFactory", eventQueue.getFlowChainName());
         Queue<Selectable> queue = eventQueue.getQueue();
-        assertEquals(11, queue.size());
+        assertEquals(13, queue.size());
+
+        FlowChainInitPayload flowChainInitPayload = (FlowChainInitPayload) queue.poll();
+        assertEquals(STACK_ID, flowChainInitPayload.getResourceId());
 
         SaltUpdateTriggerEvent saltUpdateTriggerEvent = (SaltUpdateTriggerEvent) queue.poll();
         assertEquals(OPERATION_ID, saltUpdateTriggerEvent.getOperationId());
