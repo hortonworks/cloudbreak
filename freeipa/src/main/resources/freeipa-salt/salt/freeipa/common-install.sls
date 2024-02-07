@@ -1,6 +1,6 @@
 update_cnames:
   cmd.run:
-    - name: /opt/salt/scripts/update_cnames.sh
+    - name: /opt/salt/scripts/update_cnames.sh 2>&1 | tee -a /var/log/update_cnames.log && exit ${PIPESTATUS[0]}
     - env:
         - FPW: {{salt['pillar.get']('freeipa:password')}}
         - DOMAIN: {{salt['pillar.get']('freeipa:domain')}}

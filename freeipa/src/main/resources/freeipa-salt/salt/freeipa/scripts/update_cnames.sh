@@ -113,7 +113,7 @@ setDomainsForCert() {
 
   checkCertForErrors "$CERT_REQUEST_ID"
 }
-
+echo "$(date +'%Y-%m-%d %H:%M:%S') Starting CNAME update"
 # Setup basic CNAME records for pointing to FreeIPA services
 echo "$FPW" | kinit "$ADMIN_USER"
 addCname kdc "ipa-ca.$DOMAIN."

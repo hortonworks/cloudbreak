@@ -130,5 +130,9 @@
   {
     "path": "/var/log/cdp-prometheus/cdp-prometheus.log",
     "label": "cdp-prometheus"
+  },
+  {
+    "path": "/var/log/update_cnames.log",
+    "label": "update_cnames"
   }
 ]
