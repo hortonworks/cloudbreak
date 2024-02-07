@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.controller.sdx;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_CREDENTIAL;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATALAKE;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.UPGRADE_DATALAKE;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 
@@ -52,6 +53,7 @@ import com.sequenceiq.datalake.authorization.DataLakeFiltering;
 import com.sequenceiq.datalake.cm.RangerCloudIdentityService;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.SdxDeleteService;
@@ -83,6 +85,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
+import com.sequenceiq.sdx.api.model.SdxInstanceMetadataUpdateRequest;
 import com.sequenceiq.sdx.api.model.SdxRecommendationResponse;
 import com.sequenceiq.sdx.api.model.SdxRefreshDatahubResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
@@ -151,6 +154,9 @@ public class SdxController implements SdxEndpoint {
 
     @Inject
     private SdxHorizontalScalingService sdxHorizontalScalingService;
+
+    @Inject
+    private SdxReactorFlowManager sdxReactorFlowManager;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
@@ -543,6 +549,11 @@ public class SdxController implements SdxEndpoint {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return verticalScaleService.addVolumesDatalake(sdxCluster, addVolumesRequest, userCrn);
+    }
+
+    @CheckPermissionByRequestProperty(action = UPGRADE_DATALAKE, type = CRN, path = "crn")
+    public FlowIdentifier instanceMetadataUpdate(@RequestObject SdxInstanceMetadataUpdateRequest request) {
+        return sdxReactorFlowManager.triggerInstanceMetadataUpdate(getSdxClusterByCrn(request.getCrn()), request.getUpdateType());
     }
 
     private SdxCluster getSdxClusterByName(String name) {

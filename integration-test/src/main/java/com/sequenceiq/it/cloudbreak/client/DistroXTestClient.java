@@ -22,6 +22,7 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDeleteDisksAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDiskUpdateAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXGetAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXInstanceMetadataUpdateAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXInternalGetAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXOSUpgradeByUpgradeSetsAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRefreshAction;
@@ -181,6 +182,10 @@ public class DistroXTestClient {
 
     public Action<DistroXTestDto, CloudbreakClient> updateDisks(int size, String volumeType, String instanceGroup) {
         return new DistroXDiskUpdateAction(size, volumeType, instanceGroup);
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> instanceMetadataUpdate() {
+        return new DistroXInstanceMetadataUpdateAction();
     }
 
 }

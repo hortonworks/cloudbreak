@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateType.IMDS_HTTP_TOKEN_REQUIRED;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -26,6 +28,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.imdupdate.StackInstanceMetadataUpdateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -179,6 +182,33 @@ public class CloudbreakStackServiceTest {
                 .hasCauseInstanceOf(RuntimeException.class)
                 .hasRootCauseMessage(ERROR_MSG)
                 .hasMessage("Could not launch Salt update in core, reason: " + ERROR_MSG);
+    }
+
+    @Test
+    void testImdUpdate() {
+        SdxCluster sdxCluster = setupSdxCluster();
+        setupIam();
+        when(stackV4Endpoint.instanceMetadataUpdate(any(), any(), any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "1"));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateInstanceMetadata(sdxCluster, IMDS_HTTP_TOKEN_REQUIRED));
+
+        ArgumentCaptor<StackInstanceMetadataUpdateV4Request> captor = ArgumentCaptor.forClass(StackInstanceMetadataUpdateV4Request.class);
+        verify(stackV4Endpoint).instanceMetadataUpdate(any(), any(), captor.capture());
+        assertEquals(captor.getValue().getUpdateType(), IMDS_HTTP_TOKEN_REQUIRED);
+    }
+
+    @Test
+    void testImdUpdateFailure() {
+        SdxCluster sdxCluster = setupSdxCluster();
+        setupIam();
+        when(exceptionMessageExtractor.getErrorMessage(any(WebApplicationException.class))).thenReturn(ERROR_MSG);
+        doThrow(new WebApplicationException(ERROR_MSG)).when(stackV4Endpoint).instanceMetadataUpdate(any(), any(), any());
+
+        assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateInstanceMetadata(sdxCluster, IMDS_HTTP_TOKEN_REQUIRED)))
+                .isInstanceOf(CloudbreakApiException.class)
+                .hasCauseInstanceOf(RuntimeException.class)
+                .hasRootCauseMessage(ERROR_MSG)
+                .hasMessage("Could not launch instance metadata update in core, reason: " + ERROR_MSG);
     }
 
     private static RdsUpgradeV4Response setupResponse(FlowIdentifier flowIdentifier) {

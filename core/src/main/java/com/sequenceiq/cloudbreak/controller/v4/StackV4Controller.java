@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalSca
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerSyncV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.imdupdate.StackInstanceMetadataUpdateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSetRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRecipeV4Request;
@@ -73,6 +74,7 @@ import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.SubnetIdWithResourceNameAndCrn;
+import com.sequenceiq.cloudbreak.service.stack.StackInstanceMetadataUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackRotationService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
@@ -112,6 +114,9 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Inject
     private StackRotationService stackRotationService;
+
+    @Inject
+    private StackInstanceMetadataUpdateService instanceMetadataUpdateService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
@@ -662,5 +667,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATALAKE_HORIZONTAL_SCALING)
     public FlowIdentifier rollingRestartServices(Long workspaceId, @ResourceCrn String crn) {
         return stackOperationService.triggerServicesRollingRestart(crn);
+    }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier instanceMetadataUpdate(Long workspaceId, @InitiatorUserCrn String initiatorUserCrn,
+            StackInstanceMetadataUpdateV4Request request) {
+        return instanceMetadataUpdateService.updateInstanceMetadata(request.getCrn(), request.getUpdateType());
     }
 }

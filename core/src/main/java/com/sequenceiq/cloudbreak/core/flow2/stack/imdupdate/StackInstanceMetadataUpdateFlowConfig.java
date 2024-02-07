@@ -22,6 +22,7 @@ import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Buil
 @Component
 public class StackInstanceMetadataUpdateFlowConfig
         extends StackStatusFinalizerAbstractFlowConfig<StackInstanceMetadataUpdateState, StackInstanceMetadataUpdateEvent> {
+
     private static final List<Transition<StackInstanceMetadataUpdateState, StackInstanceMetadataUpdateEvent>> TRANSITIONS =
             new Builder<StackInstanceMetadataUpdateState, StackInstanceMetadataUpdateEvent>()
                     .defaultFailureEvent(STACK_IMDUPDATE_FAILURE_EVENT)
@@ -70,7 +71,7 @@ public class StackInstanceMetadataUpdateFlowConfig
 
     @Override
     public StackInstanceMetadataUpdateEvent[] getInitEvents() {
-        return new StackInstanceMetadataUpdateEvent[] {
+        return new StackInstanceMetadataUpdateEvent[]{
                 STACK_IMDUPDATE_EVENT
         };
     }

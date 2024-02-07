@@ -66,6 +66,8 @@ public class ModelDescriptions {
 
     public static final String INSTANCE_DISK_SIZE = "Instance attached disk size.";
 
+    public static final String IMD_UPDATE_TYPE = "Instance metadata update type.";
+
     public static final String IMAGE_CATALOG = "Image catalog.";
 
     public static final String IMAGE_ID = "Image id.";

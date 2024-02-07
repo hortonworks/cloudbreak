@@ -18,10 +18,11 @@ import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 
-public class DistroXMultiSecretRotationTests extends AbstractE2ETest {
+public class DistroXMultiSecretRotationAndImdsV2Tests extends AbstractE2ETest {
 
     @Inject
     private DistroXTestClient distroXTestClient;
@@ -47,7 +48,7 @@ public class DistroXMultiSecretRotationTests extends AbstractE2ETest {
             given = "there is a running default Distrox cluster",
             when = "CM shared DB multi secret are getting rotated",
             then = "rotation should be successful and clusters should be available")
-    public void testCMSharedDbMultiSecretRotation(TestContext testContext, ITestContext iTestContext) {
+    public void testCMSharedDbMultiSecretRotationAndImdsUpdate(TestContext testContext, ITestContext iTestContext) {
         testContext
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.rotateSecret(Set.of(DATALAKE_CM_SERVICE_SHARED_DB)))
@@ -57,6 +58,18 @@ public class DistroXMultiSecretRotationTests extends AbstractE2ETest {
                 .awaitForFlow()
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.rotateSecret(Set.of(DATALAKE_CM_SERVICE_SHARED_DB)))
+                .awaitForFlow()
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
+                .when(freeIpaTestClient.instanceMetadataUpdate())
+                .awaitForFlow()
+                .given(SdxInternalTestDto.class)
+                .when(sdxTestClient.describeInternal())
+                .when(sdxTestClient.instanceMetadataUpdate())
+                .awaitForFlow()
+                .given(DistroXTestDto.class)
+                .when(distroXTestClient.get())
+                .when(distroXTestClient.instanceMetadataUpdate())
                 .awaitForFlow()
                 .validate();
     }

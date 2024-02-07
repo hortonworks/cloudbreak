@@ -96,6 +96,9 @@ sdx:
   upgrade.database:
     sleeptime-sec: 20
     duration-min: 330
+  update.imd:
+    sleep-time-sec: 2
+    duration-min: 10
 
   paywall.url: "https://archive.cloudera.com/p/cdp-public/"
 

@@ -84,7 +84,7 @@ public class RestUrlParserTest {
             "/v4/custom_configurations"};
 
     private static final String[] EXCLUDEPATHS = {"/stacks/internal/crn", "/govCloud", "stacks/internal/used_subnets",
-            "stacks/internal/rotate_secret", "/singleimage/internal"};
+            "stacks/internal/rotate_secret", "/singleimage/internal", "/imd_update"};
 
     @Mock
     private ContainerRequestContext containerRequestContext;

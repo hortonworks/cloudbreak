@@ -102,6 +102,8 @@ public class OperationDescriptions {
         public static final String GET_LIMITS_CONFIGURATION = "Get limits configuration";
         public static final String GET_RECOMMENDATION = "Get recommendation";
         public static final String AUTHORIZE_FOR_AUTOSCALE = "Authorize for Autoscale";
+
+        public static final String IMD_UPDATE = "update instance metadata for stack's instances";
     }
 
     public static class ClusterOpDescription {
