@@ -151,7 +151,7 @@ public class CleanupService {
                 .filter(cert -> !cert.isRevoked())
                 .forEach(cert -> {
                     try {
-                        client.revokeCert(cert.getSerialNumber());
+                        retryService.retryWhenRetryableWithoutValue(() -> client.revokeCert(cert.getSerialNumber()));
                         certCleanupSuccess.add(cert.getSubject());
                     } catch (FreeIpaClientException e) {
                         LOGGER.error("Couldn't revoke certificate: {}", cert, e);
