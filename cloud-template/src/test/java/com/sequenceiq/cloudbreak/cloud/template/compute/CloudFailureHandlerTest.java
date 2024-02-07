@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.cloud.template.compute.CloudFailureHandl
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -12,8 +14,10 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -34,6 +38,8 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -49,6 +55,18 @@ class CloudFailureHandlerTest {
 
     @Spy
     private ResourceActionFactory resourceActionFactory;
+
+    @Mock
+    private Optional<CloudbreakEventService> cloudbreakEventServiceOptional;
+
+    @Mock
+    private CloudbreakEventService cloudbreakEventService;
+
+    @BeforeEach
+    void init() {
+        when(cloudbreakEventServiceOptional.isPresent()).thenReturn(Boolean.TRUE);
+        when(cloudbreakEventServiceOptional.get()).thenReturn(cloudbreakEventService);
+    }
 
     @Test
     void rollbackOnExactDoesNotReachThreshold() throws Exception {
@@ -110,6 +128,8 @@ class CloudFailureHandlerTest {
         verifyDeleteAll(volumeResourceBuilder, resourceBuilderContext, auth, volume1, volume2, volume4, volume5, volume6);
 
         verify(resourceBuilderExecutor, times(11)).submit(any(Callable.class));
+        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), eq("CLOUD_PROVIDER_RESOURCE_CREATION_FAILED"),
+                eq(ResourceEvent.CLOUD_PROVIDER_RESOURCE_CREATION_FAILED), any());
     }
 
     @Test
@@ -167,6 +187,8 @@ class CloudFailureHandlerTest {
         verifyDeleteAll(volumeResourceBuilder, resourceBuilderContext, auth, volume2, volume4);
 
         verify(resourceBuilderExecutor, times(5)).submit(any(Callable.class));
+        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), eq("CLOUD_PROVIDER_RESOURCE_CREATION_FAILED"),
+                eq(ResourceEvent.CLOUD_PROVIDER_RESOURCE_CREATION_FAILED), any());
     }
 
     @Test
@@ -229,6 +251,8 @@ class CloudFailureHandlerTest {
         verifyDeleteAll(volumeResourceBuilder, resourceBuilderContext, auth, volume1, volume2, volume4, volume5, volume6);
 
         verify(resourceBuilderExecutor, times(11)).submit(any(Callable.class));
+        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), eq("CLOUD_PROVIDER_RESOURCE_CREATION_FAILED"),
+                eq(ResourceEvent.CLOUD_PROVIDER_RESOURCE_CREATION_FAILED), any());
     }
 
     @Test
@@ -286,6 +310,8 @@ class CloudFailureHandlerTest {
         verifyDeleteAll(volumeResourceBuilder, resourceBuilderContext, auth, volume2, volume4);
 
         verify(resourceBuilderExecutor, times(5)).submit(any(Callable.class));
+        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), eq("CLOUD_PROVIDER_RESOURCE_CREATION_FAILED"),
+                eq(ResourceEvent.CLOUD_PROVIDER_RESOURCE_CREATION_FAILED), any());
     }
 
     @Test
@@ -343,6 +369,8 @@ class CloudFailureHandlerTest {
         verifyDeleteAll(volumeResourceBuilder, resourceBuilderContext, auth, volume2, volume4);
 
         verify(resourceBuilderExecutor, times(5)).submit(any(Callable.class));
+        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), eq("CLOUD_PROVIDER_RESOURCE_CREATION_FAILED"),
+                eq(ResourceEvent.CLOUD_PROVIDER_RESOURCE_CREATION_FAILED), any());
     }
 
     private void verifyDeleteAll(ComputeResourceBuilder computeResourceBuilder, ResourceBuilderContext resourceBuilderContext, AuthenticatedContext auth,

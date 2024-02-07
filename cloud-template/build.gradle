@@ -17,6 +17,7 @@ dependencies {
     implementation project(':cloud-common')
     implementation project(':cloud-api')
     implementation project(':cloud-reactor')
+    implementation project(':structuredevent-model')
 
     implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
 
