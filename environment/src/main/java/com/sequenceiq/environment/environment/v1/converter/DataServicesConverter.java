@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.api.v1.environment.model.AwsDataServicesV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.AzureDataServicesV1Parameters;
-import com.sequenceiq.environment.api.v1.environment.model.GcpDataServicesV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.CustomDockerRegistryV1Parameters;
+import com.sequenceiq.environment.api.v1.environment.model.GcpDataServicesV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.DataServicesRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DataServicesResponse;
 import com.sequenceiq.environment.environment.dto.dataservices.AwsDataServiceParameters;
@@ -58,11 +58,11 @@ public class DataServicesConverter {
                 .build();
     }
 
-    private com.sequenceiq.environment.environment.dto.dataservices.CustomDockerRegistryParameters customDockerRegistryDataServicesToDto(CustomDockerRegistryV1Parameters customDockerRegistryV1Parameters) {
+    private CustomDockerRegistryParameters customDockerRegistryDataServicesToDto(CustomDockerRegistryV1Parameters customDockerRegistryV1Parameters) {
         if (customDockerRegistryV1Parameters == null || customDockerRegistryV1Parameters.getCrn() == null) {
             return null;
         }
-        return com.sequenceiq.environment.environment.dto.dataservices.CustomDockerRegistryParameters.builder()
+        return CustomDockerRegistryParameters.builder()
                 .withCrn(customDockerRegistryV1Parameters.getCrn())
                 .build();
     }

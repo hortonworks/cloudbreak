@@ -141,6 +141,11 @@ environment:
   experience:
     scan:
       enabled: false
+  thunderhead:
+    computeapi:
+      host: localhost
+      port: 8080
+      apiBasePath:
 
 cb:
   enabledplatforms: AWS,AZURE,YARN,GCP,MOCK

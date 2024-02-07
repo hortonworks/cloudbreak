@@ -8,6 +8,7 @@ buildscript {
     }
     dependencies {
         classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:${sonarVersion}"
+        classpath "org.openapitools:openapi-generator-gradle-plugin:$openapiGeneratorGradlePlugin"
     }
 }
 
@@ -18,6 +19,7 @@ plugins {
     id 'maven-publish'
     id 'org.springframework.boot' version "${springBootVersion}"
     id "org.sonarqube" version "${sonarVersion}"
+    id 'org.openapi.generator' version "$openapiGeneratorGradlePlugin"
 }
 
 apply plugin: org.sonarqube.gradle.SonarQubePlugin
@@ -101,6 +103,8 @@ dependencies {
     implementation     group: 'net.sourceforge.jregex',    name: 'jregex',                                   version: '1.2_01'
     implementation     group: 'com.fasterxml.jackson.core',name: 'jackson-databind',                         version: jacksonDatabindVersion
     implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                                   version: okhttpVersion
+    implementation     group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart',                  version: jerseyCoreVersion
+    implementation     group: 'org.openapitools',          name: 'jackson-databind-nullable',                version: "$jacksonDatabindNullable"
 
     implementation(group: 'net.minidev', name: 'json-smart') {
       version {
@@ -165,19 +169,40 @@ bootJar {
 }
 
 publishing {
-    publications {
-        bootJava(MavenPublication) {
-            artifact bootJar
-        }
+  publications {
+    bootJava(MavenPublication) {
+      artifact bootJar
     }
-    repositories {
-        maven {
-            url = "$System.env.NEXUS_URL"
-            allowInsecureProtocol = true
-            credentials {
-                username = "$System.env.NEXUS_USER"
-                password = "$System.env.NEXUS_PASSWORD"
-            }
-        }
+  }
+  repositories {
+    maven {
+      url = "$System.env.NEXUS_URL"
+      allowInsecureProtocol = true
+      credentials {
+        username = "$System.env.NEXUS_USER"
+        password = "$System.env.NEXUS_PASSWORD"
+      }
     }
+  }
+}
+
+openApiGenerate {
+  generatorName = "java"
+  library = "jersey3"
+  inputSpec = "$projectDir/src/main/resources/compute-api.yaml"
+  outputDir = "$projectDir/src/generated"
+  apiPackage = "com.cloudera.thunderheadcompute.api"
+  modelPackage = "com.cloudera.thunderheadcompute.model"
+  invokerPackage = "com.sequenceiq.thunderheadcompute"
+  configOptions = [
+          dateLibrary: "java8"
+  ]
+}
+
+compileJava.dependsOn tasks.openApiGenerate
+
+sourceSets {
+  main {
+    java.srcDirs += "${projectDir}/src/generated/src/main/java"
+  }
 }
