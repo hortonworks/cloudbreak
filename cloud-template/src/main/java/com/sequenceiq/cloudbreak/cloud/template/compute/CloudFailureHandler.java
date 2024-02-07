@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -32,6 +33,8 @@ import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.OrderedBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -42,11 +45,16 @@ public class CloudFailureHandler {
 
     private static final double ONE_HUNDRED = 100.0;
 
+    private static final String CLOUD_PROVIDER_RESOURCE_CREATION_FAILED = "CLOUD_PROVIDER_RESOURCE_CREATION_FAILED";
+
     @Inject
     private AsyncTaskExecutor resourceBuilderExecutor;
 
     @Inject
     private ResourceActionFactory resourceActionFactory;
+
+    @Inject
+    private Optional<CloudbreakEventService> cloudbreakEventService;
 
     public void rollbackIfNecessary(CloudFailureContext cloudFailureContext, List<CloudResourceStatus> failuresList, List<CloudResourceStatus> resourceStatuses,
             Group group, ResourceBuilders resourceBuilders, Integer requestedNodeCount) {
@@ -67,6 +75,8 @@ public class CloudFailureHandler {
             LOGGER.info("Failure policy is null so error will be thrown");
             throwError(failuresList);
         }
+
+        fireCloudbreakEvent(auth, failuresList);
         LOGGER.info("Adjustment type is {}", stx.getAdjustmentType());
         switch (stx.getAdjustmentType()) {
             case EXACT:
@@ -97,6 +107,16 @@ public class CloudFailureHandler {
                 LOGGER.info("Unsupported adjustment type so error will throw");
                 rollbackEverythingAndThrowException(failuresList, resourceStatuses, group, resourceBuilders, stx, auth, ctx);
                 break;
+        }
+    }
+
+    private void fireCloudbreakEvent(AuthenticatedContext auth, List<CloudResourceStatus> failuresList) {
+        if (cloudbreakEventService.isPresent()) {
+            String reason = failuresList.stream()
+                    .map(resourceStatus -> String.format("[privateId: %s, reason: %s]", resourceStatus.getPrivateId(), resourceStatus.getStatusReason()))
+                    .collect(Collectors.joining(","));
+            cloudbreakEventService.get().fireCloudbreakEvent(auth.getCloudContext().getId(), CLOUD_PROVIDER_RESOURCE_CREATION_FAILED,
+                    ResourceEvent.CLOUD_PROVIDER_RESOURCE_CREATION_FAILED, List.of(reason));
         }
     }
 

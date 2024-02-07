@@ -265,7 +265,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         }
     }
 
-    private static CloudResourceStatus getResourceStatusForDeletion(CloudResource resource, InstanceState instanceState) {
+    private CloudResourceStatus getResourceStatusForDeletion(CloudResource resource, InstanceState instanceState) {
         if (instanceState.code() == AWS_INSTANCE_TERMINATED_CODE) {
             LOGGER.debug("Instance {} termination finished", resource.getInstanceId());
             return new CloudResourceStatus(resource, ResourceStatus.DELETED);
@@ -274,7 +274,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         }
     }
 
-    private static CloudResourceStatus getResourceStatusForCreation(CloudResource resource, InstanceState instanceState) {
+    private CloudResourceStatus getResourceStatusForCreation(CloudResource resource, InstanceState instanceState) {
         if (instanceState.code() == AWS_INSTANCE_RUNNING_CODE) {
             LOGGER.debug("Instance {} creation finished", resource.getInstanceId());
             return new CloudResourceStatus(resource, ResourceStatus.CREATED);

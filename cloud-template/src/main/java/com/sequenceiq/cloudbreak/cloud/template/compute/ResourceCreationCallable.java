@@ -83,7 +83,7 @@ public class ResourceCreationCallable implements Callable<ResourceRequestResult<
             try {
                 Variant variant = auth.getCloudContext().getVariant();
                 List<ComputeResourceBuilder<ResourceBuilderContext>> compute = resourceBuilders.compute(variant);
-                Boolean failedComputeCreation = false;
+                boolean failedComputeCreation = false;
                 for (ComputeResourceBuilder<ResourceBuilderContext> builder : compute) {
                     if (failedComputeCreation) {
                         LOGGER.info("Skipping compute resource creation for {} of '{}' instance group of '{}' stack",
@@ -96,7 +96,11 @@ public class ResourceCreationCallable implements Callable<ResourceRequestResult<
                                 builder.getClass().getSimpleName(),
                                 group.getName(),
                                 stackName);
-                        failedComputeCreation = createComputeResourceAndReportFailure(results, instance, privateId, builder);
+                        List<CloudResourceStatus> computeResults = createComputeResources(instance, privateId, builder);
+                        results.addAll(computeResults);
+                        if (containsFailed(computeResults)) {
+                            failedComputeCreation = true;
+                        }
                     }
                     LOGGER.info("Finished building '{} ({})' resources of '{}' instance group of '{}' stack", builder.resourceType(),
                             builder.getClass().getSimpleName(), group.getName(), stackName);
@@ -111,8 +115,8 @@ public class ResourceCreationCallable implements Callable<ResourceRequestResult<
         return new ResourceRequestResult<>(FutureResult.SUCCESS, results);
     }
 
-    private boolean createComputeResourceAndReportFailure(List<CloudResourceStatus> results, CloudInstance instance, Long privateId,
-        ComputeResourceBuilder<ResourceBuilderContext> builder) {
+    private List<CloudResourceStatus> createComputeResources(CloudInstance instance, Long privateId, ComputeResourceBuilder<ResourceBuilderContext> builder) {
+        List<CloudResourceStatus> computeResults = new ArrayList<>();
         List<CloudResource> cloudResources = builder.create(context, instance, privateId, auth, group, cloudStack.getImage());
         if (!CollectionUtils.isEmpty(cloudResources)) {
             try {
@@ -129,28 +133,26 @@ public class ResourceCreationCallable implements Callable<ResourceRequestResult<
 
                 if (ResourceType.GCP_INSTANCE.equals(builder.resourceType())) {
                     LOGGER.debug("Skip instance polling in case of GCP");
-                    resources.stream()
-                            .map(resource -> new CloudResourceStatus(resource, ResourceStatus.IN_PROGRESS, privateId)).forEach(results::add);
+                    resources.stream().map(resource -> new CloudResourceStatus(resource, ResourceStatus.IN_PROGRESS, privateId)).forEach(computeResults::add);
                 } else {
                     PollTask<List<CloudResourceStatus>> task = resourcePollTaskFactory.newPollResourceTask(builder, auth, resources, context, true);
                     List<CloudResourceStatus> pollerResult = scheduleTask(task, resources);
                     for (CloudResourceStatus resourceStatus : pollerResult) {
                         resourceStatus.setPrivateId(privateId);
                     }
-                    results.addAll(pollerResult);
+                    computeResults.addAll(pollerResult);
                 }
             } catch (Exception e) {
                 String errorMessage = format("Failed to create resources for instance with id: '%s', message: '%s'",
                         instance.getTemplate().getPrivateId(), e.getMessage());
                 LOGGER.error(errorMessage, e);
-                results.removeIf(crs -> crs.getPrivateId().equals(privateId));
+                computeResults.removeIf(crs -> crs.getPrivateId().equals(privateId));
                 for (CloudResource cloudResource : cloudResources) {
-                    results.add(new CloudResourceStatus(cloudResource, ResourceStatus.FAILED, errorMessage, privateId));
+                    computeResults.add(new CloudResourceStatus(cloudResource, ResourceStatus.FAILED, errorMessage, privateId));
                 }
-                return true;
             }
         }
-        return false;
+        return computeResults;
     }
 
     private List<CloudResourceStatus> scheduleTask(PollTask<List<CloudResourceStatus>> task, List<CloudResource> resources) throws Exception {
@@ -183,5 +185,9 @@ public class ResourceCreationCallable implements Callable<ResourceRequestResult<
         if (!resourcesToUpdate.isEmpty()) {
             persistenceNotifier.notifyUpdates(resourcesToUpdate, auth.getCloudContext());
         }
+    }
+
+    private boolean containsFailed(List<CloudResourceStatus> results) {
+        return results.stream().filter(resultStatus -> ResourceStatus.FAILED.equals(resultStatus.getStatus())).findAny().isPresent();
     }
 }

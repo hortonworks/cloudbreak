@@ -2,6 +2,10 @@ package com.sequenceiq.thunderhead.grpc;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.slf4j.MDC;
+
+import com.sequenceiq.cloudbreak.logger.MdcContext;
+
 import io.grpc.Context;
 import io.grpc.ForwardingServerCallListener.SimpleForwardingServerCallListener;
 import io.grpc.Metadata;
@@ -67,12 +71,22 @@ public class RequestContextServerInterceptor implements ServerInterceptor {
         }
 
         @Override
+        protected Listener<R> delegate() {
+            GrpcRequestContext grpcRequestContext = GrpcRequestContext.REQUEST_CONTEXT.get(context);
+            if (grpcRequestContext != null) {
+                MdcContext.builder().requestId(grpcRequestContext.getRequestId()).buildMdc();
+            }
+            return super.delegate();
+        }
+
+        @Override
         public void onMessage(R message) {
             Context previous = context.attach();
             try {
                 super.onMessage(message);
             } finally {
                 context.detach(previous);
+                MDC.clear();
             }
         }
 
@@ -83,6 +97,7 @@ public class RequestContextServerInterceptor implements ServerInterceptor {
                 super.onHalfClose();
             } finally {
                 context.detach(previous);
+                MDC.clear();
             }
         }
 
@@ -93,6 +108,7 @@ public class RequestContextServerInterceptor implements ServerInterceptor {
                 super.onCancel();
             } finally {
                 context.detach(previous);
+                MDC.clear();
             }
         }
     }

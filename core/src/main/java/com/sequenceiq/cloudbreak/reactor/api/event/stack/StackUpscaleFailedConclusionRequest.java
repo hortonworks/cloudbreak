@@ -24,7 +24,10 @@ public class StackUpscaleFailedConclusionRequest extends StackEvent {
             @JsonProperty("repair") boolean repair,
             @JsonProperty("exception") Exception exception) {
         super(stackId);
+        this.hostgroupWithHostnames = hostgroupWithHostnames;
+        this.hostGroupWithAdjustment = hostGroupWithAdjustment;
         this.repair = repair;
+        this.exception = exception;
     }
 
     public Map<String, Set<String>> getHostgroupWithHostnames() {

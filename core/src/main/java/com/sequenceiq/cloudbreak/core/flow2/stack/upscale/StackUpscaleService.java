@@ -175,7 +175,7 @@ public class StackUpscaleService {
             Map<String, Integer> hostGroupWithAdjustment) {
         LOGGER.info("Exception during the upscale of stack", exception);
         try {
-            String errorReason = exception.getMessage();
+            String errorReason = exception != null ? exception.getMessage() : "Error reason is unknown";
             if (!upscaleForRepair) {
                 metadataSetupService.cleanupRequestedInstancesWithoutFQDN(stackId, hostGroupWithAdjustment.keySet());
                 stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_FAILED, "Stack update failed. " + errorReason);

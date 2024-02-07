@@ -94,4 +94,9 @@ public class ResourceBuilderContext extends DynamicModel {
         return loadBalancerResources.get(type);
     }
 
+    public ResourceBuilderContext rollback() {
+        this.build = false;
+        return this;
+    }
+
 }

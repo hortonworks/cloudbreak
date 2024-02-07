@@ -124,7 +124,7 @@ public class ComputeResourceService {
     }
 
     public List<CloudResourceStatus> update(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack stack,
-        List<CloudResource> cloudResource, Optional<String> group) {
+            List<CloudResource> cloudResource, Optional<String> group) {
         LOGGER.info("Update compute resources.");
         return new ResourceBuilder(ctx, auth).updateResources(ctx, auth, cloudResource, stack, group);
     }
@@ -326,10 +326,10 @@ public class ComputeResourceService {
                         adjustmentTypeAndThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) instances.size());
                     }
                     CloudFailureContext cloudFailureContext = new CloudFailureContext(auth,
-                            new ScaleContext(upscale, adjustmentTypeAndThreshold.getAdjustmentType(), adjustmentTypeAndThreshold.getThreshold()), ctx);
+                            new ScaleContext(upscale, adjustmentTypeAndThreshold.getAdjustmentType(),
+                                    adjustmentTypeAndThreshold.getThreshold()), ctx.rollback());
                     cloudFailureHandler.rollbackIfNecessary(cloudFailureContext, failedResources, resourceStatuses, group, resourceBuilders,
-                            getNewNodeCount(groups)
-                    );
+                            getNewNodeCount(groups));
                     results.addAll(filterResourceStatuses(resourceStatuses, ResourceStatus.CREATED));
                 }
             }
