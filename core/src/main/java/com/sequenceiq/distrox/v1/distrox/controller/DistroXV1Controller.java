@@ -8,6 +8,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_RECIPE;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ENVIRONMENT_CREATE_DATAHUB;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.RECOVER_DATAHUB;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.UPGRADE_DATAHUB;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN_LIST;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
@@ -78,6 +79,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDiagnosticsService;
 import com.sequenceiq.cloudbreak.service.diagnostics.DiagnosticsService;
 import com.sequenceiq.cloudbreak.service.operation.OperationService;
+import com.sequenceiq.cloudbreak.service.stack.StackInstanceMetadataUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -88,6 +90,7 @@ import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXGenerateImageCatalogV1Response;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXInstanceMetadataUpdateV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXScaleV1Request;
@@ -169,6 +172,9 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Inject
     private DataHubFiltering dataHubFiltering;
+
+    @Inject
+    private StackInstanceMetadataUpdateService instanceMetadataUpdateService;
 
     @Override
     @FilterListBasedOnPermissions
@@ -779,5 +785,11 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATAHUB_VERTICAL_SCALING)
     public FlowIdentifier addVolumesByStackCrn(@ResourceCrn String crn, StackAddVolumesRequest addVolumesRequest) {
         return stackOperations.putAddVolumes(NameOrCrn.ofCrn(crn), addVolumesRequest, ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
+    @CheckPermissionByRequestProperty(action = UPGRADE_DATAHUB, type = CRN, path = "crn")
+    public FlowIdentifier instanceMetadataUpdate(@RequestObject DistroXInstanceMetadataUpdateV1Request request) {
+        return instanceMetadataUpdateService.updateInstanceMetadata(request.getCrn(), request.getUpdateType());
     }
 }

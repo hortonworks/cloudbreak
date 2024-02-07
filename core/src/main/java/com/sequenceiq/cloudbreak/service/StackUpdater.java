@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.service;
 
+import java.util.Map;
+
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -10,6 +13,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateProperties;
+import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateType;
+import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateTypeMetadata;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -39,6 +46,9 @@ public class StackUpdater {
 
     @Inject
     private UsageLoggingUtil usageLoggingUtil;
+
+    @Inject
+    private InstanceMetadataUpdateProperties instanceMetadataUpdateProperties;
 
     public Stack updateStackStatus(Long stackId, DetailedStackStatus detailedStatus) {
         return doUpdateStackStatus(stackId, detailedStatus.getStatus(), detailedStatus, "");
@@ -130,5 +140,17 @@ public class StackUpdater {
     public void updateStackStatus(String resourceCrn, DetailedStackStatus detailedStackStatus, String statusReason) {
         Stack stack = stackService.getByCrn(resourceCrn);
         doUpdateStackStatus(stack, detailedStackStatus.getStatus(), detailedStackStatus, statusReason);
+    }
+
+    public void updateSupportedImdsVersionIfNecessary(Long stackId, InstanceMetadataUpdateType updateType) {
+        Stack stack = stackService.get(stackId);
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(stack.getCloudPlatform());
+        instanceMetadataUpdateProperties.validateUpdateType(updateType, cloudPlatform);
+        Map<CloudPlatform, InstanceMetadataUpdateTypeMetadata> metadata = instanceMetadataUpdateProperties.getTypes().get(updateType).metadata();
+        String supportedImdsVersion = metadata.get(cloudPlatform).imdsVersion();
+        if (!StringUtils.equals(stack.getSupportedImdsVersion(), supportedImdsVersion)) {
+            stack.setSupportedImdsVersion(supportedImdsVersion);
+            stackService.save(stack);
+        }
     }
 }

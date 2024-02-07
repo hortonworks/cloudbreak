@@ -34,6 +34,7 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STACK_REQUEST_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STATUS_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STATUS_BY_NAME;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.IMD_UPDATE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.LIST;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.LIST_FLOW_PROGRESS;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.MODIFY_PROXY_CONFIG_INTERNAL;
@@ -100,6 +101,7 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXGenerateImageCatalogV1Response;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXInstanceMetadataUpdateV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXScaleV1Request;
@@ -702,4 +704,11 @@ public interface DistroXV1Endpoint {
     FlowIdentifier addVolumesByStackCrn(
             @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @Valid StackAddVolumesRequest addVolumesRequest);
+
+    @PUT
+    @Path("imd_update")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = IMD_UPDATE, operationId = "imdUpdate",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier instanceMetadataUpdate(@Valid @NotNull DistroXInstanceMetadataUpdateV1Request request);
 }

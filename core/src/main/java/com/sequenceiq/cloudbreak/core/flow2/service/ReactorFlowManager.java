@@ -16,6 +16,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscal
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd.ClusterCredentialChangeEvent.CLUSTER_CREDENTIALCHANGE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.STACK_VERTICALSCALE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.STACK_DOWNSCALE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.imdupdate.event.StackInstanceMetadataUpdateEvent.STACK_IMDUPDATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.repair.ManualStackRepairTriggerEvent.MANUAL_STACK_REPAIR_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopEvent.STACK_STOP_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
@@ -50,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateType;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesRequest;
@@ -82,6 +84,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackLoadBalancerUpdateTrigger
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.UpgradePreparationChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.imdupdate.event.StackInstanceMetadataUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -530,5 +533,11 @@ public class ReactorFlowManager {
         AddVolumesRequest event = new AddVolumesRequest(selector, stackId, addVolumesRequest.getNumberOfDisks(), addVolumesRequest.getType(),
                 addVolumesRequest.getSize(), CloudVolumeUsageType.valueOf(addVolumesRequest.getCloudVolumeUsageType()), addVolumesRequest.getInstanceGroup());
         return reactorNotifier.notify(stackId, selector, event);
+    }
+
+    public FlowIdentifier triggerInstanceMetadataUpdate(StackDto stackDto, InstanceMetadataUpdateType updateType) {
+        StackInstanceMetadataUpdateTriggerEvent triggerEvent =
+                new StackInstanceMetadataUpdateTriggerEvent(STACK_IMDUPDATE_EVENT.event(), stackDto.getId(), updateType);
+        return reactorNotifier.notify(stackDto.getId(), STACK_IMDUPDATE_EVENT.event(), triggerEvent);
     }
 }

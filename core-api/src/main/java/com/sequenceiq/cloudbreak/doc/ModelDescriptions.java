@@ -850,4 +850,8 @@ public class ModelDescriptions {
         public static final String CCM_UPGRADE_RESPONSE_TYPE = "Information about the Upgrade CCM operation acceptance.";
         public static final String CCM_UPGRADE_ERROR_REASON = "Reason of the error if Upgrade CCM could not be started.";
     }
+
+    public static class InstanceMetadataUpdateRequest {
+        public static final String IMD_UPDATE_TYPE = "Type of instance metadata update.";
+    }
 }

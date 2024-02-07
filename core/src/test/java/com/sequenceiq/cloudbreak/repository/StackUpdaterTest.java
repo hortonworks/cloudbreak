@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import static org.junit.Assert.assertEquals;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -9,15 +10,21 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateProperties;
+import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateType;
+import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateTypeMetadata;
+import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateTypeProperty;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -26,7 +33,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.UsageLoggingUtil;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class StackUpdaterTest {
 
     @Mock
@@ -40,6 +47,9 @@ public class StackUpdaterTest {
 
     @Mock
     private ClusterService clusterService;
+
+    @Mock
+    private InstanceMetadataUpdateProperties instanceMetadataUpdateProperties;
 
     @InjectMocks
     private StackUpdater underTest;
@@ -85,6 +95,39 @@ public class StackUpdaterTest {
         verify(stackService, times(1)).save(eq(stack));
         verify(clusterService, times(1)).save(eq(stack.getCluster()));
         verify(usageLoggingUtil, times(1)).logClusterStatusChangeUsageEvent(eq(Status.AVAILABLE), eq(Status.DELETE_COMPLETED), eq(stack.getCluster()));
+    }
+
+    @Test
+    void testUpdateImdsVersionIfMatchingVersion() {
+        Stack stack = new Stack();
+        stack.setCloudPlatform("AWS");
+        stack.setSupportedImdsVersion("v2");
+        when(stackService.get(any())).thenReturn(stack);
+        mockImdsUpdateTypes();
+
+        underTest.updateSupportedImdsVersionIfNecessary(1L, InstanceMetadataUpdateType.IMDS_HTTP_TOKEN_REQUIRED);
+
+        verify(stackService, times(0)).save(any());
+    }
+
+    @Test
+    void testUpdateImdsVersion() {
+        Stack stack = new Stack();
+        stack.setCloudPlatform("AWS");
+        stack.setSupportedImdsVersion("v1");
+        when(stackService.get(any())).thenReturn(stack);
+        mockImdsUpdateTypes();
+        when(stackService.save(any())).thenReturn(stack);
+
+        underTest.updateSupportedImdsVersionIfNecessary(1L, InstanceMetadataUpdateType.IMDS_HTTP_TOKEN_REQUIRED);
+
+        verify(stackService).save(any());
+    }
+
+    private void mockImdsUpdateTypes() {
+        InstanceMetadataUpdateTypeMetadata metadataV2 = new InstanceMetadataUpdateTypeMetadata("v2");
+        InstanceMetadataUpdateTypeProperty propertyV2 = new InstanceMetadataUpdateTypeProperty("AWS", Map.of(AWS, metadataV2));
+        when(instanceMetadataUpdateProperties.getTypes()).thenReturn(Map.of(InstanceMetadataUpdateType.IMDS_HTTP_TOKEN_REQUIRED, propertyV2));
     }
 
 }

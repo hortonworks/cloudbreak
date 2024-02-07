@@ -217,6 +217,18 @@ cb:
         infrastructure: 1000
         upgrade: 1000
 
+  imd.update.types:
+    IMDS_HTTP_TOKEN_REQUIRED:
+      supportedPlatforms: AWS
+      metadata:
+        AWS:
+          imdsVersion: v2
+    IMDS_HTTP_TOKEN_OPTIONAL:
+      supportedPlatforms: AWS
+      metadata:
+        AWS:
+          imdsVersion: v1
+
   aws:
     stopStart.batch.size: 10
     create.batch.size: 8

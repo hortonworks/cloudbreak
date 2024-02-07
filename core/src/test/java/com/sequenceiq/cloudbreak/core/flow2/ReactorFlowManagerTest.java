@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateType;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesRequest;
@@ -195,6 +196,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerDeleteVolumes(STACK_ID, new StackDeleteVolumesRequest());
         underTest.triggerStackUpdateDisks(stackDto, new DiskUpdateRequest());
         underTest.triggerSecretRotation(STACK_ID, "CRN", Lists.newArrayList(), RotationFlowExecutionType.ROTATE, null);
+        underTest.triggerInstanceMetadataUpdate(stackDto, InstanceMetadataUpdateType.IMDS_HTTP_TOKEN_REQUIRED);
         StackAddVolumesRequest stackAddVolumesRequest = mock(StackAddVolumesRequest.class);
         doReturn(CloudVolumeUsageType.GENERAL.toString()).when(stackAddVolumesRequest).getCloudVolumeUsageType();
         underTest.triggerAddVolumes(STACK_ID, stackAddVolumesRequest);
