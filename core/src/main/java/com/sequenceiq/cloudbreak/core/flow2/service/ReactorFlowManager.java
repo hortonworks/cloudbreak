@@ -268,8 +268,8 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerDistroXUpgrade(Long stackId, ImageChangeDto imageChangeDto, boolean replaceVms, boolean lockComponents, String variant,
             boolean rollingUpgradeEnabled) {
         String selector = FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
-        return reactorNotifier.notify(stackId, selector, new DistroXUpgradeTriggerEvent(selector, stackId, imageChangeDto, replaceVms, lockComponents,
-                variant, rollingUpgradeEnabled));
+        return reactorNotifier.notify(stackId, selector,
+                new DistroXUpgradeTriggerEvent(selector, stackId, new Promise<>(), imageChangeDto, replaceVms, lockComponents, variant, rollingUpgradeEnabled));
     }
 
     public FlowIdentifier triggerClusterUpgradePreparation(Long stackId, ImageChangeDto imageChangeDto) {

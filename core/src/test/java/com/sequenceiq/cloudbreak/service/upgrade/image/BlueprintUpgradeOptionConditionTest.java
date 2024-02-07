@@ -61,7 +61,7 @@ class BlueprintUpgradeOptionConditionTest {
     }
 
     private ImageFilterParams createImageFilterParams(boolean osUpgrade, boolean rollingUpgrade) {
-        return new ImageFilterParams(null, null, osUpgrade, null, null, null, null,
+        return new ImageFilterParams(null, null, null, osUpgrade, null, null, null, null,
                 new InternalUpgradeSettings(false, false, rollingUpgrade), null, null, null, false);
     }
 

@@ -153,7 +153,7 @@ public class DistroXUpgradeAvailabilityService {
         }
         if (CollectionUtils.isNotEmpty(filteredCandidates) && Objects.nonNull(request)) {
             if (LATEST_ONLY == request.getShowAvailableImages()) {
-                filteredCandidates = filterForLatestImagePerRuntime(filteredCandidates);
+                filteredCandidates = filterForLatestImagePerRuntimeAndOs(filteredCandidates);
             } else if (request.isDryRun()) {
                 filteredCandidates = filterForLatestImage(filteredCandidates);
             }
@@ -167,7 +167,7 @@ public class DistroXUpgradeAvailabilityService {
         return List.of(latestImage);
     }
 
-    private List<ImageInfoV4Response> filterForLatestImagePerRuntime(List<ImageInfoV4Response> candidates) {
+    private List<ImageInfoV4Response> filterForLatestImagePerRuntimeAndOs(List<ImageInfoV4Response> candidates) {
         Map<String, Map<String, Optional<ImageInfoV4Response>>> imagesByRuntimeAndOS = candidates.stream()
                 .collect(Collectors.groupingBy(imageInfoV4Response -> imageInfoV4Response.getComponentVersions().getCdp(),
                         Collectors.groupingBy(imageInfoV4Response -> imageInfoV4Response.getComponentVersions().getOs(),

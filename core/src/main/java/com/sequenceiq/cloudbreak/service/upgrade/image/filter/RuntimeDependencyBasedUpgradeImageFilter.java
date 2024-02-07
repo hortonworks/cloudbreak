@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.service.upgrade.image.filter;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.function.Predicate;
 
 import jakarta.inject.Inject;
 
@@ -40,8 +40,7 @@ public class RuntimeDependencyBasedUpgradeImageFilter implements UpgradeImageFil
 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
-        List<Image> filteredImages = filterImages(imageFilterResult, imageFilterParams);
-        logNotEligibleImages(imageFilterResult, filteredImages, LOGGER);
+        List<Image> filteredImages = filterImages(imageFilterResult, filterByPythonVersion(imageFilterParams));
         LOGGER.debug("After the filtering {} image left.", filteredImages.size());
         return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
     }
@@ -56,14 +55,10 @@ public class RuntimeDependencyBasedUpgradeImageFilter implements UpgradeImageFil
         return ORDER_NUMBER;
     }
 
-    private List<Image> filterImages(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
+    private Predicate<Image> filterByPythonVersion(ImageFilterParams imageFilterParams) {
         StackDto stack = stackDtoService.getById(imageFilterParams.getStackId());
         List<Image> allCdhImages = getAllCdhImagesFromCatalog(imageFilterParams, stack);
-        return imageFilterResult.getImages()
-                .stream()
-                .filter(image -> pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, allCdhImages,
-                        imageFilterParams.getCurrentImage(), image))
-                .collect(Collectors.toList());
+        return image -> pythonVersionBasedRuntimeVersionValidator.isUpgradePermittedForRuntime(stack, allCdhImages, imageFilterParams.getCurrentImage(), image);
     }
 
     private List<Image> getAllCdhImagesFromCatalog(ImageFilterParams imageFilterParams, StackDto stack) {

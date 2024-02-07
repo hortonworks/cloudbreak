@@ -60,7 +60,7 @@ public class UpgradePermissionProviderTest {
         String componentVersion = "7.2.1";
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage(componentVersion, "2000");
         Image candidateImage = createImage(componentVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
+        ImageFilterParams imageFilterParams = new ImageFilterParams(null, currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
 
@@ -80,7 +80,7 @@ public class UpgradePermissionProviderTest {
         String componentVersion = "7.2.1";
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage(componentVersion, "2002");
         Image candidateImage = createImage(componentVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
+        ImageFilterParams imageFilterParams = new ImageFilterParams(null, currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
 
@@ -101,7 +101,7 @@ public class UpgradePermissionProviderTest {
         String targetVersion = "7.2.2";
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage(currentVersion, "2002");
         Image candidateImage = createImage(targetVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
+        ImageFilterParams imageFilterParams = new ImageFilterParams(null, currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
 
@@ -123,7 +123,7 @@ public class UpgradePermissionProviderTest {
         String targetVersion = "7.1.2";
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage(currentVersion, "2002");
         Image candidateImage = createImage(targetVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
+        ImageFilterParams imageFilterParams = new ImageFilterParams(null, currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
 
@@ -143,7 +143,7 @@ public class UpgradePermissionProviderTest {
         String targetVersion = "7.2.2";
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage(currentVersion, "2002");
         Image candidateImage = createImage(targetVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
+        ImageFilterParams imageFilterParams = new ImageFilterParams(null, currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
 
@@ -165,7 +165,7 @@ public class UpgradePermissionProviderTest {
         String targetVersion = "7.2.2";
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage(currentVersion, "2002");
         Image candidateImage = createImage(targetVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, null, true, Map.of(), StackType.WORKLOAD, null, STACK_ID,
+        ImageFilterParams imageFilterParams = new ImageFilterParams(null, currentImage, null, true, Map.of(), StackType.WORKLOAD, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
 
@@ -186,7 +186,7 @@ public class UpgradePermissionProviderTest {
         String targetVersion = "7.2.2";
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage(currentVersion, "2002");
         Image candidateImage = createImage(targetVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
+        ImageFilterParams imageFilterParams = new ImageFilterParams(null, currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
 
@@ -204,7 +204,7 @@ public class UpgradePermissionProviderTest {
     public void testPermitStackUpgradeShouldReturnFalseWhenTheCmBuildNumberIsNotAvailable() {
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage("7.2.1", "2002");
         Image candidateImage = createImage("7.2.1", null);
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
+        ImageFilterParams imageFilterParams = new ImageFilterParams(null, currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
 
@@ -225,7 +225,7 @@ public class UpgradePermissionProviderTest {
         String targetVersion = "7.2.10";
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage(currentVersion, "2002");
         Image candidateImage = createImage(targetVersion, "2010");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
+        ImageFilterParams imageFilterParams = new ImageFilterParams(null, currentImage, null, true, Map.of(), DATALAKE_STACK_TYPE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
 

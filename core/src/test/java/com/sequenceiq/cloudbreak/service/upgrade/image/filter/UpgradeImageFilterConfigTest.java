@@ -42,7 +42,7 @@ public class UpgradeImageFilterConfigTest {
     public void testImageUpgradeFiltersOrder() {
         assertEquals(upgradeImageFilters.size(), orderedUpgradeImageFilters.size());
         for (int i = 0; i < orderedUpgradeImageFilters.size(); i++) {
-            assertEquals(orderedUpgradeImageFilters.get(i).getFilterOrderNumber().intValue(), i + 1);
+            assertEquals(i, orderedUpgradeImageFilters.get(i).getFilterOrderNumber().intValue());
         }
     }
 

@@ -75,7 +75,7 @@ public class BlueprintUpgradeOptionValidatorTest {
     }
 
     private ImageFilterParams createImageFilterParams(Blueprint blueprint, boolean skipValidations, boolean dataHubUpgradeEntitled) {
-        return new ImageFilterParams(null, null, false, null, null, blueprint, null,
+        return new ImageFilterParams(null, null, null, false, null, null, blueprint, null,
                 new InternalUpgradeSettings(skipValidations, dataHubUpgradeEntitled, false), null, null, null, false);
     }
 

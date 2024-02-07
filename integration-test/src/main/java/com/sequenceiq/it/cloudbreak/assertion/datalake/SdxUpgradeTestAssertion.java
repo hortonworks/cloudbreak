@@ -2,6 +2,11 @@ package com.sequenceiq.it.cloudbreak.assertion.datalake;
 
 import static com.sequenceiq.it.cloudbreak.assertion.CBAssertion.assertEquals;
 import static com.sequenceiq.it.cloudbreak.assertion.CBAssertion.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.junit.Assert.assertNotNull;
 
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
@@ -9,6 +14,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
+import com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages;
 
 public class SdxUpgradeTestAssertion {
 
@@ -33,14 +39,22 @@ public class SdxUpgradeTestAssertion {
         return (testContext, entity, sdxClient) -> {
             SdxUpgradeRequest request = new SdxUpgradeRequest();
             request.setLockComponents(true);
-            request.setDryRun(true);
+            request.setShowAvailableImages(SdxUpgradeShowAvailableImages.LATEST_ONLY);
+
             SdxUpgradeResponse upgradeResponse =
                     sdxClient.getDefaultClient().sdxUpgradeEndpoint().upgradeClusterByName(entity.getName(), request);
             assertNotNull(upgradeResponse);
             assertEquals("aaa778fc-7f17-4535-9021-515351df3691", upgradeResponse.getCurrent().getImageId());
             assertEquals(1583391600L, upgradeResponse.getCurrent().getCreated());
-            assertEquals("bbbeadd2-5B95-4EC9-B300-13dc43208b64", upgradeResponse.getUpgradeCandidates().get(0).getImageId());
-            assertEquals(1583877600L, upgradeResponse.getUpgradeCandidates().get(0).getCreated());
+            assertEquals(2, upgradeResponse.getUpgradeCandidates().size());
+            assertThat(upgradeResponse.getUpgradeCandidates(),
+                    hasItem(allOf(
+                            hasProperty("imageId", equalTo("445ccd4a-7882-4aa4-9e0d-04163828e1ac")),
+                            hasProperty("created", equalTo(1583877601L)))));
+            assertThat(upgradeResponse.getUpgradeCandidates(),
+                    hasItem(allOf(
+                            hasProperty("imageId", equalTo("bbbeadd2-5B95-4EC9-B300-13dc43208b64")),
+                            hasProperty("created", equalTo(1583877600L)))));
             return entity;
         };
     }

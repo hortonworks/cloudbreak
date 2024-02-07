@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentOSToRed
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -26,28 +25,25 @@ public class ImageCreationBasedUpgradeImageFilter implements UpgradeImageFilter 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = imageFilterParams.getCurrentImage();
-        List<Image> filteredImages = filterImages(imageFilterResult, currentImage);
-        logNotEligibleImages(imageFilterResult, filteredImages, LOGGER);
+        List<Image> filteredImages =
+                filterImages(imageFilterResult, image -> isDifferentVersion(currentImage, image) || isNewerOrSameCreationImage(currentImage, image)
+                        || isCentOSToRedhatUpgrade(currentImage, image));
         LOGGER.debug("After the filtering {} image left with proper creation date.", filteredImages.size());
         return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
     }
 
     @Override
     public String getMessage(ImageFilterParams imageFilterParams) {
-        return String.format("There are no newer images available than %s.", imageFilterParams.getCurrentImage().getDate());
+        if (hasTargetImage(imageFilterParams)) {
+            return getCantUpgradeToImageMessage(imageFilterParams, "The selected image is older than the currently used image.");
+        } else {
+            return String.format("There are no newer images available than %s.", imageFilterParams.getCurrentImage().getDate());
+        }
     }
 
     @Override
     public Integer getFilterOrderNumber() {
         return ORDER_NUMBER;
-    }
-
-    private List<Image> filterImages(ImageFilterResult imageFilterResult, com.sequenceiq.cloudbreak.cloud.model.Image currentImage) {
-        return imageFilterResult.getImages()
-                .stream()
-                .filter(candidate -> isDifferentVersion(currentImage, candidate) || isNewerOrSameCreationImage(currentImage, candidate)
-                        || isCentOSToRedhatUpgrade(currentImage, candidate))
-                .collect(Collectors.toList());
     }
 
     private boolean isDifferentVersion(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image candidate) {

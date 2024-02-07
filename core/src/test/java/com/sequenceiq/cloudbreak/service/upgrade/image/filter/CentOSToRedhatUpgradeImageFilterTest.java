@@ -158,7 +158,7 @@ class CentOSToRedHatUpgradeImageFilterTest {
     }
 
     private ImageFilterParams imageFilterParams(com.sequenceiq.cloudbreak.cloud.model.Image image) {
-        return new ImageFilterParams(image, null, false, Map.of(CDH.name(), "7.2.17"), null, null, null, null, null, null, null, false);
+        return new ImageFilterParams(null, image, null, false, Map.of(CDH.name(), "7.2.17"), null, null, null, null, null, null, null, false);
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image image(String os, String osType, String version) {

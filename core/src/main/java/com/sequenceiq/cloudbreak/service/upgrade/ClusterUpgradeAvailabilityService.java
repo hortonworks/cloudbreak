@@ -50,20 +50,21 @@ public class ClusterUpgradeAvailabilityService {
     private CurrentImageRetrieverService currentImageRetrieverService;
 
     public UpgradeV4Response checkForUpgradesByName(Stack stack, boolean lockComponents, boolean replaceVms, InternalUpgradeSettings internalUpgradeSettings,
-            boolean getAllImages) {
-        UpgradeV4Response upgradeOptions = checkForUpgrades(stack, lockComponents, internalUpgradeSettings, getAllImages);
+            boolean getAllImages, String targetImageId) {
+        UpgradeV4Response upgradeOptions = checkForUpgrades(stack, lockComponents, internalUpgradeSettings, getAllImages, targetImageId);
         upgradeOptions.setReplaceVms(replaceVms);
         addReasonIfNecessary(stack, lockComponents, replaceVms, upgradeOptions);
         return upgradeOptions;
     }
 
-    public UpgradeV4Response checkForUpgrades(Stack stack, boolean lockComponents, InternalUpgradeSettings internalUpgradeSettings,
-            boolean getAllImages) {
+    public UpgradeV4Response checkForUpgrades(Stack stack, boolean lockComponents, InternalUpgradeSettings internalUpgradeSettings, boolean getAllImages,
+            String targetImageId) {
         UpgradeV4Response upgradeOptions = new UpgradeV4Response();
         try {
             LOGGER.info(String.format("Retrieving images for upgrading stack %s", stack.getName()));
             Image currentImage = currentImageRetrieverService.retrieveCurrentModelImage(stack);
-            ImageFilterParams imageFilterParams = imageFilterParamsFactory.create(currentImage, lockComponents, stack, internalUpgradeSettings, getAllImages);
+            ImageFilterParams imageFilterParams =
+                    imageFilterParamsFactory.create(targetImageId, currentImage, lockComponents, stack, internalUpgradeSettings, getAllImages);
             ImageFilterResult imageFilterResult = getAvailableImagesForUpgrade(stack, currentImage.getImageCatalogName(), imageFilterParams);
             LOGGER.info(String.format("%d possible image found for stack upgrade.", imageFilterResult.getImages().size()));
             upgradeOptions = createResponse(imageFilterResult, imageFilterParams);

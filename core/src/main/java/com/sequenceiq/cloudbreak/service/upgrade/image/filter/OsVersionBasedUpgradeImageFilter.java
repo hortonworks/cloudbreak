@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.upgrade.image.filter;
 import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentOSToRedHatUpgradeImageFilter.isCentOSToRedhatUpgrade;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,15 +23,20 @@ public class OsVersionBasedUpgradeImageFilter implements UpgradeImageFilter {
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
         String currentOs = imageFilterParams.getCurrentImage().getOs();
         String currentOsType = imageFilterParams.getCurrentImage().getOsType();
-        List<Image> filteredImages = filterImages(imageFilterParams, imageFilterResult);
-        logNotEligibleImages(imageFilterResult, filteredImages, LOGGER);
+        List<Image> filteredImages = filterImages(imageFilterResult,
+                image -> isOsVersionsMatch(imageFilterParams.getCurrentImage().getOs(), imageFilterParams.getCurrentImage().getOsType(), image)
+                        || isCentOSToRedhatUpgrade(imageFilterParams.getCurrentImage(), image));
         LOGGER.debug("After the filtering {} image left with proper OS {} and OS type {}.", filteredImages.size(), currentOs, currentOsType);
         return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
     }
 
     @Override
     public String getMessage(ImageFilterParams imageFilterParams) {
-        return "There are no eligible images to upgrade with the same OS version.";
+        if (hasTargetImage(imageFilterParams)) {
+            return getCantUpgradeToImageMessage(imageFilterParams, "Can't upgrade to the selected image because it's os type is incompatible.");
+        } else {
+            return "There are no eligible images to upgrade with the same OS version.";
+        }
     }
 
     @Override
@@ -40,15 +44,7 @@ public class OsVersionBasedUpgradeImageFilter implements UpgradeImageFilter {
         return ORDER_NUMBER;
     }
 
-    private List<Image> filterImages(ImageFilterParams imageFilterParams, ImageFilterResult imageFilterResult) {
-        com.sequenceiq.cloudbreak.cloud.model.Image currentImage = imageFilterParams.getCurrentImage();
-        return imageFilterResult.getImages()
-                .stream()
-                .filter(image -> isOsVersionsMatch(currentImage, image) || isCentOSToRedhatUpgrade(currentImage, image))
-                .collect(Collectors.toList());
-    }
-
-    private boolean isOsVersionsMatch(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image newImage) {
-        return newImage.getOs().equalsIgnoreCase(currentImage.getOs()) && newImage.getOsType().equalsIgnoreCase(currentImage.getOsType());
+    private boolean isOsVersionsMatch(String currentOs, String currentOsType, Image newImage) {
+        return newImage.getOs().equalsIgnoreCase(currentOs) && newImage.getOsType().equalsIgnoreCase(currentOsType);
     }
 }

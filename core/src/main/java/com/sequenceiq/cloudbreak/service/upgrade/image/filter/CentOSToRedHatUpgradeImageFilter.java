@@ -7,8 +7,6 @@ import java.util.Map;
 
 import jakarta.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -27,8 +25,6 @@ public class CentOSToRedHatUpgradeImageFilter implements UpgradeImageFilter {
 
     public static final String CENTOS_7 = "centos7";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CentOSToRedHatUpgradeImageFilter.class);
-
     private static final int ORDER_NUMBER = 11;
 
     @Inject
@@ -39,16 +35,21 @@ public class CentOSToRedHatUpgradeImageFilter implements UpgradeImageFilter {
 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
-        List<Image> filteredImages = filterImages(imageFilterParams, imageFilterResult);
-        logNotEligibleImages(imageFilterResult, filteredImages, LOGGER);
-        LOGGER.debug("After the filtering {} image left with proper OS {} and OS type {}.", filteredImages.size(), imageFilterParams.getCurrentImage().getOs(),
-                imageFilterParams.getCurrentImage().getOsType());
-        return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
+        if (isRedHatImage(imageFilterParams.getCurrentImage().getOs(), imageFilterParams.getCurrentImage().getOsType())) {
+            return imageFilterResult;
+        } else {
+            List<Image> filteredImages = filterImages(imageFilterParams, imageFilterResult);
+            return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
+        }
     }
 
     @Override
     public String getMessage(ImageFilterParams imageFilterParams) {
-        return "There are no eligible images to upgrade.";
+        if (hasTargetImage(imageFilterParams)) {
+            return getCantUpgradeToImageMessage(imageFilterParams, "Can't upgrade to Red Hat Enterprise Linux.");
+        } else {
+            return "There are no eligible images to upgrade.";
+        }
     }
 
     @Override
@@ -67,7 +68,7 @@ public class CentOSToRedHatUpgradeImageFilter implements UpgradeImageFilter {
                     .filter(image -> isCentOSImage(image.getOs(), image.getOsType()))
                     .toList());
             preFilteredImages.stream()
-                    .filter(CentOSToRedHatUpgradeImageFilter::isRedHatImage)
+                    .filter(image -> isRedHatImage(image.getOs(), image.getOsType()))
                     .max(Comparator.comparing(Image::getCreated))
                     .ifPresent(centOsImages::add);
         }
@@ -90,8 +91,8 @@ public class CentOSToRedHatUpgradeImageFilter implements UpgradeImageFilter {
         return centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(currentImage, image, stackRelatedParcels);
     }
 
-    private static boolean isRedHatImage(Image image) {
-        return REDHAT_8.equalsIgnoreCase(image.getOs()) && REDHAT_8.equalsIgnoreCase(image.getOsType());
+    private static boolean isRedHatImage(String os, String osType) {
+        return REDHAT_8.equalsIgnoreCase(os) && REDHAT_8.equalsIgnoreCase(osType);
     }
 
     private static boolean isCentOSImage(String os, String osType) {

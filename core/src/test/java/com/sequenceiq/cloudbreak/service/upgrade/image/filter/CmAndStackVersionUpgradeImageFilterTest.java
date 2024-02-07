@@ -130,7 +130,7 @@ class CmAndStackVersionUpgradeImageFilterTest {
                 .withOs("centos7")
                 .withOsType("redhat7")
                 .withPackageVersions(Map.of(ImagePackageVersion.CM_BUILD_NUMBER.getKey(), BUILD_NUMBER)).build();
-        return new ImageFilterParams(currentImage1, null, lockComponents, activatedParcels, StackType.DATALAKE, null, 1L,
+        return new ImageFilterParams(null, currentImage1, null, lockComponents, activatedParcels, StackType.DATALAKE, null, 1L,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform("AWS"), null, null, false);
     }
 

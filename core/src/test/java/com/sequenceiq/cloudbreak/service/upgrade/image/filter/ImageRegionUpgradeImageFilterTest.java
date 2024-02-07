@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 
 @ExtendWith(MockitoExtension.class)
-class ImageNameUpgradeImageFilterTest {
+class ImageRegionUpgradeImageFilterTest {
 
     private static final String IMAGE_ID_1 = "image1";
 
@@ -36,7 +36,7 @@ class ImageNameUpgradeImageFilterTest {
     private ImageService imageService;
 
     @InjectMocks
-    private ImageNameUpgradeImageFilter victim;
+    private ImageRegionUpgradeImageFilter victim;
 
     @Test
     public void testFilterImagesWithoutName() throws CloudbreakImageNotFoundException {
@@ -88,6 +88,6 @@ class ImageNameUpgradeImageFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams(String platform, String region) {
-        return new ImageFilterParams(null, null, false, null, null, null, null, null, imageCatalogPlatform(platform), platform, region, false);
+        return new ImageFilterParams(null, null, null, false, null, null, null, null, null, imageCatalogPlatform(platform), platform, region, false);
     }
 }

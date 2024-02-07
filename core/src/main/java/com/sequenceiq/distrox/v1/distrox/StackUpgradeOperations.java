@@ -123,7 +123,7 @@ public class StackUpgradeOperations {
         boolean replaceVms = determineReplaceVmsParameter(stack, request.getReplaceVms());
         boolean getAllImages = request.getImageId() != null;
         UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, replaceVms,
-                request.getInternalUpgradeSettings(), getAllImages);
+                request.getInternalUpgradeSettings(), getAllImages, request.getImageId());
         if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
             clusterUpgradeCandidateFilterService.filterUpgradeOptions(upgradeResponse, request, stack.isDatalake());
             populateCandidatesWithPreparedFlag(stack, upgradeResponse);

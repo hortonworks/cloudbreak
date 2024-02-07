@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.upgrade.image.filter;
 
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -27,7 +26,7 @@ public class CurrentImageUpgradeImageFilter implements UpgradeImageFilter {
 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
-        List<Image> filteredImages = filterImages(imageFilterResult, imageFilterParams);
+        List<Image> filteredImages = filterImages(imageFilterResult, filterCurrentImage(imageFilterParams));
         logNotEligibleImages(imageFilterResult, filteredImages, LOGGER);
         LOGGER.debug("After the filtering {} image left.", filteredImages.size());
         return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
@@ -41,13 +40,6 @@ public class CurrentImageUpgradeImageFilter implements UpgradeImageFilter {
     @Override
     public Integer getFilterOrderNumber() {
         return ORDER_NUMBER;
-    }
-
-    private List<Image> filterImages(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
-        return imageFilterResult.getImages()
-                .stream()
-                .filter(filterCurrentImage(imageFilterParams))
-                .collect(Collectors.toList());
     }
 
     private Predicate<Image> filterCurrentImage(ImageFilterParams imageFilterParams) {

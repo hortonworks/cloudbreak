@@ -5,6 +5,8 @@ import static com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult.
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -23,6 +25,19 @@ public interface UpgradeImageFilter {
 
     default String getReason(List<Image> filteredImages, ImageFilterParams imageFilterParams) {
         return filteredImages.isEmpty() ? getMessage(imageFilterParams) : EMPTY_REASON;
+    }
+
+    default List<Image> filterImages(ImageFilterResult imageFilterResult, Predicate<Image> predicate) {
+        return imageFilterResult.getImages().stream().filter(predicate).toList();
+    }
+
+    default String getCantUpgradeToImageMessage(ImageFilterParams imageFilterParams, String reason) {
+        return String.format("Can't upgrade to '%s' image from '%s' image. %s", imageFilterParams.getTargetImageId(),
+                imageFilterParams.getCurrentImage().getImageId(), reason);
+    }
+
+    default boolean hasTargetImage(ImageFilterParams imageFilterParams) {
+        return Optional.ofNullable(imageFilterParams).map(ImageFilterParams::getTargetImageId).isPresent();
     }
 
     default void logNotEligibleImages(ImageFilterResult imageFilterResult, List<Image> filteredImages, Logger logger) {

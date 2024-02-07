@@ -341,7 +341,7 @@ class DistroXUpgradeServiceTest {
         UpgradeV4Response response = new UpgradeV4Response();
         response.setReplaceVms(true);
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
-        when(clusterUpgradeAvailabilityService.checkForUpgrades(eq(stack), eq(true), any(), eq(true))).thenReturn(response);
+        when(clusterUpgradeAvailabilityService.checkForUpgrades(eq(stack), eq(true), any(), eq(true), any())).thenReturn(response);
         ImageInfoV4Response imageInfoV4Response = new ImageInfoV4Response();
         imageInfoV4Response.setImageId("imageID");
         imageInfoV4Response.setImageCatalogName("catalogName");
@@ -354,7 +354,7 @@ class DistroXUpgradeServiceTest {
         underTest.triggerOsUpgradeByUpgradeSets(CLUSTER, WS_ID, "imageID", upgradeSets);
         ArgumentCaptor<InternalUpgradeSettings> internalUpgradeSettingsArgumentCaptor = ArgumentCaptor.forClass(InternalUpgradeSettings.class);
         verify(clusterUpgradeAvailabilityService, times(1)).checkForUpgrades(eq(stack), eq(true),
-                internalUpgradeSettingsArgumentCaptor.capture(), eq(true));
+                internalUpgradeSettingsArgumentCaptor.capture(), eq(true), eq("imageID"));
         assertFalse(internalUpgradeSettingsArgumentCaptor.getValue().isSkipValidations());
         ArgumentCaptor<ImageChangeDto> imageChangeDtoCaptor = ArgumentCaptor.forClass(ImageChangeDto.class);
         verify(upgradeService, times(1)).upgradeOsByUpgradeSets(eq(stack), imageChangeDtoCaptor.capture(), eq(upgradeSets));

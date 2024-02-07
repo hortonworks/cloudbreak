@@ -2,6 +2,76 @@
   "images": {
     "cdh-images": [
       {
+        "created": 1583391599,
+        "date": "2020-03-06",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "mock": {
+            "default": "mockimage/hdc-hdp--1710161226.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "73f5db23-293d-4934-b124-1d5361375480",
+        "package-versions": {
+          "cm-build-number": "5949264",
+          "cdh-build-number": "1922354",
+          "cm": "CM_VERSION",
+          "salt": "2017.7.5",
+          "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
+          "stack": "CDH_RUNTIME",
+          "python38": "3.8.13-1.el7"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "https://MOCK_SERVER_ADDRESS/mock-parcel",
+              "repoid": "CDH-CDH_RUNTIME",
+              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1922354"
+            },
+            "util": null
+          },
+          "version": "CDH_RUNTIME",
+          "build-number": "1922354"
+        },
+        "repo": {
+          "redhat7": "https://MOCK_SERVER_ADDRESS/mock-parcel"
+        },
+        "version": "CDH_RUNTIME",
+        "build-number": "5949264",
+        "pre_warm_parcels": [
+          [
+            "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "STREAMS_MESSAGING_MANAGER-2.1.0.3.0.0.0-118-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-50-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-50-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "CFM-2.0.0.0-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/SCHEMAREGISTRY-0.8.1.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/PROFILER_MANAGER-2.0.3.2.0.3.0-50.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/PROFILER_SCHEDULER-2.0.3.2.0.3.0-50.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFI-1.11.1.2.0.0.0-176.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFICA-1.11.1.2.0.0.0-176.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFIREGISTRY-0.5.0.2.0.0.0-176.jar"
+        ]
+      },
+      {
         "created": 1583391600,
         "date": "2020-03-06",
         "description": "Official Cloudbreak image",
@@ -15,10 +85,12 @@
         "uuid": "aaa778fc-7f17-4535-9021-515351df3691",
         "package-versions": {
           "cm-build-number": "5949264",
+          "cdh-build-number": "1922354",
           "cm": "CM_VERSION",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
-          "stack": "CDH_RUNTIME"
+          "stack": "CDH_RUNTIME",
+          "python38": "3.8.13-1.el7"
         },
         "stack-details": {
           "repo": {
@@ -83,10 +155,12 @@
         "uuid": "bbbeadd2-5B95-4EC9-B300-13dc43208b64",
         "package-versions": {
           "cm-build-number": "5949264",
+          "cdh-build-number": "1922354",
           "cm": "CM_VERSION",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
-          "stack": "CDH_RUNTIME"
+          "stack": "CDH_RUNTIME",
+          "python38": "3.8.13-1.el7"
         },
         "stack-details": {
           "repo": {
@@ -136,6 +210,495 @@
           "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFICA-1.11.1.2.0.0.0-176.jar",
           "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFIREGISTRY-0.5.0.2.0.0.0-176.jar"
         ]
+      },
+      {
+        "created": 1583877601,
+        "date": "2020-03-10",
+        "description": "Official Cloudbreak image Upgrade Target",
+        "images": {
+          "mock": {
+            "default": "mockimage/hdc-hdp--1710161226.tar.gz"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "uuid": "445ccd4a-7882-4aa4-9e0d-04163828e1ac",
+        "package-versions": {
+          "cm-build-number": "5949264",
+          "cdh-build-number": "1922354",
+          "cm": "CM_VERSION",
+          "salt": "2017.7.5",
+          "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
+          "stack": "CDH_RUNTIME",
+          "python38": "3.8.16-1.module+el8.8.0+18967+20d359ae.1"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/",
+              "repoid": "CDH-CDH_RUNTIME",
+              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1922354"
+            },
+            "util": null
+          },
+          "version": "CDH_RUNTIME",
+          "build-number": "1922354"
+        },
+        "repo": {
+          "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/"
+        },
+        "build-number": "5949264",
+        "version": "CDH_RUNTIME",
+        "pre_warm_parcels": [
+          [
+            "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "STREAMS_MESSAGING_MANAGER-2.1.0.3.0.0.0-118-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-50-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-50-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "CFM-2.0.0.0-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/SCHEMAREGISTRY-0.8.1.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/PROFILER_MANAGER-2.0.3.2.0.3.0-50.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/PROFILER_SCHEDULER-2.0.3.2.0.3.0-50.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFI-1.11.1.2.0.0.0-176.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFICA-1.11.1.2.0.0.0-176.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFIREGISTRY-0.5.0.2.0.0.0-176.jar"
+        ]
+      },
+      {
+        "created": 1583877602,
+        "date": "2020-03-10",
+        "description": "Example where cloud provider is wrong and upgrading to it shouldn't be allowed.",
+        "images": {
+          "mock-wrong": {
+            "default": "mockimage/hdc-hdp--1710161226.tar.gz"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "uuid": "7de391a0-2359-427e-ac8c-a217876a1fdb",
+        "package-versions": {
+          "cm-build-number": "5949264",
+          "cdh-build-number": "1922354",
+          "cm": "CM_VERSION",
+          "salt": "2017.7.5",
+          "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
+          "stack": "CDH_RUNTIME",
+          "python38": "3.8.16-1.module+el8.8.0+18967+20d359ae.1"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/",
+              "repoid": "CDH-CDH_RUNTIME",
+              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1922354"
+            },
+            "util": null
+          },
+          "version": "CDH_RUNTIME",
+          "build-number": "1922354"
+        },
+        "repo": {
+          "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/"
+        },
+        "build-number": "5949264",
+        "version": "CDH_RUNTIME",
+        "pre_warm_parcels": [
+          [
+            "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "STREAMS_MESSAGING_MANAGER-2.1.0.3.0.0.0-118-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-50-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-50-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "CFM-2.0.0.0-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/SCHEMAREGISTRY-0.8.1.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/PROFILER_MANAGER-2.0.3.2.0.3.0-50.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/PROFILER_SCHEDULER-2.0.3.2.0.3.0-50.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFI-1.11.1.2.0.0.0-176.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFICA-1.11.1.2.0.0.0-176.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFIREGISTRY-0.5.0.2.0.0.0-176.jar"
+        ]
+      },
+      {
+        "created": 1583877603,
+        "date": "2020-03-10",
+        "description": "Example image in the region is not present and upgrading to it shouldn't be allowed.",
+        "images": {
+          "mock": {
+            "default-wrong": "mockimage/hdc-hdp--1710161226.tar.gz"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "uuid": "5430043e-7052-48c0-a041-e8d3b0257a60",
+        "package-versions": {
+          "cm-build-number": "5949264",
+          "cdh-build-number": "1922354",
+          "cm": "CM_VERSION",
+          "salt": "2017.7.5",
+          "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
+          "stack": "CDH_RUNTIME",
+          "python38": "3.8.16-1.module+el8.8.0+18967+20d359ae.1"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/",
+              "repoid": "CDH-CDH_RUNTIME",
+              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1922354"
+            },
+            "util": null
+          },
+          "version": "CDH_RUNTIME",
+          "build-number": "1922354"
+        },
+        "repo": {
+          "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/"
+        },
+        "build-number": "5949264",
+        "version": "CDH_RUNTIME",
+        "pre_warm_parcels": [
+          [
+            "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "STREAMS_MESSAGING_MANAGER-2.1.0.3.0.0.0-118-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-50-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-50-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "CFM-2.0.0.0-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/SCHEMAREGISTRY-0.8.1.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/PROFILER_MANAGER-2.0.3.2.0.3.0-50.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/PROFILER_SCHEDULER-2.0.3.2.0.3.0-50.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFI-1.11.1.2.0.0.0-176.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFICA-1.11.1.2.0.0.0-176.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFIREGISTRY-0.5.0.2.0.0.0-176.jar"
+        ]
+      },
+      {
+        "created": 1583877604,
+        "date": "2020-03-10",
+        "description": "Example image doesn't have cm package version and upgrading to it shouldn't be allowed.",
+        "images": {
+          "mock": {
+            "default": "mockimage/hdc-hdp--1710161226.tar.gz"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "uuid": "48939ee5-23a5-4f97-8564-1c3a1285525c",
+        "package-versions": {
+          "cm-build-number": "5949264",
+          "cdh-build-number": "1922354",
+          "salt": "2017.7.5",
+          "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
+          "stack": "CDH_RUNTIME",
+          "python38": "3.8.16-1.module+el8.8.0+18967+20d359ae.1"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/",
+              "repoid": "CDH-CDH_RUNTIME",
+              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1922354"
+            },
+            "util": null
+          },
+          "version": "CDH_RUNTIME",
+          "build-number": "1922354"
+        },
+        "repo": {
+          "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/"
+        },
+        "build-number": "5949264",
+        "version": "CDH_RUNTIME",
+        "pre_warm_parcels": [
+          [
+            "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "STREAMS_MESSAGING_MANAGER-2.1.0.3.0.0.0-118-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-50-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-50-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "CFM-2.0.0.0-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/SCHEMAREGISTRY-0.8.1.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/PROFILER_MANAGER-2.0.3.2.0.3.0-50.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/PROFILER_SCHEDULER-2.0.3.2.0.3.0-50.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFI-1.11.1.2.0.0.0-176.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFICA-1.11.1.2.0.0.0-176.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFIREGISTRY-0.5.0.2.0.0.0-176.jar"
+        ]
+      },
+      {
+        "created": 1583877605,
+        "date": "2020-03-10",
+        "description": "Example image where cm package version contains 7.x.0 and upgrading to it shouldn't be allowed.",
+        "images": {
+          "mock": {
+            "default": "mockimage/hdc-hdp--1710161226.tar.gz"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "uuid": "bdeb66e6-87c3-46c7-8d83-4df5a008253e",
+        "package-versions": {
+          "cm-build-number": "5949264",
+          "cdh-build-number": "1922354",
+          "cm": "7.x.0",
+          "salt": "2017.7.5",
+          "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
+          "stack": "CDH_RUNTIME",
+          "python38": "3.8.16-1.module+el8.8.0+18967+20d359ae.1"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/",
+              "repoid": "CDH-CDH_RUNTIME",
+              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1922354"
+            },
+            "util": null
+          },
+          "version": "CDH_RUNTIME",
+          "build-number": "1922354"
+        },
+        "repo": {
+          "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/"
+        },
+        "build-number": "5949264",
+        "version": "CDH_RUNTIME",
+        "pre_warm_parcels": [
+          [
+            "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "STREAMS_MESSAGING_MANAGER-2.1.0.3.0.0.0-118-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-50-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-50-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "CFM-2.0.0.0-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/SCHEMAREGISTRY-0.8.1.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/PROFILER_MANAGER-2.0.3.2.0.3.0-50.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/PROFILER_SCHEDULER-2.0.3.2.0.3.0-50.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFI-1.11.1.2.0.0.0-176.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFICA-1.11.1.2.0.0.0-176.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFIREGISTRY-0.5.0.2.0.0.0-176.jar"
+        ]
+      },
+      {
+        "created": 1583877606,
+        "date": "2020-03-10",
+        "description": "Example image where cm upgrade path is not allowed and upgrading to it shouldn't be allowed.",
+        "images": {
+          "mock": {
+            "default": "mockimage/hdc-hdp--1710161226.tar.gz"
+          }
+        },
+        "os": "redhat8",
+        "os_type": "redhat8",
+        "uuid": "fc0dfdc6-b63a-4c4e-a4fe-a80e8347677c",
+        "package-versions": {
+          "cm-build-number": "2000",
+          "cdh-build-number": "1922354",
+          "cm": "CM_VERSION",
+          "salt": "2017.7.5",
+          "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
+          "stack": "CDH_RUNTIME",
+          "python38": "3.8.16-1.module+el8.8.0+18967+20d359ae.1"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/",
+              "repoid": "CDH-CDH_RUNTIME",
+              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1922354"
+            },
+            "util": null
+          },
+          "version": "CDH_RUNTIME",
+          "build-number": "1922354"
+        },
+        "repo": {
+          "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/"
+        },
+        "build-number": "2000",
+        "version": "CDH_RUNTIME",
+        "pre_warm_parcels": [
+          [
+            "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "STREAMS_MESSAGING_MANAGER-2.1.0.3.0.0.0-118-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-50-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-50-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "CFM-2.0.0.0-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/SCHEMAREGISTRY-0.8.1.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/PROFILER_MANAGER-2.0.3.2.0.3.0-50.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/PROFILER_SCHEDULER-2.0.3.2.0.3.0-50.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFI-1.11.1.2.0.0.0-176.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFICA-1.11.1.2.0.0.0-176.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFIREGISTRY-0.5.0.2.0.0.0-176.jar"
+        ]
+      },
+      {
+        "created": 1583877607,
+        "date": "2020-03-10",
+        "description": "Example image where cm upgrade path is not allowed and upgrading to it shouldn't be allowed.",
+        "images": {
+          "mock": {
+            "default": "mockimage/hdc-hdp--1710161226.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "3e5c7848-020a-4bea-8b30-424c11c975ae",
+        "package-versions": {
+          "cm-build-number": "2000",
+          "cdh-build-number": "1922354",
+          "cm": "CM_VERSION",
+          "salt": "2017.7.5",
+          "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
+          "stack": "CDH_RUNTIME",
+          "python38": "3.8.13-1.el7"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "https://MOCK_SERVER_ADDRESS/mock-parcel/",
+              "repoid": "CDH-CDH_RUNTIME",
+              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1922354"
+            },
+            "util": null
+          },
+          "version": "CDH_RUNTIME",
+          "build-number": "1922354"
+        },
+        "repo": {
+          "redhat7": "https://MOCK_SERVER_ADDRESS/mock-parcel/"
+        },
+        "build-number": "2000",
+        "version": "CDH_RUNTIME",
+        "pre_warm_parcels": [
+          [
+            "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "STREAMS_MESSAGING_MANAGER-2.1.0.3.0.0.0-118-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-50-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-50-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ],
+          [
+            "CFM-2.0.0.0-el7.parcel",
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/SCHEMAREGISTRY-0.8.1.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/PROFILER_MANAGER-2.0.3.2.0.3.0-50.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/PROFILER_SCHEDULER-2.0.3.2.0.3.0-50.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFI-1.11.1.2.0.0.0-176.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFICA-1.11.1.2.0.0.0-176.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFIREGISTRY-0.5.0.2.0.0.0-176.jar"
+        ]
       }
     ]
   },
@@ -143,12 +706,28 @@
     "cloudbreak": [
       {
         "images": [
+          "73f5db23-293d-4934-b124-1d5361375480",
           "aaa778fc-7f17-4535-9021-515351df3691",
-          "bbbeadd2-5B95-4EC9-B300-13dc43208b64"
+          "bbbeadd2-5B95-4EC9-B300-13dc43208b64",
+          "445ccd4a-7882-4aa4-9e0d-04163828e1ac",
+          "7de391a0-2359-427e-ac8c-a217876a1fdb",
+          "5430043e-7052-48c0-a041-e8d3b0257a60",
+          "48939ee5-23a5-4f97-8564-1c3a1285525c",
+          "bdeb66e6-87c3-46c7-8d83-4df5a008253e",
+          "fc0dfdc6-b63a-4c4e-a4fe-a80e8347677c",
+          "3e5c7848-020a-4bea-8b30-424c11c975ae"
         ],
         "defaults": [
+          "73f5db23-293d-4934-b124-1d5361375480",
           "aaa778fc-7f17-4535-9021-515351df3691",
-          "bbbeadd2-5B95-4EC9-B300-13dc43208b64"
+          "bbbeadd2-5B95-4EC9-B300-13dc43208b64",
+          "445ccd4a-7882-4aa4-9e0d-04163828e1ac",
+          "7de391a0-2359-427e-ac8c-a217876a1fdb",
+          "5430043e-7052-48c0-a041-e8d3b0257a60",
+          "48939ee5-23a5-4f97-8564-1c3a1285525c",
+          "bdeb66e6-87c3-46c7-8d83-4df5a008253e",
+          "fc0dfdc6-b63a-4c4e-a4fe-a80e8347677c",
+          "3e5c7848-020a-4bea-8b30-424c11c975ae"
         ],
         "versions": [
           "CB_VERSION"

@@ -11,6 +11,8 @@ import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 public class ImageFilterParams {
 
+    private final String targetImageId;
+
     private final Image currentImage;
 
     private final String imageCatalogName;
@@ -35,9 +37,10 @@ public class ImageFilterParams {
 
     private final boolean getAllImages;
 
-    public ImageFilterParams(Image currentImage, String imageCatalogName, boolean lockComponents, Map<String, String> stackRelatedParcels, StackType stackType,
-            Blueprint blueprint, Long stackId, InternalUpgradeSettings internalUpgradeSettings, ImageCatalogPlatform imageCatalogPlatform, String cloudPlatform,
-            String region, boolean getAllImages) {
+    public ImageFilterParams(String targetImageId, Image currentImage, String imageCatalogName, boolean lockComponents, Map<String, String> stackRelatedParcels,
+            StackType stackType, Blueprint blueprint, Long stackId, InternalUpgradeSettings internalUpgradeSettings, ImageCatalogPlatform imageCatalogPlatform,
+            String cloudPlatform, String region, boolean getAllImages) {
+        this.targetImageId = targetImageId;
         this.currentImage = currentImage;
         this.imageCatalogName = imageCatalogName;
         this.lockComponents = lockComponents;
@@ -50,6 +53,10 @@ public class ImageFilterParams {
         this.cloudPlatform = cloudPlatform;
         this.region = region;
         this.getAllImages = getAllImages;
+    }
+
+    public String getTargetImageId() {
+        return targetImageId;
     }
 
     public Image getCurrentImage() {
@@ -128,12 +135,13 @@ public class ImageFilterParams {
                 Objects.equals(stackId, that.stackId) &&
                 Objects.equals(cloudPlatform, that.cloudPlatform) &&
                 Objects.equals(region, that.region) &&
-                Objects.equals(getAllImages, that.getAllImages);
+                Objects.equals(getAllImages, that.getAllImages) &&
+                Objects.equals(targetImageId, that.targetImageId);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(currentImage, lockComponents, stackRelatedParcels, stackType, blueprint, stackId, internalUpgradeSettings,
-                imageCatalogPlatform, cloudPlatform, region, getAllImages);
+                imageCatalogPlatform, cloudPlatform, region, getAllImages, targetImageId);
     }
 }

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image.filter;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -35,10 +34,16 @@ public class CmAndStackVersionUpgradeImageFilter implements UpgradeImageFilter {
 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
-        List<Image> filteredImages = filterImages(imageFilterResult, imageFilterParams);
-        logNotEligibleImages(imageFilterResult, filteredImages, LOGGER);
-        LOGGER.debug("After the filtering {} image left with proper CM and CDH version.", filteredImages.size());
-        return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
+        if (hasTargetImage(imageFilterParams)) {
+            Image candidateImage = imageFilterResult.getImages().getFirst();
+            CmAndStackVersionMatchResult cmAndStackVersionMatchResult = isUpgradePermitted(imageFilterParams, candidateImage);
+            return getImageFilterResultForTargetImage(imageFilterResult, imageFilterParams, cmAndStackVersionMatchResult, candidateImage);
+        } else {
+            List<Image> filteredImages =
+                    filterImages(imageFilterResult, image -> CmAndStackVersionMatchResult.PERMITTED.equals(isUpgradePermitted(imageFilterParams, image)));
+            LOGGER.debug("After the filtering {} image left with proper CM and CDH version.", filteredImages.size());
+            return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
+        }
     }
 
     @Override
@@ -54,17 +59,48 @@ public class CmAndStackVersionUpgradeImageFilter implements UpgradeImageFilter {
         return ORDER_NUMBER;
     }
 
-    private List<Image> filterImages(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
-        return imageFilterResult.getImages()
-                .stream()
-                .filter(image -> isUpgradePermitted(imageFilterParams, image))
-                .collect(Collectors.toList());
+    private ImageFilterResult getImageFilterResultForTargetImage(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams,
+            CmAndStackVersionMatchResult cmAndStackVersionMatchResult, Image candidateImage) {
+        return switch (cmAndStackVersionMatchResult) {
+            case PERMITTED -> imageFilterResult;
+            case LOCKED_COMPONENTS_MISMATCH -> new ImageFilterResult(List.of(), getCantUpgradeToImageMessage(imageFilterParams,
+                    "One of the following versions doesn't match between the images: activated parcel versions, " +
+                            "cloudera manager version, runtime version."));
+            case CM_UPGRADE_NOT_PERMITTED -> new ImageFilterResult(List.of(), getCantUpgradeToImageMessage(imageFilterParams,
+                    String.format("Can't upgrade Cloudera Manager from %s gbn: %s to %s gbn: %s.",
+                            imageFilterParams.getCurrentImage().getPackageVersion(ImagePackageVersion.CM),
+                            imageFilterParams.getCurrentImage().getPackageVersion(ImagePackageVersion.CM_BUILD_NUMBER),
+                            candidateImage.getPackageVersion(ImagePackageVersion.CM),
+                            candidateImage.getPackageVersion(ImagePackageVersion.CM_BUILD_NUMBER))));
+            case STACK_UPGRADE_NOT_PERMITTED -> new ImageFilterResult(List.of(), getCantUpgradeToImageMessage(imageFilterParams,
+                    String.format("Can't upgrade Cloudera Manager from %s gbn: %s to %s gbn: %s.",
+                            imageFilterParams.getCurrentImage().getPackageVersion(ImagePackageVersion.STACK),
+                            imageFilterParams.getCurrentImage().getPackageVersion(ImagePackageVersion.CDH_BUILD_NUMBER),
+                            candidateImage.getPackageVersion(ImagePackageVersion.STACK),
+                            candidateImage.getPackageVersion(ImagePackageVersion.CDH_BUILD_NUMBER))));
+        };
     }
 
-    private boolean isUpgradePermitted(ImageFilterParams imageFilterParams, Image candidateImage) {
-        return imageFilterParams.isLockComponents() || isCentOSToRedhatOsUpgrade(imageFilterParams, candidateImage)
-                ? lockedComponentChecker.isUpgradePermitted(candidateImage, imageFilterParams.getStackRelatedParcels(), getCmBuildNumber(imageFilterParams))
-                : isUnlockedCmAndStackUpgradePermitted(imageFilterParams, candidateImage);
+    private CmAndStackVersionMatchResult isUpgradePermitted(ImageFilterParams imageFilterParams, Image candidateImage) {
+        if (shouldCheckWithLockedComponents(imageFilterParams, candidateImage)) {
+            if (lockedComponentChecker.isUpgradePermitted(candidateImage, imageFilterParams.getStackRelatedParcels(), getCmBuildNumber(imageFilterParams))) {
+                return CmAndStackVersionMatchResult.PERMITTED;
+            } else {
+                return CmAndStackVersionMatchResult.LOCKED_COMPONENTS_MISMATCH;
+            }
+        } else {
+            if (!upgradePermissionProvider.permitCmUpgrade(imageFilterParams, candidateImage)) {
+                return CmAndStackVersionMatchResult.CM_UPGRADE_NOT_PERMITTED;
+            } else if (!upgradePermissionProvider.permitStackUpgrade(imageFilterParams, candidateImage)) {
+                return CmAndStackVersionMatchResult.STACK_UPGRADE_NOT_PERMITTED;
+            } else {
+                return CmAndStackVersionMatchResult.PERMITTED;
+            }
+        }
+    }
+
+    private boolean shouldCheckWithLockedComponents(ImageFilterParams imageFilterParams, Image candidateImage) {
+        return imageFilterParams.isLockComponents() || isCentOSToRedhatOsUpgrade(imageFilterParams, candidateImage);
     }
 
     private boolean isCentOSToRedhatOsUpgrade(ImageFilterParams imageFilterParams, Image candidateImage) {
@@ -76,8 +112,10 @@ public class CmAndStackVersionUpgradeImageFilter implements UpgradeImageFilter {
         return imageFilterParams.getCurrentImage().getPackageVersion(ImagePackageVersion.CM_BUILD_NUMBER);
     }
 
-    private boolean isUnlockedCmAndStackUpgradePermitted(ImageFilterParams imageFilterParams, Image candidateImage) {
-        return upgradePermissionProvider.permitCmUpgrade(imageFilterParams, candidateImage)
-                && upgradePermissionProvider.permitStackUpgrade(imageFilterParams, candidateImage);
+    enum CmAndStackVersionMatchResult {
+        LOCKED_COMPONENTS_MISMATCH,
+        CM_UPGRADE_NOT_PERMITTED,
+        STACK_UPGRADE_NOT_PERMITTED,
+        PERMITTED
     }
 }

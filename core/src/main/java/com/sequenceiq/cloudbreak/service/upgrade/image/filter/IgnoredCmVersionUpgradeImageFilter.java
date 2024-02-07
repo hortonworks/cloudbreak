@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image.filter;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,7 @@ public class IgnoredCmVersionUpgradeImageFilter implements UpgradeImageFilter {
 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
-        List<Image> filteredImages = filterImages(imageFilterResult);
+        List<Image> filteredImages = filterImages(imageFilterResult, image -> !image.getPackageVersion(ImagePackageVersion.CM).contains(IGNORED_CM_VERSION));
         logNotEligibleImages(imageFilterResult, filteredImages, LOGGER);
         LOGGER.debug("After the filtering {} image left with proper Cloudera Manager version format.", filteredImages.size());
         return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
@@ -31,18 +30,16 @@ public class IgnoredCmVersionUpgradeImageFilter implements UpgradeImageFilter {
 
     @Override
     public String getMessage(ImageFilterParams imageFilterParams) {
-        return "There are no eligible images with supported Cloudera Manager or CDP version.";
+        if (hasTargetImage(imageFilterParams)) {
+            return getCantUpgradeToImageMessage(imageFilterParams,
+                    String.format("Cloudera Manager version on the target image contains '%s'.", IGNORED_CM_VERSION));
+        } else {
+            return "There are no eligible images with supported Cloudera Manager or CDP version.";
+        }
     }
 
     @Override
     public Integer getFilterOrderNumber() {
         return ORDER_NUMBER;
-    }
-
-    private List<Image> filterImages(ImageFilterResult imageFilterResult) {
-        return imageFilterResult.getImages()
-                .stream()
-                .filter(image -> !image.getPackageVersion(ImagePackageVersion.CM).contains(IGNORED_CM_VERSION))
-                .collect(Collectors.toList());
     }
 }

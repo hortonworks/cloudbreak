@@ -181,7 +181,7 @@ class ImageCreationBasedUpgradeImageFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams() {
-        return new ImageFilterParams(current, null, false, null, null, null, null, null, null, null, null, false);
+        return new ImageFilterParams(null, current, null, false, null, null, null, null, null, null, null, null, false);
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentImage(Long created) {

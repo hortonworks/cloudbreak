@@ -117,7 +117,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         ImageChangeDto imageChangeDto = event.getImageChangeDto();
         LOGGER.debug("Creating new event where changing the image from RHEL8 {} to centos7 {} for perform the runtime upgrade", imageChangeDto.getImageId(),
                 helperImage.getUuid());
-        return new DistroXUpgradeTriggerEvent(event.getSelector(), event.getResourceId(),
+        return new DistroXUpgradeTriggerEvent(event.getSelector(), event.getResourceId(), event.accepted(),
                 new ImageChangeDto(event.getResourceId(), helperImage.getUuid(), imageChangeDto.getImageCatalogName(), imageChangeDto.getImageCatalogUrl()),
                 event.isReplaceVms(), event.isLockComponents(), event.getTriggeredStackVariant(), event.isRollingUpgradeEnabled());
     }
