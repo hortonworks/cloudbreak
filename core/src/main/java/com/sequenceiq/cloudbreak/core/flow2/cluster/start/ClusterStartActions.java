@@ -136,7 +136,7 @@ public class ClusterStartActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Cluster (stackID: {}, provisionType: {}) start falied due to: {}", context.getStackId(), context.getProvisionType(),
-                        payload.getException().getMessage());
+                        payload.getException().getMessage(), payload.getException());
                 clusterStartService.handleClusterStartFailure(context.getStack(), payload.getException().getMessage());
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_START_FAILED, context.getStack(), payload.getException());
                 sendEvent(context);

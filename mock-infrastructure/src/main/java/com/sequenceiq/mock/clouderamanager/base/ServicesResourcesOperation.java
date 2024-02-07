@@ -48,4 +48,8 @@ public class ServicesResourcesOperation {
         }
         return responseCreatorComponent.exec(response);
     }
+
+    public ResponseEntity<ApiServiceConfig> updateServiceConfig(String mockUuid, String clusterName, String serviceName, String message, ApiServiceConfig body) {
+        return responseCreatorComponent.exec(body);
+    }
 }

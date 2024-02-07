@@ -447,6 +447,10 @@ public class ClusterService {
         return repository.findByRdsConfig(rdsConfigId);
     }
 
+    public int countByRdsConfig(Long rdsConfigId) {
+        return repository.countByRdsConfig(rdsConfigId);
+    }
+
     public Set<String> findNamesByRdsConfig(Long rdsConfigId) {
         return repository.findNamesByRdsConfig(rdsConfigId);
     }

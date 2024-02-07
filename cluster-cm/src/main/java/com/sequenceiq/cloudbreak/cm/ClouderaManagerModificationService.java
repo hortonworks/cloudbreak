@@ -928,9 +928,16 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Override
     public void startCluster() throws CloudbreakException {
+        startCluster(false);
+    }
+
+    @Override
+    public void startCluster(boolean servicesOnly) throws CloudbreakException {
         try {
-            startClouderaManager();
-            startAgents();
+            if (!servicesOnly) {
+                startClouderaManager();
+                startAgents();
+            }
             enableKnoxAutoRestart();
             startServices();
         } catch (ApiException e) {
