@@ -150,6 +150,7 @@ public class ClusterBuilderService implements PaasRemoteDataContextSupplier {
             if (StringUtils.isNotEmpty(stackDto.getDatalakeCrn())) {
                 return stackDto.getDatalakeCrn();
             } else {
+                LOGGER.info("Datalake CRN not found in Stack. Fetching the CRN SDX services.");
                 return platformAwareSdxConnector.getSdxCrnByEnvironmentCrn(stackDto.getEnvironmentCrn()).orElse(null);
             }
         }
@@ -271,6 +272,7 @@ public class ClusterBuilderService implements PaasRemoteDataContextSupplier {
         if (StringUtils.isNotBlank(sdxCrn)) {
             return platformAwareSdxConnector.getRemoteDataContext(sdxCrn);
         }
+        LOGGER.info("Skipping getSdxContextOptional as the Crn is empty");
         return Optional.empty();
     }
 

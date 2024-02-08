@@ -45,6 +45,7 @@ public class ServiceDiscoveryClient {
                 .newBuilder()
                 .setDatalake(sdxCrn)
                 .build();
+        LOGGER.info("Created request to get RDC: {}. Crn: {}", request, sdxCrn);
         return newStub().describeDatalakeAsApiRemoteDataContext(request).getContext();
     }
 }

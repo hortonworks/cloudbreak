@@ -30,7 +30,7 @@ public class PlatformAwareSdxConnector {
     private Map<TargetPlatform, SdxService<?>> platformDependentServiceMap;
 
     public Optional<String> getRemoteDataContext(String sdxCrn) {
-        LOGGER.debug("Getting remote data context for SDX {}", sdxCrn);
+        LOGGER.info("Getting remote data context for SDX {}", sdxCrn);
         return platformDependentServiceMap.get(TargetPlatform.getByCrn(sdxCrn)).getRemoteDataContext(sdxCrn);
     }
 
@@ -44,6 +44,7 @@ public class PlatformAwareSdxConnector {
     }
 
     public Set<String> listSdxCrns(String environmentName, String environmentCrn) {
+        LOGGER.info("Getting SDX CRN'S for the datalakes in the environment {}", environmentName);
         Set<String> saasSdxCrns = platformDependentServiceMap.get(TargetPlatform.CDL).listSdxCrns(environmentName, environmentCrn);
         Set<String> paasSdxCrns = platformDependentServiceMap.get(TargetPlatform.PAAS).listSdxCrns(environmentName, environmentCrn);
         if (!paasSdxCrns.isEmpty() && !saasSdxCrns.isEmpty()) {

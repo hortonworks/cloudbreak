@@ -52,9 +52,9 @@ public class CdlSdxService extends AbstractSdxService<CdlCrudProto.StatusType.Va
             try {
                 return Optional.of(grpcServiceDiscoveryClient.getRemoteDataContext(crn));
             } catch (JsonProcessingException e) {
-                LOGGER.error("Json processing failed, thus we cannot query remote data context.");
+                LOGGER.warn("Json processing failed, thus we cannot query remote data context. Crn: {}", crn, e);
             } catch (RuntimeException exception) {
-                LOGGER.error("Not able to fetch the RDC for CDL from Serivce Discovery. CRN: {}", crn);
+                LOGGER.warn("Not able to fetch the RDC for CDL from Service Discovery. CRN: {}", crn, exception);
             }
         }
         return Optional.empty();

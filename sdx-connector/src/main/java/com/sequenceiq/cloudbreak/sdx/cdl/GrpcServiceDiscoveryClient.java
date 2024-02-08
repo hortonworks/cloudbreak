@@ -1,14 +1,23 @@
 package com.sequenceiq.cloudbreak.sdx.cdl;
 
+
+import java.util.Collections;
+import java.util.Objects;
+
 import jakarta.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
+import com.cloudera.api.swagger.model.ApiRemoteDataContext;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
+import com.googlecode.protobuf.format.JsonFormat;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.sdx.cdl.config.ServiceDiscoveryChannelConfig;
 
@@ -35,7 +44,26 @@ public class GrpcServiceDiscoveryClient {
 
     public String getRemoteDataContext(String sdxCrn) throws JsonProcessingException {
         ServiceDiscoveryClient serviceDiscoveryClient = makeClient();
-        return JsonUtil.writeValueAsString(serviceDiscoveryClient.getRemoteDataContext(sdxCrn));
+        JsonFormat jsonFormat = new JsonFormat();
+        String parsedJson = jsonFormat.printToString(serviceDiscoveryClient.getRemoteDataContext(sdxCrn));
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setDefaultSetterInfo(JsonSetter.Value.construct(Nulls.AS_EMPTY, Nulls.AS_EMPTY));
+        ApiRemoteDataContext apiRemoteDataContext = objectMapper.readValue(parsedJson, ApiRemoteDataContext.class);
+        //Handle incorrectly set null values
+        if (Objects.nonNull(apiRemoteDataContext)) {
+            apiRemoteDataContext.getEndPoints()
+                    .forEach(endpoint -> {
+                        if (!CollectionUtils.isEmpty(endpoint.getEndPointHostList())) {
+                            endpoint.getEndPointHostList()
+                                    .forEach(apiEndPointHost -> {
+                                        if (null == apiEndPointHost.getEndPointConfigs()) {
+                                            apiEndPointHost.setEndPointConfigs(Collections.emptyList());
+                                        }
+                                    });
+                        }
+                    });
+        }
+        return objectMapper.writeValueAsString(apiRemoteDataContext);
     }
 
     ServiceDiscoveryClient makeClient() {
