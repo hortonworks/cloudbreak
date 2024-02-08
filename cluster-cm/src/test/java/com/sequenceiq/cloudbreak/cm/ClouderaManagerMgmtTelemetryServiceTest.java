@@ -430,6 +430,74 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         verify(mgmtRoleConfigGroupsResourceApi, times(1)).updateConfig(any(), anyString(), any());
     }
 
+    @Test
+    public void testGovCloudValidationNotGovCloud() throws ApiException {
+        // GIVEN
+        Stack stack = new Stack();
+        stack.setType(StackType.DATALAKE);
+        User user = new User();
+        user.setUserCrn("crn:cdp:iam:us-west-1:accountId:user:name");
+        stack.setCreator(user);
+        stack.setResourceCrn("crn:cdp:datalake:us-west-1:accountId:datalake:name");
+        stack.setPlatformVariant("AWS");
+        WorkloadAnalytics wa = new WorkloadAnalytics();
+        Telemetry telemetry = new Telemetry();
+        telemetry.setWorkloadAnalytics(wa);
+
+        when(entitlementService.useDataBusCNameEndpointEnabled(anyString())).thenReturn(false);
+        when(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).thenReturn("https://dbusapi.us-west-1.sigma.altus.cloudera.com");
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(cmResourceApi);
+
+        ApiConfigList apiConfigList = new ApiConfigList();
+        when(cmResourceApi.updateConfig(anyString(), any())).thenReturn(apiConfigList);
+
+        AltusCredential credential = new AltusCredential("accessKey", "secretKey".toCharArray());
+        when(clouderaManagerDatabusService.getAltusCredential(stack, SDX_STACK_CRN)).thenReturn(credential);
+
+        ApiResponse response = new ApiResponse<>(0, null, apiConfigList);
+        when(apiClient.execute(any(), any())).thenReturn(response);
+
+        // WHEN
+        underTest.setupTelemetryRole(stack, apiClient, null, new ApiRoleList(), telemetry, SDX_STACK_CRN);
+        // THEN
+        verify(externalAccountService, times(1)).createExternalAccount(anyString(), anyString(), anyString(), anyMap(), any(ApiClient.class));
+        verify(clouderaManagerDatabusService, times(1)).getAltusCredential(stack, SDX_STACK_CRN);
+    }
+
+    @Test
+    public void testGovCloudValidationGovCloud() throws ApiException {
+        // GIVEN
+        Stack stack = new Stack();
+        stack.setType(StackType.DATALAKE);
+        User user = new User();
+        user.setUserCrn("crn:cdp:iam:us-west-1:accountId:user:name");
+        stack.setCreator(user);
+        stack.setResourceCrn("crn:cdp:datalake:us-west-1:accountId:datalake:name");
+        stack.setPlatformVariant("govCloud");
+        WorkloadAnalytics wa = new WorkloadAnalytics();
+        Telemetry telemetry = new Telemetry();
+        telemetry.setWorkloadAnalytics(wa);
+
+        when(entitlementService.useDataBusCNameEndpointEnabled(anyString())).thenReturn(false);
+        when(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).thenReturn("https://dbusapi.us-west-1.sigma.altus.cloudera.com");
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(cmResourceApi);
+
+        ApiConfigList apiConfigList = new ApiConfigList();
+        when(cmResourceApi.updateConfig(anyString(), any())).thenReturn(apiConfigList);
+
+        AltusCredential credential = new AltusCredential("accessKey", "secretKey".toCharArray());
+        when(clouderaManagerDatabusService.getAltusCredential(stack, SDX_STACK_CRN)).thenReturn(credential);
+
+        ApiResponse response = new ApiResponse<>(0, null, apiConfigList);
+        when(apiClient.execute(any(), any())).thenReturn(response);
+
+        // WHEN
+        underTest.setupTelemetryRole(stack, apiClient, null, new ApiRoleList(), telemetry, SDX_STACK_CRN);
+        // THEN
+        verify(externalAccountService, times(0)).createExternalAccount(anyString(), anyString(), anyString(), anyMap(), any(ApiClient.class));
+        verify(clouderaManagerDatabusService, times(0)).getAltusCredential(stack, SDX_STACK_CRN);
+    }
+
     private boolean containsConfigWithValue(ApiConfigList configList, String configKey, String configValue) {
         return configList.getItems().stream()
                 .anyMatch(c -> configKey.equals(c.getName()) && configValue.equals(c.getValue()));
