@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.image.userdata;
 
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -7,14 +9,23 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserDataBuilderParams {
 
-    private String customData = "touch /tmp/cb-custom-data-default.txt";
+    private String customUserData = "touch /tmp/cb-custom-data-default.txt";
 
-    public String getCustomData() {
-        return customData;
+    private Map<String, String> userDataSecrets;
+
+    public String getCustomUserData() {
+        return customUserData;
     }
 
-    public void setCustomData(String customData) {
-        this.customData = customData;
+    public void setCustomUserData(String customUserData) {
+        this.customUserData = customUserData;
     }
 
+    public Map<String, String> getUserDataSecrets() {
+        return userDataSecrets;
+    }
+
+    public void setUserDataSecrets(Map<String, String> userDataSecrets) {
+        this.userDataSecrets = userDataSecrets;
+    }
 }

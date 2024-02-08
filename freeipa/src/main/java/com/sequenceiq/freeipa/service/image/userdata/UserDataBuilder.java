@@ -7,18 +7,14 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
@@ -33,10 +29,10 @@ import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2Parameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeySource;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -51,12 +47,8 @@ public class UserDataBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserDataBuilder.class);
 
-    private static final String SECRET_KEYS_AND_NAMES_LOCATION = "encryption/secret-keys-and-names.json";
-
     @Value("${cdp.apiendpoint.url:}")
     private String cdpApiEndpointUrl;
-
-    private Map<String, String> secretKeysAndNames;
 
     @Inject
     private UserDataBuilderParams userDataBuilderParams;
@@ -72,23 +64,6 @@ public class UserDataBuilder {
 
     @Inject
     private EncryptionUtil encryptionUtil;
-
-    @PostConstruct
-    public void init() throws IOException {
-        ClassPathResource classPathResource = new ClassPathResource(SECRET_KEYS_AND_NAMES_LOCATION);
-        if (classPathResource.exists()) {
-            try {
-                String json = FileReaderUtils.readFileFromClasspath(SECRET_KEYS_AND_NAMES_LOCATION);
-                secretKeysAndNames = JsonUtil.readValue(json, new TypeReference<>() { });
-                LOGGER.debug("Loaded the following secretKeysAndNames: {}.", secretKeysAndNames);
-            } catch (IOException e) {
-                LOGGER.warn("Secret keys and names could not be loaded!", e);
-                throw e;
-            }
-        } else {
-            LOGGER.warn("ClassPathResource for SECRET_KEYS_AND_NAMES_LOCATION does not exist, therefore secretKeysAndNames could not be loaded.");
-        }
-    }
 
     public String buildUserData(String accountId, DetailedEnvironmentResponse environment, Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
             PlatformParameters parameters, String saltBootPassword, String cbCert,
@@ -109,7 +84,7 @@ public class UserDataBuilder {
         model.put("gateway", true);
         model.put("signaturePublicKey", BaseEncoding.base64().encode(cbSshKeyDer));
         model.put("sshUser", sshUser);
-        model.put("customUserData", userDataBuilderParams.getCustomData());
+        model.put("customUserData", userDataBuilderParams.getCustomUserData());
         model.put("saltBootPassword", saltBootPassword);
         model.put("cbCert", cbCert);
         model.put("cdpApiEndpointUrl", Strings.nullToEmpty(cdpApiEndpointUrl));
@@ -167,14 +142,14 @@ public class UserDataBuilder {
 
     private void extendModelAndEncryptSecretsIfSecretEncryptionEnabled(DetailedEnvironmentResponse environment, Map<String, Object> model) {
         if (environment.isEnableSecretEncryption()) {
+            Map<String, String> secretKeysAndNames = validateAndReturnSecretKeysAndNames();
             CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
-            model.put("secretEncryptionEnabled", Boolean.TRUE);
-            switch (cloudPlatform) {
-                case AWS -> model.put("secretEncryptionKeySource", environment.getAws().getAwsDiskEncryptionParameters().getEncryptionKeyArn());
-                default -> LOGGER.warn("Couldn't specify secret encryption key source for cloud platform {}.", cloudPlatform);
-            }
+            EncryptionKeySource secretEncryptionKeySource = encryptionUtil.getEncryptionKeySource(cloudPlatform, environment);
 
-            for (Entry<String, Object> entry : model.entrySet()) {
+            model.put("secretEncryptionEnabled", Boolean.TRUE);
+            model.put("secretEncryptionKeySource", secretEncryptionKeySource.keyValue());
+
+            for (Map.Entry<String, Object> entry : model.entrySet()) {
                 String key = entry.getKey();
                 if (secretKeysAndNames.containsKey(key)) {
                     String secretName = secretKeysAndNames.get(key);
@@ -190,6 +165,19 @@ public class UserDataBuilder {
                 }
             }
         }
+    }
+
+    public Map<String, String> validateAndReturnSecretKeysAndNames() {
+        Map<String, String> secretKeysAndNames = userDataBuilderParams.getUserDataSecrets();
+        if (secretKeysAndNames == null) {
+            throw new CloudbreakServiceException("Secret encryption is enabled, but secret keys and names couldn't be loaded for user data secret encryption!");
+        }
+        if (secretKeysAndNames.isEmpty()) {
+            throw new CloudbreakServiceException("Secret encryption is enabled, but secret keys and names map is empty, " +
+                    "which means no secrets will be encrypted in the user data!");
+        }
+        LOGGER.debug("Using the following secret keys and names for user data secret encryption: {}.", secretKeysAndNames);
+        return secretKeysAndNames;
     }
 
     private String build(Map<String, Object> model) {

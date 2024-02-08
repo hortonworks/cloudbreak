@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.service.image.userdata;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,13 +13,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
@@ -41,28 +45,39 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeySource;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyType;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
+import com.sequenceiq.cloudbreak.encryption.EncryptionUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 
-@RunWith(MockitoJUnitRunner.class)
-public class UserDataBuilderTest {
+@ExtendWith(MockitoExtension.class)
+class UserDataBuilderTest {
 
     @Spy
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
+    private DetailedEnvironmentResponse environment;
+
+    @Mock
+    private EncryptionUtil encryptionUtil;
+
     @InjectMocks
     private UserDataBuilder underTest;
 
-    @Before
-    public void setup() throws IOException, TemplateException {
+    @BeforeEach
+    void setup() throws IOException, TemplateException {
         FreeMarkerConfigurationFactoryBean factoryBean = new FreeMarkerConfigurationFactoryBean();
         factoryBean.setPreferFileSystemAccess(false);
         factoryBean.setTemplateLoaderPath("classpath:/");
@@ -71,23 +86,27 @@ public class UserDataBuilderTest {
         underTest.setFreemarkerConfiguration(configuration);
 
         UserDataBuilderParams params = new UserDataBuilderParams();
-        params.setCustomData("date >> /tmp/time.txt");
-
+        params.setCustomUserData("date >> /tmp/time.txt");
+        params.setUserDataSecrets(Map.of("saltBootPassword", "SALT_BOOT_PASSWORD"));
         ReflectionTestUtils.setField(underTest, "userDataBuilderParams", params);
+
+        environment = DetailedEnvironmentResponse.builder()
+                .withCrn("environment:crn")
+                .build();
     }
 
     @Test
-    public void testBuildUserDataAzure() throws IOException {
+    void testBuildUserDataAzure() throws IOException {
         String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-init.sh");
         String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-init.sh");
-        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null);
-        Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
-        Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
+        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), Variant.variant("AZURE"), "priv-key".getBytes(),
+                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null, environment);
+        assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
+        assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
     }
 
     @Test
-    public void testBuildUserDataWithCCM() throws IOException {
+    void testBuildUserDataWithCCM() throws IOException {
         BaseServiceEndpoint serviceEndpoint = new BaseServiceEndpoint(new HostEndpoint("ccm.cloudera.com"));
         DefaultServerParameters serverParameters = new DefaultServerParameters(serviceEndpoint, "pub-key", "mina-id");
         DefaultInstanceParameters instanceParameters = new DefaultInstanceParameters("tunnel-id", "key-id", "private-key");
@@ -96,48 +115,48 @@ public class UserDataBuilderTest {
         CcmParameters ccmParameters = new DefaultCcmParameters(serverParameters, instanceParameters, List.of(nginxTunnel, knoxTunnel));
         CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters(ccmParameters);
 
-        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", ccmConnectivityParameters, null);
+        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), Variant.variant("AZURE"), "priv-key".getBytes(),
+                "cloudbreak", getPlatformParameters(), "pass", "cert", ccmConnectivityParameters, null, environment);
 
         String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-ccm-init.sh");
         String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-ccm-init.sh");
-        Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
-        Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
+        assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
+        assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
     }
 
     @Test
-    public void testBuildUserDataWithCCMV2() throws IOException {
+    void testBuildUserDataWithCCMV2() throws IOException {
         CcmV2Parameters ccmV2Parameters = new DefaultCcmV2Parameters("invertingProxyHost", "invertingProxyCertificate",
                 "agentCrn", "agentKeyId", "agentEncipheredPrivateKey", "agentCertificate");
         CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters(ccmV2Parameters);
 
-        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", ccmConnectivityParameters, null);
+        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), Variant.variant("AZURE"), "priv-key".getBytes(),
+                "cloudbreak", getPlatformParameters(), "pass", "cert", ccmConnectivityParameters, null, environment);
 
         String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-ccm-init.sh");
         String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-ccm-v2-init.sh");
 
-        Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
-        Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
+        assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
+        assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
     }
 
     @Test
-    public void testBuildUserDataWithCCMV2Jumpgate() throws IOException {
+    void testBuildUserDataWithCCMV2Jumpgate() throws IOException {
         CcmV2JumpgateParameters ccmV2JumpgateParameters = new DefaultCcmV2JumpgateParameters();
         CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters(ccmV2JumpgateParameters);
 
-        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", ccmConnectivityParameters, null);
+        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), Variant.variant("AZURE"), "priv-key".getBytes(),
+                "cloudbreak", getPlatformParameters(), "pass", "cert", ccmConnectivityParameters, null, environment);
 
         String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-ccm-init.sh");
         String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-ccm-v2-jumpgate-init.sh");
 
-        Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
-        Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
+        assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
+        assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
     }
 
     @Test
-    public void testBuildUserDataAzureWithNoAuthProxy() throws IOException {
+    void testBuildUserDataAzureWithNoAuthProxy() throws IOException {
         String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-init-noauthproxy.sh");
         String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-init.sh");
         ProxyConfig proxyConfig = ProxyConfig.builder()
@@ -146,14 +165,14 @@ public class UserDataBuilderTest {
                 .withNoProxyHosts("noproxy.com")
                 .withProtocol("http")
                 .build();
-        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), proxyConfig);
-        Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
-        Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
+        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), Variant.variant("AZURE"), "priv-key".getBytes(),
+                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), proxyConfig, environment);
+        assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
+        assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
     }
 
     @Test
-    public void testBuildUserDataAzureWithAuthProxy() throws IOException {
+    void testBuildUserDataAzureWithAuthProxy() throws IOException {
         String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-init-authproxy.sh");
         String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-init.sh");
         ProxyAuthentication proxyAuthentication = ProxyAuthentication.builder()
@@ -167,10 +186,43 @@ public class UserDataBuilderTest {
                 .withNoProxyHosts("noproxy.com")
                 .withProtocol("https")
                 .build();
-        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), proxyConfig);
-        Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
-        Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
+        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), Variant.variant("AZURE"), "priv-key".getBytes(),
+                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), proxyConfig, environment);
+        assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
+        assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
+    }
+
+    @Test
+    void testBuildUserDataWithSecretEncryptionEnabled() throws IOException {
+        String expectedGwScript = FileReaderUtils.readFileFromClasspath("aws-gateway-init-secret-encryption.sh");
+        String expectedCoreScript = FileReaderUtils.readFileFromClasspath("aws-core-init-secret-encryption.sh");
+        environment.setEnableSecretEncryption(true);
+        environment.setCloudPlatform(CloudPlatform.AWS.name());
+        EncryptionKeySource encryptionKeySource = EncryptionKeySource.builder()
+                .withKeyType(EncryptionKeyType.AWS_KMS_KEY_ARN)
+                .withKeyValue("keyArn")
+                .build();
+        when(encryptionUtil.getEncryptionKeySource(CloudPlatform.AWS, environment)).thenReturn(encryptionKeySource);
+        when(encryptionUtil.encrypt(any(), any(), eq("pass"), eq(environment), eq("SALT_BOOT_PASSWORD"))).thenReturn("encrypted-pass");
+
+        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AWS"), Variant.variant("AWS"), "priv-key".getBytes(),
+                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null, environment);
+
+        assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
+        assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
+    }
+
+    @Test
+    void testBuildUserDataWithSecretEncryptionDisabled() throws IOException {
+        String expectedGwScript = FileReaderUtils.readFileFromClasspath("aws-gateway-init.sh");
+        String expectedCoreScript = FileReaderUtils.readFileFromClasspath("aws-core-init.sh");
+        environment.setEnableSecretEncryption(false);
+
+        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AWS"), Variant.variant("AWS"), "priv-key".getBytes(),
+                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null, environment);
+
+        assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
+        assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
     }
 
     private PlatformParameters getPlatformParameters() {

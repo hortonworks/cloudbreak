@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.encryption;
+package com.sequenceiq.cloudbreak.encryption;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -21,6 +21,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CryptoConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureConstants;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -30,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptRequest;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeySource;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
@@ -37,7 +40,6 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEn
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
-import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 
 @ExtendWith(MockitoExtension.class)
 class EncryptionUtilTest {
@@ -103,7 +105,7 @@ class EncryptionUtilTest {
         when(cloudPlatformConnectors.get(Platform.platform(CloudPlatform.AWS.name()), Variant.variant(CloudPlatform.AWS.name()))).thenReturn(cloudConnector);
         when(cryptoConnector.encrypt(encryptRequestArgumentCaptor.capture())).thenReturn("encrypted-secret");
 
-        String encryptResult = underTest.encrypt(CloudPlatform.AWS, "secret", environment, "SECRET_NAME");
+        String encryptResult = underTest.encrypt(AwsConstants.AWS_PLATFORM, AwsConstants.AWS_DEFAULT_VARIANT, "secret", environment, "SECRET_NAME");
 
         EncryptionKeySource expectedKeySource = EncryptionKeySource.builder()
                 .withKeyType(EncryptionKeyType.AWS_KMS_KEY_ARN)
@@ -128,7 +130,8 @@ class EncryptionUtilTest {
         when(cloudPlatformConnectors.get(Platform.platform(CloudPlatform.AZURE.name()), Variant.variant(CloudPlatform.AZURE.name())))
                 .thenReturn(cloudConnector);
 
-        assertThrows(CloudConnectorException.class, () -> underTest.encrypt(CloudPlatform.AZURE, "secret", environment, "SECRET_NAME"));
+        assertThrows(CloudConnectorException.class, () ->
+                underTest.encrypt(AzureConstants.PLATFORM, AzureConstants.VARIANT, "secret", environment, "SECRET_NAME"));
     }
 
     @Test

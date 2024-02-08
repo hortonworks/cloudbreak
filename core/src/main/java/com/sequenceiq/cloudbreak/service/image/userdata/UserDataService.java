@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -29,16 +30,17 @@ import com.sequenceiq.cloudbreak.domain.Userdata;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.repository.UserdataRepository;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigUserDataReplacer;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
-import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.util.UserDataReplacer;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
 public class UserDataService {
@@ -67,9 +69,6 @@ public class UserDataService {
     private ImageService imageService;
 
     @Inject
-    private StackDtoService stackDtoService;
-
-    @Inject
     private SecretService secretService;
 
     @Inject
@@ -80,6 +79,9 @@ public class UserDataService {
 
     @Inject
     private ProxyConfigUserDataReplacer proxyConfigUserDataReplacer;
+
+    @Inject
+    private EnvironmentClientService environmentClientService;
 
     public void updateJumpgateFlagOnly(Long stackId) {
         LOGGER.debug("Updating Jumpgate flag in user data for stack {}", stackId);
@@ -168,7 +170,7 @@ public class UserDataService {
         return new CloudbreakServiceException(message, e);
     }
 
-    public void createUserData(Long stackId) throws CloudbreakImageNotFoundException {
+    public void createUserData(Long stackId) {
         Stack stack = stackService.getByIdWithLists(stackId);
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         Future<PlatformParameters> platformParametersFuture =
@@ -188,8 +190,10 @@ public class UserDataService {
             PlatformParameters platformParameters = platformParametersFuture.get();
             CcmConnectivityParameters ccmParameters = ccmUserDataService.fetchAndSaveCcmParameters(stack);
             Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByEnvironmentCrn(stack.getEnvironmentCrn());
-            Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(Platform.platform(stack.getCloudPlatform()), cbSshKeyDer,
-                    sshUser, platformParameters, saltBootPassword, cbCert, ccmParameters, proxyConfig.orElse(null));
+            DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
+            Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(Platform.platform(stack.getCloudPlatform()),
+                    Variant.variant(stack.getPlatformVariant()), cbSshKeyDer, sshUser, platformParameters, saltBootPassword, cbCert, ccmParameters,
+                    proxyConfig.orElse(null), environment);
             createOrUpdateUserData(stackId, userData);
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Failed to get Platform parmaters", e);

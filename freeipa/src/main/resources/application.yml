@@ -263,9 +263,23 @@ cb:
       container.format: bare
 
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
-  custom.user.data: |
+
+  customUserData: |
     touch /tmp/custom-user-data
     date >> /tmp/custom-user-data
+  userDataSecrets:
+    saltBootPassword: SALT_BOOT_PASSWORD
+    proxyPassword: PROXY_PASSWORD
+    ccmTunnelInitiatorId: CCM_TUNNEL_INITIATOR_ID
+    ccmKeyId: CCM_KEY_ID
+    ccmEncipheredPrivateKey: CCM_ENCIPHERED_PRIVATE_KEY
+    ccmV2AgentKeyId: CCM_V2_AGENT_KEY_ID
+    ccmV2AgentEncipheredKey: CCM_V2_AGENT_ENCIPHERED_KEY
+    ccmV2AgentCertificate: CCM_V2_AGENT_CERTIFICATE
+    ccmV2AgentMachineUserEncipheredAccessKey: CCM_V2_AGENT_ENCIPHERED_ACCESS_KEY
+    ccmV2AgentHmacKey: CCM_V2_AGENT_HMAC_KEY
+    ccmV2AgentIv: CCM_V2_IV
+    ccmV2AgentHmacForPrivateKey: CCM_V2_AGENT_HMAC_FOR_PRIVATE_KEY
 
   arm:
     template.path: templates/arm-v2-freeipa.ftl

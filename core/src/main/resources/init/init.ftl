@@ -5,6 +5,7 @@ exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 
 set -x
 
+export ENVIRONMENT_CRN="${environmentCrn}"
 export CLOUD_PLATFORM="${cloudPlatform}"
 export START_LABEL=${platformDiskStartLabel}
 export PLATFORM_DISK_PREFIX=${platformDiskPrefix}
@@ -81,6 +82,10 @@ export IS_CCM_V2_ENABLED=false
 export IS_CCM_V2_JUMPGATE_ENABLED=true
 <#else>
 export IS_CCM_V2_JUMPGATE_ENABLED=false
+</#if>
+<#if secretEncryptionEnabled!false>
+export SECRET_ENCRYPTION_ENABLED=true
+export SECRET_ENCRYPTION_KEY_SOURCE="${secretEncryptionKeySource}"
 </#if>
 
 ${customUserData}
