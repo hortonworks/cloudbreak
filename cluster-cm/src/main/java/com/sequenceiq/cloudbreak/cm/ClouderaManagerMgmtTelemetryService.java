@@ -346,8 +346,8 @@ public class ClouderaManagerMgmtTelemetryService {
 
     private boolean isGovCloud(StackDtoDelegate stack) {
         return stack.getPlatformVariant() != null
-                && !stack.getPlatformVariant().equalsIgnoreCase("govCloud")
-                && !stack.getPlatformVariant().equalsIgnoreCase(AWS_NATIVE_GOV);
+                && (stack.getPlatformVariant().equalsIgnoreCase("govCloud")
+                || stack.getPlatformVariant().equalsIgnoreCase(AWS_NATIVE_GOV));
     }
 
 }
