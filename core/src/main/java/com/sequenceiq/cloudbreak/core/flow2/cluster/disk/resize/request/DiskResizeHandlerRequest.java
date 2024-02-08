@@ -24,7 +24,7 @@ public class DiskResizeHandlerRequest extends StackEvent {
             @JsonProperty("instanceGroup") String instanceGroup,
             @JsonProperty("diskUpdateRequest") DiskUpdateRequest diskUpdateRequest,
             @JsonProperty("volumesToUpdate") List<Volume> volumesToUpdate) {
-        super(selector, stackId, null);
+        super(selector, stackId);
         this.instanceGroup = instanceGroup;
         this.diskUpdateRequest = diskUpdateRequest;
         this.volumesToUpdate = volumesToUpdate;
