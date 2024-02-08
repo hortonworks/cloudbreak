@@ -48,4 +48,13 @@ public class VolumeV4Response implements JsonEntity {
     public void setType(String type) {
         this.type = type;
     }
+
+    @Override
+    public String toString() {
+        return "VolumeV4Response{" +
+                "count=" + count +
+                ", type='" + type + '\'' +
+                ", size=" + size +
+                '}';
+    }
 }
