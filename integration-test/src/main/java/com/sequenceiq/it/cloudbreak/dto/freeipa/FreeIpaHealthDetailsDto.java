@@ -4,6 +4,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFre
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 
 @Prototype
 public class FreeIpaHealthDetailsDto extends AbstractFreeIpaTestDto<String, HealthDetailsFreeIpaResponse, FreeIpaHealthDetailsDto> implements EnvironmentAware {
@@ -16,7 +17,7 @@ public class FreeIpaHealthDetailsDto extends AbstractFreeIpaTestDto<String, Heal
 
     @Override
     public FreeIpaHealthDetailsDto valid() {
-        return withEnvironmentCrn(getTestContext().given(FreeIpaHealthDetailsDto.class).getCrn());
+        return withEnvironmentCrn(getTestContext().given(EnvironmentTestDto.class).getCrn());
     }
 
     private FreeIpaHealthDetailsDto withEnvironmentCrn(String environmentCrn) {
