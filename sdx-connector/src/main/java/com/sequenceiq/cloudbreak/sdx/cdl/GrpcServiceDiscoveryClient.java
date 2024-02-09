@@ -16,7 +16,8 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import com.googlecode.protobuf.format.JsonFormat;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.util.JsonFormat;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.sdx.cdl.config.ServiceDiscoveryChannelConfig;
@@ -42,10 +43,9 @@ public class GrpcServiceDiscoveryClient {
         return client;
     }
 
-    public String getRemoteDataContext(String sdxCrn) throws JsonProcessingException {
+    public String getRemoteDataContext(String sdxCrn) throws JsonProcessingException, InvalidProtocolBufferException {
         ServiceDiscoveryClient serviceDiscoveryClient = makeClient();
-        JsonFormat jsonFormat = new JsonFormat();
-        String parsedJson = jsonFormat.printToString(serviceDiscoveryClient.getRemoteDataContext(sdxCrn));
+        String parsedJson = JsonFormat.printer().includingDefaultValueFields().print(serviceDiscoveryClient.getRemoteDataContext(sdxCrn));
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setDefaultSetterInfo(JsonSetter.Value.construct(Nulls.AS_EMPTY, Nulls.AS_EMPTY));
         ApiRemoteDataContext apiRemoteDataContext = objectMapper.readValue(parsedJson, ApiRemoteDataContext.class);

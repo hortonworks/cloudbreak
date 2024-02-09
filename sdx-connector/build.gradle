@@ -35,7 +35,6 @@ dependencies {
   implementation     group: 'javax.annotation',                  name: 'javax.annotation-api',           version: javaxAnnotationApiVersion
   implementation     group: 'com.google.protobuf',               name: 'protobuf-java',                  version: protobufVersion
   implementation     group: 'com.dyngr',                         name: 'polling',                        version: dyngrPollingVersion
-  implementation     group: 'com.googlecode.protobuf-java-format', name: 'protobuf-java-format',          version: protobufJavaVersion
   implementation     (group: "com.cloudera.api.swagger",      name: "cloudera-manager-api-swagger",   version: cmClientVersion) {
     transitive = false
   }

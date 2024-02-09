@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
@@ -51,7 +52,7 @@ public class CdlSdxService extends AbstractSdxService<CdlCrudProto.StatusType.Va
         if (isEnabled(crn)) {
             try {
                 return Optional.of(grpcServiceDiscoveryClient.getRemoteDataContext(crn));
-            } catch (JsonProcessingException e) {
+            } catch (JsonProcessingException | InvalidProtocolBufferException e) {
                 LOGGER.warn("Json processing failed, thus we cannot query remote data context. Crn: {}", crn, e);
             } catch (RuntimeException exception) {
                 LOGGER.warn("Not able to fetch the RDC for CDL from Service Discovery. CRN: {}", crn, exception);
