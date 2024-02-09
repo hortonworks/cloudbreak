@@ -321,7 +321,7 @@ integrationtest:
     verticalScale:
       supported: false
     credential:
-      endpoint: http://yprod001.l42scl.hortonworks.com:9191
+      endpoint: http://dash.yprod.comops.io
     instance:
       cpuCount: 4
       memory: 8192
@@ -329,7 +329,7 @@ integrationtest:
       volumeSize: 0
       volumeCount: 0
     queue: infrastructure-services
-    networkCidr: 172.27.0.0/16
+    networkCidr: 10.140.0.0/16
     baseimage:
       imageId:
       osType:
