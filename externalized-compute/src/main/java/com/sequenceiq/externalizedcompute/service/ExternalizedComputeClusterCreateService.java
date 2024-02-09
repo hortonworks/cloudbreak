@@ -1,5 +1,6 @@
 package com.sequenceiq.externalizedcompute.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.DefaultApi;
-import com.cloudera.model.CommonAPIServer;
 import com.cloudera.model.CommonClusterMetadata;
 import com.cloudera.model.CommonClusterOwner;
 import com.cloudera.model.CommonClusterSpec;
@@ -20,10 +20,11 @@ import com.cloudera.model.CommonCreateClusterResponse;
 import com.cloudera.model.CommonKubernetes;
 import com.cloudera.model.CommonNetwork;
 import com.cloudera.model.CommonNetworkTopology;
-import com.cloudera.model.CommonSecretEncryption;
-import com.cloudera.model.CommonSecurity;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
@@ -32,6 +33,8 @@ import com.sequenceiq.externalizedcompute.util.TagUtil;
 
 @Service
 public class ExternalizedComputeClusterCreateService {
+
+    public static final String COMPUTE_CLUSTER_JSON = "compute-cluster.json";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExternalizedComputeClusterCreateService.class);
 
@@ -60,71 +63,67 @@ public class ExternalizedComputeClusterCreateService {
 
     private void createLiftieCluster(String userCrn, ExternalizedComputeCluster externalizedComputeCluster) {
         DefaultApi defaultApi = liftieService.getDefaultApi();
-        CommonCreateClusterRequest cluster = setupLiftieCluster(userCrn, externalizedComputeCluster);
+        String databaseTemplateJson = FileReaderUtils.readFileFromClasspathQuietly(COMPUTE_CLUSTER_JSON);
         try {
-            CommonCreateClusterResponse clusterResponse = defaultApi.createCluster(cluster);
-            externalizedComputeCluster.setLiftieName(clusterResponse.getClusterId());
-            externalizedComputeClusterRepository.save(externalizedComputeCluster);
-            LOGGER.info("Liftie create response: {}", clusterResponse);
-        } catch (Exception e) {
-            LOGGER.error("Externalized compute cluster creation failed", e);
-            throw new RuntimeException(e);
+            CommonCreateClusterRequest commonCreateClusterRequest = JsonUtil.readValue(databaseTemplateJson, CommonCreateClusterRequest.class);
+            CommonCreateClusterRequest cluster = setupLiftieCluster(commonCreateClusterRequest, userCrn, externalizedComputeCluster);
+            try {
+                LOGGER.info("Send request to liftie: {}", cluster);
+                CommonCreateClusterResponse clusterResponse = defaultApi.createCluster(cluster);
+                externalizedComputeCluster.setLiftieName(clusterResponse.getClusterId());
+                externalizedComputeClusterRepository.save(externalizedComputeCluster);
+                LOGGER.info("Liftie create response: {}", clusterResponse);
+            } catch (Exception e) {
+                LOGGER.error("Externalized compute cluster creation failed", e);
+                throw new RuntimeException(e);
+            }
+        } catch (IOException e) {
+            LOGGER.error("Can't read cluster json to CommonCreateClusterRequest", e);
+            throw new CloudbreakServiceException("Can't read cluster json to CommonCreateClusterRequest", e);
         }
     }
 
-    private CommonCreateClusterRequest setupLiftieCluster(String userCrn, ExternalizedComputeCluster externalizedComputeCluster) {
-        CommonCreateClusterRequest cluster = new CommonCreateClusterRequest();
-        CommonClusterMetadata metadata = getMetadata(externalizedComputeCluster, userCrn);
-        cluster.setMetadata(metadata);
-
-        CommonClusterSpec spec = new CommonClusterSpec();
-        CommonKubernetes kubernetes = new CommonKubernetes();
-        kubernetes.setVersion(kubernetesVersion);
-        spec.kubernetes(kubernetes);
-
-        DetailedEnvironmentResponse environment = environmentEndpoint.getByCrn(externalizedComputeCluster.getEnvironmentCrn());
-        CommonNetwork network = getNetwork(environment);
-        spec.setNetwork(network);
-        CommonSecurity security = getSecurity();
-        spec.setSecurity(security);
-        cluster.setSpec(spec);
-        cluster.setKind("ManagedK8sCluster");
-        cluster.setApiVersion("compute.cloud.cloudera.io/v1alpha1");
+    private CommonCreateClusterRequest setupLiftieCluster(CommonCreateClusterRequest cluster, String userCrn,
+            ExternalizedComputeCluster externalizedComputeCluster) {
+        fillMetadata(cluster.getMetadata(), externalizedComputeCluster, userCrn);
+        CommonClusterSpec spec = cluster.getSpec();
+        if (spec == null) {
+            throw new IllegalStateException("CommonClusterSpec can not be null!");
+        }
+        setKubernetes(spec);
+        fillNetworkSettings(spec, externalizedComputeCluster);
         return cluster;
     }
 
-    private CommonClusterMetadata getMetadata(ExternalizedComputeCluster externalizedComputeCluster, String userCrn) {
-        CommonClusterMetadata metadata = new CommonClusterMetadata();
+    private void fillNetworkSettings(CommonClusterSpec spec, ExternalizedComputeCluster externalizedComputeCluster) {
+        DetailedEnvironmentResponse environment = environmentEndpoint.getByCrn(externalizedComputeCluster.getEnvironmentCrn());
+        CommonNetwork network = getNetworkFromEnvResponse(environment);
+        spec.setNetwork(network);
+    }
+
+    private void setKubernetes(CommonClusterSpec spec) {
+        CommonKubernetes kubernetes = new CommonKubernetes();
+        kubernetes.setVersion(kubernetesVersion);
+        spec.setKubernetes(kubernetes);
+    }
+
+    private void fillMetadata(CommonClusterMetadata metadata, ExternalizedComputeCluster externalizedComputeCluster, String userCrn) {
         CrnUser crnUser = crnUserDetailsService.loadUserByUsername(userCrn);
         metadata.setOwnerEmail(crnUser.getEmail());
         CommonClusterOwner clusterOwner = new CommonClusterOwner().crn(crnUser.getUserCrn()).accountId(crnUser.getTenant());
         metadata.setEnv(externalizedComputeCluster.getEnvironmentCrn());
         metadata.setClusterOwner(clusterOwner);
-        metadata.setClusterType("Dedicated");
         Map<String, String> tags = TagUtil.getTags(externalizedComputeCluster.getTags());
         metadata.setLabels(tags);
         metadata.setName(externalizedComputeCluster.getName());
-        return metadata;
     }
 
-    private CommonNetwork getNetwork(DetailedEnvironmentResponse environment) {
+    private CommonNetwork getNetworkFromEnvResponse(DetailedEnvironmentResponse environment) {
         CommonNetwork network = new CommonNetwork();
         CommonNetworkTopology topology = new CommonNetworkTopology();
         topology.setSubnets(new ArrayList<>(environment.getNetwork().getLiftieSubnets().keySet()));
         network.setTopology(topology);
         return network;
-    }
-
-    private CommonSecurity getSecurity() {
-        CommonSecurity security = new CommonSecurity();
-        CommonAPIServer apiServer = new CommonAPIServer();
-        apiServer.setEnabled(true);
-        security.setApiServer(apiServer);
-        security.setPrivate(false);
-        CommonSecretEncryption secretEncryption = new CommonSecretEncryption();
-        secretEncryption.setEnabled(false);
-        security.setSecretEncryption(secretEncryption);
-        return security;
     }
 
 }

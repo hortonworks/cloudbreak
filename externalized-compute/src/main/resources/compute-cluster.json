@@ -1,0 +1,54 @@
+{
+  "api_version": "compute.cloud.cloudera.io/v1alpha1",
+  "kind": "ManagedK8sCluster",
+  "metadata": {
+    "cluster_type": "Dedicated",
+    "description": "Common compute cluster",
+    "experimental": {
+      "deleteClusterOnError": true
+    }
+  },
+  "spec": {
+    "deployments": {
+      "istio": {
+        "deploymentProfile": "cml",
+        "enabled": true
+      },
+      "logging": {
+        "enabled": true
+      },
+      "monitoring": {
+        "enabled": true
+      }
+    },
+    "instance_groups": [
+      {
+        "autoscaling": {
+          "enabled": true,
+          "max_instance": 4,
+          "min_instance": 2
+        },
+        "instance_count": 4,
+        "instance_tier": "ON_DEMAND",
+        "instance_type": "m5.xlarge",
+        "labels": {
+          "project": "SDX-SaaS"
+        },
+        "name": "cdl-instance-group-1",
+        "root_volume": {
+          "size": 50
+        },
+        "taints": {}
+      }
+    ],
+    "security": {
+      "apiServer": {
+        "enabled": true
+      },
+      "private": false,
+      "secretEncryption": {
+        "enabled": false
+      }
+    }
+  }
+}

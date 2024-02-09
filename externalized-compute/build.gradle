@@ -44,6 +44,7 @@ dependencies {
     implementation group: 'javax.xml.bind', name: 'jaxb-api', version: javaxXmlBindJaxbApiVersion
     implementation group: 'org.openapitools', name: 'jackson-databind-nullable', version: "$jacksonDatabindNullable"
 
+    testImplementation project(':cloud-api')
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
     testImplementation group: 'org.mockito', name: 'mockito-inline', version: mockitoVersion
 }
