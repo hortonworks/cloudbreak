@@ -35,6 +35,8 @@ public class SchedulerFactoryConfig {
 
     public static final String METERING_QUARTZ_EXECUTOR_THREAD_NAME_PREFIX = "meteringQuartzExecutor-";
 
+    public static final String METERING_SYNC_QUARTZ_EXECUTOR_THREAD_NAME_PREFIX = "meteringSyncQuartzExecutor-";
+
     private static final String QUARTZ_TASK_EXECUTOR = "quartzTaskExecutor";
 
     @Value("${quartz.threadpool.core.size:10}")

@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.job.metering.MeteringTransactionalScheduler;
+import com.sequenceiq.cloudbreak.job.metering.MeteringSyncTransactionalScheduler;
 import com.sequenceiq.cloudbreak.metering.config.MeteringConfig;
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
@@ -38,7 +38,7 @@ public class MeteringSyncJobService implements JobSchedulerService {
     private MeteringConfig meteringConfig;
 
     @Inject
-    private MeteringTransactionalScheduler scheduler;
+    private MeteringSyncTransactionalScheduler scheduler;
 
     @Inject
     private ApplicationContext applicationContext;
