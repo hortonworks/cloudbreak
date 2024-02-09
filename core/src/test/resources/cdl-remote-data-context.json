@@ -1,0 +1,214 @@
+{
+  "endPointId": "test",
+  "endPoints": [
+    {
+      "name": "ranger",
+      "version": "CDH 7.2.17",
+      "serviceConfigs": [
+        {
+          "key": "solr_service",
+          "value": "solr"
+        },
+        {
+          "key": "load_balancer_url",
+          "value": ""
+        },
+        {
+          "key": "ranger_plugin_hdfs_audit_enabled",
+          "value": "true"
+        },
+        {
+          "key": "ranger_plugin_hdfs_audit_url",
+          "value": "s3a://eng-sdx-longrunning-v2/cdl-raz/ranger/audit"
+        },
+        {
+          "key": "ranger_service_http_port",
+          "value": "6080"
+        },
+        {
+          "key": "ranger_service_https_port",
+          "value": "6182"
+        },
+        {
+          "key": "xasecure.audit.destination.solr.zookeepers",
+          "value": "test-internal.test.xcu2-8y8x.dev.cldr.work:2181/solr-infra"
+        },
+        {
+          "key": "gateway_endpoint",
+          "value": "http://test-internal.test.xcu2-8y8x.dev.cldr.work/v1/authorization/admin"
+        },
+        {
+          "key": "ui_gateway_endpoint",
+          "value": "http://test-internal.test.xcu2-8y8x.dev.cldr.work/v1/authorization/admin"
+        }
+      ],
+      "endPointHostList": [
+        {
+          "uri": "http://test-internal.test.xcu2-8y8x.dev.cldr.work:6080",
+          "endPointConfigs": [
+            {
+              "key": "ssl_enabled",
+              "value": "false"
+            }
+          ],
+          "type": "RANGER_ADMIN"
+        },
+        {
+          "uri": "http://test-internal.test.xcu2-8y8x.dev.cldr.work:8283",
+          "endPointConfigs": [
+            {
+              "key": "ranger.usersync.port",
+              "value": "8283"
+            }
+          ],
+          "type": "RANGER_USERSYNC"
+        }
+      ],
+      "serviceType": "RANGER"
+    },
+    {
+      "name": "hive",
+      "version": "CDH 7.2.17",
+      "serviceConfigs": [
+        {
+          "key": "ranger_service",
+          "value": "ranger"
+        },
+        {
+          "key": "ranger_repository",
+          "value": "cm_hive"
+        },
+        {
+          "key": "zookeeper_service",
+          "value": "zookeeper"
+        },
+        {
+          "key": "hive_warehouse_directory",
+          "value": "s3a://eng-sdx-longrunning-v2/cdl-raz/warehouse/tablespace/managed/hive"
+        },
+        {
+          "key": "hive_warehouse_external_directory",
+          "value": "s3a://eng-sdx-longrunning-v2/cdl-raz/warehouse/tablespace/external/hive"
+        },
+        {
+          "key": "kerberos_princ_name",
+          "value": "hive"
+        },
+        {
+          "key": "hadoop_rpc_protection",
+          "value": "authentication"
+        },
+        {
+          "key": "hive_metastore_database_type",
+          "value": "postgresql"
+        },
+        {
+          "key": "hive_metastore_database_host",
+          "value": "test-internal.test.xcu2-8y8x.dev.cldr.work"
+        },
+        {
+          "key": "hive_metastore_database_port",
+          "value": "5432"
+        },
+        {
+          "key": "hive_metastore_database_name",
+          "value": "hms"
+        },
+        {
+          "key": "hive_metastore_database_user",
+          "value": "as5NNb3La50gla8CxK4UPbxciFpYLW7XklOxBA5b"
+        },
+        {
+          "key": "hive_metastore_database_password",
+          "value": "EiULUn4KLVSrp3BtJ0Bo1r21Q2ec1fmiDtVjkr2E"
+        }
+      ],
+      "endPointHostList": [
+        {
+          "uri": "thrift://test-internal.test.xcu2-8y8x.dev.cldr.work:9083",
+          "endPointConfigs": [],
+          "type": "HIVEMETASTORE"
+        }
+      ],
+      "serviceType": "HIVE"
+    },
+    {
+      "name": "knox",
+      "version": "CDH 7.2.17",
+      "serviceConfigs": [
+        {
+          "key": "ranger_service",
+          "value": "ranger"
+        }
+      ],
+      "endPointHostList": [
+        {
+          "uri": "http://test-internal.test.xcu2-8y8x.dev.cldr.work:8444",
+          "endPointConfigs": [
+            {
+              "key": "ssl_enabled",
+              "value": "false"
+            },
+            {
+              "key": "idbroker_gateway_port",
+              "value": "8444"
+            }
+          ],
+          "type": "IDBROKER"
+        }
+      ],
+      "serviceType": "KNOX"
+    },
+    {
+      "name": "zookeeper",
+      "version": "CDH 7.2.17",
+      "serviceConfigs": [
+        {
+          "key": "zookeeper_tls_enabled",
+          "value": "false"
+        }
+      ],
+      "endPointHostList": [
+        {
+          "uri": "http://test-internal.test.xcu2-8y8x.dev.cldr.work:2182",
+          "endPointConfigs": [
+            {
+              "key": "clientPort",
+              "value": "2181"
+            },
+            {
+              "key": "zookeeper_secure_client_port",
+              "value": "2182"
+            }
+          ],
+          "type": "SERVER"
+        }
+      ],
+      "serviceType": "ZOOKEEPER"
+    },
+    {
+      "name": "solr",
+      "version": "CDH 7.2.17",
+      "serviceConfigs": [
+        {
+          "key": "zookeeper_service",
+          "value": "zookeeper"
+        },
+        {
+          "key": "zookeeper_znode",
+          "value": "/solr-infra"
+        }
+      ],
+      "endPointHostList": [
+        {
+          "uri": "http://test-internal.test.xcu2-8y8x.dev.cldr.work:8985",
+          "endPointConfigs": [],
+          "type": "SOLR_SERVER"
+        }
+      ],
+      "serviceType": "SOLR"
+    }
+  ],
+  "configs": [],
+  "clusterVersion": "CDH 7.2.17"
+}

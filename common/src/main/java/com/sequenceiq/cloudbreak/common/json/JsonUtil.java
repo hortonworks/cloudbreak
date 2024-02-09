@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -11,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
@@ -58,6 +61,16 @@ public class JsonUtil {
 
     public static <T> T readValue(String content, Class<T> valueType) throws IOException {
         return MAPPER.readValue(content, valueType);
+    }
+
+    public static <T> T readValueFromGrpcJson(String content, Class<T> valueType) {
+        ObjectMapper mapper = getObjectMapperForGrpcJsonProcessing();
+        try {
+            return mapper.readValue(content, valueType);
+        } catch (JsonProcessingException e) {
+            LOGGER.warn("Failed to deserialize with Jackson: {}", content, e);
+            throw new IllegalStateException("Cannot convert Json string to object.", e);
+        }
     }
 
     public static <T> T readValueUnchecked(String content, Class<T> valueType) {
@@ -195,5 +208,14 @@ public class JsonUtil {
         } catch (Exception e) {
             LOGGER.debug("{}.toString() has thrown an error.", object.getClass().getName(), e);
         }
+    }
+
+    private static ObjectMapper getObjectMapperForGrpcJsonProcessing() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configOverride(List.class).setSetterInfo(JsonSetter.Value.forContentNulls(Nulls.AS_EMPTY));
+        mapper.setDefaultSetterInfo(JsonSetter.Value.forContentNulls(Nulls.AS_EMPTY));
+        mapper.setDefaultSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY));
+        mapper.setDefaultPropertyInclusion(Include.ALWAYS);
+        return mapper;
     }
 }

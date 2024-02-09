@@ -12,6 +12,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.repository.RdsConfigWithoutClusterRepository;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -46,5 +47,9 @@ public class RdsConfigWithoutClusterService {
 
     public Set<RdsConfigWithoutCluster> findAllByNamesAndWorkspaceId(Set<String> names, Workspace workspace) {
         return CollectionUtils.isEmpty(names) ? new HashSet<>() : rdsConfigWithoutClusterRepository.findAllByNamesAndWorkspaceId(names, workspace.getId());
+    }
+
+    public void saveRdsConfigWithoutCluster(RDSConfig rdsConfig) {
+        rdsConfigWithoutClusterRepository.save(rdsConfig);
     }
 }

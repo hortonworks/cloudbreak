@@ -6,6 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -93,7 +94,7 @@ public class CdlSdxService extends AbstractSdxService<CdlCrudProto.StatusType.Va
             return Optional.of(datalake.getCrn());
         } catch (RuntimeException exception) {
             LOGGER.error("Exception while fetching CRN for containerized datalake with Environment:{} {}",
-                    environmentCrn, exception);
+                    environmentCrn, exception.getMessage(), exception);
             return Optional.empty();
         }
     }
@@ -149,7 +150,15 @@ public class CdlSdxService extends AbstractSdxService<CdlCrudProto.StatusType.Va
         return Optional.of(ENABLE_CONTAINERIZED_DATALKE);
     }
 
-    private boolean isEnabled(String crn) {
+    public Map<String, String> getServiceConfiguration(String sdxCrn, String name) {
+        if (isEnabled(sdxCrn)) {
+            LOGGER.info("Service configuration fetch for {}, in sdx {}", name, sdxCrn);
+            return grpcServiceDiscoveryClient.getServiceConfiguration(sdxCrn, name);
+        }
+        return Collections.emptyMap();
+    }
+
+    public boolean isEnabled(String crn) {
         boolean enabled = cdlEnabled && isPlatformEntitled(Crn.safeFromString(crn).getAccountId());
         if (!cdlEnabled) {
             LOGGER.info("CDL is not enabled. {} {}",
@@ -157,4 +166,5 @@ public class CdlSdxService extends AbstractSdxService<CdlCrudProto.StatusType.Va
         }
         return enabled;
     }
+
 }

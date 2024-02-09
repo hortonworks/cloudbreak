@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
@@ -483,6 +484,10 @@ public class ClusterService {
         Cluster cluster = repository.findById(clusterId).orElseThrow(NotFoundException.notFound("Cluster", clusterId));
         cluster.setMonitoringCredential(databusCredentialJsonString);
         updateCluster(cluster);
+    }
+
+    public void saveRdsConfig(RDSConfig rdsConfig) {
+        rdsConfigWithoutClusterService.saveRdsConfigWithoutCluster(rdsConfig);
     }
 
     public void addRdsConfigToCluster(Long newRdsConfigId, Long clusterId) {
