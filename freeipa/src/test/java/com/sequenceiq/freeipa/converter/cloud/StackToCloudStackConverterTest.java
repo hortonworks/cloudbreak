@@ -49,7 +49,6 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackAuthentication;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
-import com.sequenceiq.freeipa.service.SecurityRuleService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 
@@ -78,9 +77,6 @@ public class StackToCloudStackConverterTest {
 
     @Mock
     private StackAuthentication stackAuthentication;
-
-    @Mock
-    private SecurityRuleService securityRuleService;
 
     @Mock
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;

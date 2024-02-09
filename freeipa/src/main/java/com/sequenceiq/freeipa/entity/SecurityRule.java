@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.entity;
 import java.util.Objects;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -25,7 +26,7 @@ public class SecurityRule {
     @SequenceGenerator(name = "securityrule_generator", sequenceName = "securityrule_id_seq", allocationSize = 1)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonBackReference
     private SecurityGroup securityGroup;
 

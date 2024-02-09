@@ -83,7 +83,6 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackAuthentication;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
-import com.sequenceiq.freeipa.service.SecurityRuleService;
 import com.sequenceiq.freeipa.service.client.AzureMarketplaceTermsClientService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.image.ImageService;
@@ -92,9 +91,6 @@ import com.sequenceiq.freeipa.service.image.ImageService;
 public class StackToCloudStackConverter implements Converter<Stack, CloudStack> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackToCloudStackConverter.class);
-
-    @Inject
-    private SecurityRuleService securityRuleService;
 
     @Inject
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
@@ -303,26 +299,27 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     }
 
     private Security buildSecurity(InstanceGroup ig) {
-        List<SecurityRule> rules = new ArrayList<>();
         if (ig.getSecurityGroup() == null) {
-            return new Security(rules, Collections.emptyList(), true);
-        }
-        List<com.sequenceiq.freeipa.entity.SecurityRule> securityRules = securityRuleService.findAllBySecurityGroup(ig.getSecurityGroup());
-        for (com.sequenceiq.freeipa.entity.SecurityRule securityRule : securityRules) {
-            List<PortDefinition> portDefinitions = new ArrayList<>();
-            for (String actualPort : securityRule.getPorts()) {
-                String[] segments = actualPort.split("-");
-                if (segments.length > 1) {
-                    portDefinitions.add(new PortDefinition(segments[0], segments[1]));
-                } else {
-                    portDefinitions.add(new PortDefinition(segments[0], segments[0]));
+            return new Security(List.of(), Collections.emptyList(), true);
+        } else {
+            Set<com.sequenceiq.freeipa.entity.SecurityRule> securityRules
+                    = Optional.ofNullable(ig.getSecurityGroup().getSecurityRules()).orElseGet(Set::of);
+            List<SecurityRule> rules = new ArrayList<>();
+            for (com.sequenceiq.freeipa.entity.SecurityRule securityRule : securityRules) {
+                List<PortDefinition> portDefinitions = new ArrayList<>();
+                for (String actualPort : securityRule.getPorts()) {
+                    String[] segments = actualPort.split("-");
+                    if (segments.length > 1) {
+                        portDefinitions.add(new PortDefinition(segments[0], segments[1]));
+                    } else {
+                        portDefinitions.add(new PortDefinition(segments[0], segments[0]));
+                    }
                 }
+                rules.add(new SecurityRule(securityRule.getCidr(), portDefinitions.toArray(new PortDefinition[portDefinitions.size()]),
+                        securityRule.getProtocol()));
             }
-
-            rules.add(new SecurityRule(securityRule.getCidr(), portDefinitions.toArray(new PortDefinition[portDefinitions.size()]),
-                    securityRule.getProtocol()));
+            return new Security(rules, ig.getSecurityGroup().getSecurityGroupIds(), true);
         }
-        return new Security(rules, ig.getSecurityGroup().getSecurityGroupIds(), true);
     }
 
     public CloudStack updateWithVerticalScaleRequest(CloudStack cloudStack, VerticalScaleRequest request) {
