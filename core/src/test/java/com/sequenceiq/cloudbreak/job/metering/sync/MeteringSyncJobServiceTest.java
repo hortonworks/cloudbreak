@@ -21,7 +21,7 @@ import org.quartz.impl.JobDetailImpl;
 import org.springframework.context.ApplicationContext;
 
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.job.metering.MeteringTransactionalScheduler;
+import com.sequenceiq.cloudbreak.job.metering.MeteringSyncTransactionalScheduler;
 import com.sequenceiq.cloudbreak.metering.config.MeteringConfig;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -35,7 +35,7 @@ class MeteringSyncJobServiceTest {
     private MeteringConfig meteringConfig;
 
     @Mock
-    private MeteringTransactionalScheduler scheduler;
+    private MeteringSyncTransactionalScheduler scheduler;
 
     @Mock
     private ApplicationContext applicationContext;
