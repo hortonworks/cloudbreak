@@ -205,7 +205,7 @@ public class UpgradeCcmService {
         }
         if (!unhealthyHosts.isEmpty()) {
             LOGGER.info("There are unhealthy hosts after registering to Cluster Proxy: {}", unhealthyHosts);
-            throw new CloudbreakServiceException("One or more Gateway instance is not available. Need to roll back CCM upgrade to previous version.");
+            throw new CloudbreakServiceException("One or more instances are not available. Need to roll back CCM upgrade to previous version.");
         } else {
             LOGGER.info("All hosts are healthy after registering to Cluster Proxy.");
         }
