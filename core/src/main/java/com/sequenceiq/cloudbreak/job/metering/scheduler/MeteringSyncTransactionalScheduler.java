@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.job.metering;
+package com.sequenceiq.cloudbreak.job.metering.scheduler;
 
 import jakarta.inject.Inject;
 
@@ -6,9 +6,9 @@ import org.quartz.Scheduler;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
+import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 
-@Component
+@Component("MeteringSyncTransactionalScheduler")
 public class MeteringSyncTransactionalScheduler extends TransactionalScheduler {
 
     @Qualifier("meteringSyncScheduler")
@@ -16,7 +16,7 @@ public class MeteringSyncTransactionalScheduler extends TransactionalScheduler {
     private Scheduler scheduler;
 
     @Override
-    protected Scheduler getScheduler() {
+    public Scheduler getScheduler() {
         return scheduler;
     }
 }

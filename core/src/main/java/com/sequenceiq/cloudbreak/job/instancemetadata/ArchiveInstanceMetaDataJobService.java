@@ -20,7 +20,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
-import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
+import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.util.RandomUtil;
 
 @Service
@@ -123,5 +123,10 @@ public class ArchiveInstanceMetaDataJobService implements JobSchedulerService {
     @Override
     public String getJobGroup() {
         return JOB_GROUP;
+    }
+
+    @Override
+    public TransactionalScheduler getScheduler() {
+        return scheduler;
     }
 }

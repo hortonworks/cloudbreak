@@ -12,6 +12,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.quartz.model.JobInitializer;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.StatusCheckerConfig;
 
@@ -44,7 +45,12 @@ public class QuartzJobInitializerService {
             }
             for (JobInitializer jobDef : initJobDefinitions.get()) {
                 LOGGER.debug("Initialize quartz jobs with initializer '{}'", jobDef.getClass());
-                jobDef.initJobs();
+                try {
+                    jobDef.initJobs();
+                } catch (Exception e) {
+                    LOGGER.error("Error during quartz job init for job class: {}", jobDef.getClass(), e);
+                    throw e;
+                }
             }
         }
     }

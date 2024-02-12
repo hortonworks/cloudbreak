@@ -8,6 +8,7 @@ import jakarta.annotation.Nullable;
 
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.JobKey;
 import org.slf4j.Logger;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
@@ -22,9 +23,13 @@ public abstract class MdcQuartzJob extends QuartzJobBean {
     @Override
     protected final void executeInternal(JobExecutionContext context) throws JobExecutionException {
         fillMdcContext(context);
+        String jobClassName = context.getJobDetail().getJobClass().getSimpleName();
+        JobKey jobKey = context.getJobDetail().getKey();
+        LOGGER.debug("{} job started with key: {}", jobClassName, jobKey);
         try {
             executeTracedJob(context);
         } finally {
+            LOGGER.debug("{} job finished with key: {}", jobClassName, jobKey);
             MDCBuilder.cleanupMdc();
         }
     }

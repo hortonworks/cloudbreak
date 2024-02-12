@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.quartz.JobDataMapProvider;
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
-import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
+import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stackpatch.ExistingStackPatchService;
@@ -107,5 +107,10 @@ public class ExistingStackPatcherJobService implements JobSchedulerService {
     @Override
     public String getJobGroup() {
         return JOB_GROUP;
+    }
+
+    @Override
+    public TransactionalScheduler getScheduler() {
+        return scheduler;
     }
 }

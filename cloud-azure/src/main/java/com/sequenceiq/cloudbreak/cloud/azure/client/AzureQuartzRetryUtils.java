@@ -1,12 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
-import static com.sequenceiq.cloudbreak.quartz.configuration.SchedulerFactoryConfig.QUARTZ_EXECUTOR_THREAD_NAME_PREFIX;
-
 import java.util.function.Function;
 
 import com.azure.core.http.policy.ExponentialBackoffOptions;
 import com.azure.core.http.policy.RetryOptions;
 import com.azure.core.http.policy.RetryPolicy;
+import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.QuartzThreadUtil;
 
 public class AzureQuartzRetryUtils {
 
@@ -17,22 +16,19 @@ public class AzureQuartzRetryUtils {
     }
 
     public static void reconfigureAzureClientIfNeeded(Function<Integer, Object> azureClientFunction) {
-        String threadName = Thread.currentThread().getName();
-        if (threadName.contains(QUARTZ_EXECUTOR_THREAD_NAME_PREFIX)) {
+        if (QuartzThreadUtil.isCurrentQuartzThread()) {
             azureClientFunction.apply(MAX_CLIENT_QUARTZ_RETRY);
         }
     }
 
     public static void reconfigureHttpClientRetryOptionsIfNeeded(Function<RetryOptions, Object> httpClientFunction) {
-        String threadName = Thread.currentThread().getName();
-        if (threadName.contains(QUARTZ_EXECUTOR_THREAD_NAME_PREFIX)) {
+        if (QuartzThreadUtil.isCurrentQuartzThread()) {
             httpClientFunction.apply(getQuartzRetryOptions());
         }
     }
 
     public static void reconfigureHttpClientRetryPolicyIfNeeded(Function<RetryPolicy, Object> httpClientFunction) {
-        String threadName = Thread.currentThread().getName();
-        if (threadName.contains(QUARTZ_EXECUTOR_THREAD_NAME_PREFIX)) {
+        if (QuartzThreadUtil.isCurrentQuartzThread()) {
             httpClientFunction.apply(getQuartzRetryPolicy());
         }
     }

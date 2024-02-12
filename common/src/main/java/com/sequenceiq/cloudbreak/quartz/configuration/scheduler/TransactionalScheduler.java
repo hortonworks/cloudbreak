@@ -1,6 +1,4 @@
-package com.sequenceiq.cloudbreak.quartz.configuration;
-
-import static com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+package com.sequenceiq.cloudbreak.quartz.configuration.scheduler;
 
 import java.util.Set;
 
@@ -15,24 +13,20 @@ import org.quartz.Trigger;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Primary;
-import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.quartz.configuration.SchedulerRuntimeException;
 
-@Primary
-@Component
-public class TransactionalScheduler {
+public abstract class TransactionalScheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalScheduler.class);
 
     @Inject
-    private Scheduler scheduler;
-
-    @Inject
     private TransactionService transactionService;
 
-    public void clear() throws TransactionExecutionException {
+    public abstract Scheduler getScheduler();
+
+    public void clear() throws TransactionService.TransactionExecutionException {
         transactionService.required(() -> {
             try {
                 getScheduler().clear();
@@ -43,7 +37,7 @@ public class TransactionalScheduler {
         });
     }
 
-    public void scheduleJob(JobDetail jobDetail, Trigger trigger) throws TransactionExecutionException {
+    public void scheduleJob(JobDetail jobDetail, Trigger trigger) throws TransactionService.TransactionExecutionException {
         transactionService.required(() -> {
             try {
                 getScheduler().scheduleJob(jobDetail, trigger);
@@ -55,7 +49,7 @@ public class TransactionalScheduler {
         });
     }
 
-    public void deleteJob(JobKey jobKey) throws TransactionExecutionException {
+    public void deleteJob(JobKey jobKey) throws TransactionService.TransactionExecutionException {
         transactionService.required(() -> {
             try {
                 getScheduler().deleteJob(jobKey);
@@ -78,7 +72,4 @@ public class TransactionalScheduler {
         return getScheduler().getJobKeys(groupMatcher);
     }
 
-    protected Scheduler getScheduler() {
-        return scheduler;
-    }
 }

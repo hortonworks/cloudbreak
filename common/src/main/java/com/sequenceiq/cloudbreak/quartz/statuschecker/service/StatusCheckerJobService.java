@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
-import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
+import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.StatusCheckerConfig;
@@ -171,5 +171,10 @@ public class StatusCheckerJobService implements JobSchedulerService {
     @Override
     public String getJobGroup() {
         return JOB_GROUP;
+    }
+
+    @Override
+    public TransactionalScheduler getScheduler() {
+        return scheduler;
     }
 }

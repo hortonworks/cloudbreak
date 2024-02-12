@@ -17,9 +17,6 @@ import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 @Component
 public class JobCountMetricConfigurator {
 
-    @Inject
-    private GroupNameToJobCountFunction groupNameToJobCountFunction;
-
     @Qualifier("CommonMetricService")
     @Inject
     private MetricService metricService;
@@ -30,6 +27,6 @@ public class JobCountMetricConfigurator {
     @PostConstruct
     public void init() {
         jobSchedulerServices.forEach(jobSchedulerService -> metricService.registerGaugeMetric(QuartzMetricType.JOB_COUNT, jobSchedulerService.getJobGroup(),
-                        groupNameToJobCountFunction, Map.of(JOB_GROUP.name(), jobSchedulerService.getJobGroup())));
+                new GroupNameToJobCountFunction(jobSchedulerService.getScheduler()), Map.of(JOB_GROUP.name(), jobSchedulerService.getJobGroup())));
     }
 }

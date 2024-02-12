@@ -38,6 +38,19 @@ class RoutingDataSourceTest {
     @Mock
     private Connection quartzConnection;
 
+    /**
+     * @return Collection of thread names inspected while running quartz jobs
+     */
+    private static Collection<String> getQuartzThreadNames() {
+        return Set.of(
+                "quartzExecutor-6",
+                "quartzMeteringExecutor-6",
+                "quartzMeteringSyncExecutor-6",
+                "QuartzScheduler_quartzScheduler-dbajzath1648036370090_ClusterManager",
+                "QuartzScheduler_quartzScheduler-dbajzath1648036370090_MisfireHandler"
+        );
+    }
+
     @BeforeEach
     void setUp() throws SQLException {
         lenient().when(defaultDataSource.getConnection()).thenReturn(defaultConnection);
@@ -59,18 +72,6 @@ class RoutingDataSourceTest {
         Connection result = getConnectionInThread(threadName);
 
         assertThat(result).isEqualTo(quartzConnection);
-    }
-
-    /**
-     * @return Collection of thread names inspected while running quartz jobs
-     */
-    private static Collection<String> getQuartzThreadNames() {
-        return Set.of(
-                "quartzExecutor-6",
-                "meteringQuartzExecutor-6",
-                "QuartzScheduler_quartzScheduler-dbajzath1648036370090_ClusterManager",
-                "QuartzScheduler_quartzScheduler-dbajzath1648036370090_MisfireHandler"
-        );
     }
 
     private Connection getConnectionInThread(String threadName) {

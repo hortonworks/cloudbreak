@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.jerseyclient;
 
-import static com.sequenceiq.cloudbreak.quartz.configuration.SchedulerFactoryConfig.QUARTZ_EXECUTOR_THREAD_NAME_PREFIX;
-
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 
@@ -17,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricTag;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
+import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.QuartzThreadUtil;
 
 @Aspect
 @Component
@@ -53,7 +52,7 @@ public class RetryAndMetricsJerseyClientAspect {
         String invokedMethod = proceedingJoinPoint.getSignature().getName();
         try {
             Object result;
-            if (Thread.currentThread().getName().contains(QUARTZ_EXECUTOR_THREAD_NAME_PREFIX)) {
+            if (QuartzThreadUtil.isCurrentQuartzThread()) {
                 result = quartzJerseyClientRetryTemplate.execute(context -> proceedingJoinPoint.proceed());
             } else {
                 result = jerseyClientRetryTemplate.execute(context -> proceedingJoinPoint.proceed());

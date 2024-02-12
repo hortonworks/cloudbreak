@@ -1,6 +1,7 @@
-package com.sequenceiq.cloudbreak.quartz.configuration;
+package com.sequenceiq.cloudbreak.quartz.configuration.scheduler;
 
-import java.util.concurrent.ExecutorService;
+import java.util.Set;
+import java.util.concurrent.Executor;
 
 import javax.sql.DataSource;
 
@@ -15,9 +16,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
+import org.springframework.scheduling.quartz.SimpleThreadPoolTaskExecutor;
 
+import com.sequenceiq.cloudbreak.quartz.configuration.SchedulerFactoryBeanUtil;
 import com.sequenceiq.cloudbreak.quartz.metric.JobMetricsListener;
 import com.sequenceiq.cloudbreak.quartz.metric.SchedulerMetricsListener;
 import com.sequenceiq.cloudbreak.quartz.metric.TriggerMetricsListener;
@@ -25,33 +27,28 @@ import com.sequenceiq.cloudbreak.quartz.statuschecker.ResourceCheckerJobListener
 import com.sequenceiq.cloudbreak.quartz.statuschecker.StatusCheckerConfig;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 
-@ConditionalOnProperty(value = "quartz.common.scheduler.enabled", matchIfMissing = true)
+@ConditionalOnProperty(value = "quartz.default.scheduler.enabled", matchIfMissing = true)
 @Configuration
 public class SchedulerFactoryConfig {
 
-    public static final String QUARTZ_EXECUTOR_THREAD_NAME_PREFIX = "quartzExecutor-";
+    public static final String METRIC_PREFIX = "threadpool.";
 
-    public static final String METERING_QUARTZ_EXECUTOR_THREAD_NAME_PREFIX = "meteringQuartzExecutor-";
+    public static final String QUARTZ_EXECUTOR_THREAD_NAME_PREFIX = "quartzExecutor";
 
-    public static final String METERING_SYNC_QUARTZ_EXECUTOR_THREAD_NAME_PREFIX = "meteringSyncQuartzExecutor-";
+    public static final String QUARTZ_METERING_EXECUTOR_THREAD_NAME_PREFIX = "quartzMeteringExecutor";
+
+    public static final String QUARTZ_METERING_SYNC_EXECUTOR_THREAD_NAME_PREFIX = "quartzMeteringSyncExecutor";
 
     private static final String QUARTZ_TASK_EXECUTOR = "quartzTaskExecutor";
 
-    @Value("${quartz.threadpool.core.size:10}")
-    private int quartzCorePoolSize;
+    @Value("${quartz.default.threadpool.size:15}")
+    private int threadpoolSize;
 
-    @Value("${quartz.threadpool.max.size:10}")
-    private int quartzMaxPoolSize;
+    @Value("${quartz.default.threadpool.priority:5}")
+    private int threadpoolPriority;
 
-    @Value("${quartz.threadpool.capacity.size:-1}")
-    private int quartzQueueCapacity;
-
-    @Value("${quartz.threadpool.thread.priority:5}")
-    private int quartzThreadPriority;
-
-    @Value("${quartz.threadpool.custom.executor:true}")
+    @Value("${quartz.default.threadpool.custom.executor:true}")
     private boolean customExecutorEnabled;
 
     @Inject
@@ -93,14 +90,11 @@ public class SchedulerFactoryConfig {
     }
 
     @Bean(name = QUARTZ_TASK_EXECUTOR)
-    public ExecutorService quartzTaskExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(quartzCorePoolSize);
-        executor.setMaxPoolSize(quartzMaxPoolSize);
-        executor.setQueueCapacity(quartzQueueCapacity == -1 ? Integer.MAX_VALUE : quartzQueueCapacity);
-        executor.setThreadPriority(quartzThreadPriority);
+    public Executor quartzTaskExecutor() {
+        SimpleThreadPoolTaskExecutor executor = new SimpleThreadPoolTaskExecutor();
+        executor.setThreadPriority(threadpoolPriority);
+        executor.setThreadCount(threadpoolSize);
         executor.setThreadNamePrefix(QUARTZ_EXECUTOR_THREAD_NAME_PREFIX);
-        executor.initialize();
-        return ExecutorServiceMetrics.monitor(meterRegistry, executor.getThreadPoolExecutor(), QUARTZ_TASK_EXECUTOR, "threadpool");
+        return new TimedSimpleThreadPoolTaskExecutor(meterRegistry, executor, QUARTZ_TASK_EXECUTOR, METRIC_PREFIX, Set.of());
     }
 }

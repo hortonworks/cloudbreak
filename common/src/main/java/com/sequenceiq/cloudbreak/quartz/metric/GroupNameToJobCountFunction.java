@@ -3,24 +3,23 @@ package com.sequenceiq.cloudbreak.quartz.metric;
 import java.util.Set;
 import java.util.function.ToDoubleFunction;
 
-import jakarta.inject.Inject;
-
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
+import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 
-@Component
 public class GroupNameToJobCountFunction implements ToDoubleFunction<String> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GroupNameToJobCountFunction.class);
 
-    @Inject
     private TransactionalScheduler scheduler;
+
+    public GroupNameToJobCountFunction(TransactionalScheduler scheduler) {
+        this.scheduler = scheduler;
+    }
 
     @Override
     public double applyAsDouble(String groupName) {

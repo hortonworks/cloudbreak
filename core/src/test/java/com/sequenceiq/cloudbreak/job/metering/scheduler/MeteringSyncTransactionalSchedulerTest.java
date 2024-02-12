@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.job.metering;
+package com.sequenceiq.cloudbreak.job.metering.scheduler;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.quartz.MdcQuartzJob;
 
 @ExtendWith(MockitoExtension.class)
-class MeteringTransactionalSchedulerTest {
+class MeteringSyncTransactionalSchedulerTest {
 
     private static final String JOB_NAME = "JOB_NAME";
 
@@ -36,7 +36,7 @@ class MeteringTransactionalSchedulerTest {
     private TransactionService transactionService;
 
     @InjectMocks
-    private MeteringTransactionalScheduler underTest;
+    private MeteringSyncTransactionalScheduler underTest;
 
     @BeforeEach
     void setUp() throws TransactionService.TransactionExecutionException {

@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
-import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
+import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 
 @Service
 public class EnvironmentArchiverJobService implements JobSchedulerService {
@@ -91,11 +91,16 @@ public class EnvironmentArchiverJobService implements JobSchedulerService {
         return Date.from(
                 ZonedDateTime.now()
                         .toInstant()
-                .plus(Duration.ofMinutes(1)));
+                        .plus(Duration.ofMinutes(1)));
     }
 
     @Override
     public String getJobGroup() {
         return JOB_GROUP;
+    }
+
+    @Override
+    public TransactionalScheduler getScheduler() {
+        return scheduler;
     }
 }

@@ -117,7 +117,7 @@ spring:
     template-loader-path: classpath:/
     prefer-file-system-access: false
   datasource:
-      maxActive: 30
+    maxActive: 30
   jpa:
     properties:
       hibernate:
@@ -163,4 +163,4 @@ clusterProxy:
   disabledPlatforms: MOCK
 
 
-quartz.common.scheduler.enabled: false
+quartz.default.scheduler.enabled: false

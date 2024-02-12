@@ -16,12 +16,13 @@ import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.job.metering.MeteringSyncTransactionalScheduler;
 import com.sequenceiq.cloudbreak.metering.config.MeteringConfig;
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
+import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.util.RandomUtil;
 
@@ -37,8 +38,9 @@ public class MeteringSyncJobService implements JobSchedulerService {
     @Inject
     private MeteringConfig meteringConfig;
 
+    @Qualifier("MeteringSyncTransactionalScheduler")
     @Inject
-    private MeteringSyncTransactionalScheduler scheduler;
+    private TransactionalScheduler scheduler;
 
     @Inject
     private ApplicationContext applicationContext;
@@ -132,5 +134,10 @@ public class MeteringSyncJobService implements JobSchedulerService {
     @Override
     public String getJobGroup() {
         return JOB_GROUP;
+    }
+
+    @Override
+    public TransactionalScheduler getScheduler() {
+        return scheduler;
     }
 }

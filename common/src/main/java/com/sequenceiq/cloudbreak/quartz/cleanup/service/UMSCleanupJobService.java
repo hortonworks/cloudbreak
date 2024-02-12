@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 import com.sequenceiq.cloudbreak.quartz.cleanup.UMSCleanupConfig;
 import com.sequenceiq.cloudbreak.quartz.cleanup.job.UMSCleanupJob;
-import com.sequenceiq.cloudbreak.quartz.configuration.TransactionalScheduler;
+import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 
 public abstract class UMSCleanupJobService<T extends UMSCleanupJob> implements JobSchedulerService {
 
@@ -81,5 +81,10 @@ public abstract class UMSCleanupJobService<T extends UMSCleanupJob> implements J
     @Override
     public String getJobGroup() {
         return JOB_GROUP;
+    }
+
+    @Override
+    public TransactionalScheduler getScheduler() {
+        return scheduler;
     }
 }

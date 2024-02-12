@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.job.metering;
+package com.sequenceiq.cloudbreak.job.metering.scheduler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -17,7 +17,7 @@ import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import io.micrometer.core.instrument.MeterRegistry;
 
 @ExtendWith(MockitoExtension.class)
-class MeteringSchedulerFactoryConfigTest {
+class MeteringSyncSchedulerFactoryConfigTest {
 
     @Mock
     private MeterRegistry meterRegistry;
@@ -32,13 +32,13 @@ class MeteringSchedulerFactoryConfigTest {
     private DataSource dataSource;
 
     @InjectMocks
-    private MeteringSchedulerFactoryConfig underTest;
+    private MeteringSyncSchedulerFactoryConfig underTest;
 
     @Test
     void testMeteringSchedulerShouldHaveCustomName() throws Exception {
-        SchedulerFactoryBean meteringScheduler = underTest.meteringScheduler(new QuartzProperties(), objectProvider, applicationContext, dataSource);
+        SchedulerFactoryBean meteringScheduler = underTest.meteringSyncScheduler(new QuartzProperties(), objectProvider, applicationContext, dataSource);
         meteringScheduler.afterPropertiesSet();
-        assertEquals("meteringScheduler", meteringScheduler.getScheduler().getSchedulerName());
+        assertEquals("meteringSyncScheduler", meteringScheduler.getScheduler().getSchedulerName());
     }
 
 }
