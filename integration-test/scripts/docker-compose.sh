@@ -18,7 +18,7 @@ cd ..
 
 date
 echo -e "\n\033[1;96m--- Kill running test container\033[0m\n"
-$INTEGCB_LOCATION/.deps/bin/docker-compose --compatibility down --remove-orphans
+docker compose --compatibility down --remove-orphans
 
 date
 echo -e "\n\033[1;96m--- Create docker network\033[0m\n"
@@ -26,7 +26,7 @@ docker network create -o "com.docker.network.bridge.name"="docker-cbreak" cbreak
 
 date
 echo -e "\n\033[1;96m--- Start thunderhead mock\033[0m\n"
-$INTEGCB_LOCATION/.deps/bin/docker-compose --compatibility up --remove-orphans --detach thunderhead-mock
+docker compose --compatibility up --remove-orphans --detach thunderhead-mock
 
 date
 echo -e "\n\033[1;96m--- Copy mock infrastructure infrastructure-mock.p12 cert to certs dir\033[0m\n"
@@ -44,7 +44,7 @@ cbd_teardown_and_exit() {
   date
   echo -e "\n\033[1;96m--- ERROR: Failed to bring up all the necessary CBD services! Process is about to terminate!\033[0m\n"
   ./cbd kill
-  .deps/bin/docker-compose --compatibility down --remove-orphans
+  docker compose --compatibility down --remove-orphans
   exit 1
 }
 
@@ -89,7 +89,7 @@ check_primary_key () {
         set -e
         echo -e "\n\033[1;96m--- ERROR: There are tables in ${DB_NAME} without primary key. Process is about to terminate!\033[0m\n"
         ./cbd kill
-        .deps/bin/docker-compose --compatibility down --remove-orphans
+        docker compose --compatibility down --remove-orphans
         exit 1
     fi
     set -e
@@ -178,7 +178,7 @@ if [[ "$CIRCLECI" && "$CIRCLECI" == "true" ]]; then
     export DOCKER_CLIENT_TIMEOUT=120
     export COMPOSE_HTTP_TIMEOUT=120
 
-    set -o pipefail ; $INTEGCB_LOCATION/.deps/bin/docker-compose --compatibility up --remove-orphans --exit-code-from test test | tee test.out
+    set -o pipefail ; docker compose --compatibility up --remove-orphans --exit-code-from test test | tee test.out
     echo -e "\n\033[1;96m--- Test finished\033[0m\n"
 
     echo -e "\n\033[1;96m--- Collect docker stats:\033[0m\n"

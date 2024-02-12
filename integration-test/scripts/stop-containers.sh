@@ -4,7 +4,7 @@
 
 echo -e "\n\033[1;96m--- Stop cbd containers"
 cd $INTEGCB_LOCATION;
-.deps/bin/docker-compose --compatibility stop;
+docker compose --compatibility stop;
 
 echo -e "\n\033[1;96m--- Save Cluster Proxy log to cluster-proxy.log file"
 docker logs cbreak_cluster-proxy_1 &> ../cluster-proxy.log;
