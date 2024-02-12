@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -153,7 +154,7 @@ public class BlueprintLoaderService {
     private boolean isActiveBlueprintMustBeUpdatedAndNotUserManaged(Blueprint blueprintInDatabase, BlueprintFile defaultBlueprint) {
         return isActiveDefaultBlueprint(blueprintInDatabase)
                 && isBlueprintInTheDefaultCache(defaultBlueprint)
-                && (defaultBlueprintNotSameAsNewTexts(blueprintInDatabase, defaultBlueprint.getBlueprintText(), defaultBlueprint.getDefaultBlueprintText())
+                && (defaultBlueprintsDefaultBlueprintTextNotSameAsNew(blueprintInDatabase, defaultBlueprint.getDefaultBlueprintText())
                         || defaultBlueprintContainsNewDescription(blueprintInDatabase, defaultBlueprint)
                         || isBlueprintInDBSameNameButUserManaged(blueprintInDatabase, defaultBlueprint)
                         || isUpgradeOptionModified(blueprintInDatabase, defaultBlueprint));
@@ -170,8 +171,8 @@ public class BlueprintLoaderService {
     private Blueprint prepareBlueprint(Blueprint blueprintFromDatabase, BlueprintFile newBlueprint,
             Workspace workspace) {
         setupBlueprint(blueprintFromDatabase, workspace);
-        blueprintFromDatabase.setBlueprintText(newBlueprint.getBlueprintText());
         blueprintFromDatabase.setDefaultBlueprintText(newBlueprint.getBlueprintText());
+        blueprintFromDatabase.setBlueprintTextToBlankIfDefaultTextIsPresent(newBlueprint.getBlueprintText());
         blueprintFromDatabase.setDescription(newBlueprint.getDescription());
         blueprintFromDatabase.setHostGroupCount(newBlueprint.getHostGroupCount());
         blueprintFromDatabase.setStackName(newBlueprint.getStackName());
@@ -225,12 +226,12 @@ public class BlueprintLoaderService {
         return DEFAULT.equals(bp.getStatus()) || USER_MANAGED.equals(bp.getStatus());
     }
 
-    private boolean defaultBlueprintNotSameAsNewTexts(Blueprint blueprintFromDatabase, String blueprintText, String defaultBlueprintText) {
-        if (!defaultBlueprintText.equals(blueprintFromDatabase.getDefaultBlueprintText())) {
-            return true;
+    private boolean defaultBlueprintsDefaultBlueprintTextNotSameAsNew(Blueprint blueprintInDatabase, String defaultBlueprintText) {
+        ResourceStatus blueprintInDatabaseStatus = blueprintInDatabase.getStatus();
+        if (blueprintInDatabaseStatus == DEFAULT || blueprintInDatabaseStatus == DEFAULT_DELETED) {
+            return !defaultBlueprintText.equals(blueprintInDatabase.getDefaultBlueprintText());
         }
-        String blueprintTextFromVault = blueprintFromDatabase.getBlueprintJsonText();
-        return blueprintTextFromVault == null || !blueprintTextFromVault.equals(blueprintText);
+        return false;
     }
 
     private boolean defaultBlueprintContainsNewDescription(Blueprint cd, BlueprintFile blueprint) {
@@ -258,7 +259,7 @@ public class BlueprintLoaderService {
     private boolean isActiveAndMustBeUpdated(Blueprint blueprintFromDatabase, BlueprintFile defaultBlueprint) {
         return isActiveDefaultBlueprint(blueprintFromDatabase)
                 && isBlueprintInTheDefaultCache(defaultBlueprint)
-                && (defaultBlueprintNotSameAsNewTexts(blueprintFromDatabase, defaultBlueprint.getBlueprintText(), defaultBlueprint.getDefaultBlueprintText())
+                && (defaultBlueprintsDefaultBlueprintTextNotSameAsNew(blueprintFromDatabase, defaultBlueprint.getDefaultBlueprintText())
                         || defaultBlueprintContainsNewDescription(blueprintFromDatabase, defaultBlueprint)
                         || isUpgradeOptionModified(blueprintFromDatabase, defaultBlueprint));
     }

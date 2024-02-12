@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.domain.converter.BlueprintUpgradeOptionConverte
 import com.sequenceiq.cloudbreak.domain.converter.ResourceStatusConverter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
-import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 
@@ -35,7 +34,7 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
     private String name;
 
     @Column(nullable = false)
-    @Convert(converter = SecretToString.class)
+    @Convert(converter = BlueprintSecretToString.class)
     @SecretValue
     private Secret blueprintText = Secret.EMPTY;
 
@@ -119,6 +118,14 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setBlueprintText(String blueprintText) {
         this.blueprintText = new Secret(blueprintText);
+    }
+
+    public void setBlueprintTextToBlankIfDefaultTextIsPresent(String blueprintText) {
+        if (defaultBlueprintText != null) {
+            this.blueprintText = Secret.EMPTY;
+        } else {
+            setBlueprintText(blueprintText);
+        }
     }
 
     public String getBlueprintJsonText() {
