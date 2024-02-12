@@ -530,7 +530,7 @@ public class CloudParameterService {
         if (isRetryableException(errorDetails)) {
             return new GetCloudParameterException(errorMessage, errorDetails);
         } else {
-            return new OperationException(errorDetails);
+            return new BadRequestException(errorDetails);
         }
     }
 

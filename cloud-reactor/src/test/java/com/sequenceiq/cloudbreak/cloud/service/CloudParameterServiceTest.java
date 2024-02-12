@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import jakarta.ws.rs.BadRequestException;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,7 +32,6 @@ import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTable;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
-import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 @ExtendWith(MockitoExtension.class)
@@ -84,7 +85,7 @@ class CloudParameterServiceTest {
             ev.getData().getResult().onNext(new GetPlatformDatabaseCapabilityResult("Unauthorized", errorResponse, 1L));
             return null;
         }).when(eventBus).notify(anyString(), any(Event.class));
-        assertThrows(OperationException.class, () -> underTest.getDatabaseCapabilities(
+        assertThrows(BadRequestException.class, () -> underTest.getDatabaseCapabilities(
                 new ExtendedCloudCredential(new CloudCredential("id", "name", "acc"),
                         "aws", "desc", "account", new ArrayList<>()), "region", "aws", null));
     }
