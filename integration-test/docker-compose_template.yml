@@ -3,23 +3,6 @@ networks:
   cbreak_default:
     external: true
 services:
-  thunderhead-mock:
-    networks:
-      cbreak_default: {}
-    ports:
-      - 10080:8080
-      - 8982:8982
-      - 8981:8981
-    volumes:
-    - ../mock-thunderhead/build/libs/mock-thunderhead.jar:/mock-thunderhead.jar
-    - ./integcb/etc:/etc/auth
-    command: java -jar /mock-thunderhead.jar
-    image: docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-21-runtime-cis:1.18-2.1705519635-stig-05022024
-    deploy:
-      resources:
-        limits:
-          memory: 1024M
-          cpus: '1.0'
   test:
     networks:
       cbreak_default: {}

@@ -21,14 +21,6 @@ echo -e "\n\033[1;96m--- Kill running test container\033[0m\n"
 docker compose --compatibility down --remove-orphans
 
 date
-echo -e "\n\033[1;96m--- Create docker network\033[0m\n"
-docker network create -o "com.docker.network.bridge.name"="docker-cbreak" cbreak_default || true
-
-date
-echo -e "\n\033[1;96m--- Start thunderhead mock\033[0m\n"
-docker compose --compatibility up --remove-orphans --detach thunderhead-mock
-
-date
 echo -e "\n\033[1;96m--- Copy mock infrastructure infrastructure-mock.p12 cert to certs dir\033[0m\n"
 mkdir -p $INTEGCB_LOCATION/certs/into-nssdb
 cp ../mock-infrastructure/src/main/resources/keystore/infrastructure-mock.pem $INTEGCB_LOCATION/certs/into-nssdb/infrastructure-mock.pem
@@ -67,7 +59,7 @@ cbd_services_sanity_check() {
 }
 
 TRACE=1 ./cbd regenerate
-./cbd start-wait traefik dev-gateway core-gateway commondb vault cloudbreak environment periscope freeipa redbeams datalake haveged mock-infrastructure idbmms cluster-proxy cadence cluster-proxy-health-check-worker
+./cbd start-wait traefik dev-gateway core-gateway commondb vault cloudbreak environment periscope freeipa redbeams datalake haveged mock-infrastructure idbmms cluster-proxy cadence cluster-proxy-health-check-worker thunderhead-mock
 RESULT=$?
 cbd_services_sanity_check
 
@@ -190,7 +182,7 @@ if [[ "$CIRCLECI" && "$CIRCLECI" == "true" ]]; then
         docker stats --no-stream --format "{{ .NetIO }}" cbreak_commondb_1 > ./test-output/docker_stats/pg_stat_network_io.result;
 
         docker stats --no-stream --format "table {{ .Name }}\t{{ .Container }}\t{{ .MemUsage }}\t{{ .MemPerc }}\t{{ .CPUPerc }}\t{{ .NetIO }}\t{{ .BlockIO }}" > ./test-output/docker_stats/docker_stat.html
-        docker exec cbreak_commondb_1 psql -U postgres --pset=pager=off -d cbdb -c "CREATE EXTENSION pg_stat_statements;";
+        docker exec cbreak_commondb_1 psql -U postgres --pset=pager=off -d cbdb -c "CREATE EXTENSION IF NOT EXISTS pg_stat_statements;";
         docker exec cbreak_commondb_1 psql -U postgres --pset=pager=off -d cbdb -c "select * from pg_stat_statements;" --html > ./test-output/docker_stats/query_stat.html
 
         cp ./src/main/resources/pg_stats/pg_query_stat_template.html ./test-output/docker_stats/pg_query_stat_template.html
