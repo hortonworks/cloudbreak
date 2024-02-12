@@ -14,9 +14,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.view.BaseBlueprintClusterView;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.common.api.type.CertExpirationState;
@@ -43,7 +43,17 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.stack WHERE c.workspace IS null")
     Set<Cluster> findAllWithNoWorkspace();
 
-    Set<Cluster> findByBlueprint(Blueprint blueprint);
+    @Modifying
+    @Query(value = "UPDATE cluster "
+            + "SET blueprint_id = null "
+            + "WHERE blueprint_id = :blueprintId "
+            + "AND status= 'DELETE_COMPLETED'", nativeQuery = true)
+    void deleteBlueprintRelationWhereClusterDeleted(@Param("blueprintId") Long blueprintId);
+
+    @Query("SELECT s.name as name, s.type as type, s.id as id FROM Cluster c " +
+            "JOIN c.stack s " +
+            "WHERE c.blueprint.id = :blueprintId")
+    Set<BaseBlueprintClusterView> findByStackResourceCrn(@Param("blueprintId") Long blueprintId);
 
     Set<Cluster> findByCustomConfigurations(CustomConfigurations customConfigurations);
 

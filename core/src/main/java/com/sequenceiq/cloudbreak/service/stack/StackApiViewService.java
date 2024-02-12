@@ -74,7 +74,7 @@ public class StackApiViewService {
     public Set<StackApiView> retrieveStackViewsByWorkspaceIdAndEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         if (StringUtils.isEmpty(environmentName)) {
             LOGGER.info("Environment name was empty so we will query all the stack.");
-            return retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, null, stackTypes);
+            return  retrieveStackViewsByWorkspaceIdAndEnvironmentCrn(workspaceId, null, stackTypes);
         } else {
             LOGGER.info("Environment name was defined so we will query all the stack in the {} environment.", environmentName);
             String environmentCrn = environmentClientService.getCrnByName(environmentName);

@@ -19,7 +19,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalUserModifier;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -103,14 +102,6 @@ public class UserService extends InternalUserModifier {
 
     public Set<User> getByUsersIds(Set<String> userIds) {
         return userRepository.findByUserIdIn(userIds);
-    }
-
-    public Set<User> getAll(CloudbreakUser cloudbreakUser) {
-        Optional<Tenant> tenant = tenantService.findByName(cloudbreakUser.getTenant());
-        if (tenant.isPresent()) {
-            return userRepository.findAllByTenant(tenant.get());
-        }
-        return Sets.newHashSet();
     }
 
     public String evictCurrentUserDetailsForLoggedInUser() {

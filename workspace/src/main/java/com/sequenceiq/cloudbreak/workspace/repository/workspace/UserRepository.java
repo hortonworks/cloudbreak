@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 
@@ -23,9 +22,6 @@ public interface UserRepository extends CrudRepository<User, Long> {
 
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.tenant t WHERE u.userId = :userId AND t.id = :tenantId")
     Optional<User> findByTenantIdAndUserId(@Param("tenantId") Long tenantId, @Param("userId") String userId);
-
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.tenant t WHERE u.tenant = :tenant")
-    Set<User> findAllByTenant(@Param("tenant") Tenant tenant);
 
     Set<User> findByUserIdIn(Set<String> userIds);
 }

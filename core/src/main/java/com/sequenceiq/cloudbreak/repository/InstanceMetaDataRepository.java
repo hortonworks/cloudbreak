@@ -225,10 +225,13 @@ public interface InstanceMetaDataRepository extends JpaRepository<InstanceMetaDa
     Long getMaxPrivateId(@Param("instanceGroups") List<InstanceGroup> instanceGroups);
 
     @Query("SELECT s.id as stackId, COUNT(i) as instanceCount "
-            + "FROM InstanceMetaData i JOIN i.instanceGroup ig JOIN ig.stack s WHERE s.workspace.id= :id "
+            + "FROM InstanceMetaData i "
+            + "JOIN i.instanceGroup ig "
+            + "JOIN ig.stack s "
+            + "WHERE s.workspace.id= :id "
             + "AND i.instanceStatus <> 'TERMINATED' "
-            + "AND (:environmentCrn IS null OR s.environmentCrn = :environmentCrn) "
-            + "AND (s.type IS null OR s.type in :stackTypes) "
+            + "AND s.environmentCrn = :environmentCrn "
+            + "AND s.type in :stackTypes "
             + "GROUP BY s.id")
     Set<StackInstanceCount> countByWorkspaceId(@Param("id") Long id, @Param("environmentCrn") String environmentCrn,
             @Param("stackTypes") List<StackType> stackTypes);

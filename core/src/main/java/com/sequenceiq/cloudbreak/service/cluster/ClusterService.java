@@ -62,6 +62,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.view.BaseBlueprintClusterView;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -409,10 +410,6 @@ public class ClusterService {
         return clusterApiConnectors.getConnector(stackDto).clusterStatusService().getHostStatusesRaw();
     }
 
-    public Set<Cluster> findByBlueprint(Blueprint blueprint) {
-        return repository.findByBlueprint(blueprint);
-    }
-
     public Set<Cluster> findByCustomConfigurations(CustomConfigurations customConfigurations) {
         return repository.findByCustomConfigurations(customConfigurations);
     }
@@ -508,6 +505,14 @@ public class ClusterService {
 
     public void updateDbSslCert(Long clusterId, DatabaseSslDetails sslDetails) {
         repository.updateDbSslCert(clusterId, sslDetails.getSslCertBundle(), sslDetails.isSslEnabledForStack());
+    }
+
+    public void deleteBlueprintsOnSpecificClusters(Long blueprintId) {
+        repository.deleteBlueprintRelationWhereClusterDeleted(blueprintId);
+    }
+
+    public Set<BaseBlueprintClusterView> findByStackResourceCrn(Long blueprintId) {
+        return repository.findByStackResourceCrn(blueprintId);
     }
 
 }

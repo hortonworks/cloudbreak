@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DE
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT_DELETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.SERVICE_MANAGED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 import java.util.Collection;
@@ -58,8 +57,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.PlatformRecommendationToPlatformRecommendationV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.projection.BlueprintStatusView;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.view.BaseBlueprintClusterView;
 import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
@@ -389,38 +387,60 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Override
     protected void prepareDeletion(Blueprint blueprint) {
-        Set<Cluster> notDeletedClustersWithThisCd = getNotDeletedClustersWithBlueprint(blueprint);
-        if (!notDeletedClustersWithThisCd.isEmpty()) {
-            if (notDeletedClustersWithThisCd.size() > 1) {
-                List<String> clusters = notDeletedClustersWithThisCd
-                        .stream()
-                        .filter(it -> !it.getStack().getType().equals(StackType.TEMPLATE))
-                        .map(it -> it.getStack().getName())
-                        .collect(Collectors.toList());
-                List<Long> stackTemplateIds = notDeletedClustersWithThisCd
-                        .stream()
-                        .filter(it -> it.getStack().getType().equals(StackType.TEMPLATE))
-                        .map(it -> it.getStack().getId())
-                        .collect(Collectors.toList());
-                Set<String> clusterDefinitions = getClusterDefinitionNamesByStackTemplateIds(stackTemplateIds);
-                throw new BadRequestException(String.format(
-                        "There are clusters or cluster definitions associated with cluster template '%s'. "
-                                + "The cluster template used by %s cluster(s) (%s) and %s cluster definitions (%s). "
-                                + "Please remove these before deleting the cluster template.", blueprint.getName(),
-                        clusters.size(), String.join(", ", clusters), clusterDefinitions.size(),
-                        String.join(", ", clusterDefinitions)));
+        clusterService.deleteBlueprintsOnSpecificClusters(blueprint.getId());
+        Set<BaseBlueprintClusterView> blueprintClusterViews = clusterService.findByStackResourceCrn(blueprint.getId());
+        if (!blueprintClusterViews.isEmpty()) {
+            List<String> clusters = getClusterFromList(blueprintClusterViews);
+            if (blueprintClusterViews.size() == 1) {
+                checkOnlyOneRemainingEntityRelation(
+                        blueprint,
+                        blueprintClusterViews,
+                        clusters);
+            } else {
+                checkOnlyMultipleRemainingEntityRelation(
+                        blueprint,
+                        clusters,
+                        getBlueprintsFromList(blueprintClusterViews));
             }
-            Cluster cluster = notDeletedClustersWithThisCd.iterator().next();
-            String clusterType = getClusterType(cluster);
-            String clusterOrClusterDefinitonName = cluster.getStack().getName();
-            if (cluster.getStack().getType().equals(StackType.TEMPLATE)) {
-                clusterOrClusterDefinitonName = getClusterDefinitionNamesByStackTemplateIds(List.of(cluster.getStack().getId()))
-                        .stream().findFirst().orElseThrow(() -> new BadRequestException(String.format("The cluster template['%s'] could not be deleted, "
-                                + "because a cluster definition uses the template, but its name could not be loaded.", blueprint.getName())));
-            }
-            throw new BadRequestException(String.format("The %s with name ['%s'] uses cluster template '%s'. Please remove the "
-                    + "%s before deleting the cluster template.", clusterType, clusterOrClusterDefinitonName, blueprint.getName(), clusterType));
         }
+    }
+
+    private void checkOnlyMultipleRemainingEntityRelation(Blueprint blueprint, List<String> clusters, List<Long> stackTemplateIds) {
+        Set<String> clusterDefinitions = getClusterDefinitionNamesByStackTemplateIds(stackTemplateIds);
+        throw new BadRequestException(String.format(
+                "There are clusters or cluster definitions associated with cluster template '%s'. "
+                        + "The cluster template used by %s cluster(s) (%s) and %s cluster definitions (%s). "
+                        + "Please remove these before deleting the cluster template.", blueprint.getName(),
+                clusters.size(), String.join(", ", clusters), clusterDefinitions.size(),
+                String.join(", ", clusterDefinitions)));
+    }
+
+    private void checkOnlyOneRemainingEntityRelation(Blueprint blueprint, Set<BaseBlueprintClusterView> blueprintClusterViews, List<String> clusters) {
+        BaseBlueprintClusterView blueprintClusterView = blueprintClusterViews.iterator().next();
+        String clusterType = getClusterType(blueprintClusterView);
+        String clusterOrClusterDefinitionName = blueprintClusterView.getName();
+        throw new BadRequestException(String.format("The %s with name ['%s'] uses cluster template '%s'. Please remove the "
+                        + "%s before deleting the cluster template.",
+                clusterType,
+                clusterOrClusterDefinitionName,
+                blueprint.getName(),
+                clusterType));
+    }
+
+    private List<Long> getBlueprintsFromList(Set<BaseBlueprintClusterView> blueprintClusterViews) {
+        return blueprintClusterViews
+                .stream()
+                .filter(it -> it.getType().equals(StackType.TEMPLATE))
+                .map(it -> it.getId())
+                .collect(Collectors.toList());
+    }
+
+    private List<String> getClusterFromList(Set<BaseBlueprintClusterView> blueprintClusterViews) {
+        return blueprintClusterViews
+                .stream()
+                .filter(it -> !it.getType().equals(StackType.TEMPLATE))
+                .map(it -> it.getName())
+                .collect(Collectors.toList());
     }
 
     private Set<String> getClusterDefinitionNamesByStackTemplateIds(List<Long> stackTemplateIds) {
@@ -429,25 +449,8 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                 .collect(Collectors.toSet());
     }
 
-    private String getClusterType(Cluster cluster) {
-        return cluster.getStack().getType().equals(StackType.TEMPLATE) ? "cluster definition" : "cluster";
-    }
-
-    private Set<Cluster> getNotDeletedClustersWithBlueprint(Blueprint blueprint) {
-        Set<Cluster> clustersWithThisBlueprint = clusterService.findByBlueprint(blueprint);
-        Set<Cluster> deletedClustersWithThisBp = clustersWithThisBlueprint.stream()
-                .filter(cluster -> {
-                    Stack stack = cluster.getStack();
-                    return DELETE_COMPLETED.equals(stack.getStatus());
-                })
-                .collect(Collectors.toSet());
-        LOGGER.info("Cluster template will be detached from {} cluster definition(s): {}", deletedClustersWithThisBp.size(),
-                deletedClustersWithThisBp.stream().map(cluster -> cluster.getStack().getName()).collect(Collectors.toList()));
-        deletedClustersWithThisBp.forEach(cluster -> cluster.setBlueprint(null));
-        clusterService.saveAll(deletedClustersWithThisBp);
-        Set<Cluster> notDeletedClustersWithThisBp = new HashSet<>(clustersWithThisBlueprint);
-        notDeletedClustersWithThisBp.removeAll(deletedClustersWithThisBp);
-        return notDeletedClustersWithThisBp;
+    private String getClusterType(BaseBlueprintClusterView cluster) {
+        return cluster.getType().equals(StackType.TEMPLATE) ? "cluster definition" : "cluster";
     }
 
     @Override
