@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -40,8 +41,8 @@ class ParcelMatcherTest {
 
     @BeforeEach
     public void init() {
-        when(image.getPreWarmParcels()).thenReturn(List.of(PREWARMED_PARCEL1, PREWARMED_PARCEL2));
-        when(preWarmParcelParser.parseProductFromParcel(anyList(), eq(Collections.emptyList()))).thenReturn(Optional.empty());
+        lenient().when(image.getPreWarmParcels()).thenReturn(List.of(PREWARMED_PARCEL1, PREWARMED_PARCEL2));
+        lenient().when(preWarmParcelParser.parseProductFromParcel(anyList(), eq(Collections.emptyList()))).thenReturn(Optional.empty());
     }
 
     @Test

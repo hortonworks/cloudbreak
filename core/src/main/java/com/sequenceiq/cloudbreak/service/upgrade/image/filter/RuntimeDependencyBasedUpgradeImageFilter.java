@@ -41,6 +41,7 @@ public class RuntimeDependencyBasedUpgradeImageFilter implements UpgradeImageFil
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
         List<Image> filteredImages = filterImages(imageFilterResult, imageFilterParams);
+        logNotEligibleImages(imageFilterResult, filteredImages, LOGGER);
         LOGGER.debug("After the filtering {} image left.", filteredImages.size());
         return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
     }

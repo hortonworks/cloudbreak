@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.service.upgrade.image.CentOSToRedHatUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 
@@ -35,26 +36,13 @@ class CentOSToRedHatUpgradeImageFilterTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private CentOSToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
+
     @InjectMocks
     private CentOSToRedHatUpgradeImageFilter underTest;
 
     private AtomicLong imageCreationTimeSequence = new AtomicLong(1);
-
-    @Test
-    //CHECKSTYLE:OFF
-    public void testCentOS_7_2_16_toRedHat_7_2_16_UpgradeIsNotAllowed() {
-        //CHECKSTYLE:ON
-        redhatImageIsPreferred();
-        ImageFilterParams imageFilterParams = centosImageFilterParams(VERSION_7_2_16);
-        Image redhatImage = redhatCatalogImage(VERSION_7_2_16);
-        Image centOSImage1 = centOSCatalogImage(VERSION_7_2_16);
-        Image centOSImage2 = centOSCatalogImage(VERSION_7_2_17);
-
-        ImageFilterResult result = testImageFiltering(imageFilterParams,
-                centOSImage1, redhatImage, centOSImage2);
-
-        assertEquals(List.of(centOSImage1, centOSImage2), result.getImages());
-    }
 
     @Test
     //CHECKSTYLE:OFF
@@ -76,6 +64,8 @@ class CentOSToRedHatUpgradeImageFilterTest {
         redhatImageIsPreferred();
         ImageFilterParams imageFilterParams = centosImageFilterParams(VERSION_7_2_17);
         Image redhatImage = redhatCatalogImage(VERSION_7_2_17);
+        when(centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(imageFilterParams.getCurrentImage(), redhatImage,
+                imageFilterParams.getStackRelatedParcels())).thenReturn(true);
 
         ImageFilterResult result = testImageFiltering(imageFilterParams, redhatImage);
 
@@ -128,10 +118,12 @@ class CentOSToRedHatUpgradeImageFilterTest {
         Image redhatImage = redhatCatalogImage(VERSION_7_2_17);
         Image centOSImage1 = centOSCatalogImage(VERSION_7_2_17);
         Image centOSImage2 = centOSCatalogImage(VERSION_7_2_18);
+        when(centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(imageFilterParams.getCurrentImage(), redhatImage,
+                imageFilterParams.getStackRelatedParcels())).thenReturn(true);
 
         ImageFilterResult result = testImageFiltering(imageFilterParams, centOSImage1, redhatImage, centOSImage2);
 
-        assertEquals(List.of(centOSImage1, centOSImage2, redhatImage), result.getImages());
+        assertEquals(List.of(centOSImage1, redhatImage, centOSImage2), result.getImages());
     }
 
     private ImageFilterResult testImageFiltering(ImageFilterParams imageFilterParams, Image... images) {

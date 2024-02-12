@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.common.model.UpgradeShowAvailableImages;
 import com.sequenceiq.distrox.v1.distrox.StackUpgradeOperations;
 
@@ -247,7 +248,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         ImageInfoV4Response image8 = createImageResponse(8L, "C");
         ImageInfoV4Response image9 = createImageResponse(6L, "C");
         response.setUpgradeCandidates(List.of(image1, image2, image3, image4, image5, image6, image7, image8, image9));
-        response.setCurrent(new ImageInfoV4Response());
+        response.setCurrent(createImageResponse(STACK_ID, "7.2.0"));
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
         when(currentImageUsageCondition.currentImageUsedOnInstances(any(), any())).thenReturn(true);
@@ -462,7 +463,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
     private ImageInfoV4Response createImageResponse(long creation, String cdp) {
         ImageInfoV4Response image = new ImageInfoV4Response();
         image.setCreated(creation);
-        image.setComponentVersions(new ImageComponentVersions("dontcare", "dontcare", cdp, "dontcare", "dontcare", "dontcare", List.of()));
+        image.setComponentVersions(new ImageComponentVersions("dontcare", "dontcare", cdp, "dontcare", OsType.CENTOS7.getOs(), "dontcare", List.of()));
         return image;
     }
 }

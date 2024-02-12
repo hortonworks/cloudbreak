@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
-import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentOSToRedHatUpgradeImageFilter.isCentOSToRedHatUpgradableVersion;
-
 import java.util.List;
 
 import jakarta.inject.Inject;
@@ -31,6 +29,7 @@ import com.sequenceiq.cloudbreak.service.StackTypeResolver;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.CentOSToRedHatUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -67,6 +66,9 @@ public class StackImageUpdateService {
     @Inject
     private PlatformStringTransformer platformStringTransformer;
 
+    @Inject
+    private CentOSToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
+
     public StatedImage getNewImageIfVersionsMatch(StackDtoDelegate stack, String newImageId, String imageCatalogName, String imageCatalogUrl) {
         try {
             restRequestThreadLocalService.setWorkspaceId(stack.getWorkspaceId());
@@ -82,10 +84,11 @@ public class StackImageUpdateService {
                 throw new OperationException(message);
             }
 
-            if (!isOsVersionsMatch(currentImage, newImage) && !isCentOSToRedHatUpgradableVersion(currentImage, newImage.getImage())) {
+            if (!isOsVersionsMatch(currentImage, newImage) &&
+                    !centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(currentImage, newImage.getImage(), stack)) {
                 String message = messagesService.getMessage(Msg.OSVERSION_DIFFERENT.code(),
                         Lists.newArrayList(newImage.getImage().getOs(), newImage.getImage().getOsType(), currentImage.getOs(), currentImage.getOsType()));
-                LOGGER.debug(message);
+                LOGGER.debug("Image change not permitted because: {} Current image: {}, new image: {}", message, currentImage, newImage.getImage());
                 throw new OperationException(message);
             }
 

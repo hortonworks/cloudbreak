@@ -105,3 +105,6 @@ orchestrator-salt/src/main/resources/salt/salt/datalake_metrics                 
 orchestrator-salt/**/postgresql/root-certs.sls                                  @lrodek
 orchestrator-salt/**/postgresql/scripts/conf_pgsql_ssl.sh                       @lrodek
 orchestrator-salt/**/postgresql/scripts/create_embeddeddb_certificate.sh        @lrodek
+
+core/src/main/java/com/sequenceiq/cloudbreak/service/upgrade/                   @tpopovics
+core/src/main/java/com/sequenceiq/cloudbreak/core/flow2/cluster/datalake/upgrade/ @tpopovics
