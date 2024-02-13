@@ -38,6 +38,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
@@ -326,5 +328,16 @@ public class StackUpscaleService {
 
     public void fireImageFallbackFlowMessage(Long stackId) {
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_IMAGE_FALLBACK);
+    }
+
+    public InstanceStoreMetadata getInstanceStorageInfo(AuthenticatedContext ac, String instanceType, CloudConnector connector)
+            throws CloudbreakServiceException {
+        try {
+            return connector.metadata().collectInstanceStorageCount(ac, List.of(instanceType));
+        } catch (Exception e) {
+            String exceptionMessage = format("Exception in vertical scale flow while trying to fetch metadata for the instance type: %s", instanceType);
+            LOGGER.warn(exceptionMessage, e);
+            throw new CloudbreakServiceException(exceptionMessage, e);
+        }
     }
 }

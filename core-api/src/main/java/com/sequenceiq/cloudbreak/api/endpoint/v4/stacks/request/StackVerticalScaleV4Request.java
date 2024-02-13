@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request;
 
+import java.util.StringJoiner;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -50,5 +52,13 @@ public class StackVerticalScaleV4Request implements JsonEntity {
 
     public void setTemplate(InstanceTemplateV4Request template) {
         this.template = template;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", StackVerticalScaleV4Request.class.getSimpleName() + "[", "]")
+                .add("group=" + group)
+                .add("instanceTemplateRequested=" + template.getInstanceType())
+                .toString();
     }
 }

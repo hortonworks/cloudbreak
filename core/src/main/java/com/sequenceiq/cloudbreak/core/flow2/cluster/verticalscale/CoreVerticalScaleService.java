@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
@@ -77,7 +78,8 @@ public class CoreVerticalScaleService {
         }
     }
 
-    public void updateTemplateWithVerticalScaleInformation(Long stackId, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
+    public void updateTemplateWithVerticalScaleInformation(Long stackId, StackVerticalScaleV4Request stackVerticalScaleV4Request,
+            int instanceStorageCount, int instanceStorageSize) {
         Optional<InstanceGroupView> optionalGroup = instanceGroupService
                 .findInstanceGroupViewByStackIdAndGroupName(stackId, stackVerticalScaleV4Request.getGroup());
         if (optionalGroup.isPresent() && stackVerticalScaleV4Request.getTemplate() != null) {
@@ -87,23 +89,32 @@ public class CoreVerticalScaleService {
             String instanceType = requestedTemplate.getInstanceType();
             if (!Strings.isNullOrEmpty(instanceType)) {
                 template.setInstanceType(instanceType);
+                template.setInstanceStorageCount(instanceStorageCount);
+                template.setInstanceStorageSize(instanceStorageSize);
             }
             if (requestedTemplate.getRootVolume() != null) {
                 Integer rootVolumeSize = requestedTemplate.getRootVolume().getSize();
                 template.setRootVolumeSize(rootVolumeSize);
             }
-            Set<VolumeV4Request> requestedAttachedVolumes = requestedTemplate.getAttachedVolumes();
-            if (requestedAttachedVolumes != null) {
-                for (VolumeTemplate volumeTemplateInTheDatabase : template.getVolumeTemplates()) {
-                    for (VolumeV4Request volumeV4Request : requestedAttachedVolumes) {
-                        if (volumeTemplateInTheDatabase.getVolumeType().equals(volumeV4Request.getType())) {
-                            volumeTemplateInTheDatabase.setVolumeCount(volumeV4Request.getSize());
-                            volumeTemplateInTheDatabase.setVolumeSize(volumeV4Request.getCount());
-                        }
+            updateVolumeTemplate(requestedTemplate, template);
+            if (instanceStorageCount > 0 && template.getTemporaryStorage().equals(TemporaryStorage.ATTACHED_VOLUMES)) {
+                template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES);
+            }
+            templateService.savePure(template);
+        }
+    }
+
+    private static void updateVolumeTemplate(InstanceTemplateV4Request requestedTemplate, Template template) {
+        Set<VolumeV4Request> requestedAttachedVolumes = requestedTemplate.getAttachedVolumes();
+        if (requestedAttachedVolumes != null) {
+            for (VolumeTemplate volumeTemplateInTheDatabase : template.getVolumeTemplates()) {
+                for (VolumeV4Request volumeV4Request : requestedAttachedVolumes) {
+                    if (volumeTemplateInTheDatabase.getVolumeType().equals(volumeV4Request.getType())) {
+                        volumeTemplateInTheDatabase.setVolumeCount(volumeV4Request.getCount());
+                        volumeTemplateInTheDatabase.setVolumeSize(volumeV4Request.getSize());
                     }
                 }
             }
-            templateService.savePure(template);
         }
     }
 }

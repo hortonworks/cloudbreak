@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.handler.CloudPlatformEventHandler;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -48,17 +49,24 @@ public class CoreVerticalScaleHandler implements CloudPlatformEventHandler<CoreV
         CoreVerticalScaleRequest<CoreVerticalScaleResult> request = stackVerticalScaleRequestEvent.getData();
         CloudContext cloudContext = request.getCloudContext();
         StackVerticalScaleV4Request stackVerticalScaleV4Request = request.getStackVerticalScaleV4Request();
+        String requestedInstanceType = stackVerticalScaleV4Request.getTemplate().getInstanceType();
         try {
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = getAuthenticatedContext(request, cloudContext, connector);
             List<CloudResourceStatus> resourceStatus = stackUpscaleService.verticalScale(ac, request, connector,
                     stackVerticalScaleV4Request.getGroup());
             LOGGER.info("Vertical scaling resource statuses: {}", resourceStatus);
+            InstanceStoreMetadata instanceStoreMetadata =  stackUpscaleService.getInstanceStorageInfo(ac,
+                    requestedInstanceType, connector);
+            Integer instanceStorageCount = instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled(requestedInstanceType);
+            Integer instanceStorageSize = instanceStoreMetadata.mapInstanceTypeToInstanceSizeNullHandled(requestedInstanceType);
             CoreVerticalScaleResult result = new CoreVerticalScaleResult(
                     request.getResourceId(),
                     ResourceStatus.UPDATED,
                     resourceStatus,
-                    stackVerticalScaleV4Request);
+                    stackVerticalScaleV4Request,
+                    instanceStorageCount,
+                    instanceStorageSize);
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(stackVerticalScaleRequestEvent.getHeaders(), result));
             LOGGER.debug("Vertical scaling successfully finished for {}, and the result is: {}", cloudContext, result);
