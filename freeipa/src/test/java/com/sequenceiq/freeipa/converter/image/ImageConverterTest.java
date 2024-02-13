@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 
@@ -30,6 +31,7 @@ class ImageConverterTest {
         imageEntity.setSourceImage(hasSourceImage ? "sourceImage" : null);
         imageEntity.setImageCatalogName("catalogName");
         imageEntity.setImageCatalogUrl("catalogUrl");
+        imageEntity.setImdsVersion("v2");
         if (legacyUserData) {
             imageEntity.setUserdata("userData");
         } else {
@@ -42,7 +44,8 @@ class ImageConverterTest {
         assertEquals("catalogUrl", converted.getImageCatalogUrl());
         assertEquals("catalogName", converted.getImageCatalogName());
         assertEquals("osType", converted.getOsType());
-        assertEquals(hasSourceImage ? "sourceImage" : null, converted.getPackageVersions().get("source-image"));
+        assertEquals(hasSourceImage ? "sourceImage" : null, converted.getPackageVersion(ImagePackageVersion.SOURCE_IMAGE));
+        assertEquals("v2", converted.getPackageVersion(ImagePackageVersion.IMDS_VERSION));
         assertEquals(2, converted.getUserdata().keySet().size());
         assertEquals(legacyUserData ? "userData" : "gwUserData", converted.getUserdata().get(InstanceGroupType.GATEWAY));
         assertEquals(legacyUserData ? "userData" : "gwUserData", converted.getUserdata().get(InstanceGroupType.CORE));

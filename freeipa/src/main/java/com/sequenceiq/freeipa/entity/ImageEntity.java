@@ -66,6 +66,8 @@ public class ImageEntity implements AccountIdAwareResource {
 
     private String sourceImage;
 
+    private String imdsVersion;
+
     public String getImageName() {
         return imageName;
     }
@@ -189,6 +191,14 @@ public class ImageEntity implements AccountIdAwareResource {
         this.sourceImage = sourceImage;
     }
 
+    public String getImdsVersion() {
+        return imdsVersion;
+    }
+
+    public void setImdsVersion(String imdsVersion) {
+        this.imdsVersion = imdsVersion;
+    }
+
     @Override
     public String toString() {
         return "ImageEntity{" +
@@ -204,6 +214,7 @@ public class ImageEntity implements AccountIdAwareResource {
                 ", ldapAgentVersion='" + ldapAgentVersion + '\'' +
                 ", accountId='" + accountId + '\'' +
                 ", sourceImage='" + sourceImage + '\'' +
+                ", imdsVersion='" + imdsVersion + '\'' +
                 '}';
     }
 

@@ -19,8 +19,17 @@ public class ImageToImageEntityConverter {
         imageEntity.setOsType(source.getOsType());
         imageEntity.setDate(source.getDate());
         imageEntity.setLdapAgentVersion(extractLdapAgentVersion(source));
+        imageEntity.setImdsVersion(extractImdsVersion(source));
         imageEntity.setSourceImage(extractSourceImage(source));
         return imageEntity;
+    }
+
+    public String extractImdsVersion(Image image) {
+        return extractImdsVersion(image.getPackageVersions());
+    }
+
+    private String extractImdsVersion(Map<String, String> packageVersions) {
+        return packageVersions == null ? null : packageVersions.get(ImagePackageVersion.IMDS_VERSION.getKey());
     }
 
     public String extractLdapAgentVersion(Image image) {

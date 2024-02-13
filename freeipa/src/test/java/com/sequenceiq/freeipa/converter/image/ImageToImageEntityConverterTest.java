@@ -19,7 +19,8 @@ class ImageToImageEntityConverterTest {
     void testConversion() {
         Image source = new Image(1L, "date", "", "arch", "1-2-a-b", Map.of(), "manjaro",
                 Map.of("freeipa-ldap-agent", "1.2.3",
-                        "source-image", SOURCE_IMAGE),
+                        "source-image", SOURCE_IMAGE,
+                        "imds", "v2"),
                 false);
 
         ImageEntity result = underTest.convert("accountId", source);
@@ -30,6 +31,16 @@ class ImageToImageEntityConverterTest {
         assertEquals(source.getDate(), result.getDate());
         assertEquals("1.2.3", result.getLdapAgentVersion());
         assertEquals(SOURCE_IMAGE, result.getSourceImage());
+        assertEquals("v2", result.getImdsVersion());
+    }
+
+    @Test
+    void testExtracImdsVersion() {
+        Image source = new Image(1L, "date", "", "arch", "1-2-a-b", Map.of(), "manjaro", Map.of("imds", "anything"), false);
+
+        String result = underTest.extractImdsVersion(source);
+
+        assertEquals("anything", result);
     }
 
     @Test

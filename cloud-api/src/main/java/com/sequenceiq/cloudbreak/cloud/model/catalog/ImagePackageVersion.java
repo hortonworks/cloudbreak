@@ -19,7 +19,8 @@ public enum ImagePackageVersion {
     SALT_BOOTSTRAP("salt-bootstrap"),
     SOURCE_IMAGE("source-image"),
     SPARK3("spark3", "Spark 3"),
-    STACK("stack");
+    STACK("stack"),
+    IMDS_VERSION("imds");
 
     private final String key;
 
