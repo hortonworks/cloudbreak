@@ -30,7 +30,7 @@ public class HiveCdlRdsConfigProvider extends AbstractCdlRdsConfigProvider {
 
     @Override
     public DatabaseType getRdsType() {
-        return DatabaseType.HIVE;
+        return DatabaseType.CDL_HIVE;
     }
 
     @Override

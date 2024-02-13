@@ -217,7 +217,7 @@ class AbstractRdsConfigProviderTest {
         when(secretService.getRotation(eq(ROTATION_PASSWORD_PATH))).thenReturn(new RotationSecret(ROTATION_NEW_PASS, ROTATION_OLD_PASS));
         when(dbUsernameConverterService.toDatabaseUsername(eq(ROTATION_NEW_USER))).thenReturn(ROTATION_NEW_USER);
         when(dbUsernameConverterService.toDatabaseUsername(eq(ROTATION_OLD_USER))).thenReturn(ROTATION_OLD_USER);
-        when(rdsConfigService.existsByClusterIdAndType(anyLong(), any())).thenReturn(Boolean.TRUE);
+        when(rdsConfigService.existsByClusterIdAndType(anyLong(), any(DatabaseType.class))).thenReturn(Boolean.TRUE);
         when(rdsConfigWithoutClusterService.findByClusterId(anyLong())).thenReturn(Set.of(rdsConfigWithoutCluster));
         StackDto stackDto = mock(StackDto.class);
         ClusterView clusterView = mock(ClusterView.class);

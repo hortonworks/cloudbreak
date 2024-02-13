@@ -4,25 +4,27 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -37,7 +39,8 @@ import com.sequenceiq.cloudbreak.sdx.cdl.config.ServiceDiscoveryChannelConfig;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
-public class CdlRdsConfigServiceTest {
+@ExtendWith(MockitoExtension.class)
+class CdlRdsConfigServiceTest {
 
     private static final Long CLUSTER_ID = 1L;
 
@@ -52,6 +55,8 @@ public class CdlRdsConfigServiceTest {
 
     private static final Crn CDL_CRN =
             Crn.safeFromString("crn:cdp:sdxsvc:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:instance:ab79a335-70cc-4c06-90af-ea74efe02636");
+
+    private static final String ACTOR_CRN = "crn:cdp:users:us-west-1:1" + ":user:" + UUID.randomUUID();
 
     @InjectMocks
     private HiveCdlRdsConfigProvider underTest;
@@ -83,34 +88,18 @@ public class CdlRdsConfigServiceTest {
     @Mock
     private ServiceDiscoveryClient serviceDiscoveryClient;
 
+    @Mock
     private CdlSdxService cdlSdxService;
 
-    @Before
-    public void setUp() {
-        openMocks(this);
-        this.cdlSdxService = new CdlSdxService();
-        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
-        ReflectionTestUtils.setField(grpcServiceDiscoveryClient, "channelWrapper", managedChannelWrapper);
-        ReflectionTestUtils.setField(grpcServiceDiscoveryClient, "serviceDiscoveryChannelConfig", serviceDiscoveryChannelConfig);
-        ReflectionTestUtils.setField(cdlSdxService, "grpcServiceDiscoveryClient", grpcServiceDiscoveryClient);
-        ReflectionTestUtils.setField(cdlSdxService, "cdlEnabled", true);
-        ReflectionTestUtils.setField(cdlSdxService, "entitlementService", entitlementService);
-        ReflectionTestUtils.setField(underTest, "cdlSdxService", cdlSdxService);
-    }
-
     @Test
-    public void testRetrieveRdsConfigs() {
-        when(rdsConfigService.findByClusterId(eq(CLUSTER_ID))).thenReturn(Collections.emptySet());
-        when(platformAwareSdxConnector.getSdxCrnByEnvironmentCrn(eq(ENVIRONMENT_CRN.toString()))).thenReturn(Optional.of(CDL_CRN.toString()));
-        when(grpcServiceDiscoveryClient.makeClient()).thenReturn(serviceDiscoveryClient);
-        when(grpcServiceDiscoveryClient.getServiceConfiguration(eq(CDL_CRN.toString()), eq(HIVE))).thenCallRealMethod();
-        when(serviceDiscoveryClient.getRemoteDataContext(eq(CDL_CRN.toString()))).thenReturn(getCastedRdc());
+    void testRetrieveCdlRdsConfigs() {
+        when(platformAwareSdxConnector.getSdxCrnByEnvironmentCrn(any())).thenReturn(Optional.of(CDL_CRN.toString()));
+        when(cdlSdxService.getServiceConfiguration(any(), any())).thenReturn(getCastedRdc());
         ArgumentCaptor<RDSConfig> rdsConfigCaptor = ArgumentCaptor.forClass(RDSConfig.class);
+        StackDtoDelegate stack = getStack();
+        when(stack.getName()).thenReturn(STACK_NAME);
+        ThreadBasedUserCrnProvider.doAs(ACTOR_CRN, () -> underTest.createPostgresRdsConfigIfNeeded(stack));
 
-        underTest.createPostgresRdsConfigIfNeeded(getStack());
-
-        verify(serviceDiscoveryClient, times(1)).getRemoteDataContext(eq(CDL_CRN.toString()));
-        verify(platformAwareSdxConnector, times(2)).getSdxCrnByEnvironmentCrn(eq(ENVIRONMENT_CRN.toString()));
         verify(clusterService, times(1)).saveRdsConfig(rdsConfigCaptor.capture());
         verify(clusterService, times(1)).addRdsConfigToCluster(any(), eq(CLUSTER_ID));
 
@@ -124,11 +113,9 @@ public class CdlRdsConfigServiceTest {
     }
 
     @Test
-    public void testCreationWhenRdcNotFound() {
-        when(rdsConfigService.findByClusterId(eq(CLUSTER_ID))).thenReturn(Collections.emptySet());
+    void testCreationWhenRdcNotFoundCdl() {
         when(platformAwareSdxConnector.getSdxCrnByEnvironmentCrn(eq(ENVIRONMENT_CRN.toString()))).thenReturn(Optional.of(CDL_CRN.toString()));
         assertThrows(IllegalArgumentException.class,  () -> underTest.createPostgresRdsConfigIfNeeded(getStack()));
-
         verify(platformAwareSdxConnector, times(0)).getRemoteDataContext(eq(CDL_CRN.toString()));
         verify(platformAwareSdxConnector, times(2)).getSdxCrnByEnvironmentCrn(eq(ENVIRONMENT_CRN.toString()));
         verify(clusterService, times(0)).saveRdsConfig(any(RDSConfig.class));
@@ -139,7 +126,6 @@ public class CdlRdsConfigServiceTest {
         StackDto stackDto = mock(StackDto.class);
         when(stackDto.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN.toString());
         when(stackDto.getId()).thenReturn(STACK_ID);
-        when(stackDto.getName()).thenReturn(STACK_NAME);
         Cluster cluster = getCluster();
         when(stackDto.getCluster()).thenReturn(cluster);
         return stackDto;
@@ -151,7 +137,19 @@ public class CdlRdsConfigServiceTest {
         return cluster;
     }
 
-    private ServiceDiscoveryProto.ApiRemoteDataContext getCastedRdc() {
+    private Map<String, String> getCastedRdc() {
+
+        Optional<ServiceDiscoveryProto.ApiEndPoint> apiEndpoint = getRdc()
+                .getEndPointsList()
+                .stream()
+                .findFirst();
+        return apiEndpoint.map(ep -> ep.getServiceConfigsList()
+                        .stream()
+                        .collect(Collectors.toMap(ServiceDiscoveryProto.ApiMapEntry::getKey, ServiceDiscoveryProto.ApiMapEntry::getValue)))
+                .orElse(Collections.emptyMap());
+    }
+
+    private ServiceDiscoveryProto.ApiRemoteDataContext getRdc() {
         ServiceDiscoveryProto.ApiMapEntry port = ServiceDiscoveryProto.ApiMapEntry.newBuilder()
                 .setKey("hive_metastore_database_port")
                 .setValue("5432")

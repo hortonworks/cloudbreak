@@ -97,6 +97,10 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
         return rdsConfigRepository.existsByClusterIdAndType(clusterId, databaseType.name());
     }
 
+    public Boolean existsByClusterIdAndType(Long clusterId, String databaseType) {
+        return rdsConfigRepository.existsByClusterIdAndType(clusterId, databaseType);
+    }
+
     public void deleteDefaultRdsConfigs(Set<RDSConfig> rdsConfigs) {
         Map<String, String> mdcContextMap = MDCBuilder.getMdcContextMap();
         rdsConfigs.stream()

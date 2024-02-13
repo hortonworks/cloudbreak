@@ -55,9 +55,11 @@ public abstract class AbstractCdlRdsConfigProvider extends AbstractRdsConfigProv
     @Override
     public Set<RdsConfigWithoutCluster> createPostgresRdsConfigIfNeeded(StackDtoDelegate stackDto) {
         LOGGER.info("create RdsConfigFor stack: {}", stackDto.getId());
-        if (isRdsConfigNeeded(stackDto) && !rdsConfigService.existsByClusterIdAndType(stackDto.getCluster().getId(), getRdsType())) {
+        if (isRdsConfigNeeded(stackDto) && !rdsConfigService.existsByClusterIdAndType(stackDto.getCluster().getId(), getDb())) {
             LOGGER.info("Create Rds for CDL service: {}", getRdsType());
             getConfigurationValue(stackDto);
+        } else {
+            super.createPostgresRdsConfigIfNeeded(stackDto);
         }
         return rdsConfigWithoutClusterService.findByClusterId(stackDto.getCluster().getId());
     }
@@ -81,7 +83,7 @@ public abstract class AbstractCdlRdsConfigProvider extends AbstractRdsConfigProv
         config.setStatus(ResourceStatus.DEFAULT);
         config.setConnectionUserName(user);
         config.setName(String.format("%s_%s_%s", stack.getName(), stack.getId(), dbName));
-        config.setType(getRdsType().name());
+        config.setType(getDb());
         Cluster cluster = new Cluster();
         cluster.setId(stack.getCluster().getId());
         config.setClusters(Set.of(cluster));
@@ -101,7 +103,7 @@ public abstract class AbstractCdlRdsConfigProvider extends AbstractRdsConfigProv
         if (sdxCrnOptional.isEmpty()) {
             return Collections.emptyMap();
         }
-        return cdlSdxService.getServiceConfiguration(sdxCrnOptional.get(), getRdsType().name());
+        return cdlSdxService.getServiceConfiguration(sdxCrnOptional.get(), getDb());
     }
 
     private String getConfigurationValue(Map<String, String> configuration, String key, String message) {
