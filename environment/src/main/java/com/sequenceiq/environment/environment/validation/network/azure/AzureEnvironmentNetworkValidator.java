@@ -29,6 +29,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.network.CloudNetworkService;
+import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
@@ -130,6 +131,26 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
                 resultBuilder.error(message);
             }
         }
+    }
+
+    private void validateNetworkId(EnvironmentValidationDto environmentValidationDto, NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
+        LOGGER.debug("About to validate Azure network using {}: {} and {}: {}", EnvironmentValidationDto.class.getSimpleName(), environmentValidationDto,
+                NetworkDto.class.getSimpleName(), networkDto);
+        NetworkDto network = networkDto != null ? networkDto : environmentValidationDto.getEnvironmentDto().getNetwork();
+        if (network == null) {
+            resultBuilder.error("Unable to validate network ID due to the lack of network parameters");
+            return;
+        }
+        if (RegistrationType.EXISTING.equals(network.getRegistrationType())) {
+            boolean foundOnProvider = cloudNetworkService.retrieveCloudNetworks(environmentValidationDto.getEnvironmentDto())
+                    .stream()
+                    .anyMatch(networkId -> networkId.equalsIgnoreCase(network.getNetworkId()));
+            if (!foundOnProvider) {
+                resultBuilder.error("Unable to find network on Azure with the following name: " + network.getNetworkId() +
+                        ". Please double check the name/ID.");
+            }
+        }
+
     }
 
     private void checkResourceGroupNameWhenExistingNetwork(ValidationResultBuilder resultBuilder, AzureParams azureParams) {
@@ -290,6 +311,7 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
                 (validationType == ENVIRONMENT_EDIT && !StringUtils.equals(originalDnsZone, newDnsZone))) {
             LOGGER.debug("Dns zone validation: validation type: {}, originalDnsZone: {}, newDnsZone {}", validationType, originalDnsZone, newDnsZone);
             azurePrivateEndpointValidator.checkExistingDnsZoneDeletion(validationType, originalDnsZone, newDnsZone, resultBuilder);
+            validateNetworkId(environmentValidationDto, networkDto, resultBuilder);
             azurePrivateEndpointValidator.checkNetworkPoliciesWhenExistingNetwork(networkDto, cloudNetworks, resultBuilder);
             azurePrivateEndpointValidator.checkMultipleResourceGroup(resultBuilder, environmentDto, networkDto);
             azurePrivateEndpointValidator.checkExistingManagedPrivateDnsZone(resultBuilder, environmentDto, networkDto);

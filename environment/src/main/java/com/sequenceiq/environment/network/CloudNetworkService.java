@@ -1,13 +1,17 @@
 package com.sequenceiq.environment.network;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNullOtherwise;
 import static java.util.stream.Collectors.toMap;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,9 +46,32 @@ public class CloudNetworkService {
     }
 
     public Map<String, CloudSubnet> retrieveSubnetMetadata(EnvironmentDto environmentDto, NetworkDto network) {
+        LOGGER.debug("Subnet metadata retrieval requested using {} and {}", environmentDto, network);
         Map<String, CloudSubnet> subnetMetadata = getSubnetMetadata(environmentDto, network, network == null ? Set.of() : network.getSubnetIds());
         decorateWithDeploymentRestrictions(subnetMetadata, network);
+        LOGGER.debug("The following subnet metadata got fetched: {}", subnetMetadata);
         return subnetMetadata;
+    }
+
+    public Set<String> retrieveCloudNetworks(EnvironmentDto environment) {
+        String regionName = getIfNotNull(environment.getRegions(), regions -> regions.iterator().hasNext() ? regions.iterator().next().getName() : null);
+        PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
+        platformResourceRequest.setCredential(environment.getCredential());
+        platformResourceRequest.setCloudPlatform(environment.getCloudPlatform());
+        platformResourceRequest.setRegion(regionName);
+        PlatformResourceRequest req = platformParameterService.getPlatformResourceRequest(
+                environment.getAccountId(), getIfNotNullOtherwise(environment.getCredential(), Credential::getName, null), null, regionName,
+                environment.getCloudPlatform(), null);
+        CloudNetworks networks = platformParameterService.getCloudNetworks(req);
+        if (regionName != null && networks.getCloudNetworkResponses().containsKey(regionName)) {
+            return networks.getCloudNetworkResponses().get(regionName)
+                    .stream()
+                    .map(CloudNetwork::getName)
+                    .collect(Collectors.toSet());
+        }
+        LOGGER.warn("Unable to retrieve cloud network for environment: {} using the following {}: {}", environment.getName(),
+                PlatformResourceRequest.class.getSimpleName(), req);
+        return Collections.emptySet();
     }
 
     public Map<String, CloudSubnet> retrieveSubnetMetadata(Environment environment, NetworkDto network) {
@@ -86,13 +113,13 @@ public class CloudNetworkService {
                     .map(vpcId -> Map.of("vpcId", vpcId))
                     .orElse(Map.of());
             return fetchCloudNetwork(environmentDto.getRegions(), environmentDto.getCredential(), environmentDto.getCloudPlatform(),
-                network, filter, subnetIds);
+                    network, filter, subnetIds);
         } else if (isAzure(environmentDto.getCloudPlatform())) {
             Map<String, String> filter = new HashMap<>();
             filter.put("networkId", network.getAzure().getNetworkId());
             filter.put("resourceGroupName", network.getAzure().getResourceGroupName());
             return fetchCloudNetwork(environmentDto.getRegions(), environmentDto.getCredential(), environmentDto.getCloudPlatform(),
-                network, filter, subnetIds);
+                    network, filter, subnetIds);
         } else if (isGcp(environmentDto.getCloudPlatform())) {
             Map<String, String> filter = new HashMap<>();
             GcpParams gcpNetworkParams = network.getGcp();
@@ -106,7 +133,7 @@ public class CloudNetworkService {
             filter.put(GcpStackUtil.CUSTOM_AVAILABILITY_ZONE, customAvailabilityZone);
             buildSubnetIdFilter(subnetIds, filter);
             return fetchCloudNetwork(environmentDto.getRegions(), environmentDto.getCredential(), environmentDto.getCloudPlatform(),
-                network, filter, subnetIds);
+                    network, filter, subnetIds);
         } else {
             return subnetIds.stream().collect(toMap(Function.identity(), id -> new CloudSubnet(id, null)));
         }
@@ -121,13 +148,13 @@ public class CloudNetworkService {
                     .map(vpcId -> Map.of("vpcId", vpcId))
                     .orElse(Map.of());
             return fetchCloudNetwork(environment.getRegionSet(), environment.getCredential(), environment.getCloudPlatform(),
-                network, filter, subnetIds);
+                    network, filter, subnetIds);
         } else if (isAzure(environment.getCloudPlatform())) {
             Map<String, String> filter = new HashMap<>();
             filter.put("networkId", network.getAzure().getNetworkId());
             filter.put("resourceGroupName", network.getAzure().getResourceGroupName());
             return fetchCloudNetwork(environment.getRegionSet(), environment.getCredential(), environment.getCloudPlatform(),
-                network, filter, subnetIds);
+                    network, filter, subnetIds);
         } else if (isGcp(environment.getCloudPlatform())) {
             Map<String, String> filter = new HashMap<>();
             GcpParams gcpParams = network.getGcp();
@@ -141,7 +168,7 @@ public class CloudNetworkService {
             filter.put(GcpStackUtil.CUSTOM_AVAILABILITY_ZONE, customAvailabilityZone);
             buildSubnetIdFilter(subnetIds, filter);
             return fetchCloudNetwork(environment.getRegionSet(), environment.getCredential(), environment.getCloudPlatform(),
-                network, filter, subnetIds);
+                    network, filter, subnetIds);
         } else {
             return subnetIds.stream().collect(toMap(Function.identity(), id -> new CloudSubnet(id, null)));
         }
