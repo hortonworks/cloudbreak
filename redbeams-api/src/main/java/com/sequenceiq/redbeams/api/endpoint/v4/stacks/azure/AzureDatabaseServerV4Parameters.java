@@ -5,6 +5,8 @@ import java.util.Map;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 
+import org.springframework.util.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -83,8 +85,12 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
     @Schema(description = AzureDatabaseServerModelDescriptions.AVAILABILITY_ZONE)
     private String availabilityZone;
 
+    @Deprecated
     @Schema(description = AzureDatabaseServerModelDescriptions.FLEXIBLE_SERVER_DELEGATED_SUBNET)
     private String felxibleServerDelegatedSubnetId;
+
+    @Schema(description = AzureDatabaseServerModelDescriptions.FLEXIBLE_SERVER_DELEGATED_SUBNET)
+    private String flexibleServerDelegatedSubnetId;
 
     public Integer getBackupRetentionDays() {
         return backupRetentionDays;
@@ -182,6 +188,14 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
         this.felxibleServerDelegatedSubnetId = felxibleServerDelegatedSubnetId;
     }
 
+    public String getFlexibleServerDelegatedSubnetId() {
+        return flexibleServerDelegatedSubnetId;
+    }
+
+    public void setFlexibleServerDelegatedSubnetId(String flexibleServerDelegatedSubnetId) {
+        this.flexibleServerDelegatedSubnetId = flexibleServerDelegatedSubnetId;
+    }
+
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
@@ -196,7 +210,11 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
         putIfValueNotNull(map, HIGH_AVAILABILITY, highAvailabilityMode == null ? AzureHighAvailabiltyMode.DISABLED.name() : highAvailabilityMode.name());
         putIfValueNotNull(map, STAND_BY_AVAILABILITY_ZONE, standbyAvailabilityZone);
         putIfValueNotNull(map, AVAILABILITY_ZONE, availabilityZone);
-        putIfValueNotNull(map, FLEXIBLE_SERVER_DELEGATED_SUBNETID, felxibleServerDelegatedSubnetId);
+        if (StringUtils.hasText(flexibleServerDelegatedSubnetId)) {
+            putIfValueNotNull(map, FLEXIBLE_SERVER_DELEGATED_SUBNETID, flexibleServerDelegatedSubnetId);
+        } else {
+            putIfValueNotNull(map, FLEXIBLE_SERVER_DELEGATED_SUBNETID, felxibleServerDelegatedSubnetId);
+        }
         return map;
     }
 
@@ -220,6 +238,7 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
         highAvailabilityMode = AzureHighAvailabiltyMode.safeValueOf(getParameterOrNull(parameters, HIGH_AVAILABILITY));
         standbyAvailabilityZone = getParameterOrNull(parameters, STAND_BY_AVAILABILITY_ZONE);
         availabilityZone = getParameterOrNull(parameters, AVAILABILITY_ZONE);
+        flexibleServerDelegatedSubnetId = getParameterOrNull(parameters, FLEXIBLE_SERVER_DELEGATED_SUBNETID);
         felxibleServerDelegatedSubnetId = getParameterOrNull(parameters, FLEXIBLE_SERVER_DELEGATED_SUBNETID);
     }
 
@@ -238,6 +257,7 @@ public class AzureDatabaseServerV4Parameters extends MappableBase {
                 ", availabilityZone=" + availabilityZone +
                 ", standbyAvailabilityZone=" + standbyAvailabilityZone +
                 ", felxibleServerDelegatedSubnetId=" + felxibleServerDelegatedSubnetId +
+                ", flexibleServerDelegatedSubnetId=" + flexibleServerDelegatedSubnetId +
                 "} " + super.toString();
     }
 }

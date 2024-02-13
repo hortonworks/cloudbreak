@@ -74,7 +74,7 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
         // Until flexible is not a default. Remove this statement after that
         AzureDatabaseType azureDatabaseType = getAzureDatabaseType(sdxDatabase);
         parameters.setAzureDatabaseType(azureDatabaseType);
-        parameters.setFelxibleServerDelegatedSubnetId(azureDatabaseAttributesService.getFlexibleServerDelegatedSubnetId(sdxDatabase));
+        parameters.setFlexibleServerDelegatedSubnetId(azureDatabaseAttributesService.getFlexibleServerDelegatedSubnetId(sdxDatabase));
         if (sdxCluster.isEnableMultiAz() && FLEXIBLE_SERVER.equals(azureDatabaseType)) {
             List<String> zones = env.getNetwork().getAzure().getAvailabilityZones().stream().toList();
             parameters.setAvailabilityZone(getAvailabilityZone(zones));

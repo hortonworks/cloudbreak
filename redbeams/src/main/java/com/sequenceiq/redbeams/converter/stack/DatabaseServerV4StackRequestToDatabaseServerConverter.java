@@ -81,9 +81,10 @@ public class DatabaseServerV4StackRequestToDatabaseServerConverter {
     }
 
     private void setDelegatedSubnetID(DatabaseServerV4StackRequest source, Map<String, Object> parameters) {
-        Optional.ofNullable(source.getAzure())
-                .map(AzureDatabaseServerV4Parameters::getFelxibleServerDelegatedSubnetId)
-                        .ifPresent(subnetId -> parameters.put(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID, subnetId));
+        Optional<String> flexibleOpt = Optional.ofNullable(source.getAzure())
+                .map(AzureDatabaseServerV4Parameters::getFlexibleServerDelegatedSubnetId)
+                .or(() -> Optional.ofNullable(source.getAzure()).map(AzureDatabaseServerV4Parameters::getFelxibleServerDelegatedSubnetId));
+        flexibleOpt.ifPresent(subnetId -> parameters.put(FLEXIBLE_SERVER_DELEGATED_SUBNET_ID, subnetId));
     }
 
     /**
