@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.assertion.datalake.RecipeTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
@@ -51,6 +52,7 @@ import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
+import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
 
@@ -174,20 +176,26 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
 
     private void secretRotation(TestContext testContext) {
         String clusterName = testContext.given(sdxInternal, SdxInternalTestDto.class).getResponse().getName();
+        Set<DatalakeSecretType> secretTypes = Sets.newHashSet();
+        secretTypes.addAll(Set.of(
+                DATALAKE_USER_KEYPAIR,
+                DATALAKE_IDBROKER_CERT,
+                DATALAKE_SALT_BOOT_SECRETS,
+                DATALAKE_MGMT_CM_ADMIN_PASSWORD,
+                DATALAKE_CB_CM_ADMIN_PASSWORD,
+                DATALAKE_DATABASE_ROOT_PASSWORD,
+                DATALAKE_CM_DB_PASSWORD,
+                DATALAKE_CM_SERVICE_DB_PASSWORD));
+        if (!testContext.given(sdxInternal, SdxInternalTestDto.class).govCloud()) {
+            // SEA-1382 and CB-24497
+            secretTypes.add(DATALAKE_GATEWAY_CERT);
+            // OPSAPS-69621 and CB-24535
+            secretTypes.add(DATALAKE_CM_INTERMEDIATE_CA_CERT);
+        }
         testContext
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .when(sdxTestClient.describeInternal(), key(sdxInternal))
-                .when(sdxTestClient.rotateSecret(Set.of(
-                        DATALAKE_USER_KEYPAIR,
-                        DATALAKE_IDBROKER_CERT,
-                        DATALAKE_GATEWAY_CERT,
-                        DATALAKE_SALT_BOOT_SECRETS,
-                        DATALAKE_MGMT_CM_ADMIN_PASSWORD,
-                        DATALAKE_CB_CM_ADMIN_PASSWORD,
-                        DATALAKE_DATABASE_ROOT_PASSWORD,
-                        DATALAKE_CM_DB_PASSWORD,
-                        DATALAKE_CM_SERVICE_DB_PASSWORD,
-                        DATALAKE_CM_INTERMEDIATE_CA_CERT)))
+                .when(sdxTestClient.rotateSecret(secretTypes))
                 .awaitForFlow()
                 .when(sdxTestClient.rotateSecret(Set.of(DATALAKE_LDAP_BIND_PASSWORD),
                         Map.of(CLUSTER_NAME.name(), clusterName)))

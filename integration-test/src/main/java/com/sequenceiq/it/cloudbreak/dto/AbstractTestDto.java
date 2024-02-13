@@ -454,4 +454,8 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
             return searchUrl.getSearchUrl(searchables, testStartDate, testStopDate);
         }
     }
+
+    public boolean govCloud() {
+        return getCloudProvider().getGovCloud();
+    }
 }

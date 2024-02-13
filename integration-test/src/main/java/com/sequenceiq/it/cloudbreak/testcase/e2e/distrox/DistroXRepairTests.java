@@ -23,8 +23,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.it.cloudbreak.assertion.distrox.AwsAvailabilityZoneAssertion;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -81,22 +83,27 @@ public class DistroXRepairTests extends AbstractE2ETest {
 
     private void secretRotation(TestContext testContext) {
         String clusterName = testContext.given(DistroXTestDto.class).getResponse().getName();
+        Set<CloudbreakSecretType> secretTypes = Sets.newHashSet();
+        secretTypes.addAll(Set.of(
+                USER_KEYPAIR,
+                SALT_BOOT_SECRETS,
+                CLUSTER_MGMT_CM_ADMIN_PASSWORD,
+                CLUSTER_CB_CM_ADMIN_PASSWORD,
+                CLUSTER_CM_DB_PASSWORD,
+                // we should enable this again when CDPD-43281 is resolved
+                //CLUSTER_CM_SERVICES_DB_PASSWORD,
+                DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD));
+        if (!testContext.given(DistroXTestDto.class).govCloud()) {
+            // SEA-1382 and CB-24497
+            secretTypes.add(GATEWAY_CERT);
+            // OPSAPS-69621 and CB-24535
+            secretTypes.add(DATAHUB_CM_INTERMEDIATE_CA_CERT);
+        }
         testContext
                 .given(DistroXTestDto.class)
-                .when(distroXTestClient.rotateSecret(Set.of(
-                        USER_KEYPAIR,
-                        GATEWAY_CERT,
-                        SALT_BOOT_SECRETS,
-                        CLUSTER_MGMT_CM_ADMIN_PASSWORD,
-                        CLUSTER_CB_CM_ADMIN_PASSWORD,
-                        CLUSTER_CM_DB_PASSWORD,
-                        // we should enable this again when CDPD-43281 is resolved
-                        //CLUSTER_CM_SERVICES_DB_PASSWORD,
-                        DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD,
-                        DATAHUB_CM_INTERMEDIATE_CA_CERT)))
+                .when(distroXTestClient.rotateSecret(secretTypes))
                 .awaitForFlow()
-                .when(distroXTestClient.rotateSecret(Set.of(CLUSTER_LDAP_BIND_PASSWORD),
-                        Map.of(CLUSTER_NAME.name(), clusterName)))
+                .when(distroXTestClient.rotateSecret(Set.of(CLUSTER_LDAP_BIND_PASSWORD), Map.of(CLUSTER_NAME.name(), clusterName)))
                 .awaitForFlow()
                 .then((tc, testDto, client) -> {
                     secretRotationCheckUtil.checkLdapLogin(tc, testDto, client);
