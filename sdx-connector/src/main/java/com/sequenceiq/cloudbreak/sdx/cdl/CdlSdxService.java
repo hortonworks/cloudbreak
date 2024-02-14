@@ -68,7 +68,7 @@ public class CdlSdxService extends AbstractSdxService<CdlCrudProto.StatusType.Va
             try {
                 grpcClient.deleteDatalake(sdxCrn);
             } catch (RuntimeException exception) {
-                LOGGER.info("We are not able to delete CDL with CRN: {}", sdxCrn);
+                LOGGER.info("We are not able to delete CDL with CRN: {}, Exception: {}", sdxCrn, exception);
             }
         }
     }
@@ -80,7 +80,8 @@ public class CdlSdxService extends AbstractSdxService<CdlCrudProto.StatusType.Va
                 CdlCrudProto.DatalakeResponse datalake = grpcClient.findDatalake(isBlank(environmentCrn) ? environmentName : environmentCrn, "");
                 return Set.of(datalake.getCrn());
             } catch (RuntimeException exception) {
-                LOGGER.info("CDL not found for environment. CRN: {}. Name: {}", environmentCrn, environmentName);
+                LOGGER.info("CDL not found for environment. CRN: {}. Name: {}. Exception: {}",
+                        environmentCrn, environmentName, exception);
                 return Collections.emptySet();
             }
         }
