@@ -5,11 +5,10 @@ cd ..
 git checkout master
 git reset --hard origin/master
 
-NEW_IMAGE_LINE="FROM $NEW_IMAGE"
-FROM_REGEX="FROM docker-private.* "
+FROM_REGEX="docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-21-runtime-cis[^[:space:]]+(.*)$"
 
-for i in $(find . -name "Dockerfile"); do
-    sed -i "s|FROM docker-private.*|$NEW_IMAGE_LINE|g" $i
+for i in $(find . -name "Dockerfile" -o -name "docker-build.sh" -o -name "docker-compose_template.yml"); do
+    sed -E -i "s|$FROM_REGEX|$NEW_IMAGE\1|g" "$i"
 done
 
 if [[ `git status --porcelain` ]]; then
