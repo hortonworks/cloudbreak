@@ -39,10 +39,6 @@ public class GatewayService {
         return Optional.ofNullable(repository.findByClusterId(clusterId).orElse(null));
     }
 
-    public Boolean existsByClusterId(Long clusterId) {
-        return repository.existsByClusterId(clusterId);
-    }
-
     public void generateAndUpdateSignKeys(GatewayView gateway) {
         if (gateway != null) {
             if (gateway.getSignCert() == null) {

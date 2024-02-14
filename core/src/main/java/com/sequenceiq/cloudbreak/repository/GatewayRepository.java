@@ -39,11 +39,4 @@ public interface GatewayRepository extends CrudRepository<Gateway, Long> {
             "LEFT JOIN g.topologies gt " +
             "WHERE c.id = :clusterId")
     Optional<GatewayViewDelegate> findByClusterId(@Param("clusterId") Long clusterId);
-
-    @Query("SELECT count (g) > 0 " +
-            "FROM Gateway g " +
-            "LEFT JOIN g.cluster c " +
-            "WHERE c.id = :clusterId")
-    Boolean existsByClusterId(@Param("clusterId") Long clusterId);
-
 }

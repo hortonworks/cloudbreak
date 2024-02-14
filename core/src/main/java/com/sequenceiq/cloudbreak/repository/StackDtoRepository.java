@@ -130,23 +130,12 @@ public interface StackDtoRepository extends Repository<Stack, Long> {
     @Query(BASE_QUERY
             + "WHERE s.id = :stackId "
     )
-    Optional<StackViewDelegate> findById1(@Param("stackId") long stackId);
-
-    @Query(BASE_QUERY
-            + "WHERE s.id = :stackId "
-    )
     Optional<StackViewDelegate> findById(@Param("stackId") long stackId);
 
     @Query(BASE_QUERY
             + "WHERE s.resourceCrn in :resourceCrns "
     )
     List<StackViewDelegate> findAllByResourceCrnIn(@Param("resourceCrns") Collection<String> resourceCrns);
-
-    @Query(BASE_QUERY
-            + "WHERE s.resourceCrn in :resourceCrns "
-            + "AND s.terminated IS null"
-    )
-    List<StackViewDelegate> findNotTerminatedByResourceCrnIn(@Param("resourceCrns") Collection<String> resourceCrns);
 
     @Query(BASE_QUERY
             + "WHERE s.environmentCrn in :environmentCrns "

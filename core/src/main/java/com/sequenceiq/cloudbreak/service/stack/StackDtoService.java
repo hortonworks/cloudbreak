@@ -318,20 +318,12 @@ public class StackDtoService {
         return stackDtoRepository.getSecurityByStackId(stackId);
     }
 
-    public Boolean hasGateway(Long clusterId) {
-        return gatewayService.existsByClusterId(clusterId);
-    }
-
     public Stack getStackReferenceById(Long stackId) {
         return stackService.getStackReferenceById(stackId);
     }
 
     public List<StackView> findNotTerminatedByCrns(Collection<String> resourceCrns) {
         return new ArrayList<>(stackDtoRepository.findAllByResourceCrnIn(resourceCrns));
-    }
-
-    public List<StackView> findNotTerminatedByResourceCrns(Collection<String> resourceCrns) {
-        return new ArrayList<>(stackDtoRepository.findNotTerminatedByResourceCrnIn(resourceCrns));
     }
 
     public List<StackView> findNotTerminatedByResourceCrnsAndCloudPlatforms(Collection<String> resourceCrns, Collection<CloudPlatform> cloudPlatforms) {

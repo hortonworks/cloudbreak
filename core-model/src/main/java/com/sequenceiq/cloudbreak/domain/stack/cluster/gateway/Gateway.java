@@ -41,7 +41,7 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
     @SequenceGenerator(name = "gateway_generator", sequenceName = "gateway_id_seq", allocationSize = 1)
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     private Cluster cluster;
 
     @Convert(converter = GatewayTypeConverter.class)
@@ -149,6 +149,10 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
         this.id = id;
     }
 
+    /**
+     * @deprecated This is only used by JPA. The cluster field from gateway was made lazy loading because it generated slow query.
+     */
+    @Deprecated
     public Cluster getCluster() {
         return cluster;
     }
