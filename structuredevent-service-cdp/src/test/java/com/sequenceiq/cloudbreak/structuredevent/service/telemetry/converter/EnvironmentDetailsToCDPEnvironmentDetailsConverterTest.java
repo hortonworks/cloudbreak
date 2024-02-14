@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -54,6 +55,7 @@ class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
     void setUp() {
         underTest = new EnvironmentDetailsToCDPEnvironmentDetailsConverter();
         ReflectionTestUtils.setField(underTest, "networkDetailsConverter", new EnvironmentDetailsToCDPNetworkDetailsConverter());
+        lenient().when(environmentDetails.creatorClient()).thenReturn("No Info");
     }
 
     @Test

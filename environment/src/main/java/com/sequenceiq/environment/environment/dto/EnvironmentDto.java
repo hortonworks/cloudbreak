@@ -51,6 +51,16 @@ public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDet
         return credentialDetails;
     }
 
+    @Override
+    public String creatorClient() {
+        return super.getCreatorClient();
+    }
+
+    @Override
+    public void setCreatorClient(String creatorClient) {
+        super.setCreatorClient(creatorClient);
+    }
+
     public void setCredentialDetails(CredentialDetails credentialDetails) {
         this.credentialDetails = credentialDetails;
     }

@@ -102,6 +102,7 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverter {
             cdpEnvironmentDetails.setCredentialDetails(convertCredentialDetails(srcEnvironmentDetails.getCredentialDetails()));
 
             cdpEnvironmentDetails.setSecretEncryptionEnabled(srcEnvironmentDetails.isEnableSecretEncryption());
+            cdpEnvironmentDetails.setCreatorClient(srcEnvironmentDetails.creatorClient());
         }
 
         UsageProto.CDPEnvironmentDetails ret = cdpEnvironmentDetails.build();

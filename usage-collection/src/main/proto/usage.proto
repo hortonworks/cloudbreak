@@ -2179,6 +2179,8 @@ message CDPOperationDetails {
   string correlationId = 10;
   // Cloud provider identifier
   CDPEnvironmentsEnvironmentType.Value environmentType = 11;
+  // shows which client initiated the operation. This value shall come from the userAgent header from the request context
+  string creatorClient = 12;
 }
 
 message CDPEnvironmentDetails {
@@ -2206,6 +2208,8 @@ message CDPEnvironmentDetails {
   CDPCredentialDetails credentialDetails = 10;
   // True if the secret encryption feature is enabled for the environment
   bool secretEncryptionEnabled = 11;
+  // shows which client initiated the operation. This value shall come from the userAgent header from the request context
+  string creatorClient = 12;
 }
 
 // CDP FreeIPA details closely related to the CDP Environment

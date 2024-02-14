@@ -3,6 +3,10 @@ package com.sequenceiq.environment.environment.v1.converter;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
+import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.CALLER_ID_NOT_FOUND;
+import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.CDP_CALLER_ID_HEADER;
+import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.USER_AGENT_HEADER;
+import static com.sequenceiq.cloudbreak.common.request.HeaderValueProvider.getHeaderOrItsFallbackValueOrDefault;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -153,7 +157,8 @@ public class EnvironmentApiConverter {
                 .withParameters(paramsToParametersDto(request, cloudPlatform))
                 .withParentEnvironmentName(request.getParentEnvironmentName())
                 .withProxyConfigName(request.getProxyConfigName())
-                .withDataServices(dataServicesConverter.convertToDto(request.getDataServices()));
+                .withDataServices(dataServicesConverter.convertToDto(request.getDataServices()))
+                .withCreatorClient(getHeaderOrItsFallbackValueOrDefault(USER_AGENT_HEADER, CDP_CALLER_ID_HEADER, CALLER_ID_NOT_FOUND));
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> {
             NetworkDto networkDto = networkRequestToDto(network);
@@ -169,6 +174,7 @@ public class EnvironmentApiConverter {
                     .build();
             builder.withSecurityAccess(securityAccess);
         }
+
         return builder.build();
     }
 

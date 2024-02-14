@@ -141,6 +141,9 @@ public class SdxCluster implements AccountAwareResource {
     @JoinColumn(name = "sdxdatabase_id")
     private SdxDatabase sdxDatabase;
 
+    @Column(name = "creator_client")
+    private String creatorClient;
+
     public Long getId() {
         return id;
     }
@@ -250,6 +253,14 @@ public class SdxCluster implements AccountAwareResource {
             LOGGER.error("Can not parse internal stack request", e);
             throw new BadRequestException("Can not parse internal stack request", e);
         }
+    }
+
+    public String getCreatorClient() {
+        return creatorClient;
+    }
+
+    public void setCreatorClient(String creatorClient) {
+        this.creatorClient = creatorClient;
     }
 
     /**
