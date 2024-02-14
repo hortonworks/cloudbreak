@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -46,9 +45,8 @@ public class InstanceGroup implements Comparable<InstanceGroup> {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private SecurityGroup securityGroup;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Column(name = "availabilityzone")
-    private Set<String> availabilityZones = new HashSet<>();
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "instanceGroup", orphanRemoval = true, cascade = CascadeType.ALL)
+    private Set<InstanceGroupAvailabilityZone> availabilityZones;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private InstanceGroupNetwork instanceGroupNetwork;
@@ -112,11 +110,11 @@ public class InstanceGroup implements Comparable<InstanceGroup> {
         this.instanceGroupNetwork = instanceGroupNetwork;
     }
 
-    public Set<String> getAvailabilityZones() {
+    public Set<InstanceGroupAvailabilityZone> getAvailabilityZones() {
         return availabilityZones;
     }
 
-    public void setAvailabilityZones(Set<String> availabilityZones) {
+    public void setAvailabilityZones(Set<InstanceGroupAvailabilityZone> availabilityZones) {
         this.availabilityZones = availabilityZones;
     }
 

@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.converter.AvailabilityZoneConverter;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
+import com.sequenceiq.freeipa.entity.InstanceGroupAvailabilityZone;
 import com.sequenceiq.freeipa.entity.InstanceGroupNetwork;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -242,7 +243,13 @@ public class MultiAzCalculatorService {
                     LOGGER.debug("Availability Zones for instance group are  {}", availabilityZones);
                     instanceGroup.getInstanceGroupNetwork().setAttributes(availabilityZoneConverter.getJsonAttributesWithAvailabilityZones(availabilityZones,
                             instanceGroup.getInstanceGroupNetwork().getAttributes()));
-                    instanceGroup.setAvailabilityZones(availabilityZones);
+                    Set<InstanceGroupAvailabilityZone> instanceGroupAvailabilityZones = availabilityZones.stream().map(az -> {
+                        InstanceGroupAvailabilityZone instanceGroupAvailabilityZone = new InstanceGroupAvailabilityZone();
+                        instanceGroupAvailabilityZone.setInstanceGroup(instanceGroup);
+                        instanceGroupAvailabilityZone.setAvailabilityZone(az);
+                        return instanceGroupAvailabilityZone;
+                    }).collect(Collectors.toSet());
+                    instanceGroup.setAvailabilityZones(instanceGroupAvailabilityZones);
                 } else {
                     LOGGER.debug("Implementation for AvailabilityZoneConnector is not present for CloudPlatform {} and PlatformVariant {}",
                             stack.getCloudPlatform(), stack.getPlatformvariant());

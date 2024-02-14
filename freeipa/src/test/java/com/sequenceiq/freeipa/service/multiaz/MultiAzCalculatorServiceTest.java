@@ -45,6 +45,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.LocationResp
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
+import com.sequenceiq.freeipa.entity.InstanceGroupAvailabilityZone;
 import com.sequenceiq.freeipa.entity.InstanceGroupNetwork;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -180,7 +181,7 @@ class MultiAzCalculatorServiceTest {
         verify(availabilityZoneConverter, times(0)).getAvailabilityZonesFromJsonAttributes(any());
 
         assertNull(instanceGroup.getInstanceGroupNetwork().getAttributes());
-        assertEquals(Set.of(), instanceGroup.getAvailabilityZones());
+        assertNull(instanceGroup.getAvailabilityZones());
     }
 
     @Test
@@ -236,7 +237,7 @@ class MultiAzCalculatorServiceTest {
         underTest.populateAvailabilityZones(stack, detailedEnvironmentResponse, instanceGroup);
 
         assertNull(instanceGroup.getInstanceGroupNetwork().getAttributes());
-        assertEquals(Set.of(), instanceGroup.getAvailabilityZones());
+        assertNull(instanceGroup.getAvailabilityZones());
     }
 
     @Test
@@ -275,7 +276,8 @@ class MultiAzCalculatorServiceTest {
         verify(availabilityZoneConnector).getAvailabilityZones(any(), any(), any(), any());
 
         assertEquals(expectedAttribute.getMap(), instanceGroup.getInstanceGroupNetwork().getAttributes().getMap());
-        assertEquals(Set.of("1", "2", "3"), instanceGroup.getAvailabilityZones());
+        assertEquals(Set.of("1", "2", "3"),
+                instanceGroup.getAvailabilityZones().stream().map(InstanceGroupAvailabilityZone::getAvailabilityZone).collect(Collectors.toSet()));
     }
 
     @Test

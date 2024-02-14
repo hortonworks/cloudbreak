@@ -16,6 +16,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -32,6 +33,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
 import com.sequenceiq.freeipa.converter.instance.template.InstanceTemplateRequestToTemplateConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
+import com.sequenceiq.freeipa.entity.InstanceGroupAvailabilityZone;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
@@ -139,11 +141,19 @@ public class InstanceGroupRequestToInstanceGroupConverter {
         instanceGroup.setInstanceMetaData(instanceMetaDataSet);
     }
 
-    private Set<String> getAvailabilityZoneFromEnv(InstanceGroup group, DetailedEnvironmentResponse environment) {
+    private Set<InstanceGroupAvailabilityZone> getAvailabilityZoneFromEnv(InstanceGroup group, DetailedEnvironmentResponse environment) {
         if (environment.getNetwork() != null
-                && environment.getNetwork().getSubnetMetas() != null
-                && (group.getAvailabilityZones() == null || group.getAvailabilityZones().isEmpty())) {
-            return getAvailabilityZones(environment, group.getInstanceGroupNetwork().getAttributes());
+                && environment.getNetwork().getSubnetMetas() != null) {
+            Set<InstanceGroupAvailabilityZone> availabilityZones = getAvailabilityZones(environment, group.getInstanceGroupNetwork().getAttributes())
+                    .stream()
+                    .map(az -> {
+                        InstanceGroupAvailabilityZone instanceGroupAvailabilityZone = new InstanceGroupAvailabilityZone();
+                        instanceGroupAvailabilityZone.setAvailabilityZone(az);
+                        instanceGroupAvailabilityZone.setInstanceGroup(group);
+                        return instanceGroupAvailabilityZone;
+                    })
+                    .collect(Collectors.toSet());
+            return availabilityZones;
         } else {
             return Set.of();
         }

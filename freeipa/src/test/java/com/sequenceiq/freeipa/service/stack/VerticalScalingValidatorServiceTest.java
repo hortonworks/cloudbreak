@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmTypeWithMeta;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
@@ -46,10 +47,12 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequ
 import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
+import com.sequenceiq.freeipa.entity.InstanceGroupAvailabilityZone;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupAvailabilityZoneService;
 
 @ExtendWith(MockitoExtension.class)
 public class VerticalScalingValidatorServiceTest {
@@ -80,6 +83,9 @@ public class VerticalScalingValidatorServiceTest {
 
     @Mock
     private MultiAzCalculatorService multiAzCalculatorService;
+
+    @Mock
+    private InstanceGroupAvailabilityZoneService availabilityZoneService;
 
     @BeforeEach
     public void before() {
@@ -286,6 +292,11 @@ public class VerticalScalingValidatorServiceTest {
         when(credentialToExtendedCloudCredentialConverter.convert(credential)).thenReturn(extendedCloudCredential);
         when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
         when(multiAzCalculatorService.getAvailabilityZoneConnector(stack)).thenReturn(new AzureAvailabilityZoneConnector());
+        when(availabilityZoneService.findAllByInstanceGroupId(anyLong())).thenReturn(Set.of("1", "2").stream().map(s -> {
+            InstanceGroupAvailabilityZone availabilityZone = new InstanceGroupAvailabilityZone();
+            availabilityZone.setAvailabilityZone(s);
+            return availabilityZone;
+        }).collect(Collectors.toSet()));
         VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
         InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
         instanceTemplateRequest.setInstanceType(instanceTypeNameInRequest);
@@ -332,6 +343,11 @@ public class VerticalScalingValidatorServiceTest {
         when(credentialToExtendedCloudCredentialConverter.convert(credential)).thenReturn(extendedCloudCredential);
         when(cloudParameterService.getVmTypesV2(any(), anyString(), anyString(), any(), any())).thenReturn(cloudVmTypes);
         when(multiAzCalculatorService.getAvailabilityZoneConnector(stack)).thenReturn(new AzureAvailabilityZoneConnector());
+        when(availabilityZoneService.findAllByInstanceGroupId(anyLong())).thenReturn(Set.of("1", "2", "3").stream().map(s -> {
+            InstanceGroupAvailabilityZone availabilityZone = new InstanceGroupAvailabilityZone();
+            availabilityZone.setAvailabilityZone(s);
+            return availabilityZone;
+        }).collect(Collectors.toSet()));
         VerticalScaleRequest verticalScaleRequest = new VerticalScaleRequest();
         InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
         instanceTemplateRequest.setInstanceType(instanceTypeNameInRequest);
@@ -410,10 +426,17 @@ public class VerticalScalingValidatorServiceTest {
     private InstanceGroup instanceGroup(String name, String instanceType, Set<String> availabilityZones) {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName(name);
+        instanceGroup.setId(1L);
         Template template = new Template();
         template.setInstanceType(instanceType);
         instanceGroup.setTemplate(template);
-        instanceGroup.setAvailabilityZones(availabilityZones);
+        Set<InstanceGroupAvailabilityZone> instanceGroupAvailabilityZones = availabilityZones.stream().map(s -> {
+            InstanceGroupAvailabilityZone instanceGroupAvailabilityZone = new InstanceGroupAvailabilityZone();
+            instanceGroupAvailabilityZone.setAvailabilityZone(s);
+            instanceGroupAvailabilityZone.setInstanceGroup(instanceGroup);
+            return instanceGroupAvailabilityZone;
+        }).collect(Collectors.toSet());
+        instanceGroup.setAvailabilityZones(instanceGroupAvailabilityZones);
         return instanceGroup;
     }
 

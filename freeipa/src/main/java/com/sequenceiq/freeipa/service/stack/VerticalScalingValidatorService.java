@@ -26,9 +26,11 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequ
 import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
+import com.sequenceiq.freeipa.entity.InstanceGroupAvailabilityZone;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupAvailabilityZoneService;
 
 @Service
 public class VerticalScalingValidatorService {
@@ -52,6 +54,9 @@ public class VerticalScalingValidatorService {
 
     @Inject
     private MultiAzCalculatorService multiAzCalculatorService;
+
+    @Inject
+    private InstanceGroupAvailabilityZoneService availabilityZoneService;
 
     public void validateRequest(Stack stack, VerticalScaleRequest verticalScaleV4Request) {
         if (!verticalScalingSupported.contains(stack.getCloudPlatform())) {
@@ -94,11 +99,13 @@ public class VerticalScalingValidatorService {
                     Maps.newHashMap());
             Optional<VmType> requestInstanceForVerticalScaling = getInstance(region, availabilityZone, requestedInstanceType, allVmTypes);
             boolean validateMultiAz = stack.isMultiAz() && multiAzCalculatorService.getAvailabilityZoneConnector(stack) != null;
+            Set<String> availabilityZones = validateMultiAz ? availabilityZoneService.findAllByInstanceGroupId(instanceGroupOptional.get().getId()).stream()
+                    .map(InstanceGroupAvailabilityZone::getAvailabilityZone).collect(Collectors.toSet()) : null;
             Json attributes = instanceGroupOptional.get().getTemplate().getAttributes();
             verticalScaleInstanceProvider.validateInstanceTypeForVerticalScaling(
                     getInstance(region, availabilityZone, currentInstanceType, allVmTypes),
                     requestInstanceForVerticalScaling,
-                    validateMultiAz ? instanceGroupOptional.get().getAvailabilityZones() : null,
+                    availabilityZones,
                     attributes == null ? Map.of() : attributes.getMap());
         } else {
             throw new BadRequestException(String.format("Define a group which exists in FreeIpa. It can be [%s].",
