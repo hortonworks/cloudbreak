@@ -98,6 +98,7 @@ auth:
       enabled: true
       preferred: true
     secret.encryption.enabled: false
+    container.ready.env.enabled: true
 crn:
   partition: cdp
   region: us-west-1

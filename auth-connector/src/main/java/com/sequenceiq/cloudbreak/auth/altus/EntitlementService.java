@@ -37,6 +37,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_BULK
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_DISABLE_AUTO_BUNDLE_COLLECTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONTAINER_READY_ENV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_DATABUS_ENDPOINT_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_EXPERIMENTAL_SCALE_LIMITS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_LONG_TIMEOUT;
@@ -543,6 +544,10 @@ public class EntitlementService {
 
     public boolean isExpressOnboardingEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_EXPRESS_ONBOARDING);
+    }
+
+    public boolean isContainerReadyEnvEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CONTAINER_READY_ENV);
     }
 
     public boolean isAwsImdsV2Enforced(String accountId) {
