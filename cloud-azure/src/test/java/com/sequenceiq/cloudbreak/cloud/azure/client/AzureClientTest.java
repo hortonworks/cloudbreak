@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -117,6 +118,8 @@ class AzureClientTest {
     private static final String FRONTEND_2_NAME = "frontend2-gateway";
 
     private static final String GATEWAY_PRIVATE_IP_ADDRESS1 = "110.111.112.113";
+
+    private static final String TAG_NAME = "created-for";
 
     @Mock
     private AzureClientFactory azureClientCredentials;
@@ -562,5 +565,50 @@ class AzureClientTest {
                 diskUpdateArgumentCaptor.capture());
         assertEquals(100, diskUpdateArgumentCaptor.getValue().diskSizeGB());
         assertEquals(DiskStorageAccountTypes.STANDARD_LRS, diskUpdateArgumentCaptor.getValue().sku().name());
+    }
+
+    @Test
+    void testListDisksByTag() {
+        AzureListResult<Disk> azureListResult = mock(AzureListResult.class);
+        Disks disks = mock(Disks.class);
+        Disk disk1 = mock(Disk.class);
+        when(disk1.tags()).thenReturn(Map.of(TAG_NAME, "fqdn1"));
+        Disk disk2 = mock(Disk.class);
+        when(disk2.tags()).thenReturn(Map.of(TAG_NAME, "fqdn2"));
+        Disk disk3 = mock(Disk.class);
+        when(disk3.tags()).thenReturn(Map.of(TAG_NAME, "fqdn3"));
+        Disk disk4 = mock(Disk.class);
+        when(disk4.tags()).thenReturn(Map.of());
+        Disk disk5 = mock(Disk.class);
+        when(disk5.tags()).thenReturn(Map.of("OTHER_TAG", "TEST"));
+        when(azureListResult.getAll()).thenReturn(List.of(disk1, disk2, disk3, disk4, disk5));
+        when(azureResourceManager.disks()).thenReturn(disks);
+        when(azureListResultFactory.listByResourceGroup(disks, RESOURCE_GROUP_NAME)).thenReturn(azureListResult);
+
+        List<Disk> disk = underTest.listDisksByTag(RESOURCE_GROUP_NAME, TAG_NAME, List.of("fqdn1", "fqdn2"));
+
+        assertEquals(2, disk.size());
+        assertTrue(CollectionUtils.isEqualCollection(disk, List.of(disk1, disk2)));
+    }
+
+    @Test
+    void testListDisksByTagNoneDisksReturned() {
+        AzureListResult<Disk> azureListResult = mock(AzureListResult.class);
+        Disks disks = mock(Disks.class);
+        Disk disk1 = mock(Disk.class);
+        when(disk1.tags()).thenReturn(Map.of(TAG_NAME, "fqdn1"));
+        Disk disk2 = mock(Disk.class);
+        when(disk2.tags()).thenReturn(Map.of(TAG_NAME, "fqdn2"));
+        Disk disk3 = mock(Disk.class);
+        when(disk3.tags()).thenReturn(Map.of(TAG_NAME, "fqdn3"));
+        Disk disk4 = mock(Disk.class);
+        when(disk4.tags()).thenReturn(Map.of());
+        when(azureListResult.getAll()).thenReturn(List.of(disk1, disk2, disk3, disk4));
+        when(azureResourceManager.disks()).thenReturn(disks);
+        when(azureListResultFactory.listByResourceGroup(disks, RESOURCE_GROUP_NAME)).thenReturn(azureListResult);
+
+        List<Disk> disk = underTest.listDisksByTag(RESOURCE_GROUP_NAME, TAG_NAME, List.of("fqdn4"));
+
+        assertEquals(0, disk.size());
     }
 }

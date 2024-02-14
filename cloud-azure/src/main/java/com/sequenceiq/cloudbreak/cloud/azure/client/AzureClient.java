@@ -385,6 +385,13 @@ public class AzureClient {
         return azureListResultFactory.listByResourceGroup(azure.disks(), resourceGroupName);
     }
 
+    public List<Disk> listDisksByTag(String resourceGroupName, String tag, List<String> tagValues) {
+        List<Disk> disks = listDisksByResourceGroup(resourceGroupName).getAll();
+        return disks.stream()
+                .filter(disk -> tagValues.contains(disk.tags().getOrDefault(tag, "")))
+                .collect(Collectors.toList());
+    }
+
     public Disk getDiskById(String id) {
         return azure.disks().getById(id);
     }

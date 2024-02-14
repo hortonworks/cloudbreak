@@ -69,7 +69,8 @@ public interface ResourceVolumeConnector {
      * @param cloudResources       resources that are being modified
      * @throws Exception        in case of any error
      */
-    default void attachVolumes(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources) throws CloudbreakServiceException {
+    default void attachVolumes(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, CloudStack cloudStack)
+            throws CloudbreakServiceException {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 }

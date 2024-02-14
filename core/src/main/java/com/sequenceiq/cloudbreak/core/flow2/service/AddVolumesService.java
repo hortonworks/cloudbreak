@@ -159,7 +159,7 @@ public class AddVolumesService {
             CloudConnector connector = cloudConnectResources.getCloudConnector();
             AuthenticatedContext ac = cloudConnectResources.getAuthenticatedContext();
             LOGGER.debug("Calling cloud connector to attach new volumes created on stack name: {}.", stack.getName());
-            connector.volumeConnector().attachVolumes(ac, cloudResources);
+            connector.volumeConnector().attachVolumes(ac, cloudResources, cloudConnectResources.getCloudStack());
             LOGGER.debug("Finished attaching disks on stack {}", stack.getName());
         } catch (Exception ex) {
             LOGGER.warn("Exception while creating volumes on stack id: {}, because: {}", stackId, ex.getMessage());

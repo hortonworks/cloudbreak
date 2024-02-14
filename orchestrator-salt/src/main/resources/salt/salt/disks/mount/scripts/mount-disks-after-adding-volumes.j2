@@ -86,15 +86,11 @@ unmount_and_mount_block_store() {
     return $((counter))
 }
 
-mount_all_attached_disks() {
+mount_all_attached_disks_aws() {
       local hadoop_fs_dir_counter=1
       local hadoop_ephfs_dir_counter=1
       local return_value=0
-      if [[ "$CLOUD_PLATFORM" == "AZURE" ]]; then
-        not_mounted_volume_names=$(lsblk_command --noheadings --raw -o NAME,MOUNTPOINT | awk '$1~/[[:digit:]]/ && $2 == ""')
-      else
-        not_mounted_volume_names=$(lsblk_command | grep -v part | grep ^[a-z] | cut -f1 -d' ')
-      fi
+      not_mounted_volume_names=$(lsblk_command | grep -v part | grep ^[a-z] | cut -f1 -d' ')
       log $LOG_FILE remaining not mounted volumes: $not_mounted_volume_names
       root_disk=$(get_root_disk)
       unmount_instance_storage
@@ -111,6 +107,32 @@ mount_all_attached_disks() {
           else
               log $LOG_FILE volume $volume has still no uuid, skipping it
               return_value=1
+          fi
+      done
+
+    return $((return_value))
+}
+
+mount_all_attached_disks_azure() {
+      local hadoop_fs_dir_counter=1
+      local hadoop_ephfs_dir_counter=1
+      local return_value=0
+      local non_ebs_device_id=""
+      not_mounted_volume_names=$(lsblk_command | grep -v part | grep ^[a-z] | cut -f1 -d' ')
+      log $LOG_FILE remaining not mounted volumes: $not_mounted_volume_names
+      if [[ "$TEMPORARY_STORAGE" == "EPHEMERAL_VOLUMES" ]]; then
+           non_ebs_device_id="/dev/sdb"
+      else
+           non_ebs_device_id="/dev/sda"
+      fi
+      log $LOG_FILE non_ebs_device_id: $non_ebs_device_id
+      for volume in $not_mounted_volume_names; do
+          uuid=$(get_disk_uuid "/dev/$volume")
+          if [[ "/dev/$volume" > "$non_ebs_device_id" ]]; then
+              unmount_and_mount_block_store $hadoop_fs_dir_counter
+              hadoop_fs_dir_counter=$?
+          else
+              log $LOG_FILE volume $volume is not EBS, skipping it
           fi
       done
 
@@ -142,7 +164,11 @@ mount_common() {
     if [[ $DATABASE_VOLUME_INDEX != -1 ]]; then
       mkdir /dbfs
     fi
-    mount_all_attached_disks
+    if [[ "$CLOUD_PLATFORM" == "AZURE" ]]; then
+      mount_all_attached_disks_azure
+    else
+      mount_all_attached_disks_aws
+    fi
     return_value=$?
     return $((return_value))
 }

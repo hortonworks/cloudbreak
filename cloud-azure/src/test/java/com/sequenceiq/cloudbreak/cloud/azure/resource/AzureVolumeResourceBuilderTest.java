@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -87,6 +88,8 @@ public class AzureVolumeResourceBuilderTest {
     private static final String RESOURCE_GROUP = "my-rg";
 
     private static final String DISK_ID = "disk-1";
+
+    private static final String DISK_ID_ON_AZURE = "/subscriptions/subid/resourceGroups/rg/providers/Microsoft.Compute/disks/disk-1";
 
     private static final String VOLUME_NAME = "volume";
 
@@ -189,7 +192,7 @@ public class AzureVolumeResourceBuilderTest {
 
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack)).thenReturn(RESOURCE_GROUP);
 
-        when(disk.id()).thenReturn(DISK_ID);
+        when(disk.id()).thenReturn(DISK_ID_ON_AZURE);
     }
 
     @Test
@@ -376,7 +379,7 @@ public class AzureVolumeResourceBuilderTest {
         volumes.add(new VolumeSetAttributes.Volume(VOLUME_ID, DEVICE, VOLUME_SIZE, VOLUME_TYPE, CloudVolumeUsageType.GENERAL));
         CloudResource volumeSetResource = CloudResource.builder().withType(ResourceType.AZURE_VOLUMESET).withStatus(CommonStatus.CREATED)
                 .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, VOLUME_SIZE, VOLUME_TYPE)))
-                .withName(VOLUME_NAME).build();
+                .withName(VOLUME_NAME).withAvailabilityZone(AVAILABILITY_ZONE).build();
 
         List<CloudResource> result = underTest.build(context, cloudInstance, PRIVATE_ID, auth, group, List.of(volumeSetResource), cloudStack);
 
@@ -393,12 +396,12 @@ public class AzureVolumeResourceBuilderTest {
         initAsyncTaskExecutor();
 
         ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
-        volumes.add(new VolumeSetAttributes.Volume(VOLUME_ID, DEVICE, VOLUME_SIZE, VOLUME_TYPE, CloudVolumeUsageType.GENERAL));
+        volumes.add(new VolumeSetAttributes.Volume(DISK_ID_ON_AZURE, DEVICE, VOLUME_SIZE, VOLUME_TYPE, CloudVolumeUsageType.GENERAL));
         CloudResource volumeSetResource = CloudResource.builder().withType(ResourceType.AZURE_VOLUMESET).withStatus(CommonStatus.REQUESTED)
                 .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, VOLUME_SIZE, VOLUME_TYPE)))
-                .withName(VOLUME_NAME).build();
+                .withName(VOLUME_NAME).withAvailabilityZone(AVAILABILITY_ZONE).build();
 
-        when(azureClient.getDiskByName(RESOURCE_GROUP, VOLUME_ID)).thenReturn(disk);
+        when(azureClient.getDiskByName(RESOURCE_GROUP, DISK_ID)).thenReturn(disk);
 
         List<CloudResource> result = underTest.build(context, cloudInstance, PRIVATE_ID, auth, group, List.of(volumeSetResource), cloudStack);
 
@@ -407,7 +410,7 @@ public class AzureVolumeResourceBuilderTest {
         assertThat(result).isNotNull();
         assertThat(result).hasSize(1);
 
-        verifyVolumeSetResource(result.get(0), DISK_ID, DEVICE_DEV_SDC);
+        verifyVolumeSetResource(result.get(0), DISK_ID_ON_AZURE, DEVICE);
     }
 
     @Test
@@ -415,10 +418,10 @@ public class AzureVolumeResourceBuilderTest {
         initAsyncTaskExecutor();
 
         ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
-        volumes.add(new VolumeSetAttributes.Volume(VOLUME_ID, DEVICE, VOLUME_SIZE, VOLUME_TYPE, CloudVolumeUsageType.GENERAL));
+        volumes.add(new VolumeSetAttributes.Volume(VOLUME_ID, null, VOLUME_SIZE, VOLUME_TYPE, CloudVolumeUsageType.GENERAL));
         CloudResource volumeSetResource = CloudResource.builder().withType(ResourceType.AZURE_VOLUMESET).withStatus(CommonStatus.REQUESTED)
                 .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, VOLUME_SIZE, VOLUME_TYPE)))
-                .withName(VOLUME_NAME).build();
+                .withName(VOLUME_NAME).withAvailabilityZone(AVAILABILITY_ZONE).build();
 
         when(azureClient.createManagedDisk(new AzureDisk(VOLUME_ID, VOLUME_SIZE, AzureDiskType.STANDARD_SSD_LRS, REGION, RESOURCE_GROUP,
                 Map.of(), null, null))).thenReturn(disk);
@@ -428,7 +431,37 @@ public class AzureVolumeResourceBuilderTest {
         assertThat(result).isNotNull();
         assertThat(result).hasSize(1);
 
-        verifyVolumeSetResource(result.get(0), DISK_ID, DEVICE_DEV_SDC);
+        verifyVolumeSetResource(result.get(0), DISK_ID_ON_AZURE, DEVICE_DEV_SDC);
+    }
+
+    @Test
+    void buildTestWhenVolumeSetExistsAndRequestedAndOffSetAndAdditionalTagsGiven() throws Exception {
+        initAsyncTaskExecutor();
+
+        ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
+        volumes.add(new VolumeSetAttributes.Volume(VOLUME_ID, null, VOLUME_SIZE, VOLUME_TYPE, CloudVolumeUsageType.GENERAL));
+        CloudResource volumeSetResource = CloudResource.builder().withType(ResourceType.AZURE_VOLUMESET).withStatus(CommonStatus.REQUESTED)
+                .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, VOLUME_SIZE, VOLUME_TYPE)))
+                .withName(VOLUME_NAME).withAvailabilityZone(AVAILABILITY_ZONE).build();
+
+        when(azureClient.createManagedDisk(new AzureDisk(VOLUME_ID, VOLUME_SIZE, AzureDiskType.STANDARD_SSD_LRS, REGION, RESOURCE_GROUP,
+                Map.of(), null, null))).thenReturn(disk);
+        when(cloudStack.getTags()).thenReturn(Map.of("existingTag", "existingTagValue"));
+
+        List<CloudResource> result = underTest.build(cloudInstance, auth, group, List.of(volumeSetResource), cloudStack, 5, Map.of("newTag", "newTagValue"));
+
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(1);
+
+        ArgumentCaptor<AzureDisk> captor = ArgumentCaptor.forClass(AzureDisk.class);
+        verify(azureClient).createManagedDisk(captor.capture());
+        AzureDisk azureDisk = captor.getValue();
+        assertEquals(2, azureDisk.getTags().size());
+        assertTrue("existingTagValue".equals(azureDisk.getTags().get("existingTag")));
+        assertTrue("newTagValue".equals(azureDisk.getTags().get("newTag")));
+
+
+        verifyVolumeSetResource(result.get(0), DISK_ID_ON_AZURE, "/dev/sdg");
     }
 
     @Test
@@ -436,10 +469,10 @@ public class AzureVolumeResourceBuilderTest {
         initAsyncTaskExecutor();
 
         ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
-        volumes.add(new VolumeSetAttributes.Volume(VOLUME_ID, DEVICE, VOLUME_SIZE, VOLUME_TYPE, CloudVolumeUsageType.GENERAL));
+        volumes.add(new VolumeSetAttributes.Volume(VOLUME_ID, null, VOLUME_SIZE, VOLUME_TYPE, CloudVolumeUsageType.GENERAL));
         CloudResource volumeSetResource = CloudResource.builder().withType(ResourceType.AZURE_VOLUMESET).withStatus(CommonStatus.REQUESTED)
                 .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, VOLUME_SIZE, VOLUME_TYPE)))
-                .withName(VOLUME_NAME).build();
+                .withName(VOLUME_NAME).withAvailabilityZone(AVAILABILITY_ZONE).build();
 
         when(instanceTemplate.getStringParameter(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID)).thenReturn(DISK_ENCRYPTION_SET_ID);
 
@@ -451,7 +484,7 @@ public class AzureVolumeResourceBuilderTest {
         assertThat(result).isNotNull();
         assertThat(result).hasSize(1);
 
-        verifyVolumeSetResource(result.get(0), DISK_ID, DEVICE_DEV_SDC);
+        verifyVolumeSetResource(result.get(0), DISK_ID_ON_AZURE, DEVICE_DEV_SDC);
     }
 
     @Test
@@ -462,7 +495,7 @@ public class AzureVolumeResourceBuilderTest {
         volumes.add(new VolumeSetAttributes.Volume(VOLUME_ID, DEVICE, VOLUME_SIZE, VOLUME_TYPE, CloudVolumeUsageType.GENERAL));
         CloudResource volumeSetResource = CloudResource.builder().withType(ResourceType.AZURE_VOLUMESET).withStatus(CommonStatus.REQUESTED)
                 .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, VOLUME_SIZE, VOLUME_TYPE)))
-                .withName(VOLUME_NAME).build();
+                .withName(VOLUME_NAME).withAvailabilityZone(AVAILABILITY_ZONE).build();
 
         when(instanceTemplate.getParameter(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED, Object.class)).thenReturn(true);
         when(instanceTemplate.getStringParameter(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID)).thenReturn(DISK_ENCRYPTION_SET_ID);
@@ -475,13 +508,15 @@ public class AzureVolumeResourceBuilderTest {
         assertThat(result).isNotNull();
         assertThat(result).hasSize(1);
 
-        verifyVolumeSetResource(result.get(0), DISK_ID, DEVICE_DEV_SDC);
+        verifyVolumeSetResource(result.get(0), DISK_ID_ON_AZURE, DEVICE);
     }
 
     private void verifyVolumeSetResource(CloudResource resultVolumeSetResource, String diskIdExpected, String deviceExpected) {
         assertThat(resultVolumeSetResource.getType()).isEqualTo(ResourceType.AZURE_VOLUMESET);
         assertThat(resultVolumeSetResource.getStatus()).isEqualTo(CommonStatus.CREATED);
         assertThat(resultVolumeSetResource.getName()).isEqualTo(VOLUME_NAME);
+        assertThat(resultVolumeSetResource.getAvailabilityZone()).isEqualTo(AVAILABILITY_ZONE);
+
 
         VolumeSetAttributes resultVolumeSetAttributes = resultVolumeSetResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
         assertThat(resultVolumeSetAttributes).isNotNull();

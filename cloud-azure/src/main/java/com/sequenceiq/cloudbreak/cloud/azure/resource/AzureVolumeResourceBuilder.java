@@ -12,7 +12,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -99,7 +98,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         Optional<CloudResource> reattachableVolumeSet = getReattachableVolumeSet(computeResources, vm);
 
         return List.of(reattachableVolumeSet.orElseGet(
-                createVolumeSet(privateId, auth, group, vm, context.getStringParameter(PlatformParametersConsts.RESOURCE_CRN_PARAMETER))));
+                () -> createVolumeSet(privateId, auth, group, vm, context.getStringParameter(PlatformParametersConsts.RESOURCE_CRN_PARAMETER), true)));
     }
 
     private Optional<CloudResource> getReattachableVolumeSet(List<CloudResource> computeResources, CloudResource vm) {
@@ -115,44 +114,43 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         return reattachableVolumeSet;
     }
 
-    private Supplier<CloudResource> createVolumeSet(long privateId, AuthenticatedContext auth, Group group, CloudResource vm, String stackCrn) {
-        return () -> {
-            String instanceId = vm.getInstanceId();
-            Optional<CloudResource> volumeSetForInstanceId = findVolumeSetForInstanceId(instanceId, auth, group);
-            if (volumeSetForInstanceId.isPresent()) {
-                return volumeSetForInstanceId.get();
-            }
-            AzureResourceNameService resourceNameService = getResourceNameService();
+    public CloudResource createVolumeSet(long privateId, AuthenticatedContext auth, Group group, CloudResource vm, String stackCrn,
+            boolean withVolumesFromTemplate) {
+        String instanceId = vm.getInstanceId();
+        Optional<CloudResource> volumeSetForInstanceId = findVolumeSetForInstanceId(instanceId, auth, group);
+        if (volumeSetForInstanceId.isPresent()) {
+            return volumeSetForInstanceId.get();
+        }
+        AzureResourceNameService resourceNameService = getResourceNameService();
 
-            InstanceTemplate template = group.getReferenceInstanceTemplate();
-            String groupName = group.getName();
-            CloudContext cloudContext = auth.getCloudContext();
-            String stackName = cloudContext.getName();
-            String availabilityZone = getAvailabilityZone(auth, vm);
-            String hashableString = stackCrn + System.currentTimeMillis();
+        InstanceTemplate template = group.getReferenceInstanceTemplate();
+        String groupName = group.getName();
+        CloudContext cloudContext = auth.getCloudContext();
+        String stackName = cloudContext.getName();
+        String availabilityZone = getAvailabilityZone(auth, vm);
+        String hashableString = stackCrn + System.currentTimeMillis();
 
-            return CloudResource.builder()
-                    .withInstanceId(instanceId)
-                    .withPersistent(true)
-                    .withType(resourceType())
-                    .withName(resourceNameService.volumeSet(stackName, groupName, privateId, hashableString))
-                    .withGroup(group.getName())
-                    .withStatus(CommonStatus.REQUESTED)
-                    .withAvailabilityZone(availabilityZone)
-                    .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
-                                    .withAvailabilityZone(availabilityZone)
-                                    .withDeleteOnTermination(Boolean.TRUE)
-                                    .withVolumes(
-                                            template.getVolumes().stream()
-                                                    .map(volume -> new VolumeSetAttributes.Volume(
-                                                            resourceNameService.attachedDisk(stackName, groupName, privateId,
-                                                                    template.getVolumes().indexOf(volume), hashableString),
-                                                            null, volume.getSize(), volume.getType(), volume.getVolumeUsageType()))
-                                                    .collect(toList()))
-                                    .build(),
-                            PRIVATE_ID, privateId))
-                    .build();
-        };
+        return CloudResource.builder()
+                .withInstanceId(instanceId)
+                .withPersistent(true)
+                .withType(resourceType())
+                .withName(resourceNameService.volumeSet(stackName, groupName, privateId, hashableString))
+                .withGroup(group.getName())
+                .withStatus(CommonStatus.REQUESTED)
+                .withAvailabilityZone(availabilityZone)
+                .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
+                                .withAvailabilityZone(availabilityZone)
+                                .withDeleteOnTermination(Boolean.TRUE)
+                                .withVolumes(
+                                        withVolumesFromTemplate ? template.getVolumes().stream()
+                                                .map(volume -> new VolumeSetAttributes.Volume(
+                                                        resourceNameService.attachedDisk(stackName, groupName, privateId,
+                                                                template.getVolumes().indexOf(volume), hashableString),
+                                                        null, volume.getSize(), volume.getType(), volume.getVolumeUsageType()))
+                                                .collect(toList()) : new ArrayList<>())
+                                .build(),
+                        PRIVATE_ID, privateId))
+                .build();
     }
 
     @NotNull
@@ -188,6 +186,11 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
     @Override
     public List<CloudResource> build(AzureContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
+        return build(instance, auth, group, buildableResource, cloudStack, null, null);
+    }
+
+    public List<CloudResource> build(CloudInstance instance, AuthenticatedContext auth, Group group,
+            List<CloudResource> buildableResource, CloudStack cloudStack, Integer offSet, Map<String, String> additionalTags) throws Exception {
         LOGGER.info("Create volumes on provider");
         AzureClient client = getAzureClient(auth);
 
@@ -204,21 +207,21 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         for (CloudResource resource : requestedResources) {
             volumeSetMap.put(resource.getName(), Collections.synchronizedList(new ArrayList<>()));
             VolumeSetAttributes volumeSet = getVolumeSetAttributes(resource);
-            DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, getDeviceOffset(instance));
+            DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, offSet != null ? offSet : getDeviceOffset(instance));
             futures.addAll(volumeSet.getVolumes().stream()
                     .map(volume -> intermediateBuilderExecutor.submit(() -> {
-                        Disk result = client.getDiskByName(resourceGroupName, volume.getId());
+                        Disk result = client.getDiskByName(resourceGroupName, getDiskName(volume.getId()));
                         if (result == null) {
                             result = client.createManagedDisk(
                                     new AzureDisk(volume.getId(), volume.getSize(), AzureDiskType.getByValue(
-                                            volume.getType()), region, resourceGroupName, cloudStack.getTags(), diskEncryptionSetId,
+                                            volume.getType()), region, resourceGroupName, getTags(cloudStack.getTags(), additionalTags), diskEncryptionSetId,
                                     resource.getAvailabilityZone()));
                         } else {
                             LOGGER.info("Managed disk for resource group: {}, name: {} already exists: {}", resourceGroupName, volume.getId(), result);
                         }
                         String volumeId = result.id();
-                        volumeSetMap.get(resource.getName()).add(new VolumeSetAttributes.Volume(volumeId, generator.next(), volume.getSize(), volume.getType(),
-                                volume.getCloudVolumeUsageType()));
+                        volumeSetMap.get(resource.getName()).add(new VolumeSetAttributes.Volume(volumeId, volume.getDevice() != null ? volume.getDevice() :
+                                generator.next(), volume.getSize(), volume.getType(), volume.getCloudVolumeUsageType()));
                     }))
                     .collect(toList()));
         }
@@ -261,6 +264,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                 .withInstanceId(resource.getInstanceId())
                 .withName(resource.getName())
                 .withParameters(resource.getParameters())
+                .withAvailabilityZone(resource.getAvailabilityZone())
                 .build();
     }
 
@@ -430,6 +434,19 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
 
     private VolumeSetAttributes getVolumeSetAttributes(CloudResource volumeSet) {
         return volumeSet.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+    }
+
+    private Map<String, String> getTags(Map<String, String> stackTags, Map<String, String> additionalTags) {
+        if (stackTags != null && additionalTags != null) {
+            Map<String, String> mergedTags = new HashMap<>(stackTags);
+            mergedTags.putAll(additionalTags);
+            return mergedTags;
+        }
+        return stackTags != null ? stackTags : additionalTags;
+    }
+
+    private String getDiskName(String volumeId) {
+        return volumeId.lastIndexOf('/') != -1 ? volumeId.substring(volumeId.lastIndexOf('/') + 1) : volumeId;
     }
 
     @Override

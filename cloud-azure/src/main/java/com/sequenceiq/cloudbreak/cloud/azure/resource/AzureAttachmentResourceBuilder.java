@@ -120,6 +120,29 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
         throw new PreserveResourceException("Resource will be preserved for later reattachment.");
     }
 
+    public void attachDisks(CloudInstance instance, AuthenticatedContext auth, CloudResource volumeSet, CloudStack cloudStack) {
+        CloudContext cloudContext = auth.getCloudContext();
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack);
+        AzureClient client = getAzureClient(auth);
+        VirtualMachine vm = client.getVirtualMachineByResourceGroup(resourceGroupName, instance.getInstanceId());
+        Set<String> diskIds = vm.dataDisks().values().stream().map(VirtualMachineDataDisk::id).collect(Collectors.toSet());
+
+        VolumeSetAttributes volumeSetAttributes = getVolumeSetAttributes(volumeSet);
+        LOGGER.debug("Volume set attributes: {}", volumeSetAttributes);
+        List<VolumeSetAttributes.Volume> volumes = volumeSetAttributes.getVolumes();
+        attachVolumesIfNeeded(client, vm, diskIds, volumes, volumeSetAttributes.getDiscoveryFQDN(), instance.getParameters().get(CloudInstance.FQDN));
+        LOGGER.info("Volume set {} attached successfully", volumeSet);
+    }
+
+    public List<Disk> getAvailableDisks(AuthenticatedContext auth, CloudStack cloudStack, String tagName, List<String> tagValues) {
+        CloudContext cloudContext = auth.getCloudContext();
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack);
+        AzureClient client = getAzureClient(auth);
+        return client.listDisksByTag(resourceGroupName, tagName, tagValues).stream()
+                .filter(disk -> !disk.isAttachedToVirtualMachine())
+                .collect(Collectors.toList());
+    }
+
     @Override
     public ResourceType resourceType() {
         return ResourceType.AZURE_VOLUMESET;

@@ -117,7 +117,7 @@ public class AwsNativeResourceVolumeConnectorTest {
     @Test
     void testAttachVolumes() {
         CloudResource cloudResource = mock(CloudResource.class);
-        underTest.attachVolumes(authenticatedContext, List.of(cloudResource));
+        underTest.attachVolumes(authenticatedContext, List.of(cloudResource), null);
         verify(awsAdditionalDiskAttachmentService).attachAllVolumes(authenticatedContext, List.of(cloudResource));
     }
 }

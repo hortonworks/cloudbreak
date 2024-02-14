@@ -59,7 +59,7 @@ public class AwsResourceVolumeConnector implements ResourceVolumeConnector {
     }
 
     @Override
-    public void attachVolumes(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources)
+    public void attachVolumes(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, CloudStack cloudStack)
             throws CloudbreakServiceException {
         awsAdditionalDiskAttachmentService.attachAllVolumes(authenticatedContext, cloudResources);
     }
