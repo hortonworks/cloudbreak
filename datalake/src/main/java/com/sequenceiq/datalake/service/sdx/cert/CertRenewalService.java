@@ -3,6 +3,8 @@ package com.sequenceiq.datalake.service.sdx.cert;
 import static com.sequenceiq.datalake.service.sdx.SdxService.WORKSPACE_ID_DEFAULT;
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
+import java.util.Collections;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.ClientErrorException;
 import jakarta.ws.rs.ProcessingException;
@@ -139,7 +141,7 @@ public class CertRenewalService {
     }
 
     public void handleFailure(Long id, String reason) {
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_RENEWAL_FAILED,
-                defaultIfBlank(reason, "Datalake certificate renewal failed"), id);
+        String message = defaultIfBlank(reason, "Datalake certificate renewal failed");
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_RENEWAL_FAILED, Collections.singletonList(message), message, id);
     }
 }

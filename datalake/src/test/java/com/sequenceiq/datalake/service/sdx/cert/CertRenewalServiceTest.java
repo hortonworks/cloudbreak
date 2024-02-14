@@ -13,6 +13,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import jakarta.ws.rs.WebApplicationException;
 
 import org.junit.jupiter.api.Test;
@@ -97,7 +99,7 @@ public class CertRenewalServiceTest {
     public void testFailureHandlrSetsCertenewFailedStatus() {
         underTest.handleFailure(1L, "Error");
 
-        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_RENEWAL_FAILED, "Error", 1L);
+        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_RENEWAL_FAILED, List.of("Error"), "Error", 1L);
     }
 
     @Test
