@@ -4,6 +4,7 @@ import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatf
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -230,5 +231,29 @@ class ImageFallbackServiceTest {
 
         assertNull(result);
         verify(azureImageFormatValidator).isMarketplaceImageFormat("vhdImage");
+    }
+
+    @Test
+    public void testGetFallbackImageNameShouldReturnNullIfException() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        Image image = mock(Image.class);
+
+        when(image.getImageName()).thenReturn("anImage");
+        when(azureImageFormatValidator.isMarketplaceImageFormat(anyString())).thenReturn(true);
+        when(stackView.getCloudPlatform()).thenReturn("AZURE");
+        when(imageService.determineImageNameByRegion(any(), any(), any(), any())).
+                thenThrow(new CloudbreakImageNotFoundException("Image not found"));
+        StatedImage statedImage = mock(StatedImage.class);
+        when(imageCatalogService.getImage(anyLong(), any(), any(), any())).thenReturn(statedImage);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                imageFallbackService.getFallbackImageName(stackView, image);
+            } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
+                throw new RuntimeException(e);
+            }
+        }));
+
+        assertEquals("com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException: Image not found", exception.getMessage());
+        verify(azureImageFormatValidator).isMarketplaceImageFormat("anImage");
     }
 }

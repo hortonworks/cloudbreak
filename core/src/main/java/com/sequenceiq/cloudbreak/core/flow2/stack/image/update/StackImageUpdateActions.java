@@ -119,18 +119,24 @@ public class StackImageUpdateActions {
                 CloudStack cloudStack = context.getCloudStack();
 
                 getStackCreationService().prepareImage(stack.getId(), variables);
+                String fallbackImageName = null;
+                Image image = null;
                 try {
-                    Image image = getImageService().getImage(stack.getId());
-                    String fallbackImageName = imageFallbackService.getFallbackImageName(stack.getStack(), image);
-                    variables.put(FALLBACK_IMAGE, fallbackImageName == null ? "" : fallbackImageName);
-
-                    PrepareImageRequest<Selectable> request =
-                            new PrepareImageRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudStack, image,
-                                    PrepareImageType.EXECUTED_DURING_IMAGE_CHANGE, fallbackImageName);
-                    sendEvent(context, request);
-                } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
+                    image = getImageService().getImage(stack.getId());
+                    fallbackImageName = imageFallbackService.getFallbackImageName(stack.getStack(), image);
+                } catch (CloudbreakImageNotFoundException e) {
+                    LOGGER.info("Fallback image could not be determined due to exception {}," +
+                            " we should continue execution", e.getMessage());
+                } catch (CloudbreakImageCatalogException e) {
                     throw new CloudbreakServiceException(e);
                 }
+
+                variables.put(FALLBACK_IMAGE, fallbackImageName == null ? "" : fallbackImageName);
+                PrepareImageRequest<Selectable> request =
+                        new PrepareImageRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudStack, image,
+                                PrepareImageType.EXECUTED_DURING_IMAGE_CHANGE, fallbackImageName);
+                sendEvent(context, request);
+
             }
         };
     }

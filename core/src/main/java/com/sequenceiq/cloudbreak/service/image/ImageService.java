@@ -298,8 +298,9 @@ public class ImageService {
         return findStringKeyWithEqualsIgnoreCase(DEFAULT_REGION, imagesByRegion)
                 .or(() -> supplyAlternativeImageWhenEntitlementAllows(translatedRegion, imagesByRegion, accountId))
                 .orElseThrow(() -> new CloudbreakImageNotFoundException(
-                        String.format("The virtual machine image couldn't be found for %s in the %s region. Available images are as follows: %s.",
-                                platform, translatedRegion, imagesByRegion)));
+                        String.format("The preferred Azure Marketplace image is not present and virtual machine image could not be found in the %s region. " +
+                                        "Available images are as follows: %s.",
+                                translatedRegion, imagesByRegion)));
     }
 
     private Optional<String> supplyAlternativeImageWhenEntitlementAllows(String translatedRegion, Map<String, String> imagesByRegion, String accountId) {

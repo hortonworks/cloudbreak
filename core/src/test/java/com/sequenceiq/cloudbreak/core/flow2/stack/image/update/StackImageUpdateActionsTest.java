@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -319,6 +320,40 @@ public class StackImageUpdateActionsTest {
 
         verify(stackCreationService, times(1)).prepareImage(anyLong(), eq(variables));
         verify(eventBus, times(1)).notify(eq(CloudPlatformRequest.selector(PrepareImageRequest.class)), any(Event.class));
+    }
+
+    @Test
+    public void prepareImageActionFallbackThrowsImageNotFoundException() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        FlowEvent flowEvent = Mockito.mock(FlowEvent.class);
+        when(stateContext.getEvent()).thenReturn(flowEvent);
+        when(flowEvent.name()).thenReturn(EVENT_NAME);
+        StackEvent payload = new StackEvent(StackImageUpdateEvent.UPDATE_IMAGE_FINESHED_EVENT.event(), 1L);
+        when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
+        when(state.getId()).thenReturn(StackImageUpdateState.IMAGE_PREPARE_STATE);
+        when(imageFallbackService.getFallbackImageName(any(), any())).thenThrow(new CloudbreakImageNotFoundException("image not found"));
+
+        prepareImageAction.execute(stateContext);
+
+        verify(stackCreationService, times(1)).prepareImage(anyLong(), eq(variables));
+        verify(eventBus, times(1)).notify(eq(CloudPlatformRequest.selector(PrepareImageRequest.class)), any(Event.class));
+    }
+
+    @Test
+    public void prepareImageActionFallbackThrowsImageCatalogException() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        FlowEvent flowEvent = Mockito.mock(FlowEvent.class);
+        when(stateContext.getEvent()).thenReturn(flowEvent);
+        when(flowEvent.name()).thenReturn(EVENT_NAME);
+        StackEvent payload = new StackEvent(StackImageUpdateEvent.UPDATE_IMAGE_FINESHED_EVENT.event(), 1L);
+        when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
+        when(state.getId()).thenReturn(StackImageUpdateState.IMAGE_PREPARE_STATE);
+        when(imageFallbackService.getFallbackImageName(any(), any())).thenThrow(new CloudbreakImageCatalogException("image catalog not found"));
+        prepareImageAction.setFailureEvent(StackImageUpdateEvent.IMAGE_PREPARATION_FAILED_EVENT);
+
+        prepareImageAction.execute(stateContext);
+
+        verify(eventBus, times(1)).notify(eq(StackImageUpdateEvent.IMAGE_PREPARATION_FAILED_EVENT.event()), any(Event.class));
+        verify(stackCreationService, times(1)).prepareImage(anyLong(), eq(variables));
+        verify(eventBus, never()).notify(eq(CloudPlatformRequest.selector(PrepareImageRequest.class)), any(Event.class));
     }
 
     @Test
