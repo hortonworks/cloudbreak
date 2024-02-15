@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
@@ -44,6 +45,7 @@ import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.util.CdhPatchVersionProvider;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -51,6 +53,9 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 @RunWith(MockitoJUnitRunner.class)
 public class KnoxGatewayConfigProviderTest {
     private static final String TEST_USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
+
+    @Spy
+    private CdhPatchVersionProvider cdhPatchVersionProvider;
 
     @Mock
     private VirtualGroupService virtualGroupService;

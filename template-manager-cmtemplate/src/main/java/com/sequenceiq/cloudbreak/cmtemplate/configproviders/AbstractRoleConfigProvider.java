@@ -7,8 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import jakarta.inject.Inject;
+
+import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
@@ -17,10 +19,13 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.util.CdhPatchVersionProvider;
 
+@Component
 public abstract class AbstractRoleConfigProvider implements CmTemplateComponentConfigProvider {
 
-    private static final String PATCH_VERSION_REGEX = "\\.p([0-9]+)\\.";
+    @Inject
+    private CdhPatchVersionProvider cdhPatchVersionProvider;
 
     @Override
     public Map<String, List<ApiClusterTemplateConfig>> getRoleConfigs(CmTemplateProcessor cmTemplate, TemplatePreparationObject source) {
@@ -52,7 +57,7 @@ public abstract class AbstractRoleConfigProvider implements CmTemplateComponentC
         if (source.getProductDetailsView() != null && source.getProductDetailsView().getProducts() != null) {
             Optional<ClouderaManagerProduct> cdh = getCdhProduct(source);
             if (cdh.isPresent()) {
-                return cdh.flatMap(p -> getPatchFromVersionString(p.getVersion()));
+                return cdh.flatMap(p -> cdhPatchVersionProvider.getPatchFromVersionString(p.getVersion()));
             }
         }
         return Optional.empty();
@@ -66,10 +71,5 @@ public abstract class AbstractRoleConfigProvider implements CmTemplateComponentC
                     .findAny();
         }
         return Optional.empty();
-    }
-
-    protected Optional<Integer> getPatchFromVersionString(String version) {
-        Matcher matcher = Pattern.compile(PATCH_VERSION_REGEX).matcher(version);
-        return matcher.find() ? Optional.of(Integer.valueOf(matcher.group(1))) : Optional.empty();
     }
 }

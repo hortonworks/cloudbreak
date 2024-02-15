@@ -132,6 +132,6 @@ class HdfsConfigurationValidatorTest {
 
     private ServiceUpgradeValidationRequest createRequest(boolean rollingUpgradeEnabled) {
         lenient().when(stack.getName()).thenReturn(STACK_NAME);
-        return new ServiceUpgradeValidationRequest(stack, false, rollingUpgradeEnabled, null, null);
+        return new ServiceUpgradeValidationRequest(stack, false, rollingUpgradeEnabled, null);
     }
 }
