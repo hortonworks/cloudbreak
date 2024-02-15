@@ -211,7 +211,7 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:{{ monitoring.cmMetricsExporterPort }}']
         labels:
-          resource_crn: {{ telemetry.clusterCrn }}
+          cluster_id: {{ telemetry.clusterCrn }}
           platform: {{ telemetry.platform }}
     relabel_configs:
       - target_label: instance
