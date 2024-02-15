@@ -15,8 +15,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +31,8 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -83,6 +88,14 @@ public class StackDecoratorTest {
     private static final String MISCONFIGURED_STACK_FOR_SHARED_SERVICE = "Shared service stack configuration contains some errors";
 
     private static final Set<String> EXPECTED_AZS = Set.of("availabilityZone1", "availabilityZone2");
+
+    private static final String CREATOR_CLIENT_HEADER_NAME = "user-agent";
+
+    private static final String CREATOR_CLIENT_HEADER_VALUE = "CDPTFPROVIDER/dev";
+
+    private static final String CREATOR_CLIENT_FALLBACK_HEADER_NAME = "cdp-caller-id";
+
+    private static final String CREATOR_CLIENT_DEFAULT_VALUE = "No Info";
 
     @InjectMocks
     private StackDecorator underTest;
@@ -263,6 +276,46 @@ public class StackDecoratorTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.decorate(environmentResponse, subject, request, user, workspace)));
         assertEquals(MISCONFIGURED_STACK_FOR_SHARED_SERVICE, badRequestException.getMessage());
+    }
+
+    @Test
+    void testDecoratorWhenCreatorClientPrimaryHeaderIsPresent() {
+        setUpServletRequestWithHeaderAndValue(Optional.of(CREATOR_CLIENT_HEADER_NAME), CREATOR_CLIENT_HEADER_VALUE);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.decorate(environmentResponse, subject, request, user, workspace));
+
+
+        assertEquals(CREATOR_CLIENT_HEADER_VALUE, subject.getCreatorClient());
+    }
+
+    @Test
+    void testDecoratorWhenCreatorClientPrimaryHeaderIsNotPresentButSecondaryIs() {
+        setUpServletRequestWithHeaderAndValue(Optional.of(CREATOR_CLIENT_FALLBACK_HEADER_NAME), CREATOR_CLIENT_HEADER_VALUE);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.decorate(environmentResponse, subject, request, user, workspace));
+
+
+        assertEquals(CREATOR_CLIENT_HEADER_VALUE, subject.getCreatorClient());
+    }
+
+    @Test
+    void testDecoratorWhenNeitherPrimaryNorSecondaryCreatorClientHeaderIsPresent() {
+        setUpServletRequestWithHeaderAndValue(Optional.empty(), null);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.decorate(environmentResponse, subject, request, user, workspace));
+
+        assertEquals(CREATOR_CLIENT_DEFAULT_VALUE, subject.getCreatorClient());
+    }
+
+    private void setUpServletRequestWithHeaderAndValue(Optional<String> headerName, String headerValue) {
+        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+        when(httpServletRequest.getHeader(headerName.orElse(any()))).thenReturn(headerValue);
+        ServletRequestAttributes attributes = mock(ServletRequestAttributes.class);
+        when(attributes.getRequest()).thenReturn(httpServletRequest);
+        RequestContextHolder.setRequestAttributes(attributes);
     }
 
     private Set<InstanceGroup> createInstanceGroups(InstanceGroupType... types) {

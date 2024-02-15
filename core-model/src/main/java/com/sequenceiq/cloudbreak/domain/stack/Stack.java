@@ -254,6 +254,9 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
 
     private boolean multiAz;
 
+    @Column(name = "creator_client")
+    private String creatorClient;
+
     public String getResourceCrn() {
         return resourceCrn;
     }
@@ -375,6 +378,14 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.resources.clear();
         Optional.ofNullable(resources).ifPresent(this.resources::addAll);
         return this;
+    }
+
+    public String getCreatorClient() {
+        return creatorClient;
+    }
+
+    public void setCreatorClient(String creatorClient) {
+        this.creatorClient = creatorClient;
     }
 
     public int getConsulServers() {
@@ -1079,6 +1090,11 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     @Override
     public Long getDatabaseId() {
         return Optional.ofNullable(database).map(Database::getId).orElse(null);
+    }
+
+    @Override
+    public String creatorClient() {
+        return getCreatorClient();
     }
 
     public void setJavaVersion(Integer javaVersion) {

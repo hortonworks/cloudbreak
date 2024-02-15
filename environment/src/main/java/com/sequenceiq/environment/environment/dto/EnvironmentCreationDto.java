@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.dto;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -68,6 +70,8 @@ public class EnvironmentCreationDto {
 
     private final String proxyConfigName;
 
+    private final String creatorClient;
+
     private final EnvironmentDataServices dataServices;
 
     private EnvironmentCreationDto(Builder builder) {
@@ -99,6 +103,7 @@ public class EnvironmentCreationDto {
         parentEnvironmentName = builder.parentEnvironmentName;
         proxyConfigName = builder.proxyConfigName;
         dataServices = builder.dataServices;
+        creatorClient = builder.creatorClient;
     }
 
     public static Builder builder() {
@@ -206,6 +211,10 @@ public class EnvironmentCreationDto {
         return dataServices;
     }
 
+    public String getCreatorClient() {
+        return creatorClient;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentCreationDto{" +
@@ -214,6 +223,7 @@ public class EnvironmentCreationDto {
                 ", creator='" + creator + '\'' +
                 ", crn='" + crn + '\'' +
                 ", parentEnvironmentName='" + parentEnvironmentName + '\'' +
+                (isNotEmpty(creatorClient) ? ", creatorClient='" + creatorClient + '\'' : "") +
                 '}';
     }
 
@@ -270,6 +280,8 @@ public class EnvironmentCreationDto {
         private String proxyConfigName;
 
         private EnvironmentDataServices dataServices;
+
+        private String creatorClient;
 
         private Builder() {
         }
@@ -396,6 +408,11 @@ public class EnvironmentCreationDto {
 
         public Builder withDataServices(EnvironmentDataServices dataServices) {
             this.dataServices = dataServices;
+            return this;
+        }
+
+        public Builder withCreatorClient(String creatorClient) {
+            this.creatorClient = creatorClient;
             return this;
         }
 

@@ -6,6 +6,10 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.MOCK;
+import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.CALLER_ID_NOT_FOUND;
+import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.CDP_CALLER_ID_HEADER;
+import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.USER_AGENT_HEADER;
+import static com.sequenceiq.cloudbreak.common.request.HeaderValueProvider.getHeaderOrItsFallbackValueOrDefault;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -706,6 +710,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         newSdxCluster.setRangerRmsEnabled(sdxCluster.isRangerRmsEnabled());
         newSdxCluster.setRuntime(sdxCluster.getRuntime());
         newSdxCluster.setEnableMultiAz(enableMultiAz);
+        newSdxCluster.setCreatorClient(getHeaderOrItsFallbackValueOrDefault(USER_AGENT_HEADER, CDP_CALLER_ID_HEADER, CALLER_ID_NOT_FOUND));
         return newSdxCluster;
     }
 
@@ -729,6 +734,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         newSdxCluster.setRangerRmsEnabled(cluster.isEnableRangerRms());
         newSdxCluster.setRuntime(version);
         newSdxCluster.setEnableMultiAz(cluster.isEnableMultiAz());
+        newSdxCluster.setCreatorClient(getHeaderOrItsFallbackValueOrDefault(USER_AGENT_HEADER, CDP_CALLER_ID_HEADER, CALLER_ID_NOT_FOUND));
         return newSdxCluster;
     }
 

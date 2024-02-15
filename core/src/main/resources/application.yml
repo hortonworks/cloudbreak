@@ -197,13 +197,13 @@ cb:
   limit:
     nodeCountLimits:
       safe:
-        cm: 400
-        infrastructure: 500
-        upgrade: 400
-      experimental:
         cm: 800
         infrastructure: 800
         upgrade: 800
+      experimental:
+        cm: 1000
+        infrastructure: 1000
+        upgrade: 1000
 
   aws:
     stopStart.batch.size: 10

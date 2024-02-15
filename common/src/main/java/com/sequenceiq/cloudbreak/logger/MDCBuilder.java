@@ -115,6 +115,7 @@ public class MDCBuilder {
             MDC.put(LoggerContextKey.RESOURCE_ID.toString(), null);
             MDC.put(LoggerContextKey.RESOURCE_CRN.toString(), null);
             MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), null);
+            MDC.put(LoggerContextKey.CLIENT_ID.toString(), null);
         } else {
             MDC.put(LoggerContextKey.WORKSPACE.toString(), getFieldValue(object, "workspace"));
             MdcContext.builder()
@@ -123,6 +124,7 @@ public class MDCBuilder {
                     .resourceName(getFieldValues(object, LoggerContextKey.NAME.toString(), LoggerContextKey.CLUSTER_NAME.toString()))
                     .environmentCrn(getFieldValues(object, LoggerContextKey.ENVIRONMENT_CRN.toString(), LoggerContextKey.ENV_CRN.toString()))
                     .tenant(getFieldValue(object, LoggerContextKey.ACCOUNT_ID.toString()))
+                    .clientId(getFieldValue(object, LoggerContextKey.CLIENT_ID.toString()))
                     .buildMdc();
         }
         getOrGenerateRequestId();

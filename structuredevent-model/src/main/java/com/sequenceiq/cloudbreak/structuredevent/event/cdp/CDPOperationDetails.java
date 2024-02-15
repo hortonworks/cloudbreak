@@ -41,6 +41,8 @@ public class CDPOperationDetails implements Serializable {
 
     private String resourceEvent;
 
+    private String creatorClient;
+
     public CDPOperationDetails() {
     }
 
@@ -173,4 +175,11 @@ public class CDPOperationDetails implements Serializable {
         this.resourceEvent = resourceEvent;
     }
 
+    public String getCreatorClient() {
+        return creatorClient;
+    }
+
+    public void setCreatorClient(String creatorClient) {
+        this.creatorClient = creatorClient;
+    }
 }

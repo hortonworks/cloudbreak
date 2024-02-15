@@ -29,7 +29,7 @@ import com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager.AbstractCloude
 
 public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerTest {
 
-    private static final int CLUSTER_NODE_COUNT_MAX = 800;
+    private static final int CLUSTER_NODE_COUNT_MAX = 1000;
 
     private static final int CLUSTER_NODE_COUNT_MIN = 2;
 

@@ -46,4 +46,7 @@ public interface EnvironmentDetails {
     boolean isEnableSecretEncryption();
 
     CredentialDetails getCredentialDetails();
+
+    String creatorClient();
+
 }

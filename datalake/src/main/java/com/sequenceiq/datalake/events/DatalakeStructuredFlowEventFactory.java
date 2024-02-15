@@ -92,7 +92,7 @@ public class DatalakeStructuredFlowEventFactory implements CDPStructuredFlowEven
         operationDetails.setAccountId(sdxCluster.getAccountId());
         operationDetails.setEnvironmentCrn(sdxCluster.getEnvCrn());
         operationDetails.setUuid(UUID.randomUUID().toString());
-
+        operationDetails.setCreatorClient(sdxCluster.getCreatorClient());
         return operationDetails;
     }
 }
