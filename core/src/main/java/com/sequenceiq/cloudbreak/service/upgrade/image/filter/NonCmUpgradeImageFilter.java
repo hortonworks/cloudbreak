@@ -24,6 +24,7 @@ public class NonCmUpgradeImageFilter implements UpgradeImageFilter {
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
         List<Image> filteredImages = filterImages(imageFilterResult);
+        logNotEligibleImages(imageFilterResult, filteredImages, LOGGER);
         LOGGER.debug("After the filtering {} image left with Cloudera Manager package.", filteredImages.size());
         return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
     }

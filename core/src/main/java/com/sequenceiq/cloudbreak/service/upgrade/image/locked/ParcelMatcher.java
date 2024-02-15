@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image.locked;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -23,22 +23,16 @@ public class ParcelMatcher {
 
     // Only compares the versions of the activated parcels
     public boolean isMatchingNonCdhParcels(Image image, Map<String, String> activatedParcels) {
-        Map<String, String> prewarmedParcels = getPreWarmedParcels(image);
-        return isAllActivatedParcelVersionEqualExceptCdh(activatedParcels, prewarmedParcels);
-    }
-
-    private boolean isAllActivatedParcelVersionEqualExceptCdh(Map<String, String> activatedParcels, Map<String, String> prewarmedParcels) {
-        return activatedParcels.entrySet()
-                .stream()
-                .filter(createNonCdhParcelPredicate())
-                .allMatch(activatedParcelWithVersion -> isParcelVersionEqual(prewarmedParcels, activatedParcelWithVersion));
-    }
-
-    private Predicate<Entry<String, String>> createNonCdhParcelPredicate() {
-        return activatedParcel -> {
-            String activatedParcelName = activatedParcel.getKey();
-            return !StackType.CDH.name().equals(activatedParcelName);
-        };
+        Map<String, String> activeNonCdhParcels = new HashMap<>(activatedParcels);
+        activeNonCdhParcels.remove(StackType.CDH.name());
+        if (activeNonCdhParcels.isEmpty()) {
+            return true;
+        } else {
+            Map<String, String> prewarmedParcels = getPreWarmedParcels(image);
+            return activeNonCdhParcels.entrySet()
+                    .stream()
+                    .allMatch(activatedParcelWithVersion -> isParcelVersionEqual(prewarmedParcels, activatedParcelWithVersion));
+        }
     }
 
     private boolean isParcelVersionEqual(Map<String, String> prewarmedParcels, Entry<String, String> activatedParcelWithVersion) {

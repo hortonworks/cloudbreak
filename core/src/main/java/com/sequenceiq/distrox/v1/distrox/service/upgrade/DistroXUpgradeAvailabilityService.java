@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVer
 import static com.sequenceiq.common.model.UpgradeShowAvailableImages.LATEST_ONLY;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -167,15 +168,17 @@ public class DistroXUpgradeAvailabilityService {
     }
 
     private List<ImageInfoV4Response> filterForLatestImagePerRuntime(List<ImageInfoV4Response> candidates) {
-        Map<String, Optional<ImageInfoV4Response>> latestImageByRuntime = candidates.stream()
+        Map<String, Map<String, Optional<ImageInfoV4Response>>> imagesByRuntimeAndOS = candidates.stream()
                 .collect(Collectors.groupingBy(imageInfoV4Response -> imageInfoV4Response.getComponentVersions().getCdp(),
-                        Collectors.maxBy(ImageInfoV4Response.creationBasedComparator())));
-        List<ImageInfoV4Response> filteredCandidates = latestImageByRuntime.values()
-                .stream()
-                .flatMap(Optional::stream)
-                .collect(Collectors.toList());
-        LOGGER.debug("Filtering for latest image per runtimes {}", latestImageByRuntime.keySet());
-        return filteredCandidates;
+                        Collectors.groupingBy(imageInfoV4Response -> imageInfoV4Response.getComponentVersions().getOs(),
+                                Collectors.maxBy(Comparator.comparingLong(ImageInfoV4Response::getCreated)))));
+
+        return imagesByRuntimeAndOS.values().stream()
+                .map(values -> values.values().stream()
+                        .flatMap(Optional::stream)
+                        .toList())
+                .flatMap(List::stream)
+                .toList();
     }
 
     private List<ImageInfoV4Response> filterForDatalakeVersion(Stack stack, UpgradeV4Response upgradeV4Response) {

@@ -16,6 +16,8 @@ public class ImageTestUtil {
 
     public static final String REGION = "West US 2";
 
+    public static final String OTHER_REGION = "West US 3";
+
     public static final String DEFAULT_REGION = "default";
 
     private ImageTestUtil() {

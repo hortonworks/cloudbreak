@@ -142,7 +142,7 @@ public class SdxRuntimeUpgradeServiceTest {
         sdxUpgradeResponse = new SdxUpgradeResponse();
         sdxCluster = getValidSdxCluster();
         sdxUpgradeRequest = getFullSdxUpgradeRequest();
-        when(sdxUpgradeFilter.filterSdxUpgradeResponse(any(), any(), any(), any())).thenCallRealMethod();
+        when(sdxUpgradeFilter.filterSdxUpgradeResponse(any(), any())).thenCallRealMethod();
         ReflectionTestUtils.setField(underTest, "paywallUrl", "https://archive.coudera.com/p/cdp-public/");
     }
 
@@ -228,7 +228,7 @@ public class SdxRuntimeUpgradeServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo));
         sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo));
 
@@ -260,11 +260,11 @@ public class SdxRuntimeUpgradeServiceTest {
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1L);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
         lastImageInfo.setImageId(IMAGE_ID_LAST);
         lastImageInfo.setCreated(2L);
-        lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
+        lastImageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
         sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
 
@@ -303,7 +303,7 @@ public class SdxRuntimeUpgradeServiceTest {
         when(entitlementService.isDatalakeZduOSUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo));
         sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo));
 
@@ -326,7 +326,7 @@ public class SdxRuntimeUpgradeServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo));
         sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo));
 
@@ -348,7 +348,7 @@ public class SdxRuntimeUpgradeServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo));
         sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo));
 
@@ -369,7 +369,7 @@ public class SdxRuntimeUpgradeServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo));
         sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo));
 
@@ -396,11 +396,11 @@ public class SdxRuntimeUpgradeServiceTest {
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1L);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
         lastImageInfo.setImageId(IMAGE_ID_LAST);
         lastImageInfo.setCreated(2L);
-        lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
+        lastImageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
         sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
 
@@ -436,11 +436,11 @@ public class SdxRuntimeUpgradeServiceTest {
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1L);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
         lastImageInfo.setImageId(IMAGE_ID_LAST);
         lastImageInfo.setCreated(2L);
-        lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
+        lastImageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
         sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
 
@@ -480,11 +480,11 @@ public class SdxRuntimeUpgradeServiceTest {
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1L);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
         lastImageInfo.setImageId(IMAGE_ID_LAST);
         lastImageInfo.setCreated(2L);
-        lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
+        lastImageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
         sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
 
@@ -522,11 +522,11 @@ public class SdxRuntimeUpgradeServiceTest {
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1L);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
         lastImageInfo.setImageId(IMAGE_ID_LAST);
         lastImageInfo.setCreated(2L);
-        lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
+        lastImageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
         sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
 
@@ -562,11 +562,11 @@ public class SdxRuntimeUpgradeServiceTest {
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1L);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
         lastImageInfo.setImageId(IMAGE_ID_LAST);
         lastImageInfo.setCreated(2L);
-        lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
+        lastImageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
         sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
 
@@ -666,11 +666,11 @@ public class SdxRuntimeUpgradeServiceTest {
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1L);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
         lastImageInfo.setImageId(IMAGE_ID_LAST);
         lastImageInfo.setCreated(2L);
-        lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
+        lastImageInfo.setComponentVersions(createExpectedPackageVersions());
         List<ImageInfoV4Response> candidates = List.of(imageInfo, lastImageInfo);
         response.setUpgradeCandidates(candidates);
         SdxUpgradeResponse expectedResponse = new SdxUpgradeResponse(response.getCurrent(), candidates, response.getReason(), response.getFlowIdentifier());
@@ -789,7 +789,7 @@ public class SdxRuntimeUpgradeServiceTest {
         return sdxUpgradeRequest;
     }
 
-    private ImageComponentVersions creatExpectedPackageVersions() {
+    private ImageComponentVersions createExpectedPackageVersions() {
         ImageComponentVersions imageComponentVersions = new ImageComponentVersions();
         imageComponentVersions.setCm(V_7_0_3);
         imageComponentVersions.setCdp(V_7_0_2);
