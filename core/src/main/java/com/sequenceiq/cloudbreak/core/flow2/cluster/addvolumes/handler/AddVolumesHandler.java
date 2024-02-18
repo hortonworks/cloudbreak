@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesFailedEvent;
@@ -52,6 +53,9 @@ public class AddVolumesHandler extends ExceptionCatcherEventHandler<AddVolumesHa
     @Inject
     private TemplateService templateService;
 
+    @Inject
+    private ResourceAttributeUtil resourceAttributeUtil;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(AddVolumesHandlerEvent.class);
@@ -72,7 +76,7 @@ public class AddVolumesHandler extends ExceptionCatcherEventHandler<AddVolumesHa
             List<Resource> updatedResources = addVolumesService.createVolumes(resources, volumeRequest, payload.getNumberOfDisks().intValue(),
                     payload.getInstanceGroup(), stackId);
             resourceService.saveAll(updatedResources);
-            saveUpdatedTemplate(stackId, payload);
+            saveUpdatedTemplate(stackId, payload, updatedResources);
             LOGGER.info("Successfully created and saved volumes from request {} to all instances", payload);
             return new AddVolumesFinishedEvent(stackId, payload.getNumberOfDisks(), payload.getType(), payload.getSize(),
                     payload.getCloudVolumeUsageType(), payload.getInstanceGroup());
@@ -82,7 +86,7 @@ public class AddVolumesHandler extends ExceptionCatcherEventHandler<AddVolumesHa
         }
     }
 
-    private void saveUpdatedTemplate(Long stackId, AddVolumesHandlerEvent payload) {
+    private void saveUpdatedTemplate(Long stackId, AddVolumesHandlerEvent payload, List<Resource> updatedResources) {
         Optional<InstanceGroupView> optionalGroup = instanceGroupService
                 .findInstanceGroupViewByStackIdAndGroupName(stackId, payload.getInstanceGroup());
         if (optionalGroup.isPresent()) {
@@ -92,25 +96,25 @@ public class AddVolumesHandler extends ExceptionCatcherEventHandler<AddVolumesHa
                 LOGGER.info("Template update for temporary storage from EPHEMERAL_VOLUMES_ONLY to EPHEMERAL_VOLUMES");
                 template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES);
             }
-            int attachedNumberOfDisks = payload.getNumberOfDisks().intValue();
+            int attachedNumberOfDisksFromResources = getAttachedNumberOfDisksFromResources(payload, updatedResources);
             boolean savedVolume = false;
             for (VolumeTemplate volumeTemplateInTheDatabase : template.getVolumeTemplates()) {
                 if (volumeTemplateInTheDatabase.getVolumeSize() == payload.getSize().intValue() &&
                         volumeTemplateInTheDatabase.getVolumeType().equals(payload.getType())) {
                     LOGGER.info("Template update for attached volumes count from {} to {}", volumeTemplateInTheDatabase.getVolumeCount(),
-                            volumeTemplateInTheDatabase.getVolumeCount() + attachedNumberOfDisks);
-                    volumeTemplateInTheDatabase.setVolumeCount(volumeTemplateInTheDatabase.getVolumeCount() + attachedNumberOfDisks);
+                            attachedNumberOfDisksFromResources);
+                    volumeTemplateInTheDatabase.setVolumeCount(attachedNumberOfDisksFromResources);
                     savedVolume = true;
                 }
             }
             if (!savedVolume) {
                 VolumeTemplate volumeTemplate = new VolumeTemplate();
-                volumeTemplate.setVolumeCount(attachedNumberOfDisks);
+                volumeTemplate.setVolumeCount(attachedNumberOfDisksFromResources);
                 volumeTemplate.setVolumeSize(payload.getSize().intValue());
                 volumeTemplate.setVolumeType(payload.getType());
                 volumeTemplate.setTemplate(template);
                 template.getVolumeTemplates().add(volumeTemplate);
-                LOGGER.info("Added new Volume Template with volume count - {}", attachedNumberOfDisks);
+                LOGGER.info("Added new Volume Template with volume count - {}", attachedNumberOfDisksFromResources);
             }
             templateService.savePure(template);
         }
@@ -119,5 +123,23 @@ public class AddVolumesHandler extends ExceptionCatcherEventHandler<AddVolumesHa
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<AddVolumesHandlerEvent> event) {
         return new AddVolumesFailedEvent(resourceId, e);
+    }
+
+    private int getAttachedNumberOfDisksFromResources(AddVolumesHandlerEvent payload, List<Resource> updatedResources) {
+        LOGGER.debug("Getting the actual count of attached volumes from one of the instances in resources table, as the payload count may be wrong " +
+                "if the flow errored out during attach step. Updated resources here will only have affected group instances.");
+        Optional<VolumeSetAttributes> volumeSetOptional = resourceAttributeUtil.getTypedAttributes(updatedResources.getFirst(), VolumeSetAttributes.class);
+        int count = 0;
+        if (volumeSetOptional.isPresent()) {
+            VolumeSetAttributes volumeSet = volumeSetOptional.get();
+            List<VolumeSetAttributes.Volume> volumes = volumeSet.getVolumes();
+            for (VolumeSetAttributes.Volume volume : volumes) {
+                if (volume.getSize() == payload.getSize().intValue() && volume.getType().equals(payload.getType())) {
+                    count++;
+                }
+            }
+        }
+        LOGGER.info("Returning the total count of volumes attached which are of same size and type as requested, count - {}", count);
+        return count;
     }
 }

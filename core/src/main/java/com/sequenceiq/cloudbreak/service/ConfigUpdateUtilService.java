@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.common.type.TemporaryStorage.EPHEMERAL_V
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -72,7 +73,7 @@ public class ConfigUpdateUtilService {
                 LOGGER.debug("Updating CM service config for service {}, in stack {} for roles {}", serviceComponent.getService(),
                         stackDto.getId(), roleGroupNames);
                 Map<String, String> configMap = new HashMap<>();
-                List<String> allMountPoints = new ArrayList<>();
+                Set<String> allMountPoints = new HashSet<>();
                 Optional<InstanceGroupDto> requestInstanceGroupOptional = stackDto.getInstanceGroupDtos().stream()
                         .filter(group -> group.getInstanceGroup().getGroupName().equals(requestGroup)).findFirst();
                 if (requestInstanceGroupOptional.isPresent()) {
@@ -122,7 +123,7 @@ public class ConfigUpdateUtilService {
         }
     }
 
-    private Map<String, String> getConfigsForService(String service, List<String> mountPoints) {
+    private Map<String, String> getConfigsForService(String service, Set<String> mountPoints) {
         LOGGER.debug("Building configs to be updated for service {} in CM", service);
         Map<String, String> config = new HashMap<>();
         StringBuilder localMountPaths = new StringBuilder();
