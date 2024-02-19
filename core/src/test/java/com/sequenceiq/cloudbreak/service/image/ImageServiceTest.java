@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.common.type.ComponentType.CM_REPO_DETAIL
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.IMAGE;
 import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.DEFAULT_REGION;
 import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.INVALID_PLATFORM;
+import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.OTHER_REGION;
 import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.PLATFORM;
 import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.REGION;
 import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
@@ -461,6 +462,48 @@ public class ImageServiceTest {
             }
         });
         assertEquals("ami-09fea90f257c85514", imageName);
+    }
+
+    @Test
+    public void testDetermineImageNameNotDefaultPreferredFallbackToRegion() {
+        Image image = mock(Image.class);
+        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
+        when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(true);
+
+        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(PLATFORM,
+                Map.of(REGION, EXISTING_ID)));
+
+        String imageName = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                return underTest.determineImageName(PLATFORM, imageCatalogPlatform, REGION, image);
+            } catch (CloudbreakImageNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        assertEquals("ami-09fea90f257c85513", imageName);
+    }
+
+    @Test
+    public void testDetermineImageNameNotFoundDefaultNorFallback() {
+        Image image = mock(Image.class);
+        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
+        when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(true);
+
+        when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(PLATFORM,
+                Map.of(OTHER_REGION, EXISTING_ID)));
+
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                        () -> {
+                            try {
+                                return underTest.determineImageName(PLATFORM, imageCatalogPlatform, REGION, image);
+                            } catch (CloudbreakImageNotFoundException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }));
+        assertEquals("com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException: " +
+                "The preferred Azure Marketplace image is not present and virtual machine image could not be found in the West US 2 region. " +
+                "Available images are as follows: {West US 3=ami-09fea90f257c85513}.", exception.getMessage());
     }
 
     @Test

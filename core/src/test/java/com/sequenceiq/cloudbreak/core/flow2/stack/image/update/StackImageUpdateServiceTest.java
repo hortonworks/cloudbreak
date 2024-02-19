@@ -35,9 +35,9 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.CentOSToRedHatUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
@@ -53,9 +53,6 @@ public class StackImageUpdateServiceTest {
     private ImageCatalogService imageCatalogService;
 
     @Mock
-    private ImageService imageService;
-
-    @Mock
     private StackImageService stackImageService;
 
     @Mock
@@ -69,6 +66,9 @@ public class StackImageUpdateServiceTest {
 
     @Mock
     private PlatformStringTransformer platformStringTransformer;
+
+    @Mock
+    private CentOSToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
 
     @InjectMocks
     private StackImageUpdateService underTest;
@@ -140,6 +140,23 @@ public class StackImageUpdateServiceTest {
         assertThrows(OperationException.class, () -> underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl"));
 
         verify(restRequestThreadLocalService).setWorkspaceId(stack.getWorkspaceId());
+    }
+
+    @Test
+    public void testGetNewImageIfOsVersionsMatchShouldNotThrowExceptionWhenCentOSToRedhatOSUpgradePermitted()
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
+                new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos6", "centos",
+                        statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions, null, null);
+        when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
+        when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("AWS"));
+        when(centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(imageInComponent, statedImage.getImage(), stack)).thenReturn(true);
+
+        underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl");
+
+        verify(restRequestThreadLocalService).setWorkspaceId(stack.getWorkspaceId());
+        verify(centOSToRedHatUpgradeAvailabilityService).isOsUpgradePermitted(imageInComponent, statedImage.getImage(), stack);
     }
 
     @Test

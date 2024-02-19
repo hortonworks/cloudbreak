@@ -30,6 +30,7 @@ public class ImageNameUpgradeImageFilter implements UpgradeImageFilter {
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
         List<Image> filteredImages = filterImages(imageFilterResult, imageFilterParams.getImageCatalogPlatform(),
                 imageFilterParams.getCloudPlatform(), imageFilterParams.getRegion());
+        logNotEligibleImages(imageFilterResult, filteredImages, LOGGER);
         LOGGER.debug("After the filtering {} image found with '{}' image catalog platform, '{}' cloud platform and '{}' region.", filteredImages.size(),
                 imageFilterParams.getImageCatalogPlatform().nameToUpperCase(), imageFilterParams.getCloudPlatform(), imageFilterParams.getRegion());
         return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
