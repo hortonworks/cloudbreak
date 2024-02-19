@@ -35,6 +35,7 @@ import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.binduser.UserSyncBindUserService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.host.MaxHostnameLengthPolicyService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -48,8 +49,6 @@ public class FreeIpaPostInstallService {
     private static final String SET_PASSWORD_EXPIRATION_PERMISSION = "Set Password Expiration";
 
     private static final int MAX_NAME_LENGTH = 255;
-
-    private static final int MAX_HOSTNAME_LENGTH_WITH_DELIMITER = 64;
 
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
@@ -87,6 +86,9 @@ public class FreeIpaPostInstallService {
     @Inject
     private UserSyncBindUserService userSyncBindUserService;
 
+    @Inject
+    private MaxHostnameLengthPolicyService hostnameLengthPolicyService;
+
     @Retryable(value = FreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
@@ -96,6 +98,7 @@ public class FreeIpaPostInstallService {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
         freeIpaTopologyService.updateReplicationTopology(stackId, Set.of(), freeIpaClient);
+        hostnameLengthPolicyService.updateMaxHostnameLength(stack, freeIpaClient);
         if (fullPostInstall) {
             setInitialFreeIpaPolicies(stack, freeIpaClient);
             userSyncBindUserService.createUserAndLdapConfig(stack, freeIpaClient);
@@ -133,7 +136,6 @@ public class FreeIpaPostInstallService {
         freeIpaPermissionService.setPermissions(stack, freeIpaClient);
         Config ipaConfig = freeIpaClient.getConfig();
         updateMaxUsernameLength(freeIpaClient, ipaConfig);
-        updateMaxHostnameLength(stack, freeIpaClient, ipaConfig);
         passwordPolicyService.updatePasswordPolicy(freeIpaClient);
         modifyAdminPasswordExpirationIfNeeded(freeIpaClient);
     }
@@ -143,21 +145,6 @@ public class FreeIpaPostInstallService {
             LOGGER.debug("Set maximum username length to {}", MAX_NAME_LENGTH);
             freeIpaClient.setUsernameLength(MAX_NAME_LENGTH);
         }
-    }
-
-    private void updateMaxHostnameLength(Stack stack, FreeIpaClient freeIpaClient, Config ipaConfig) throws FreeIpaClientException {
-        Integer maxHostNameLength = getMaxHostnameLength(stack);
-        LOGGER.debug("The maximum hostname length that is required by the environment: '{}', the maximum that is configured for IPA: '{}'", maxHostNameLength,
-                ipaConfig.getIpamaxhostnamelength());
-        if (ipaConfig.getIpamaxhostnamelength() != null && ipaConfig.getIpamaxhostnamelength() < maxHostNameLength) {
-            LOGGER.info("Set maximum hostname length to '{}'", maxHostNameLength);
-            freeIpaClient.setMaxHostNameLength(maxHostNameLength);
-        }
-    }
-
-    private Integer getMaxHostnameLength(Stack stack) {
-        int domainLength = stack.getPrimaryGateway().map(im -> im.getDomain().length()).orElse(MAX_NAME_LENGTH);
-        return Math.min(domainLength + MAX_HOSTNAME_LENGTH_WITH_DELIMITER, MAX_NAME_LENGTH);
     }
 
     private void synchronizeUsers(Stack stack) {
