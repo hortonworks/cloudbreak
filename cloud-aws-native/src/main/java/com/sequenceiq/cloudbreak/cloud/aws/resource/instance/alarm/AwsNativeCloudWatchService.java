@@ -76,10 +76,10 @@ public class AwsNativeCloudWatchService {
             PutMetricAlarmRequest metricAlarmRequest = createPutMetricAlarmRequest(resource.getInstanceId(), regionName,
                     credentialView.isGovernmentCloudEnabled());
             LOGGER.debug("The following cloudwatch alarm - for instanceId: {} - has created and about to put it on AWS side: [{}]",
-                    resource.getReference(), metricAlarmRequest);
+                    resource.getInstanceId(), metricAlarmRequest);
             commonAwsClient.createCloudWatchClient(credentialView, regionName).putMetricAlarm(metricAlarmRequest);
         } catch (CloudWatchException acwe) {
-            LOGGER.error("Unable to create cloudwatch alarm for instanceId {}: {}", resource.getReference(), acwe.getLocalizedMessage(), acwe);
+            LOGGER.warn("Unable to create cloudwatch alarm for instanceId {}: {}", resource.getInstanceId(), acwe.getLocalizedMessage(), acwe);
         }
     }
 

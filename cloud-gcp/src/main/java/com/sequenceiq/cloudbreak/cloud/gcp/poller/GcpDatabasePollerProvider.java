@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerCheckerService;
+import com.sequenceiq.cloudbreak.cloud.transform.ResourceStatusLists;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
@@ -107,7 +108,7 @@ public class GcpDatabasePollerProvider {
     }
 
     private String getFailedStatus(List<CloudResourceStatus> cloudResourceStatuses) {
-        return getFailedStates(cloudResourceStatuses).get(0).getStatusReason();
+        return ResourceStatusLists.aggregateReason(getFailedStates(cloudResourceStatuses));
     }
 
     public List<CloudResourceStatus> checkResources(

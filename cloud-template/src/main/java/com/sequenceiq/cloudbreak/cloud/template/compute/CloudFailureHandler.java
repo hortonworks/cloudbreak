@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.OrderedBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
+import com.sequenceiq.cloudbreak.cloud.transform.ResourceStatusLists;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -216,11 +217,11 @@ public class CloudFailureHandler {
 
     private void throwRolledbackException(List<CloudResourceStatus> statuses) {
         throw new RolledbackResourcesException("Resources are rolled back because successful node count was lower than threshold. "
-                + statuses.size() + " nodes are failed. Error reason: " + statuses.get(0).getStatusReason());
+                + statuses.size() + " nodes are failed. Error reason: " + ResourceStatusLists.aggregateReason(statuses));
     }
 
     private void throwError(List<CloudResourceStatus> statuses) {
-        throw new CloudConnectorException(statuses.get(0).getStatusReason());
+        throw new CloudConnectorException("Error reason: " + ResourceStatusLists.aggregateReason(statuses));
     }
 
     public static class ScaleContext {
