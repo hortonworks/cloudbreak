@@ -15,6 +15,7 @@
         + [Running FreeIPA in IDEA](#running-freeipa-in-idea)
         + [Running Redbeams in IDEA](#running-redbeams-in-idea)
         + [Running the Environment Service in IDEA](#running-the-environment-service-in-idea)
+        + [Running the Externalized Compute Service in IDEA](#running-the-externalized-compute-service-in-idea)
         + [Running Thunderhead Mock in IDEA](#running-thunderhead-mock-in-idea)
         + [Running Mock-Infrastructure in IDEA](#running-mock-infrastructure-in-idea)
     * [Command Line](#command-line)
@@ -24,6 +25,7 @@
         + [Running FreeIPA from the Command Line](#running-freeipa-from-the-command-line)
         + [Running Redbeams from the Command Line](#running-redbeams-from-the-command-line)
         + [Running the Environment Service from the Command Line](#running-the-environment-service-from-the-command-line)
+        + [Running the Externalized Compute Service from the Command Line](#running-the-externalized-compute-service-from-the-command-line)
         + [Running Thunderhead Mock from the Command Line](#running-thunderhead-mock-from-the-command-line)
         + [Running Mock-Infrastructure from the Command Line](#running-mock-infrastructure-from-the-command-line)
     * [Database Development](#database-development)
@@ -72,6 +74,7 @@ export ENVIRONMENT_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR
 export FREEIPA_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/freeipa/src/main/resources/schema
 export PERISCOPE_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/autoscale/src/main/resources/schema
 export REDBEAMS_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/redbeams/src/main/resources/schema
+export EXTERNALIZEDCOMPUTE_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/externalized-compute/src/main/resources/schema
 export ULU_SUBSCRIBE_TO_NOTIFICATIONS=true
 export CB_INSTANCE_UUID=$(uuidgen | tr '[:upper:]' '[:lower:]')
 export CB_INSTANCE_NODE_ID=5743e6ed-3409-420b-b08b-f688f2fc5db1
@@ -463,6 +466,18 @@ AWS_GOV_SECRET_ACCESS_KEY=
 CB_AWS_GOV_ACCOUNT_ID=
 ```
 
+### Running the Externalized Compute Service in IDEA
+
+After importing the `cloudbreak` repo root, launch the Externalized Compute application by executing the `com.sequenceiq.externalizedcompute.ExternalizedComputeClusterApplication` class (set `Use classpath of module` to `cloudbreak.externalized-compute.main`) with the following JVM options:
+
+```
+--add-opens java.base/java.lang=ALL-UNNAMED
+-Dserver.port=8091
+-Dinstance.node.id=<NODE_ID>
+```
+
+Replace `<NODE_ID>` with the value of `CB_INSTANCE_NODE_ID` respectively from the `Profile` file.
+
 ### Running Thunderhead Mock in IDEA
 
 After importing the `cloudbreak` repo root, launch the Thunderhead Mock application by executing the `com.sequenceiq.thunderhead.MockThunderheadApplication` class (set `Use classpath of module` to `cloudbreak.mock-thunderhead.main`) with the following JVM options:
@@ -627,7 +642,16 @@ then run the following Gradle command:
 -Dspring.config.location=$(pwd)/environment/src/main/resources/application.yml,$(pwd)/environment/build/resources/main/application.properties"
 ```
 
-Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` from the `Profile` file.
+### Running the Externalized Compute Service from the Command Line
+To run the Externalized Compute service from the command line run the following Gradle command:
+
+```
+./gradlew :externalized-compute:bootRun -PjvmArgs="\
+--add-opens java.base/java.lang=ALL-UNNAMED \
+-Dserver.port=8091 \
+-Dinstance.node.id=<NODE_ID> \
+-Dspring.config.location=$(pwd)/externalized-compute/src/main/resources/application.yaml"
+```
 
 ### Running Thunderhead Mock from the Command Line
 To run Thunderhead Mock from the command line, run the following Gradle command:

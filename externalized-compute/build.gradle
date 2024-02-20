@@ -58,7 +58,7 @@ bootRun {
 }
 
 bootRun {
-    mainClass = 'com.sequenceiq.externalizedcompute.ExternalizedComputeApplication'
+    mainClass = 'com.sequenceiq.externalizedcompute.ExternalizedComputeClusterApplication'
 }
 
 bootJar {
