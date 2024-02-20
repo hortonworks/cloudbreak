@@ -30,8 +30,8 @@ public class HueRdsConfigProvider extends AbstractRdsConfigProvider {
     private boolean isRdsConfigNeedForHueServer(Blueprint blueprint) {
         String blueprintText = blueprint.getBlueprintJsonText();
         CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
-        return blueprintProcessor.isCMComponentExistsInBlueprint("HUE_SERVER")
-                && blueprintProcessor.isCMComponentExistsInBlueprint("HUE_LOAD_BALANCER");
+        return blueprintProcessor.doesCMComponentExistsInBlueprint("HUE_SERVER")
+                && blueprintProcessor.doesCMComponentExistsInBlueprint("HUE_LOAD_BALANCER");
     }
 
     @Override

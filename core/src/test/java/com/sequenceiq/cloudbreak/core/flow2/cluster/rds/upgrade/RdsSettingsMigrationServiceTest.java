@@ -166,9 +166,9 @@ class RdsSettingsMigrationServiceTest {
         RDSConfig rdsConfig3 = createRDSConfig(2L, DatabaseType.NIFIREGISTRY, USER_NAME + "@cuttable");
         RDSConfig rdsConfig4 = createRDSConfig(3L, DatabaseType.HUE, USER_NAME + "@cuttable");
 
-        when(rdsConfigService.getClustersUsingResource(rdsConfig1)).thenReturn(Set.of(mock(Cluster.class)));
-        when(rdsConfigService.getClustersUsingResource(rdsConfig2)).thenReturn(Set.of(mock(Cluster.class), mock(Cluster.class)));
-        when(rdsConfigService.getClustersUsingResource(rdsConfig3)).thenReturn(Set.of(mock(Cluster.class)));
+        when(rdsConfigService.countOfClustersUsingResource(rdsConfig1)).thenReturn(1);
+        when(rdsConfigService.countOfClustersUsingResource(rdsConfig2)).thenReturn(2);
+        when(rdsConfigService.countOfClustersUsingResource(rdsConfig3)).thenReturn(1);
 
         Set<RDSConfig> rdsConfigs = new LinkedHashSet<>();
         rdsConfigs.add(rdsConfig1);
@@ -206,15 +206,27 @@ class RdsSettingsMigrationServiceTest {
     }
 
     @Test
-    void updateCMServiceConfigs() throws Exception {
+    void updateCMServiceConfigsWithoutRestart() throws Exception {
         ClusterApi clusterApi = mock(ClusterApi.class);
         StackDto stackDto = mock(StackDto.class);
         ClusterModificationService clusterModificationService = mock(ClusterModificationService.class);
         when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
         when(clusterApiConnectors.getConnector(any(StackDto.class))).thenReturn(clusterApi);
         Table<String, String, String> cmServiceConfigs = HashBasedTable.create();
-        underTest.updateCMServiceConfigs(stackDto, cmServiceConfigs);
+        underTest.updateCMServiceConfigs(stackDto, cmServiceConfigs, false);
         verify(clusterModificationService, times(1)).updateConfigWithoutRestart(cmServiceConfigs);
+    }
+
+    @Test
+    void updateCMServiceConfigsWithRestart() throws Exception {
+        ClusterApi clusterApi = mock(ClusterApi.class);
+        StackDto stackDto = mock(StackDto.class);
+        ClusterModificationService clusterModificationService = mock(ClusterModificationService.class);
+        when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
+        when(clusterApiConnectors.getConnector(any(StackDto.class))).thenReturn(clusterApi);
+        Table<String, String, String> cmServiceConfigs = HashBasedTable.create();
+        underTest.updateCMServiceConfigs(stackDto, cmServiceConfigs, true);
+        verify(clusterModificationService, times(1)).updateConfig(cmServiceConfigs);
     }
 
     @Test

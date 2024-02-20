@@ -1016,7 +1016,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         return configs;
     }
 
-    public boolean isCMComponentExistsInBlueprint(String component) {
+    public boolean doesCMComponentExistsInBlueprint(String component) {
         for (Entry<String, Set<String>> entry : getComponentsByHostGroup().entrySet()) {
             for (String entryComponent : entry.getValue()) {
                 if (component.equalsIgnoreCase(entryComponent)) {

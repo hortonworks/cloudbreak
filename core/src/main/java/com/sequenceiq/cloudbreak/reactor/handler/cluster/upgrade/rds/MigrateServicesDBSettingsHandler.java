@@ -58,7 +58,7 @@ public class MigrateServicesDBSettingsHandler extends ExceptionCatcherEventHandl
             Set<RDSConfig> rdsConfigs = rdsSettingsMigrationService.collectRdsConfigs(cluster.getId(), this::isClouderaManagerService);
             rdsConfigs = rdsSettingsMigrationService.updateRdsConfigs(stackDto, rdsConfigs);
             Table<String, String, String> cmServiceConfigs = rdsSettingsMigrationService.collectCMServiceConfigs(rdsConfigs);
-            rdsSettingsMigrationService.updateCMServiceConfigs(stackDto, cmServiceConfigs);
+            rdsSettingsMigrationService.updateCMServiceConfigs(stackDto, cmServiceConfigs, false);
         } catch (Exception e) {
             LOGGER.error("Migration of services' database settings is failed. {}", e.getMessage());
             return new UpgradeRdsFailedEvent(stackId, e, DetailedStackStatus.DATABASE_UPGRADE_FAILED);

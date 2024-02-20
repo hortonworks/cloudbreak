@@ -657,6 +657,11 @@ class StackServiceTest {
             }
 
             @Override
+            public String getName() {
+                return "name";
+            }
+
+            @Override
             public Status getStatus() {
                 return Status.AVAILABLE;
             }
@@ -664,6 +669,11 @@ class StackServiceTest {
             @Override
             public String getStatusReason() {
                 return "ok";
+            }
+
+            @Override
+            public Long getClusterId() {
+                return 1L;
             }
 
             @Override

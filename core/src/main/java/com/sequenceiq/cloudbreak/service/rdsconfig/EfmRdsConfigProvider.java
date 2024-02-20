@@ -29,7 +29,7 @@ public class EfmRdsConfigProvider extends AbstractRdsConfigProvider {
     private boolean isRdsConfigNeededForEfm(Blueprint blueprint) {
         String blueprintText = blueprint.getBlueprintJsonText();
         CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintText);
-        return cmTemplateProcessor.isCMComponentExistsInBlueprint("EFM_SERVER");
+        return cmTemplateProcessor.doesCMComponentExistsInBlueprint("EFM_SERVER");
     }
 
     @Override

@@ -83,7 +83,7 @@ public class ClusterStartHandlerService {
                 LOGGER.info("Update rds configs which are using the datalake's shared database for services {}",
                         rdsConfigs.stream().map(RDSConfig::getType).collect(Collectors.toSet()));
                 Table<String, String, String> cmServiceConfigs = rdsSettingsMigrationService.collectCMServiceConfigs(rdsConfigs);
-                rdsSettingsMigrationService.updateCMServiceConfigs(stack, cmServiceConfigs);
+                rdsSettingsMigrationService.updateCMServiceConfigs(stack, cmServiceConfigs, false);
             } else {
                 LOGGER.info("No rds config update is needed on datahub {}", stack.getName());
             }

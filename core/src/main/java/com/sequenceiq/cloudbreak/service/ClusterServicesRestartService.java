@@ -137,6 +137,6 @@ public class ClusterServicesRestartService {
     }
 
     private boolean shouldReloadDatabaseConfig(CmTemplateProcessor blueprintProcessor) {
-        return blueprintProcessor.isCMComponentExistsInBlueprint(AllRoleTypes.HIVEMETASTORE.name());
+        return blueprintProcessor.doesCMComponentExistsInBlueprint(AllRoleTypes.HIVEMETASTORE.name());
     }
 }

@@ -30,7 +30,7 @@ public class RangerRdsConfigProvider extends AbstractRdsConfigProvider {
     private boolean isRdsConfigNeedForRangerAdmin(Blueprint blueprint) {
         String blueprintText = blueprint.getBlueprintJsonText();
         CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
-        return blueprintProcessor.isCMComponentExistsInBlueprint("RANGER_ADMIN");
+        return blueprintProcessor.doesCMComponentExistsInBlueprint("RANGER_ADMIN");
     }
 
     @Override

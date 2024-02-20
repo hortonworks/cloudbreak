@@ -4,6 +4,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataRestoreResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsInstallPostgresPackagesResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateAttachedDatahubsResponse;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateDatabaseSettingsResponse;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateServicesDBSettingsResponse;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsStartCMResult;
@@ -29,6 +30,7 @@ public enum UpgradeRdsEvent implements FlowEvent {
     UPGRADE_RDS_START_CMSERVICES_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsStartCMServicesResult.class)),
 
     UPGRADE_RDS_INSTALL_POSTGRES_PACKAGES_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsInstallPostgresPackagesResult.class)),
+    UPGRADE_RDS_MIGRATE_ATTACHED_DATAHUBS_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsMigrateAttachedDatahubsResponse.class)),
     UPGRADE_RDS_VERSION_UPDATE_FINISHED_EVENT(EventSelectorUtil.selector(UpgradeRdsUpdateVersionResult.class)),
     UPGRADE_RDS_FAILED_EVENT(EventSelectorUtil.selector(UpgradeRdsFailedEvent.class)),
 

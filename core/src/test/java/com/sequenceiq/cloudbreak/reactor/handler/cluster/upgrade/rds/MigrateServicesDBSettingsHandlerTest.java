@@ -73,7 +73,7 @@ class MigrateServicesDBSettingsHandlerTest {
         assertEquals(1L, response.getResourceId());
 
         verify(stackDtoService, times(1)).getById(anyLong());
-        verify(rdsSettingsMigrationService, times(1)).updateCMServiceConfigs(stackDto, cmServiceConfigs);
+        verify(rdsSettingsMigrationService, times(1)).updateCMServiceConfigs(stackDto, cmServiceConfigs, false);
     }
 
     @Test

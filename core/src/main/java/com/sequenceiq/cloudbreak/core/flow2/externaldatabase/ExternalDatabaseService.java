@@ -13,6 +13,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotFoundException;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -412,22 +413,23 @@ public class ExternalDatabaseService {
 
     public boolean isMigrationNeededDuringUpgrade(StackView stack, Database database, TargetMajorVersion majorVersion) {
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(stack.getCloudPlatform());
+        boolean externalDb = !ObjectUtils.defaultIfNull(database.getExternalDatabaseAvailabilityType(), DatabaseAvailabilityType.NONE).isEmbedded();
         Versioned currentVersion = database::getExternalDatabaseEngineVersion;
         Versioned targetVersion = majorVersion::getMajorVersion;
-        return isMigrationNeededDuringUpgrade(currentVersion, targetVersion, cloudPlatform);
+        return isMigrationNeededDuringUpgrade(currentVersion, targetVersion, cloudPlatform, externalDb);
     }
 
-    private boolean isMigrationNeededDuringUpgrade(Versioned currentVersion, Versioned targetVersion, CloudPlatform cloudPlatform) {
+    private boolean isMigrationNeededDuringUpgrade(Versioned currentVersion, Versioned targetVersion, CloudPlatform cloudPlatform, boolean externalDb) {
         boolean upgradeTargetVersionImpliesFlexibleServerMigration =
                 CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(targetVersion, TargetMajorVersion.VERSION_14::getMajorVersion);
         boolean currentVersionImpliesFlexibleServerMigration =
                 CMRepositoryVersionUtil.isVersionOlderThanLimited(currentVersion, TargetMajorVersion.VERSION_14::getMajorVersion);
-        boolean migrationNeeded = cloudPlatform == CloudPlatform.AZURE && upgradeTargetVersionImpliesFlexibleServerMigration &&
+        boolean migrationNeeded = externalDb && cloudPlatform == CloudPlatform.AZURE && upgradeTargetVersionImpliesFlexibleServerMigration &&
                 currentVersionImpliesFlexibleServerMigration;
         String migrationNeededMsg = migrationNeeded ? "Database settings migration is needed during upgrade." :
                 "Database settings migration is not needed during upgrade.";
-        LOGGER.debug("{} Current version: {}, target version: {}, cloudPlatform: {}",
-                migrationNeededMsg, currentVersion.getVersion(), targetVersion.getVersion(), cloudPlatform);
+        LOGGER.debug("{} Current version: {}, target version: {}, cloudPlatform: {}, externalDb: {}",
+                migrationNeededMsg, currentVersion.getVersion(), targetVersion.getVersion(), cloudPlatform, externalDb);
         return migrationNeeded;
     }
 
@@ -436,8 +438,9 @@ public class ExternalDatabaseService {
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(stack.getCloudPlatform());
         Versioned currentVersion = stack::getExternalDatabaseEngineVersion;
         Versioned targetVersion = majorVersion::getMajorVersion;
+        boolean externalDb = !ObjectUtils.defaultIfNull(stack.getExternalDatabaseCreationType(), DatabaseAvailabilityType.NONE).isEmbedded();
 
-        if (isMigrationNeededDuringUpgrade(currentVersion, targetVersion, cloudPlatform)) {
+        if (isMigrationNeededDuringUpgrade(currentVersion, targetVersion, cloudPlatform, externalDb)) {
             DatabaseAvailabilityType databaseAvailabilityType = fetchDatabaseAvailabilityType(stack);
 
             Map<String, Object> attributes = getAttributes(stack.getDatabase());
@@ -450,10 +453,8 @@ public class ExternalDatabaseService {
             LOGGER.debug("Migration resulted in request: {}", modifiedRequest);
             return modifiedRequest;
         }
-        LOGGER.debug("Migration was not needed, original version: {}, target version: {}, cloud platform: {}",
-                currentVersion,
-                targetVersion,
-                cloudPlatform);
+        LOGGER.debug("Migration was not needed, original version: {}, target version: {}, cloud platform: {}, externalDb: {}",
+                currentVersion, targetVersion, cloudPlatform, externalDb);
         return null;
     }
 

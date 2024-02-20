@@ -59,7 +59,7 @@ public class HiveCdlRdsConfigProvider extends AbstractCdlRdsConfigProvider {
     protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean knoxGateway, boolean cdl) {
         String blueprintText = blueprint.getBlueprintJsonText();
         CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
-        return cdl && blueprintProcessor.isCMComponentExistsInBlueprint("HIVEMETASTORE");
+        return cdl && blueprintProcessor.doesCMComponentExistsInBlueprint("HIVEMETASTORE");
     }
 
     @Override

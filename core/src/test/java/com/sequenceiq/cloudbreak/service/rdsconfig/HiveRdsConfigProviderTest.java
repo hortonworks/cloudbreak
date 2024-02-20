@@ -127,7 +127,7 @@ public class HiveRdsConfigProviderTest {
         when(stackDto.getStack()).thenReturn(stackView);
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
-        when(cmTemplateProcessor.isCMComponentExistsInBlueprint(any())).thenReturn(true);
+        when(cmTemplateProcessor.doesCMComponentExistsInBlueprint(any())).thenReturn(true);
         InstanceMetadataView instanceMetadataView = mock(InstanceMetadataView.class);
         when(stackDto.getPrimaryGatewayInstance()).thenReturn(instanceMetadataView);
         when(instanceMetadataView.getDiscoveryFQDN()).thenReturn("fqdn");

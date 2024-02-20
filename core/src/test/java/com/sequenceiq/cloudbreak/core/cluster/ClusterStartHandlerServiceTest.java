@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
@@ -115,7 +116,7 @@ class ClusterStartHandlerServiceTest {
         underTest.startCluster(stack, cmTemplateProcessor, false);
         // THEN
         verify(connector).startClusterManagerAndAgents();
-        verify(rdsSettingsMigrationService).updateCMServiceConfigs(stack, cmServiceConfigs);
+        verify(rdsSettingsMigrationService).updateCMServiceConfigs(stack, cmServiceConfigs, false);
         verify(connector).startCluster(true);
     }
 
@@ -129,12 +130,12 @@ class ClusterStartHandlerServiceTest {
         when(rdsSettingsMigrationService.collectRdsConfigs(any(), any())).thenReturn(rdsConfigs);
         Table<String, String, String> cmServiceConfigs = HashBasedTable.create();
         when(rdsSettingsMigrationService.collectCMServiceConfigs(rdsConfigs)).thenReturn(cmServiceConfigs);
-        doThrow(new RuntimeException("msg")).when(rdsSettingsMigrationService).updateCMServiceConfigs(any(), any());
+        doThrow(new RuntimeException("msg")).when(rdsSettingsMigrationService).updateCMServiceConfigs(any(), any(), eq(false));
         // WHEN
         underTest.startCluster(stack, cmTemplateProcessor, false);
         // THEN
         verify(connector).startClusterManagerAndAgents();
-        verify(rdsSettingsMigrationService).updateCMServiceConfigs(stack, cmServiceConfigs);
+        verify(rdsSettingsMigrationService).updateCMServiceConfigs(stack, cmServiceConfigs, false);
         verify(connector).startCluster(true);
     }
 
@@ -149,7 +150,7 @@ class ClusterStartHandlerServiceTest {
         verify(connector).startClusterManagerAndAgents();
         verify(rdsSettingsMigrationService, never()).collectRdsConfigs(any(), any());
         verify(rdsSettingsMigrationService, never()).collectCMServiceConfigs(any());
-        verify(rdsSettingsMigrationService, never()).updateCMServiceConfigs(any(), any());
+        verify(rdsSettingsMigrationService, never()).updateCMServiceConfigs(any(), any(), anyBoolean());
         verify(connector).startCluster(true);
     }
 
@@ -165,7 +166,7 @@ class ClusterStartHandlerServiceTest {
         // THEN
         verify(connector).startClusterManagerAndAgents();
         verify(rdsSettingsMigrationService, never()).collectCMServiceConfigs(any());
-        verify(rdsSettingsMigrationService, never()).updateCMServiceConfigs(any(), any());
+        verify(rdsSettingsMigrationService, never()).updateCMServiceConfigs(any(), any(), anyBoolean());
         verify(connector).startCluster(true);
     }
 

@@ -30,7 +30,7 @@ public class OozieRdsConfigProvider extends AbstractRdsConfigProvider {
     private boolean isRdsConfigNeedForOozieServer(Blueprint blueprint) {
         String blueprintText = blueprint.getBlueprintJsonText();
         CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
-        return blueprintProcessor.isCMComponentExistsInBlueprint("OOZIE_SERVER");
+        return blueprintProcessor.doesCMComponentExistsInBlueprint("OOZIE_SERVER");
     }
 
     @Override

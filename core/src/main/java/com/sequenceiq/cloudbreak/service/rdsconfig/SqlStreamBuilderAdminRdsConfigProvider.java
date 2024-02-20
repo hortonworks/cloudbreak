@@ -56,6 +56,6 @@ public class SqlStreamBuilderAdminRdsConfigProvider extends AbstractRdsConfigPro
     @Override
     protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway, boolean cdl) {
         CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprint.getBlueprintJsonText());
-        return blueprintProcessor.isCMComponentExistsInBlueprint(SqlStreamBuilderRoles.STREAMING_SQL_ENGINE);
+        return blueprintProcessor.doesCMComponentExistsInBlueprint(SqlStreamBuilderRoles.STREAMING_SQL_ENGINE);
     }
 }

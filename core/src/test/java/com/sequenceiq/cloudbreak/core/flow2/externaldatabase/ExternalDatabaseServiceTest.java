@@ -560,10 +560,11 @@ class ExternalDatabaseServiceTest {
 
     @ParameterizedTest
     @MethodSource("dbUpgradeMigrationScenarios")
-    void testIsMigrationNeededDuringUpgrade(String platform, String current, String target, boolean migrationRequired) {
+    void testIsMigrationNeededDuringUpgrade(DatabaseAvailabilityType dbType, String platform, String current, String target, boolean migrationRequired) {
         StackView stack = mock(StackView.class);
         Database database = new Database();
         database.setExternalDatabaseEngineVersion(current);
+        database.setExternalDatabaseAvailabilityType(dbType);
         TargetMajorVersion majorVersion = mock(TargetMajorVersion.class);
 
         when(stack.getCloudPlatform()).thenReturn(platform);
@@ -574,8 +575,8 @@ class ExternalDatabaseServiceTest {
 
     @ParameterizedTest
     @MethodSource("dbUpgradeMigrationScenarios")
-    void testMigrateDatabaseSettingsAzureBothConditionsMetThenMigration(String platform, String current, String target, boolean migrationRequired,
-            boolean datalake) {
+    void testMigrateDatabaseSettingsAzureBothConditionsMetThenMigration(DatabaseAvailabilityType dbType, String platform, String current, String target,
+            boolean migrationRequired, boolean datalake) {
         StackDto stack = mock(StackDto.class);
         TargetMajorVersion majorVersion = mock(TargetMajorVersion.class);
 
@@ -613,16 +614,17 @@ class ExternalDatabaseServiceTest {
 
     private static Object[][] dbUpgradeMigrationScenarios() {
         return new Object[][]{
-                // Platform, currentVersion, targetVersion, migrationRequired
-                {"AZURE", "10", "11", false, true},
-                {"AZURE", "10", "14", true, true},
-                {"AZURE", "10", "14", true, false},
-                {"AZURE", "14", "14", false, false},
-                {"AZURE", "14", "11", false, false},
-                {"AWS", "10", "11", false, false},
-                {"AWS", "10", "14", false, false},
-                {"AWS", "14", "14", false, false},
-                {"AWS", "14", "11", false, false},
+                // DbType, Platform, currentVersion, targetVersion, migrationRequired, datalake
+                {DatabaseAvailabilityType.NON_HA, "AZURE", "10", "11", false, true},
+                {DatabaseAvailabilityType.NON_HA, "AZURE", "10", "14", true, true},
+                {DatabaseAvailabilityType.NON_HA, "AZURE", "10", "14", true, false},
+                {DatabaseAvailabilityType.NON_HA, "AZURE", "14", "14", false, false},
+                {DatabaseAvailabilityType.NON_HA, "AZURE", "14", "11", false, false},
+                {DatabaseAvailabilityType.NON_HA, "AWS", "10", "11", false, false},
+                {DatabaseAvailabilityType.NON_HA, "AWS", "10", "14", false, false},
+                {DatabaseAvailabilityType.NON_HA, "AWS", "14", "14", false, false},
+                {DatabaseAvailabilityType.NON_HA, "AWS", "14", "11", false, false},
+                {DatabaseAvailabilityType.NONE, "AZURE", "10", "14", false, true},
         };
     }
 

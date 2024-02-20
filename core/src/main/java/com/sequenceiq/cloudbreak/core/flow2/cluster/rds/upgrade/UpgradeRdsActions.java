@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
@@ -25,6 +26,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsInstallPostgresPackagesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsInstallPostgresPackagesResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateAttachedDatahubsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateAttachedDatahubsResponse;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateDatabaseSettingsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateDatabaseSettingsResponse;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateServicesDBSettingsRequest;
@@ -54,6 +57,9 @@ public class UpgradeRdsActions {
 
     @Inject
     private ExternalDatabaseService externalDatabaseService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Bean(name = "UPGRADE_RDS_STOP_SERVICES_STATE")
     public Action<?, ?> stopServicesAndCm() {
@@ -211,11 +217,29 @@ public class UpgradeRdsActions {
         };
     }
 
-    @Bean(name = "UPGRADE_RDS_VERSION_UPDATE_STATE")
-    public Action<?, ?> updateRsdVersion() {
+    @Bean(name = "UPGRADE_RDS_MIGRATE_ATTACHED_DATAHUBS_STATE")
+    public Action<?, ?> migrateAttachedDatahubs() {
         return new AbstractUpgradeRdsAction<>(UpgradeRdsInstallPostgresPackagesResult.class) {
             @Override
             protected void doExecute(UpgradeRdsContext context, UpgradeRdsInstallPostgresPackagesResult payload, Map<Object, Object> variables) {
+                Selectable event;
+                if (externalDatabaseService.isMigrationNeededDuringUpgrade(context.getStack(), context.getDatabase(), context.getVersion()) &&
+                        upgradeRdsService.shouldMigrateAttachedDatahubs(context.getStack())) {
+                    upgradeRdsService.migrateAttachedDatahubs(payload.getResourceId());
+                    event = new UpgradeRdsMigrateAttachedDatahubsRequest(context.getStackId(), context.getVersion());
+                } else {
+                    event = new UpgradeRdsMigrateAttachedDatahubsResponse(context.getStackId(), context.getVersion());
+                }
+                sendEvent(context, event);
+            }
+        };
+    }
+
+    @Bean(name = "UPGRADE_RDS_VERSION_UPDATE_STATE")
+    public Action<?, ?> updateRsdVersion() {
+        return new AbstractUpgradeRdsAction<>(UpgradeRdsMigrateAttachedDatahubsResponse.class) {
+            @Override
+            protected void doExecute(UpgradeRdsContext context, UpgradeRdsMigrateAttachedDatahubsResponse payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 

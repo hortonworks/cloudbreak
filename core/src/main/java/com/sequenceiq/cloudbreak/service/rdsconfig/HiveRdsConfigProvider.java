@@ -56,7 +56,7 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
     private boolean isRdsConfigNeedForHiveMetastore(Blueprint blueprint) {
         String blueprintText = blueprint.getBlueprintJsonText();
         CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
-        return blueprintProcessor.isCMComponentExistsInBlueprint("HIVEMETASTORE");
+        return blueprintProcessor.doesCMComponentExistsInBlueprint("HIVEMETASTORE");
     }
 
     @Override

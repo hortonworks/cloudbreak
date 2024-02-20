@@ -7,9 +7,13 @@ public interface StackClusterStatusView {
 
     Long getId();
 
+    String getName();
+
     Status getStatus();
 
     String getStatusReason();
+
+    Long getClusterId();
 
     Status getClusterStatus();
 

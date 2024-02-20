@@ -18,6 +18,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
@@ -108,8 +109,13 @@ public class RdsSettingsMigrationService {
         return cmServiceConfigTable;
     }
 
-    public void updateCMServiceConfigs(StackDtoDelegate stackDto, Table<String, String, String> cmServiceConfigs) throws Exception {
-        clusterApiConnectors.getConnector(stackDto).clusterModificationService().updateConfigWithoutRestart(cmServiceConfigs);
+    public void updateCMServiceConfigs(StackDtoDelegate stackDto, Table<String, String, String> cmServiceConfigs, boolean withRestart) throws Exception {
+        ClusterModificationService clusterModificationService = clusterApiConnectors.getConnector(stackDto).clusterModificationService();
+        if (withRestart) {
+            clusterModificationService.updateConfig(cmServiceConfigs);
+        } else {
+            clusterModificationService.updateConfigWithoutRestart(cmServiceConfigs);
+        }
     }
 
     public void updateSaltPillars(StackDto stackDto, Long clusterId) throws CloudbreakOrchestratorFailedException {
@@ -142,7 +148,7 @@ public class RdsSettingsMigrationService {
      * @return true if config update is required
      */
     private boolean isConfigUpdateRequired(RDSConfig rdsCfg, boolean dataHubCluster) {
-        return !(dataHubCluster && rdsConfigService.getClustersUsingResource(rdsCfg).size() > 1);
+        return !(dataHubCluster && rdsConfigService.countOfClustersUsingResource(rdsCfg) > 1);
     }
 
     private void updateUserName(RDSConfig rdsConfig) {

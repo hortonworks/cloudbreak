@@ -32,6 +32,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRd
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataBackupResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataRestoreRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsDataRestoreResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsInstallPostgresPackagesResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateAttachedDatahubsRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateAttachedDatahubsResponse;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateDatabaseSettingsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateDatabaseSettingsResponse;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsMigrateServicesDBSettingsRequest;
@@ -199,6 +202,26 @@ class UpgradeRdsActionsTest {
 
         verify(upgradeRdsService, never()).migrateServicesDatabaseSettingsState(STACK_ID);
         verifyBackupRestoreAction(UpgradeRdsMigrateServicesDBSettingsResponse.class);
+    }
+
+    @Test
+    public void testShouldMigrateAttachedDatahubs() throws Exception {
+        AbstractAction action = (AbstractAction) upgradeRdsActions.migrateAttachedDatahubs();
+        UpgradeRdsInstallPostgresPackagesResult triggerEvent = new UpgradeRdsInstallPostgresPackagesResult(STACK_ID, TargetMajorVersion.VERSION_11);
+        when(upgradeRdsService.shouldMigrateAttachedDatahubs(any())).thenReturn(true);
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, true, true);
+        verify(upgradeRdsService).migrateAttachedDatahubs(STACK_ID);
+        verifyBackupRestoreAction(UpgradeRdsMigrateAttachedDatahubsRequest.class);
+    }
+
+    @Test
+    public void testShouldNotMigrateAttachedDatahubs() throws Exception {
+        AbstractAction action = (AbstractAction) upgradeRdsActions.migrateAttachedDatahubs();
+        UpgradeRdsInstallPostgresPackagesResult triggerEvent = new UpgradeRdsInstallPostgresPackagesResult(STACK_ID, TargetMajorVersion.VERSION_11);
+        mockAndTriggerRdsUpgradeAction(action, triggerEvent, true, true, false);
+
+        verify(upgradeRdsService, never()).migrateAttachedDatahubs(STACK_ID);
+        verifyBackupRestoreAction(UpgradeRdsMigrateAttachedDatahubsResponse.class);
     }
 
     @Test

@@ -88,6 +88,11 @@ public class UpgradeRdsService {
                 ResourceEvent.CLUSTER_RDS_UPGRADE_INSTALL_PG, majorVersion);
     }
 
+    void migrateAttachedDatahubs(Long stackId) {
+        setStatusAndNotify(stackId, getMessage(ResourceEvent.CLUSTER_RDS_UPGRADE_ATTACHED_DATAHUBS_MIGRATE_DBSETTINGS_STARTED),
+                ResourceEvent.CLUSTER_RDS_UPGRADE_ATTACHED_DATAHUBS_MIGRATE_DBSETTINGS_STARTED);
+    }
+
     private void setStatusAndNotify(Long stackId, String statusReason, ResourceEvent resourceEvent, String... args) {
         updateStatus(stackId, statusReason);
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), resourceEvent, args);
@@ -146,6 +151,16 @@ public class UpgradeRdsService {
 
     public boolean shouldStopStartServices(StackView stack) {
         return !entitlementService.isPostgresUpgradeSkipServicesAndCmStopEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId());
+    }
+
+    /**
+     * If the CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK is enabled then the attached datahub clusters can be in AVAILABLE status during database
+     * upgrade of the Datalake. In this case we need to update the running datahub clusters' datalake related database configurations on th fly.
+     * @param stack datalake stack
+     * @return true if migration is needed otherwise false
+     */
+    public boolean shouldMigrateAttachedDatahubs(StackView stack) {
+        return entitlementService.isPostgresUpgradeAttachedDatahubsCheckSkipped(Crn.safeFromString(stack.getResourceCrn()).getAccountId());
     }
 
     private String getMessage(ResourceEvent resourceEvent) {

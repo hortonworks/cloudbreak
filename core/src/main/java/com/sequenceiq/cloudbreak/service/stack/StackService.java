@@ -375,6 +375,10 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return stackRepository.getStatusByCrn(crn).orElseThrow(notFound("stack", crn));
     }
 
+    public List<StackClusterStatusView> findStatusesByIds(List<Long> ids) {
+        return stackRepository.findStatusesByIds(ids);
+    }
+
     public StackClusterStatusView getStatusByNameOrCrn(NameOrCrn nameOrCrn, Long workspaceId) {
         Optional<StackClusterStatusView> foundStack = nameOrCrn.hasName()
                 ? stackRepository.getStatusByNameAndWorkspace(nameOrCrn.getName(), workspaceId)

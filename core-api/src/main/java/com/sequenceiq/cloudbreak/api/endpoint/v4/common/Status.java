@@ -187,4 +187,8 @@ public enum Status {
                 LOAD_BALANCER_UPDATE_FAILED
         );
     }
+
+    public static boolean isClusterAvailable(Status stackStatus, Status clusterStatus) {
+        return getAvailableStatuses().contains(stackStatus) && getAvailableStatuses().contains(clusterStatus);
+    }
 }

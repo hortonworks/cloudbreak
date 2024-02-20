@@ -76,13 +76,13 @@ public class ClouderaManagerDeregisterService {
                 }
             } else {
                 ApiClient client = clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), user, password, clientConfig);
-                if (cmTemplateProcessor.isCMComponentExistsInBlueprint(COMPONENT_NIFI_REGISTRY_SERVER)) {
+                if (cmTemplateProcessor.doesCMComponentExistsInBlueprint(COMPONENT_NIFI_REGISTRY_SERVER)) {
                     LOGGER.info("The current cluster {} contains NIFI_REGISTRY_SERVER and ranger teardown not supported. " +
                             "CDP will call RemoveRangerRepo command.", stack.getName());
                     clouderaManagerApiFactory.getServicesResourceApi(client)
                             .serviceCommandByName(stack.getName(), "RemoveRangerRepo", SERVICE_NIFIREGISTRY);
                 }
-                if (cmTemplateProcessor.isCMComponentExistsInBlueprint(COMPONENT_NIFI_NODE)) {
+                if (cmTemplateProcessor.doesCMComponentExistsInBlueprint(COMPONENT_NIFI_NODE)) {
                     LOGGER.info("The current cluster {} contains NIFI_NODE and ranger teardown not supported. " +
                             "CDP will call RemoveRangerRepo command.", stack.getName());
                     clouderaManagerApiFactory.getServicesResourceApi(client)

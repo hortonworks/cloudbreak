@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRd
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent.UPGRADE_RDS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent.UPGRADE_RDS_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent.UPGRADE_RDS_INSTALL_POSTGRES_PACKAGES_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent.UPGRADE_RDS_MIGRATE_ATTACHED_DATAHUBS_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent.UPGRADE_RDS_MIGRATE_DATABASE_SETTINGS_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent.UPGRADE_RDS_MIGRATE_SERVICES_DB_SETTINGS_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent.UPGRADE_RDS_START_CMSERVICES_FINISHED_EVENT;
@@ -22,6 +23,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRd
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.UPGRADE_RDS_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.UPGRADE_RDS_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.UPGRADE_RDS_INSTALL_POSTGRES_PACKAGES_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.UPGRADE_RDS_MIGRATE_ATTACHED_DATAHUBS_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.UPGRADE_RDS_MIGRATE_DB_SETTINGS_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.UPGRADE_RDS_MIGRATE_SERVICES_DB_SETTINGS_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsState.UPGRADE_RDS_START_CMSERVICES_STATE;
@@ -88,8 +90,12 @@ public class UpgradeRdsFlowConfig extends StackStatusFinalizerAbstractFlowConfig
                     .event(UPGRADE_RDS_START_CMSERVICES_FINISHED_EVENT)
                     .defaultFailureEvent()
 
-                    .from(UPGRADE_RDS_INSTALL_POSTGRES_PACKAGES_STATE).to(UPGRADE_RDS_VERSION_UPDATE_STATE)
+                    .from(UPGRADE_RDS_INSTALL_POSTGRES_PACKAGES_STATE).to(UPGRADE_RDS_MIGRATE_ATTACHED_DATAHUBS_STATE)
                     .event(UPGRADE_RDS_INSTALL_POSTGRES_PACKAGES_FINISHED_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(UPGRADE_RDS_MIGRATE_ATTACHED_DATAHUBS_STATE).to(UPGRADE_RDS_VERSION_UPDATE_STATE)
+                    .event(UPGRADE_RDS_MIGRATE_ATTACHED_DATAHUBS_FINISHED_EVENT)
                     .defaultFailureEvent()
 
                     .from(UPGRADE_RDS_VERSION_UPDATE_STATE).to(UPGRADE_RDS_FINISHED_STATE)
