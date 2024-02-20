@@ -97,7 +97,7 @@ public class StackToStackDetailsConverter {
         convertComponents(stackDetails, source);
         stackDetails.setDatabaseType(convertDatabaseType(cluster, getGatewayGroup(instanceGroupDtos)));
         stackDetails.setDatabaseDetails(convertDatabaseDetails(source, cluster));
-        stackDetails.setCreatorClient(source.creatorClient());
+        stackDetails.setCreatorClient(source.getCreatorClient());
         return stackDetails;
     }
 

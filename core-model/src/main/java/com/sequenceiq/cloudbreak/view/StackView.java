@@ -132,7 +132,7 @@ public interface StackView extends MdcContextInfoProvider {
 
     Long getDatabaseId();
 
-    String creatorClient();
+    String getCreatorClient();
 
     default boolean isDatalake() {
         return getType() == StackType.DATALAKE;
@@ -254,4 +254,5 @@ public interface StackView extends MdcContextInfoProvider {
     default String getResourceName() {
         return getName();
     }
+
 }

@@ -380,10 +380,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return this;
     }
 
-    public String getCreatorClient() {
-        return creatorClient;
-    }
-
     public void setCreatorClient(String creatorClient) {
         this.creatorClient = creatorClient;
     }
@@ -1093,8 +1089,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     }
 
     @Override
-    public String creatorClient() {
-        return getCreatorClient();
+    public String getCreatorClient() {
+        return creatorClient;
     }
 
     public void setJavaVersion(Integer javaVersion) {
