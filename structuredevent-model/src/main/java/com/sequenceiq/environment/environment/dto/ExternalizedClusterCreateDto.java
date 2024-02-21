@@ -3,7 +3,7 @@ package com.sequenceiq.environment.environment.dto;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
-@JsonDeserialize(builder = FreeIpaCreationDto.Builder.class)
+@JsonDeserialize(builder = ExternalizedClusterCreateDto.Builder.class)
 public class ExternalizedClusterCreateDto {
 
     private static final String EXTERNALIZED_CLUSTER_NAME_FORMAT = "default-%s-compute-cluster";

@@ -32,7 +32,7 @@ public class RequestPropertyAuthorizationFactory extends TypedAuthorizationFacto
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
 
     @Inject
-    private ResourceCrnAthorizationFactory resourceCrnAthorizationProvider;
+    private ResourceCrnAthorizationFactory resourceCrnAuthorizationProvider;
 
     @Inject
     private ResourceNameAuthorizationFactory resourceNameAuthorizationProvider;
@@ -113,7 +113,7 @@ public class RequestPropertyAuthorizationFactory extends TypedAuthorizationFacto
         }
         String resourceCrn = (String) resultObject;
         crnAccountValidator.validateSameAccount(userCrn, resourceCrn);
-        return resourceCrnAthorizationProvider.calcAuthorization(resourceCrn, action);
+        return resourceCrnAuthorizationProvider.calcAuthorization(resourceCrn, action);
     }
 
     private Optional<AuthorizationRule> getAuthorizationFromResourceCrnList(Object resultObject, AuthorizationResourceAction action, String userCrn) {

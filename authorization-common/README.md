@@ -121,7 +121,7 @@ To support list filtering you need to extend the `AbstractAuthorizationFiltering
 
 #### CheckPermissionByResourceCrn
 
-The method's arguments should conatin extactly one `@ResourceCrn` annotated `String` argument (valid Crn).
+The method's arguments should contain exactly one `@ResourceCrn` annotated `String` argument (valid Crn).
 
 If hierarchical authorization is needed for resource type (like for datalake), then implementation of `AuthorizationEnvironmentCrnProvider` is needed.
 
