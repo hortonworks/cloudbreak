@@ -74,7 +74,6 @@ class ConfigUpdateUtilServiceTest {
         doReturn(clusterModificationService).when(clusterApi).clusterModificationService();
         Map<String, String> serviceStatuses = new HashMap<>();
         serviceStatuses.put("yarn", "STOPPED");
-        doReturn(serviceStatuses).when(clusterModificationService).fetchServiceStatuses();
         Set<ServiceComponent> hostTemplateServiceComponents = new HashSet<>();
         ServiceComponent serviceComponent = ServiceComponent.of("yarn", "yarn");
         hostTemplateServiceComponents.add(serviceComponent);
@@ -82,8 +81,7 @@ class ConfigUpdateUtilServiceTest {
 
         underTest.stopClouderaManagerServices(stack, hostTemplateServiceComponents);
 
-        verify(clusterModificationService, times(1)).stopClouderaManagerService("yarn", false);
-        verify(clusterModificationService, times(1)).fetchServiceStatuses();
+        verify(clusterModificationService, times(1)).stopClouderaManagerService("yarn", true);
     }
 
     @Test
@@ -92,7 +90,7 @@ class ConfigUpdateUtilServiceTest {
         Set<ServiceComponent> hostTemplateServiceComponents = new HashSet<>();
         ServiceComponent serviceComponent = ServiceComponent.of("yarn", "yarn");
         hostTemplateServiceComponents.add(serviceComponent);
-        doThrow(new Exception("Test")).when(clusterModificationService).stopClouderaManagerService("yarn", false);
+        doThrow(new Exception("Test")).when(clusterModificationService).stopClouderaManagerService("yarn", true);
         doReturn(1L).when(stack).getId();
 
         Exception exception = assertThrows(Exception.class, () -> underTest.stopClouderaManagerServices(stack, hostTemplateServiceComponents));

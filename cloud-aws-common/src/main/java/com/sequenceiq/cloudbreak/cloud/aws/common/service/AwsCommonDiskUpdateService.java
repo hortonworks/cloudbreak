@@ -164,7 +164,7 @@ public class AwsCommonDiskUpdateService {
             DescribeVolumesResponse volumesResponse = amazonEC2Client.describeVolumes(describeVolumesRequestBuilder.build());
             if (volumesResponse.hasVolumes()) {
                 return volumesResponse.volumes().stream().collect(Collectors.groupingBy(vol -> vol.tags().stream()
-                                .filter(tag -> tag.key().equals("tag:created-for")).map(Tag::value).findAny().orElseThrow()));
+                                .filter(tag -> tag.key().equals("tag:created-for")).map(Tag::value).findAny().orElse("")));
             }
             return Map.of("", List.of());
         } catch (Exception ex) {
