@@ -31,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -44,6 +45,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
@@ -418,5 +420,18 @@ class StackUpscaleServiceTest {
         underTest.verticalScaleWithoutInstances(mock(AuthenticatedContext.class), new CoreVerticalScaleRequest<>(mock(CloudContext.class),
                 mock(CloudCredential.class), mock(CloudStack.class), new ArrayList<>(), new StackVerticalScaleV4Request()), cloudConnector, "master");
         verify(resourceConnector, times(1)).update(any(), any(), any(), eq(UpdateType.VERTICAL_SCALE_WITHOUT_INSTANCES), eq(Optional.of("master")));
+    }
+
+    @Test
+    void testGetInstanceStorageInfo() throws Exception {
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        CloudConnector cloudConnector = mock(CloudConnector.class);
+        MetadataCollector metadataCollector = mock(MetadataCollector.class);
+        when(cloudConnector.metadata()).thenReturn(metadataCollector);
+        InstanceStoreMetadata resultMetadata = new InstanceStoreMetadata();
+        when(metadataCollector.collectInstanceStorageCount(ac, List.of("m5d.2xlarge"))).thenReturn(resultMetadata);
+        InstanceStoreMetadata instanceStoreMetadata = underTest.getInstanceStorageInfo(ac, "m5d.2xlarge", cloudConnector);
+        verify(metadataCollector, times(1)).collectInstanceStorageCount(eq(ac), eq(List.of("m5d.2xlarge")));
+        assertEquals(resultMetadata, instanceStoreMetadata);
     }
 }
