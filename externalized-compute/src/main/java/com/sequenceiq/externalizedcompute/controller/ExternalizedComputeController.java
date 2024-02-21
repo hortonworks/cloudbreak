@@ -22,8 +22,10 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 import com.sequenceiq.authorization.service.CustomCheckUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.externalizedcompute.api.endpoint.ExternalizedComputeClusterEndpoint;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterRequest;
@@ -58,7 +60,8 @@ public class ExternalizedComputeController implements ExternalizedComputeCluster
     @CheckPermissionByAccount(action = CREATE_ENVIRONMENT)
     public FlowIdentifier create(@Valid ExternalizedComputeClusterRequest externalizedComputeClusterRequest) {
         LOGGER.info("Externalized Compute Cluster request: {}", externalizedComputeClusterRequest);
-        return externalizedComputeClusterService.prepareComputeClusterCreation(externalizedComputeClusterRequest);
+        Crn userCrn = Crn.ofUser(ThreadBasedUserCrnProvider.getUserCrn());
+        return externalizedComputeClusterService.prepareComputeClusterCreation(externalizedComputeClusterRequest, userCrn);
     }
 
     @Override
@@ -67,14 +70,15 @@ public class ExternalizedComputeController implements ExternalizedComputeCluster
         LOGGER.info("Externalized Compute Cluster delete: {}", name);
         ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(name);
         checkPermissionOnEnvironment(DELETE_ENVIRONMENT, externalizedComputeCluster);
+        MDCBuilder.buildMdcContext(externalizedComputeCluster);
         return externalizedComputeClusterFlowManager.triggerExternalizedComputeClusterDeletion(externalizedComputeCluster);
     }
 
     @Override
-    @CustomPermissionCheck
-    public ExternalizedComputeClusterResponse describe(@NotEmpty String name) {
+    public ExternalizedComputeClusterResponse describe(String name) {
         ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(name);
         checkPermissionOnEnvironment(DESCRIBE_ENVIRONMENT, externalizedComputeCluster);
+        MDCBuilder.buildMdcContext(externalizedComputeCluster);
         return externalizedComputeClusterConverterService.convertToResponse(externalizedComputeCluster);
     }
 

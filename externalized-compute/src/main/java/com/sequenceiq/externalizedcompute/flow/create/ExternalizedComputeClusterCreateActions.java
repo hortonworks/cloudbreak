@@ -14,11 +14,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatusEnum;
 import com.sequenceiq.externalizedcompute.flow.AbstractExternalizedComputeClusterAction;
 import com.sequenceiq.externalizedcompute.flow.AbstractExternalizedComputeClusterFailureAction;
 import com.sequenceiq.externalizedcompute.flow.ExternalizedComputeClusterContext;
 import com.sequenceiq.externalizedcompute.flow.ExternalizedComputeClusterEvent;
 import com.sequenceiq.externalizedcompute.service.ExternalizedComputeClusterCreateService;
+import com.sequenceiq.externalizedcompute.service.ExternalizedComputeClusterStatusService;
 
 @Configuration
 public class ExternalizedComputeClusterCreateActions {
@@ -27,6 +29,9 @@ public class ExternalizedComputeClusterCreateActions {
 
     @Inject
     private ExternalizedComputeClusterCreateService externalizedComputeClusterCreateService;
+
+    @Inject
+    private ExternalizedComputeClusterStatusService externalizedComputeClusterStatusService;
 
     @Bean(name = "EXTERNALIZED_COMPUTE_CLUSTER_CREATE_WAIT_ENV_STATE")
     public Action<?, ?> externalizedComputeClusterCreate() {
@@ -74,6 +79,8 @@ public class ExternalizedComputeClusterCreateActions {
             @Override
             protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterCreateWaitSuccessResponse payload,
                     Map<Object, Object> variables) {
+                externalizedComputeClusterStatusService.setStatus(context.getExternalizedComputeId(), ExternalizedComputeClusterStatusEnum.AVAILABLE,
+                        "Cluster provision finished");
                 sendEvent(context, EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FINALIZED_EVENT.event(), payload);
             }
 
@@ -92,7 +99,13 @@ public class ExternalizedComputeClusterCreateActions {
             @Override
             protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterCreateFailedEvent payload,
                     Map<Object, Object> variables) {
-                LOGGER.warn("Externalized compute cluster create failed", payload.getException());
+                String reason = "unknown reason";
+                if (payload.getException() != null && payload.getException().getMessage() != null) {
+                    reason = payload.getException().getMessage();
+                }
+                externalizedComputeClusterStatusService.setStatus(context.getExternalizedComputeId(), ExternalizedComputeClusterStatusEnum.CREATE_FAILED,
+                        "Cluster provision failed due to: " + reason);
+                LOGGER.warn("Cluster provision failed", payload.getException());
                 sendEvent(context, EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FAIL_HANDLED_EVENT.event(), payload);
             }
         };

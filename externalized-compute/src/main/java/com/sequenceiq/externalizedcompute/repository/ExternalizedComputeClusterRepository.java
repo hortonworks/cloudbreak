@@ -38,5 +38,12 @@ public interface ExternalizedComputeClusterRepository
             "AND e.accountId = :accountId")
     List<ResourceBasicView> findAllResourceBasicViewByNamesAndAccountId(@Param("names") Collection<String> names, @Param("accountId") String accountId);
 
-    List<ExternalizedComputeCluster> findAllByEnvironmentCrnAndAccountId(String environmentCrn, String accountId);
+    List<ExternalizedComputeCluster> findAllByEnvironmentCrnAndAccountIdAndDeletedIsNull(String environmentCrn, String accountId);
+
+    Optional<ExternalizedComputeCluster> findByResourceCrnAndAccountIdAndDeletedIsNull(String resourceCrn, String accountId);
+
+    Optional<ExternalizedComputeCluster> findByNameAndAccountIdAndDeletedIsNull(String name, String accountId);
+
+    Optional<ExternalizedComputeCluster> findByIdAndDeletedIsNull(Long id);
+
 }

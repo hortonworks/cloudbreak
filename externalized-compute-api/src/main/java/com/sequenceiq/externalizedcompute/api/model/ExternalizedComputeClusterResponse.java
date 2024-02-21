@@ -12,11 +12,31 @@ public class ExternalizedComputeClusterResponse extends ExternalizedComputeClust
 
     private String liftieClusterName;
 
+    private ExternalizedComputeClusterApiStatus status;
+
+    private String statusReason;
+
     public String getLiftieClusterName() {
         return liftieClusterName;
     }
 
     public void setLiftieClusterName(String liftieClusterName) {
         this.liftieClusterName = liftieClusterName;
+    }
+
+    public ExternalizedComputeClusterApiStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ExternalizedComputeClusterApiStatus status) {
+        this.status = status;
+    }
+
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
     }
 }

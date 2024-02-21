@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -27,6 +28,9 @@ import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
@@ -34,6 +38,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.externalizedcompute.ApiException;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterRequest;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
+import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatusEnum;
 import com.sequenceiq.externalizedcompute.flow.ExternalizedComputeClusterFlowManager;
 import com.sequenceiq.externalizedcompute.repository.ExternalizedComputeClusterRepository;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -53,6 +58,9 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
 
     @Inject
     private ExternalizedComputeClusterRepository externalizedComputeClusterRepository;
+
+    @Inject
+    private ExternalizedComputeClusterStatusService externalizedComputeClusterStatusService;
 
     @Inject
     private ExternalizedComputeClusterFlowManager externalizedComputeClusterFlowManager;
@@ -75,30 +83,41 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
     @Inject
     private CostTagging costTagging;
 
+    @Inject
+    private TransactionService transactionService;
+
+    @Inject
+    private Clock clock;
+
     @Override
     public Long getResourceIdByResourceCrn(String resourceCrn) {
-        return externalizedComputeClusterRepository.findByResourceCrnAndAccountId(resourceCrn, ThreadBasedUserCrnProvider.getAccountId())
+        return externalizedComputeClusterRepository.findByResourceCrnAndAccountIdAndDeletedIsNull(resourceCrn, ThreadBasedUserCrnProvider.getAccountId())
                 .map(ExternalizedComputeCluster::getId)
                 .orElseThrow(() -> new NotFoundException("Resource id not found for resource crn"));
     }
 
     @Override
     public Long getResourceIdByResourceName(String resourceName) {
-        return externalizedComputeClusterRepository.findByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId())
+        return externalizedComputeClusterRepository.findByNameAndAccountIdAndDeletedIsNull(resourceName, ThreadBasedUserCrnProvider.getAccountId())
                 .map(ExternalizedComputeCluster::getId)
                 .orElseThrow(() -> new NotFoundException("Resource id not found for resource name"));
     }
 
     @Override
     public List<Long> getResourceIdsByResourceCrn(String resourceName) {
-        return externalizedComputeClusterRepository.findByResourceCrnAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId())
+        return externalizedComputeClusterRepository.findByResourceCrnAndAccountIdAndDeletedIsNull(resourceName, ThreadBasedUserCrnProvider.getAccountId())
                 .stream()
                 .map(ExternalizedComputeCluster::getId)
                 .collect(Collectors.toList());
     }
 
-    public FlowIdentifier prepareComputeClusterCreation(ExternalizedComputeClusterRequest externalizedComputeClusterRequest) {
-        Crn userCrn = Crn.ofUser(ThreadBasedUserCrnProvider.getUserCrn());
+    public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<ExternalizedComputeClusterStatusEnum> statuses) {
+        LOGGER.debug("Find by resource ids ({}) and statuses: {}", resourceIds, statuses);
+        return externalizedComputeClusterStatusService.findLatestClusterStatusesFilteredByStatusesAndClusterIds(statuses, resourceIds)
+                .stream().map(statusEntity -> statusEntity.getExternalizedComputeCluster().getId()).collect(Collectors.toSet());
+    }
+
+    public FlowIdentifier prepareComputeClusterCreation(ExternalizedComputeClusterRequest externalizedComputeClusterRequest, Crn userCrn) {
         ExternalizedComputeCluster externalizedComputeCluster = new ExternalizedComputeCluster();
         externalizedComputeCluster.setName(externalizedComputeClusterRequest.getName());
         DetailedEnvironmentResponse environment = environmentEndpoint.getByCrn(externalizedComputeClusterRequest.getEnvironmentCrn());
@@ -107,15 +126,27 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
         externalizedComputeCluster.setAccountId(userCrn.getAccountId());
         String crn = regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.EXTERNALIZED_COMPUTE, userCrn.getAccountId());
         externalizedComputeCluster.setResourceCrn(crn);
-        setTagsSafe(environment, externalizedComputeClusterRequest.getTags(), externalizedComputeCluster);
+        setTagsSafe(environment, externalizedComputeClusterRequest.getTags(), externalizedComputeCluster, userCrn);
         // TODO: add check if exists
-        ExternalizedComputeCluster savedExternalizedComputeCluster = externalizedComputeClusterRepository.save(externalizedComputeCluster);
-        LOGGER.info("Saved ExternalizedComputeCluster entity: {}", savedExternalizedComputeCluster);
-        return externalizedComputeClusterFlowManager.triggerExternalizedComputeClusterCreation(savedExternalizedComputeCluster);
+        try {
+            ExternalizedComputeCluster initiatedExternalizedComputeCluster = transactionService.required(() -> {
+                ExternalizedComputeCluster savedExternalizedComputeCluster = externalizedComputeClusterRepository.save(externalizedComputeCluster);
+                MDCBuilder.buildMdcContext(savedExternalizedComputeCluster);
+                externalizedComputeClusterStatusService.setStatus(savedExternalizedComputeCluster, ExternalizedComputeClusterStatusEnum.CREATE_IN_PROGRESS,
+                        "Cluster provision initiated");
+                return savedExternalizedComputeCluster;
+            });
+            LOGGER.info("Saved ExternalizedComputeCluster entity: {}", initiatedExternalizedComputeCluster);
+            return externalizedComputeClusterFlowManager.triggerExternalizedComputeClusterCreation(initiatedExternalizedComputeCluster);
+        } catch (TransactionService.TransactionExecutionException e) {
+            LOGGER.error("Externalized compute cluster save failed", e);
+            throw new RuntimeException("Externalized compute cluster initiation failed");
+        }
     }
 
     public void initiateDelete(Long id) {
         ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(id);
+        LOGGER.info("Initiate delete for: {}", externalizedComputeCluster.getName());
         DefaultApi defaultApi = liftieService.getDefaultApi();
         try {
             if (externalizedComputeCluster.getLiftieName() != null) {
@@ -131,17 +162,27 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
     }
 
     public ExternalizedComputeCluster getExternalizedComputeCluster(String name, String accountId) {
-        return externalizedComputeClusterRepository.findByNameAndAccountId(name, accountId)
+        return externalizedComputeClusterRepository.findByNameAndAccountIdAndDeletedIsNull(name, accountId)
                 .orElseThrow(() -> new NotFoundException("Can't find externalized compute cluster by name: " + name));
     }
 
     public ExternalizedComputeCluster getExternalizedComputeCluster(Long id) {
-        return externalizedComputeClusterRepository.findById(id)
+        return externalizedComputeClusterRepository.findByIdAndDeletedIsNull(id)
                 .orElseThrow(() -> new NotFoundException("Can't find externalized compute cluster by id: " + id));
     }
 
     public void deleteExternalizedComputeCluster(Long id) {
-        externalizedComputeClusterRepository.deleteById(id);
+        try {
+            transactionService.required(() -> {
+                externalizedComputeClusterStatusService.setStatus(id, ExternalizedComputeClusterStatusEnum.DELETED, "Successfully deleted");
+                externalizedComputeClusterRepository.findById(id).ifPresent(externalizedComputeCluster -> {
+                    externalizedComputeCluster.setDeleted(clock.getCurrentTimeMillis());
+                    externalizedComputeClusterRepository.save(externalizedComputeCluster);
+                });
+            });
+        } catch (TransactionService.TransactionExecutionException e) {
+            throw new RuntimeException("Could not delete cluster", e);
+        }
     }
 
     @Override
@@ -161,14 +202,16 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
     }
 
     public List<ExternalizedComputeCluster> getAllByEnvironmentCrn(String environmentCrn, String accountId) {
-        return externalizedComputeClusterRepository.findAllByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+        return externalizedComputeClusterRepository.findAllByEnvironmentCrnAndAccountIdAndDeletedIsNull(environmentCrn, accountId);
     }
 
     private void setTagsSafe(DetailedEnvironmentResponse environment, Map<String, String> userDefinedTags,
-            ExternalizedComputeCluster externalizedComputeCluster) {
+            ExternalizedComputeCluster externalizedComputeCluster, Crn userCrn) {
         try {
-            CrnUser crnUser = crnUserDetailsService.loadUserByUsername(ThreadBasedUserCrnProvider.getUserCrn());
-            boolean internalTenant = entitlementService.internalTenant(ThreadBasedUserCrnProvider.getAccountId());
+            String userCrnString = userCrn.toString();
+            String accountId = userCrn.getAccountId();
+            CrnUser crnUser = crnUserDetailsService.loadUserByUsername(userCrnString);
+            boolean internalTenant = entitlementService.internalTenant(accountId);
             Map<String, String> tags = new HashMap<>();
             if (environment.getTags().getUserDefined() != null) {
                 tags.putAll(environment.getTags().getUserDefined());
@@ -178,10 +221,10 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
             }
             CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder
                 .builder()
-                .withCreatorCrn(ThreadBasedUserCrnProvider.getUserCrn())
+                .withCreatorCrn(userCrnString)
                 .withEnvironmentCrn(environment.getCrn())
                 .withPlatform(environment.getCloudPlatform())
-                .withAccountId(ThreadBasedUserCrnProvider.getAccountId())
+                .withAccountId(accountId)
                 .withResourceCrn(externalizedComputeCluster.getResourceCrn())
                 .withIsInternalTenant(internalTenant)
                 .withUserName(crnUser.getUsername())

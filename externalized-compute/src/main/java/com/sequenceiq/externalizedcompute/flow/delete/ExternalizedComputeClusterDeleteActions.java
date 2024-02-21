@@ -15,11 +15,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatusEnum;
 import com.sequenceiq.externalizedcompute.flow.AbstractExternalizedComputeClusterAction;
 import com.sequenceiq.externalizedcompute.flow.AbstractExternalizedComputeClusterFailureAction;
 import com.sequenceiq.externalizedcompute.flow.ExternalizedComputeClusterContext;
 import com.sequenceiq.externalizedcompute.flow.ExternalizedComputeClusterEvent;
 import com.sequenceiq.externalizedcompute.service.ExternalizedComputeClusterService;
+import com.sequenceiq.externalizedcompute.service.ExternalizedComputeClusterStatusService;
 
 @Configuration
 public class ExternalizedComputeClusterDeleteActions {
@@ -29,12 +31,17 @@ public class ExternalizedComputeClusterDeleteActions {
     @Inject
     private ExternalizedComputeClusterService externalizedComputeClusterService;
 
+    @Inject
+    private ExternalizedComputeClusterStatusService externalizedComputeClusterStatusService;
+
     @Bean(name = "EXTERNALIZED_COMPUTE_CLUSTER_DELETE_STATE")
     public Action<?, ?> externalizedComputeClusterDelete() {
         return new AbstractExternalizedComputeClusterAction<>(ExternalizedComputeClusterEvent.class) {
 
             @Override
             protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterEvent payload, Map<Object, Object> variables) {
+                externalizedComputeClusterStatusService.setStatus(context.getExternalizedComputeId(), ExternalizedComputeClusterStatusEnum.DELETE_IN_PROGRESS,
+                        "Cluster delete initiated");
                 externalizedComputeClusterService.initiateDelete(context.getExternalizedComputeId());
                 sendEvent(context, EXTERNALIZED_COMPUTE_CLUSTER_DELETE_STARTED_EVENT.event(), payload);
             }
@@ -88,7 +95,13 @@ public class ExternalizedComputeClusterDeleteActions {
             @Override
             protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterDeleteFailedEvent payload,
                     Map<Object, Object> variables) {
-                LOGGER.warn("Externalized compute cluster delete failed", payload.getException());
+                String reason = "unknown reason";
+                if (payload.getException() != null && payload.getException().getMessage() != null) {
+                    reason = payload.getException().getMessage();
+                }
+                externalizedComputeClusterStatusService.setStatus(context.getExternalizedComputeId(), ExternalizedComputeClusterStatusEnum.DELETE_FAILED,
+                        "Cluster deletion failed due to: " + reason);
+                LOGGER.warn("Cluster deletion failed", payload.getException());
                 sendEvent(context, EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FAIL_HANDLED_EVENT.event(), payload);
             }
         };
