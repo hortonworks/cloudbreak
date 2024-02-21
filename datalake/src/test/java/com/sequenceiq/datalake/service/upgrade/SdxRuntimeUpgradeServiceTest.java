@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
@@ -178,6 +181,7 @@ public class SdxRuntimeUpgradeServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(ANOTHER_IMAGE_ID);
+        imageInfo.setComponentVersions(new ImageComponentVersions("", "", "", "", "", "", List.of()));
         response.setUpgradeCandidates(List.of(imageInfo));
         sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo));
         BadRequestException exception = assertThrows(
@@ -201,6 +205,7 @@ public class SdxRuntimeUpgradeServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
+        imageInfo.setComponentVersions(new ImageComponentVersions("",  "",  "",  "", "", "", List.of()));
         response.setUpgradeCandidates(List.of(imageInfo));
         response.setReason("error reason");
         sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo));
@@ -338,7 +343,8 @@ public class SdxRuntimeUpgradeServiceTest {
     @Test
     public void testNoErrorWithEnterpriseShape() {
         sdxCluster.setClusterShape(SdxClusterShape.ENTERPRISE);
-        when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
+        when(sdxService.getByCrn(any(), any())).thenReturn(sdxCluster);
+        when(sdxService.getByNameOrCrn(any(), any())).thenReturn(sdxCluster);
         ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
         when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), upgradeV4RequestCaptor.capture(), eq(ACCOUNT_ID))).thenReturn(response);
         when(sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(sdxUpgradeRequest)).thenCallRealMethod();
@@ -508,6 +514,7 @@ public class SdxRuntimeUpgradeServiceTest {
     @Test
     public void testTriggerUpgradeShouldThrowBadRequestWhenRollingUpgradeRequestedAndRollingUpgradeEntitlementIsDisabled() {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
+        sdxCluster.setRuntime("7.2.17");
         ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
         when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), upgradeV4RequestCaptor.capture(), eq(ACCOUNT_ID))).thenReturn(response);
         when(sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(sdxUpgradeRequest)).thenCallRealMethod();
@@ -629,6 +636,7 @@ public class SdxRuntimeUpgradeServiceTest {
 
     @Test
     public void testTriggerRuntimeUpgradeByNameWhenNotEnabledAndNoPatchUpgrades() {
+        when(sdxService.getByNameOrCrn(any(), any())).thenReturn(sdxCluster);
         ImageInfoV4Response currentImageInfo = new ImageInfoV4Response();
         currentImageInfo.setImageId(IMAGE_ID);
         currentImageInfo.setCreated(1L);
@@ -644,6 +652,7 @@ public class SdxRuntimeUpgradeServiceTest {
         List<ImageInfoV4Response> candidates = List.of(imageInfo, imageInfo2);
         response.setCurrent(currentImageInfo);
         response.setUpgradeCandidates(candidates);
+        sdxUpgradeRequest.setRuntime("7.2.17");
         SdxUpgradeResponse expectedResponse = new SdxUpgradeResponse(response.getCurrent(), List.of(), "Something went wrong", response.getFlowIdentifier());
 
         ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
@@ -688,7 +697,6 @@ public class SdxRuntimeUpgradeServiceTest {
 
         UpgradeV4Response capturedUpgradeV4Response = upgradeV4ResponseCaptor.getValue();
         assertEquals(actualResponse, expectedResponse);
-        assertFalse(capturedUpgradeV4Response.getUpgradeCandidates().isEmpty());
         assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
@@ -712,8 +720,11 @@ public class SdxRuntimeUpgradeServiceTest {
         response.setUpgradeCandidates(candidates);
         SdxUpgradeResponse expectedResponse = new SdxUpgradeResponse(response.getCurrent(), candidates, response.getReason(), response.getFlowIdentifier());
         SdxUpgradeRequest upgradeRequest = new SdxUpgradeRequest();
+        upgradeRequest.setRuntime("7.2.18");
 
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
+        when(sdxService.getByNameOrCrn(any(), any())).thenReturn(sdxCluster);
+        sdxCluster.setClusterShape(SdxClusterShape.ENTERPRISE);
         ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
         when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), upgradeV4RequestCaptor.capture(), eq(ACCOUNT_ID))).thenReturn(response);
         when(sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeRequest)).thenCallRealMethod();
@@ -737,6 +748,7 @@ public class SdxRuntimeUpgradeServiceTest {
     public void testCheckForUpgradeByCrnWhenDisabledAndRequestImageIdParamIsWrong() {
         SdxUpgradeRequest sdxUpgradeRequest = new SdxUpgradeRequest();
         sdxUpgradeRequest.setImageId(IMAGE_ID_LAST);
+        sdxUpgradeRequest.setRuntime("7.2.17");
         ImageInfoV4Response currentImageInfo = new ImageInfoV4Response();
         currentImageInfo.setImageId(IMAGE_ID);
         currentImageInfo.setCreated(1L);
@@ -755,6 +767,7 @@ public class SdxRuntimeUpgradeServiceTest {
         SdxUpgradeResponse expectedResponse = new SdxUpgradeResponse(response.getCurrent(), candidates, response.getReason(), response.getFlowIdentifier());
 
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
+        when(sdxService.getByNameOrCrn(any(), any())).thenReturn(sdxCluster);
         ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
         when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), upgradeV4RequestCaptor.capture(), eq(ACCOUNT_ID))).thenReturn(response);
         when(sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(sdxUpgradeRequest)).thenCallRealMethod();
@@ -771,11 +784,65 @@ public class SdxRuntimeUpgradeServiceTest {
         assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    public void testIsShapeValidForRuntimeValidLightDuty() {
+        SdxCluster validSdxCluster = getValidSdxCluster();
+        validSdxCluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
+        validSdxCluster.setRuntime("7.2.17");
+        ImageInfoV4Response currentImageInfo = new ImageInfoV4Response();
+        currentImageInfo.setImageId(IMAGE_ID);
+        currentImageInfo.setCreated(1L);
+        currentImageInfo.setComponentVersions(creatImageComponentVersions("7.10", "7.2.18"));
+        Assertions.assertDoesNotThrow(() -> underTest.isShapeValidForRuntime(sdxUpgradeRequest, List.of(currentImageInfo), validSdxCluster));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    public void testIsShapeValidForRuntimeValid() {
+        SdxCluster validSdxCluster = getValidSdxCluster();
+        validSdxCluster.setClusterShape(SdxClusterShape.ENTERPRISE);
+        validSdxCluster.setRuntime("7.2.17");
+        ImageInfoV4Response currentImageInfo = new ImageInfoV4Response();
+        currentImageInfo.setImageId(IMAGE_ID);
+        currentImageInfo.setCreated(1L);
+        currentImageInfo.setComponentVersions(creatImageComponentVersions("7.10", "7.2.18"));
+        Assertions.assertDoesNotThrow(() -> underTest.isShapeValidForRuntime(sdxUpgradeRequest, List.of(currentImageInfo), validSdxCluster));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    public void testIsShapeValidForRuntimeInvalidByImage() {
+        sdxUpgradeRequest.setRuntime("");
+        SdxCluster validSdxCluster = getValidSdxCluster();
+        validSdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+        validSdxCluster.setRuntime("7.2.17");
+        ImageInfoV4Response currentImageInfo = new ImageInfoV4Response();
+        currentImageInfo.setImageId(IMAGE_ID);
+        currentImageInfo.setCreated(1L);
+        ImageComponentVersions imageComponentVersions = new ImageComponentVersions();
+        imageComponentVersions.setCdp("7.2.18");
+        currentImageInfo.setComponentVersions(imageComponentVersions);
+        Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.isShapeValidForRuntime(sdxUpgradeRequest, List.of(currentImageInfo), validSdxCluster));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    public void testIsShapeValidForRuntimeInvalid() {
+        SdxCluster validSdxCluster = getValidSdxCluster();
+        validSdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+        validSdxCluster.setRuntime("7.2.17");
+        sdxUpgradeRequest.setRuntime("7.2.18");
+        Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.isShapeValidForRuntime(sdxUpgradeRequest, List.of(), validSdxCluster));
+    }
+
     private SdxCluster getValidSdxCluster() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setClusterName(STACK_NAME);
         sdxCluster.setCrn(STACK_CRN);
-        sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+        sdxCluster.setClusterShape(SdxClusterShape.ENTERPRISE);
         sdxCluster.setEnvName("test-env");
         sdxCluster.setId(1L);
         sdxCluster.setAccountId("accountid");
