@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DiskUpdateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -135,5 +136,9 @@ public class VerticalScaleService {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.sdxAdmin().getInternalCrnForServiceAsString(),
                 () -> diskUpdateEndpoint.isDiskTypeChangeSupported(cloudPlatform));
+    }
+
+    public FlowIdentifier addVolumesDatalake(SdxCluster sdxCluster, StackAddVolumesRequest addVolumesRequest, String userCrn) {
+        return sdxReactorFlowManager.triggerDatalakeAddVolumes(sdxCluster, addVolumesRequest, userCrn);
     }
 }

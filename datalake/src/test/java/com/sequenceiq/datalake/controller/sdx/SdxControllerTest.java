@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -294,6 +295,52 @@ class SdxControllerTest {
 
         verify(sdxService, times(1)).getByCrn(USER_CRN, sdxCluster.getCrn());
         verify(verticalScaleService, times(1)).updateDisksDatalake(sdxCluster, diskUpdateRequest, USER_CRN);
+        assertEquals(FlowType.FLOW, flowIdentifier.getType());
+        assertEquals("FLOW_ID", flowIdentifier.getPollableId());
+    }
+
+    @Test
+    void testAddVolumesByName() {
+        StackAddVolumesRequest stackAddVolumesRequest = new StackAddVolumesRequest();
+        stackAddVolumesRequest.setInstanceGroup("COMPUTE");
+        stackAddVolumesRequest.setCloudVolumeUsageType("GENERAL");
+        stackAddVolumesRequest.setSize(200L);
+        stackAddVolumesRequest.setType("gp2");
+        stackAddVolumesRequest.setNumberOfDisks(2L);
+
+        SdxCluster sdxCluster = getValidSdxCluster();
+        when(sdxService.getByNameInAccount(USER_CRN, "TEST")).thenReturn(sdxCluster);
+        when(verticalScaleService.addVolumesDatalake(sdxCluster, stackAddVolumesRequest, USER_CRN))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.addVolumesByStackName("TEST",
+                stackAddVolumesRequest));
+
+        verify(sdxService, times(1)).getByNameInAccount(USER_CRN, "TEST");
+        verify(verticalScaleService, times(1)).addVolumesDatalake(sdxCluster, stackAddVolumesRequest, USER_CRN);
+        assertEquals(FlowType.FLOW, flowIdentifier.getType());
+        assertEquals("FLOW_ID", flowIdentifier.getPollableId());
+    }
+
+    @Test
+    void testAddVolumesByCrn() {
+        StackAddVolumesRequest stackAddVolumesRequest = new StackAddVolumesRequest();
+        stackAddVolumesRequest.setInstanceGroup("COMPUTE");
+        stackAddVolumesRequest.setCloudVolumeUsageType("GENERAL");
+        stackAddVolumesRequest.setSize(200L);
+        stackAddVolumesRequest.setType("gp2");
+        stackAddVolumesRequest.setNumberOfDisks(2L);
+
+        SdxCluster sdxCluster = getValidSdxCluster();
+        when(sdxService.getByCrn(USER_CRN, sdxCluster.getCrn())).thenReturn(sdxCluster);
+        when(verticalScaleService.addVolumesDatalake(sdxCluster, stackAddVolumesRequest, USER_CRN))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.addVolumesByStackCrn(sdxCluster.getCrn(),
+                stackAddVolumesRequest));
+
+        verify(sdxService, times(1)).getByCrn(USER_CRN, sdxCluster.getCrn());
+        verify(verticalScaleService, times(1)).addVolumesDatalake(sdxCluster, stackAddVolumesRequest, USER_CRN);
         assertEquals(FlowType.FLOW, flowIdentifier.getType());
         assertEquals("FLOW_ID", flowIdentifier.getPollableId());
     }

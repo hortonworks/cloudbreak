@@ -20,6 +20,7 @@ import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.ccm.UpgradeCcmStateSelectors.UPGRADE_CCM_UPGRADE_STACK_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.database.SdxUpgradeDatabaseServerStateSelectors.SDX_UPGRADE_DATABASE_SERVER_UPGRADE_EVENT;
+import static com.sequenceiq.datalake.flow.verticalscale.addvolumes.event.DatalakeAddVolumesStateSelectors.DATALAKE_ADD_VOLUMES_TRIGGER_EVENT;
 
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
@@ -78,6 +80,7 @@ import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.datalake.flow.upgrade.ccm.event.UpgradeCcmStackEvent;
 import com.sequenceiq.datalake.flow.upgrade.database.event.SdxUpgradeDatabaseServerEvent;
+import com.sequenceiq.datalake.flow.verticalscale.addvolumes.event.DatalakeAddVolumesEvent;
 import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateEvent;
 import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateStateSelectors;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
@@ -381,6 +384,15 @@ public class SdxReactorFlowManager {
                 .build();
         LOGGER.debug("Disk Update flow trigger event sent for datalake {}", sdxCluster.getName());
         return notify(DatalakeDiskUpdateStateSelectors.DATALAKE_DISK_UPDATE_VALIDATION_EVENT.selector(), datalakeDiskUpdateTriggerEvent,
+                sdxCluster.getClusterName(), userCrn);
+    }
+
+    public FlowIdentifier triggerDatalakeAddVolumes(SdxCluster sdxCluster, StackAddVolumesRequest addVolumesRequest, String userCrn) {
+        MDCBuilder.buildMdcContext(sdxCluster);
+        LOGGER.info("Vertical Scale flow triggered for datalake add volumes {}", sdxCluster.getName());
+        DatalakeAddVolumesEvent datalakeAddVolumesTriggerEvent = new DatalakeAddVolumesEvent(DATALAKE_ADD_VOLUMES_TRIGGER_EVENT.selector(),
+                sdxCluster.getId(), userCrn, addVolumesRequest, sdxCluster.getClusterName());
+        return notify(DATALAKE_ADD_VOLUMES_TRIGGER_EVENT.selector(), datalakeAddVolumesTriggerEvent,
                 sdxCluster.getClusterName(), userCrn);
     }
 }

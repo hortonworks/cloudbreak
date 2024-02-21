@@ -27,6 +27,7 @@ import org.springframework.validation.annotation.Validated;
 import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
@@ -443,5 +444,20 @@ public interface SdxEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier diskUpdateByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.DATALAKE) @PathParam("crn") String crn, @Valid DiskUpdateRequest updateRequest);
+
+    @PUT
+    @Path("/name/{name}/add_volumes")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "add block storage to an instance group on DL by name", operationId = "addVolumesByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier addVolumesByStackName(@PathParam("name") String name, @Valid StackAddVolumesRequest addVolumesRequest);
+
+    @PUT
+    @Path("/crn/{crn}/add_volumes")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "add block storage to an instance group on DL by crn", operationId = "addVolumesByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier addVolumesByStackCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.DATALAKE) @PathParam("crn") String crn, @Valid StackAddVolumesRequest addVolumesRequest);
 }
 

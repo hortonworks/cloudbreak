@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DiskUpdateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
@@ -66,5 +67,14 @@ public class VerticalScaleServiceTest {
         doReturn(mock(RegionAwareInternalCrnGenerator.class)).when(regionAwareInternalCrnGeneratorFactory).sdxAdmin();
         underTest.getDiskTypeChangeSupported("AWS");
         verify(diskUpdateEndpoint).isDiskTypeChangeSupported("AWS");
+    }
+
+    @Test
+    public void testAddVolumesDatalake() {
+        SdxCluster sdxCluster = mock(SdxCluster.class);
+        StackAddVolumesRequest addVolumesRequest = mock(StackAddVolumesRequest.class);
+        String userCrn = "TEST-CRN";
+        underTest.addVolumesDatalake(sdxCluster, addVolumesRequest, userCrn);
+        verify(sdxReactorFlowManager).triggerDatalakeAddVolumes(sdxCluster, addVolumesRequest, userCrn);
     }
 }

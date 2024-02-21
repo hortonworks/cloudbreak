@@ -5,6 +5,7 @@ import static com.sequenceiq.datalake.flow.datalake.upgrade.preparation.Datalake
 import static com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent.SDX_RESIZE_FLOW_CHAIN_START_EVENT;
 import static com.sequenceiq.datalake.flow.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.ccm.UpgradeCcmStateSelectors.UPGRADE_CCM_UPGRADE_STACK_EVENT;
+import static com.sequenceiq.datalake.flow.verticalscale.addvolumes.event.DatalakeAddVolumesStateSelectors.DATALAKE_ADD_VOLUMES_TRIGGER_EVENT;
 import static com.sequenceiq.flow.api.model.FlowType.FLOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -29,6 +30,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
@@ -47,6 +49,7 @@ import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.modifyproxy.ModifyProxyConfigTrackerEvent;
+import com.sequenceiq.datalake.flow.verticalscale.addvolumes.event.DatalakeAddVolumesEvent;
 import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateEvent;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
@@ -279,5 +282,24 @@ class SdxReactorFlowManagerTest {
         underTest.triggerDatalakeDiskUpdate(sdxCluster, updateRequest, USER_CRN);
         verify(eventFactory).createEventWithErrHandler(anyMap(), captor.capture());
         assertEquals("TEST", captor.getValue().getClusterName());
+    }
+
+    @Test
+    public void testTriggerDatalakeAddVolumes() {
+        ArgumentCaptor<DatalakeAddVolumesEvent> captor = ArgumentCaptor.forClass(DatalakeAddVolumesEvent.class);
+        SdxCluster sdxCluster = mock(SdxCluster.class);
+        doReturn("TEST").when(sdxCluster).getClusterName();
+        StackAddVolumesRequest stackAddVolumesRequest = new StackAddVolumesRequest();
+        stackAddVolumesRequest.setInstanceGroup("COMPUTE");
+        stackAddVolumesRequest.setCloudVolumeUsageType("GENERAL");
+        stackAddVolumesRequest.setSize(200L);
+        stackAddVolumesRequest.setType("gp2");
+        stackAddVolumesRequest.setNumberOfDisks(2L);
+
+        underTest.triggerDatalakeAddVolumes(sdxCluster, stackAddVolumesRequest, USER_CRN);
+        verify(eventFactory).createEventWithErrHandler(anyMap(), captor.capture());
+        assertEquals("TEST", captor.getValue().getSdxName());
+        assertEquals(DATALAKE_ADD_VOLUMES_TRIGGER_EVENT.selector(), captor.getValue().selector());
+        assertEquals("COMPUTE", captor.getValue().getStackAddVolumesRequest().getInstanceGroup());
     }
 }
