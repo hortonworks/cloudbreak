@@ -5,7 +5,6 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.rdsconfig.cm.AbstractCdlRdsConfigProvider;
@@ -55,9 +54,11 @@ public class HiveCdlRdsConfigProvider extends AbstractCdlRdsConfigProvider {
 
     @Override
     protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean knoxGateway) {
-        String blueprintText = blueprint.getBlueprintJsonText();
-        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
-        return blueprintProcessor.isCMComponentExistsInBlueprint("HIVEMETASTORE");
+        // This provider needed to be disabled because overridden the pillar of the default com.sequenceiq.cloudbreak.service.rdsconfig.HiveRdsConfigProvider
+//        String blueprintText = blueprint.getBlueprintJsonText();
+//        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
+//        return blueprintProcessor.isCMComponentExistsInBlueprint("HIVEMETASTORE");
+        return false;
     }
 
     @Override
