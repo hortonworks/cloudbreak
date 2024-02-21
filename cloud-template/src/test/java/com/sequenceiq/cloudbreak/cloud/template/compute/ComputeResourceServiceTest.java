@@ -4,18 +4,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +29,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import org.springframework.core.task.AsyncTaskExecutor;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -35,8 +40,13 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
@@ -45,6 +55,7 @@ import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 class ComputeResourceServiceTest {
@@ -52,7 +63,7 @@ class ComputeResourceServiceTest {
     private static final Variant AWS_VARIANT = Variant.variant("AWS");
 
     @InjectMocks
-    private ComputeResourceService computeResourceService;
+    private ComputeResourceService underTest;
 
     @Mock
     private ResourceBuilders resourceBuilders;
@@ -70,9 +81,6 @@ class ComputeResourceServiceTest {
     private SyncPollingScheduler<List<CloudVmInstanceStatus>> syncVMPollingScheduler;
 
     @Mock
-    private ResourceBuilderContext resourceBuilderContext;
-
-    @Mock
     private AuthenticatedContext authenticatedContext;
 
     @Mock
@@ -87,6 +95,9 @@ class ComputeResourceServiceTest {
     @Mock
     private ComputeResourceBuilder<ResourceBuilderContext> computeResourceBuilder2;
 
+    @Mock
+    private CloudFailureHandler cloudFailureHandler;
+
     @Captor
     private ArgumentCaptor<ResourceDeletionCallablePayload> deletionCallableCaptor;
 
@@ -98,6 +109,7 @@ class ComputeResourceServiceTest {
 
     @Test
     void startInstancesTest() throws Exception {
+        ResourceBuilderContext resourceBuilderContext = mock(ResourceBuilderContext.class);
         when(resourceBuilders.getStopStartBatchSize(any())).thenReturn(10);
         ComputeResourceBuilder computeResourceBuilder = mock(ComputeResourceBuilder.class);
         when(computeResourceBuilder.isInstanceBuilder()).thenReturn(true);
@@ -117,7 +129,7 @@ class ComputeResourceServiceTest {
         PollTask pollTask = mock(PollTask.class);
         when(resourcePollTaskFactory.newPollComputeStatusTask(eq(computeResourceBuilder), eq(authenticatedContext), eq(resourceBuilderContext),
                 eq(cloudInstanceList))).thenReturn(pollTask);
-        computeResourceService.startInstances(resourceBuilderContext, authenticatedContext, cloudInstanceList);
+        underTest.startInstances(resourceBuilderContext, authenticatedContext, cloudInstanceList);
         verify(resourceBuilders, times(1)).getStopStartBatchSize(AWS_VARIANT);
         verify(resourceBuilders, times(1)).compute(AWS_VARIANT);
         verify(computeResourceBuilder, times(1)).isInstanceBuilder();
@@ -133,6 +145,7 @@ class ComputeResourceServiceTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testStopAndStartInstancesWhenCallableThrowExceptionFromTheFutureShouldPropagateException(boolean startOperation) throws Exception {
+        ResourceBuilderContext resourceBuilderContext = mock(ResourceBuilderContext.class);
         when(resourceBuilders.getStopStartBatchSize(any())).thenReturn(10);
         ComputeResourceBuilder computeResourceBuilder = mock(ComputeResourceBuilder.class);
         when(computeResourceBuilder.isInstanceBuilder()).thenReturn(true);
@@ -148,11 +161,11 @@ class ComputeResourceServiceTest {
 
         Executable executable;
         if (startOperation) {
-            executable = () -> computeResourceService.startInstances(resourceBuilderContext, authenticatedContext, cloudInstanceList);
+            executable = () -> underTest.startInstances(resourceBuilderContext, authenticatedContext, cloudInstanceList);
         } else {
-            executable = () -> computeResourceService.stopInstances(resourceBuilderContext, authenticatedContext, cloudInstanceList);
+            executable = () -> underTest.stopInstances(resourceBuilderContext, authenticatedContext, cloudInstanceList);
         }
-        Assertions.assertThrows(CloudConnectorException.class,
+        assertThrows(CloudConnectorException.class,
                 executable,
                 "The execution of infrastructure operations failed: Connector Failure");
 
@@ -170,13 +183,14 @@ class ComputeResourceServiceTest {
 
     @Test
     void testResourceDeletionSuccess() throws ExecutionException, InterruptedException {
+        ResourceBuilderContext resourceBuilderContext = mock(ResourceBuilderContext.class);
         when(resourceBuilders.compute(AWS_VARIANT)).thenReturn(List.of(computeResourceBuilder1, computeResourceBuilder2));
         when(resourceBuilderContext.getParallelResourceRequest()).thenReturn(2);
 
         givenDeletionResult(FutureResult.SUCCESS, new CloudResourceStatus(cloudResource, ResourceStatus.DELETED));
 
         List<CloudResourceStatus> cloudResourceStatuses =
-                computeResourceService.deleteResources(resourceBuilderContext, authenticatedContext, List.of(cloudResource), false);
+                underTest.deleteResources(resourceBuilderContext, authenticatedContext, List.of(cloudResource), false);
 
         assertThat(cloudResourceStatuses).hasSize(2);
         verify(resourceActionFactory, times(2)).buildDeletionCallable(deletionCallableCaptor.capture());
@@ -189,15 +203,58 @@ class ComputeResourceServiceTest {
 
     @Test
     void testResourceDeletionFailure() throws ExecutionException, InterruptedException {
+        ResourceBuilderContext resourceBuilderContext = mock(ResourceBuilderContext.class);
         when(resourceBuilders.compute(AWS_VARIANT)).thenReturn(List.of(computeResourceBuilder1, computeResourceBuilder2));
         when(resourceBuilderContext.getParallelResourceRequest()).thenReturn(1);
         givenDeletionResult(
                 FutureResult.FAILED, new CloudResourceStatus(cloudResource, ResourceStatus.FAILED, "No permission to delete."));
 
         CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
-                () -> computeResourceService.deleteResources(resourceBuilderContext, authenticatedContext, List.of(cloudResource), false));
+                () -> underTest.deleteResources(resourceBuilderContext, authenticatedContext, List.of(cloudResource), false));
 
         assertEquals("Resource deletion failed. Reason: No permission to delete.", cloudConnectorException.getMessage());
+    }
+
+    @Test
+    void testBuildResourcesForLaunch() throws ExecutionException, InterruptedException {
+        ResourceBuilderContext resourceBuilderContext = new ResourceBuilderContext("name", Location.location(Region.region("region")), 8, true);
+        when(cloudResource.getType()).thenReturn(ResourceType.AWS_INSTANCE);
+        CloudStack cloudStack = mock(CloudStack.class);
+        Group group1 = mock(Group.class);
+        Group group2 = mock(Group.class);
+        when(cloudStack.getGroups()).thenReturn(List.of(group1, group2));
+        InstanceTemplate template = new InstanceTemplate("flavor", "group1", 1L, List.of(), InstanceStatus.CREATE_REQUESTED, null, 1L, "imageId", null, 1L);
+        CloudInstance cloudInstance1 = new CloudInstance("instance1", template, null, null, null);
+        CloudInstance cloudInstance2 = new CloudInstance("instance2", template, null, null, null);
+        when(group1.getInstances()).thenReturn(List.of(cloudInstance1));
+        when(group2.getInstances()).thenReturn(List.of(cloudInstance2));
+        when(resourceBuilders.getCreateBatchSize(any())).thenReturn(Integer.valueOf(8));
+        ResourceCreationCallable resourceCreationCallable = mock(ResourceCreationCallable.class);
+        when(resourceActionFactory.buildCreationCallable(any())).thenReturn(resourceCreationCallable);
+        Future resourceRequestFuture = mock(Future.class);
+        ResourceRequestResult<List<CloudResourceStatus>> resourceRequestResult = new ResourceRequestResult<>(FutureResult.SUCCESS,
+                List.of(new CloudResourceStatus(cloudResource, ResourceStatus.CREATED)));
+        when(resourceRequestFuture.get()).thenReturn(resourceRequestResult);
+        when(resourceBuilderExecutor.submit(eq(resourceCreationCallable))).thenReturn(resourceRequestFuture);
+        List<Boolean> rollbackContextBuildValue = new ArrayList<>();
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) {
+                // this is required to assert on the cloudFailureContext.getCtx().isBuild() value, because it gets modified before the mockito verify call
+                CloudFailureContext cloudFailureContext = invocation.getArgument(0, CloudFailureContext.class);
+                rollbackContextBuildValue.add(cloudFailureContext.getCtx().isBuild());
+                return null;
+            }
+        }).when(cloudFailureHandler).rollbackIfNecessary(any(), anyList(), anyList(), any(), any(), any());
+
+        List<CloudResourceStatus> cloudResourceStatuses = underTest.buildResourcesForLaunch(resourceBuilderContext, authenticatedContext, cloudStack, null);
+        assertThat(cloudResourceStatuses).hasSize(2);
+        assertThat(cloudResourceStatuses).extracting(cloudResourceStatus -> cloudResourceStatus.getStatus()).containsOnly(ResourceStatus.CREATED);
+        verify(resourceActionFactory, times(2)).buildCreationCallable(
+                argThat(resourceCreationCallablePayload -> resourceCreationCallablePayload.getContext().isBuild()));
+        verify(cloudFailureHandler, times(1)).rollbackIfNecessary(any(), anyList(), anyList(), eq(group1), any(), any());
+        verify(cloudFailureHandler, times(1)).rollbackIfNecessary(any(), anyList(), anyList(), eq(group2), any(), any());
+        assertThat(rollbackContextBuildValue).containsExactly(Boolean.FALSE, Boolean.FALSE);
     }
 
     private Future<ResourceRequestResult<List<CloudResourceStatus>>> givenDeletionResult(FutureResult futureResult, CloudResourceStatus cloudResourceStatus)

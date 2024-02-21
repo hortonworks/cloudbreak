@@ -325,12 +325,16 @@ public class ComputeResourceService {
                     if (adjustmentTypeAndThreshold == null) {
                         adjustmentTypeAndThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) instances.size());
                     }
-                    CloudFailureContext cloudFailureContext = new CloudFailureContext(auth,
-                            new ScaleContext(upscale, adjustmentTypeAndThreshold.getAdjustmentType(),
-                                    adjustmentTypeAndThreshold.getThreshold()), ctx.rollback());
-                    cloudFailureHandler.rollbackIfNecessary(cloudFailureContext, failedResources, resourceStatuses, group, resourceBuilders,
-                            getNewNodeCount(groups));
-                    results.addAll(filterResourceStatuses(resourceStatuses, ResourceStatus.CREATED));
+                    try {
+                        ctx.setBuild(false);
+                        CloudFailureContext cloudFailureContext = new CloudFailureContext(auth,
+                                new ScaleContext(upscale, adjustmentTypeAndThreshold.getAdjustmentType(), adjustmentTypeAndThreshold.getThreshold()), ctx);
+                        cloudFailureHandler.rollbackIfNecessary(cloudFailureContext, failedResources, resourceStatuses, group, resourceBuilders,
+                                getNewNodeCount(groups));
+                        results.addAll(filterResourceStatuses(resourceStatuses, ResourceStatus.CREATED));
+                    } finally {
+                        ctx.setBuild(true);
+                    }
                 }
             }
             return results;

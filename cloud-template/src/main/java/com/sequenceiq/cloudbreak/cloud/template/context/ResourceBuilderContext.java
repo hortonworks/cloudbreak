@@ -51,6 +51,10 @@ public class ResourceBuilderContext extends DynamicModel {
         return build;
     }
 
+    public void setBuild(boolean build) {
+        this.build = build;
+    }
+
     public List<CloudResource> getNetworkResources() {
         return new ArrayList<>(networkResources);
     }
@@ -92,11 +96,6 @@ public class ResourceBuilderContext extends DynamicModel {
 
     public List<CloudResource> getLoadBalancerResources(LoadBalancerType type) {
         return loadBalancerResources.get(type);
-    }
-
-    public ResourceBuilderContext rollback() {
-        this.build = false;
-        return this;
     }
 
 }
