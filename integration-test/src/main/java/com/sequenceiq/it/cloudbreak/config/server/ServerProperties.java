@@ -86,8 +86,11 @@ public class ServerProperties {
     @Value("${integrationtest.authdistributor.host:localhost}")
     private String authDistributorHost;
 
-    @Value("${mock.imagecatalog.server:localhost:10090}")
+    @Value("${mock.imagecatalog.server:localhost}")
     private String mockImageCatalogAddr;
+
+    @Value("${mock.imagecatalog.port}")
+    private String mockImageCatalogPort;
 
     @Value("${integrationtest.periscope.server}")
     private String periscopeServer;
@@ -98,6 +101,21 @@ public class ServerProperties {
     @Value("${periscope.server.contextPath:/as}")
     private String periscopeRootContextPath;
 
+    @Value("${integrationtest.cloudbreak.port:0}")
+    private int cloudbreakPort;
+
+    @Value("${integrationtest.freeipa.port:0}")
+    private int freeipaPort;
+
+    @Value("${integrationtest.sdx.port:0}")
+    private int sdxPort;
+
+    @Value("${integrationtest.environment.port:0}")
+    private int environmentPort;
+
+    @Value("${integrationtest.redbeams.port:0}")
+    private int redbeamsPort;
+
     private String cbVersion;
 
     @Inject
@@ -107,7 +125,11 @@ public class ServerProperties {
     private ServerUtil serverUtil;
 
     public String getCloudbreakAddress() {
-        return cloudbreakServer + cbRootContextPath;
+        if (cloudbreakPort != 0) {
+            return cloudbreakServer + ":" + cloudbreakPort + cbRootContextPath;
+        } else {
+            return cloudbreakServer + cbRootContextPath;
+        }
     }
 
     public String getCloudbreak() {
@@ -119,7 +141,11 @@ public class ServerProperties {
     }
 
     public String getEnvironmentAddress() {
-        return environmentServer + environmentRootContextPath;
+        if (environmentPort != 0) {
+            return environmentServer + ":" + environmentPort + environmentRootContextPath;
+        } else {
+            return environmentServer + environmentRootContextPath;
+        }
     }
 
     public String getEnvironmentInternalAddress() {
@@ -127,7 +153,11 @@ public class ServerProperties {
     }
 
     public String getFreeipaAddress() {
-        return freeipaServer + freeIpaRootContextPath;
+        if (freeipaPort != 0) {
+            return freeipaServer + ":" + freeipaPort + freeIpaRootContextPath;
+        } else {
+            return freeipaServer + freeIpaRootContextPath;
+        }
     }
 
     public String getFreeipaInternalAddress() {
@@ -135,7 +165,11 @@ public class ServerProperties {
     }
 
     public String getRedbeamsAddress() {
-        return redbeamsServer + redbeamsRootContextPath;
+        if (redbeamsPort != 0) {
+            return redbeamsServer + ":" + redbeamsPort + redbeamsRootContextPath;
+        } else {
+            return redbeamsServer + redbeamsRootContextPath;
+        }
     }
 
     public String getPeriscopeAddress() {
@@ -143,7 +177,11 @@ public class ServerProperties {
     }
 
     public String getSdxAddress() {
-        return sdxServer + sdxRootContextPath;
+        if (sdxPort != 0) {
+            return sdxServer + ":" + sdxPort + sdxRootContextPath;
+        } else {
+            return sdxServer + sdxRootContextPath;
+        }
     }
 
     public String getSdxInternalAddress() {
@@ -163,7 +201,7 @@ public class ServerProperties {
     }
 
     public String getMockImageCatalogAddr() {
-        return mockImageCatalogAddr;
+        return mockImageCatalogAddr + ":" + mockImageCatalogPort;
     }
 
     public String getCbVersion() {

@@ -2,7 +2,8 @@ mock:
   server:
     address: test
   imagecatalog:
-    server: mock-infrastructure:10090
+    server: mock-infrastructure
+    port: 10090
 
 integrationtest:
   outputdir: /it
