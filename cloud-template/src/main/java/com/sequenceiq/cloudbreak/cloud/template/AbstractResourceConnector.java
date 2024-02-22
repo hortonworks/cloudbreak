@@ -311,7 +311,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
 
         //compute
         List<CloudResource> computeResources = computeResourceService.getComputeResources(variant, resources);
-        List<CloudResourceStatus> computeStatuses = computeResourceService.update(context, auth, stack, computeResources, group);
+        List<CloudResourceStatus> computeStatuses = computeResourceService.update(context, auth, stack, computeResources, group, type);
         cloudResourceStatuses.addAll(computeStatuses);
 
         return cloudResourceStatuses;

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -20,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
+import software.amazon.awssdk.services.ec2.model.HttpTokensState;
 
 @Service
 public class AwsLaunchConfigurationUpdateService {
@@ -65,7 +67,10 @@ public class AwsLaunchConfigurationUpdateService {
         }
         if (group != null && updateInstances) {
             AmazonEc2Client ec2Client = awsClient.createEc2Client(credentialView, regionName);
-            scalingGroups.keySet().forEach(autoScalingGroup -> instanceUpdater.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group));
+            Optional<HttpTokensState> httpTokensStateOptional = Optional.ofNullable(HttpTokensState.fromValue(
+                    updatableFields.getOrDefault(LaunchTemplateField.HTTP_METADATA_OPTIONS, null)));
+            scalingGroups.keySet().forEach(autoScalingGroup ->
+                    instanceUpdater.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group, httpTokensStateOptional));
         }
     }
 

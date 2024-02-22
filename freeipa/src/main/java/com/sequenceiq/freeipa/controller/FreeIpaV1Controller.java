@@ -58,6 +58,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachCh
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.ChangeImageCatalogRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.GenerateImageCatalogResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imdupdate.InstanceMetadataUpdateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
@@ -97,6 +98,7 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaStackHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStartService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStopService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaUpgradeCcmService;
+import com.sequenceiq.freeipa.service.stack.FreeipaInstanceMetadataUpdateService;
 import com.sequenceiq.freeipa.service.stack.FreeipaModifyProxyConfigService;
 import com.sequenceiq.freeipa.service.stack.RepairInstancesService;
 import com.sequenceiq.freeipa.util.CrnService;
@@ -190,6 +192,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private FreeIpaRecommendationService freeIpaRecommendationService;
+
+    @Inject
+    private FreeipaInstanceMetadataUpdateService instanceMetadataUpdateService;
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
@@ -475,6 +480,12 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
             @RequestObject @Valid @NotNull VerticalScaleRequest updateRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return freeIpaScalingService.verticalScale(accountId, environmentCrn, updateRequest);
+    }
+
+    @Override
+    @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
+    public FlowIdentifier instanceMetadataUpdate(@RequestObject InstanceMetadataUpdateRequest request) {
+        return instanceMetadataUpdateService.updateInstanceMetadata(request.getEnvironmentCrn(), request.getUpdateType());
     }
 
     @Override

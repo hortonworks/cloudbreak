@@ -47,6 +47,7 @@ import com.google.api.services.compute.model.ServiceAccount;
 import com.google.api.services.compute.model.Tags;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters.GcpDiskType;
@@ -373,7 +374,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     @Override
     public CloudResource update(GcpContext context, CloudResource resource, CloudInstance cloudInstance,
-            AuthenticatedContext auth, CloudStack cloudStack, Optional<String> targetGroupName) throws Exception {
+            AuthenticatedContext auth, CloudStack cloudStack, Optional<String> targetGroupName, UpdateType updateType) throws Exception {
         String projectId = gcpStackUtil.getProjectId(auth.getCloudCredential());
         String availabilityZone = cloudInstance.getAvailabilityZone();
         Compute compute = context.getCompute();

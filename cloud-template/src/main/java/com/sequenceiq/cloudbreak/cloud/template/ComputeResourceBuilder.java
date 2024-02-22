@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.cloud.CloudPlatformAware;
+import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -88,8 +89,10 @@ public interface ComputeResourceBuilder<C extends ResourceBuilderContext> extend
     List<CloudResource> build(C context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception;
 
-    CloudResource update(C context, CloudResource resource, CloudInstance instance, AuthenticatedContext auth,
-            CloudStack cloudStack, Optional<String> targetGroup) throws Exception;
+    default CloudResource update(C context, CloudResource resource, CloudInstance instance, AuthenticatedContext auth,
+            CloudStack cloudStack, Optional<String> targetGroup, UpdateType updateType) throws Exception {
+        return null;
+    }
 
     /**
      * This method will be called if an instance stop/start is requested to check the state of the instance.

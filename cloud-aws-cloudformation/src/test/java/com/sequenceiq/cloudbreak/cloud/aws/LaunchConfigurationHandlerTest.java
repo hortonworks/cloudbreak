@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -36,7 +37,9 @@ import software.amazon.awssdk.services.autoscaling.model.CreateLaunchConfigurati
 import software.amazon.awssdk.services.autoscaling.model.DeleteLaunchConfigurationRequest;
 import software.amazon.awssdk.services.autoscaling.model.DescribeLaunchConfigurationsRequest;
 import software.amazon.awssdk.services.autoscaling.model.DescribeLaunchConfigurationsResponse;
+import software.amazon.awssdk.services.autoscaling.model.InstanceMetadataHttpTokensState;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
+import software.amazon.awssdk.services.ec2.model.HttpTokensState;
 
 @ExtendWith(MockitoExtension.class)
 class LaunchConfigurationHandlerTest {
@@ -87,12 +90,15 @@ class LaunchConfigurationHandlerTest {
                 .withLocation(location(region("region"), availabilityZone("az1")))
                 .build();
         String imageName = "imageName";
-        String launchConfigurationName = underTest.createNewLaunchConfiguration(Map.of(LaunchTemplateField.IMAGE_ID, imageName), autoScalingClient,
+        String launchConfigurationName = underTest.createNewLaunchConfiguration(Map.of(LaunchTemplateField.IMAGE_ID, imageName,
+                        LaunchTemplateField.HTTP_METADATA_OPTIONS, HttpTokensState.REQUIRED.toString()), autoScalingClient,
                 LaunchConfiguration.builder().launchConfigurationName(lName).build(), cloudContext, ac, stack);
         ArgumentCaptor<CreateLaunchConfigurationRequest> captor = ArgumentCaptor.forClass(CreateLaunchConfigurationRequest.class);
         verify(autoScalingClient).createLaunchConfiguration(captor.capture());
         assertTrue(captor.getValue().launchConfigurationName().startsWith(lName));
         assertTrue(launchConfigurationName.matches(lName + "-" + "[a-zA-Z0-9]{12}"));
+        assertNotNull(captor.getValue().metadataOptions());
+        assertEquals(InstanceMetadataHttpTokensState.REQUIRED, captor.getValue().metadataOptions().httpTokens());
         verify(resourceNotifier, times(1)).notifyAllocation(any(CloudResource.class), eq(cloudContext));
     }
 

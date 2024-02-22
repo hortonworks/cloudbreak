@@ -3,9 +3,13 @@ package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -24,16 +28,20 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.VolumeBuilderUtil;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsImdsUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsStackNameCommonUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
@@ -52,6 +60,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -61,7 +70,10 @@ import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.Ec2Exception;
 import software.amazon.awssdk.services.ec2.model.HttpTokensState;
 import software.amazon.awssdk.services.ec2.model.Instance;
+import software.amazon.awssdk.services.ec2.model.InstanceMetadataOptionsResponse;
 import software.amazon.awssdk.services.ec2.model.InstanceState;
+import software.amazon.awssdk.services.ec2.model.InstanceType;
+import software.amazon.awssdk.services.ec2.model.ModifyInstanceMetadataOptionsResponse;
 import software.amazon.awssdk.services.ec2.model.Reservation;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
@@ -119,6 +131,16 @@ class AwsNativeInstanceResourceBuilderTest {
     @Mock
     private AwsStackNameCommonUtil awsStackNameCommonUtil;
 
+    @Mock
+    private AwsImdsUtil awsImdsUtil;
+
+    static Object[][] testBuildWhenInstanceNoExistSource() {
+        return new Object[][] {
+                {"v2", HttpTokensState.REQUIRED},
+                {null, null}
+        };
+    }
+
     @BeforeEach
     void setup() {
         CloudContext cloudContext = mock(CloudContext.class);
@@ -134,8 +156,9 @@ class AwsNativeInstanceResourceBuilderTest {
         assertEquals("Buildable resources cannot be empty!", actual.getMessage());
     }
 
-    @Test
-    void testBuildWhenInstanceNotExist() throws Exception {
+    @ParameterizedTest
+    @MethodSource("testBuildWhenInstanceNoExistSource")
+    void testBuildWhenInstanceNoExist(String supportedImdsVersionOfStack, HttpTokensState expectedTokenState) throws Exception {
         Instance instance = Instance.builder().instanceId(INSTANCE_ID).build();
         RunInstancesResponse runInstancesResponse = RunInstancesResponse.builder().instances(instance).build();
         InstanceAuthentication authentication = mock(InstanceAuthentication.class);
@@ -160,14 +183,18 @@ class AwsNativeInstanceResourceBuilderTest {
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
         when(securityGroupBuilderUtil.getSecurityGroupIds(awsContext, group)).thenReturn(List.of("sg-id"));
         when(awsStackNameCommonUtil.getInstanceName(ac, "groupName", privateId)).thenReturn("stackname");
-        when(cloudStack.getSupportedImdsVersion()).thenReturn("v2");
+        when(cloudStack.getSupportedImdsVersion()).thenReturn(supportedImdsVersionOfStack);
 
         ArgumentCaptor<RunInstancesRequest> runInstancesRequestArgumentCaptor = ArgumentCaptor.forClass(RunInstancesRequest.class);
         List<CloudResource> actual = underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
         verify(amazonEc2Client).createInstance(runInstancesRequestArgumentCaptor.capture());
         RunInstancesRequest runInstancesRequest = runInstancesRequestArgumentCaptor.getValue();
         assertEquals(actual.get(0).getInstanceId(), INSTANCE_ID);
-        assertEquals(runInstancesRequest.metadataOptions().httpTokens(), HttpTokensState.REQUIRED);
+        if (expectedTokenState != null) {
+            assertEquals(runInstancesRequest.metadataOptions().httpTokens(), expectedTokenState);
+        } else {
+            assertNull(runInstancesRequest.metadataOptions());
+        }
         assertEquals("sg-id", runInstancesRequest.securityGroupIds().get(0));
         assertThat(runInstancesRequest.tagSpecifications().get(0)).matches(ts -> ts.tags().stream()
                 .anyMatch(t -> "Name".equals(t.key()) && "stackname".equals(t.value())));
@@ -492,6 +519,88 @@ class AwsNativeInstanceResourceBuilderTest {
         when(volumeBuilderUtil.getRootVolume(any(AwsInstanceView.class), eq(group), eq(cloudStack), eq(ac))).thenReturn(root);
         Collection<BlockDeviceMapping> actual = underTest.blocks(group, cloudStack, ac);
         assertEquals(3, actual.size());
+    }
+
+    @Test
+    void testUpdateWithImdsOptional() throws Exception {
+        Instance instance = Instance.builder()
+                .instanceId(INSTANCE_ID)
+                .instanceType(InstanceType.A1_MEDIUM)
+                .metadataOptions(InstanceMetadataOptionsResponse.builder().httpTokens(HttpTokensState.REQUIRED).build())
+                .state(InstanceState.builder().code(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE).build())
+                .build();
+        CloudResource cloudResource = setupImdsTest(instance);
+
+        underTest.update(awsContext, cloudResource, cloudInstance, ac, cloudStack, Optional.empty(),
+                UpdateType.INSTANCE_METADATA_UPDATE_TOKEN_OPTIONAL);
+
+        verify(amazonEc2Client).modifyInstanceMetadataOptions(any());
+    }
+
+    @Test
+    void testUpdateWithImdsRequired() throws Exception {
+        Instance instance = Instance.builder()
+                .instanceId(INSTANCE_ID)
+                .instanceType(InstanceType.A1_MEDIUM)
+                .metadataOptions(InstanceMetadataOptionsResponse.builder().httpTokens(HttpTokensState.OPTIONAL).build())
+                .state(InstanceState.builder().code(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE).build())
+                .build();
+        CloudResource cloudResource = setupImdsTest(instance);
+        doNothing().when(awsImdsUtil).validateInstanceMetadataUpdate(any(), any(), any());
+
+        underTest.update(awsContext, cloudResource, cloudInstance, ac, cloudStack, Optional.empty(),
+                UpdateType.INSTANCE_METADATA_UPDATE_TOKEN_REQUIRED);
+
+        verify(amazonEc2Client).modifyInstanceMetadataOptions(any());
+    }
+
+    @Test
+    void testUpdateWithImdsIfMatching() throws Exception {
+        Instance instance = Instance.builder()
+                .instanceId(INSTANCE_ID)
+                .instanceType(InstanceType.A1_MEDIUM)
+                .metadataOptions(InstanceMetadataOptionsResponse.builder().httpTokens(HttpTokensState.OPTIONAL).build())
+                .state(InstanceState.builder().code(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE).build())
+                .build();
+        CloudResource cloudResource = setupImdsTest(instance);
+
+        underTest.update(awsContext, cloudResource, cloudInstance, ac, cloudStack, Optional.empty(),
+                UpdateType.INSTANCE_METADATA_UPDATE_TOKEN_OPTIONAL);
+
+        verify(amazonEc2Client, times(0)).modifyInstanceMetadataOptions(any());
+    }
+
+    @Test
+    void testUpdateWithImdsIfNotSupported() {
+        Instance instance = Instance.builder()
+                .instanceId(INSTANCE_ID)
+                .instanceType(InstanceType.A1_MEDIUM)
+                .metadataOptions(InstanceMetadataOptionsResponse.builder().httpTokens(HttpTokensState.OPTIONAL).build())
+                .state(InstanceState.builder().code(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE).build())
+                .build();
+        CloudResource cloudResource = setupImdsTest(instance);
+        doThrow(CloudbreakServiceException.class).when(awsImdsUtil).validateInstanceMetadataUpdate(any(), any(), any());
+
+        assertThrows(CloudbreakServiceException.class, () -> underTest.update(awsContext, cloudResource, cloudInstance, ac, cloudStack,
+                Optional.empty(), UpdateType.INSTANCE_METADATA_UPDATE_TOKEN_REQUIRED));
+
+        verify(amazonEc2Client, times(0)).modifyInstanceMetadataOptions(any());
+    }
+
+    private CloudResource setupImdsTest(Instance instance) {
+        CloudResource cloudResource = CloudResource.builder()
+                .withName("name")
+                .withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED)
+                .withParameters(emptyMap())
+                .withInstanceId(INSTANCE_ID)
+                .build();
+        when(awsMethodExecutor.execute(any(), eq(Optional.empty()))).thenReturn(Optional.of(instance));
+        when(cloudInstance.getTemplate()).thenReturn(new InstanceTemplate(InstanceType.A1_MEDIUM.toString(), null, null, List.of(),
+                null, null, null, null, null, null));
+        lenient().when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+        lenient().when(amazonEc2Client.modifyInstanceMetadataOptions(any())).thenReturn(ModifyInstanceMetadataOptionsResponse.builder().build());
+        return cloudResource;
     }
 
     private CloudResource createInstanceResource() {

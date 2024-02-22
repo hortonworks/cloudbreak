@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.api.v1.freeipa.stack;
 
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.GET_RECOMMENDATION;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.GET_USED_SUBNETS_BY_ENVIRONMENT_CRN;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.IMD_UPDATE;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.LIST_RETRYABLE_FLOWS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.RETRY;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.UPDATE_SALT;
@@ -43,6 +44,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachCh
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.ChangeImageCatalogRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.GenerateImageCatalogResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imdupdate.InstanceMetadataUpdateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
@@ -368,6 +370,14 @@ public interface FreeIpaV1Endpoint {
     VerticalScaleResponse verticalScalingByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
             @Valid @NotNull VerticalScaleRequest updateRequest);
+
+    @PUT
+    @Path("imd_update")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = IMD_UPDATE, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "imdUpdate",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier instanceMetadataUpdate(@Valid @NotNull InstanceMetadataUpdateRequest request);
 
     @GET
     @Path("internal/used_subnets")

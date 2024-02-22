@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector.INSTANCE_NOT_FOUND_ERROR_CODE;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,7 +22,9 @@ import software.amazon.awssdk.services.autoscaling.model.Instance;
 import software.amazon.awssdk.services.ec2.model.AttributeValue;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.Ec2Exception;
+import software.amazon.awssdk.services.ec2.model.HttpTokensState;
 import software.amazon.awssdk.services.ec2.model.ModifyInstanceAttributeRequest;
+import software.amazon.awssdk.services.ec2.model.ModifyInstanceMetadataOptionsRequest;
 import software.amazon.awssdk.services.ec2.model.Reservation;
 
 @Component
@@ -29,7 +32,8 @@ public class InstanceInAutoScalingGroupUpdater {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceInAutoScalingGroupUpdater.class);
 
-    public void updateInstanceInAutoscalingGroup(AmazonEc2Client ec2Client, AutoScalingGroup autoScalingGroup, Group group) {
+    public void updateInstanceInAutoscalingGroup(AmazonEc2Client ec2Client, AutoScalingGroup autoScalingGroup, Group group,
+            Optional<HttpTokensState> httpTokensStateOptional) {
         String requestedFlavor = group.getReferenceInstanceTemplate().getFlavor();
 
         Set<String> instanceIds = autoScalingGroup.instances().stream()
@@ -39,7 +43,10 @@ public class InstanceInAutoScalingGroupUpdater {
         if (CollectionUtils.isNotEmpty(instanceIds)) {
             List<Reservation> instanceReservations = describeInstances(ec2Client, instanceIds, autoScalingGroup.autoScalingGroupName());
             instanceReservations.forEach(reservation -> {
-                reservation.instances().forEach(instance -> modifyInstanceTypeIfNecessary(ec2Client, instance, requestedFlavor));
+                reservation.instances().forEach(instance -> {
+                    modifyInstanceTypeIfNecessary(ec2Client, instance, requestedFlavor);
+                    httpTokensStateOptional.ifPresent(httpTokensState -> modifyInstanceMetadataIfNecessary(ec2Client, instance, httpTokensState));
+                });
             });
         } else {
             LOGGER.info("No instance is presented for group: {} and auto scaling group: {}. No modify instance request is required.", group.getName(),
@@ -82,6 +89,19 @@ public class InstanceInAutoScalingGroupUpdater {
             ec2Client.modifyInstanceAttribute(modifyInstanceAttributeRequest);
         } else {
             LOGGER.info("Instance {} using the same type what was requested: {}", instance.instanceId(), requestedFlavor);
+        }
+    }
+
+    private void modifyInstanceMetadataIfNecessary(AmazonEc2Client ec2Client, software.amazon.awssdk.services.ec2.model.Instance instance,
+            HttpTokensState httpTokensState) {
+        if (!instance.metadataOptions().httpTokens().equals(httpTokensState)) {
+            ec2Client.modifyInstanceMetadataOptions(ModifyInstanceMetadataOptionsRequest.builder()
+                    .httpTokens(httpTokensState)
+                    .instanceId(instance.instanceId())
+                    .build());
+        } else {
+            LOGGER.info("No need to update instance {}, it's metadata option regarding HTTP token (IMDSv2) " +
+                    "is already the same with the requested value.", instance.instanceId());
         }
     }
 }

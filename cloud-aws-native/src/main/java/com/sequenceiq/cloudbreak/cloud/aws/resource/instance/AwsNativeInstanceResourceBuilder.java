@@ -22,10 +22,12 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.VolumeBuilderUtil;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsImdsUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsStackNameCommonUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
@@ -61,6 +63,7 @@ import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceMetadataOptionsRequest;
 import software.amazon.awssdk.services.ec2.model.InstanceState;
 import software.amazon.awssdk.services.ec2.model.ModifyInstanceAttributeRequest;
+import software.amazon.awssdk.services.ec2.model.ModifyInstanceMetadataOptionsRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.StartInstancesRequest;
@@ -94,6 +97,9 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
 
     @Inject
     private SecurityGroupBuilderUtil securityGroupBuilderUtil;
+
+    @Inject
+    private AwsImdsUtil awsImdsUtil;
 
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -169,9 +175,9 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
 
     @Override
     public CloudResource update(AwsContext context, CloudResource cloudResource, CloudInstance instance,
-            AuthenticatedContext auth, CloudStack cloudStack, Optional<String> targetGroup) throws Exception {
+            AuthenticatedContext auth, CloudStack cloudStack, Optional<String> targetGroup, UpdateType updateType) throws Exception {
         AmazonEc2Client amazonEc2Client = context.getAmazonEc2Client();
-        if (!isThisGroupApplicable(instance, targetGroup)) {
+        if (!isThisGroupApplicable(instance, targetGroup, updateType)) {
             LOGGER.info("The group is {} which is not same as the requested group {}.",
                     instance.getTemplate().getGroupName(), targetGroup.orElse("unknown"));
             return null;
@@ -202,12 +208,25 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                 LOGGER.info("Instance ID {} is using {} type which is the same type what was requested: {}",
                         awsInstance.instanceId(), awsInstance.instanceType().toString(), requestedInstanceType);
             }
+            if (AwsImdsUtil.APPLICABLE_UPDATE_TYPES.contains(updateType)) {
+                awsImdsUtil.validateInstanceMetadataUpdate(updateType, cloudStack, auth);
+                HttpTokensState requestedHttpTokenState = AwsImdsUtil.getHttpTokensStateByUpdateType(updateType);
+                HttpTokensState currentHttpTokenState = awsInstance.metadataOptions() != null && awsInstance.metadataOptions().httpTokens() != null ?
+                        awsInstance.metadataOptions().httpTokens() : HttpTokensState.OPTIONAL;
+                if (!requestedHttpTokenState.equals(currentHttpTokenState)) {
+                    amazonEc2Client.modifyInstanceMetadataOptions(ModifyInstanceMetadataOptionsRequest.builder()
+                            .httpTokens(requestedHttpTokenState)
+                            .instanceId(awsInstance.instanceId())
+                            .build());
+                }
+            }
         }
         return null;
     }
 
-    private boolean isThisGroupApplicable(CloudInstance instance, Optional<String> targetGroup) {
-        return targetGroup.isPresent() && targetGroup.get().equals(instance.getTemplate().getGroupName());
+    private boolean isThisGroupApplicable(CloudInstance instance, Optional<String> targetGroup, UpdateType updateType) {
+        return (targetGroup.isPresent() && targetGroup.get().equals(instance.getTemplate().getGroupName()))
+                || AwsImdsUtil.APPLICABLE_UPDATE_TYPES.contains(updateType);
     }
 
     private boolean isInstanceApplicable(Instance awsInstance, String requestedInstanceType) {

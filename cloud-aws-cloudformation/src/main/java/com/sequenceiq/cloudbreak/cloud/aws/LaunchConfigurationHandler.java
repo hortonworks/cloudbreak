@@ -29,6 +29,8 @@ import software.amazon.awssdk.services.autoscaling.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.autoscaling.model.CreateLaunchConfigurationRequest;
 import software.amazon.awssdk.services.autoscaling.model.DeleteLaunchConfigurationRequest;
 import software.amazon.awssdk.services.autoscaling.model.DescribeLaunchConfigurationsRequest;
+import software.amazon.awssdk.services.autoscaling.model.InstanceMetadataHttpTokensState;
+import software.amazon.awssdk.services.autoscaling.model.InstanceMetadataOptions;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
 
 @Component
@@ -83,6 +85,11 @@ public class LaunchConfigurationHandler {
                         .imageId(imageName)
                         .instanceType(updatableFields.getOrDefault(LaunchTemplateField.INSTANCE_TYPE, oldLaunchConfiguration.instanceType()))
                         .launchConfigurationName(newLaunchConfigName);
+        if (updatableFields.containsKey(LaunchTemplateField.HTTP_METADATA_OPTIONS)) {
+            createLaunchConfigurationRequest.metadataOptions(InstanceMetadataOptions.builder()
+                    .httpTokens(InstanceMetadataHttpTokensState.fromValue(updatableFields.get(LaunchTemplateField.HTTP_METADATA_OPTIONS)))
+                    .build());
+        }
         Optional<List<BlockDeviceMapping>> blockDeviceMapping =
                 resizedRootBlockDeviceMappingProvider.createBlockDeviceMappingIfRootDiskResizeRequired(ac, cloudStack, updatableFields, oldLaunchConfiguration);
         blockDeviceMapping.ifPresent(createLaunchConfigurationRequest::blockDeviceMappings);

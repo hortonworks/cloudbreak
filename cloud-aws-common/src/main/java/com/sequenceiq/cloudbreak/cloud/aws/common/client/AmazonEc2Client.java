@@ -74,6 +74,8 @@ import software.amazon.awssdk.services.ec2.model.ImportKeyPairRequest;
 import software.amazon.awssdk.services.ec2.model.ImportKeyPairResponse;
 import software.amazon.awssdk.services.ec2.model.ModifyInstanceAttributeRequest;
 import software.amazon.awssdk.services.ec2.model.ModifyInstanceAttributeResponse;
+import software.amazon.awssdk.services.ec2.model.ModifyInstanceMetadataOptionsRequest;
+import software.amazon.awssdk.services.ec2.model.ModifyInstanceMetadataOptionsResponse;
 import software.amazon.awssdk.services.ec2.model.ModifyLaunchTemplateRequest;
 import software.amazon.awssdk.services.ec2.model.ModifyLaunchTemplateResponse;
 import software.amazon.awssdk.services.ec2.model.ModifyVolumeRequest;
@@ -298,5 +300,9 @@ public class AmazonEc2Client extends AmazonClient {
 
     public DescribeVolumesModificationsResponse describeVolumeModifications(DescribeVolumesModificationsRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> client.describeVolumesModifications(request));
+    }
+
+    public ModifyInstanceMetadataOptionsResponse modifyInstanceMetadataOptions(ModifyInstanceMetadataOptionsRequest request) {
+        return retry.testWith2SecDelayMax15Times(() -> client.modifyInstanceMetadataOptions(request));
     }
 }

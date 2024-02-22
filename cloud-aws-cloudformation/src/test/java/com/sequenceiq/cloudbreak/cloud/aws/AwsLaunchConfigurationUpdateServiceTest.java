@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.LaunchConfiguration;
+import software.amazon.awssdk.services.ec2.model.HttpTokensState;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsLaunchConfigurationUpdateServiceTest {
@@ -142,8 +144,9 @@ public class AwsLaunchConfigurationUpdateServiceTest {
         when(launchConfigurationHandler.getLaunchConfigurations(autoScalingClient, scalingGroupStringMap.keySet()))
                 .thenReturn(oldLaunchConfigs);
         String newLCName = "newLCName";
-        when(launchConfigurationHandler.createNewLaunchConfiguration(eq(Map.of(LaunchTemplateField.IMAGE_ID, "imageName")), eq(autoScalingClient),
-                eq(oldLaunchConfigs.get(0)), eq(ac.getCloudContext()), eq(ac), eq(stack))).thenReturn(newLCName);
+        when(launchConfigurationHandler.createNewLaunchConfiguration(eq(Map.of(LaunchTemplateField.IMAGE_ID, "imageName",
+                        LaunchTemplateField.HTTP_METADATA_OPTIONS, "required")), eq(autoScalingClient), eq(oldLaunchConfigs.get(0)),
+                eq(ac.getCloudContext()), eq(ac), eq(stack))).thenReturn(newLCName);
         Group group = mock(Group.class);
         String groupName = "groupName";
         when(group.getName()).thenReturn(groupName);
@@ -151,17 +154,19 @@ public class AwsLaunchConfigurationUpdateServiceTest {
         AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         when(awsClient.createEc2Client(any(AwsCredentialView.class), eq("region"))).thenReturn(ec2Client);
 
-        underTest.updateLaunchConfigurations(ac, stack, cfResource, Map.of(LaunchTemplateField.IMAGE_ID, IMAGE_NAME), group, true);
+        underTest.updateLaunchConfigurations(ac, stack, cfResource, Map.of(LaunchTemplateField.IMAGE_ID, IMAGE_NAME,
+                LaunchTemplateField.HTTP_METADATA_OPTIONS, HttpTokensState.REQUIRED.toString()), group, true);
 
         verify(autoScalingGroupHandler, times(1)).getAutoScalingGroups(cloudFormationClient, autoScalingClient, cfResource);
         verify(launchConfigurationHandler, times(1)).getLaunchConfigurations(autoScalingClient, scalingGroupStringMap.keySet());
-        verify(launchConfigurationHandler, times(1)).createNewLaunchConfiguration(eq(Map.of(LaunchTemplateField.IMAGE_ID, IMAGE_NAME)),
+        verify(launchConfigurationHandler, times(1)).createNewLaunchConfiguration(eq(Map.of(LaunchTemplateField.IMAGE_ID, IMAGE_NAME,
+                        LaunchTemplateField.HTTP_METADATA_OPTIONS, HttpTokensState.REQUIRED.toString())),
                 eq(autoScalingClient), eq(oldLaunchConfigs.get(0)), eq(ac.getCloudContext()), eq(ac), eq(stack));
         verify(autoScalingGroupHandler, times(1)).updateAutoScalingGroupWithLaunchConfiguration(autoScalingClient,
                 autoScalingGroupName, newLCName);
         verify(launchConfigurationHandler, times(1)).removeOldLaunchConfiguration(oldLaunchConfigs.get(0), autoScalingClient,
                 ac.getCloudContext());
-        verify(instanceUpdater).updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group);
+        verify(instanceUpdater).updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group, Optional.of(HttpTokensState.REQUIRED));
         verifyNoMoreInteractions(instanceUpdater);
     }
 
@@ -201,7 +206,7 @@ public class AwsLaunchConfigurationUpdateServiceTest {
                 autoScalingGroupName, newLCName);
         verify(launchConfigurationHandler, times(1)).removeOldLaunchConfiguration(oldLaunchConfigs.get(0), autoScalingClient,
                 ac.getCloudContext());
-        verify(instanceUpdater, never()).updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group);
+        verify(instanceUpdater, never()).updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group, Optional.empty());
         verifyNoMoreInteractions(instanceUpdater);
     }
 }

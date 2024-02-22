@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,8 @@ import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.autoscaling.model.Instance;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.Ec2Exception;
+import software.amazon.awssdk.services.ec2.model.HttpTokensState;
+import software.amazon.awssdk.services.ec2.model.InstanceMetadataOptionsResponse;
 import software.amazon.awssdk.services.ec2.model.ModifyInstanceAttributeRequest;
 import software.amazon.awssdk.services.ec2.model.Reservation;
 
@@ -65,7 +68,7 @@ class InstanceInAutoScalingGroupUpdaterTest {
     void testUpdateInstanceInAutoscalingGroupWhenTheASGIsEmpty() {
         when(autoScalingGroup.instances()).thenReturn(List.of());
 
-        assertDoesNotThrow(() -> underTest.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group));
+        assertDoesNotThrow(() -> underTest.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group, Optional.empty()));
 
         verifyNoInteractions(ec2Client);
     }
@@ -85,7 +88,7 @@ class InstanceInAutoScalingGroupUpdaterTest {
         when(ec2Client.describeInstances(any())).thenThrow(ec2Exception);
 
         assertThrows(CloudbreakServiceException.class,
-                () -> underTest.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group),
+                () -> underTest.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group, Optional.empty()),
                 "Some of the instances in the auto scaling group('asg-name') does not exist on EC2: ");
 
         verify(ec2Client, times(1)).describeInstances(any());
@@ -103,7 +106,7 @@ void testUpdateInstanceInAutoscalingGroupWhenTheASGContainsInstancesButDescribeI
         when(ec2Client.describeInstances(any())).thenThrow(SdkClientException.builder().build());
 
         assertThrows(CloudbreakServiceException.class,
-                () -> underTest.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group),
+                () -> underTest.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group, Optional.empty()),
                 "AWS EC2 could not be contacted for a response during describing instances for auto scaling group('asg-name')");
 
         verify(ec2Client, times(1)).describeInstances(any());
@@ -123,11 +126,12 @@ void testUpdateInstanceInAutoscalingGroupWhenTheASGContainsInstancesButDescribeI
                         .build())
                 .build());
 
-        assertDoesNotThrow(() -> underTest.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group));
+        assertDoesNotThrow(() -> underTest.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group, Optional.empty()));
 
         verify(ec2Client, times(1)).describeInstances(any());
         ArgumentCaptor<ModifyInstanceAttributeRequest> captor = ArgumentCaptor.forClass(ModifyInstanceAttributeRequest.class);
         verify(ec2Client, times(1)).modifyInstanceAttribute(captor.capture());
+        verify(ec2Client, times(0)).modifyInstanceMetadataOptions(any());
         ModifyInstanceAttributeRequest request = captor.getValue();
         assertEquals(request.instanceId(), "instanceId2");
         assertEquals(request.instanceType().value(), DESIRED_FLAVOR);
@@ -147,9 +151,47 @@ void testUpdateInstanceInAutoscalingGroupWhenTheASGContainsInstancesButDescribeI
                         .build())
                 .build());
 
-        assertDoesNotThrow(() -> underTest.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group));
+        assertDoesNotThrow(() -> underTest.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group, Optional.empty()));
+
+        verify(ec2Client, times(1)).describeInstances(any());
+        verify(ec2Client, times(0)).modifyInstanceMetadataOptions(any());
+        verifyNoMoreInteractions(ec2Client);
+    }
+
+    @Test
+    void testUpdateInstanceWhenImdsOptionIsTheSame() {
+        setupImdsMock();
+
+        assertDoesNotThrow(() -> underTest.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group, Optional.of(HttpTokensState.REQUIRED)));
 
         verify(ec2Client, times(1)).describeInstances(any());
         verifyNoMoreInteractions(ec2Client);
+    }
+
+    @Test
+    void testUpdateInstanceWhenImdsOptionIsUpdated() {
+        setupImdsMock();
+
+        assertDoesNotThrow(() -> underTest.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group, Optional.of(HttpTokensState.OPTIONAL)));
+
+        verify(ec2Client, times(1)).describeInstances(any());
+        verify(ec2Client, times(2)).modifyInstanceMetadataOptions(any());
+        verifyNoMoreInteractions(ec2Client);
+    }
+
+    private void setupImdsMock() {
+        Instance instance1 = mock(Instance.class);
+        when(instance1.instanceId()).thenReturn("instanceId1");
+        Instance instance2 = mock(Instance.class);
+        when(instance2.instanceId()).thenReturn("instanceId2");
+        when(autoScalingGroup.instances()).thenReturn(List.of(instance1, instance2));
+        when(ec2Client.describeInstances(any())).thenReturn(DescribeInstancesResponse.builder()
+                .reservations(Reservation.builder()
+                        .instances(List.of(software.amazon.awssdk.services.ec2.model.Instance.builder().instanceType(DESIRED_FLAVOR)
+                                        .metadataOptions(InstanceMetadataOptionsResponse.builder().httpTokens(HttpTokensState.REQUIRED).build()).build(),
+                                software.amazon.awssdk.services.ec2.model.Instance.builder().instanceType(DESIRED_FLAVOR)
+                                        .metadataOptions(InstanceMetadataOptionsResponse.builder().httpTokens(HttpTokensState.REQUIRED).build()).build()))
+                        .build())
+                .build());
     }
 }

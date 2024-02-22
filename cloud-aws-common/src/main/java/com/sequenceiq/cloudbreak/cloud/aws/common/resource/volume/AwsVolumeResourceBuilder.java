@@ -309,12 +309,6 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         return previouslyCreatedVolumeSets;
     }
 
-    @Override
-    public CloudResource update(AwsContext context, CloudResource cloudResource, CloudInstance instance,
-            AuthenticatedContext auth, CloudStack cloudStack, Optional<String> targetGroupName) throws Exception {
-        return null;
-    }
-
     private Long getEphemeralCount(Group group) {
         Long ephemeralTemplateCount = group.getReferenceInstanceTemplate().getVolumes().stream()
                 .filter(vol -> isVolumeEphemeral(vol)).count();

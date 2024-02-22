@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsImageUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsLaunchConfigurationUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsLaunchTemplateUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.LaunchTemplateField;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsImdsUtil;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -31,6 +32,8 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.common.api.type.CommonResourceType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.services.ec2.model.HttpTokensState;
 
 @Service
 public class AwsUpdateService {
@@ -48,6 +51,9 @@ public class AwsUpdateService {
 
     @Inject
     private AwsLaunchConfigurationUpdateService launchConfigurationUpdateService;
+
+    @Inject
+    private AwsImdsUtil awsImdsUtil;
 
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
             UpdateType type, Optional<String> targetGroupName) {
@@ -71,9 +77,29 @@ public class AwsUpdateService {
                 updateWithVerticalScaling(authenticatedContext, stack, resources, targetGroupName, true);
             } else if (type.equals(UpdateType.VERTICAL_SCALE_WITHOUT_INSTANCES)) {
                 updateWithVerticalScaling(authenticatedContext, stack, resources, targetGroupName, false);
+            } else if (AwsImdsUtil.APPLICABLE_UPDATE_TYPES.contains(type)) {
+                updateInstanceMetadataOptions(authenticatedContext, stack, resources, type);
             }
         }
         return cloudResourceStatuses;
+    }
+
+    private void updateInstanceMetadataOptions(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+            UpdateType updateType) {
+        awsImdsUtil.validateInstanceMetadataUpdate(updateType, stack, authenticatedContext);
+        HttpTokensState httpTokensState = AwsImdsUtil.getHttpTokensStateByUpdateType(updateType);
+        String cfTemplate = stack.getTemplate();
+        CloudResource cfResource = getCloudFormationStack(resources);
+        for (Group group : stack.getGroups()) {
+            Map<LaunchTemplateField, String> updatableFields = Map.of(LaunchTemplateField.HTTP_METADATA_OPTIONS, httpTokensState.toString());
+            if (cfTemplate.contains(LAUNCH_TEMPLATE)) {
+                LOGGER.info("Update fields on launchtemplate {} on group {} on cf {}", updatableFields, group.getName(), cfResource.getName());
+                awsLaunchTemplateUpdateService.updateLaunchTemplate(updatableFields, authenticatedContext, cfResource.getName(), group, stack, true);
+            } else {
+                LOGGER.info("Update fields on launchconfiguration {} on group {} on cf {}", updatableFields, group.getName(), cfResource.getName());
+                launchConfigurationUpdateService.updateLaunchConfigurations(authenticatedContext, stack, cfResource, updatableFields, group, true);
+            }
+        }
     }
 
     private void updateWithVerticalScaling(AuthenticatedContext authenticatedContext, CloudStack stack,
@@ -99,7 +125,6 @@ public class AwsUpdateService {
                 }
             }
         }
-
     }
 
     public void updateUserData(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,

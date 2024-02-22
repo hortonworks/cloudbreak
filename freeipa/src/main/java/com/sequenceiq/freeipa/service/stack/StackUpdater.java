@@ -1,15 +1,21 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import java.util.Map;
 import java.util.Objects;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateProperties;
+import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateType;
+import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateTypeMetadata;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.message.StackStatusMessageTransformator;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -34,6 +40,9 @@ public class StackUpdater {
 
     @Inject
     private ServiceStatusRawMessageTransformer serviceStatusRawMessageTransformer;
+
+    @Inject
+    private InstanceMetadataUpdateProperties instanceMetadataUpdateProperties;
 
     public Stack updateStackStatus(Long stackId, DetailedStackStatus detailedStatus, String statusReason) {
         return doUpdateStackStatus(stackId, detailedStatus, statusReason);
@@ -121,6 +130,18 @@ public class StackUpdater {
             stackService.save(stack);
         } else {
             LOGGER.info("The variant was already set to {}", variant);
+        }
+    }
+
+    public void updateSupportedImdsVersion(Long stackId, InstanceMetadataUpdateType updateType) {
+        Stack stack = stackService.getStackById(stackId);
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(stack.getCloudPlatform());
+        instanceMetadataUpdateProperties.validateUpdateType(updateType, cloudPlatform);
+        Map<CloudPlatform, InstanceMetadataUpdateTypeMetadata> metadata = instanceMetadataUpdateProperties.getTypes().get(updateType).metadata();
+        String supportedImdsVersion = metadata.get(cloudPlatform).imdsVersion();
+        if (!StringUtils.equals(stack.getSupportedImdsVersion(), supportedImdsVersion)) {
+            stack.setSupportedImdsVersion(supportedImdsVersion);
+            stackService.save(stack);
         }
     }
 }

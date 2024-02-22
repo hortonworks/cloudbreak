@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -29,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsImageUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsLaunchConfigurationUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsLaunchTemplateUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.LaunchTemplateField;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsImdsUtil;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -38,8 +42,11 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.base64.Base64Util;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
+
+import software.amazon.awssdk.services.ec2.model.HttpTokensState;
 
 @ExtendWith(MockitoExtension.class)
 class AwsUpdateServiceTest {
@@ -58,6 +65,9 @@ class AwsUpdateServiceTest {
 
     @Mock
     private AwsLaunchConfigurationUpdateService launchConfigurationUpdateService;
+
+    @Mock
+    private AwsImdsUtil awsImdsUtil;
 
     @InjectMocks
     private AwsUpdateService underTest;
@@ -195,6 +205,47 @@ class AwsUpdateServiceTest {
                 "100");
         verify(awsLaunchTemplateUpdateService, times(1)).updateLaunchTemplate(eq(updatableFields), any(), eq("cf"), eq(gatewayGroup),
                 eq(stack), eq(Boolean.TRUE));
+    }
+
+    @Test
+    void instanceMetadataUpdateLaunchTemplate() {
+        CloudResource cloudResource = CloudResource.builder().withName("cf").withType(ResourceType.CLOUDFORMATION_STACK).build();
+        Group gatewayGroup = mock(Group.class);
+        when(gatewayGroup.getName()).thenReturn("gwGroup");
+        when(stack.getGroups()).thenReturn(List.of(gatewayGroup));
+        when(stack.getTemplate()).thenReturn("AWS::EC2::LaunchTemplate");
+        doNothing().when(awsImdsUtil).validateInstanceMetadataUpdate(any(), any(), any());
+
+        underTest.update(ac, stack, Collections.singletonList(cloudResource), UpdateType.INSTANCE_METADATA_UPDATE_TOKEN_REQUIRED, Optional.empty());
+
+        Map<LaunchTemplateField, String> updatableFields = Map.of(LaunchTemplateField.HTTP_METADATA_OPTIONS, HttpTokensState.REQUIRED.toString());
+        verify(awsLaunchTemplateUpdateService, times(1)).updateLaunchTemplate(eq(updatableFields), any(), eq("cf"), any(),
+                eq(stack), eq(Boolean.TRUE));
+    }
+
+    @Test
+    void instanceMetadataUpdateLaunchConfig() {
+        CloudResource cloudResource = CloudResource.builder().withName("cf").withType(ResourceType.CLOUDFORMATION_STACK).build();
+        Group gatewayGroup = mock(Group.class);
+        when(gatewayGroup.getName()).thenReturn("gwGroup");
+        when(stack.getGroups()).thenReturn(List.of(gatewayGroup));
+        when(stack.getTemplate()).thenReturn("AWS::EC2::LaunchConfiguration");
+        doNothing().when(awsImdsUtil).validateInstanceMetadataUpdate(any(), any(), any());
+
+        underTest.update(ac, stack, Collections.singletonList(cloudResource), UpdateType.INSTANCE_METADATA_UPDATE_TOKEN_REQUIRED, Optional.empty());
+
+        Map<LaunchTemplateField, String> updatableFields = Map.of(LaunchTemplateField.HTTP_METADATA_OPTIONS, HttpTokensState.REQUIRED.toString());
+        verify(launchConfigurationUpdateService, times(1)).updateLaunchConfigurations(any(), any(), any(), eq(updatableFields),
+                any(), eq(Boolean.TRUE));
+    }
+
+    @Test
+    void instanceMetadataUpdateLaunchConfigIfNotSupported() {
+        CloudResource cloudResource = CloudResource.builder().withName("cf").withType(ResourceType.CLOUDFORMATION_STACK).build();
+        doThrow(CloudbreakServiceException.class).when(awsImdsUtil).validateInstanceMetadataUpdate(any(), any(), any());
+
+        assertThrows(CloudbreakServiceException.class, () -> underTest.update(ac, stack, Collections.singletonList(cloudResource),
+                UpdateType.INSTANCE_METADATA_UPDATE_TOKEN_REQUIRED, Optional.empty()));
     }
 
     @Test

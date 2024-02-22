@@ -30,7 +30,10 @@ import software.amazon.awssdk.services.ec2.model.CreateLaunchTemplateVersionRequ
 import software.amazon.awssdk.services.ec2.model.CreateLaunchTemplateVersionResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeLaunchTemplateVersionsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeLaunchTemplateVersionsResponse;
+import software.amazon.awssdk.services.ec2.model.HttpTokensState;
 import software.amazon.awssdk.services.ec2.model.LaunchTemplateBlockDeviceMappingRequest;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateHttpTokensState;
+import software.amazon.awssdk.services.ec2.model.LaunchTemplateInstanceMetadataOptionsRequest;
 import software.amazon.awssdk.services.ec2.model.LaunchTemplateVersion;
 import software.amazon.awssdk.services.ec2.model.ModifyLaunchTemplateRequest;
 import software.amazon.awssdk.services.ec2.model.ModifyLaunchTemplateResponse;
@@ -141,7 +144,9 @@ public class AwsLaunchTemplateUpdateService {
                     newLaunchTemplate);
             if (updateInstances) {
                 LOGGER.info("Update all instance for {} autoscaling group", autoScalingGroup.autoScalingGroupName());
-                instanceUpdater.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group);
+                Optional<HttpTokensState> httpTokensStateOptional = Optional.ofNullable(HttpTokensState.fromValue(
+                        updatableFields.getOrDefault(LaunchTemplateField.HTTP_METADATA_OPTIONS, null)));
+                instanceUpdater.updateInstanceInAutoscalingGroup(ec2Client, autoScalingGroup, group, httpTokensStateOptional);
             }
         }
     }
@@ -202,16 +207,22 @@ public class AwsLaunchTemplateUpdateService {
             Map<LaunchTemplateField, String> updatableFields, LaunchTemplateSpecification launchTemplateSpecification, CloudStack cloudStack) {
         List<LaunchTemplateBlockDeviceMappingRequest> resizedRootBlockDeviceMapping =
                 resizedRootBlockDeviceMappingProvider.createUpdatedRootBlockDeviceMapping(ec2Client, updatableFields, launchTemplateSpecification, cloudStack);
+        RequestLaunchTemplateData.Builder templateDataBuilder = RequestLaunchTemplateData.builder()
+                .imageId(updatableFields.getOrDefault(LaunchTemplateField.IMAGE_ID, null))
+                .userData(updatableFields.getOrDefault(LaunchTemplateField.USER_DATA, null))
+                .instanceType(updatableFields.getOrDefault(LaunchTemplateField.INSTANCE_TYPE, null))
+                .blockDeviceMappings(CollectionUtils.isNotEmpty(resizedRootBlockDeviceMapping) ? resizedRootBlockDeviceMapping : null);
+        if (updatableFields.containsKey(LaunchTemplateField.HTTP_METADATA_OPTIONS)) {
+            templateDataBuilder.metadataOptions(LaunchTemplateInstanceMetadataOptionsRequest
+                    .builder()
+                    .httpTokens(LaunchTemplateHttpTokensState.fromValue(updatableFields.get(LaunchTemplateField.HTTP_METADATA_OPTIONS)))
+                    .build());
+        }
         CreateLaunchTemplateVersionRequest createLaunchTemplateVersionRequest = CreateLaunchTemplateVersionRequest.builder()
                 .launchTemplateId(launchTemplateSpecification.launchTemplateId())
                 .sourceVersion(launchTemplateSpecification.version())
                 .versionDescription(updatableFields.getOrDefault(LaunchTemplateField.DESCRIPTION, null))
-                .launchTemplateData(RequestLaunchTemplateData.builder()
-                        .imageId(updatableFields.getOrDefault(LaunchTemplateField.IMAGE_ID, null))
-                        .userData(updatableFields.getOrDefault(LaunchTemplateField.USER_DATA, null))
-                        .instanceType(updatableFields.getOrDefault(LaunchTemplateField.INSTANCE_TYPE, null))
-                        .blockDeviceMappings(CollectionUtils.isNotEmpty(resizedRootBlockDeviceMapping) ? resizedRootBlockDeviceMapping : null)
-                        .build())
+                .launchTemplateData(templateDataBuilder.build())
                 .build();
         CreateLaunchTemplateVersionResponse createLaunchTemplateVersionResponse = ec2Client.createLaunchTemplateVersion(createLaunchTemplateVersionRequest);
         validateCreatedLaunchTemplateVersionResponse(createLaunchTemplateVersionResponse);

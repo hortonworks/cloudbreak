@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.template.compute;
 
 import java.util.Optional;
 
+import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -25,8 +26,11 @@ public class ResourceUpdateCallablePayload {
 
     private final Optional<String> targetGroup;
 
+    private final UpdateType updateType;
+
     public ResourceUpdateCallablePayload(CloudResource resource, CloudInstance cloudInstance, ResourceBuilderContext context,
-        AuthenticatedContext auth, CloudStack cloudStack, ComputeResourceBuilder<ResourceBuilderContext> builder, Optional<String> targetGroup) {
+        AuthenticatedContext auth, CloudStack cloudStack, ComputeResourceBuilder<ResourceBuilderContext> builder, Optional<String> targetGroup,
+            UpdateType updateType) {
         this.resource = resource;
         this.cloudInstance = cloudInstance;
         this.context = context;
@@ -34,6 +38,7 @@ public class ResourceUpdateCallablePayload {
         this.cloudStack = cloudStack;
         this.builder = builder;
         this.targetGroup = targetGroup;
+        this.updateType = updateType;
     }
 
     public CloudResource getCloudResource() {
@@ -62,5 +67,9 @@ public class ResourceUpdateCallablePayload {
 
     public Optional<String> getTargetGroup() {
         return targetGroup;
+    }
+
+    public UpdateType getUpdateType() {
+        return updateType;
     }
 }

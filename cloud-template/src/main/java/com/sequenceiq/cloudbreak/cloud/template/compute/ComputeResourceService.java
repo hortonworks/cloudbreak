@@ -28,6 +28,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.google.common.primitives.Ints;
+import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -124,9 +125,9 @@ public class ComputeResourceService {
     }
 
     public List<CloudResourceStatus> update(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack stack,
-            List<CloudResource> cloudResource, Optional<String> group) {
+            List<CloudResource> cloudResource, Optional<String> group, UpdateType updateType) {
         LOGGER.info("Update compute resources.");
-        return new ResourceBuilder(ctx, auth).updateResources(ctx, auth, cloudResource, stack, group);
+        return new ResourceBuilder(ctx, auth).updateResources(ctx, auth, cloudResource, stack, group, updateType);
     }
 
     public List<CloudVmInstanceStatus> stopInstances(ResourceBuilderContext context, AuthenticatedContext auth, List<CloudInstance> cloudInstances) {
@@ -341,7 +342,7 @@ public class ComputeResourceService {
         }
 
         public List<CloudResourceStatus> updateResources(ResourceBuilderContext ctx, AuthenticatedContext auth,
-                List<CloudResource> computeResources, CloudStack cloudStack, Optional<String> group) {
+                List<CloudResource> computeResources, CloudStack cloudStack, Optional<String> group, UpdateType updateType) {
             List<CloudResourceStatus> results = new ArrayList<>();
             Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
             Variant variant = auth.getCloudContext().getVariant();
@@ -356,7 +357,7 @@ public class ComputeResourceService {
                             .findFirst();
                     if (instance.isPresent()) {
                         ResourceUpdateCallablePayload resourceUpdateCallablePayload
-                                = new ResourceUpdateCallablePayload(cloudResource, instance.get(), ctx, auth, cloudStack, builder, group);
+                                = new ResourceUpdateCallablePayload(cloudResource, instance.get(), ctx, auth, cloudStack, builder, group, updateType);
                         ResourceUpdateCallable updateCallable = resourceActionFactory.buildUpdateCallable(resourceUpdateCallablePayload);
                         Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(updateCallable);
                         futures.add(future);

@@ -21,6 +21,7 @@ public class ModelDescriptions {
     public static final String GROUP = "Group to check for.";
     public static final String RESULT = "Result of the check.";
     public static final String REBUILD_SOURCE_CRN = "CRN of the FreeIPA to use as the source for rebuilding.";
+    public static final String IMD_UPDATE_TYPE = "Type of instance metadata update.";
 
     private ModelDescriptions() {
     }

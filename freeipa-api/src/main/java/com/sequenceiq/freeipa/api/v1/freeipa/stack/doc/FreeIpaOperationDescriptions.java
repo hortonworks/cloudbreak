@@ -46,6 +46,8 @@ public final class FreeIpaOperationDescriptions {
             "Initiates the modification of the proxy config for FreeIPA stack by environment CRN using the internal actor";
     public static final String GET_RECOMMENDATION = "Get recommendation that advises cloud resources for FreeIPA based on the given credential CRN.";
     public static final String VERTICAL_SCALE_BY_CRN = "Vertical scale by environment CRN.";
+
+    public static final String IMD_UPDATE = "Stacks' instances metadata update.";
     public static final String ROTATE_SECRETS_BY_CRN = "Rotate secrets by environment CRN.";
     public static final String ROTATE_MULTI_SECRETS_BY_CRN = "Rotate multi secrets by environment CRN.";
     public static final String GET_USED_SUBNETS_BY_ENVIRONMENT_CRN = "List the used subnets by the given Environment resource CRN";

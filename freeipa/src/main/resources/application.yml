@@ -330,6 +330,18 @@ cb:
       enabled: true
       contentlogging: true
 
+  imd.update.types:
+    IMDS_HTTP_TOKEN_REQUIRED:
+      supportedPlatforms: AWS
+      metadata:
+        AWS:
+          imdsVersion: v2
+    IMDS_HTTP_TOKEN_OPTIONAL:
+      supportedPlatforms: AWS
+      metadata:
+        AWS:
+          imdsVersion: v1
+
 cluster:
   monitoring:
     enabled: true
