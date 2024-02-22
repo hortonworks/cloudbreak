@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image.filter;
 
+import static com.sequenceiq.cloudbreak.cloud.model.component.StackType.CDH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -55,6 +56,24 @@ class CentOSToRedHatUpgradeImageFilterTest {
         ImageFilterResult result = testImageFiltering(imageFilterParams, redhatImage);
 
         assertEquals(List.of(), result.getImages());
+    }
+
+    @Test
+    //CHECKSTYLE:OFF
+    public void testCentOS_7_2_16_toRedHat_7_2_17_UpgradeIsAllowedWhenCentOSImageIsAvailableWithTheSamePackages() {
+        //CHECKSTYLE:ON
+        redhatImageIsPreferred();
+        ImageFilterParams imageFilterParams = centosImageFilterParams(VERSION_7_2_16);
+        Image redhatImage = redhatCatalogImage(VERSION_7_2_17);
+        Image centosImage = centOSCatalogImage(VERSION_7_2_17);
+        when(centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(imageFilterParams.getCurrentImage(), redhatImage,
+                imageFilterParams.getStackRelatedParcels())).thenReturn(false);
+        when(centOSToRedHatUpgradeAvailabilityService.isHelperImageAvailable(List.of(redhatImage, centosImage), redhatImage,
+                imageFilterParams.getStackRelatedParcels().keySet())).thenReturn(true);
+
+        ImageFilterResult result = testImageFiltering(imageFilterParams, redhatImage, centosImage);
+
+        assertEquals(List.of(redhatImage, centosImage), result.getImages());
     }
 
     @Test
@@ -139,7 +158,7 @@ class CentOSToRedHatUpgradeImageFilterTest {
     }
 
     private ImageFilterParams imageFilterParams(com.sequenceiq.cloudbreak.cloud.model.Image image) {
-        return new ImageFilterParams(image, null, false, null, null, null, null, null, null, null, null, false);
+        return new ImageFilterParams(image, null, false, Map.of(CDH.name(), "7.2.17"), null, null, null, null, null, null, null, false);
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image image(String os, String osType, String version) {

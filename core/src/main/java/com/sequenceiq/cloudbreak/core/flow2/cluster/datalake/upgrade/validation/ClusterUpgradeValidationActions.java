@@ -89,6 +89,8 @@ public class ClusterUpgradeValidationActions {
 
     private static final String TARGET_RUNTIME = "targetRuntime";
 
+    private static final String REPLACE_VMS = "replaceVms";
+
     @Inject
     private StackService stackService;
 
@@ -128,6 +130,7 @@ public class ClusterUpgradeValidationActions {
                 cloudbreakEventService.fireCloudbreakEvent(payload.getResourceId(), UPDATE_IN_PROGRESS.name(), resourceEvent);
                 variables.put(LOCK_COMPONENTS, payload.isLockComponents());
                 variables.put(ROLLING_UPGRADE_ENABLED, payload.isRollingUpgradeEnabled());
+                variables.put(REPLACE_VMS, payload.isReplaceVms());
                 ClusterUpgradeValidationEvent event = new ClusterUpgradeValidationEvent(START_CLUSTER_UPGRADE_S3GUARD_VALIDATION_EVENT.name(),
                         payload.getResourceId(), payload.getImageId());
                 sendEvent(context, event.selector(), event);
@@ -299,10 +302,11 @@ public class ClusterUpgradeValidationActions {
                 LOGGER.info("Starting to validate services.");
                 boolean lockComponents = (Boolean) variables.get(LOCK_COMPONENTS);
                 boolean rollingUpgradeEnabled = Optional.ofNullable(variables.get(ROLLING_UPGRADE_ENABLED)).map(variable -> (Boolean) (variable)).orElse(false);
+                boolean replaceVms = Optional.ofNullable(variables.get(REPLACE_VMS)).map(variable -> (Boolean) (variable)).orElse(false);
                 String targetRuntime = (String) variables.get(TARGET_RUNTIME);
                 UpgradeImageInfo imageInfo = (UpgradeImageInfo) variables.get(UPGRADE_IMAGE_INFO);
                 ClusterUpgradeServiceValidationEvent event = new ClusterUpgradeServiceValidationEvent(payload.getResourceId(), lockComponents,
-                        rollingUpgradeEnabled, targetRuntime, imageInfo);
+                        rollingUpgradeEnabled, targetRuntime, imageInfo, replaceVms);
                 sendEvent(context, event.selector(), event);
             }
 

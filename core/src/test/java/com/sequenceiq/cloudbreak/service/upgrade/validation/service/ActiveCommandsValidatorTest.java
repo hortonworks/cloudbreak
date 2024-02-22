@@ -56,7 +56,7 @@ public class ActiveCommandsValidatorTest {
 
     @BeforeEach
     void before() {
-        request = new ServiceUpgradeValidationRequest(stack, true, true, null);
+        request = new ServiceUpgradeValidationRequest(stack, true, true, null, false);
     }
 
     @Test

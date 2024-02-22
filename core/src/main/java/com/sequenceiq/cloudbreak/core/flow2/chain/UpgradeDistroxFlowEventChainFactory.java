@@ -4,6 +4,9 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCluste
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_FAILED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_STARTED;
+import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_INIT_EVENT;
 import static com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType.ALL_AT_ONCE;
 import static com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType.BATCH;
@@ -27,6 +30,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeState;
@@ -46,6 +50,8 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
+import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.cloudbreak.service.upgrade.image.CentOSToRedHatUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -67,9 +73,12 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
     @Inject
     private ScalingHardLimitsService scalingHardLimitsService;
 
+    @Inject
+    private CentOSToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
+
     @Override
     public String initEvent() {
-        return FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
+        return DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
     }
 
     @Override
@@ -89,22 +98,35 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
 
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(DistroXUpgradeTriggerEvent event) {
+        Optional<Image> helperImage = centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(event.getImageChangeDto().getImageId(),
+                event.getResourceId());
+        DistroXUpgradeTriggerEvent eventForRuntimeUpgrade = helperImage.map(image -> createEventForRuntimeUpgrade(image, event)).orElse(event);
+
         LOGGER.debug("Creating flow trigger event queue for distrox upgrade with event {}", event);
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        addUpgradeValidationTriggerEvent(event).ifPresent(flowEventChain::add);
-        addClusterUpgradePreparationTriggerEvent(event).ifPresent(flowEventChain::add);
-        addSaltUpdateTriggerEvent(event).ifPresent(flowEventChain::add);
-        addClusterUpgradeTriggerEvent(event).ifPresent(flowEventChain::add);
+        addUpgradeValidationTriggerEvent(eventForRuntimeUpgrade).ifPresent(flowEventChain::add);
+        addClusterUpgradePreparationTriggerEvent(eventForRuntimeUpgrade).ifPresent(flowEventChain::add);
+        addSaltUpdateTriggerEvent(eventForRuntimeUpgrade).ifPresent(flowEventChain::add);
+        addClusterUpgradeTriggerEvent(eventForRuntimeUpgrade).ifPresent(flowEventChain::add);
         addImageUpdateTriggerEvent(event).ifPresent(flowEventChain::add);
         addClusterRepairTriggerEventIfNecessary(event).ifPresent(flowEventChain::add);
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
+    }
+
+    private DistroXUpgradeTriggerEvent createEventForRuntimeUpgrade(Image helperImage, DistroXUpgradeTriggerEvent event) {
+        ImageChangeDto imageChangeDto = event.getImageChangeDto();
+        LOGGER.debug("Creating new event where changing the image from RHEL8 {} to centos7 {} for perform the runtime upgrade", imageChangeDto.getImageId(),
+                helperImage.getUuid());
+        return new DistroXUpgradeTriggerEvent(event.getSelector(), event.getResourceId(),
+                new ImageChangeDto(event.getResourceId(), helperImage.getUuid(), imageChangeDto.getImageCatalogName(), imageChangeDto.getImageCatalogUrl()),
+                event.isReplaceVms(), event.isLockComponents(), event.getTriggeredStackVariant(), event.isRollingUpgradeEnabled());
     }
 
     private Optional<ClusterUpgradeValidationTriggerEvent> addUpgradeValidationTriggerEvent(DistroXUpgradeTriggerEvent event) {
         if (upgradeValidationEnabled) {
             LOGGER.info("Upgrade validation enabled, adding to flowchain");
             return Optional.of(new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto().getImageId(),
-                    event.isLockComponents(), event.isRollingUpgradeEnabled()));
+                    event.isLockComponents(), event.isRollingUpgradeEnabled(), event.isReplaceVms()));
         } else {
             LOGGER.info("Upgrade validation disabled");
             return Optional.empty();
@@ -135,15 +157,15 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
     }
 
     private Optional<StackImageUpdateTriggerEvent> addImageUpdateTriggerEvent(DistroXUpgradeTriggerEvent event) {
-        return Optional.of(new StackImageUpdateTriggerEvent(FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT, event.getImageChangeDto()));
+        return Optional.of(new StackImageUpdateTriggerEvent(STACK_IMAGE_UPDATE_TRIGGER_EVENT, event.getImageChangeDto()));
     }
 
     private Optional<ClusterRepairTriggerEvent> addClusterRepairTriggerEventIfNecessary(DistroXUpgradeTriggerEvent event) {
         if (event.isReplaceVms()) {
-            Map<String, List<String>> nodeMap = getReplaceableInstancesByHostgroup(event);
+            Map<String, List<String>> nodeMap = getReplaceableInstancesByHostGroup(event);
             ClusterRepairTriggerEvent.RepairType repairType = decideRepairType(event, nodeMap);
             LOGGER.info("Repair type: {}", repairType);
-            return Optional.of(new ClusterRepairTriggerEvent(FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT, event.getResourceId(),
+            return Optional.of(new ClusterRepairTriggerEvent(CLUSTER_REPAIR_TRIGGER_EVENT, event.getResourceId(),
                     repairType, nodeMap, true, event.getTriggeredStackVariant(), event.isRollingUpgradeEnabled()));
         } else {
             return Optional.empty();
@@ -164,7 +186,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         }
     }
 
-    private Map<String, List<String>> getReplaceableInstancesByHostgroup(DistroXUpgradeTriggerEvent event) {
+    private Map<String, List<String>> getReplaceableInstancesByHostGroup(DistroXUpgradeTriggerEvent event) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult = clusterRepairService.validateRepair(ManualClusterRepairMode.ALL,
                 event.getResourceId(), Set.of(), false);
         return toStringMap(validationResult.getSuccess());

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation.service;
 
+import java.util.Optional;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -10,7 +12,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
-import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.conf.LimitConfiguration;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 
 @Component
@@ -27,17 +29,20 @@ public class ClusterSizeUpgradeValidator implements ServiceUpgradeValidator {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private LimitConfiguration limitConfiguration;
+
     @Override
     public void validate(ServiceUpgradeValidationRequest validationRequest) {
+        long numberOfInstances = validationRequest.stack().getFullNodeCount();
         if (validationRequest.rollingUpgradeEnabled() && rollingUpgradeValidationEnabled()) {
-            validateClusterSizeForRollingUpgrade(validationRequest.stack());
-        } else {
-            LOGGER.debug("Skipping cluster size validation because the rolling upgrade is not enabled");
+            validateClusterSizeForRollingUpgrade(numberOfInstances);
+        } else if (validationRequest.replaceVms()) {
+            validateForOsUpgrade(numberOfInstances);
         }
     }
 
-    private void validateClusterSizeForRollingUpgrade(StackDto stack) {
-        int numberOfInstances = stack.getAllAvailableInstances().size();
+    private void validateClusterSizeForRollingUpgrade(long numberOfInstances) {
         if (numberOfInstances > maxNumberOfInstancesForRollingUpgrade) {
             String errorMessage = String.format("Rolling upgrade is not permitted because this cluster has %s nodes but the maximum number of "
                     + "allowed nodes is %s.", numberOfInstances, maxNumberOfInstancesForRollingUpgrade);
@@ -54,5 +59,15 @@ public class ClusterSizeUpgradeValidator implements ServiceUpgradeValidator {
             LOGGER.debug("Skipping cluster size validation because rolling upgrade validation is disabled.");
         }
         return !skipRollingUpgradeValidationEnabled;
+    }
+
+    private void validateForOsUpgrade(long numberOfInstances) {
+        Integer upgradeNodeCountLimit = limitConfiguration.getUpgradeNodeCountLimit(Optional.ofNullable(ThreadBasedUserCrnProvider.getAccountId()));
+        LOGGER.debug("Instance count: {} and limit: [{}]", numberOfInstances, upgradeNodeCountLimit);
+        if (numberOfInstances > upgradeNodeCountLimit) {
+            throw new UpgradeValidationFailedException(
+                    String.format("There are %s nodes in the cluster. Upgrade is supported up to %s nodes. " +
+                            "Please downscale the cluster below the limit and retry the upgrade.", numberOfInstances, upgradeNodeCountLimit));
+        }
     }
 }

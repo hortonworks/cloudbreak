@@ -35,11 +35,12 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.ImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
-import com.sequenceiq.cloudbreak.service.upgrade.image.CentOSToRedHatUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.model.OsType;
 
 @ExtendWith(MockitoExtension.class)
 public class StackImageUpdateServiceTest {
@@ -66,9 +67,6 @@ public class StackImageUpdateServiceTest {
 
     @Mock
     private PlatformStringTransformer platformStringTransformer;
-
-    @Mock
-    private CentOSToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
 
     @InjectMocks
     private StackImageUpdateService underTest;
@@ -145,18 +143,22 @@ public class StackImageUpdateServiceTest {
     @Test
     public void testGetNewImageIfOsVersionsMatchShouldNotThrowExceptionWhenCentOSToRedhatOSUpgradePermitted()
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        StatedImage targetStatedImage = StatedImage.statedImage(ImageTestBuilder.builder()
+                        .withOs(OsType.RHEL8.getOs())
+                        .withOsType(OsType.RHEL8.getOsType())
+                        .withImageSetsByProvider(image.getImageSetsByProvider())
+                        .withStackDetails(image.getStackDetails()).build(),
+                statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName());
         com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
-                new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos6", "centos",
+                new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos7", "redhat7",
                         statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions, null, null);
         when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
-        when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
+        when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(targetStatedImage);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("AWS"));
-        when(centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(imageInComponent, statedImage.getImage(), stack)).thenReturn(true);
 
         underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl");
 
         verify(restRequestThreadLocalService).setWorkspaceId(stack.getWorkspaceId());
-        verify(centOSToRedHatUpgradeAvailabilityService).isOsUpgradePermitted(imageInComponent, statedImage.getImage(), stack);
     }
 
     @Test

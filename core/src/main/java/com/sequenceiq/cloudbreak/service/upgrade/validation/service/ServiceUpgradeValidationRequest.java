@@ -7,5 +7,6 @@ public record ServiceUpgradeValidationRequest(
         StackDto stack,
         boolean lockComponents,
         boolean rollingUpgradeEnabled,
-        UpgradeImageInfo upgradeImageInfo) {
+        UpgradeImageInfo upgradeImageInfo,
+        boolean replaceVms) {
 }

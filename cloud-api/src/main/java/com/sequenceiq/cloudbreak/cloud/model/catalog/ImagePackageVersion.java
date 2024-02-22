@@ -8,6 +8,7 @@ public enum ImagePackageVersion {
     CDH_BUILD_NUMBER("cdh-build-number"),
     CDP_LOGGING_AGENT("cdp-logging-agent"),
     CFM("cfm", "Cloudera Flow Management"),
+    CEM("cem", "Cloudera Edge Management"),
     CM("cm", "Cloudera Manager"),
     CM_BUILD_NUMBER("cm-build-number"),
     CSA("csa", "Cloudera Streaming Analytics with Apache Flink"),

@@ -120,6 +120,6 @@ public class FlinkUpgradeValidatorTest {
 
     private ServiceUpgradeValidationRequest createRequest(String stackVersion) {
         return new ServiceUpgradeValidationRequest(stack, false, true,
-                new UpgradeImageInfo(null, StatedImage.statedImage(ImageTestBuilder.builder().withVersion(stackVersion).build(), null, null)));
+                new UpgradeImageInfo(null, StatedImage.statedImage(ImageTestBuilder.builder().withVersion(stackVersion).build(), null, null)), false);
     }
 }

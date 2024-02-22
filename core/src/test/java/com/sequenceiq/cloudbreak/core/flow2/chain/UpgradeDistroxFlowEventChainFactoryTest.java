@@ -7,7 +7,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.prep
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,8 @@ import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.cloudbreak.service.image.ImageTestBuilder;
+import com.sequenceiq.cloudbreak.service.upgrade.image.CentOSToRedHatUpgradeAvailabilityService;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,16 +51,23 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     private static final long STACK_ID = 1L;
 
+    private static final String IMAGE_ID = "imageId";
+
+    private static final String RH_IMAGE = "rh-image";
+
     @InjectMocks
     private UpgradeDistroxFlowEventChainFactory underTest;
 
-    private final ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, "imageId", "imageCatalogName", "imageCatUrl");
+    private final ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, IMAGE_ID, "imageCatalogName", "imageCatUrl");
 
     @Mock
     private ClusterRepairService clusterRepairService;
 
     @Mock
     private ScalingHardLimitsService scalingHardLimitsService;
+
+    @Mock
+    private CentOSToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
 
     @Test
     public void testInitEvent() {
@@ -66,21 +76,23 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     @Test
     public void testChainQueueForNonReplaceVms() {
+        when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
         ReflectionTestUtils.setField(underTest, "upgradeValidationEnabled", true);
         DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
                 imageChangeDto, false, false, "variant", true);
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
         assertEquals(5, flowChainQueue.getQueue().size());
-        assertUpdateValidationEvent(flowChainQueue);
-        assertUpdatePreparationEvent(flowChainQueue);
+        assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
+        assertUpdatePreparationEvent(flowChainQueue, IMAGE_ID);
         assertSaltUpdateEvent(flowChainQueue);
-        assertUpgradeEvent(flowChainQueue);
+        assertUpgradeEvent(flowChainQueue, IMAGE_ID);
         assertImageUpdateEvent(flowChainQueue);
     }
 
     @Test
     public void testChainQueueForRollingUpgradeWithReplaceVms() {
+        when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
         ReflectionTestUtils.setField(underTest, "upgradeValidationEnabled", true);
@@ -91,7 +103,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
                 imageChangeDto, true, true, "variant", true);
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
         assertEquals(4, flowChainQueue.getQueue().size());
-        assertUpdateValidationEvent(flowChainQueue);
+        assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
         assertSaltUpdateEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
         assertRepairEvent(flowChainQueue, RepairType.ONE_BY_ONE);
@@ -99,6 +111,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     @Test
     public void testChainQueueForReplaceVmsWithHundredNodes() {
+        when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
@@ -118,52 +131,74 @@ class UpgradeDistroxFlowEventChainFactoryTest {
                 imageChangeDto, true, true, "variant", false);
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
         assertEquals(4, flowChainQueue.getQueue().size());
-        assertUpdateValidationEvent(flowChainQueue);
+        assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
         assertSaltUpdateEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
         assertRepairEvent(flowChainQueue, RepairType.BATCH);
     }
 
-    private void assertUpdateValidationEvent(FlowTriggerEventQueue flowChainQueue) {
+    @Test
+    public void testCreateFlowTriggerEventQueueWhenCentosToRedHadRuntimeUpgradeIsAvailable() {
+        when(centOSToRedHatUpgradeAvailabilityService.findHelperImageIfNecessary(IMAGE_ID, STACK_ID))
+                .thenReturn(Optional.of(ImageTestBuilder.builder().withUuid(RH_IMAGE).build()));
+        ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
+        ReflectionTestUtils.setField(underTest, "upgradeValidationEnabled", true);
+        DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
+                imageChangeDto, false, false, "variant", true);
+        FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
+        assertEquals(5, flowChainQueue.getQueue().size());
+        assertUpdateValidationEvent(flowChainQueue, RH_IMAGE, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
+        assertUpdatePreparationEvent(flowChainQueue, RH_IMAGE);
+        assertSaltUpdateEvent(flowChainQueue);
+        assertUpgradeEvent(flowChainQueue, RH_IMAGE);
+        assertImageUpdateEvent(flowChainQueue);
+    }
+
+    private void assertUpdateValidationEvent(FlowTriggerEventQueue flowChainQueue, String imageId, boolean replaceVms, boolean lockComponents,
+            boolean rollingUpgradeEnabled) {
         Selectable upgradeValidationEvent = flowChainQueue.getQueue().remove();
         assertEquals(START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT.event(), upgradeValidationEvent.selector());
         assertEquals(STACK_ID, upgradeValidationEvent.getResourceId());
-        assertTrue(upgradeValidationEvent instanceof ClusterUpgradeValidationTriggerEvent);
-        assertEquals(imageChangeDto.getImageId(), ((ClusterUpgradeValidationTriggerEvent) upgradeValidationEvent).getImageId());
+        assertInstanceOf(ClusterUpgradeValidationTriggerEvent.class, upgradeValidationEvent);
+        ClusterUpgradeValidationTriggerEvent validationEvent = (ClusterUpgradeValidationTriggerEvent) upgradeValidationEvent;
+        assertEquals(imageId, validationEvent.getImageId());
+        assertEquals(lockComponents, validationEvent.isLockComponents());
+        assertEquals(replaceVms, validationEvent.isReplaceVms());
+        assertEquals(rollingUpgradeEnabled, validationEvent.isRollingUpgradeEnabled());
     }
 
-    private void assertUpdatePreparationEvent(FlowTriggerEventQueue flowChainQueue) {
+    private void assertUpdatePreparationEvent(FlowTriggerEventQueue flowChainQueue, String imageId) {
         Selectable upgradePreparationEvent = flowChainQueue.getQueue().remove();
         assertEquals(START_CLUSTER_UPGRADE_PREPARATION_INIT_EVENT.event(), upgradePreparationEvent.selector());
         assertEquals(STACK_ID, upgradePreparationEvent.getResourceId());
-        assertTrue(upgradePreparationEvent instanceof ClusterUpgradePreparationTriggerEvent);
-        assertEquals(imageChangeDto, ((ClusterUpgradePreparationTriggerEvent) upgradePreparationEvent).getImageChangeDto());
-    }
-
-    private void assertImageUpdateEvent(FlowTriggerEventQueue flowChainQueue) {
-        Selectable imageUpdateEvent = flowChainQueue.getQueue().remove();
-        assertEquals(STACK_IMAGE_UPDATE_TRIGGER_EVENT, imageUpdateEvent.selector());
-        assertEquals(STACK_ID, imageUpdateEvent.getResourceId());
-        assertTrue(imageUpdateEvent instanceof StackImageUpdateTriggerEvent);
-        StackImageUpdateTriggerEvent event = (StackImageUpdateTriggerEvent) imageUpdateEvent;
-        assertEquals(imageChangeDto.getImageId(), event.getNewImageId());
-        assertEquals(imageChangeDto.getImageCatalogName(), event.getImageCatalogName());
-        assertEquals(imageChangeDto.getImageCatalogUrl(), event.getImageCatalogUrl());
-    }
-
-    private void assertUpgradeEvent(FlowTriggerEventQueue flowChainQueue) {
-        Selectable upgradeEvent = flowChainQueue.getQueue().remove();
-        assertEquals(CLUSTER_UPGRADE_INIT_EVENT.event(), upgradeEvent.selector());
-        assertEquals(STACK_ID, upgradeEvent.getResourceId());
-        assertTrue(upgradeEvent instanceof ClusterUpgradeTriggerEvent);
-        assertEquals(imageChangeDto.getImageId(), ((ClusterUpgradeTriggerEvent) upgradeEvent).getImageId());
+        assertInstanceOf(ClusterUpgradePreparationTriggerEvent.class, upgradePreparationEvent);
+        assertEquals(imageId, ((ClusterUpgradePreparationTriggerEvent) upgradePreparationEvent).getImageChangeDto().getImageId());
     }
 
     private void assertSaltUpdateEvent(FlowTriggerEventQueue flowChainQueue) {
         Selectable saltUpdateEvent = flowChainQueue.getQueue().remove();
         assertEquals(SALT_UPDATE_EVENT.event(), saltUpdateEvent.selector());
         assertEquals(STACK_ID, saltUpdateEvent.getResourceId());
-        assertTrue(saltUpdateEvent instanceof StackEvent);
+        assertInstanceOf(StackEvent.class, saltUpdateEvent);
+    }
+
+    private void assertUpgradeEvent(FlowTriggerEventQueue flowChainQueue, String imageId) {
+        Selectable upgradeEvent = flowChainQueue.getQueue().remove();
+        assertEquals(CLUSTER_UPGRADE_INIT_EVENT.event(), upgradeEvent.selector());
+        assertEquals(STACK_ID, upgradeEvent.getResourceId());
+        assertInstanceOf(ClusterUpgradeTriggerEvent.class, upgradeEvent);
+        assertEquals(imageId, ((ClusterUpgradeTriggerEvent) upgradeEvent).getImageId());
+    }
+
+    private void assertImageUpdateEvent(FlowTriggerEventQueue flowChainQueue) {
+        Selectable imageUpdateEvent = flowChainQueue.getQueue().remove();
+        assertEquals(STACK_IMAGE_UPDATE_TRIGGER_EVENT, imageUpdateEvent.selector());
+        assertEquals(STACK_ID, imageUpdateEvent.getResourceId());
+        assertInstanceOf(StackImageUpdateTriggerEvent.class, imageUpdateEvent);
+        StackImageUpdateTriggerEvent event = (StackImageUpdateTriggerEvent) imageUpdateEvent;
+        assertEquals(imageChangeDto.getImageId(), event.getNewImageId());
+        assertEquals(imageChangeDto.getImageCatalogName(), event.getImageCatalogName());
+        assertEquals(imageChangeDto.getImageCatalogUrl(), event.getImageCatalogUrl());
     }
 
     private void assertRepairEvent(FlowTriggerEventQueue flowChainQueue, RepairType repairType) {
@@ -171,6 +206,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertEquals(CLUSTER_REPAIR_TRIGGER_EVENT, repairEvent.selector());
         assertEquals(repairType, ((ClusterRepairTriggerEvent) repairEvent).getRepairType());
         assertEquals(STACK_ID, repairEvent.getResourceId());
-        assertTrue(repairEvent instanceof ClusterRepairTriggerEvent);
+        assertInstanceOf(ClusterRepairTriggerEvent.class, repairEvent);
     }
 }

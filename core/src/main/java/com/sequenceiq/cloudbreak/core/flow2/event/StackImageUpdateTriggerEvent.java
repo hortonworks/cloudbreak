@@ -57,13 +57,6 @@ public class StackImageUpdateTriggerEvent extends StackEvent {
         imageCatalogUrl = imageChangeDto.getImageCatalogUrl();
     }
 
-    public StackImageUpdateTriggerEvent(String selector, Long stackId, Promise<AcceptResult> accepted, String newImageId) {
-        super(selector, stackId, accepted);
-        this.newImageId = newImageId;
-        imageCatalogName = null;
-        imageCatalogUrl = null;
-    }
-
     public String getNewImageId() {
         return newImageId;
     }

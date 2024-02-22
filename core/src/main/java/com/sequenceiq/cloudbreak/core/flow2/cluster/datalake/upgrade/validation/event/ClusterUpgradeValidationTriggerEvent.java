@@ -19,17 +19,21 @@ public class ClusterUpgradeValidationTriggerEvent extends StackEvent {
 
     private final boolean rollingUpgradeEnabled;
 
+    private final boolean replaceVms;
+
     @JsonCreator
     public ClusterUpgradeValidationTriggerEvent(
             @JsonProperty("resourceId") Long resourceId,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("imageId") String imageId,
             @JsonProperty("lockComponents") boolean lockComponents,
-            @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled) {
+            @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled,
+            @JsonProperty("replaceVms") boolean replaceVms) {
         super(START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT.event(), resourceId, accepted);
         this.imageId = imageId;
         this.lockComponents = lockComponents;
         this.rollingUpgradeEnabled = rollingUpgradeEnabled;
+        this.replaceVms = replaceVms;
     }
 
     public String getImageId() {
@@ -44,12 +48,17 @@ public class ClusterUpgradeValidationTriggerEvent extends StackEvent {
         return rollingUpgradeEnabled;
     }
 
+    public boolean isReplaceVms() {
+        return replaceVms;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", ClusterUpgradeValidationTriggerEvent.class.getSimpleName() + "[", "]")
                 .add("imageId='" + imageId + "'")
                 .add("lockComponents=" + lockComponents)
                 .add("rollingUpgradeEnabled=" + rollingUpgradeEnabled)
+                .add("replaceVms=" + replaceVms)
                 .add(super.toString())
                 .toString();
     }

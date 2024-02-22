@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -65,6 +66,9 @@ public class ImageComponentUpdaterServiceTest {
     @Mock
     private StatedImage targetStatedImage;
 
+    @Mock
+    private Image image;
+
     private final Stack stack = new Stack();
 
     private final Workspace workspace = new Workspace();
@@ -73,6 +77,8 @@ public class ImageComponentUpdaterServiceTest {
     void setup() {
         setupStack();
         setupWorkspace();
+        lenient().when(image.getUuid()).thenReturn(TARGET_IMAGE_ID);
+        lenient().when(targetStatedImage.getImage()).thenReturn(image);
     }
 
     @Test
@@ -93,8 +99,6 @@ public class ImageComponentUpdaterServiceTest {
     void testUpgradeComponentsForUpdateWithStatedImage() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Set<Component> componentsToUpdate = getComponents();
         when(imageService.getComponentsWithoutUserData(stack, targetStatedImage)).thenReturn(componentsToUpdate);
-        Image image = mock(Image.class);
-        when(targetStatedImage.getImage()).thenReturn(image);
 
         underTest.updateComponentsForUpgrade(targetStatedImage, STACK_ID);
 
@@ -153,9 +157,6 @@ public class ImageComponentUpdaterServiceTest {
     void testUpgradeComponentsForUpdateWhenGetComponentsThrows(Class<? extends Exception> thrownException)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         when(imageService.getComponentsWithoutUserData(stack, targetStatedImage)).thenThrow(thrownException);
-        Image image = mock(Image.class);
-        when(image.getUuid()).thenReturn(TARGET_IMAGE_ID);
-        when(targetStatedImage.getImage()).thenReturn(image);
 
         Assertions.assertThatThrownBy(() -> underTest.updateComponentsForUpgrade(targetStatedImage, STACK_ID))
                 .isInstanceOf(NotFoundException.class)

@@ -172,7 +172,6 @@ public class DistroXUpgradeAvailabilityService {
                 .collect(Collectors.groupingBy(imageInfoV4Response -> imageInfoV4Response.getComponentVersions().getCdp(),
                         Collectors.groupingBy(imageInfoV4Response -> imageInfoV4Response.getComponentVersions().getOs(),
                                 Collectors.maxBy(Comparator.comparingLong(ImageInfoV4Response::getCreated)))));
-
         return imagesByRuntimeAndOS.values().stream()
                 .map(values -> values.values().stream()
                         .flatMap(Optional::stream)

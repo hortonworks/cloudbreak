@@ -5,9 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -19,7 +17,6 @@ import java.util.Optional;
 
 import jakarta.ws.rs.BadRequestException;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,8 +35,6 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.conf.LimitConfiguration;
-import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
@@ -47,7 +42,6 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeCandidateFilterService;
@@ -75,10 +69,6 @@ class StackUpgradeOperationsTest {
 
     private static final boolean ROLLING_UPGRADE_ENABLED = true;
 
-    private static final int INSTANCE_COUNT = 10;
-
-    private static final int NODE_LIMIT = 15;
-
     private static final String ENVIRONMENT_CRN = "env-crn";
 
     @InjectMocks
@@ -92,12 +82,6 @@ class StackUpgradeOperationsTest {
 
     @Mock
     private InstanceGroupService instanceGroupService;
-
-    @Mock
-    private InstanceMetaDataService instanceMetaDataService;
-
-    @Mock
-    private LimitConfiguration limitConfiguration;
 
     @Mock
     private ClusterUpgradeAvailabilityService clusterUpgradeAvailabilityService;
@@ -164,21 +148,6 @@ class StackUpgradeOperationsTest {
     }
 
     @Test
-    void throwsBadRequestIfClusterHasMoreNodesThanTheLimit() {
-        UpgradeV4Request request = createUpgradeRequest(true, null);
-        StackInstanceCount stackInstanceCount = mock(StackInstanceCount.class);
-        when(stackInstanceCount.getInstanceCount()).thenReturn(201);
-        when(limitConfiguration.getUpgradeNodeCountLimit(any())).thenReturn(200);
-        when(instanceMetaDataService.countByStackId(any())).thenReturn(stackInstanceCount);
-
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
-                () -> underTest.checkForClusterUpgrade("accId", mock(Stack.class), request));
-
-        assertEquals("There are 201 nodes in the cluster. Upgrade has a limit of 200 nodes, above the limit it is unstable. " +
-                "Please downscale the cluster below the limit and retry the upgrade.", exception.getMessage());
-    }
-
-    @Test
     void testCheckForClusterUpgradeShouldReturnUpgradeCandidatesWhenTheUpgradeIsRuntimeUpgradeAndTheStackTypeIsWorkloadAndReplaceVmDisabled() {
         doReturn(Optional.of(CLUSTER_ID)).when(clusterService).findClusterIdByStackId(STACK_ID);
         Stack stack = createStack(StackType.WORKLOAD);
@@ -211,10 +180,6 @@ class StackUpgradeOperationsTest {
         UpgradeV4Response upgradeResponse = createUpgradeResponse();
         when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
         when(upgradeService.isOsUpgrade(request)).thenReturn(false);
-        StackInstanceCount instanceCount = mock(StackInstanceCount.class);
-        when(instanceCount.getInstanceCount()).thenReturn(INSTANCE_COUNT);
-        when(instanceMetaDataService.countByStackId(STACK_ID)).thenReturn(instanceCount);
-        when(limitConfiguration.getUpgradeNodeCountLimit(any())).thenReturn(NODE_LIMIT);
         when(clusterUpgradeAvailabilityService
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false))
                 .thenReturn(upgradeResponse);
@@ -225,7 +190,6 @@ class StackUpgradeOperationsTest {
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
         verify(upgradeService).isOsUpgrade(request);
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
-        verify(limitConfiguration).getUpgradeNodeCountLimit(any());
         verify(clusterUpgradeAvailabilityService)
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false);
         verify(clusterUpgradeCandidateFilterService).filterUpgradeOptions(upgradeResponse, request, false);
@@ -241,10 +205,6 @@ class StackUpgradeOperationsTest {
         UpgradeV4Response upgradeResponse = createUpgradeResponse();
         when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
         when(upgradeService.isOsUpgrade(request)).thenReturn(false);
-        StackInstanceCount instanceCount = mock(StackInstanceCount.class);
-        when(instanceCount.getInstanceCount()).thenReturn(INSTANCE_COUNT);
-        when(instanceMetaDataService.countByStackId(STACK_ID)).thenReturn(instanceCount);
-        when(limitConfiguration.getUpgradeNodeCountLimit(any())).thenReturn(NODE_LIMIT);
         when(clusterUpgradeAvailabilityService
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false))
                 .thenReturn(upgradeResponse);
@@ -256,7 +216,6 @@ class StackUpgradeOperationsTest {
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
         verify(upgradeService).isOsUpgrade(request);
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
-        verify(limitConfiguration).getUpgradeNodeCountLimit(any());
         verify(clusterUpgradeAvailabilityService)
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false);
         verify(clusterUpgradeCandidateFilterService).filterUpgradeOptions(upgradeResponse, request, true);
@@ -273,10 +232,6 @@ class StackUpgradeOperationsTest {
         UpgradeV4Response upgradeResponse = createUpgradeResponse();
         when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
         when(upgradeService.isOsUpgrade(request)).thenReturn(false);
-        StackInstanceCount instanceCount = mock(StackInstanceCount.class);
-        when(instanceCount.getInstanceCount()).thenReturn(INSTANCE_COUNT);
-        when(instanceMetaDataService.countByStackId(STACK_ID)).thenReturn(instanceCount);
-        when(limitConfiguration.getUpgradeNodeCountLimit(any())).thenReturn(NODE_LIMIT);
         when(clusterUpgradeAvailabilityService
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false))
                 .thenReturn(upgradeResponse);
@@ -287,7 +242,6 @@ class StackUpgradeOperationsTest {
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
         verify(upgradeService).isOsUpgrade(request);
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
-        verify(limitConfiguration).getUpgradeNodeCountLimit(any());
         verify(clusterUpgradeAvailabilityService)
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false);
         verify(clusterUpgradeCandidateFilterService).filterUpgradeOptions(upgradeResponse, request, true);
@@ -305,10 +259,6 @@ class StackUpgradeOperationsTest {
         expectedResponse.setReason("There are attached Data Hub clusters in incorrect state");
         when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
         when(upgradeService.isOsUpgrade(request)).thenReturn(false);
-        StackInstanceCount instanceCount = mock(StackInstanceCount.class);
-        when(instanceCount.getInstanceCount()).thenReturn(INSTANCE_COUNT);
-        when(instanceMetaDataService.countByStackId(STACK_ID)).thenReturn(instanceCount);
-        when(limitConfiguration.getUpgradeNodeCountLimit(any())).thenReturn(NODE_LIMIT);
         when(clusterUpgradeAvailabilityService
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false))
                 .thenReturn(upgradeResponseToReturn);
@@ -322,7 +272,6 @@ class StackUpgradeOperationsTest {
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
         verify(upgradeService).isOsUpgrade(request);
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
-        verify(limitConfiguration).getUpgradeNodeCountLimit(any());
         verify(clusterUpgradeAvailabilityService)
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false);
         verify(clusterUpgradeCandidateFilterService).filterUpgradeOptions(upgradeResponseToReturn, request, true);
@@ -341,10 +290,6 @@ class StackUpgradeOperationsTest {
         expectedResponse.setReason("There are attached Data Hub clusters in incorrect state");
         when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
         when(upgradeService.isOsUpgrade(request)).thenReturn(false);
-        StackInstanceCount instanceCount = mock(StackInstanceCount.class);
-        when(instanceCount.getInstanceCount()).thenReturn(INSTANCE_COUNT);
-        when(instanceMetaDataService.countByStackId(STACK_ID)).thenReturn(instanceCount);
-        when(limitConfiguration.getUpgradeNodeCountLimit(any())).thenReturn(NODE_LIMIT);
         when(clusterUpgradeAvailabilityService
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false))
                 .thenReturn(upgradeResponseToReturn);
@@ -358,7 +303,6 @@ class StackUpgradeOperationsTest {
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
         verify(upgradeService).isOsUpgrade(request);
         verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
-        verify(limitConfiguration).getUpgradeNodeCountLimit(any());
         verify(clusterUpgradeAvailabilityService)
                 .checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings(), false);
         verify(clusterUpgradeCandidateFilterService).filterUpgradeOptions(upgradeResponseToReturn, request, true);

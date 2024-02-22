@@ -59,7 +59,8 @@ public class CentOSToRedHatUpgradeImageFilter implements UpgradeImageFilter {
     private List<Image> filterImages(ImageFilterParams imageFilterParams, ImageFilterResult imageFilterResult) {
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = imageFilterParams.getCurrentImage();
         List<Image> preFilteredImages = imageFilterResult.getImages().stream()
-                .filter(image -> !isCentOSToRedhatUpgrade(currentImage, image) || isCentOsToRedHatUpgradePossible(imageFilterParams, image, currentImage))
+                .filter(image -> !isCentOSToRedhatUpgrade(currentImage, image)
+                        || isCentOsToRedHatUpgradePossible(imageFilterParams, imageFilterResult, image, currentImage))
                 .toList();
         if (isCentOSImage(currentImage.getOs(), currentImage.getOsType())) {
             List<Image> centOsImages = new ArrayList<>(preFilteredImages.stream()
@@ -73,9 +74,16 @@ public class CentOSToRedHatUpgradeImageFilter implements UpgradeImageFilter {
         return preFilteredImages;
     }
 
-    private boolean isCentOsToRedHatUpgradePossible(ImageFilterParams imageFilterParams, Image image, com.sequenceiq.cloudbreak.cloud.model.Image currentImage) {
+    private boolean isCentOsToRedHatUpgradePossible(ImageFilterParams imageFilterParams, ImageFilterResult imageFilterResult, Image image,
+            com.sequenceiq.cloudbreak.cloud.model.Image currentImage) {
         boolean rhel8ImagePreferred = entitlementService.isRhel8ImagePreferred(ThreadBasedUserCrnProvider.getAccountId());
-        return rhel8ImagePreferred && isCentOSToRedhatOsUpgrade(currentImage, image, imageFilterParams.getStackRelatedParcels());
+        return rhel8ImagePreferred && isCentOSToRedhatOsUpgrade(currentImage, image, imageFilterParams.getStackRelatedParcels())
+                || isCentOSImageAvailableWithSameVersion(imageFilterParams, imageFilterResult, image);
+    }
+
+    private boolean isCentOSImageAvailableWithSameVersion(ImageFilterParams imageFilterParams, ImageFilterResult imageFilterResult, Image image) {
+        return centOSToRedHatUpgradeAvailabilityService.isHelperImageAvailable(imageFilterResult.getImages(), image,
+                imageFilterParams.getStackRelatedParcels().keySet());
     }
 
     private boolean isCentOSToRedhatOsUpgrade(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image image, Map<String, String> stackRelatedParcels) {

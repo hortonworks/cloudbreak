@@ -109,8 +109,8 @@ public class ClusterComponentConfigProvider {
 
     public List<ClouderaManagerProduct> getClouderaManagerProductDetails(Long clusterId) {
         Set<ClusterComponentView> components = getComponentListByType(clusterId, ComponentType.CDH_PRODUCT_DETAILS);
-        return components.stream().map(component ->
-                        retrieveFromAttribute(component, ClouderaManagerProduct.class))
+        return components.stream()
+                .map(component -> retrieveFromAttribute(component, ClouderaManagerProduct.class))
                 .collect(Collectors.toList());
     }
 

@@ -100,6 +100,7 @@ public class StackImageUpdateActions {
                     LOGGER.debug("Image not found", e);
                     throw new CloudbreakServiceException(e.getMessage(), e);
                 }
+                getImageComponentUpdaterService().updateComponentsForUpgrade(payload.getImage(), context.getStack().getId());
                 getStackImageService().storeNewImageComponent(context.getStack(), payload.getImage());
                 sendEvent(context, new StackEvent(StackImageUpdateEvent.UPDATE_IMAGE_FINESHED_EVENT.event(), context.getStack().getId()));
             }

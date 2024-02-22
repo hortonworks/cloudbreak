@@ -169,7 +169,7 @@ class StackVersionBasedRollingUpgradeValidatorTest {
     private ServiceUpgradeValidationRequest createRequest(boolean rollingUpgradeEnabled, String currentRuntimeVersion, String targetRuntimeVersion) {
         return new ServiceUpgradeValidationRequest(stackDto, false, rollingUpgradeEnabled,
                 new UpgradeImageInfo(ModelImageTestBuilder.builder().withPackageVersions(Map.of(STACK.getKey(), currentRuntimeVersion)).build(),
-                        StatedImage.statedImage(ImageTestBuilder.builder().withVersion(targetRuntimeVersion).build(), null, null)));
+                        StatedImage.statedImage(ImageTestBuilder.builder().withVersion(targetRuntimeVersion).build(), null, null)), false);
     }
 
     private ClouderaManagerProduct createCdhProduct(String cdhVersion) {

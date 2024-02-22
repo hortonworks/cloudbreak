@@ -15,18 +15,22 @@ public class ClusterUpgradeServiceValidationEvent extends StackEvent {
 
     private final UpgradeImageInfo upgradeImageInfo;
 
+    private final boolean replaceVms;
+
     @JsonCreator
     public ClusterUpgradeServiceValidationEvent(
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("lockComponents") boolean lockComponents,
             @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled,
             @JsonProperty("targetRuntime") String targetRuntime,
-            @JsonProperty("upgradeImageInfo") UpgradeImageInfo upgradeImageInfo) {
+            @JsonProperty("upgradeImageInfo") UpgradeImageInfo upgradeImageInfo,
+            @JsonProperty("replaceVms") boolean replaceVms) {
         super(ClusterUpgradeValidationHandlerSelectors.VALIDATE_SERVICES_EVENT.name(), resourceId);
         this.lockComponents = lockComponents;
         this.rollingUpgradeEnabled = rollingUpgradeEnabled;
         this.targetRuntime = targetRuntime;
         this.upgradeImageInfo = upgradeImageInfo;
+        this.replaceVms = replaceVms;
     }
 
     public boolean isLockComponents() {
@@ -45,6 +49,10 @@ public class ClusterUpgradeServiceValidationEvent extends StackEvent {
         return upgradeImageInfo;
     }
 
+    public boolean isReplaceVms() {
+        return replaceVms;
+    }
+
     @Override
     public String toString() {
         return "ClusterUpgradeServiceValidationEvent{" +
@@ -52,6 +60,7 @@ public class ClusterUpgradeServiceValidationEvent extends StackEvent {
                 "rollingUpgradeEnabled=" + rollingUpgradeEnabled +
                 "targetRuntime=" + targetRuntime +
                 "upgradeImageInfo=" + upgradeImageInfo +
+                "replaceVms=" + replaceVms +
                 "} " + super.toString();
     }
 }

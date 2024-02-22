@@ -46,7 +46,7 @@ public class ImageComponentUpdaterService {
         Stack stack = stackService.getById(stackId);
         restRequestThreadLocalService.setWorkspaceId(stack.getWorkspaceId());
         UpgradeImageInfo upgradeImageInfo = getUpgradeImageInfo(targetImageId, stackId, stack);
-        updateComponents(upgradeImageInfo.targetStatedImage(), stack, targetImageId);
+        updateComponents(upgradeImageInfo.targetStatedImage(), stack);
 
         return upgradeImageInfo;
     }
@@ -54,17 +54,18 @@ public class ImageComponentUpdaterService {
     public void updateComponentsForUpgrade(StatedImage targetStatedImage, Long stackId) {
         Stack stack = stackService.getById(stackId);
         restRequestThreadLocalService.setWorkspaceId(stack.getWorkspaceId());
-        updateComponents(targetStatedImage, stack, targetStatedImage.getImage().getUuid());
+        updateComponents(targetStatedImage, stack);
     }
 
-    private void updateComponents(StatedImage upgradeImageInfo, Stack stack, String targetImageId) {
+    private void updateComponents(StatedImage targetStatedImage, Stack stack) {
         try {
-            Set<Component> targetComponents = imageService.getComponentsWithoutUserData(stack, upgradeImageInfo);
+            LOGGER.debug("Updating the components based on image {}", targetStatedImage.getImage().getUuid());
+            Set<Component> targetComponents = imageService.getComponentsWithoutUserData(stack, targetStatedImage);
             stackComponentUpdater.updateComponentsByStackId(stack, targetComponents, true);
             clusterComponentUpdater.updateClusterComponentsByStackId(stack, targetComponents, true);
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
             LOGGER.warn(String.format("Image was not found for stack %s", stack.getName()), e);
-            throw notFoundException("Image", targetImageId);
+            throw notFoundException("Image", targetStatedImage.getImage().getUuid());
         }
     }
 

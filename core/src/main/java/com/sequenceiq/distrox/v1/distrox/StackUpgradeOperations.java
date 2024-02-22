@@ -26,8 +26,6 @@ import com.sequenceiq.cloudbreak.cloud.model.component.PreparedImages;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.conf.LimitConfiguration;
-import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
@@ -35,7 +33,6 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
@@ -62,12 +59,6 @@ public class StackUpgradeOperations {
 
     @Inject
     private InstanceGroupService instanceGroupService;
-
-    @Inject
-    private InstanceMetaDataService instanceMetaDataService;
-
-    @Inject
-    private LimitConfiguration limitConfiguration;
 
     @Inject
     private ClusterUpgradeAvailabilityService clusterUpgradeAvailabilityService;
@@ -130,17 +121,6 @@ public class StackUpgradeOperations {
         stack.setInstanceGroups(instanceGroupService.getByStackAndFetchTemplates(stack.getId()));
         boolean osUpgrade = upgradeService.isOsUpgrade(request);
         boolean replaceVms = determineReplaceVmsParameter(stack, request.getReplaceVms());
-        if (replaceVms) {
-            StackInstanceCount stackInstanceCount = instanceMetaDataService.countByStackId(stack.getId());
-            Integer upgradeNodeCountLimit = limitConfiguration.getUpgradeNodeCountLimit(Optional.ofNullable(accountId));
-            LOGGER.debug("Instance count: {} and limit: [{}]", stackInstanceCount == null ? "null" : stackInstanceCount.asString(), upgradeNodeCountLimit);
-            if (stackInstanceCount != null && stackInstanceCount.getInstanceCount() > upgradeNodeCountLimit) {
-                throw new BadRequestException(
-                        String.format("There are %s nodes in the cluster. Upgrade has a limit of %s nodes, above the limit it is unstable. " +
-                                        "Please downscale the cluster below the limit and retry the upgrade.",
-                                stackInstanceCount.getInstanceCount(), upgradeNodeCountLimit));
-            }
-        }
         boolean getAllImages = request.getImageId() != null;
         UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, replaceVms,
                 request.getInternalUpgradeSettings(), getAllImages);

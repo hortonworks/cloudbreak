@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
+import com.sequenceiq.cloudbreak.service.upgrade.ImageComponentUpdaterService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.core.FlowParameters;
 
@@ -71,6 +72,9 @@ abstract class AbstractStackImageUpdateAction<P extends Payload> extends Abstrac
 
     @Inject
     private StackUtil stackUtil;
+
+    @Inject
+    private ImageComponentUpdaterService imageComponentUpdaterService;
 
     protected AbstractStackImageUpdateAction(Class<P> payloadClass) {
         super(payloadClass);
@@ -132,5 +136,9 @@ abstract class AbstractStackImageUpdateAction<P extends Payload> extends Abstrac
 
     protected ResourceToCloudResourceConverter getResourceToCloudResourceConverter() {
         return resourceToCloudResourceConverter;
+    }
+
+    protected ImageComponentUpdaterService getImageComponentUpdaterService() {
+        return imageComponentUpdaterService;
     }
 }

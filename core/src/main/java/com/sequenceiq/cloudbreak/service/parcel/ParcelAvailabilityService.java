@@ -44,11 +44,11 @@ public class ParcelAvailabilityService {
 
     public Set<Response> validateAvailability(Image image, Long resourceId) {
         StackDto stackDto = stackDtoService.getById(resourceId);
-        Set<String> requiredParcelsFromImage = new HashSet<>(parcelUrlProvider.getRequiredParcelsFromImage(image, stackDto));
+        Set<String> requiredParcelUrlsFromImage = new HashSet<>(parcelUrlProvider.getRequiredParcelsFromImage(image, stackDto));
         String cmRpmUrl = cmUrlProvider.getCmRpmUrl(image);
-        requiredParcelsFromImage.add(cmRpmUrl);
+        requiredParcelUrlsFromImage.add(cmRpmUrl);
 
-        Map<String, Optional<Response>> parcelsByResponse = getParcelsByResponse(requiredParcelsFromImage);
+        Map<String, Optional<Response>> parcelsByResponse = getParcelsByResponse(requiredParcelUrlsFromImage);
         Set<String> unavailableParcels = getUnavailableParcels(parcelsByResponse);
 
         if (unavailableParcels.isEmpty()) {
@@ -58,6 +58,7 @@ public class ParcelAvailabilityService {
                     .map(entry -> entry.getValue().get())
                     .collect(Collectors.toSet());
         } else {
+            LOGGER.debug("Parcels by response status: {}", parcelsByResponse);
             String errorMessage = buildErrorMessage(image, cmRpmUrl, unavailableParcels);
             LOGGER.error(errorMessage);
             throw new UpgradeValidationFailedException(errorMessage);
@@ -101,7 +102,7 @@ public class ParcelAvailabilityService {
         try {
             response = parcelService.getHeadResponseForParcel(url);
         } catch (Exception e) {
-            LOGGER.warn("Could not get the size of the parcel: {} Reason: {}", url, e.getMessage());
+            LOGGER.warn("Failed during HEAD request to url: {} Reason: {}", url, e.getMessage());
         }
         return response;
     }
