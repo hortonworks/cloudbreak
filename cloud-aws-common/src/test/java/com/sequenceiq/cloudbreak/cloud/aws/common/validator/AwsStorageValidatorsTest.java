@@ -142,7 +142,7 @@ public class AwsStorageValidatorsTest {
                 List.of(noStorageInstance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork(), emptyMap());
         Group storageGroup = new Group("compute", InstanceGroupType.CORE,
                 List.of(storageInstance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork(), emptyMap());
-        CloudStack cloudStack = new CloudStack(List.of(noStoragegroup, storageGroup), null, null, Map.of(), Map.of(), "", null, "", "", null, null, null);
+        CloudStack cloudStack = new CloudStack(List.of(noStoragegroup, storageGroup), null, null, Map.of(), Map.of(), "", null, "", "", null, null, null, null);
 
         CloudVmTypes cloudVmTypes = new CloudVmTypes();
         VmType storageType = VmType.vmTypeWithMeta("storage", VmTypeMeta.VmTypeMetaBuilder.builder()
@@ -226,7 +226,7 @@ public class AwsStorageValidatorsTest {
 
     private CloudStack getTestCloudStackWithTags(Map<String, String> tags) {
         return new CloudStack(List.of(), null, null, Map.of(), tags,
-                "", null, null, null, null, null, null);
+                "", null, null, null, null, null, null, null);
     }
 
     private GroupNetwork createGroupNetwork() {

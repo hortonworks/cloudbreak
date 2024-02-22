@@ -248,4 +248,8 @@ public interface StackDtoDelegate {
     List<InstanceGroupView> getInstanceGroupViews();
 
     Json getTags();
+
+    default String getSupportedImdsVersion() {
+        return getStack().getSupportedImdsVersion();
+    }
 }

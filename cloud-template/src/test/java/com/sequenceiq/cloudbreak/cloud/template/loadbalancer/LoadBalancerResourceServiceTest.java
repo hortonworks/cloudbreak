@@ -90,8 +90,6 @@ public class LoadBalancerResourceServiceTest {
                 .build();
         CloudCredential cloudCredential = new CloudCredential(privateCrn, "credentialname", "account");
         cloudCredential.putParameter("projectId", "projectId");
-        String projectId = "projectId";
-        String serviceAccountId = "serviceAccountId";
         authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
         context = new ResourceBuilderContext(cloudContext.getName(), location, 30, false);
         List<CloudResource> networkResources = Collections.singletonList(CloudResource.builder()
@@ -99,7 +97,7 @@ public class LoadBalancerResourceServiceTest {
         context.addNetworkResources(networkResources);
         Network network = new Network(null);
         cloudStack = new CloudStack(Collections.emptyList(), network, image, emptyMap(), emptyMap(), null,
-                null, null, null, null, null, null);
+                null, null, null, null, null, null, null);
     }
 
     @Test

@@ -77,7 +77,7 @@ class LaunchTemplateRotationExecutorTest {
         stack.setImage(imageEntity);
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(eq(ENVIRONMENT_CRN), anyString())).thenReturn(stack);
         CloudStack cloudStack = new CloudStack(new HashSet<>(), null, null, new HashMap<>(), new HashMap<>(), "AWS::EC2::LaunchTemplate",
-                null, null, null, null, null, null);
+                null, null, null, null, null, null, null);
         when(stackToCloudStackConverter.convert(eq(stack))).thenReturn(cloudStack);
         CloudConnector cloudConnector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);

@@ -98,6 +98,9 @@ public class DescribeFreeIpaResponse {
     @Schema(description = FreeIpaModelDescriptions.MULTIAZ)
     private boolean enableMultiAz;
 
+    @Schema(description = FreeIpaModelDescriptions.SUPPORTED_IMDS_VERSION)
+    private String supportedImdsVersion;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -274,6 +277,14 @@ public class DescribeFreeIpaResponse {
         this.enableMultiAz = enableMultiAz;
     }
 
+    public String getSupportedImdsVersion() {
+        return supportedImdsVersion;
+    }
+
+    public void setSupportedImdsVersion(String supportedImdsVersion) {
+        this.supportedImdsVersion = supportedImdsVersion;
+    }
+
     @Override
     public String toString() {
         return "DescribeFreeIpaResponse{" +
@@ -298,6 +309,7 @@ public class DescribeFreeIpaResponse {
                 ", userSyncStatus=" + userSyncStatus +
                 ", recipes=" + recipes +
                 ", enableMultiAz=" + enableMultiAz +
+                ", supportedImdsVersion=" + enableMultiAz +
                 '}';
     }
 }

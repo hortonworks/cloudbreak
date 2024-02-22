@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_V2;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.Objects;
@@ -9,6 +10,7 @@ import java.util.concurrent.Future;
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
@@ -24,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
@@ -129,6 +133,9 @@ public class FreeIpaCreationService {
     @Value("${info.app.version:}")
     private String appVersion;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public DescribeFreeIpaResponse launchFreeIpa(CreateFreeIpaRequest request, String accountId) {
         String userCrn = crnService.getUserCrn();
         Future<String> ownerFuture = initiateOwnerFetching(userCrn);
@@ -170,6 +177,7 @@ public class FreeIpaCreationService {
                 ImageEntity image = imageService.create(savedStack, Objects.nonNull(imageSettingsRequest) ? imageSettingsRequest : new ImageSettingsRequest());
                 Image imageForIm = imageConverter.convert(image);
                 stack.getAllInstanceMetaDataList().forEach(im -> im.setImage(new Json(imageForIm)));
+                savedStack = setSupportedImdsVersionForStackIfNecessary(savedStack, image, accountId).orElse(savedStack);
                 FreeIpa freeIpa = freeIpaService.create(savedStack, request.getFreeIpa());
                 return Triple.of(savedStack, image, freeIpa);
             });
@@ -193,6 +201,16 @@ public class FreeIpaCreationService {
             ownerFuture = intermediateBuilderExecutor.submit(() -> umsClient.getUserDetails(userCrn).getEmail());
         }
         return ownerFuture;
+    }
+
+    private Optional<Stack> setSupportedImdsVersionForStackIfNecessary(Stack stack, ImageEntity image, String accountId) {
+        if (CloudPlatform.AWS.equals(CloudPlatform.valueOf(stack.getCloudPlatform())) &&
+                StringUtils.equals(image.getImdsVersion(), AWS_IMDS_VERSION_V2) &&
+                entitlementService.isAwsImdsV2Enforced(accountId)) {
+            stack.setSupportedImdsVersion(AWS_IMDS_VERSION_V2);
+            return Optional.of(stackService.save(stack));
+        }
+        return Optional.empty();
     }
 
     private void fillInstanceMetadata(Stack stack, DetailedEnvironmentResponse environment) {

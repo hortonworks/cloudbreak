@@ -147,6 +147,9 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
     @Schema(description = StackModelDescription.JAVA_VERSION)
     private Integer javaVersion;
 
+    @Schema(description = StackModelDescription.SUPPORTED_IMDS_VERSION)
+    private String supportedImdsVersion;
+
     private boolean enableMultiAz;
 
     @Schema(description = "List of resources attached to the stack")
@@ -455,6 +458,14 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
         this.resources = resources;
     }
 
+    public String getSupportedImdsVersion() {
+        return supportedImdsVersion;
+    }
+
+    public void setSupportedImdsVersion(String supportedImdsVersion) {
+        this.supportedImdsVersion = supportedImdsVersion;
+    }
+
     @Override
     public String toString() {
         return "StackV4Response{ " +
@@ -494,6 +505,7 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
                 ", javaVersion=" + javaVersion +
                 ", multiAz=" + enableMultiAz +
                 ", resources=" + resources +
+                ", supportedImdsVersion=" + supportedImdsVersion +
                 '}';
     }
 }

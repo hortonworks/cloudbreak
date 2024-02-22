@@ -297,6 +297,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         Database database = new Database();
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.HA);
         stack.setDatabase(database);
+        stack.setSupportedImdsVersion("v2");
         return stack;
     }
 }

@@ -84,7 +84,7 @@ public class FreeIpaVerticalScaleHandlerTest {
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
         CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, null, null);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, null, null, null);
 
         VerticalScaleRequest freeIPAVerticalScaleRequest = new VerticalScaleRequest();
         freeIPAVerticalScaleRequest.setGroup("master");
@@ -140,7 +140,7 @@ public class FreeIpaVerticalScaleHandlerTest {
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
         CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, null, null);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, null, null, null);
 
         VerticalScaleRequest freeIPAVerticalScaleRequest = new VerticalScaleRequest();
         freeIPAVerticalScaleRequest.setGroup("master");

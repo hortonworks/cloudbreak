@@ -28,6 +28,10 @@ public class ImageToImageEntityConverter {
         return extractImdsVersion(image.getPackageVersions());
     }
 
+    public String extractImdsVersion(com.sequenceiq.cloudbreak.cloud.model.Image image) {
+        return extractImdsVersion(image.getPackageVersions());
+    }
+
     private String extractImdsVersion(Map<String, String> packageVersions) {
         return packageVersions == null ? null : packageVersions.get(ImagePackageVersion.IMDS_VERSION.getKey());
     }

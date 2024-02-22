@@ -1,13 +1,15 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource;
 
+import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_V2;
+
 import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsImdsService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.efs.AwsEfsFileSystem;
@@ -33,9 +35,6 @@ public class AwsModelService {
 
     @Inject
     private AwsNetworkService awsNetworkService;
-
-    @Inject
-    private AwsImdsService awsImdsService;
 
     public ModelContext buildDefaultModelContext(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier) {
         Network network = stack.getNetwork();
@@ -67,7 +66,7 @@ public class AwsModelService {
                 .withOutboundInternetTraffic(network.getOutboundInternetTraffic())
                 .withVpcCidrs(network.getNetworkCidrs())
                 .withPrefixListIds(awsNetworkService.getPrefixListIds(amazonEC2Client, regionName, network.getOutboundInternetTraffic()))
-                .withImdsv2Supported(awsImdsService.isImdsV2Supported(stack, ac.getCloudContext().getAccountId()));
+                .withImdsv2Supported(StringUtils.equals(stack.getSupportedImdsVersion(), AWS_IMDS_VERSION_V2));
 
         AwsEfsFileSystem efsFileSystem = getAwsEfsFileSystem(stack);
 

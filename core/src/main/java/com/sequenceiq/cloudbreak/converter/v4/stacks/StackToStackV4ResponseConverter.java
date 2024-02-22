@@ -182,6 +182,7 @@ public class StackToStackV4ResponseConverter {
         if (!CollectionUtils.isEmpty(response.getLoadBalancers())) {
             response.setEnableLoadBalancer(true);
         }
+        response.setSupportedImdsVersion(stack.getSupportedImdsVersion());
         return response;
     }
 

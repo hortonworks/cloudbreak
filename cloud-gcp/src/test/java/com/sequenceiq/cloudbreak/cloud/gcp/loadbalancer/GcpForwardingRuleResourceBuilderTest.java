@@ -120,7 +120,7 @@ class GcpForwardingRuleResourceBuilderTest {
         ReflectionTestUtils.setField(underTest, "resourceNameService", resourceNameService);
         Network network = new Network(null);
         cloudStack = new CloudStack(Collections.emptyList(), network, image, emptyMap(), emptyMap(), null,
-                null, null, null, null, null, null);
+                null, null, null, null, null, null, null);
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("hcport", 8080);
         parameters.put("trafficport", 8080);

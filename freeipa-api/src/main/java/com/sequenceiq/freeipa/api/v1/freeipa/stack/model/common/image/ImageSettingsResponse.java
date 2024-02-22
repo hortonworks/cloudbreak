@@ -15,6 +15,9 @@ public class ImageSettingsResponse extends ImageSettingsBase {
     @Schema(description = FreeIpaModelDescriptions.ImageSettingsModelDescription.LDAP_AGENT_VERSION)
     private String ldapAgentVersion;
 
+    @Schema(description = FreeIpaModelDescriptions.ImageSettingsModelDescription.IMDS_VERSION)
+    private String imdsVersion;
+
     @Schema(description = FreeIpaModelDescriptions.ImageSettingsModelDescription.SOURCE_IMAGE)
     private String sourceImage;
 
@@ -34,11 +37,20 @@ public class ImageSettingsResponse extends ImageSettingsBase {
         this.sourceImage = sourceImage;
     }
 
+    public String getImdsVersion() {
+        return imdsVersion;
+    }
+
+    public void setImdsVersion(String imdsVersion) {
+        this.imdsVersion = imdsVersion;
+    }
+
     @Override
     public String toString() {
         return "ImageSettingsResponse{" +
                 "ldapAgentVersion='" + ldapAgentVersion + '\'' +
                 ", sourceImage='" + sourceImage + '\'' +
+                ", imdsVersion='" + imdsVersion + '\'' +
                 "} " + super.toString();
     }
 }

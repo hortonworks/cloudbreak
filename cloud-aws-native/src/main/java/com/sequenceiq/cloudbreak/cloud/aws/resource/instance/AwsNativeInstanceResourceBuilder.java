@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.resource.AwsNativeResourceBuilderOrderConstants.NATIVE_INSTANCE_RESOURCE_BUILDER_ORDER;
+import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_V2;
 import static java.util.Collections.singletonList;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -21,7 +22,6 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsImdsService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
@@ -95,9 +95,6 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
     @Inject
     private SecurityGroupBuilderUtil securityGroupBuilderUtil;
 
-    @Inject
-    private AwsImdsService awsImdsService;
-
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
@@ -153,7 +150,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                     .maxCount(1)
                     .blockDeviceMappings(blocks(group, cloudStack, ac))
                     .keyName(cloudStack.getInstanceAuthentication().getPublicKeyId());
-            if (awsImdsService.isImdsV2Supported(cloudStack, ac.getCloudContext().getAccountId())) {
+            if (StringUtils.equals(cloudStack.getSupportedImdsVersion(), AWS_IMDS_VERSION_V2)) {
                 builder.metadataOptions(InstanceMetadataOptionsRequest.builder()
                         .httpTokens(HttpTokensState.REQUIRED)
                         .build());

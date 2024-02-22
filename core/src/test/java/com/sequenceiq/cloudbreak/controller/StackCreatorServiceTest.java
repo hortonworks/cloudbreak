@@ -98,6 +98,8 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 @ExtendWith(MockitoExtension.class)
 public class StackCreatorServiceTest {
 
+    private static final String STACK_CRN = "crn:cdp:sdx:us-west-1:1234:sdxcluster:mystack";
+
     private static final Long WORKSPACE_ID = 1L;
 
     private static final String INSTANCE_GROUP = "INSTANCE_GROUP";
@@ -227,6 +229,7 @@ public class StackCreatorServiceTest {
         instanceGroupV4Request.setName(INSTANCE_GROUP);
         instanceGroupV4Request.setRecipeNames(Set.of(RECIPE_NAME));
         stackRequest.setInstanceGroups(List.of(instanceGroupV4Request));
+        when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
 
         doNothing().when(nodeCountLimitValidator).validateProvision(any());
         when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.of(mock(StackView.class)));

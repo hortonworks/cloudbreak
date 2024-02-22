@@ -862,7 +862,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
 
     private CloudStack getCloudStack() {
         Network network = new Network(new Subnet("10.0.0.0/16"), Map.of(NetworkConstants.VPC_ID, "vpc-avpcarn"));
-        return new CloudStack(List.of(), network, null, Map.of(), Map.of(), null, null, null, null, null, null, null, false);
+        return new CloudStack(List.of(), network, null, Map.of(), Map.of(), null, null, null, null, null, null, null, false, null);
     }
 
     private AwsLoadBalancer getAwsLoadBalancer() {

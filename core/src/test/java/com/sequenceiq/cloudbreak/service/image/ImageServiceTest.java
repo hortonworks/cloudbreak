@@ -25,8 +25,10 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -599,6 +601,38 @@ public class ImageServiceTest {
                 assertEquals(EXISTING_ID, component.getAttributes().getValue("imageName"));
             }
         }
+    }
+
+    @Test
+    public void testUpdateSupportedImdsIfEntitlementDisabled() {
+        when(entitlementService.isAwsImdsV2Enforced(any())).thenReturn(Boolean.FALSE);
+
+        assertFalse(underTest.getSupportedImdsVersion("acc", "AWS", StatedImage.statedImage(null, null, null)).isPresent());
+    }
+
+    @Test
+    public void testUpdateSupportedImdsIfPlatformNotAws() {
+        assertFalse(underTest.getSupportedImdsVersion("acc", "AZURE", StatedImage.statedImage(null, null, null)).isPresent());
+    }
+
+    @Test
+    public void testUpdateSupportedImdsIfPkgVersionMissing() {
+        Image image = new Image(null, null, null, null, null, null, null, Map.of(), Map.of(), null, null,
+                Map.of(), List.of(), List.of(), null, false, null, null);
+        when(entitlementService.isAwsImdsV2Enforced(any())).thenReturn(Boolean.TRUE);
+
+        assertFalse(underTest.getSupportedImdsVersion("acc", "AWS", StatedImage.statedImage(image, null, null)).isPresent());
+    }
+
+    @Test
+    public void testUpdateSupportedImds() {
+        Image image = new Image(null, null, null, null, null, null, null, Map.of(), Map.of(), null, null,
+                Map.of("imds", "v2"), List.of(), List.of(), null, false, null, null);
+        when(entitlementService.isAwsImdsV2Enforced(any())).thenReturn(Boolean.TRUE);
+
+        Optional<String> supportedImdsVersion = underTest.getSupportedImdsVersion("acc", "AWS", StatedImage.statedImage(image, null, null));
+        assertTrue(supportedImdsVersion.isPresent());
+        assertEquals("v2", supportedImdsVersion.get());
     }
 
     private ImageCatalog getImageCatalog() {

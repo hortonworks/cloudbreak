@@ -47,25 +47,27 @@ public class CloudStack {
 
     private final boolean multiAz;
 
+    private final String supportedImdsVersion;
+
     public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags, String template,
             InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, SpiFileSystem fileSystem,
-            String gatewayUserData, String coreUserData) {
+            String gatewayUserData, String coreUserData, String supportedImdsVersion) {
         this(groups, network, image, parameters, tags, template, instanceAuthentication, loginUserName, publicKey, fileSystem,
-                Collections.emptyList(), gatewayUserData, coreUserData);
+                Collections.emptyList(), gatewayUserData, coreUserData, supportedImdsVersion);
     }
 
     public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags, String template,
             InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, SpiFileSystem fileSystem,
-            String gatewayUserData, String coreUserData, boolean multiAz) {
+            String gatewayUserData, String coreUserData, boolean multiAz, String supportedImdsVersion) {
         this(groups, network, image, parameters, tags, template, instanceAuthentication, loginUserName, publicKey, fileSystem,
-                Collections.emptyList(), null, gatewayUserData, coreUserData, multiAz);
+                Collections.emptyList(), null, gatewayUserData, coreUserData, multiAz, supportedImdsVersion);
     }
 
     public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags,
             String template, InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, SpiFileSystem fileSystem,
-            List<CloudLoadBalancer> loadBalancers, String gatewayUserData, String coreUserData) {
+            List<CloudLoadBalancer> loadBalancers, String gatewayUserData, String coreUserData, String supportedImdsVersion) {
         this(groups, network, image, parameters, tags, template, instanceAuthentication, loginUserName, publicKey, fileSystem,
-                loadBalancers, null, gatewayUserData, coreUserData, false);
+                loadBalancers, null, gatewayUserData, coreUserData, false, supportedImdsVersion);
     }
 
     @JsonCreator
@@ -84,7 +86,8 @@ public class CloudStack {
             @JsonProperty("additionalFileSystem") SpiFileSystem additionalFileSystem,
             @JsonProperty("gatewayUserData") String gatewayUserData,
             @JsonProperty("coreUserData") String coreUserData,
-            @JsonProperty("multiAz") boolean multiAz) {
+            @JsonProperty("multiAz") boolean multiAz,
+            @JsonProperty("supportedImdsVersion") String supportedImdsVersion) {
         this.groups = ImmutableList.copyOf(groups);
         this.network = network;
         this.image = image;
@@ -100,11 +103,12 @@ public class CloudStack {
         this.gatewayUserData = gatewayUserData;
         this.coreUserData = coreUserData;
         this.multiAz = multiAz;
+        this.supportedImdsVersion = supportedImdsVersion;
     }
 
     public CloudStack replaceImage(Image newImage) {
         return new CloudStack(groups, network, newImage, parameters, tags, template, instanceAuthentication, loginUserName, publicKey,
-                fileSystem.orElse(null), loadBalancers, additionalFileSystem.orElse(null), gatewayUserData, coreUserData, multiAz);
+                fileSystem.orElse(null), loadBalancers, additionalFileSystem.orElse(null), gatewayUserData, coreUserData, multiAz, supportedImdsVersion);
     }
 
     public List<Group> getGroups() {
@@ -175,6 +179,10 @@ public class CloudStack {
         }
     }
 
+    public String getSupportedImdsVersion() {
+        return supportedImdsVersion;
+    }
+
     public boolean isMultiAz() {
         return multiAz;
     }
@@ -194,6 +202,7 @@ public class CloudStack {
                 ", fileSystem=" + fileSystem +
                 ", additionalFileSystem=" + additionalFileSystem +
                 ", multiAz=" + multiAz +
+                ", supportedImdsVersion=" + supportedImdsVersion +
                 '}';
     }
 }

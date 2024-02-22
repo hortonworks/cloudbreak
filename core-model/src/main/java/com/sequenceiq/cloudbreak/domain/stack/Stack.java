@@ -257,6 +257,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     @Column(name = "creator_client")
     private String creatorClient;
 
+    private String supportedImdsVersion;
+
     public String getResourceCrn() {
         return resourceCrn;
     }
@@ -1114,6 +1116,14 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.database = database;
     }
 
+    public String getSupportedImdsVersion() {
+        return supportedImdsVersion;
+    }
+
+    public void setSupportedImdsVersion(String supportedImdsVersion) {
+        this.supportedImdsVersion = supportedImdsVersion;
+    }
+
     @Override
     public String toString() {
         return "Stack{" +
@@ -1163,6 +1173,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 ", javaVersion=" + javaVersion +
                 ", database=" + database +
                 ", multiAz=" + multiAz +
+                ", supportedImdsVersion=" + supportedImdsVersion +
                 '}';
     }
 

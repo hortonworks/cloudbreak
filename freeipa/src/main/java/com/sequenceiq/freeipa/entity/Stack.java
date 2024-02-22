@@ -157,6 +157,8 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
 
     private boolean multiAz;
 
+    private String supportedImdsVersion;
+
     public Long getId() {
         return id;
     }
@@ -519,6 +521,14 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
         this.multiAz = multiAz;
     }
 
+    public String getSupportedImdsVersion() {
+        return supportedImdsVersion;
+    }
+
+    public void setSupportedImdsVersion(String supportedImdsVersion) {
+        this.supportedImdsVersion = supportedImdsVersion;
+    }
+
     @Override
     public String toString() {
         return "Stack{" +
@@ -548,6 +558,7 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
                 ", minaSshdServiceId='" + minaSshdServiceId + '\'' +
                 ", ccmV2AgentCrn='" + ccmV2AgentCrn + '\'' +
                 ", multiAz='" + multiAz + '\'' +
+                ", supportedImdsVersion='" + supportedImdsVersion + '\'' +
                 '}';
     }
 

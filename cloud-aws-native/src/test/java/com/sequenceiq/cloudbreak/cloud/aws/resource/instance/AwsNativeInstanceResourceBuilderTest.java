@@ -29,7 +29,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsImdsService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
@@ -119,9 +118,6 @@ class AwsNativeInstanceResourceBuilderTest {
     @Mock
     private AwsStackNameCommonUtil awsStackNameCommonUtil;
 
-    @Mock
-    private AwsImdsService awsImdsService;
-
     @BeforeEach
     void setup() {
         CloudContext cloudContext = mock(CloudContext.class);
@@ -163,7 +159,7 @@ class AwsNativeInstanceResourceBuilderTest {
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
         when(securityGroupBuilderUtil.getSecurityGroupIds(awsContext, group)).thenReturn(List.of("sg-id"));
         when(awsStackNameCommonUtil.getInstanceName(ac, "groupName", privateId)).thenReturn("stackname");
-        when(awsImdsService.isImdsV2Supported(any(), any())).thenReturn(true);
+        when(cloudStack.getSupportedImdsVersion()).thenReturn("v2");
 
         ArgumentCaptor<RunInstancesRequest> runInstancesRequestArgumentCaptor = ArgumentCaptor.forClass(RunInstancesRequest.class);
         List<CloudResource> actual = underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);

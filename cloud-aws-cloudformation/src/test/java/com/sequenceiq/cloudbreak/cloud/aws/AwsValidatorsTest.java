@@ -154,7 +154,7 @@ class AwsValidatorsTest {
         CloudInstance instance = new CloudInstance("", template, null, "subnet-1", "az1");
         Group group = new Group("worker", InstanceGroupType.CORE, List.of(instance), null, null, null, "", "", 0, Optional.empty(), createGroupNetwork(),
                 emptyMap());
-        CloudStack cloudStack = new CloudStack(List.of(group), null, null, Map.of(), Map.of(), "", null, "", "", null, null, null);
+        CloudStack cloudStack = new CloudStack(List.of(group), null, null, Map.of(), Map.of(), "", null, "", "", null, null, null, null);
         awsStackValidatorUnderTest.validate(authenticatedContext, cloudStack);
     }
 
@@ -238,7 +238,7 @@ class AwsValidatorsTest {
 
     private CloudStack getTestCloudStackWithTags(Map<String, String> tags) {
         return new CloudStack(List.of(), null, null, Map.of(), tags,
-                "", null, null, null, null, null, null);
+                "", null, null, null, null, null, null, null);
     }
 
     private GroupNetwork createGroupNetwork() {

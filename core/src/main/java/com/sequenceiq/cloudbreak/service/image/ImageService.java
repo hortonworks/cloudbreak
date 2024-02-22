@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.CM_REPO_DETAILS;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.IMAGE;
+import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_V2;
 import static com.sequenceiq.cloudbreak.service.image.ImageCatalogService.CDP_DEFAULT_CATALOG_NAME;
 
 import java.io.IOException;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
@@ -354,6 +356,19 @@ public class ImageService {
             addCmRepo(stack, components, catalogBasedImage);
         }
         return components;
+    }
+
+    public Optional<String> getSupportedImdsVersion(String accountId, String cloudPlatform, StatedImage image) {
+        if (CloudPlatform.AWS.equals(CloudPlatform.valueOf(cloudPlatform))) {
+            if (entitlementService.isAwsImdsV2Enforced(accountId)) {
+                Map<String, String> packageVersions = image.getImage().getPackageVersions();
+                if (packageVersions.containsKey(ImagePackageVersion.IMDS_VERSION.getKey()) &&
+                        StringUtils.equals(packageVersions.get(ImagePackageVersion.IMDS_VERSION.getKey()), AWS_IMDS_VERSION_V2)) {
+                    return Optional.of(AWS_IMDS_VERSION_V2);
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     private void addPrewarmParcels(Stack stack, StatedImage statedImage, Set<Component> components) {

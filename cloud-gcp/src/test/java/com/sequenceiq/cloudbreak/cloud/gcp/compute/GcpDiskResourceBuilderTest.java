@@ -176,7 +176,7 @@ class GcpDiskResourceBuilderTest {
         Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default",
                 "default-id", new HashMap<>(), "2019-10-24", 1571884856L);
         cloudStack = new CloudStack(Collections.emptyList(), null, image, emptyMap(), emptyMap(), null,
-                null, null, null, null, null, null);
+                null, null, null, null, null, null, null);
 
         Operation operation = new Operation();
         operation.setName("operation");

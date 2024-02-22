@@ -94,6 +94,7 @@ public class StackToDescribeFreeIpaResponseConverter {
         describeFreeIpaResponse.setRecipes(freeIpaRecipeService.getRecipeNamesForStack(stack.getId()));
         decorateWithCloudStorageAndTelemetry(stack, describeFreeIpaResponse);
         userSyncStatus.ifPresent(u -> describeFreeIpaResponse.setUserSyncStatus(userSyncStatusConverter.convert(u, stack.getEnvironmentCrn())));
+        describeFreeIpaResponse.setSupportedImdsVersion(stack.getSupportedImdsVersion());
         return describeFreeIpaResponse;
     }
 
