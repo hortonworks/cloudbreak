@@ -535,4 +535,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     public FlowIdentifier putAddVolumes(NameOrCrn nameOrCrn, @Valid StackAddVolumesRequest addVolumesRequest, String accountId) {
         return stackCommonService.putAddVolumesInWorkspace(nameOrCrn, accountId, addVolumesRequest);
     }
+
+    public FlowIdentifier refreshEntitlementParams(@NotNull String crn) {
+        StackDto stack = stackDtoService.getByCrn(crn);
+        return clusterOperationService.refreshEntitlementParams(stack);
+    }
 }

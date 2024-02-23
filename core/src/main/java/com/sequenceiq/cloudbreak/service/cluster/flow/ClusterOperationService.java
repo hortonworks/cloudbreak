@@ -82,6 +82,7 @@ import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
+import com.sequenceiq.cloudbreak.service.telemetry.DynamicEntitlementRefreshService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.util.NotAllowedStatusUpdate;
@@ -150,6 +151,9 @@ public class ClusterOperationService {
 
     @Inject
     private StackUpdater stackUpdater;
+
+    @Inject
+    private DynamicEntitlementRefreshService dynamicEntitlementRefreshService;
 
     @Measure(ClusterOperationService.class)
     public Cluster create(Stack stack, Cluster cluster, List<ClusterComponent> components, User user) throws TransactionService.TransactionExecutionException {
@@ -597,5 +601,20 @@ public class ClusterOperationService {
 
     public FlowIdentifier addVolumes(Long stackId, StackAddVolumesRequest addVolumesRequest) {
         return flowManager.triggerAddVolumes(stackId, addVolumesRequest);
+    }
+
+    public FlowIdentifier refreshEntitlementParams(StackDto stack) {
+        if (!dynamicEntitlementRefreshService.isClusterManagerServerReachable(stack)) {
+            LOGGER.info("CM is not running for stack {}, skipping dynamic entitlement checking", stack.getResourceCrn());
+            return FlowIdentifier.notTriggered();
+        }
+        Map<String, Boolean> changedEntitlements = dynamicEntitlementRefreshService.getChangedWatchedEntitlements(stack);
+        if (changedEntitlements == null || changedEntitlements.isEmpty()) {
+            LOGGER.debug("Watched entitlements didn't change for stack: '{}'.", stack.getName());
+            return FlowIdentifier.notTriggered();
+        }
+        Boolean saltRefreshNeeded = dynamicEntitlementRefreshService.saltRefreshNeeded(changedEntitlements);
+        return flowManager.triggerRefreshEntitlementParams(stack.getId(), stack.getResourceCrn(),
+                changedEntitlements, saltRefreshNeeded);
     }
 }

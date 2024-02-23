@@ -100,4 +100,18 @@ start_cdp_prometheus:
       - file: /opt/cdp-prometheus/remote_token_file
   {%- endif %}
 {%- endif %}
+{%- else %}
+kill_cdp_prometheus:
+  service.dead:
+    - name: "cdp-prometheus"
+
+delete_config_files:
+  file.absent:
+    - names:
+      - /opt/cdp-prometheus/prometheus.yml
+      - /opt/cdp-prometheus/prometheus-web-config.yml
+      - /opt/cdp-prometheus/request_signer_pwd_file
+      - /opt/cdp-prometheus/remote_pwd_file
+      - /opt/cdp-prometheus/remote_token_file
+      - /etc/systemd/system/cdp-prometheus.service
 {%- endif %}

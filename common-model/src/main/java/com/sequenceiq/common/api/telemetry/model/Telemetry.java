@@ -35,6 +35,9 @@ public class Telemetry implements Serializable {
     @JsonProperty("fluentAttributes")
     private Map<String, Object> fluentAttributes = new HashMap<>();
 
+    @JsonProperty("dynamicEntitlements")
+    private Map<String, Boolean> dynamicEntitlements = new HashMap<>();
+
     @JsonProperty("rules")
     private List<AnonymizationRule> rules;
 
@@ -84,6 +87,14 @@ public class Telemetry implements Serializable {
 
     public void setFluentAttributes(Map<String, Object> fluentAttributes) {
         this.fluentAttributes = fluentAttributes;
+    }
+
+    public Map<String, Boolean> getDynamicEntitlements() {
+        return dynamicEntitlements;
+    }
+
+    public void setDynamicEntitlements(Map<String, Boolean> dynamicEntitlements) {
+        this.dynamicEntitlements = dynamicEntitlements;
     }
 
     public List<AnonymizationRule> getRules() {

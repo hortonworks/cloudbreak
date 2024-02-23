@@ -42,6 +42,8 @@ public class SchedulerFactoryConfig {
 
     public static final String QUARTZ_METERING_SYNC_EXECUTOR_THREAD_NAME_PREFIX = "quartzMeteringSyncExecutor";
 
+    public static final String QUARTZ_DYNAMIC_ENTITLEMENT_EXECUTOR_THREAD_NAME_PREFIX = "quartzDynamicEntitlementExecutor";
+
     private static final String QUARTZ_TASK_EXECUTOR = "quartzTaskExecutor";
 
     private static final String DEFAULT_SCHEDULER = "quartzScheduler";

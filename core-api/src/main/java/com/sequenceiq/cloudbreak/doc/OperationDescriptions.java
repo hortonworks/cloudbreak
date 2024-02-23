@@ -91,7 +91,7 @@ public class OperationDescriptions {
         public static final String ROTATE_CERTIFICATES = "Rotates the certificates of the cluster";
         public static final String RENEW_CERTIFICATE = "Trigger a certificate renewal on the desired cluster which is identified via stack's name";
         public static final String UPDATE_LOAD_BALANCERS = "Updates an existing cluster with load balancers, including adding the Endpoint Gateway " +
-            "if it's enabled.";
+                "if it's enabled.";
         public static final String CHANGE_IMAGE_CATALOG = "Changes image catalog of the cluster";
         public static final String RANGER_RAZ_ENABLED = "Determines if Ranger Raz is present in the cluster.";
         public static final String GENERATE_IMAGE_CATALOG = "Generates an image catalog that only contains the currently used image for creating instances";
@@ -102,8 +102,8 @@ public class OperationDescriptions {
         public static final String GET_LIMITS_CONFIGURATION = "Get limits configuration";
         public static final String GET_RECOMMENDATION = "Get recommendation";
         public static final String AUTHORIZE_FOR_AUTOSCALE = "Authorize for Autoscale";
-
         public static final String IMD_UPDATE = "update instance metadata for stack's instances";
+        public static final String REFRESH_ENTITLEMENTS_PARAMS = "Refresh configurations based on entitlements";
     }
 
     public static class ClusterOpDescription {

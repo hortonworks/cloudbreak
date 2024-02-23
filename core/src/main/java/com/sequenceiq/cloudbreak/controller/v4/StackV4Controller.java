@@ -664,6 +664,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
+    @InternalOnly
+    public FlowIdentifier refreshEntitlementParams(Long workspaceId, String crn, @InitiatorUserCrn String initiatorUserCrn) {
+        return stackOperations.refreshEntitlementParams(crn);
+    }
+
+    @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DATALAKE_HORIZONTAL_SCALING)
     public FlowIdentifier rollingRestartServices(Long workspaceId, @ResourceCrn String crn) {
         return stackOperationService.triggerServicesRollingRestart(crn);

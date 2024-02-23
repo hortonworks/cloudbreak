@@ -197,6 +197,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerStackUpdateDisks(stackDto, new DiskUpdateRequest());
         underTest.triggerSecretRotation(STACK_ID, "CRN", Lists.newArrayList(), RotationFlowExecutionType.ROTATE, null);
         underTest.triggerInstanceMetadataUpdate(stackDto, InstanceMetadataUpdateType.IMDS_HTTP_TOKEN_REQUIRED);
+        underTest.triggerRefreshEntitlementParams(STACK_ID, "CRN", Collections.emptyMap(), Boolean.FALSE);
         StackAddVolumesRequest stackAddVolumesRequest = mock(StackAddVolumesRequest.class);
         doReturn(CloudVolumeUsageType.GENERAL.toString()).when(stackAddVolumesRequest).getCloudVolumeUsageType();
         underTest.triggerAddVolumes(STACK_ID, stackAddVolumesRequest);

@@ -826,6 +826,10 @@ existing-stack-patcher:
     user-data-ccmv2-setup:
       enabled: true
 
+dynamic-entitlement:
+  entitlements:
+    cb: CDP_CENTRAL_COMPUTE_MONITORING
+
 clusterdns:
   host: localhost
   port: 8982

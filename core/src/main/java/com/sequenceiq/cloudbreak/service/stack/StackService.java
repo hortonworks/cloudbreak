@@ -131,6 +131,7 @@ import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClusterConfigServic
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.stackpatch.StackPatchService;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
+import com.sequenceiq.cloudbreak.service.telemetry.DynamicEntitlementRefreshService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
@@ -286,6 +287,9 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     @Inject
     private AzureDatabaseServerParameterDecorator azureDatabaseServerParameterDecorator;
+
+    @Inject
+    private DynamicEntitlementRefreshService dynamicEntitlementRefreshService;
 
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
@@ -961,6 +965,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
                         Telemetry telemetry = component.getAttributes().get(Telemetry.class);
                         if (telemetry != null) {
                             telemetry.setRules(accountTelemetryClientService.getAnonymizationRules());
+                            dynamicEntitlementRefreshService.setupDynamicEntitlementsForProvision(stack.getResourceCrn(), telemetry);
                         }
                         cloudStorageFolderResolverService.updateStorageLocation(telemetry,
                                 fluentClusterType.value(),

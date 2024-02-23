@@ -3,15 +3,15 @@
 {%- set cdp_prometheus_installed = salt['file.directory_exists' ]('/opt/cdp-prometheus') %}
 include:
   - monitoring.scripts
+  {%- if cdp_prometheus_installed %}
+  - monitoring.cdp-prometheus
+  {%- endif %}
 {%- if monitoring.enabled and monitoring.remoteWriteUrl %}
   - monitoring.exporters
   {%- if monitoring.nodeExporterExists %}
   - monitoring.textfiles.*
   {%- endif %}
   - monitoring.request-signer
-  {%- if cdp_prometheus_installed %}
-  - monitoring.cdp-prometheus
-  {%- endif %}
 
 /etc/cron.d/monitoring_cert_check:
   file.managed:

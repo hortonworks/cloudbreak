@@ -46,6 +46,7 @@ class RoutingDataSourceTest {
                 "quartzExecutor-6",
                 "quartzMeteringExecutor-6",
                 "quartzMeteringSyncExecutor-6",
+                "quartzDynamicEntitlementExecutor-6",
                 "QuartzScheduler_quartzScheduler-dbajzath1648036370090_ClusterManager",
                 "QuartzScheduler_quartzScheduler-dbajzath1648036370090_MisfireHandler"
         );

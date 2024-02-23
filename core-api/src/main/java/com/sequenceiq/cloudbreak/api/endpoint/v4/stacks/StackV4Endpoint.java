@@ -42,6 +42,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.RANGER_RAZ_ENABLED;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.RDS_UPGRADE_INTERNAL;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.RECOVER_CLUSTER_IN_WORKSPACE_INTERNAL;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.REFRESH_ENTITLEMENTS_PARAMS;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.REFRESH_RECIPES_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.REFRESH_RECIPES_IN_WORKSPACE_INTERNAL;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.REPAIR_CLUSTER_IN_WORKSPACE;
@@ -810,6 +811,14 @@ public interface StackV4Endpoint {
     @Operation(summary = ROTATE_STACK_SECRETS, operationId = "rotateStackSecrets",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true), hidden = true)
     FlowIdentifier rotateSecrets(@PathParam("workspaceId") Long workspaceId, @Valid @NotNull StackV4SecretRotationRequest request,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @POST
+    @Path("internal/{crn}/refresh_entitlement_params")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = REFRESH_ENTITLEMENTS_PARAMS, operationId = "refreshEntitlementParams",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true), hidden = true)
+    FlowIdentifier refreshEntitlementParams(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @POST

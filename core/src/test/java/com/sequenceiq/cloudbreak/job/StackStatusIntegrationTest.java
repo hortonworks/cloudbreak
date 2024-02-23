@@ -91,6 +91,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
+import com.sequenceiq.cloudbreak.service.telemetry.DynamicEntitlementRefreshService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.util.UsageLoggingUtil;
@@ -175,6 +176,9 @@ class StackStatusIntegrationTest {
 
     @MockBean
     private ServiceStatusCheckerLogLocationDecorator serviceStatusCheckerLogLocationDecorator;
+
+    @MockBean
+    private DynamicEntitlementRefreshService dynamicEntitlementRefreshService;
 
     private Stack stack;
 

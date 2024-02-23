@@ -77,6 +77,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.RdsUpgradeChainTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.RefreshEntitlementParamsFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
@@ -526,6 +527,12 @@ public class ReactorFlowManager {
                 .build();
         LOGGER.debug("Disk Update flow trigger event sent for datahub {}", stack.getName());
         return reactorNotifier.notify(stackId, selector, datahubDiskUpdateTriggerEvent);
+    }
+
+    public FlowIdentifier triggerRefreshEntitlementParams(Long stackId, String crn, Map<String, Boolean> changedEntitlements, Boolean saltRefreshNeeded) {
+        String selector = FlowChainTriggers.REFRESH_ENTITLEMENT_PARAM_CHAIN_TRIGGER_EVENT;
+        Acceptable triggerEvent = new RefreshEntitlementParamsFlowChainTriggerEvent(selector, stackId, crn, changedEntitlements, saltRefreshNeeded);
+        return reactorNotifier.notify(stackId, selector, triggerEvent);
     }
 
     public FlowIdentifier triggerAddVolumes(Long stackId, StackAddVolumesRequest addVolumesRequest) {

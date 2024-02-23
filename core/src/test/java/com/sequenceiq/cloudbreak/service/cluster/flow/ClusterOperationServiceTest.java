@@ -15,6 +15,8 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -47,6 +49,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
+import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
@@ -61,6 +64,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -73,8 +77,10 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.telemetry.DynamicEntitlementRefreshService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @ExtendWith(MockitoExtension.class)
 public class ClusterOperationServiceTest {
@@ -117,6 +123,9 @@ public class ClusterOperationServiceTest {
 
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
+
+    @Mock
+    private DynamicEntitlementRefreshService dynamicEntitlementRefreshService;
 
     @InjectMocks
     private ClusterOperationService underTest;
@@ -335,6 +344,35 @@ public class ClusterOperationServiceTest {
         verify(flowManager).triggerAddVolumes(eq(STACK_ID), captor.capture());
         StackAddVolumesRequest request = captor.getValue();
         assertEquals("COMPUTE", request.getInstanceGroup());
+    }
+
+    @Test
+    void testRefreshEntitlementParams() {
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getId()).thenReturn(STACK_ID);
+        when(stackDto.getResourceCrn()).thenReturn(STACK_CRN);
+        when(dynamicEntitlementRefreshService.isClusterManagerServerReachable(stackDto)).thenReturn(true);
+        Map<String, Boolean> changedEntitlements = Map.of(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name(), Boolean.TRUE);
+        when(dynamicEntitlementRefreshService.getChangedWatchedEntitlements(stackDto)).thenReturn(changedEntitlements);
+        when(dynamicEntitlementRefreshService.saltRefreshNeeded(any())).thenReturn(true);
+
+        underTest.refreshEntitlementParams(stackDto);
+
+        verify(flowManager).triggerRefreshEntitlementParams(eq(STACK_ID), eq(STACK_CRN), eq(changedEntitlements), eq(true));
+    }
+
+    @Test
+    void testRefreshEntitlementParamsNotChanged() {
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getName()).thenReturn(STACK_CRN);
+        when(dynamicEntitlementRefreshService.isClusterManagerServerReachable(stackDto)).thenReturn(true);
+        Map<String, Boolean> changedEntitlements = Map.of();
+        when(dynamicEntitlementRefreshService.getChangedWatchedEntitlements(stackDto)).thenReturn(changedEntitlements);
+
+        FlowIdentifier flowIdentifier = underTest.refreshEntitlementParams(stackDto);
+
+        assertEquals(FlowIdentifier.notTriggered(), flowIdentifier);
+        verify(flowManager, never()).triggerRefreshEntitlementParams(any(), any(), any(), any());
     }
 
     private InstanceMetaData getHost(String hostName, String groupName, InstanceStatus instanceStatus, InstanceGroupType instanceGroupType) {
