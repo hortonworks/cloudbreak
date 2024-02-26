@@ -83,7 +83,7 @@ class ClusterSizeUpgradeValidatorTest {
     }
 
     private ServiceUpgradeValidationRequest createRequest(boolean rollingUpgradeEnabled) {
-        return new ServiceUpgradeValidationRequest(stack, false, rollingUpgradeEnabled, null, null);
+        return new ServiceUpgradeValidationRequest(stack, false, rollingUpgradeEnabled, null);
     }
 
 }

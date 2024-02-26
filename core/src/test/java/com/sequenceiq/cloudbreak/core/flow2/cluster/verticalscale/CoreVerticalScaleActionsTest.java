@@ -87,7 +87,7 @@ class CoreVerticalScaleActionsTest {
         initActionPrivateFields(action);
         when(stack.getId()).thenReturn(1L);
         ClusterViewContext clusterViewContext = new ClusterViewContext(flowParameters, stack, cluster);
-        CoreVerticalScaleResult payload = new CoreVerticalScaleResult(1L, ResourceStatus.CREATED, new ArrayList<>(), null);
+        CoreVerticalScaleResult payload = new CoreVerticalScaleResult(1L, ResourceStatus.CREATED, new ArrayList<>(), null, 1, 1);
 
         new AbstractActionTestSupport<>(action).doExecute(clusterViewContext, payload, Collections.emptyMap());
         verify(coreVerticalScaleService, times(1)).finishVerticalScale(eq(1L), any(), any());

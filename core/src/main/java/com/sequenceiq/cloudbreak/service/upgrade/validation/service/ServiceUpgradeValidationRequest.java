@@ -7,6 +7,5 @@ public record ServiceUpgradeValidationRequest(
         StackDto stack,
         boolean lockComponents,
         boolean rollingUpgradeEnabled,
-        String targetRuntime,
         UpgradeImageInfo upgradeImageInfo) {
 }

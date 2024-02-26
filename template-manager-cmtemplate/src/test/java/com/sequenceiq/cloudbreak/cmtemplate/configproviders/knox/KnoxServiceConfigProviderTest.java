@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles.KNOX;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -8,12 +11,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.MockitoAnnotations;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -24,19 +28,20 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
+import com.sequenceiq.cloudbreak.util.CdhPatchVersionProvider;
 
+@ExtendWith(MockitoExtension.class)
 public class KnoxServiceConfigProviderTest {
 
-    private KnoxServiceConfigProvider underTest = new KnoxServiceConfigProvider();
+    @InjectMocks
+    private KnoxServiceConfigProvider underTest;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
+    @Spy
+    private CdhPatchVersionProvider cdhPatchVersionProvider;
 
     @Test
     public void testGetServiceTypeShouldReturnKnox() {
-        Assert.assertTrue(underTest.getServiceType().equals(KNOX));
+        assertEquals(KNOX, underTest.getServiceType());
     }
 
     @ParameterizedTest(name = "{index}: check knox properties cm version {0} and cdh version {1} will produce {2} property")
@@ -46,11 +51,9 @@ public class KnoxServiceConfigProviderTest {
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         BlueprintView blueprintView = new BlueprintView("text", cdhVersion, "CDH", blueprintTextProcessor);
         RdsView rdsConfig = mock(RdsView.class);
-        when(rdsConfig.getConnectionPassword()).thenReturn("pw");
-        when(rdsConfig.getConnectionUserName()).thenReturn("usr");
-        when(rdsConfig.isUseSsl()).thenReturn(ssl);
+        lenient().when(rdsConfig.isUseSsl()).thenReturn(ssl);
         when(rdsConfig.getType()).thenReturn(DatabaseType.KNOX_GATEWAY.name());
-        when(rdsConfig.getConnectionURL()).thenReturn("jdbc:postgresql://somehost.com:5432/dbName");
+        lenient().when(rdsConfig.getConnectionURL()).thenReturn("jdbc:postgresql://somehost.com:5432/dbName");
         TemplatePreparationObject source = TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(blueprintView)
                 .withRdsSslCertificateFilePath("file://path")
@@ -67,21 +70,21 @@ public class KnoxServiceConfigProviderTest {
                 .filter(e -> e.getName().equals("gateway_database_ssl_enabled"))
                 .findFirst();
         if (sslPresented) {
-            Assert.assertTrue(sslOptional.isPresent());
+            assertTrue(sslOptional.isPresent());
         } else {
-            Assert.assertTrue(sslOptional.isEmpty());
+            assertTrue(sslOptional.isEmpty());
         }
-        Assert.assertTrue(roleConfigs.size() == numberOfProperties);
+        assertEquals(numberOfProperties, roleConfigs.size());
     }
 
     @Test
     public void testDbTypeShouldReturnKnoxGateway() {
-        Assert.assertTrue(underTest.dbType().equals(DatabaseType.KNOX_GATEWAY));
+        assertEquals(DatabaseType.KNOX_GATEWAY, underTest.dbType());
     }
 
     @Test
     public void testGetRoleTypesShouldReturnKnoxGatewayIdbroker() {
-        Assert.assertTrue(underTest.getRoleTypes().equals(List.of(KnoxRoles.KNOX_GATEWAY, KnoxRoles.IDBROKER)));
+        assertEquals(List.of(KnoxRoles.KNOX_GATEWAY, KnoxRoles.IDBROKER), underTest.getRoleTypes());
     }
 
     @ParameterizedTest(name = "{index}: check knox properties cm version {0} and cdh version {1} will produce {2} property")
@@ -94,10 +97,7 @@ public class KnoxServiceConfigProviderTest {
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         BlueprintView blueprintView = new BlueprintView("text", cdhVersion, "CDH", blueprintTextProcessor);
         RdsView rdsConfig = mock(RdsView.class);
-        when(rdsConfig.getConnectionPassword()).thenReturn("pw");
-        when(rdsConfig.getConnectionUserName()).thenReturn("usr");
         when(rdsConfig.getType()).thenReturn(DatabaseType.KNOX_GATEWAY.name());
-        when(rdsConfig.getConnectionURL()).thenReturn("jdbc:postgresql://somehost.com:5432/dbName");
         TemplatePreparationObject source = TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(blueprintView)
                 .withRdsSslCertificateFilePath("file://path")
@@ -108,11 +108,11 @@ public class KnoxServiceConfigProviderTest {
                                 .withName("CDH")))
                 .build();
 
-        when(blueprintTextProcessor.getStackVersion()).thenReturn(cdhVersion);
+        lenient().when(blueprintTextProcessor.getStackVersion()).thenReturn(cdhVersion);
 
         List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(templateProcessor, source);
 
-        Assert.assertTrue(serviceConfigs.size() == numberOfProperties);
+        assertEquals(numberOfProperties, serviceConfigs.size());
     }
 
     static Object[][] cmCdhCombinations() {

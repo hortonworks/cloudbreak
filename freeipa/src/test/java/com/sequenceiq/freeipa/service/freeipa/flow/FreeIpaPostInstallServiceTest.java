@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.flow;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -35,12 +34,12 @@ import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Config;
 import com.sequenceiq.freeipa.client.model.User;
-import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.binduser.UserSyncBindUserService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.host.MaxHostnameLengthPolicyService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -89,6 +88,9 @@ class FreeIpaPostInstallServiceTest {
 
     @Mock
     private PasswordPolicyService passwordPolicyService;
+
+    @Mock
+    private MaxHostnameLengthPolicyService hostnameLengthPolicyService;
 
     @InjectMocks
     private FreeIpaPostInstallService underTest;
@@ -175,38 +177,8 @@ class FreeIpaPostInstallServiceTest {
     }
 
     @Test
-    public void testMaxHostnameConfigModNotInvokedWhenTheConfigValueIsNull() throws Exception {
+    public void testMaxHostnameLengthPolicyServiceInvoked() throws Exception {
         Stack stack = mock(Stack.class);
-        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
-        Set<Node> nodes = Set.of(mock(Node.class));
-        FreeIpaClient ipaClient = mock(FreeIpaClient.class);
-        User user = new User();
-        mockUsersyncCommonPart(stack, ipaClient, user);
-        Config ipaConfig = new Config();
-        ipaConfig.setIpamaxusernamelength(5);
-        ipaConfig.setIpamaxhostnamelength(null);
-        when(ipaClient.getConfig()).thenReturn(ipaConfig);
-        when(entitlementService.isWorkloadIamSyncEnabled(ACCOUNT_ID)).thenReturn(true);
-
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            try {
-                underTest.postInstallFreeIpa(1L, true);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        verifyNoInteractions(userSyncService);
-        verifyUsersyncCommanPart(stack, gatewayConfig, nodes, ipaClient, user);
-        verify(ipaClient, times(0)).setMaxHostNameLength(anyInt());
-    }
-
-    @Test
-    public void testMaxHostnameConfigModInvokedWhenTheConfiguredValueLessThenTheRequiredByMaxFQDNLength() throws Exception {
-        Stack stack = mock(Stack.class);
-        InstanceMetaData gatewayInstanceMetaData = new InstanceMetaData();
-        gatewayInstanceMetaData.setDiscoveryFQDN("shorthostname.domainpart1.domainpart2.clouder.site");
-        when(stack.getPrimaryGateway()).thenReturn(Optional.of(gatewayInstanceMetaData));
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         Set<Node> nodes = Set.of(mock(Node.class));
         FreeIpaClient ipaClient = mock(FreeIpaClient.class);
@@ -228,38 +200,7 @@ class FreeIpaPostInstallServiceTest {
 
         verifyNoInteractions(userSyncService);
         verifyUsersyncCommanPart(stack, gatewayConfig, nodes, ipaClient, user);
-        verify(ipaClient).setMaxHostNameLength(100);
-    }
-
-    @Test
-    public void testMaxHostnameConfigModInvokedWhenTheConfiguredValueLowAndDomainExtremelyLong() throws Exception {
-        Stack stack = mock(Stack.class);
-        InstanceMetaData gatewayInstanceMetaData = new InstanceMetaData();
-        gatewayInstanceMetaData.setDiscoveryFQDN("shorthostname.butaveryveryverylong.domainbuthatismoremorelongthanwhatisexpected." +
-                "domainbuthatismoremorelongthanwhatisexpected.domainbuthatismoremorelongthanwhatisexpected.domainbuthatismoremorelongthanwhatisexpected");
-        when(stack.getPrimaryGateway()).thenReturn(Optional.of(gatewayInstanceMetaData));
-        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
-        Set<Node> nodes = Set.of(mock(Node.class));
-        FreeIpaClient ipaClient = mock(FreeIpaClient.class);
-        User user = new User();
-        mockUsersyncCommonPart(stack, ipaClient, user);
-        Config ipaConfig = new Config();
-        ipaConfig.setIpamaxusernamelength(5);
-        ipaConfig.setIpamaxhostnamelength(64);
-        when(ipaClient.getConfig()).thenReturn(ipaConfig);
-        when(entitlementService.isWorkloadIamSyncEnabled(ACCOUNT_ID)).thenReturn(true);
-
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            try {
-                underTest.postInstallFreeIpa(1L, true);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        verifyNoInteractions(userSyncService);
-        verifyUsersyncCommanPart(stack, gatewayConfig, nodes, ipaClient, user);
-        verify(ipaClient).setMaxHostNameLength(255);
+        verify(hostnameLengthPolicyService).updateMaxHostnameLength(stack, ipaClient);
     }
 
     private void mockUsersyncCommonPart(Stack stack, FreeIpaClient ipaClient, User user) throws FreeIpaClientException {

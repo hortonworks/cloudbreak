@@ -55,8 +55,7 @@ public class ClusterUpgradeServiceValidationHandler extends ExceptionCatcherEven
 
     private ServiceUpgradeValidationRequest createValidationRequest(ClusterUpgradeServiceValidationEvent request, Long stackId) {
         StackDto stack = stackDtoService.getById(stackId);
-        return new ServiceUpgradeValidationRequest(stack, request.isLockComponents(), request.isRollingUpgradeEnabled(), request.getTargetRuntime(),
-                request.getUpgradeImageInfo());
+        return new ServiceUpgradeValidationRequest(stack, request.isLockComponents(), request.isRollingUpgradeEnabled(), request.getUpgradeImageInfo());
     }
 
     @Override
