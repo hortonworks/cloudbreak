@@ -1,14 +1,17 @@
 package com.sequenceiq.environment.environment.flow.deletion;
 
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_COMPUTE_CLUSTERS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_DATAHUB_CLUSTERS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_DATALAKE_CLUSTERS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_EXPERIENCE_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -297,6 +300,44 @@ class EnvClustersDeleteActionsTest {
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
 
         verifyDeleteActionSuccessEvent(DELETE_EXPERIENCE_EVENT);
+    }
+
+    @Test
+    void computeClusterDeleteActionFailure() {
+        Action<?, ?> action = configureAction(() -> underTest.externalizedComputeClustersDeleteAction());
+
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenThrow(new IllegalStateException(MESSAGE));
+        when(failureEvent.event()).thenReturn(FAILURE_EVENT);
+
+        action.execute(stateContext);
+
+        verify(environmentService, never()).save(any(Environment.class));
+        verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
+        verify(eventSenderService, never()).sendEventAndNotification(any(EnvironmentDto.class), anyString(), any(ResourceEvent.class));
+        verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
+        verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
+
+        verifyFailureEvent();
+    }
+
+    @Test
+    void computeClusterDeleteAction() {
+        Action<?, ?> action = configureAction(() -> underTest.externalizedComputeClustersDeleteAction());
+
+        when(environmentService.save(any())).thenReturn(savedEnvironment);
+        when(environmentService.getEnvironmentDto(savedEnvironment)).thenReturn(environmentDto);
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(new Environment()));
+
+        action.execute(stateContext);
+
+        verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
+        verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
+        ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
+        verify(environmentService).save(environmentArgumentCaptor.capture());
+        assertEquals(EnvironmentStatus.COMPUTE_CLUSTERS_DELETE_IN_PROGRESS, environmentArgumentCaptor.getValue().getStatus());
+        verify(eventSenderService, times(1)).sendEventAndNotification(any(EnvironmentDto.class), anyString(), any(ResourceEvent.class));
+
+        verifyDeleteActionSuccessEvent(DELETE_COMPUTE_CLUSTERS_EVENT);
     }
 
     private void setActionPrivateFields(Action<?, ?> action) {

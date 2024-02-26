@@ -138,9 +138,9 @@ public class EnvironmentCreationService {
                     getIfNotNull(creationDto.getNetwork(), NetworkDto::getEndpointGatewaySubnetMetas));
             createAndSetParameters(environment, creationDto.getParameters());
             environmentService.save(environment);
-            reactorFlowManager.triggerCreationFlow(environment.getId(), environment.getName(), creationDto.getCreator(), environment.getResourceCrn());
             externalizedComputeClusterCreationService.createExternalizedComputeCluster(environment.getResourceCrn(),
                     creationDto.getExternalizedClusterCreation());
+            reactorFlowManager.triggerCreationFlow(environment.getId(), environment.getName(), creationDto.getCreator(), environment.getResourceCrn());
         } catch (Exception e) {
             environment.setStatus(EnvironmentStatus.CREATE_FAILED);
             environment.setStatusReason(e.getMessage());

@@ -43,6 +43,7 @@ public enum EnvironmentStatus {
 
     DATAHUB_CLUSTERS_DELETE_IN_PROGRESS("Deleting Data Hub clusters"),
     DATALAKE_CLUSTERS_DELETE_IN_PROGRESS("Deleting Data Lake cluster"),
+    COMPUTE_CLUSTERS_DELETE_IN_PROGRESS("Deleting Compute clusters"),
 
     PUBLICKEY_CREATE_IN_PROGRESS("Creating SSH Public key"),
     PUBLICKEY_DELETE_IN_PROGRESS("Deleting SSH Public key"),
@@ -194,7 +195,8 @@ public enum EnvironmentStatus {
             DATAHUB_CLUSTERS_DELETE_IN_PROGRESS,
             DATALAKE_CLUSTERS_DELETE_IN_PROGRESS,
             PUBLICKEY_DELETE_IN_PROGRESS,
-            EXPERIENCE_DELETE_IN_PROGRESS
+            EXPERIENCE_DELETE_IN_PROGRESS,
+            COMPUTE_CLUSTERS_DELETE_IN_PROGRESS
     );
 
     private final String description;

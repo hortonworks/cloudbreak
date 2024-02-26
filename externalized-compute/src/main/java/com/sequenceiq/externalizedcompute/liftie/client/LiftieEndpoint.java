@@ -6,13 +6,24 @@ public class LiftieEndpoint {
 
     private static final String API_PATH_PREFIX = "";
 
+    private String protocol;
+
     private String host;
 
     private int port;
 
-    public LiftieEndpoint(String host, int port) {
+    public LiftieEndpoint(String protocol, String host, int port) {
+        this.protocol = checkNotNull(protocol);
         this.host = checkNotNull(host);
         this.port = port;
+    }
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
     }
 
     public String getHost() {
@@ -32,6 +43,6 @@ public class LiftieEndpoint {
     }
 
     public String getBasePath() {
-        return String.format("%s%s:%d%s", "http://", host, port, API_PATH_PREFIX);
+        return String.format("%s%s:%d%s", protocol, host, port, API_PATH_PREFIX);
     }
 }

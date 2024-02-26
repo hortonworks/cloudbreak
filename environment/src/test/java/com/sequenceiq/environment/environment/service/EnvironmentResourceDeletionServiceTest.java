@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
+import com.sequenceiq.environment.environment.flow.deletion.handler.computecluster.ComputeClusterDeleteService;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.environment.experience.ExperienceConnectorService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
@@ -78,6 +79,9 @@ class EnvironmentResourceDeletionServiceTest {
 
     @MockBean
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @MockBean
+    private ComputeClusterDeleteService computeClusterDeleteService;
 
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;

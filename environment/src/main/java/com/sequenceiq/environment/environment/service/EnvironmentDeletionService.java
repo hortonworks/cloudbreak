@@ -152,6 +152,12 @@ public class EnvironmentDeletionService {
                     getMustUseCascadingDeleteError("they"), String.join(", ", datalakes)));
         }
 
+        Set<String> computeClusterNames = environmentResourceDeletionService.getComputeClusterNames(env);
+        if (!computeClusterNames.isEmpty()) {
+            throw new BadRequestException(String.format("The following Compute cluster(s) are attached to the Environment: [%s]. " +
+                    getMustUseCascadingDeleteError("they"), String.join(", ", computeClusterNames)));
+        }
+
         LOGGER.info("No attached clusters or experiences have been found for environment [name: {}], deletion without cascading may proceed.",
                 env.getName());
     }

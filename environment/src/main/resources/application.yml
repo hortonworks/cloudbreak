@@ -141,6 +141,8 @@ environment:
   experience:
     scan:
       enabled: false
+  externalizedcompute:
+    enabled: false
   thunderhead:
     computeapi:
       host: localhost

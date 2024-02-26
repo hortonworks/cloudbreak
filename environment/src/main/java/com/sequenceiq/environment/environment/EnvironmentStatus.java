@@ -80,6 +80,7 @@ public enum EnvironmentStatus {
     DATAHUB_CLUSTERS_DELETE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.DATAHUB_CLUSTERS_DELETE_IN_PROGRESS),
     // Deleting all the Data Lake cluster (currently only 1)
     DATALAKE_CLUSTERS_DELETE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.DATALAKE_CLUSTERS_DELETE_IN_PROGRESS),
+    COMPUTE_CLUSTERS_DELETE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.COMPUTE_CLUSTERS_DELETE_IN_PROGRESS),
 
     // Environment is Available (ready to use)
     AVAILABLE(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.AVAILABLE),

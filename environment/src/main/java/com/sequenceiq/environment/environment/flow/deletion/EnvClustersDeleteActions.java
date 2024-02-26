@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.flow.deletion;
 
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.HANDLED_FAILED_ENV_CLUSTERS_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_COMPUTE_CLUSTERS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_DATAHUB_CLUSTERS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_DATALAKE_CLUSTERS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_EXPERIENCE_EVENT;
@@ -102,6 +103,23 @@ public class EnvClustersDeleteActions {
                 EnvironmentDeletionDto envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent,
                         envClustersDeleteState, logDeleteState);
                 sendEvent(context, DELETE_DATALAKE_CLUSTERS_EVENT.selector(), envDto);
+            }
+        };
+    }
+
+    @Bean(name = "COMPUTE_CLUSTERS_DELETE_STARTED_STATE")
+    public Action<?, ?> externalizedComputeClustersDeleteAction() {
+        return new AbstractEnvClustersDeleteAction<>(EnvDeleteEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
+                EnvironmentStatus environmentStatus = EnvironmentStatus.COMPUTE_CLUSTERS_DELETE_IN_PROGRESS;
+                ResourceEvent resourceEvent = ResourceEvent.ENVIRONMENT_COMPUTE_CLUSTERS_DELETION_STARTED;
+                EnvClustersDeleteState envClustersDeleteState = EnvClustersDeleteState.COMPUTE_CLUSTERS_DELETE_STARTED_STATE;
+                String logDeleteState = "Compute clusters";
+
+                EnvironmentDeletionDto envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent,
+                        envClustersDeleteState, logDeleteState);
+                sendEvent(context, DELETE_COMPUTE_CLUSTERS_EVENT.selector(), envDto);
             }
         };
     }

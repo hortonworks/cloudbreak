@@ -91,7 +91,7 @@ class DataLakeClustersDeleteHandlerTest {
         assertThat(capturedDeleteEvent.getResourceName()).isEqualTo(ENV_NAME);
         assertThat(capturedDeleteEvent.getResourceId()).isEqualTo(ENV_ID);
         assertThat(capturedDeleteEvent.getResourceCrn()).isEqualTo(RESOURCE_CRN);
-        assertThat(capturedDeleteEvent.selector()).isEqualTo("FINISH_ENV_CLUSTERS_DELETE_EVENT");
+        assertThat(capturedDeleteEvent.selector()).isEqualTo("START_COMPUTE_CLUSTERS_DELETE_EVENT");
     }
 
     @Test

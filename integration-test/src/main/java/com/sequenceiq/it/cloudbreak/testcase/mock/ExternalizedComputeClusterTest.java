@@ -60,4 +60,33 @@ public class ExternalizedComputeClusterTest extends AbstractMockTest {
                 .await(ExternalizedComputeClusterApiStatus.DELETED)
                 .validate();
     }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "create an env with externalized compute service, then delete env",
+            then = "env should delete externalized compute service also")
+    public void testCreateExternalizedComputeClusterThenDeleteWithEnvDelete(MockedTestContext testContext) {
+        testContext
+                .given(EnvironmentNetworkTestDto.class)
+                .given(EnvironmentTestDto.class)
+                .withExternalizedComputeCluster()
+                .withNetwork()
+                .withCreateFreeIpa(true)
+                .withOneFreeIpaNode()
+                .withFreeIpaImage(imageCatalogMockServerSetup.getFreeIpaImageCatalogUrl(), "f6e778fc-7f17-4535-9021-515351df3691")
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .given(ExternalizedComputeClusterTestDto.class)
+                .when(externalizedComputeClusterTestClient.describeDefault())
+                .await(ExternalizedComputeClusterApiStatus.AVAILABLE)
+                .when(externalizedComputeClusterTestClient.describe())
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.delete())
+                .awaitForFlow()
+                .given(ExternalizedComputeClusterTestDto.class)
+                .when(externalizedComputeClusterTestClient.describeDeleted())
+                .await(ExternalizedComputeClusterApiStatus.DELETED)
+                .validate();
+    }
 }

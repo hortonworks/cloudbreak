@@ -112,6 +112,7 @@ public enum ResourceEvent {
     ENVIRONMENT_DATABASE_DELETION_STARTED("environment.database.deletion.started"),
     ENVIRONMENT_FREEIPA_DELETION_STARTED("environment.freeipa.deletion.started"),
     ENVIRONMENT_EXPERIENCE_DELETION_STARTED("environment.xp.deletion.started"),
+    ENVIRONMENT_COMPUTE_CLUSTERS_DELETION_STARTED("environment.compute.clusters.deletion.started"),
     ENVIRONMENT_IDBROKER_MAPPINGS_DELETION_STARTED("environment.idbroker.mappings.deletion.started"),
     ENVIRONMENT_S3GUARD_TABLE_DELETION_STARTED("environment.s3guard.table.deletion.started"),
     ENVIRONMENT_UMS_RESOURCE_DELETION_STARTED("environment.ums.resource.deletion.started"),

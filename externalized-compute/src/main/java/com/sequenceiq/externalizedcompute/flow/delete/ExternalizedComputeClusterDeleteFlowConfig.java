@@ -14,13 +14,13 @@ import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedCompute
 
 import java.util.List;
 
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
-@Configuration
+@Component
 public class ExternalizedComputeClusterDeleteFlowConfig
         extends AbstractFlowConfiguration<ExternalizedComputeClusterDeleteState, ExternalizedComputeClusterDeleteEvent>
         implements RetryableFlowConfiguration<ExternalizedComputeClusterDeleteEvent> {
@@ -60,7 +60,7 @@ public class ExternalizedComputeClusterDeleteFlowConfig
 
     @Override
     public ExternalizedComputeClusterDeleteEvent[] getInitEvents() {
-        return new ExternalizedComputeClusterDeleteEvent[]{
+        return new ExternalizedComputeClusterDeleteEvent[] {
                 EXTERNALIZED_COMPUTE_CLUSTER_DELETE_INITIATED_EVENT
         };
     }

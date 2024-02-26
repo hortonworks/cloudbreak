@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.flow.deletion.config;
 
+import static com.sequenceiq.environment.environment.flow.deletion.EnvClustersDeleteState.COMPUTE_CLUSTERS_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvClustersDeleteState.DATAHUB_CLUSTERS_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvClustersDeleteState.DATALAKE_CLUSTERS_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvClustersDeleteState.ENV_CLUSTERS_DELETE_FAILED_STATE;
@@ -8,6 +9,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.EnvClustersDe
 import static com.sequenceiq.environment.environment.flow.deletion.EnvClustersDeleteState.EXPERIENCE_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.FINISH_ENV_CLUSTERS_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.HANDLED_FAILED_ENV_CLUSTERS_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.START_COMPUTE_CLUSTERS_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.START_DATAHUB_CLUSTERS_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.START_DATALAKE_CLUSTERS_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.START_EXPERIENCE_DELETE_EVENT;
@@ -39,7 +41,10 @@ public class EnvClustersDeleteFlowConfig extends AbstractFlowConfiguration<EnvCl
             .from(EXPERIENCE_DELETE_STARTED_STATE).to(DATALAKE_CLUSTERS_DELETE_STARTED_STATE)
             .event(START_DATALAKE_CLUSTERS_DELETE_EVENT).defaultFailureEvent()
 
-            .from(DATALAKE_CLUSTERS_DELETE_STARTED_STATE).to(ENV_CLUSTERS_DELETE_FINAL_STATE)
+            .from(DATALAKE_CLUSTERS_DELETE_STARTED_STATE).to(COMPUTE_CLUSTERS_DELETE_STARTED_STATE)
+            .event(START_COMPUTE_CLUSTERS_DELETE_EVENT).defaultFailureEvent()
+
+            .from(COMPUTE_CLUSTERS_DELETE_STARTED_STATE).to(ENV_CLUSTERS_DELETE_FINAL_STATE)
             .event(FINISH_ENV_CLUSTERS_DELETE_EVENT).defaultFailureEvent()
 
             .build();

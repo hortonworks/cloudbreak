@@ -49,4 +49,13 @@ public class ExternalizedComputeClusterResponse extends ExternalizedComputeClust
     public void setStatusReason(String statusReason) {
         this.statusReason = statusReason;
     }
+
+    @Override
+    public String toString() {
+        return "ExternalizedComputeClusterResponse{" +
+                "liftieClusterName='" + liftieClusterName + '\'' +
+                ", status=" + status +
+                ", statusReason='" + statusReason + '\'' +
+                "} " + super.toString();
+    }
 }

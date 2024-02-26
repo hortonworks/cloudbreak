@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.externalizedcompute.flow.ExternalizedComputeClusterEvent;
 import com.sequenceiq.externalizedcompute.flow.ExternalizedComputeClusterFailedEvent;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 
 public class ExternalizedComputeClusterCreateFailedEvent extends ExternalizedComputeClusterFailedEvent {
 
@@ -21,7 +22,11 @@ public class ExternalizedComputeClusterCreateFailedEvent extends ExternalizedCom
 
         @Override
         public String selector() {
-            return getClass().getSimpleName();
+            return EventSelectorUtil.selector(ExternalizedComputeClusterCreateFailedEvent.class);
         }
 
+    @Override
+    public String toString() {
+        return "ExternalizedComputeClusterCreateFailedEvent{} " + super.toString();
+    }
 }

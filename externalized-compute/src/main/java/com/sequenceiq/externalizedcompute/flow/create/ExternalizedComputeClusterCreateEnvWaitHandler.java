@@ -72,11 +72,16 @@ public class ExternalizedComputeClusterCreateEnvWaitHandler extends ExceptionCat
                             return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, event.getData().getUserId(),
                                     new RuntimeException(String.format("Environment creation failed. Status: %s. Message: %s", environmentStatus,
                                             environmentStatus.getDescription()))));
+                        } else if (environmentStatus.isDeleteInProgress()) {
+                            return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, event.getData().getUserId(),
+                                    new RuntimeException(String.format("Environment is deleted. Status: %s. Message: %s", environmentStatus,
+                                            environmentStatus.getDescription()))));
                         } else {
                             LOGGER.debug("{} environment is in {}", environmentCrn, environmentStatus);
                             return AttemptResults.justContinue();
                         }
                     } catch (NotFoundException notFoundException) {
+                        LOGGER.warn("Environment not found: {}", environmentCrn);
                         return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, event.getData().getUserId(),
                                 new RuntimeException("Environment not found")));
                     }

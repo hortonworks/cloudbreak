@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler.sdx;
 
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.FINISH_ENV_CLUSTERS_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.START_COMPUTE_CLUSTERS_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_DATALAKE_CLUSTERS_EVENT;
 
 import java.util.concurrent.TimeUnit;
@@ -106,7 +106,7 @@ public class DataLakeClustersDeleteHandler extends EventSenderAwareHandler<Envir
                 .withResourceName(environmentDto.getName())
                 .withResourceCrn(environmentDto.getResourceCrn())
                 .withForceDelete(environmentDeletionDto.isForceDelete())
-                .withSelector(FINISH_ENV_CLUSTERS_DELETE_EVENT.selector())
+                .withSelector(START_COMPUTE_CLUSTERS_DELETE_EVENT.selector())
                 .build();
     }
 }

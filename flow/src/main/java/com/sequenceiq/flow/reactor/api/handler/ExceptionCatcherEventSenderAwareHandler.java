@@ -3,16 +3,11 @@ package com.sequenceiq.flow.reactor.api.handler;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 
-/**
- * @deprecated Please use {@link ExceptionCatcherEventSenderAwareHandler}
- */
-
-@Deprecated
-public abstract class EventSenderAwareHandler<T extends Payload> implements EventHandler<T> {
+public abstract class ExceptionCatcherEventSenderAwareHandler<T extends Payload> extends ExceptionCatcherEventHandler<T> {
 
     private final EventSender eventSender;
 
-    protected EventSenderAwareHandler(EventSender eventSender) {
+    protected ExceptionCatcherEventSenderAwareHandler(EventSender eventSender) {
         this.eventSender = eventSender;
     }
 

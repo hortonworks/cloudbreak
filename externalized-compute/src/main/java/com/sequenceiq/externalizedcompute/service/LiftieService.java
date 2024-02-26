@@ -16,6 +16,9 @@ public class LiftieService {
 
     private static final String X_CDP_ACTOR_CRN = "x-cdp-actor-crn";
 
+    @Value("${externalizedcompute.liftie.protocol:http://}")
+    private String protocol;
+
     @Value("${externalizedcompute.liftie.host}")
     private String liftieHost;
 
@@ -24,7 +27,7 @@ public class LiftieService {
 
     public DefaultApi getDefaultApi() {
         String requestId = MDCBuilder.getOrGenerateRequestId();
-        ApiClient liftieClient = LiftieClientFactory.getApiClient(new LiftieEndpoint(liftieHost, liftiePort));
+        ApiClient liftieClient = LiftieClientFactory.getApiClient(new LiftieEndpoint(protocol, liftieHost, liftiePort));
         liftieClient.setDebugging(true);
         liftieClient.addDefaultHeader(X_CDP_ACTOR_CRN, ThreadBasedUserCrnProvider.getUserCrn());
         liftieClient.addDefaultHeader(MDCContextFilter.REQUEST_ID_HEADER, requestId);
