@@ -54,7 +54,7 @@ import com.sequenceiq.common.model.ImageCatalogPlatform;
 import com.sequenceiq.common.model.OsType;
 
 @ExtendWith(MockitoExtension.class)
-class CentOSToRedHatUpgradeAvailabilityServiceTest {
+class CentosToRedHatUpgradeAvailabilityServiceTest {
 
     private static final String ACTOR = "crn:cdp:iam:us-west-1:cloudera:user:__internal__actor__";
 
@@ -77,7 +77,7 @@ class CentOSToRedHatUpgradeAvailabilityServiceTest {
     private static final String ACCOUNT_ID = "cloudera";
 
     @InjectMocks
-    private CentOSToRedHatUpgradeAvailabilityService underTest;
+    private CentosToRedHatUpgradeAvailabilityService underTest;
 
     @Mock
     private LockedComponentChecker lockedComponentChecker;

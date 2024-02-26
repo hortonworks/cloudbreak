@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
-import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentOSToRedHatUpgradeImageFilter.isCentOSToRedhatUpgrade;
+import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentosToRedHatUpgradeImageFilter.isCentosToRedhatUpgrade;
 
 import java.util.List;
 
@@ -82,7 +82,7 @@ public class StackImageUpdateService {
                 throw new OperationException(message);
             }
 
-            if (!isOsVersionsMatch(currentImage, newImage) && !isCentOSToRedhatUpgrade(currentImage, newImage.getImage())) {
+            if (!isOsVersionsMatch(currentImage, newImage) && !isCentosToRedhatUpgrade(currentImage, newImage.getImage())) {
                 String message = messagesService.getMessage(Msg.OSVERSION_DIFFERENT.code(),
                         Lists.newArrayList(newImage.getImage().getOs(), newImage.getImage().getOsType(), currentImage.getOs(), currentImage.getOsType()));
                 LOGGER.debug("Image change not permitted because: {} Current image: {}, new image: {}", message, currentImage, newImage.getImage());

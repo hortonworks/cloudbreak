@@ -71,11 +71,11 @@ public class ClusterUpgradePreparationActions {
                 LOGGER.debug("Initiating cluster upgrade preparation {}", payload);
                 Long resourceId = payload.getResourceId();
                 ImageChangeDto imageChangeDto = payload.getImageChangeDto();
-                List<String> imageIdAsList = singletonList(imageChangeDto.getImageId());
+                List<String> parameterList = List.of(payload.getRuntimeVersion(), imageChangeDto.getImageId());
                 ResourceEvent preparationStartedResourceEvent = ResourceEvent.CLUSTER_UPGRADE_PREPARATION_STARTED;
                 stackUpdater.updateStackStatus(resourceId, CLUSTER_UPGRADE_PREPARATION_STARTED,
-                        messagesService.getMessage(preparationStartedResourceEvent.getMessage(), imageIdAsList));
-                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(), preparationStartedResourceEvent, imageIdAsList);
+                        messagesService.getMessage(preparationStartedResourceEvent.getMessage(), parameterList));
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(), preparationStartedResourceEvent, parameterList);
                 ClusterUpgradeParcelSettingsPreparationEvent nextEvent = new ClusterUpgradeParcelSettingsPreparationEvent(resourceId, imageChangeDto);
                 sendEvent(context, nextEvent.selector(), nextEvent);
             }

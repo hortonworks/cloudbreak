@@ -14,24 +14,32 @@ public class ClusterUpgradePreparationTriggerEvent extends StackEvent {
 
     private final ImageChangeDto imageChangeDto;
 
+    private final String runtimeVersion;
+
     @JsonCreator
     public ClusterUpgradePreparationTriggerEvent(
             @JsonProperty("resourceId") Long resourceId,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
-            @JsonProperty("imageChangeDto") ImageChangeDto imageChangeDto) {
+            @JsonProperty("imageChangeDto") ImageChangeDto imageChangeDto,
+            @JsonProperty("runtimeVersion") String runtimeVersion) {
         super(START_CLUSTER_UPGRADE_PREPARATION_INIT_EVENT.event(), resourceId, accepted);
         this.imageChangeDto = imageChangeDto;
+        this.runtimeVersion = runtimeVersion;
     }
 
     public ImageChangeDto getImageChangeDto() {
         return imageChangeDto;
     }
 
+    public String getRuntimeVersion() {
+        return runtimeVersion;
+    }
+
     @Override
     public String toString() {
         return "ClusterUpgradePreparationTriggerEvent{" +
-                "selector='" + selector() + '\'' +
-                ", imageChangeDto='" + imageChangeDto + '\'' +
-                '}' + super.toString();
+                "imageChangeDto=" + imageChangeDto +
+                ", runtimeVersion='" + runtimeVersion + '\'' +
+                "} " + super.toString();
     }
 }

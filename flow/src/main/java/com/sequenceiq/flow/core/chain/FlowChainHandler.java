@@ -45,7 +45,7 @@ public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
 
     @Override
     public void accept(Event<? extends Payload> event) {
-        String key = (String) event.getKey();
+        String key = event.getKey();
         String parentFlowChainId = getFlowChainId(event);
         String flowTriggerUserCrn = getFlowTriggerUserCrn(event);
         FlowEventChainFactory<Payload> flowEventChainFactory = flowChainConfigMap.get(key);

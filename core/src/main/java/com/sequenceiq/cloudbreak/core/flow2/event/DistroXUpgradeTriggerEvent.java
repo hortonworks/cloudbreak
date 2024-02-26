@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.event;
 
-import java.util.StringJoiner;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
@@ -22,6 +20,8 @@ public class DistroXUpgradeTriggerEvent extends StackEvent {
 
     private final boolean rollingUpgradeEnabled;
 
+    private final String runtimeVersion;
+
     @JsonCreator
     public DistroXUpgradeTriggerEvent(
             @JsonProperty("selector") String selector,
@@ -31,13 +31,15 @@ public class DistroXUpgradeTriggerEvent extends StackEvent {
             @JsonProperty("replaceVms") boolean replaceVms,
             @JsonProperty("lockComponents") boolean lockComponents,
             @JsonProperty("triggeredStackVariant") String triggeredStackVariant,
-            @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled) {
-        super(selector, stackId, accepted);
+            @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled,
+            @JsonProperty("runtimeVersion") String runtimeVersion) {
+            super(selector, stackId, accepted);
         this.imageChangeDto = imageChangeDto;
         this.replaceVms = replaceVms;
         this.lockComponents = lockComponents;
         this.triggeredStackVariant = triggeredStackVariant;
         this.rollingUpgradeEnabled = rollingUpgradeEnabled;
+        this.runtimeVersion = runtimeVersion;
     }
 
     public ImageChangeDto getImageChangeDto() {
@@ -60,13 +62,19 @@ public class DistroXUpgradeTriggerEvent extends StackEvent {
         return rollingUpgradeEnabled;
     }
 
+    public String getRuntimeVersion() {
+        return runtimeVersion;
+    }
+
     @Override
     public String toString() {
-        return new StringJoiner(", ", DistroXUpgradeTriggerEvent.class.getSimpleName() + "[", "]")
-                .add("imageChangeDto=" + imageChangeDto)
-                .add("replaceVms=" + replaceVms)
-                .add("lockComponents=" + lockComponents)
-                .add("rollingUpgradeEnabled=" + rollingUpgradeEnabled)
-                .toString();
+        return "DistroXUpgradeTriggerEvent{" +
+                "imageChangeDto=" + imageChangeDto +
+                ", replaceVms=" + replaceVms +
+                ", lockComponents=" + lockComponents +
+                ", triggeredStackVariant='" + triggeredStackVariant + '\'' +
+                ", rollingUpgradeEnabled=" + rollingUpgradeEnabled +
+                ", runtimeVersion='" + runtimeVersion + '\'' +
+                "} " + super.toString();
     }
 }

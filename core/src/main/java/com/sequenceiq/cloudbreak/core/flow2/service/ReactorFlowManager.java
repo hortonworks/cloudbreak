@@ -266,15 +266,15 @@ public class ReactorFlowManager {
     }
 
     public FlowIdentifier triggerDistroXUpgrade(Long stackId, ImageChangeDto imageChangeDto, boolean replaceVms, boolean lockComponents, String variant,
-            boolean rollingUpgradeEnabled) {
+            boolean rollingUpgradeEnabled, String runtime) {
         String selector = FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
-        return reactorNotifier.notify(stackId, selector,
-                new DistroXUpgradeTriggerEvent(selector, stackId, new Promise<>(), imageChangeDto, replaceVms, lockComponents, variant, rollingUpgradeEnabled));
+        return reactorNotifier.notify(stackId, selector, new DistroXUpgradeTriggerEvent(selector, stackId, new Promise<>(), imageChangeDto, replaceVms,
+                lockComponents, variant, rollingUpgradeEnabled, runtime));
     }
 
-    public FlowIdentifier triggerClusterUpgradePreparation(Long stackId, ImageChangeDto imageChangeDto) {
+    public FlowIdentifier triggerClusterUpgradePreparation(Long stackId, ImageChangeDto imageChangeDto, String runtimeVersion) {
         String selector = FlowChainTriggers.CLUSTER_UPGRADE_PREPARATION_CHAIN_TRIGGER_EVENT;
-        return reactorNotifier.notify(stackId, selector, new UpgradePreparationChainTriggerEvent(selector, stackId, imageChangeDto));
+        return reactorNotifier.notify(stackId, selector, new UpgradePreparationChainTriggerEvent(selector, stackId, imageChangeDto, runtimeVersion));
     }
 
     public FlowIdentifier triggerRdsUpgrade(Long stackId, TargetMajorVersion targetVersion, String backupLocation, String backupInstanceProfile) {

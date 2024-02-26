@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image.filter;
 
-import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentOSToRedHatUpgradeImageFilter.isCentOSToRedhatUpgrade;
+import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentosToRedHatUpgradeImageFilter.isCentosToRedhatUpgrade;
 
 import java.util.List;
 import java.util.Objects;
@@ -27,7 +27,7 @@ public class ImageCreationBasedUpgradeImageFilter implements UpgradeImageFilter 
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = imageFilterParams.getCurrentImage();
         List<Image> filteredImages =
                 filterImages(imageFilterResult, image -> isDifferentVersion(currentImage, image) || isNewerOrSameCreationImage(currentImage, image)
-                        || isCentOSToRedhatUpgrade(currentImage, image));
+                        || isCentosToRedhatUpgrade(currentImage, image));
         LOGGER.debug("After the filtering {} image left with proper creation date.", filteredImages.size());
         return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
     }

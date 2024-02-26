@@ -177,7 +177,8 @@ public class UpgradeService {
         }
         Image image = findImage(stack.getStack());
         ImageChangeDto imageChangeDto = getImageChangeDto(imageId, stack.getId(), image);
-        return flowManager.triggerClusterUpgradePreparation(stack.getId(), imageChangeDto);
+        String runtimeVersion = image.getPackageVersion(ImagePackageVersion.STACK);
+        return flowManager.triggerClusterUpgradePreparation(stack.getId(), imageChangeDto, runtimeVersion);
     }
 
     private ImageChangeDto getImageChangeDto(String imageId, Long stackId, Image image) {

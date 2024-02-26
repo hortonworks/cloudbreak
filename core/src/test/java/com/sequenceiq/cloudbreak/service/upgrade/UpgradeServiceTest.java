@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Respo
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -366,10 +367,12 @@ public class UpgradeServiceTest {
         when(image.getImageCatalogName()).thenReturn(imgCatName);
         String imgCatUrl = "imgCatUrl";
         when(image.getImageCatalogUrl()).thenReturn(imgCatUrl);
+        when(image.getPackageVersion(ImagePackageVersion.STACK)).thenReturn("runtime");
         when(componentConfigProviderService.getImage(stack.getId())).thenReturn(image);
         ArgumentCaptor<ImageChangeDto> imageChangeDtoArgumentCaptor = ArgumentCaptor.forClass(ImageChangeDto.class);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollId");
-        when(flowManager.triggerClusterUpgradePreparation(eq(stack.getId()), imageChangeDtoArgumentCaptor.capture())).thenReturn(flowIdentifier);
+        when(flowManager.triggerClusterUpgradePreparation(eq(stack.getId()), imageChangeDtoArgumentCaptor.capture(), eq("runtime")))
+                .thenReturn(flowIdentifier);
 
         FlowIdentifier result = underTest.prepareClusterUpgrade(ACCOUNT_ID, OF_CRN, IMAGE_ID);
 

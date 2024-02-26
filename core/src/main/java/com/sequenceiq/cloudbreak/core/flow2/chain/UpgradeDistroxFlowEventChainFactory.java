@@ -51,7 +51,7 @@ import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
-import com.sequenceiq.cloudbreak.service.upgrade.image.CentOSToRedHatUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -74,7 +74,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
     private ScalingHardLimitsService scalingHardLimitsService;
 
     @Inject
-    private CentOSToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
+    private CentosToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
 
     @Override
     public String initEvent() {
@@ -119,7 +119,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
                 helperImage.getUuid());
         return new DistroXUpgradeTriggerEvent(event.getSelector(), event.getResourceId(), event.accepted(),
                 new ImageChangeDto(event.getResourceId(), helperImage.getUuid(), imageChangeDto.getImageCatalogName(), imageChangeDto.getImageCatalogUrl()),
-                event.isReplaceVms(), event.isLockComponents(), event.getTriggeredStackVariant(), event.isRollingUpgradeEnabled());
+                event.isReplaceVms(), event.isLockComponents(), event.getTriggeredStackVariant(), event.isRollingUpgradeEnabled(), event.getRuntimeVersion());
     }
 
     private Optional<ClusterUpgradeValidationTriggerEvent> addUpgradeValidationTriggerEvent(DistroXUpgradeTriggerEvent event) {
@@ -138,7 +138,8 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
             LOGGER.debug("Skip upgrade preparation because the component versions are not changing.");
             return Optional.empty();
         } else {
-            return Optional.of(new ClusterUpgradePreparationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto()));
+            return Optional.of(new ClusterUpgradePreparationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto(),
+                    event.getRuntimeVersion()));
         }
     }
 

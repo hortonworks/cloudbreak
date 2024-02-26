@@ -2,9 +2,7 @@ package com.sequenceiq.cloudbreak.service.upgrade.image;
 
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.REPOSITORY_VERSION;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackType.CDH;
-import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentOSToRedHatUpgradeImageFilter.CENTOS_7;
-import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentOSToRedHatUpgradeImageFilter.REDHAT_7;
-import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentOSToRedHatUpgradeImageFilter.isCentOSToRedhatUpgrade;
+import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentosToRedHatUpgradeImageFilter.isCentosToRedhatUpgrade;
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,11 +32,12 @@ import com.sequenceiq.cloudbreak.service.upgrade.ImageFilterParamsFactory;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfoFactory;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChecker;
+import com.sequenceiq.common.model.OsType;
 
 @Service
-public class CentOSToRedHatUpgradeAvailabilityService {
+public class CentosToRedHatUpgradeAvailabilityService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CentOSToRedHatUpgradeAvailabilityService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CentosToRedHatUpgradeAvailabilityService.class);
 
     @Inject
     private LockedComponentChecker lockedComponentChecker;
@@ -67,10 +66,12 @@ public class CentOSToRedHatUpgradeAvailabilityService {
         try {
             UpgradeImageInfo upgradeImageInfo = upgradeImageInfoFactory.create(targetImageId, resourceId);
             StatedImage targetImage = upgradeImageInfo.targetStatedImage();
-            if (isCentOSToRedhatUpgrade(upgradeImageInfo.currentImage(), targetImage.getImage())) {
+            if (isCentosToRedhatUpgrade(upgradeImageInfo.currentImage(), targetImage.getImage())) {
                 StackDto stack = stackDtoService.getById(resourceId);
                 List<Image> cdhImages = getAllCdhImages(stack, targetImage);
-                return findHelperImage(cdhImages, targetImage.getImage(), stack);
+                Optional<Image> helperImage = findHelperImage(cdhImages, targetImage.getImage(), stack);
+                LOGGER.debug("Helper image {} found", helperImage.isPresent() ? helperImage.get().getUuid() : "not");
+                return helperImage;
             }
             return Optional.empty();
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
@@ -80,13 +81,13 @@ public class CentOSToRedHatUpgradeAvailabilityService {
     }
 
     public boolean isOsUpgradePermitted(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image image, Map<String, String> stackRelatedParcels) {
-        return isCentOSToRedhatUpgrade(currentImage, image) && containsSameComponentVersions(image, getCmBuildNumber(currentImage), stackRelatedParcels);
+        return isCentosToRedhatUpgrade(currentImage, image) && containsSameComponentVersions(image, getCmBuildNumber(currentImage), stackRelatedParcels);
     }
 
     private Optional<Image> findHelperImage(List<Image> images, Image targetImage, Set<String> stackRelatedParcels) {
         Map<String, String> requiredParcelsFromTargetImage = getRequiredParcelsFromTargetImage(targetImage, stackRelatedParcels);
         return images.stream()
-                .filter(image -> isCentOSImage(image) && containsSameComponentVersions(image, targetImage.getCmBuildNumber(), requiredParcelsFromTargetImage))
+                .filter(image -> isCentosImage(image) && containsSameComponentVersions(image, targetImage.getCmBuildNumber(), requiredParcelsFromTargetImage))
                 .findFirst();
     }
 
@@ -100,8 +101,8 @@ public class CentOSToRedHatUpgradeAvailabilityService {
 
     }
 
-    private static boolean isCentOSImage(Image image) {
-        return CENTOS_7.equalsIgnoreCase(image.getOs()) && REDHAT_7.equalsIgnoreCase(image.getOsType());
+    private static boolean isCentosImage(Image image) {
+        return OsType.CENTOS7.getOs().equalsIgnoreCase(image.getOs()) &&  OsType.CENTOS7.getOsType().equalsIgnoreCase(image.getOsType());
     }
 
     private Map<String, String> getRequiredParcelsFromTargetImage(Image targetImage, Set<String> stackRelatedParcels) {

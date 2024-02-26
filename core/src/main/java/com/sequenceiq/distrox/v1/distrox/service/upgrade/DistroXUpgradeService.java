@@ -139,15 +139,17 @@ public class DistroXUpgradeService {
 
     private UpgradeV4Response initUpgrade(DistroXUpgradeDto upgradeDto, String userCrn, boolean rollingUpgradeEnabled, boolean keepVariant) {
         boolean replaceVms = determineReplaceVmsParam(upgradeDto.getUpgradeV4Response(), upgradeDto.isLockComponents(), upgradeDto.getStackDto().getStack());
+        ImageChangeDto imageChangeDto = upgradeDto.getImageChangeDto();
         LOGGER.debug("Initializing cluster upgrade. Target image: {}, lockComponents: {}, replaceVms: {}, rollingUpgradeEnabled: {}",
-                upgradeDto.getImageChangeDto().getImageId(), upgradeDto.isLockComponents(), replaceVms, rollingUpgradeEnabled);
+                imageChangeDto.getImageId(), upgradeDto.isLockComponents(), replaceVms, rollingUpgradeEnabled);
         if (replaceVms && rollingUpgradeEnabled) {
             validateRollingUpgradeNodeCountAndRuntime(upgradeDto.getStackDto());
         }
         String upgradeVariant = stackUpgradeService.calculateUpgradeVariant(upgradeDto.getStackDto().getStack(), userCrn, keepVariant);
-        FlowIdentifier flowIdentifier = reactorFlowManager.triggerDistroXUpgrade(upgradeDto.getStackDto().getStack().getId(), upgradeDto.getImageChangeDto(),
-                replaceVms, upgradeDto.isLockComponents(), upgradeVariant, rollingUpgradeEnabled);
-        return new UpgradeV4Response("Upgrade started with Image: " + upgradeDto.getImageChangeDto().getImageId(), flowIdentifier, replaceVms);
+        String runtime = upgradeDto.getTargetImage().getComponentVersions().getCdp();
+        FlowIdentifier flowIdentifier = reactorFlowManager.triggerDistroXUpgrade(upgradeDto.getStackDto().getStack().getId(), imageChangeDto,
+                replaceVms, upgradeDto.isLockComponents(), upgradeVariant, rollingUpgradeEnabled, runtime);
+        return new UpgradeV4Response("Upgrade started with Image: " + imageChangeDto.getImageId(), flowIdentifier, replaceVms);
     }
 
     private void validateRollingUpgradeNodeCountAndRuntime(StackDto stackDto) {
@@ -180,9 +182,14 @@ public class DistroXUpgradeService {
         if (upgradeDto.isLockComponents()) {
             return new UpgradeV4Response(upgradeDto.getTargetImage(), upgradeCandidates, "Upgrade preparation is not necessary in case of OS upgrade.");
         } else {
+            String runtimeVersion = upgradeDto.getTargetImage().getComponentVersions().getCdp();
             FlowIdentifier flowIdentifier = reactorFlowManager.triggerClusterUpgradePreparation(upgradeDto.getStackDto().getId(),
-                    upgradeDto.getImageChangeDto());
-            return new UpgradeV4Response("Upgrade preparation started with Image: " + upgradeDto.getTargetImage().getImageId(), flowIdentifier, false);
+                    upgradeDto.getImageChangeDto(), runtimeVersion);
+            return new UpgradeV4Response(String.format("Upgrade preparation started for runtime %s with image: %s",
+                    runtimeVersion,
+                    upgradeDto.getTargetImage().getImageId()),
+                    flowIdentifier,
+                    false);
         }
     }
 

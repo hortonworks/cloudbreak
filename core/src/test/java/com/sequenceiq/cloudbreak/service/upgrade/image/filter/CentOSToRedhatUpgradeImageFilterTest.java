@@ -19,12 +19,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.service.upgrade.image.CentOSToRedHatUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
+import com.sequenceiq.common.model.OsType;
 
 @ExtendWith(MockitoExtension.class)
-class CentOSToRedHatUpgradeImageFilterTest {
+class CentosToRedHatUpgradeImageFilterTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
@@ -38,10 +39,10 @@ class CentOSToRedHatUpgradeImageFilterTest {
     private EntitlementService entitlementService;
 
     @Mock
-    private CentOSToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
+    private CentosToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
 
     @InjectMocks
-    private CentOSToRedHatUpgradeImageFilter underTest;
+    private CentosToRedHatUpgradeImageFilter underTest;
 
     private AtomicLong imageCreationTimeSequence = new AtomicLong(1);
 
@@ -150,11 +151,11 @@ class CentOSToRedHatUpgradeImageFilterTest {
     }
 
     private ImageFilterParams centosImageFilterParams(String version) {
-        return imageFilterParams(image(CentOSToRedHatUpgradeImageFilter.CENTOS_7, CentOSToRedHatUpgradeImageFilter.REDHAT_7, version));
+        return imageFilterParams(image(OsType.CENTOS7.getOs(), OsType.CENTOS7.getOsType(), version));
     }
 
     private ImageFilterParams redhatImageFilterParams(String version) {
-        return imageFilterParams(image(CentOSToRedHatUpgradeImageFilter.REDHAT_8, CentOSToRedHatUpgradeImageFilter.REDHAT_8, version));
+        return imageFilterParams(image(OsType.RHEL8.getOs(), OsType.RHEL8.getOsType(), version));
     }
 
     private ImageFilterParams imageFilterParams(com.sequenceiq.cloudbreak.cloud.model.Image image) {
@@ -166,11 +167,11 @@ class CentOSToRedHatUpgradeImageFilterTest {
     }
 
     private Image redhatCatalogImage(String version) {
-        return catalogImage(CentOSToRedHatUpgradeImageFilter.REDHAT_8, CentOSToRedHatUpgradeImageFilter.REDHAT_8, version);
+        return catalogImage(OsType.RHEL8.getOs(), OsType.RHEL8.getOsType(), version);
     }
 
     private Image centOSCatalogImage(String version) {
-        return catalogImage(CentOSToRedHatUpgradeImageFilter.CENTOS_7, CentOSToRedHatUpgradeImageFilter.REDHAT_7, version);
+        return catalogImage(OsType.CENTOS7.getOs(), OsType.CENTOS7.getOsType(), version);
     }
 
     private Image catalogImage(String os, String osType, String version) {

@@ -99,20 +99,17 @@ public class ReactorNotifier {
                 reactorReporter.logErrorReport();
                 throw new FlowNotAcceptedException(String.format("Timeout happened when trying to start the flow for stack %s.", identifier));
             }
-            switch (accepted.getResultType()) {
-                case ALREADY_EXISTING_FLOW:
+            return switch (accepted.getResultType()) {
+                case ALREADY_EXISTING_FLOW -> {
                     reactorReporter.logErrorReport();
                     throw new FlowsAlreadyRunningException(String.format("Request not allowed, cluster '%s' already has a running operation. " +
-                            "Running operation(s): [%s]",
+                                    "Running operation(s): [%s]",
                             identifier,
                             flowNameFormatService.formatFlows(accepted.getAlreadyRunningFlows())));
-                case RUNNING_IN_FLOW:
-                    return new FlowIdentifier(FlowType.FLOW, accepted.getAsFlowId());
-                case RUNNING_IN_FLOW_CHAIN:
-                    return new FlowIdentifier(FlowType.FLOW_CHAIN, accepted.getAsFlowChainId());
-                default:
-                    throw new IllegalStateException("Unsupported accept result type: " + accepted.getClass());
-            }
+                }
+                case RUNNING_IN_FLOW -> new FlowIdentifier(FlowType.FLOW, accepted.getAsFlowId());
+                case RUNNING_IN_FLOW_CHAIN -> new FlowIdentifier(FlowType.FLOW_CHAIN, accepted.getAsFlowChainId());
+            };
         } catch (InterruptedException e) {
             throw new CloudbreakApiException(e.getMessage(), e);
         }

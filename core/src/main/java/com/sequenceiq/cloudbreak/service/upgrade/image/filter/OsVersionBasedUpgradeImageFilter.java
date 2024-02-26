@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image.filter;
 
-import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentOSToRedHatUpgradeImageFilter.isCentOSToRedhatUpgrade;
+import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentosToRedHatUpgradeImageFilter.isCentosToRedhatUpgrade;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class OsVersionBasedUpgradeImageFilter implements UpgradeImageFilter {
         String currentOsType = imageFilterParams.getCurrentImage().getOsType();
         List<Image> filteredImages = filterImages(imageFilterResult,
                 image -> isOsVersionsMatch(imageFilterParams.getCurrentImage().getOs(), imageFilterParams.getCurrentImage().getOsType(), image)
-                        || isCentOSToRedhatUpgrade(imageFilterParams.getCurrentImage(), image));
+                        || isCentosToRedhatUpgrade(imageFilterParams.getCurrentImage(), image));
         LOGGER.debug("After the filtering {} image left with proper OS {} and OS type {}.", filteredImages.size(), currentOs, currentOsType);
         return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
     }
