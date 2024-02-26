@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -19,16 +20,24 @@ public class CoreVerticalScaleResult extends CloudPlatformResult implements Flow
 
     private final StackVerticalScaleV4Request stackVerticalScaleV4Request;
 
+    private final int instanceStorageCount;
+
+    private final int instanceStorageSize;
+
     @JsonCreator
     public CoreVerticalScaleResult(
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("resourceStatus") ResourceStatus resourceStatus,
             @JsonProperty("results") List<CloudResourceStatus> results,
-            @JsonProperty("stackVerticalScaleV4Request") StackVerticalScaleV4Request stackVerticalScaleV4Request) {
+            @JsonProperty("stackVerticalScaleV4Request") StackVerticalScaleV4Request stackVerticalScaleV4Request,
+            @JsonProperty("instanceStorageCount") int instanceStorageCount,
+            @JsonProperty("instanceStorageSize") int instanceStorageSize) {
         super(resourceId);
         this.resourceStatus = resourceStatus;
         this.results = results;
         this.stackVerticalScaleV4Request = stackVerticalScaleV4Request;
+        this.instanceStorageCount = instanceStorageCount;
+        this.instanceStorageSize = instanceStorageSize;
     }
 
     public CoreVerticalScaleResult(String statusReason, Exception errorDetails, Long resourceId,
@@ -37,6 +46,8 @@ public class CoreVerticalScaleResult extends CloudPlatformResult implements Flow
         this.resourceStatus = ResourceStatus.FAILED;
         this.stackVerticalScaleV4Request = stackVerticalScaleV4Request;
         this.results = new ArrayList<>();
+        this.instanceStorageCount = 0;
+        this.instanceStorageSize = 0;
     }
 
     public List<CloudResourceStatus> getResults() {
@@ -53,5 +64,23 @@ public class CoreVerticalScaleResult extends CloudPlatformResult implements Flow
 
     public StackVerticalScaleV4Request getStackVerticalScaleV4Request() {
         return stackVerticalScaleV4Request;
+    }
+
+    public int getInstanceStorageCount() {
+        return instanceStorageCount;
+    }
+
+    public int getInstanceStorageSize() {
+        return instanceStorageSize;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", CoreVerticalScaleResult.class.getSimpleName() + "[", "]")
+                .add("results=" + results)
+                .add("stackVerticalScaleV4Request=" + stackVerticalScaleV4Request)
+                .add("instanceStorageCount=" + instanceStorageCount)
+                .add("instanceStorageSize=" + instanceStorageSize)
+                .toString();
     }
 }

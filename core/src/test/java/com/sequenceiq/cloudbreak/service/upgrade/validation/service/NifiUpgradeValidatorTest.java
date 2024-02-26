@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateService;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -67,7 +66,7 @@ public class NifiUpgradeValidatorTest {
 
     @Test
     public void testValidateShouldNotThrowExceptionWhenLockComponentsIsFalse() {
-        underTest.validate(new ServiceUpgradeValidationRequest(null, false, true, "", null));
+        underTest.validate(new ServiceUpgradeValidationRequest(null, false, true, null));
 
         verifyNoInteractions(cmTemplateService);
         verifyNoInteractions(clusterApiConnectors);
@@ -77,7 +76,7 @@ public class NifiUpgradeValidatorTest {
     public void testValidateShouldNotThrowExceptionWhenLockComponentsTrueAndTheNifiServiceIsNotPresent() {
         when(cmTemplateService.isServiceTypePresent(SERVICE_TYPE, BLUEPRINT_TEXT)).thenReturn(false);
 
-        underTest.validate(new ServiceUpgradeValidationRequest(stack, true, true, "", null));
+        underTest.validate(new ServiceUpgradeValidationRequest(stack, true, true, null));
 
         verifyNoInteractions(clusterApiConnectors);
     }
@@ -88,7 +87,7 @@ public class NifiUpgradeValidatorTest {
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
         when(connector.getRoleConfigValueByServiceType(CLUSTER_NAME, ROLE_TYPE, SERVICE_TYPE, CONFIG)).thenReturn(Optional.of(VolumeUtils.VOLUME_PREFIX));
 
-        underTest.validate(new ServiceUpgradeValidationRequest(stack, true, true, "", null));
+        underTest.validate(new ServiceUpgradeValidationRequest(stack, true, true, null));
         verify(cmTemplateService).isServiceTypePresent(SERVICE_TYPE, BLUEPRINT_TEXT);
         verify(clusterApiConnectors).getConnector(stack);
         verify(connector).getRoleConfigValueByServiceType(CLUSTER_NAME, ROLE_TYPE, SERVICE_TYPE, CONFIG);
@@ -101,7 +100,7 @@ public class NifiUpgradeValidatorTest {
         when(connector.getRoleConfigValueByServiceType(CLUSTER_NAME, ROLE_TYPE, SERVICE_TYPE, CONFIG)).thenReturn(Optional.of("/var/etc"));
 
         Exception actual = assertThrows(UpgradeValidationFailedException.class,
-                () -> underTest.validate(new ServiceUpgradeValidationRequest(stack, true, true, "", null)));
+                () -> underTest.validate(new ServiceUpgradeValidationRequest(stack, true, true, null)));
 
         assertEquals("Nifi working directory validation failed. The current directory /var/etc is not eligible for upgrade because it is located on the "
                 + "root disk. The Nifi working directory should be under the /hadoopfs/fs path. During upgrade or repair the Nifi directory would get deleted "
@@ -109,17 +108,6 @@ public class NifiUpgradeValidatorTest {
         verify(cmTemplateService).isServiceTypePresent(SERVICE_TYPE, BLUEPRINT_TEXT);
         verify(clusterApiConnectors).getConnector(stack);
         verify(connector).getRoleConfigValueByServiceType(CLUSTER_NAME, ROLE_TYPE, SERVICE_TYPE, CONFIG);
-    }
-
-    private Stack createStack() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(BLUEPRINT_TEXT);
-        Cluster cluster = new Cluster();
-        cluster.setName(CLUSTER_NAME);
-        cluster.setBlueprint(blueprint);
-        Stack stack = new Stack();
-        stack.setCluster(cluster);
-        return stack;
     }
 
 }

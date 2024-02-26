@@ -73,10 +73,14 @@ backup_database_for_service() {
   close_existing_connections $SERVICE
 
   doLog "INFO Dumping ${SERVICE} ..."
-
+  set -x
   LOCAL_BACKUP=${DATE_DIR}/${SERVICE}_backup
+  LOCAL_BACKUP_TOC=${DATE_DIR}/${SERVICE}_backup_toc
   pg_dump -Fd -v  --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname=$SERVICE -j 8 -f $LOCAL_BACKUP > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to dump ${SERVICE}"
-
+  # These 2 lines are required to handle extensions correctly during Single 10|11 --> Flexible 11|14 migration, see CB-22820 for more context
+  pg_restore -l $LOCAL_BACKUP > $LOCAL_BACKUP_TOC
+  awk '/EXTENSION|pg_buffercache|pg_stat_statements|plpgsql/ { $0 = ";" $0 }; 1' $LOCAL_BACKUP_TOC >tmp && mv tmp $LOCAL_BACKUP_TOC
+  set +x
   doLog "INFO ${SERVICE} dumped to ${LOCAL_BACKUP} finished"
 
   limit_incomming_connection $SERVICE -1

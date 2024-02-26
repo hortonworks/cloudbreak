@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
@@ -153,6 +154,9 @@ public class MismatchedInstanceHandlerService {
         List<CloudResource> cloudResources = resources.stream()
                 .map(resource -> resourceToCloudResourceConverter.convert(resource))
                 .collect(Collectors.toList());
+        InstanceStoreMetadata instanceStoreMetadata = connector.metadata().collectInstanceStorageCount(ac, List.of(newInstanceType));
+        Integer instanceStorageCount = instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled(newInstanceType);
+        Integer instanceStorageSize = instanceStoreMetadata.mapInstanceTypeToInstanceSizeNullHandled(newInstanceType);
         CoreVerticalScaleRequest<CoreVerticalScaleResult> request = new CoreVerticalScaleRequest<>(cloudContext, cloudCredential, cloudStack, cloudResources,
                 stackVerticalScaleV4Request);
         try {
@@ -161,7 +165,8 @@ public class MismatchedInstanceHandlerService {
             LOGGER.warn("Vertical scale without instances on provider failed", e);
             throw new CloudConnectorException("Vertical scale without instances on provider failed", e);
         }
-        coreVerticalScaleService.updateTemplateWithVerticalScaleInformation(stack.getId(), stackVerticalScaleV4Request);
+        coreVerticalScaleService.updateTemplateWithVerticalScaleInformation(stack.getId(), stackVerticalScaleV4Request, instanceStorageCount,
+                instanceStorageSize);
         LOGGER.info("Changing instance type in template for instance group: {} to new instance type: {} finished", instanceGroup, newInstanceType);
     }
 

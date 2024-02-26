@@ -78,6 +78,7 @@ restore_database_for_service() {
     SERVICE="$1"
 
     BACKUP="${BACKUP_DIR}/${SERVICE}_backup"
+    BACKUP_TOC="${BACKUP_DIR}/${SERVICE}_backup_toc"
 
     if [ -d "$BACKUP" ]; then
       limit_incomming_connection $SERVICE 0
@@ -86,7 +87,7 @@ restore_database_for_service() {
       set -x
       psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "drop database if exists ${SERVICE} ;" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to drop database ${SERVICE}"
       psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "create database ${SERVICE};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to re-create database ${SERVICE}"
-      pg_restore -v --host="$HOST" --port="$PORT" --dbname="$SERVICE" --username="$USERNAME" -j 8 ${BACKUP} > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to restore ${SERVICE}"
+      pg_restore -v --host="$HOST" --port="$PORT" --dbname="$SERVICE" --username="$USERNAME" -j 8 -L ${BACKUP_TOC}  ${BACKUP} > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to restore ${SERVICE}"
       set +x
       doLog "INFO Successfully restored ${SERVICE}"
       limit_incomming_connection $SERVICE -1

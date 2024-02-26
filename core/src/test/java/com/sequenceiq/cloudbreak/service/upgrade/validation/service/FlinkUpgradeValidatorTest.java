@@ -23,6 +23,9 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.image.ImageTestBuilder;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
 
 @ExtendWith(MockitoExtension.class)
 public class FlinkUpgradeValidatorTest {
@@ -58,28 +61,22 @@ public class FlinkUpgradeValidatorTest {
 
     @Test
     void validateNoRuntimeVersion() {
-        ServiceUpgradeValidationRequest request =
-                new ServiceUpgradeValidationRequest(stack, false, true, null, null);
-        underTest.validate(request);
+        underTest.validate(createRequest(null));
         verifyNoInteractions(cmTemplateService);
         verifyNoInteractions(clusterApiConnectors);
     }
 
     @Test
     void validateNotAffectedRuntime() {
-        ServiceUpgradeValidationRequest request =
-                new ServiceUpgradeValidationRequest(stack, false, true, CLOUDERA_STACK_VERSION_7_2_14.getVersion(), null);
-        underTest.validate(request);
+        underTest.validate(createRequest(CLOUDERA_STACK_VERSION_7_2_14.getVersion()));
         verifyNoInteractions(cmTemplateService);
         verifyNoInteractions(clusterApiConnectors);
     }
 
     @Test
-    void validateNoFlinkSevice() {
+    void validateNoFlinkService() {
         when(cmTemplateService.isServiceTypePresent("SQL_STREAM_BUILDER", BLUEPRINT_TEXT)).thenReturn(false);
-        ServiceUpgradeValidationRequest request =
-                new ServiceUpgradeValidationRequest(stack, false, true, CLOUDERA_STACK_VERSION_7_2_16.getVersion(), null);
-        underTest.validate(request);
+        underTest.validate(createRequest(CLOUDERA_STACK_VERSION_7_2_16.getVersion()));
 
         verifyNoInteractions(clusterApiConnectors);
     }
@@ -89,9 +86,7 @@ public class FlinkUpgradeValidatorTest {
         when(cmTemplateService.isServiceTypePresent("SQL_STREAM_BUILDER", BLUEPRINT_TEXT)).thenReturn(true);
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
         when(clusterApi.isRolePresent(CLUSTER_NAME, "STREAMING_SQL_CONSOLE", "SQL_STREAM_BUILDER")).thenReturn(false);
-        ServiceUpgradeValidationRequest request =
-                new ServiceUpgradeValidationRequest(stack, false, true, CLOUDERA_STACK_VERSION_7_2_16.getVersion(), null);
-        underTest.validate(request);
+        underTest.validate(createRequest(CLOUDERA_STACK_VERSION_7_2_16.getVersion()));
     }
 
     @Test
@@ -101,8 +96,7 @@ public class FlinkUpgradeValidatorTest {
         when(clusterApi.isRolePresent(CLUSTER_NAME, "STREAMING_SQL_CONSOLE", "SQL_STREAM_BUILDER"))
                 .thenThrow(new CloudbreakServiceException("Api exception"));
 
-        ServiceUpgradeValidationRequest request =
-                new ServiceUpgradeValidationRequest(stack, false, true, CLOUDERA_STACK_VERSION_7_2_16.getVersion(), null);
+        ServiceUpgradeValidationRequest request = createRequest(CLOUDERA_STACK_VERSION_7_2_16.getVersion());
 
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.validate(request));
 
@@ -115,13 +109,17 @@ public class FlinkUpgradeValidatorTest {
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
         when(clusterApi.isRolePresent(CLUSTER_NAME, "STREAMING_SQL_CONSOLE", "SQL_STREAM_BUILDER")).thenReturn(true);
 
-        ServiceUpgradeValidationRequest request =
-                new ServiceUpgradeValidationRequest(stack, false, true, CLOUDERA_STACK_VERSION_7_2_16.getVersion(), null);
+        ServiceUpgradeValidationRequest request = createRequest(CLOUDERA_STACK_VERSION_7_2_16.getVersion());
 
         UpgradeValidationFailedException exception = assertThrows(UpgradeValidationFailedException.class, () -> underTest.validate(request));
 
         String expected =
                 "Version change to CDH 7.2.16 would lose access to role STREAMING_SQL_CONSOLE. To continue, remove this role and any dependent services.";
         assertEquals(expected, exception.getMessage());
+    }
+
+    private ServiceUpgradeValidationRequest createRequest(String stackVersion) {
+        return new ServiceUpgradeValidationRequest(stack, false, true,
+                new UpgradeImageInfo(null, StatedImage.statedImage(ImageTestBuilder.builder().withVersion(stackVersion).build(), null, null)));
     }
 }

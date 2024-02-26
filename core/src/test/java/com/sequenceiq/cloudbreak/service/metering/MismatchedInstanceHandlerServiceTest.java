@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.metering;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureAvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -35,8 +38,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.converter.spi.CloudContextProvider;
@@ -178,12 +184,18 @@ class MismatchedInstanceHandlerServiceTest {
         when(credentialClientService.getCloudCredential(eq(ENVIRONMENT_CRN))).thenReturn(new CloudCredential());
         CloudConnector cloudConnector = mock(CloudConnector.class);
         Authenticator authenticator = mock(Authenticator.class);
-        when(authenticator.authenticate(any(), any())).thenReturn(mock(AuthenticatedContext.class));
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        when(authenticator.authenticate(any(), any())).thenReturn(ac);
         when(cloudConnector.authentication()).thenReturn(authenticator);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         CloudStack cloudStack = mock(CloudStack.class);
         when(stackToCloudStackConverter.convert(eq(stack))).thenReturn(cloudStack);
         when(stackToCloudStackConverter.updateWithVerticalScaleRequest(any(), any())).thenReturn(cloudStack);
+        MetadataCollector metadataCollector = mock(MetadataCollector.class);
+        when(cloudConnector.metadata()).thenReturn(metadataCollector);
+        InstanceStoreMetadata resultMetadata = new InstanceStoreMetadata();
+        resultMetadata.getInstaceStoreConfigMap().put("large", new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 0, 1, 0, 1));
+        when(metadataCollector.collectInstanceStorageCount(ac, List.of("large"))).thenReturn(resultMetadata);
 
         underTest.handleMismatchingInstanceTypes(stack,
                 Set.of(new MismatchingInstanceGroup(GROUP, "xxxlarge", Map.of("instanceId1", "large", "instanceId2", "medium"))));
@@ -195,7 +207,7 @@ class MismatchedInstanceHandlerServiceTest {
         verify(metricService, times(1)).incrementMetricCounter(eq(MetricType.METERING_CHANGE_INSTANCE_TYPE_SUCCESSFUL));
         verify(stackUpscaleService, times(1)).verticalScaleWithoutInstances(any(), any(), eq(cloudConnector), eq(GROUP));
         verify(coreVerticalScaleService, times(1)).updateTemplateWithVerticalScaleInformation(eq(STACK_ID),
-                argThat(request -> "large".equals(request.getTemplate().getInstanceType())));
+                argThat(request -> "large".equals(request.getTemplate().getInstanceType())), eq(1), eq(0));
     }
 
     @Test
@@ -213,12 +225,18 @@ class MismatchedInstanceHandlerServiceTest {
         when(credentialClientService.getCloudCredential(eq(ENVIRONMENT_CRN))).thenReturn(new CloudCredential());
         CloudConnector cloudConnector = mock(CloudConnector.class);
         Authenticator authenticator = mock(Authenticator.class);
-        when(authenticator.authenticate(any(), any())).thenReturn(mock(AuthenticatedContext.class));
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        when(authenticator.authenticate(any(), any())).thenReturn(ac);
         when(cloudConnector.authentication()).thenReturn(authenticator);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         CloudStack cloudStack = mock(CloudStack.class);
         when(stackToCloudStackConverter.convert(eq(stack))).thenReturn(cloudStack);
         when(stackToCloudStackConverter.updateWithVerticalScaleRequest(any(), any())).thenReturn(cloudStack);
+        MetadataCollector metadataCollector = mock(MetadataCollector.class);
+        when(cloudConnector.metadata()).thenReturn(metadataCollector);
+        InstanceStoreMetadata resultMetadata = new InstanceStoreMetadata();
+        resultMetadata.getInstaceStoreConfigMap().put("large", new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 0, 1, 0, 1));
+        when(metadataCollector.collectInstanceStorageCount(ac, List.of("large"))).thenReturn(resultMetadata);
 
         underTest.handleMismatchingInstanceTypes(stack,
                 Set.of(new MismatchingInstanceGroup(GROUP, "medium", Map.of("instanceId1", "large", "instanceId2", "medium"))));
@@ -229,7 +247,7 @@ class MismatchedInstanceHandlerServiceTest {
         verify(metricService, never()).incrementMetricCounter(eq(MetricType.METERING_CHANGE_INSTANCE_TYPE_FAILED));
         verify(metricService, times(1)).incrementMetricCounter(eq(MetricType.METERING_CHANGE_INSTANCE_TYPE_SUCCESSFUL));
         verify(stackUpscaleService, times(1)).verticalScaleWithoutInstances(any(), any(), eq(cloudConnector), eq(GROUP));
-        verify(coreVerticalScaleService, times(1)).updateTemplateWithVerticalScaleInformation(eq(STACK_ID), any());
+        verify(coreVerticalScaleService, times(1)).updateTemplateWithVerticalScaleInformation(eq(STACK_ID), any(), anyInt(), anyInt());
     }
 
     @Test
@@ -250,12 +268,18 @@ class MismatchedInstanceHandlerServiceTest {
         when(credentialClientService.getCloudCredential(eq(ENVIRONMENT_CRN))).thenReturn(new CloudCredential());
         CloudConnector cloudConnector = mock(CloudConnector.class);
         Authenticator authenticator = mock(Authenticator.class);
-        when(authenticator.authenticate(any(), any())).thenReturn(mock(AuthenticatedContext.class));
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        when(authenticator.authenticate(any(), any())).thenReturn(ac);
         when(cloudConnector.authentication()).thenReturn(authenticator);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         CloudStack cloudStack = mock(CloudStack.class);
         when(stackToCloudStackConverter.convert(eq(stack))).thenReturn(cloudStack);
         when(stackToCloudStackConverter.updateWithVerticalScaleRequest(any(), any())).thenReturn(cloudStack);
+        MetadataCollector metadataCollector = mock(MetadataCollector.class);
+        when(cloudConnector.metadata()).thenReturn(metadataCollector);
+        InstanceStoreMetadata resultMetadata = new InstanceStoreMetadata();
+        resultMetadata.getInstaceStoreConfigMap().put("test", new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 0, 1, 0, 1));
+        when(metadataCollector.collectInstanceStorageCount(ac, List.of("large"))).thenReturn(resultMetadata);
 
         underTest.handleMismatchingInstanceTypes(stack,
                 Set.of(new MismatchingInstanceGroup(GROUP, "medium", Map.of("instanceId1", "large", "instanceId2", "medium"))));
@@ -267,7 +291,7 @@ class MismatchedInstanceHandlerServiceTest {
         verify(metricService, never()).incrementMetricCounter(eq(MetricType.METERING_CHANGE_INSTANCE_TYPE_FAILED));
         verify(metricService, times(1)).incrementMetricCounter(eq(MetricType.METERING_CHANGE_INSTANCE_TYPE_SUCCESSFUL));
         verify(stackUpscaleService, times(1)).verticalScaleWithoutInstances(any(), any(), eq(cloudConnector), eq(GROUP));
-        verify(coreVerticalScaleService, times(1)).updateTemplateWithVerticalScaleInformation(eq(STACK_ID), any());
+        verify(coreVerticalScaleService, times(1)).updateTemplateWithVerticalScaleInformation(eq(STACK_ID), any(), anyInt(), anyInt());
     }
 
     @Test
@@ -284,13 +308,19 @@ class MismatchedInstanceHandlerServiceTest {
         when(credentialClientService.getCloudCredential(eq(ENVIRONMENT_CRN))).thenReturn(new CloudCredential());
         CloudConnector cloudConnector = mock(CloudConnector.class);
         Authenticator authenticator = mock(Authenticator.class);
-        when(authenticator.authenticate(any(), any())).thenReturn(mock(AuthenticatedContext.class));
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        when(authenticator.authenticate(any(), any())).thenReturn(ac);
         when(cloudConnector.authentication()).thenReturn(authenticator);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         CloudStack cloudStack = mock(CloudStack.class);
         when(stackToCloudStackConverter.convert(eq(stack))).thenReturn(cloudStack);
         when(stackToCloudStackConverter.updateWithVerticalScaleRequest(any(), any())).thenReturn(cloudStack);
         when(stackUpscaleService.verticalScaleWithoutInstances(any(), any(), eq(cloudConnector), eq("master"))).thenThrow(new RuntimeException("error"));
+        MetadataCollector metadataCollector = mock(MetadataCollector.class);
+        when(cloudConnector.metadata()).thenReturn(metadataCollector);
+        InstanceStoreMetadata resultMetadata = new InstanceStoreMetadata();
+        resultMetadata.getInstaceStoreConfigMap().put("test", new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 0, 1, 0, 1));
+        when(metadataCollector.collectInstanceStorageCount(ac, List.of("large"))).thenReturn(resultMetadata);
 
         CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class, () -> underTest.handleMismatchingInstanceTypes(stack,
                 Set.of(new MismatchingInstanceGroup(GROUP, "medium", Map.of("instanceId", "large", "instanceId2", "medium")))));
@@ -302,7 +332,7 @@ class MismatchedInstanceHandlerServiceTest {
         verify(metricService, times(1)).incrementMetricCounter(eq(MetricType.METERING_CHANGE_INSTANCE_TYPE_FAILED));
         verify(metricService, never()).incrementMetricCounter(eq(MetricType.METERING_CHANGE_INSTANCE_TYPE_SUCCESSFUL));
         verify(stackUpscaleService, times(1)).verticalScaleWithoutInstances(any(), any(), eq(cloudConnector), eq(GROUP));
-        verify(coreVerticalScaleService, never()).updateTemplateWithVerticalScaleInformation(eq(STACK_ID), any());
+        verify(coreVerticalScaleService, never()).updateTemplateWithVerticalScaleInformation(eq(STACK_ID), any(), anyInt(), anyInt());
     }
 
     private StackDto stack() {
