@@ -160,7 +160,7 @@
                          }
                      ]
                  }
-             },
+             }<#if groups?keys?has_content || loadBalancers?has_content>,</#if>
              </#if>
              <#list igs as group>
              <#if !isUpscale && (! securityGroups[group.name]?? || ! securityGroups[group.name]?has_content)>
@@ -462,8 +462,9 @@
              </#list>
              <#if (instanceGroup_index + 1) != groups?size>,</#if>
              </#list>
+            <#if groups?keys?has_content && loadBalancers?has_content>,</#if>
             <#list loadBalancers as loadBalancer>
-                ,{
+                {
                   "apiVersion": "2023-06-01",
                   "type": "Microsoft.Network/loadBalancers",
                   "dependsOn": [
@@ -641,6 +642,7 @@
                     }<@zoneredundant/>
                 }
                 </#if>
+                <#if (loadBalancer_index + 1) != loadBalancers?size>,</#if>
             </#list>
      	]
 }

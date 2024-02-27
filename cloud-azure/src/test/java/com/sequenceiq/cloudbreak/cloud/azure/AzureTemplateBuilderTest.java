@@ -291,6 +291,7 @@ public class AzureTemplateBuilderTest {
         assertFalse(templateString.contains("publicIPAddress"));
         assertTrue(templateString.contains("\"testtagkey1\": \"testtagvalue1\""));
         assertTrue(templateString.contains("\"testtagkey2\": \"testtagvalue2\""));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildNoPublicIpNoFirewallButExistingNetwork {0}")
@@ -330,6 +331,7 @@ public class AzureTemplateBuilderTest {
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("publicIPAddress"));
         assertTrue(templateString.contains("existingNetworkName"));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildNoPublicIpButFirewall {0}")
@@ -365,6 +367,7 @@ public class AzureTemplateBuilderTest {
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("publicIPAddress"));
         assertTrue(templateString.contains("networkSecurityGroups"));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithPublicIpAndFirewall {0}")
@@ -400,6 +403,7 @@ public class AzureTemplateBuilderTest {
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("publicIPAddress"));
         assertTrue(templateString.contains("networkSecurityGroups"));
+        validateJson(templateString);
     }
 
     private String base64EncodedUserData(String data) {
@@ -437,6 +441,7 @@ public class AzureTemplateBuilderTest {
         //THEN
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"'));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithInstanceGroupTypeCoreShouldNotContainsGatewayCustomData {0}")
@@ -470,6 +475,7 @@ public class AzureTemplateBuilderTest {
         //THEN
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithInstanceGroupTypeGateway {0}")
@@ -503,6 +509,7 @@ public class AzureTemplateBuilderTest {
         //THEN
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndLoadBalancer {0}")
@@ -548,6 +555,7 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"name\": \"port-443-rule\","));
         assertTrue(templateString.contains("\"name\": \"port-8443-probe\","));
         assertTrue(templateString.contains("\"type\": \"Microsoft.Network/publicIPAddresses\","));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndBasicLoadBalancer {0}")
@@ -597,6 +605,153 @@ public class AzureTemplateBuilderTest {
 
         String strippedTemplateString = templateString.replaceAll("\\s", "");
         assertTrue(strippedTemplateString.contains(ZONE_REDUNDANT));
+        validateJson(templateString);
+    }
+
+    @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndStandardLoadBalancerAndExistingNetworkAndUpscaleWithNoInstances {0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildWithGatewayInstanceGroupTypeAndStandardLoadBalancerAndExistingNetworkAndUpscaleWithNoInstances(String templatePath) {
+        assumeTrue(isTemplateVersionGreaterOrEqualThan(templatePath, "2.7.3.0"));
+        //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
+        Network network = new Network(new Subnet(SUBNET_CIDR));
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+
+        groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.emptyList(), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
+
+        List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
+        CloudLoadBalancer loadBalancer = new CloudLoadBalancer(LoadBalancerType.PUBLIC, LoadBalancerSku.STANDARD);
+        loadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
+        loadBalancers.add(loadBalancer);
+
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
+                null, loadBalancers, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+
+        //WHEN
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
+        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+        when(azureUtils.isExistingNetwork(any())).thenReturn(true);
+        when(azureUtils.getCustomNetworkId(any())).thenReturn("existingNetworkName");
+
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.UPSCALE, null);
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertTrue(templateString.contains("\"type\": \"Microsoft.Network/loadBalancers\","));
+        assertTrue(templateString.contains("\"frontendPort\": 443,"));
+        assertTrue(templateString.contains("\"backendPort\": 443,"));
+        assertTrue(templateString.contains("\"name\": \"port-443-rule\","));
+        assertTrue(templateString.contains("\"name\": \"port-8443-probe\","));
+        assertTrue(templateString.contains("\"type\": \"Microsoft.Network/publicIPAddresses\","));
+        assertTrue(templateString.contains("\"name\": \"Standard\""));
+
+        String strippedTemplateString = templateString.replaceAll("\\s", "");
+        assertFalse(strippedTemplateString.contains(ZONE_REDUNDANT));
+        validateJson(templateString);
+    }
+
+    @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndStandardLoadBalancerAndNonExistingNetworkAndUpscaleWithNoInstances {0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildWithGatewayInstanceGroupTypeAndMultipleLoadBalancerAndNonExistingNetworkAndUpscaleWithNoInstances(String templatePath) {
+        assumeTrue(isTemplateVersionGreaterOrEqualThan(templatePath, "2.7.3.0"));
+        //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
+        Network network = new Network(new Subnet(SUBNET_CIDR));
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+
+        groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.emptyList(), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
+
+        List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
+        CloudLoadBalancer publicLb = new CloudLoadBalancer(LoadBalancerType.PUBLIC);
+        publicLb.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
+        loadBalancers.add(publicLb);
+        CloudLoadBalancer privateLb = new CloudLoadBalancer(LoadBalancerType.PRIVATE);
+        privateLb.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
+        loadBalancers.add(privateLb);
+
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
+                null, loadBalancers, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+
+        //WHEN
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
+        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+        when(azureUtils.isExistingNetwork(any())).thenReturn(false);
+
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.UPSCALE, null);
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertTrue(templateString.contains("\"type\": \"Microsoft.Network/loadBalancers\","));
+        assertTrue(templateString.contains("\"frontendPort\": 443,"));
+        assertTrue(templateString.contains("\"backendPort\": 443,"));
+        assertTrue(templateString.contains("\"name\": \"port-443-rule\","));
+        assertTrue(templateString.contains("\"name\": \"port-8443-probe\","));
+        assertTrue(templateString.contains("\"type\": \"Microsoft.Network/publicIPAddresses\","));
+        assertTrue(templateString.contains("\"name\": \"Standard\""));
+
+        String strippedTemplateString = templateString.replaceAll("\\s", "");
+        assertFalse(strippedTemplateString.contains(ZONE_REDUNDANT));
+        validateJson(templateString);
+    }
+
+    @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndStandardLoadBalancerAndNonExistingNetworkAndUpscaleWithNoInstances {0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildWithGatewayInstanceGroupTypeWithoutLoadBalancerAndNonExistingNetworkAndUpscaleWithNoInstances(String templatePath) {
+        assumeTrue(isTemplateVersionGreaterOrEqualThan(templatePath, "2.7.3.0"));
+        //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
+        Network network = new Network(new Subnet(SUBNET_CIDR));
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+
+        groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.emptyList(), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
+
+        List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
+
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
+                null, loadBalancers, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+
+        //WHEN
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
+        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+        when(azureUtils.isExistingNetwork(any())).thenReturn(false);
+
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.UPSCALE, null);
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        String strippedTemplateString = templateString.replaceAll("\\s", "");
+        assertFalse(strippedTemplateString.contains(ZONE_REDUNDANT));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndStandardLoadBalancer {0}")
@@ -647,6 +802,7 @@ public class AzureTemplateBuilderTest {
 
         String strippedTemplateString = templateString.replaceAll("\\s", "");
         assertFalse(strippedTemplateString.contains(ZONE_REDUNDANT));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndOutboundLoadBalancer {0}")
@@ -709,6 +865,7 @@ public class AzureTemplateBuilderTest {
 
         String strippedTemplateString = templateString.replaceAll("\\s", "");
         assertEquals(2, StringUtils.countMatches(strippedTemplateString, ZONE_REDUNDANT));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithStandardLoadBalancerOnlyTargetGroupsUpdated {0}")
@@ -771,6 +928,7 @@ public class AzureTemplateBuilderTest {
         String strippedTemplateString = templateString.replaceAll("\\s", "");
         assertTrue(strippedTemplateString.contains(lbGroupExpectedBlob));
         assertTrue(strippedTemplateString.contains(nonLbGroupExpectedBlob));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndMultipleLoadBalancers {0}")
@@ -830,6 +988,7 @@ public class AzureTemplateBuilderTest {
         assertEquals(1, StringUtils.countMatches(templateString,
                 "\"id\": \"[resourceId('Microsoft.Network/publicIPAddresses', 'LoadBalancertestStackPUBLIC-publicIp')]\""));
         assertFalse(StringUtils.contains(templateString, "\"name\": \"group-gateway-group-outbound-rule\","));
+        validateJson(templateString);
     }
 
     @Test
@@ -895,6 +1054,7 @@ public class AzureTemplateBuilderTest {
         assertThat(strippedTemplateString).contains(twoLoadBalancingRules);
 
         assertEquals(2, StringUtils.countMatches(strippedTemplateString, ZONE_REDUNDANT));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "testNicDependenciesAreValidJson {0}")
@@ -1046,6 +1206,7 @@ public class AzureTemplateBuilderTest {
         //THEN
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"'));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildWithInstanceGroupTypeGatewayAndCore {0}")
@@ -1083,6 +1244,7 @@ public class AzureTemplateBuilderTest {
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"'));
         assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestResourceGroupName {0}")
@@ -1119,6 +1281,7 @@ public class AzureTemplateBuilderTest {
         //THEN
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("resourceGroupName"));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestExistingVNETName {0}")
@@ -1161,6 +1324,7 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("existingVNETName"));
         assertTrue(templateString.contains("existingSubnet"));
         assertTrue(templateString.contains("existingResourceGroup"));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestExistingSubnetNameNotInTemplate {0}")
@@ -1197,6 +1361,7 @@ public class AzureTemplateBuilderTest {
         //THEN
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("existingSubnetName"));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestVirtualNetworkNamePrefix {0}")
@@ -1233,6 +1398,7 @@ public class AzureTemplateBuilderTest {
         //THEN
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("virtualNetworkNamePrefix"));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestSubnet1Prefix {0}")
@@ -1269,6 +1435,7 @@ public class AzureTemplateBuilderTest {
         //THEN
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("subnet1Prefix"));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestDisksFor1xVersions {0}")
@@ -1308,6 +1475,7 @@ public class AzureTemplateBuilderTest {
         gson.fromJson(templateString, Map.class);
         assertThat(templateString).contains("[concat('datadisk', 'm0-c4ca4238', '0')]");
         assertThat(templateString).contains("[concat('datadisk', 'm0-c4ca4238', '1')]");
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestDisksOnAllVersionsAndVerifyOsDisks {0}")
@@ -1344,6 +1512,7 @@ public class AzureTemplateBuilderTest {
         //THEN
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("[concat(parameters('vmNamePrefix'),'-osDisk', 'm0-c4ca4238')]"));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestDisksWhenTheVersion210OrGreater {0}")
@@ -1383,6 +1552,7 @@ public class AzureTemplateBuilderTest {
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("[concat(parameters('vmNamePrefix'),'-osDisk', 'm0-c4ca4238')]"));
         assertFalse(templateString.contains("[concat('datadisk', 'm0', '1')]"));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestAvailabilitySetInTemplate {0}")
@@ -1433,6 +1603,7 @@ public class AzureTemplateBuilderTest {
         assertFalse(templateString.contains("coreAsName"));
         assertTrue(templateString.contains("'Microsoft.Compute/availabilitySets', 'gateway-as'"));
         assertFalse(templateString.contains("'Microsoft.Compute/availabilitySets', 'core-as'"));
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestWithVmVersion {0}")
@@ -1471,6 +1642,7 @@ public class AzureTemplateBuilderTest {
         gson.fromJson(templateString, Map.class);
         assertThat(templateString).contains("                   \"apiVersion\": \"2023-07-01\",\n" +
                 "                   \"type\": \"Microsoft.Compute/virtualMachines\",\n");
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestWithNoManagedIdentity {0}")
@@ -1506,6 +1678,7 @@ public class AzureTemplateBuilderTest {
         //THEN
         gson.fromJson(templateString, Map.class);
         assertThat(templateString).doesNotContain("\"identity\": {");
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestWithManagedIdentityGiven {0}")
@@ -1552,6 +1725,7 @@ public class AzureTemplateBuilderTest {
                 "                            \"myIdentity\": {\n" +
                 "                            }\n" +
                 "                        }\n");
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestWithMarketplaceRegularImage {0}")
@@ -1582,6 +1756,7 @@ public class AzureTemplateBuilderTest {
                                                 "publisher": "cloudera"
                                            },
                         """);
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestWithMarketplaceNullImage {0}")
@@ -1597,6 +1772,7 @@ public class AzureTemplateBuilderTest {
         //THEN
         gson.fromJson(templateString, Map.class);
         assertThat(templateString).doesNotContain("\"plan\": {");
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestWithMarketplaceCentosSourceImage {0}")
@@ -1624,6 +1800,7 @@ public class AzureTemplateBuilderTest {
         assertThat(templateString).doesNotContain("""
                            "plan": {
         """);
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestWithMarketplaceCentosSourceImage {0}")
@@ -1655,6 +1832,7 @@ public class AzureTemplateBuilderTest {
                                 "publisher": "redhat"
                            },
         """);
+        validateJson(templateString);
     }
 
     private void setupMarketplaceTests(String templatePath) {
@@ -1717,6 +1895,7 @@ public class AzureTemplateBuilderTest {
         //THEN
         gson.fromJson(templateString, Map.class);
         assertThat(templateString).doesNotContain("\"diskEncryptionSet\": {");
+        validateJson(templateString);
     }
 
     @ParameterizedTest(name = "buildTestWithDiskEncryptionSetIdGiven {0}")
@@ -1758,6 +1937,7 @@ public class AzureTemplateBuilderTest {
         gson.fromJson(templateString, Map.class);
         assertThat(templateString).contains("\"diskEncryptionSet\": {");
         assertThat(templateString).contains("\"id\": \"myDES\"");
+        validateJson(templateString);
     }
 
     private boolean isTemplateVersionGreaterOrEqualThan2100(String templatePath) {
