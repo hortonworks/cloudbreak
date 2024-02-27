@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getSafetyValveProperty;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.HADOOP_RPC_PROTECTION;
 import static java.util.stream.Collectors.toSet;
 
@@ -35,6 +36,16 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String DFS_DATA_TRANSFER_PROTECTION = "dfs_data_transfer_protection";
 
+    private static final String DATANODE_CONFIG_SAFETY_VALVE = "datanode_config_safety_valve";
+
+    private static final String CONNECT_MAX_RETRIES_ON_TIMEOUTS = "ipc.client.connect.max.retries.on.timeouts";
+
+    private static final String CLIENT_CONNECT_TIMEOUT = "ipc.client.connect.timeout";
+
+    private static final String MAX_RETRIES = "5";
+
+    private static final String CONNECTION_TIMEOUT = "5000";
+
     private final EntitlementService entitlementService;
 
     public HdfsRoleConfigProvider(EntitlementService entitlementService) {
@@ -53,6 +64,12 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
                 .collect(toSet());
     }
 
+    public static boolean isDataNodeHA(TemplatePreparationObject source) {
+        return source.getHostGroupsWithComponent(HdfsRoles.DATANODE)
+                .mapToInt(HostgroupView::getNodeCount)
+                .sum() > 1;
+    }
+
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         switch (roleType) {
@@ -65,6 +82,12 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
                     configs.add(
                             config(DFS_ENCRYPT_DATA_TRANSFER, "true")
                     );
+                }
+                if (StackType.DATALAKE.equals(source.getStackType()) && isDataNodeHA(source)) {
+                    StringBuilder safetyValveValue = new StringBuilder();
+                    safetyValveValue.append(getSafetyValveProperty(CONNECT_MAX_RETRIES_ON_TIMEOUTS, MAX_RETRIES));
+                    safetyValveValue.append(getSafetyValveProperty(CLIENT_CONNECT_TIMEOUT, CONNECTION_TIMEOUT));
+                    configs.add(config(DATANODE_CONFIG_SAFETY_VALVE, safetyValveValue.toString()));
                 }
                 return configs;
             case HdfsRoles.NAMENODE:
