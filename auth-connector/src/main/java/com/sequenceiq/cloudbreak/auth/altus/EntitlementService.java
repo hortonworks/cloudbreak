@@ -15,6 +15,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_FREEIPA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VARIANT_MIGRATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_ADD_DISK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DELETE_DISK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_MULTIAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_RESIZE_DISK;
@@ -577,5 +578,9 @@ public class EntitlementService {
 
     public boolean azureDeleteDiskEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_AZURE_DELETE_DISK);
+    }
+
+    public boolean azureAddDiskEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_AZURE_ADD_DISK);
     }
 }

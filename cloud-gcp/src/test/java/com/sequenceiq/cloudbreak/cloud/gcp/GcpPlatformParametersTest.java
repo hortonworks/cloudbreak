@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 import java.util.List;
 
 import org.junit.Assert;
@@ -9,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.TagValidator;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
@@ -72,6 +75,11 @@ public class GcpPlatformParametersTest {
     public void testOrchestratorParams() {
         PlatformOrchestrator platformOrchestrator = underTest.orchestratorParams();
         Assert.assertEquals(1, platformOrchestrator.types().size());
+    }
+
+    @Test
+    public void testAddDiskSupported() {
+        assertFalse(underTest.specialParameters().getSpecialParameters().get(PlatformParametersConsts.ADD_VOLUMES_SUPPORTED));
     }
 
 }

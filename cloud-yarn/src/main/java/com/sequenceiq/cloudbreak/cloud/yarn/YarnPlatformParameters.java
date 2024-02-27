@@ -112,6 +112,7 @@ public class YarnPlatformParameters implements PlatformParameters {
         specialParameters.put(PlatformParametersConsts.DB_SUBNETS_UPDATE_ENABLED, Boolean.FALSE);
         specialParameters.put(PlatformParametersConsts.DELETE_VOLUMES_SUPPORTED, Boolean.FALSE);
         specialParameters.put(PlatformParametersConsts.DISK_TYPE_CHANGE_SUPPORTED, Boolean.FALSE);
+        specialParameters.put(PlatformParametersConsts.ADD_VOLUMES_SUPPORTED, Boolean.FALSE);
         return new SpecialParameters(specialParameters);
     }
 

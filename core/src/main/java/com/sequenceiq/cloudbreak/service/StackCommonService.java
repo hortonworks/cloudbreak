@@ -501,12 +501,17 @@ public class StackCommonService {
         verticalScalingValidatorService.validateInstanceTypeForDeletingDisks(stack, deleteRequest);
     }
 
+    private void validateAddVolumesRequest(Stack stack) {
+        verticalScalingValidatorService.validateProviderForAddVolumes(stack, "Adding volumes");
+        verticalScalingValidatorService.validateEntitlementForAddVolumes(stack);
+    }
+
     public FlowIdentifier putAddVolumesInWorkspace(NameOrCrn nameOrCrn, String accountId, StackAddVolumesRequest addVolumesRequest) {
         StackView stackView = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
         Stack stack = stackService.getByIdWithLists(stackView.getId());
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Validating Stack Add Volumes Request for Stack ID {}", stack.getId());
-        verticalScalingValidatorService.validateProviderForAddVolumes(stack, "Adding volumes");
+        validateAddVolumesRequest(stack);
         return clusterCommonService.putAddVolumes(stack.getResourceCrn(), addVolumesRequest);
     }
 }

@@ -619,4 +619,28 @@ class StackCommonServiceTest {
 
         assertEquals("Adding volumes is not supported on MOCK cloudplatform", exception.getMessage());
     }
+
+    @Test
+    public void testPutAddVolumesInWorkspaceFailureForEntitlement() {
+        StackView stackDto = mock(StackView.class);
+        doReturn(STACK_ID).when(stackDto).getId();
+        doReturn(stackDto).when(stackDtoService).getStackViewByNameOrCrn(STACK_CRN, "accid");
+        Stack stack = mock(Stack.class);
+        when(stackService.getByIdWithLists(STACK_ID)).thenReturn(stack);
+
+        StackAddVolumesRequest stackAddVolumesRequest = new StackAddVolumesRequest();
+        stackAddVolumesRequest.setInstanceGroup("COMPUTE");
+        stackAddVolumesRequest.setCloudVolumeUsageType("GENERAL");
+        stackAddVolumesRequest.setSize(200L);
+        stackAddVolumesRequest.setType("gp2");
+        stackAddVolumesRequest.setNumberOfDisks(2L);
+
+        doThrow(new BadRequestException("Adding Disk for Azure is not enabled for this account")).when(verticalScalingValidatorService)
+                .validateEntitlementForAddVolumes(any());
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.putAddVolumesInWorkspace(STACK_CRN, "accid",
+                stackAddVolumesRequest));
+
+        assertEquals("Adding Disk for Azure is not enabled for this account", exception.getMessage());
+    }
 }

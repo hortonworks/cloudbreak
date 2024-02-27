@@ -74,6 +74,11 @@ public class AzurePlatformParametersTest {
         assertTrue(underTest.specialParameters().getSpecialParameters().get(PlatformParametersConsts.DELETE_VOLUMES_SUPPORTED));
     }
 
+    @Test
+    public void testAddDiskSupported() {
+        assertTrue(underTest.specialParameters().getSpecialParameters().get(PlatformParametersConsts.ADD_VOLUMES_SUPPORTED));
+    }
+
     private InstanceGroupParameterRequest getRequestWithoutAs(String groupName) {
         InstanceGroupParameterRequest rq = new InstanceGroupParameterRequest();
         rq.setGroupName(groupName);

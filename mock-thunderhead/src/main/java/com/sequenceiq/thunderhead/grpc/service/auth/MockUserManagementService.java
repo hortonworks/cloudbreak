@@ -18,6 +18,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_FREEIPA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VARIANT_MIGRATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_ADD_DISK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DELETE_DISK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_MULTIAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_RESIZE_DISK;
@@ -1038,6 +1039,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(CDP_CB_AZURE_MULTIAZ))
                                 .addEntitlements(createEntitlement(CDP_CB_AZURE_RESIZE_DISK))
                                 .addEntitlements(createEntitlement(CDP_CB_AZURE_DELETE_DISK))
+                                .addEntitlements(createEntitlement(CDP_CB_AZURE_ADD_DISK))
                                 .addEntitlements(createEntitlement(DATALAKE_HORIZONTAL_SCALE))
                                 .addEntitlements(createEntitlement(CDP_EXPRESS_ONBOARDING))
                                 .setGlobalPasswordPolicy(workloadPasswordPolicy)

@@ -116,6 +116,7 @@ public class MockPlatformParameters implements PlatformParameters {
         SpecialParameters specialParameters = PlatformParameters.super.specialParameters();
         specialParameters.getSpecialParameters().put(PlatformParametersConsts.DELETE_VOLUMES_SUPPORTED, Boolean.FALSE);
         specialParameters.getSpecialParameters().put(PlatformParametersConsts.DISK_TYPE_CHANGE_SUPPORTED, Boolean.FALSE);
+        specialParameters.getSpecialParameters().put(PlatformParametersConsts.ADD_VOLUMES_SUPPORTED, Boolean.FALSE);
         return specialParameters;
     }
 

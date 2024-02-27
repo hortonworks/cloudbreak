@@ -359,6 +359,28 @@ public class VerticalScalingValidatorServiceTest {
         assertEquals("Deleting Disk for Azure is not enabled for this account", badRequestException.getMessage());
     }
 
+    @ParameterizedTest()
+    @EnumSource(CloudPlatform.class)
+    public void testValidateEntitlementForAddDisk(CloudPlatform cloudPlatform) {
+        when(stack.getCloudPlatform()).thenReturn(cloudPlatform.name());
+        if (cloudPlatform == CloudPlatform.AZURE) {
+            when(stack.getResourceCrn()).thenReturn(RESOURCE_CRN);
+            when(entitlementService.azureAddDiskEnabled("default")).thenReturn(true);
+        }
+        underTest.validateEntitlementForAddVolumes(stack);
+    }
+
+    @Test
+    public void testValidateEntitlementForAddDiskThrowsException() {
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AZURE.name());
+        when(stack.getResourceCrn()).thenReturn(RESOURCE_CRN);
+        when(entitlementService.azureAddDiskEnabled("default")).thenReturn(false);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
+            underTest.validateEntitlementForAddVolumes(stack);
+        });
+        assertEquals("Adding Disk for Azure is not enabled for this account", badRequestException.getMessage());
+    }
+
     private Credential credential() {
         return Credential.builder().crn("crn").name("name").cloudPlatform("aws").account("accountId").attributes(new Json("")).build();
     }

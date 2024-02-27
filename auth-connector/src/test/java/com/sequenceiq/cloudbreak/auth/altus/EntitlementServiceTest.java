@@ -215,6 +215,13 @@ class EntitlementServiceTest {
         assertEquals(entitled, underTest.azureDeleteDiskEnabled(ACCOUNT_ID));
     }
 
+    @ParameterizedTest()
+    @ValueSource(booleans = {true, false})
+    void testAzureAddDiskEnabled(boolean entitled) {
+        setUpUmsClient(entitled, "CDP_CB_AZURE_ADD_DISK", "CDP_CB_AZURE_ADD_DISK");
+        assertEquals(entitled, underTest.azureAddDiskEnabled(ACCOUNT_ID));
+    }
+
     @Test
     void getEntitlementsTest() {
         when(umsClient.getAccountDetails(eq(ACCOUNT_ID))).thenReturn(ACCOUNT_ENTITLEMENTS_FOO_BAR);

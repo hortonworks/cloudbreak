@@ -185,4 +185,11 @@ public class VerticalScalingValidatorService {
             throw new BadRequestException("Deleting Disk for Azure is not enabled for this account");
         }
     }
+
+    public void validateEntitlementForAddVolumes(Stack stack) {
+        if (CloudPlatform.valueOf(stack.getCloudPlatform()) == CloudPlatform.AZURE
+                && !entitlementService.azureAddDiskEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId())) {
+            throw new BadRequestException("Adding Disk for Azure is not enabled for this account");
+        }
+    }
 }
