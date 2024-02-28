@@ -44,6 +44,7 @@ public class AzureFlexibleServerClient extends AbstractAzureServiceClient {
                 LOGGER.debug("Flexible server not found with name {} in resourcegroup {}", serverName, resourceGroupName);
                 return null;
             } else {
+                LOGGER.debug("Flexible server status on Azure is {}", server.state());
                 return server.state();
             }
         });
