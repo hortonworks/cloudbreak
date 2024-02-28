@@ -190,7 +190,6 @@ public class StackCreatorService {
         String crn = getCrnForCreation(Optional.ofNullable(stackRequest.getResourceCrn()));
         String accountId = Crn.safeFromString(crn).getAccountId();
 
-        nodeCountLimitValidator.validateProvision(stackRequest);
         measure(() -> recipeValidatorService.validateRecipeExistenceOnInstanceGroups(stackRequest.getInstanceGroups(), workspace.getId()),
                 LOGGER,
                 "Check that recipes do exist took {} ms");
@@ -205,6 +204,7 @@ public class StackCreatorService {
                         () -> environmentClientService.getByCrn(stackRequest.getEnvironmentCrn())),
                 LOGGER,
                 "Get Environment from Environment service took {} ms");
+        nodeCountLimitValidator.validateProvision(stackRequest, environment.getRegions().getNames().stream().findFirst().orElse(null));
 
         Stack stackStub = measure(
                 () -> stackV4RequestToStackConverter.convert(environment, stackRequest),

@@ -14,6 +14,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -231,11 +232,11 @@ public class StackCreatorServiceTest {
         stackRequest.setInstanceGroups(List.of(instanceGroupV4Request));
         when(regionAwareCrnGenerator.generateCrnStringWithUuid(any(), anyString())).thenReturn(STACK_CRN);
 
-        doNothing().when(nodeCountLimitValidator).validateProvision(any());
+        lenient().doNothing().when(nodeCountLimitValidator).validateProvision(any(), any());
         when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.of(mock(StackView.class)));
 
         assertThrows(BadRequestException.class, () ->
-                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, false)),
+                        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createStack(user, workspace, stackRequest, false)),
                 "Cluster already exists: STACK_NAME");
 
         verify(recipeValidatorService).validateRecipeExistenceOnInstanceGroups(any(), any());
@@ -526,7 +527,7 @@ public class StackCreatorServiceTest {
     }
 
     static Object[][] fillInstanceMetadataTestWhenSubnetAndAvailabilityZoneAndRackIdAndRoundRobinDataProvider() {
-        return new Object[][]{
+        return new Object[][] {
                 // testCaseName subnetId availabilityZone
                 {"subnetId=\"subnet-1\", availabilityZone=null", "subnet-1", null},
                 {"subnetId=\"subnet-1\", availabilityZone=\"az-1\"", "subnet-1", "az-1"},

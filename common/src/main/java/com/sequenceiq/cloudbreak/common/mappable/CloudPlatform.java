@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.common.mappable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public enum CloudPlatform {
@@ -35,5 +36,17 @@ public enum CloudPlatform {
 
     public static boolean azureOrAws(String cloudPlatform) {
         return AWS.equalsIgnoreCase(cloudPlatform) || AZURE.equalsIgnoreCase(cloudPlatform);
+    }
+
+    public static CloudPlatform fromName(String name) {
+        if (name == null) {
+            return null;
+        }
+        for (CloudPlatform cloudPlatform : values()) {
+            if (Objects.equals(cloudPlatform.name(), name.toUpperCase())) {
+                return cloudPlatform;
+            }
+        }
+        return null;
     }
 }

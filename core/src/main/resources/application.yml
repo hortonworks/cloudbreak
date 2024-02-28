@@ -199,6 +199,14 @@ cb:
   externaldatabase.ssl.rootcerts.path: /hadoopfs/fs1/database-cacerts/certs.pem
 
   limit:
+    primaryGatewayRecommendations:
+      -
+        nodeCount: 400
+        minCpu: 32
+        minMemory: 128
+        recommendedInstance:
+          AWS: r5.8xlarge
+          AZURE: Standard_D32s_v5
     nodeCountLimits:
       safe:
         cm: 800

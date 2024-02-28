@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -29,6 +30,8 @@ public class LimitConfiguration {
 
     private Map<String, Map<String, Integer>> nodeCountLimits;
 
+    private List<PrimaryGatewayRequirement> primaryGatewayRecommendations;
+
     @Inject
     private EntitlementService entitlementService;
 
@@ -38,6 +41,14 @@ public class LimitConfiguration {
 
     public void setNodeCountLimits(Map<String, Map<String, Integer>> nodeCountLimits) {
         this.nodeCountLimits = nodeCountLimits;
+    }
+
+    public List<PrimaryGatewayRequirement> getPrimaryGatewayRecommendations() {
+        return primaryGatewayRecommendations;
+    }
+
+    public void setPrimaryGatewayRecommendations(List<PrimaryGatewayRequirement> primaryGatewayRecommendations) {
+        this.primaryGatewayRecommendations = primaryGatewayRecommendations;
     }
 
     public Integer getNodeCountLimit(Optional<String> accountId) {
@@ -52,6 +63,18 @@ public class LimitConfiguration {
     public Integer getUpgradeNodeCountLimit(Optional<String> accountId) {
         return nodeCountLimits.get(getLimitsKey(accountId))
                 .getOrDefault(UPGRADE_NODE_COUNT_LIMIT_PROPERTY, DEFAULT_UPGRADE_NODE_COUNT_LIMIT);
+    }
+
+    public Optional<PrimaryGatewayRequirement> getPrimaryGatewayRequirement(Integer nodeCount) {
+        PrimaryGatewayRequirement primaryGatewayRequirement = null;
+        for (PrimaryGatewayRequirement nodeRequirement : primaryGatewayRecommendations) {
+            if (nodeRequirement.getNodeCount() <= nodeCount) {
+                primaryGatewayRequirement = nodeRequirement;
+            } else {
+                return Optional.ofNullable(primaryGatewayRequirement);
+            }
+        }
+        return Optional.ofNullable(primaryGatewayRequirement);
     }
 
     private String getLimitsKey(Optional<String> accountId) {

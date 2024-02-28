@@ -323,7 +323,7 @@ public class StackCommonService {
         if (scalingAdjustment < 0 && !cloudParameterCache.isDownScalingSupported(stack.getCloudPlatform())) {
             throw new BadRequestException(String.format("Downscaling is not supported on %s cloudplatform", stack.getCloudPlatform()));
         }
-        nodeCountLimitValidator.validateScale(stack.getId(), scalingAdjustment, Crn.safeFromString(stack.getResourceCrn()).getAccountId());
+        nodeCountLimitValidator.validateScale(stack, scalingAdjustment, Crn.safeFromString(stack.getResourceCrn()).getAccountId());
     }
 
     private void validateVerticalScalingRequest(Stack stack, StackVerticalScaleV4Request verticalScaleV4Request) {
