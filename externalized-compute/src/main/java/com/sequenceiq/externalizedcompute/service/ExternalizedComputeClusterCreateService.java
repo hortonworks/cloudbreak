@@ -24,6 +24,7 @@ import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoin
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
 import com.sequenceiq.externalizedcompute.repository.ExternalizedComputeClusterRepository;
+import com.sequenceiq.externalizedcompute.util.LiftieValidationResponseUtil;
 import com.sequenceiq.externalizedcompute.util.TagUtil;
 import com.sequenceiq.liftie.client.LiftieGrpcClient;
 
@@ -46,6 +47,9 @@ public class ExternalizedComputeClusterCreateService {
     @Inject
     private CrnUserDetailsService crnUserDetailsService;
 
+    @Inject
+    private LiftieValidationResponseUtil liftieValidationResponseUtil;
+
     public void initiateCreation(Long id, String userCrn) {
         ExternalizedComputeCluster externalizedComputeCluster = externalizedComputeClusterRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Can't find externalized compute cluster in DB"));
@@ -63,6 +67,9 @@ public class ExternalizedComputeClusterCreateService {
             try {
                 LOGGER.info("Send request to liftie: {}", cluster);
                 CreateClusterResponse clusterResponse = liftieGrpcClient.createCluster(cluster, userCrn);
+                if (clusterResponse.hasValidationResponse()) {
+                    liftieValidationResponseUtil.throwException(clusterResponse.getValidationResponse());
+                }
                 externalizedComputeCluster.setLiftieName(clusterResponse.getClusterId());
                 externalizedComputeClusterRepository.save(externalizedComputeCluster);
                 LOGGER.info("Liftie create response: {}", clusterResponse);
