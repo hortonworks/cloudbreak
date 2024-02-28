@@ -75,8 +75,8 @@ public interface SdxClusterRepository extends AccountAwareResourceRepository<Sdx
 
     List<SdxCluster> findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(String accountId, String envName);
 
-    @Query("SELECT s.stackCrn FROM SdxCluster s WHERE s.crn = :crn")
-    Optional<String> findStackCrnByClusterCrn(@Param("crn") String crn);
+    @Query("SELECT s.stackCrn FROM SdxCluster s WHERE s.accountId = :accountId AND s.crn = :crn AND s.deleted IS NULL")
+    Optional<String> findStackCrnByClusterCrn(@Param("accountId") String accountId, @Param("crn") String crn);
 
     @Modifying
     @Query("UPDATE SdxCluster s SET s.certExpirationState = :state WHERE s.id = :id")
@@ -101,10 +101,6 @@ public interface SdxClusterRepository extends AccountAwareResourceRepository<Sdx
     @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(s.id, s.crn, s.envCrn) FROM SdxCluster s " +
             "WHERE s.accountId = :accountId AND s.envCrn = :envCrn AND s.deleted IS NULL")
     List<ResourceWithId> findAuthorizationResourcesByAccountIdAndEnvCrn(@Param("accountId") String accountId, @Param("envCrn") String envCrn);
-
-    @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(s.id, s.crn, s.envCrn) FROM SdxCluster s " +
-            "WHERE s.accountId = :accountId AND s.envCrn IN (:envCrns) AND s.deleted IS NULL")
-    List<ResourceWithId> findAuthorizationResourcesByAccountIdAndEnvCrns(@Param("accountId") String accountId, @Param("envCrns") List<String> envCrns);
 
     @Query("SELECT s.id as localId, s.stackCrn as remoteResourceId, s.name as name " +
             "FROM SdxCluster s " +

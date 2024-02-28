@@ -268,7 +268,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public String getStackCrnByClusterCrn(String crn) {
-        return sdxClusterRepository.findStackCrnByClusterCrn(crn)
+        return sdxClusterRepository.findStackCrnByClusterCrn(Crn.safeFromString(crn).getAccountId(), crn)
                 .orElseThrow(notFound("SdxCluster", crn));
     }
 
