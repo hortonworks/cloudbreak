@@ -37,14 +37,14 @@ class MockGroupManagementService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockGroupManagementService.class);
 
-    private static final int NUM_USER_GROUPS = 15;
-
-    @Inject
-    private MockCrnService mockCrnService;
+    private static final int NUM_USER_GROUPS = 3;
 
     private final Map<String, Map<String, Group>> accountWorkloadGroups = new ConcurrentHashMap<>();
 
     private final Map<String, Map<String, Group>> accountUserGroups = new ConcurrentHashMap<>();
+
+    @Inject
+    private MockCrnService mockCrnService;
 
     void listGroups(ListGroupsRequest request, StreamObserver<ListGroupsResponse> responseObserver) {
         LOGGER.info("List groups for account id: {}", request.getAccountId());
