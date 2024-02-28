@@ -315,11 +315,14 @@ public class AzureDatabaseResourceService {
         try {
             AzureDatabaseServerView databaseServerView = new AzureDatabaseServerView(stack.getDatabaseServer());
             if (databaseServerView.getAzureDatabaseType() == AzureDatabaseType.FLEXIBLE_SERVER) {
+                LOGGER.debug("Getting flexible server status from Azure for {} database", databaseServerView.getDbServerName());
                 return convertFlexibleStatus(
                         client.getFlexibleServerClient().getFlexibleServerStatus(resourceGroupName, stack.getDatabaseServer().getServerId()));
             } else {
+                LOGGER.debug("Checking single server existance on Azure for {} database", databaseServerView.getDbServerName());
                 ResourceGroup resourceGroup = client.getResourceGroup(resourceGroupName);
                 if (resourceGroup == null) {
+                    LOGGER.debug("Resource group for {} is null", resourceGroupName);
                     return ExternalDatabaseStatus.DELETED;
                 }
                 return ExternalDatabaseStatus.STARTED;
