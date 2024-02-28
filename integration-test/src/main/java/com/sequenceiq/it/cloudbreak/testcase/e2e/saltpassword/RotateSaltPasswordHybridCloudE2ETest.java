@@ -33,7 +33,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class RotateSaltPasswordHybridCloudE2ETest extends HybridCloudE2ETest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RotateSaltPasswordE2ETest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RotateSaltPasswordHybridCloudE2ETest.class);
 
     private static final LocalDate PAST_DATE = LocalDate.now().minusMonths(1);
 

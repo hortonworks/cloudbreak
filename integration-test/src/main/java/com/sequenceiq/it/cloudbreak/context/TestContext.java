@@ -51,6 +51,7 @@ import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Capture;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.microservice.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.microservice.TestClients;
@@ -722,6 +723,10 @@ public abstract class TestContext implements ApplicationContextAware {
         return getTestClients().getSdxClient(who);
     }
 
+    public CloudbreakClient getCloudbreakClient(String who) {
+        return getTestClients().getCloudbreakClient(who);
+    }
+
     public <U extends MicroserviceClient> U getAdminMicroserviceClient(Class<? extends CloudbreakTestDto> testDtoClass, String accountId) {
         CloudbreakUser testUser = getTestUsers().getAdminInAccount(accountId);
         String accessKey = testUser.getAccessKey();
@@ -739,6 +744,10 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public SdxClient getSdxClient() {
         return getSdxClient(getActingUserAccessKey());
+    }
+
+    public CloudbreakClient getCloudbreakClient() {
+        return getCloudbreakClient(getActingUserAccessKey());
     }
 
     public <U extends MicroserviceClient> U getMicroserviceClient(Class<U> msClientClass) {

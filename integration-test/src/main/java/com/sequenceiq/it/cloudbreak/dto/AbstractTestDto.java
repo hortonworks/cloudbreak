@@ -144,6 +144,16 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     }
 
     @Override
+    public void setMasterPrivateIp(TestContext testContext) {
+        throw new NotImplementedException(String.format("The entity(%s) must be implement the valid() method.", getClass()));
+    }
+
+    @Override
+    public String getMasterPrivateIp() {
+        throw new NotImplementedException(String.format("The entity(%s) must be implement the valid() method.", getClass()));
+    }
+
+    @Override
     public CloudbreakTestDto valid() {
         throw new NotImplementedException(String.format("The entity(%s) must be implement the valid() method.", getClass()));
     }

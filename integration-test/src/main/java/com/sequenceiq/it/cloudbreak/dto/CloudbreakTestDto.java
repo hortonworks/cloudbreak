@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.assign.Assignable;
 import com.sequenceiq.it.cloudbreak.context.Orderable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 
 public interface CloudbreakTestDto extends Orderable, Assignable {
 
@@ -20,6 +21,10 @@ public interface CloudbreakTestDto extends Orderable, Assignable {
     String getLastKnownFlowId();
 
     void setLastKnownFlowId(String lastKnownFlowId);
+
+    void setMasterPrivateIp(TestContext testContext);
+
+    String getMasterPrivateIp();
 
     CloudbreakTestDto valid();
 

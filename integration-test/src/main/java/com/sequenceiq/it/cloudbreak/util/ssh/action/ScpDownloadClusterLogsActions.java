@@ -79,7 +79,7 @@ public class ScpDownloadClusterLogsActions extends SshJClientActions {
     }
 
     private void downloadLogs(String instanceIp, String workingDirectoryLocation, String serviceName, String logPath) {
-        String destinationPath = String.join("/", workingDirectoryLocation, LOG_FOLDER_NAME, serviceName);
+        String destinationPath = String.join("/", workingDirectoryLocation, LOG_FOLDER_NAME, serviceName, instanceIp);
 
         try (FileOutputStream destinationOut = FileUtils.openOutputStream(new File(destinationPath + "/init.log"))) {
             LOGGER.info("[{}] destination path is exist, download can be started!", destinationPath);

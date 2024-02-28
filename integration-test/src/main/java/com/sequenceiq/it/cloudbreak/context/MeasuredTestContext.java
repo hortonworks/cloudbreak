@@ -17,6 +17,7 @@ import com.sequenceiq.it.cloudbreak.config.user.TestUsers;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.microservice.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.microservice.TestClients;
@@ -242,6 +243,16 @@ public class MeasuredTestContext extends MockedTestContext {
     @Override
     public SdxClient getSdxClient() {
         return wrappedTestContext.getSdxClient();
+    }
+
+    @Override
+    public CloudbreakClient getCloudbreakClient(String who) {
+        return wrappedTestContext.getCloudbreakClient(who);
+    }
+
+    @Override
+    public CloudbreakClient getCloudbreakClient() {
+        return wrappedTestContext.getCloudbreakClient();
     }
 
     @Override

@@ -5,6 +5,7 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
+import static java.lang.String.format;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,7 +70,6 @@ import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.cloudbreak.util.StructuredEventUtil;
-import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
@@ -102,8 +102,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     @Inject
     private CommonClusterManagerProperties commonClusterManagerProperties;
 
-    @Inject
-    private FlowUtil flowUtilSingleStatus;
+    private String sdxMasterPrivateIp;
 
     public SdxInternalTestDto(TestContext testContext) {
         super(new SdxInternalClusterRequest(), testContext);
@@ -650,35 +649,23 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         }
     }
 
-    public String awaitForPrivateIp(TestContext testContext, SdxClient client, String hostGroupName) {
-        int attempts = 0;
-        int maxAttempts = flowUtilSingleStatus.getMaxRetry();
-        String result = null;
+    @Override
+    public void setMasterPrivateIp(TestContext testContext) {
+        refreshResponse(testContext, testContext.getSdxClient());
+        Set<InstanceMetaDataV4Response> metadata = getInstanceMetaData(MASTER.getName());
+        Optional<InstanceMetaDataV4Response> instanceMetaData = metadata.stream()
+                .findFirst();
+        sdxMasterPrivateIp = instanceMetaData.isPresent() ? instanceMetaData.get().getPrivateIp() : null;
+        if (StringUtils.isNotBlank(sdxMasterPrivateIp)) {
+            LOGGER.info("Found {} private IP for {} host group!", sdxMasterPrivateIp, MASTER.getName());
+        } else {
+            throw new TestFailException("Cannot find valid instance group with this name: " + MASTER.getName());
+        }
+    }
 
-        if (!getTestContext().getExceptionMap().isEmpty()) {
-            Log.await(LOGGER, String.format("Await for %s host group should be skipped because of previous error!", hostGroupName));
-            return result;
-        }
-
-        while (attempts <= maxAttempts) {
-            LOGGER.info("Waiting for {} host group to be available | round {}.", hostGroupName, attempts);
-            refreshResponse(testContext, client);
-            Set<InstanceMetaDataV4Response> metadata = getInstanceMetaData(hostGroupName);
-            Optional<InstanceMetaDataV4Response> instanceMetaData = metadata.stream()
-                    .findFirst();
-            result = instanceMetaData.isPresent() ? instanceMetaData.get().getPrivateIp() : null;
-            if (StringUtils.isNotBlank(result)) {
-                LOGGER.info("Found {} private IP for {} host group!", result, hostGroupName);
-                break;
-            } else {
-                client.waiterService().sleep(flowUtilSingleStatus.getPollingDurationOrTheDefault(emptyRunningParameter()), Map.of(hostGroupName, "host group"));
-                attempts++;
-            }
-        }
-        if (maxAttempts < attempts && StringUtils.isBlank(result)) {
-            throw new IllegalStateException("Cannot find valid instance group with this name: " + hostGroupName);
-        }
-        return result;
+    @Override
+    public String getMasterPrivateIp() {
+        return sdxMasterPrivateIp;
     }
 
     private void refreshResponse(TestContext testContext, SdxClient client) {
@@ -693,9 +680,9 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 .getStackV4Response()
                 .getInstanceGroups()
                 .stream()
-                    .filter(ig -> ig.getName().equals(hostGroupName))
-                    .findFirst()
-                    .get()
-                    .getMetadata();
+                .filter(ig -> ig.getName().equals(hostGroupName))
+                .findFirst()
+                .orElseThrow(() -> new TestFailException(format("The expected '%s' host group is NOT present at SDX!", hostGroupName)))
+                .getMetadata();
     }
 }

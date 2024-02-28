@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.polling.AttemptBasedTimeoutChecker;
 import com.sequenceiq.cloudbreak.polling.TimeoutChecker;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
@@ -77,6 +78,15 @@ public class FlowUtil {
                             testDto, name, e.getMessage()));
                 }
                 testContext.getExceptionMap().put(String.format("Cloudbreak await for flow %s", testDto), e);
+                if (CloudPlatform.YARN.equalsIgnoreCase(testDto.getCloudPlatform().name())) {
+                    String testDtoName = testDto.getClass().getSimpleName();
+                    if (StringUtils.equalsIgnoreCase(testDtoName, "SdxInternalTestDto") || StringUtils.equalsIgnoreCase(testDtoName, "DistroXTestDto")) {
+                        testDto.setMasterPrivateIp(testContext);
+                    } else {
+                        LOGGER.warn("YCloud cluster logs have not been generated to '{}' testDTO (appropriate resources: Data Lake and Data Hub)!",
+                                testDtoName);
+                    }
+                }
             }
         }
         return testDto;

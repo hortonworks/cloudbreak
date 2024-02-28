@@ -106,8 +106,6 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
     @Value("${integrationtest.hybrid.flowTimeoutInMinutes:90}")
     private long hybridFlowTimeoutInMinutes;
 
-    private String sdxGatewayPrivateIp;
-
     private String cdhVersion;
 
     private String cdhParcel;
@@ -185,13 +183,10 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
                     .withStackRequest(key(cluster), key(stack))
                     .withEnvironmentKey(key(CHILD_ENVIRONMENT_KEY))
                 .when(sdxTestClient.createInternal(), key(CHILD_SDX_KEY))
-                .await(SdxClusterStatusResponse.STACK_CREATION_IN_PROGRESS, key(CHILD_SDX_KEY).withoutWaitForFlow())
-                .then((tc, dto, client) -> {
-                    sdxGatewayPrivateIp = dto.awaitForPrivateIp(tc, client, MASTER.getName());
-                    LOGGER.info("SDX master instance IP: {}", sdxGatewayPrivateIp);
-                    return dto;
-                })
-                .await(SdxClusterStatusResponse.RUNNING, key(CHILD_SDX_KEY).withWaitForFlowSuccess().withTimeoutChecker(getHybridFlowTimeoutChecker()))
+                .await(SdxClusterStatusResponse.RUNNING,
+                        key(CHILD_SDX_KEY)
+                                .withWaitForFlowSuccess()
+                                .withTimeoutChecker(getHybridFlowTimeoutChecker()))
                 .awaitForHealthyInstances()
                 .validate();
     }
@@ -238,7 +233,10 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
                     .withCluster(cluster)
                     .withImageSettings(imageSettings)
                 .when(distroXTestClient.create(), key(CHILD_DISTROX_KEY))
-                .await(STACK_AVAILABLE, key(CHILD_DISTROX_KEY).withTimeoutChecker(getHybridFlowTimeoutChecker()))
+                .await(STACK_AVAILABLE,
+                        key(CHILD_DISTROX_KEY)
+                                .withWaitForFlowSuccess()
+                                .withTimeoutChecker(getHybridFlowTimeoutChecker()))
                 .awaitForHealthyInstances()
                 .when(distroXTestClient.get(), key(CHILD_DISTROX_KEY))
                 .validate();
@@ -274,22 +272,45 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
     @AfterMethod(alwaysRun = true)
     public void tearDown(Object[] data) {
         TestContext testContext = (TestContext) data[0];
+        SdxInternalTestDto sdxInternalTestDto = testContext.get(CHILD_SDX_KEY);
+        DistroXTestDto distroXTestDto = testContext.get(CHILD_DISTROX_KEY);
 
         LOGGER.info("Tear down AWS-YCloud E2E context");
 
-        if (StringUtils.isBlank(sdxGatewayPrivateIp)) {
-            LOGGER.warn("Error occured while creating SDX stack! So cannot download cluster logs from SDX.");
-        } else {
-            try {
-                SdxInternalTestDto sdxInternalTestDto = testContext.get(CHILD_SDX_KEY);
-                String environmentCrnSdx = sdxInternalTestDto.getResponse().getEnvironmentCrn();
-                String sdxName = sdxInternalTestDto.getResponse().getName();
-                LOGGER.info("Downloading YCloud SDX logs...");
-                yarnClusterLogs.downloadClusterLogs(environmentCrnSdx, sdxName, sdxGatewayPrivateIp, "sdx");
-                LOGGER.info("YCloud SDX logs have been downloaded!");
-            } catch (Exception sdxError) {
-                LOGGER.warn("Error occured while downloading SDX logs!", sdxError);
+        if (sdxInternalTestDto != null && sdxInternalTestDto.getResponse() != null) {
+            if (StringUtils.isBlank(sdxInternalTestDto.getMasterPrivateIp())) {
+                LOGGER.warn("Error occured while creating SDX stack! So cannot download cluster logs from SDX.");
+            } else {
+                try {
+                    String environmentCrnSdx = sdxInternalTestDto.getResponse().getEnvironmentCrn();
+                    String sdxName = sdxInternalTestDto.getResponse().getName();
+                    LOGGER.info("Downloading YCloud SDX logs...");
+                    yarnClusterLogs.downloadClusterLogs(environmentCrnSdx, sdxName, sdxInternalTestDto.getMasterPrivateIp(), "sdx");
+                    LOGGER.info("YCloud SDX logs have been downloaded!");
+                } catch (Exception sdxError) {
+                    LOGGER.warn("Error occured while downloading SDX logs!", sdxError);
+                }
             }
+        } else {
+            LOGGER.warn("YCloud Internal SDX TestDTO is not present! So downloading logs is not possible!");
+        }
+
+        if (distroXTestDto != null && distroXTestDto.getResponse() != null) {
+            if (StringUtils.isBlank(distroXTestDto.getMasterPrivateIp())) {
+                LOGGER.warn("Error occured while creating DistroX! So cannot download cluster logs from DistroX.");
+            } else {
+                try {
+                    String environmentCrnDistroX = distroXTestDto.getResponse().getEnvironmentCrn();
+                    String distorxName = distroXTestDto.getResponse().getName();
+                    LOGGER.info("Downloading YCloud DistroX logs...");
+                    yarnClusterLogs.downloadClusterLogs(environmentCrnDistroX, distorxName, distroXTestDto.getMasterPrivateIp(), "distrox");
+                    LOGGER.info("YCloud DistroX logs have been downloaded!");
+                } catch (Exception distroxError) {
+                    LOGGER.warn("Error occured while downloading DistroX logs!", distroxError);
+                }
+            }
+        } else {
+            LOGGER.warn("YCloud DistroX TestDTO is not present! So downloading logs is not possible!");
         }
 
         if (testContext.shouldCleanUp()) {

@@ -1,15 +1,18 @@
 package com.sequenceiq.it.cloudbreak.dto.distrox;
 
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest.STACK_DELETED;
 import static java.lang.String.format;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -87,6 +90,8 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     private YarnCloudFunctionality yarnCloudFunctionality;
 
     private CloudPlatform cloudPlatformFromStack;
+
+    private String distroxMasterPrivateIp;
 
     public DistroXTestDto(TestContext testContext) {
         super(new DistroXV1Request(), testContext);
@@ -451,5 +456,40 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     @Override
     public CloudPlatform getCloudPlatform() {
         return (cloudPlatformFromStack != null) ? cloudPlatformFromStack : super.getCloudPlatform();
+    }
+
+    @Override
+    public void setMasterPrivateIp(TestContext testContext) {
+        refreshResponse(testContext, testContext.getCloudbreakClient());
+        Set<InstanceMetaDataV4Response> metadata = getInstanceMetaData(MASTER.getName());
+        Optional<InstanceMetaDataV4Response> instanceMetaData = metadata.stream()
+                .findFirst();
+        distroxMasterPrivateIp = instanceMetaData.isPresent() ? instanceMetaData.get().getPrivateIp() : null;
+        if (StringUtils.isNotBlank(distroxMasterPrivateIp)) {
+            LOGGER.info("Found {} private IP for {} host group!", distroxMasterPrivateIp, MASTER.getName());
+        } else {
+            throw new TestFailException("Cannot find valid instance group with this name: " + MASTER.getName());
+        }
+    }
+
+    @Override
+    public String getMasterPrivateIp() {
+        return distroxMasterPrivateIp;
+    }
+
+    private void refreshResponse(TestContext testContext, CloudbreakClient client) {
+        setResponse(client.getDefaultClient()
+                .distroXV1Endpoint()
+                .getByName(getName(), new HashSet<>()));
+    }
+
+    private Set<InstanceMetaDataV4Response> getInstanceMetaData(String hostGroupName) {
+        return getResponse()
+                .getInstanceGroups()
+                .stream()
+                .filter(ig -> ig.getName().equals(hostGroupName))
+                .findFirst()
+                .orElseThrow(() -> new TestFailException(format("The expected '%s' host group is NOT present at DistroX!", hostGroupName)))
+                .getMetadata();
     }
 }

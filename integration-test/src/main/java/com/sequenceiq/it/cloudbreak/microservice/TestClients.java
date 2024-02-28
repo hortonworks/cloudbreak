@@ -36,9 +36,17 @@ public class TestClients {
     public SdxClient getSdxClient(String who) {
         SdxClient sdxClient = (SdxClient) clients.getOrDefault(who, Map.of()).get(SdxClient.class);
         if (sdxClient == null) {
-            throw new IllegalStateException("Should create a client for this user: " + who);
+            throw new IllegalStateException("Should create an SDX client for this user: " + who);
         }
         return sdxClient;
+    }
+
+    public CloudbreakClient getCloudbreakClient(String who) {
+        CloudbreakClient cloudbreakClient = (CloudbreakClient) clients.getOrDefault(who, Map.of()).get(CloudbreakClient.class);
+        if (cloudbreakClient == null) {
+            throw new IllegalStateException("Should create a Cloudbreak client for this user: " + who);
+        }
+        return cloudbreakClient;
     }
 
     public <U extends MicroserviceClient> U getMicroserviceClientByType(Class<U> msClientClass, String who) {
