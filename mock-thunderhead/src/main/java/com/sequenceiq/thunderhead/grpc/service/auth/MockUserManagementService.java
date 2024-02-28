@@ -269,7 +269,7 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_PRIVATE_KEY = "cdp_private_key";
 
-    private static final int MOCK_USER_COUNT = 100;
+    private static final int MOCK_USER_COUNT = 10;
 
     private static final String ACCOUNT_ID_ALTUS = "altus";
 
