@@ -14,10 +14,10 @@ import io.netty.util.internal.StringUtil;
 @Configuration
 public class SdxCdlChannelConfig {
 
-    @Value("${cdl.sdx.host:localhost}")
+    @Value("${sdx.cdl.host:localhost}")
     private String host;
 
-    @Value("${cdl.sdx.port:8982}")
+    @Value("${sdx.cdl.port:8982}")
     private int port;
 
     @Bean(name = "sdxCdlManagedChannelWrapper")
