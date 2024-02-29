@@ -82,9 +82,6 @@ import com.azure.resourcemanager.network.models.LoadBalancer;
 import com.azure.resourcemanager.network.models.LoadBalancerFrontend;
 import com.azure.resourcemanager.network.models.LoadBalancers;
 import com.azure.resourcemanager.postgresql.PostgreSqlManager;
-import com.azure.resourcemanager.postgresql.models.Server;
-import com.azure.resourcemanager.postgresql.models.Server.Update;
-import com.azure.resourcemanager.postgresql.models.Servers;
 import com.azure.resourcemanager.resources.ResourceManager;
 import com.azure.resourcemanager.resources.fluent.DeploymentsClient;
 import com.azure.resourcemanager.resources.fluent.ResourceManagementClient;
@@ -110,8 +107,6 @@ class AzureClientTest {
     private static final String RESOURCE_GROUP_NAME = "rg";
 
     private static final String SERVER_NAME = "serverName";
-
-    private static final String NEW_PASSWORD = "newPassword";
 
     private static final String PRIVATE_LB_NAME = "privateLb";
 
@@ -381,24 +376,6 @@ class AzureClientTest {
                         && PRIVATE_IP_ADDRESS1.equals(fe.getIp()) && FRONTEND_1_NAME.equals(fe.getName()))
                 .anyMatch(fe -> LoadBalancerType.GATEWAY_PRIVATE == fe.getLoadBalancerType()
                 && GATEWAY_PRIVATE_IP_ADDRESS1.equals(fe.getIp()) && FRONTEND_2_NAME.equals(fe.getName()));
-    }
-
-    @Test
-    void testUpdateAdministratorLoginPassword() {
-        Servers servers = mock(Servers.class);
-        when(postgreSqlManager.servers()).thenReturn(servers);
-        Server server = mock(Server.class);
-        when(servers.getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME))).thenReturn(server);
-        Update update = mock(Update.class);
-        when(server.update()).thenReturn(update);
-        when(update.withAdministratorLoginPassword(eq(NEW_PASSWORD))).thenReturn(update);
-        when(update.apply()).thenReturn(server);
-        underTest.updateAdministratorLoginPassword(RESOURCE_GROUP_NAME, SERVER_NAME, NEW_PASSWORD);
-        verify(postgreSqlManager, times(1)).servers();
-        verify(servers, times(1)).getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME));
-        verify(server, times(1)).update();
-        verify(update, times(1)).withAdministratorLoginPassword(eq(NEW_PASSWORD));
-        verify(update, times(1)).apply();
     }
 
     static Object[] zoneInfoFromAzure() {
