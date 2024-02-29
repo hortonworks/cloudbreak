@@ -632,7 +632,7 @@ public class AzureTemplateBuilderTest {
 
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                null, loadBalancers, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA);
+                null, loadBalancers, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
@@ -687,7 +687,7 @@ public class AzureTemplateBuilderTest {
 
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                null, loadBalancers, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA);
+                null, loadBalancers, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
@@ -735,7 +735,7 @@ public class AzureTemplateBuilderTest {
 
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                null, loadBalancers, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA);
+                null, loadBalancers, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
