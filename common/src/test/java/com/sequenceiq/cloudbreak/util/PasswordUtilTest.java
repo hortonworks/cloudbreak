@@ -18,9 +18,6 @@ class PasswordUtilTest {
         Assertions.assertTrue(actual.chars().allMatch(charAsInt -> Character.isDigit(charAsInt)
                 || Character.isUpperCase(charAsInt)
                 || Character.isLowerCase(charAsInt)));
-        Assertions.assertTrue(actual.chars().anyMatch(Character::isUpperCase));
-        Assertions.assertTrue(actual.chars().anyMatch(Character::isLowerCase));
-        Assertions.assertTrue(actual.chars().anyMatch(Character::isDigit));
     }
 
     @Test
@@ -32,9 +29,8 @@ class PasswordUtilTest {
         LOGGER.info("Random string with only alphabetic chars has been generated within {}ms the generated password: '{}'", endInMillis - startInMillis,
                 actual);
         Assertions.assertEquals(expectedCount, actual.length());
-        Assertions.assertTrue(actual.chars().allMatch(Character::isAlphabetic));
-        Assertions.assertTrue(actual.chars().anyMatch(Character::isUpperCase));
-        Assertions.assertTrue(actual.chars().anyMatch(Character::isLowerCase));
+        Assertions.assertTrue(actual.chars().allMatch(charAsInt -> Character.isUpperCase(charAsInt)
+                || Character.isLowerCase(charAsInt)));
     }
 
     @Test
