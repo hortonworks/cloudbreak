@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.CLUSTER_MANAGER_ROLLING_UPGRADE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.CLUSTER_ROLLING_UPGRADE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.CLUSTER_ROLLING_UPGRADE_FINISHED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.CLUSTER_ROLLING_UPGRADE_STARTED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.CLUSTER_UPGRADE_STARTED;
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CDH_BUILD_NUMBER;
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.STACK;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_UPGRADE;
@@ -48,21 +53,24 @@ public class ClusterUpgradeService {
         String targetRuntime = targetImage.getImage().getStackDetails().getVersion();
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), rollingUpgradeEnabled ? DATALAKE_ROLLING_UPGRADE : DATALAKE_UPGRADE,
                 targetRuntime, targetImage.getImage().getUuid());
-        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.CLUSTER_UPGRADE_STARTED, "Cluster upgrade has been started.");
+        clusterService.updateClusterStatusByStackId(stackId, rollingUpgradeEnabled ? CLUSTER_ROLLING_UPGRADE_STARTED : CLUSTER_UPGRADE_STARTED,
+                "Cluster upgrade has been started.");
     }
 
     public void upgradeClusterManager(long stackId) {
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_UPGRADE);
     }
 
-    public void clusterUpgradeFinished(long stackId, Map<String, String> currentImagePackages, StatedImage targetImage) {
+    public void clusterUpgradeFinished(long stackId, Map<String, String> currentImagePackages, StatedImage targetImage, boolean rollingUpgradeEnabled) {
         Image targetIm = targetImage.getImage();
         String clusterStackVersion = NullUtil.getIfNotNull(targetIm.getStackDetails(), ImageStackDetails::getVersion);
         String currentRuntimeBuildNumber = getCurrentStackBuildNumber(currentImagePackages);
         boolean clusterRuntimeUpgradeNeeded =
                 isUpdateNeeded(currentRuntimeBuildNumber, NullUtil.getIfNotNull(targetIm.getStackDetails(), ImageStackDetails::getStackBuildNumber));
 
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_UPGRADE_FINISHED, "Cluster stack was successfully upgraded.");
+        stackUpdater.updateStackStatus(stackId,
+                rollingUpgradeEnabled ? CLUSTER_ROLLING_UPGRADE_FINISHED : DetailedStackStatus.CLUSTER_UPGRADE_FINISHED,
+                "Cluster was successfully upgraded.");
 
         Optional<String> stackVersion = getStackVersionFromImage(targetIm);
         stackVersion.ifPresentOrElse(s -> stackUpdater.updateStackVersion(stackId, s),
@@ -87,15 +95,16 @@ public class ClusterUpgradeService {
                 .map(ImageStackDetails::getVersion);
     }
 
-    public void handleUpgradeClusterFailure(long stackId, String errorReason, DetailedStackStatus detailedStatus) {
-        stackUpdater.updateStackStatus(stackId, detailedStatus, errorReason);
+    public void handleUpgradeClusterFailure(long stackId, String errorReason, DetailedStackStatus detailedStatus, boolean rollingUpgradeEnabled) {
         switch (detailedStatus) {
-            case CLUSTER_MANAGER_UPGRADE_FAILED:
-                flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), CLUSTER_MANAGER_UPGRADE_FAILED, errorReason);
-                break;
-            case CLUSTER_UPGRADE_FAILED:
-            default:
-                flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), CLUSTER_UPGRADE_FAILED, errorReason);
+        case CLUSTER_MANAGER_UPGRADE_FAILED:
+            stackUpdater.updateStackStatus(stackId, rollingUpgradeEnabled ? CLUSTER_MANAGER_ROLLING_UPGRADE_FAILED : detailedStatus, errorReason);
+            flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), CLUSTER_MANAGER_UPGRADE_FAILED, errorReason);
+            break;
+        case CLUSTER_UPGRADE_FAILED:
+        default:
+            stackUpdater.updateStackStatus(stackId, rollingUpgradeEnabled ? CLUSTER_ROLLING_UPGRADE_FAILED : detailedStatus, errorReason);
+            flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), CLUSTER_UPGRADE_FAILED, errorReason);
         }
     }
 

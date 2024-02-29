@@ -41,10 +41,6 @@ public abstract class AbstractClusterUpgradeAction<P extends Payload>
         return (StatedImage) variables.get(CURRENT_IMAGE);
     }
 
-    protected Image getCurrentModelImage(Map<Object, Object> variables) {
-        return (Image) variables.get(CURRENT_MODEL_IMAGE);
-    }
-
     protected StatedImage getTargetImage(Map<Object, Object> variables) {
         return (StatedImage) variables.get(TARGET_IMAGE);
     }

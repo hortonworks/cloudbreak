@@ -69,9 +69,9 @@ public class ClusterRecoveryService {
         int lastUpgradeFailure = getLastUpgradeFailure(detailedStackStatusList);
         String logMessage =
                 Stream.of(createLogEntry(lastUpgradeSuccess, DetailedStackStatus.CLUSTER_UPGRADE_FINISHED),
-                        createLogEntry(lastUpgradeFailure, DetailedStackStatus.CLUSTER_UPGRADE_FAILED),
-                        createLogEntry(lastRecoverySuccess, DetailedStackStatus.CLUSTER_RECOVERY_FINISHED),
-                        createLogEntry(lastRecoveryFailure, DetailedStackStatus.CLUSTER_RECOVERY_FAILED))
+                                createLogEntry(lastUpgradeFailure, DetailedStackStatus.CLUSTER_UPGRADE_FAILED),
+                                createLogEntry(lastRecoverySuccess, DetailedStackStatus.CLUSTER_RECOVERY_FINISHED),
+                                createLogEntry(lastRecoveryFailure, DetailedStackStatus.CLUSTER_RECOVERY_FAILED))
                         .flatMap(Optional::stream)
                         .collect(Collectors.joining(". "));
         LOGGER.debug(logMessage);
@@ -114,7 +114,8 @@ public class ClusterRecoveryService {
     }
 
     private int getLastUpgradeSuccess(List<DetailedStackStatus> detailedStackStatusList) {
-        return detailedStackStatusList.lastIndexOf(DetailedStackStatus.CLUSTER_UPGRADE_FINISHED);
+        return getLastStatusFromListByMultipleStatus(detailedStackStatusList,
+                List.of(DetailedStackStatus.CLUSTER_UPGRADE_FINISHED, DetailedStackStatus.CLUSTER_ROLLING_UPGRADE_FINISHED));
     }
 
     private int getLastRecoverySuccess(List<DetailedStackStatus> detailedStackStatusList) {
@@ -126,11 +127,14 @@ public class ClusterRecoveryService {
     }
 
     private int getLastUpgradeFailure(List<DetailedStackStatus> detailedStackStatusList) {
+        return getLastStatusFromListByMultipleStatus(detailedStackStatusList, DetailedStackStatus.getUpgradeFailureStatuses());
+    }
 
-        return Collections.max(DetailedStackStatus.getUpgradeFailureStatuses()
+    private int getLastStatusFromListByMultipleStatus(List<DetailedStackStatus> detailedStackStatusList, List<DetailedStackStatus> expectedStatusList) {
+        return Collections.max(expectedStatusList
                 .stream()
                 .map(detailedStackStatusList::lastIndexOf)
-                .collect(Collectors.toList()));
+                .toList());
     }
 
     private Optional<String> createLogEntry(int index, DetailedStackStatus status) {

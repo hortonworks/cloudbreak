@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.AbstractClusterUpgradeAction.ROLLING_UPGRADE_ENABLED;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -107,7 +109,7 @@ public class ClusterUpgradeActions {
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeInitSuccess payload, Map<Object, Object> variables) {
                 StatedImage targetStatedImage = getTargetImage(variables);
                 imageComponentUpdaterService.updateComponentsForUpgrade(targetStatedImage, payload.getResourceId());
-                boolean rollingUpgradeEnabled = (boolean) variables.get(ROLLING_UPGRADE_ENABLED);
+                boolean rollingUpgradeEnabled = rollingUpgradeEnabled(variables);
                 Selectable event = new ClusterManagerUpgradeRequest(context.getStackId(), rollingUpgradeEnabled);
                 sendEvent(context, event.selector(), event);
             }
@@ -135,7 +137,7 @@ public class ClusterUpgradeActions {
                 StatedImage targetStatedImage = getTargetImage(variables);
                 Image targetImage = targetStatedImage.getImage();
                 imageComponentUpdaterService.updateComponentsForUpgrade(targetStatedImage, payload.getResourceId());
-                boolean rollingUpgradeEnabled = (boolean) variables.get(ROLLING_UPGRADE_ENABLED);
+                boolean rollingUpgradeEnabled = rollingUpgradeEnabled(variables);
                 boolean patchUpgrade = clusterUpgradeService.isPatchUpgrade(currentImage.getPackageVersions(), targetImage.getPackageVersions());
                 Selectable event = new ClusterUpgradeRequest(context.getStackId(), patchUpgrade, rollingUpgradeEnabled);
                 sendEvent(context, event.selector(), event);
@@ -165,7 +167,8 @@ public class ClusterUpgradeActions {
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeSuccess payload, Map<Object, Object> variables) {
                 com.sequenceiq.cloudbreak.cloud.model.Image currentImage = retrieveCurrentImageFromVariables(variables, payload.getResourceId());
                 StatedImage targetImage = getTargetImage(variables);
-                clusterUpgradeService.clusterUpgradeFinished(context.getStackId(), currentImage.getPackageVersions(), targetImage);
+                clusterUpgradeService.clusterUpgradeFinished(context.getStackId(), currentImage.getPackageVersions(), targetImage,
+                        rollingUpgradeEnabled(variables));
                 stackImageService.removeImageByComponentName(context.getStackId(), TARGET_IMAGE);
                 clusterComponentUpdateService.deleteClusterComponentByComponentTypeAndStackId(context.getStackId(),
                         ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES);
@@ -202,7 +205,8 @@ public class ClusterUpgradeActions {
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeFailedEvent payload, Map<Object, Object> variables) {
                 LOGGER.error("Cluster upgrade failed: {}", payload);
                 String exceptionMessage = Optional.ofNullable(payload.getException()).map(Throwable::getMessage).orElse("");
-                clusterUpgradeService.handleUpgradeClusterFailure(payload.getResourceId(), exceptionMessage, payload.getDetailedStatus());
+                clusterUpgradeService.handleUpgradeClusterFailure(payload.getResourceId(), exceptionMessage, payload.getDetailedStatus(),
+                        rollingUpgradeEnabled(variables));
                 ClusterUpgradeFailedRequest cmSyncRequest = new ClusterUpgradeFailedRequest(payload.getResourceId(), payload.getException(),
                         payload.getDetailedStatus());
                 sendEvent(context, cmSyncRequest);
@@ -213,5 +217,9 @@ public class ClusterUpgradeActions {
                 return null;
             }
         };
+    }
+
+    private boolean rollingUpgradeEnabled(Map<Object, Object> variables) {
+        return (boolean) variables.get(ROLLING_UPGRADE_ENABLED);
     }
 }

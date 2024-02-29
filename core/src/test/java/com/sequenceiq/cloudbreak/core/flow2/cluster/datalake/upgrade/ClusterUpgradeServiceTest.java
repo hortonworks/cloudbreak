@@ -15,7 +15,6 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_FINI
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_ROLLING_UPGRADE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_UPGRADE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -30,7 +29,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -40,7 +38,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.image.ImageTestBuilder;
@@ -49,7 +46,10 @@ import com.sequenceiq.cloudbreak.util.NullUtil;
 
 @ExtendWith(MockitoExtension.class)
 public class ClusterUpgradeServiceTest {
+
     private static final String ERROR_MESSAGE = "error message";
+
+    private static final String SUCCESS_MESSAGE = "Cluster was successfully upgraded.";
 
     private static final long STACK_ID = 1L;
 
@@ -173,8 +173,9 @@ public class ClusterUpgradeServiceTest {
                 currentStackVersion);
         StatedImage targetImage = StatedImage.statedImage(createImage(CURRENT_BUILD_NUMBER, targetStackVersion), null, null);
         // WHEN
-        underTest.clusterUpgradeFinished(STACK_ID, currentImagePackages, targetImage);
+        underTest.clusterUpgradeFinished(STACK_ID, currentImagePackages, targetImage, false);
         // THEN
+        verify(stackUpdater).updateStackStatus(STACK_ID, DetailedStackStatus.CLUSTER_UPGRADE_FINISHED, SUCCESS_MESSAGE);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.AVAILABLE.name(), CLUSTER_UPGRADE_FINISHED, V_7_0_2);
     }
 
@@ -184,39 +185,56 @@ public class ClusterUpgradeServiceTest {
         // GIVEN
         StatedImage targetImage = StatedImage.statedImage(targetIm, null, null);
         // WHEN
-        underTest.clusterUpgradeFinished(STACK_ID, currentImagePackages, targetImage);
+        underTest.clusterUpgradeFinished(STACK_ID, currentImagePackages, targetImage, false);
         // THEN
+        verify(stackUpdater).updateStackStatus(STACK_ID, DetailedStackStatus.CLUSTER_UPGRADE_FINISHED, SUCCESS_MESSAGE);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.AVAILABLE.name(), CLUSTER_UPGRADE_FINISHED,
                 NullUtil.getIfNotNull(targetIm.getStackDetails(), ImageStackDetails::getVersion));
     }
 
     @Test
-    public void testClusterUpgradeFinishedWhenNotNeeded() {
+    public void testClusterUpgradeFinishedWhenNotNeededAndRollingUpgradeIsEnabled() {
         // GIVEN
         Map<String, String> currentImagePackages = createPackageVersions(CURRENT_BUILD_NUMBER,
                 CURRENT_BUILD_NUMBER);
-        Image targetImmage = createImage(CURRENT_BUILD_NUMBER, CURRENT_BUILD_NUMBER);
-        StatedImage targetImage = StatedImage.statedImage(targetImmage, null, null);
+        StatedImage targetImage = StatedImage.statedImage(createImage(CURRENT_BUILD_NUMBER, CURRENT_BUILD_NUMBER), null, null);
         // WHEN
-        underTest.clusterUpgradeFinished(STACK_ID, currentImagePackages, targetImage);
+        underTest.clusterUpgradeFinished(STACK_ID, currentImagePackages, targetImage, true);
         // THEN
+        verify(stackUpdater).updateStackStatus(STACK_ID, DetailedStackStatus.CLUSTER_ROLLING_UPGRADE_FINISHED, SUCCESS_MESSAGE);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.AVAILABLE.name(), CLUSTER_UPGRADE_FINISHED_NOVERSION);
     }
 
     @Test
-    public void testClusterManagerUpgradeFailure() {
-        ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
-        underTest.handleUpgradeClusterFailure(STACK_ID, ERROR_MESSAGE, DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED);
-        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(Status.UPDATE_FAILED.name()), captor.capture(), eq(ERROR_MESSAGE));
-        assertEquals(CLUSTER_MANAGER_UPGRADE_FAILED, captor.getValue());
+    public void testClusterManagerUpgradeFailureWhenRollingUpgradeIsNotEnabled() {
+        underTest.handleUpgradeClusterFailure(STACK_ID, ERROR_MESSAGE, DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED, false);
+
+        verify(stackUpdater).updateStackStatus(STACK_ID, DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED, ERROR_MESSAGE);
+        verify(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_FAILED.name(), CLUSTER_MANAGER_UPGRADE_FAILED, ERROR_MESSAGE);
     }
 
     @Test
-    public void testClusterUpgradeFailure() {
-        ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
-        underTest.handleUpgradeClusterFailure(STACK_ID, ERROR_MESSAGE, DetailedStackStatus.CLUSTER_UPGRADE_FAILED);
-        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(Status.UPDATE_FAILED.name()), captor.capture(), eq(ERROR_MESSAGE));
-        assertEquals(CLUSTER_UPGRADE_FAILED, captor.getValue());
+    public void testClusterManagerUpgradeFailureWhenRollingUpgradeIsEnabled() {
+        underTest.handleUpgradeClusterFailure(STACK_ID, ERROR_MESSAGE, DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED, true);
+
+        verify(stackUpdater).updateStackStatus(STACK_ID, DetailedStackStatus.CLUSTER_MANAGER_ROLLING_UPGRADE_FAILED, ERROR_MESSAGE);
+        verify(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_FAILED.name(), CLUSTER_MANAGER_UPGRADE_FAILED, ERROR_MESSAGE);
+    }
+
+    @Test
+    public void testClusterUpgradeFailureWhenRollingUpgradeIsNotEnabled() {
+        underTest.handleUpgradeClusterFailure(STACK_ID, ERROR_MESSAGE, DetailedStackStatus.CLUSTER_UPGRADE_FAILED, false);
+
+        verify(stackUpdater).updateStackStatus(STACK_ID, DetailedStackStatus.CLUSTER_UPGRADE_FAILED, ERROR_MESSAGE);
+        verify(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_FAILED.name(), CLUSTER_UPGRADE_FAILED, ERROR_MESSAGE);
+    }
+
+    @Test
+    public void testClusterUpgradeFailureWhenRollingUpgradeIsEnabled() {
+        underTest.handleUpgradeClusterFailure(STACK_ID, ERROR_MESSAGE, DetailedStackStatus.CLUSTER_UPGRADE_FAILED, true);
+
+        verify(stackUpdater).updateStackStatus(STACK_ID, DetailedStackStatus.CLUSTER_ROLLING_UPGRADE_FAILED, ERROR_MESSAGE);
+        verify(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_FAILED.name(), CLUSTER_UPGRADE_FAILED, ERROR_MESSAGE);
     }
 
     @ParameterizedTest
@@ -230,7 +248,7 @@ public class ClusterUpgradeServiceTest {
         Image image = ImageTestBuilder.builder().withStackDetails(new ImageStackDetails(V_7_0_2, null, null)).withUuid(IMAGE_ID).build();
         underTest.initUpgradeCluster(STACK_ID, StatedImage.statedImage(image, null, null), true);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), DATALAKE_ROLLING_UPGRADE, V_7_0_2, IMAGE_ID);
-        verify(clusterService).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.CLUSTER_UPGRADE_STARTED, "Cluster upgrade has been started.");
+        verify(clusterService).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.CLUSTER_ROLLING_UPGRADE_STARTED, "Cluster upgrade has been started.");
     }
 
     @Test
