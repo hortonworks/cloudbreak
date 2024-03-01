@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +38,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
@@ -93,12 +95,16 @@ class AbstractRdsConfigProviderTest {
     @Mock
     private DbUsernameConverterService dbUsernameConverterService;
 
+    @Mock
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
+
     @InjectMocks
     private ClouderaManagerRdsConfigProvider underTest;
 
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(underTest, "db", "clouderamanager");
+        when(platformAwareSdxConnector.getSdxCrnByEnvironmentCrn(any())).thenReturn(Optional.empty());
     }
 
     static Object[][] sslDataProvider() {

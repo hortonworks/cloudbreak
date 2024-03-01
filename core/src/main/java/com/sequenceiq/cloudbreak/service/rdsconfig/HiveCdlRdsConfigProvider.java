@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
+import java.util.Locale;
+
 import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.rdsconfig.cm.AbstractCdlRdsConfigProvider;
@@ -22,7 +25,7 @@ public class HiveCdlRdsConfigProvider extends AbstractCdlRdsConfigProvider {
 
     static final String HIVE_METASTORE_DATABASE_USER = "hive_metastore_database_user";
 
-    private static final String PILLAR_KEY = "hive";
+    private static final String PILLAR_KEY = "cdl_hive";
 
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
@@ -39,7 +42,7 @@ public class HiveCdlRdsConfigProvider extends AbstractCdlRdsConfigProvider {
 
     @Override
     protected String getDb() {
-        return DatabaseType.HIVE.name();
+        return DatabaseType.HIVE.name().toLowerCase(Locale.ROOT);
     }
 
     @Override
@@ -53,12 +56,10 @@ public class HiveCdlRdsConfigProvider extends AbstractCdlRdsConfigProvider {
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean knoxGateway) {
-        // This provider needed to be disabled because overridden the pillar of the default com.sequenceiq.cloudbreak.service.rdsconfig.HiveRdsConfigProvider
-//        String blueprintText = blueprint.getBlueprintJsonText();
-//        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
-//        return blueprintProcessor.isCMComponentExistsInBlueprint("HIVEMETASTORE");
-        return false;
+    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean knoxGateway, boolean cdl) {
+        String blueprintText = blueprint.getBlueprintJsonText();
+        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
+        return cdl && blueprintProcessor.isCMComponentExistsInBlueprint("HIVEMETASTORE");
     }
 
     @Override

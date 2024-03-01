@@ -60,7 +60,7 @@ public class HueRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
+    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway, boolean cdl) {
         return isRdsConfigNeedForHueServer(blueprint);
     }
 }

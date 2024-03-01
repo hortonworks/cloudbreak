@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -20,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -170,29 +168,10 @@ public class PostgresConfigService {
 
     public Set<RdsConfigWithoutCluster> createRdsConfigIfNeeded(StackDtoDelegate stackDto) {
         Set<AbstractRdsConfigProvider> rdsConfigProviders = rdsConfigProviderFactory.getAllSupportedRdsConfigProviders();
-        Set<AbstractRdsConfigProvider> configProviders;
-        if (isContainerizedDatalakeAndStackIsWorkload(stackDto)) {
-            configProviders = rdsConfigProviders
-                    .stream()
-                    .filter(provider -> !provider.getRdsType().equals(DatabaseType.HIVE))
-                    .collect(Collectors.toSet());
-
-        } else {
-            configProviders = rdsConfigProviders
-                    .stream()
-                    .filter(provider -> !provider.getRdsType().equals(DatabaseType.CDL_HIVE))
-                    .collect(Collectors.toSet());
-        }
-        LOGGER.debug("RdsConfigProviders: {}", configProviders.stream().map(provider -> provider.getRdsType().name()).toList());
-        return configProviders.stream()
+        return rdsConfigProviders.stream()
                 .map(provider -> provider.createPostgresRdsConfigIfNeeded(stackDto))
                 .reduce((first, second) -> second)
                 .orElse(Collections.emptySet());
-    }
-
-    // https://jira.cloudera.com/browse/CB-24858 this ticket will resolve this validation
-    private boolean isContainerizedDatalakeAndStackIsWorkload(StackDtoDelegate stack) {
-        return StackType.WORKLOAD.equals(stack.getType()) && StringUtils.isEmpty(stack.getDatalakeCrn());
     }
 
     private Map<String, Object> initPostgresConfig(StackDto stackDto) {

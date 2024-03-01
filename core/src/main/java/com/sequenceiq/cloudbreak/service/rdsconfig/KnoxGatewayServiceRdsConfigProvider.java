@@ -46,7 +46,7 @@ public class KnoxGatewayServiceRdsConfigProvider extends AbstractRdsConfigProvid
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
+    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway, boolean cdl) {
         return hasGateway;
     }
 }

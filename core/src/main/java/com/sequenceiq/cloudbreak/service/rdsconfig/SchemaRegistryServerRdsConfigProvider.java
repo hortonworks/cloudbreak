@@ -53,7 +53,7 @@ public class SchemaRegistryServerRdsConfigProvider extends AbstractRdsConfigProv
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
+    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway, boolean cdl) {
         CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprint.getBlueprintJsonText());
         return blueprintProcessor.isCMComponentExistsInBlueprint("SCHEMA_REGISTRY_SERVER");
     }

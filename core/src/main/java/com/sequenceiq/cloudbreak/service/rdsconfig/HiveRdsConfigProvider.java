@@ -85,7 +85,7 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
-        return isRdsConfigNeedForHiveMetastore(blueprint);
+    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway, boolean cdl) {
+        return isRdsConfigNeedForHiveMetastore(blueprint) && !cdl;
     }
 }

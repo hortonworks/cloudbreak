@@ -27,6 +27,9 @@ import com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -38,9 +41,10 @@ import com.sequenceiq.cloudbreak.sdx.cdl.ServiceDiscoveryClient;
 import com.sequenceiq.cloudbreak.sdx.cdl.config.ServiceDiscoveryChannelConfig;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @ExtendWith(MockitoExtension.class)
-class CdlRdsConfigServiceTest {
+class HiveCdlRdsConfigProviderTest {
 
     private static final Long CLUSTER_ID = 1L;
 
@@ -91,6 +95,12 @@ class CdlRdsConfigServiceTest {
     @Mock
     private CdlSdxService cdlSdxService;
 
+    @Mock
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
+    @Mock
+    private RedbeamsDbServerConfigurer dbServerConfigurer;
+
     @Test
     void testRetrieveCdlRdsConfigs() {
         when(platformAwareSdxConnector.getSdxCrnByEnvironmentCrn(any())).thenReturn(Optional.of(CDL_CRN.toString()));
@@ -122,6 +132,24 @@ class CdlRdsConfigServiceTest {
         verify(clusterService, times(0)).addRdsConfigToCluster(any(), eq(CLUSTER_ID));
     }
 
+    @Test
+    void isContainerizedDatalakeFalse() {
+        StackDto stackDto = mock(StackDto.class);
+        ClusterView clusterView = mock(ClusterView.class);
+        when(clusterView.getId()).thenReturn(1L);
+        when(stackDto.getCluster()).thenReturn(clusterView);
+        when(stackDto.getEnvironmentCrn()).thenReturn("environment-crn");
+        Blueprint blueprint = mock(Blueprint.class);
+        when(stackDto.getBlueprint()).thenReturn(blueprint);
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
+        when(platformAwareSdxConnector.getSdxCrnByEnvironmentCrn(any())).thenReturn(Optional.empty());
+        underTest.createPostgresRdsConfigIfNeeded(stackDto);
+        verify(platformAwareSdxConnector, times(0)).getRemoteDataContext(any());
+        verify(cdlSdxService, times(0)).getServiceConfiguration(any(), any());
+        verify(rdsConfigService, times(0)).createIfNotExists(any(), any(), any());
+    }
+
     private StackDtoDelegate getStack() {
         StackDto stackDto = mock(StackDto.class);
         when(stackDto.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN.toString());
@@ -138,7 +166,6 @@ class CdlRdsConfigServiceTest {
     }
 
     private Map<String, String> getCastedRdc() {
-
         Optional<ServiceDiscoveryProto.ApiEndPoint> apiEndpoint = getRdc()
                 .getEndPointsList()
                 .stream()
