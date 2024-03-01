@@ -89,7 +89,7 @@ public class ServerProperties {
     @Value("${mock.imagecatalog.server:localhost}")
     private String mockImageCatalogAddr;
 
-    @Value("${mock.imagecatalog.port}")
+    @Value("${mock.imagecatalog.port:10090}")
     private String mockImageCatalogPort;
 
     @Value("${integrationtest.periscope.server}")
