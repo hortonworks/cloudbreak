@@ -233,7 +233,21 @@ public interface InstanceMetaDataRepository extends JpaRepository<InstanceMetaDa
             + "AND s.environmentCrn = :environmentCrn "
             + "AND s.type in :stackTypes "
             + "GROUP BY s.id")
-    Set<StackInstanceCount> countByWorkspaceId(@Param("id") Long id, @Param("environmentCrn") String environmentCrn,
+    Set<StackInstanceCount> countByWorkspaceIdWithEnvironment(
+            @Param("id") Long id,
+            @Param("environmentCrn") String environmentCrn,
+            @Param("stackTypes") List<StackType> stackTypes);
+
+    @Query("SELECT s.id as stackId, COUNT(i) as instanceCount "
+            + "FROM InstanceMetaData i "
+            + "JOIN i.instanceGroup ig "
+            + "JOIN ig.stack s "
+            + "WHERE s.workspace.id= :id "
+            + "AND i.instanceStatus <> 'TERMINATED' "
+            + "AND s.type in :stackTypes "
+            + "GROUP BY s.id")
+    Set<StackInstanceCount> countByWorkspaceId(
+            @Param("id") Long id,
             @Param("stackTypes") List<StackType> stackTypes);
 
     @Query("SELECT s.id as stackId, COUNT(i) as instanceCount "

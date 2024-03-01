@@ -446,7 +446,11 @@ public class InstanceMetaDataService {
     }
 
     public Set<StackInstanceCount> countByWorkspaceId(Long workspaceId, String environmentCrn, List<StackType> stackTypes) {
-        return repository.countByWorkspaceId(workspaceId, environmentCrn, stackTypes);
+        if (Strings.isNullOrEmpty(environmentCrn)) {
+            return repository.countByWorkspaceId(workspaceId, stackTypes);
+        } else {
+            return repository.countByWorkspaceIdWithEnvironment(workspaceId, environmentCrn, stackTypes);
+        }
     }
 
     public StackInstanceCount countByStackId(Long stackId) {
