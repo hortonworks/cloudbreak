@@ -1,5 +1,9 @@
 package com.sequenceiq.freeipa.flow.freeipa.imdupdate;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.INSTANCE_METADATA_UPDATE_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.INSTANCE_METADATA_UPDATE_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.INSTANCE_METADATA_UPDATE_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UNSET;
 import static com.sequenceiq.freeipa.flow.freeipa.imdupdate.FreeIpaInstanceMetadataUpdateState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.imdupdate.FreeIpaInstanceMetadataUpdateState.INIT_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.imdupdate.FreeIpaInstanceMetadataUpdateState.STACK_IMDUPDATE_FAILED_STATE;
@@ -15,12 +19,16 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.FreeIpaUseCaseAware;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 import com.sequenceiq.freeipa.flow.freeipa.imdupdate.event.FreeIpaInstanceMetadataUpdateEvent;
 
 @Component
-public class FreeIpaInstanceMetadataUpdateFlowConfig extends AbstractFlowConfiguration<FreeIpaInstanceMetadataUpdateState, FreeIpaInstanceMetadataUpdateEvent> {
+public class FreeIpaInstanceMetadataUpdateFlowConfig extends AbstractFlowConfiguration<FreeIpaInstanceMetadataUpdateState, FreeIpaInstanceMetadataUpdateEvent>
+        implements FreeIpaUseCaseAware {
     private static final List<Transition<FreeIpaInstanceMetadataUpdateState, FreeIpaInstanceMetadataUpdateEvent>> TRANSITIONS =
             new Builder<FreeIpaInstanceMetadataUpdateState, FreeIpaInstanceMetadataUpdateEvent>()
                     .defaultFailureEvent(STACK_IMDUPDATE_FAILURE_EVENT)
@@ -79,4 +87,16 @@ public class FreeIpaInstanceMetadataUpdateFlowConfig extends AbstractFlowConfigu
         return "Instance metadata update on FreeIPAs instances";
     }
 
+    @Override
+    public UsageProto.CDPFreeIPAStatus.Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return INSTANCE_METADATA_UPDATE_STARTED;
+        } else if (STACK_IMDUPDATE_FINISHED_STATE.equals(flowState)) {
+            return INSTANCE_METADATA_UPDATE_FINISHED;
+        } else if (STACK_IMDUPDATE_FAILED_STATE.equals(flowState)) {
+            return INSTANCE_METADATA_UPDATE_FAILED;
+        } else {
+            return UNSET;
+        }
+    }
 }

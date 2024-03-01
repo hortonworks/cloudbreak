@@ -1992,6 +1992,13 @@ message CDPFreeIPAStatus {
     RESUME_FINISHED = 26;
     // The status when CDP FreeIPA failed to resume.
     RESUME_FAILED = 27;
+
+    // The status when instance metadata update for CDP FreeIPA is started.
+    INSTANCE_METADATA_UPDATE_STARTED = 28;
+    // The status when instance metadata update for CDP FreeIPA is finished.
+    INSTANCE_METADATA_UPDATE_FINISHED = 29;
+    // The status when instance metadata update for CDP FreeIPA is failed.
+    INSTANCE_METADATA_UPDATE_FAILED = 30;
   }
 }
 
