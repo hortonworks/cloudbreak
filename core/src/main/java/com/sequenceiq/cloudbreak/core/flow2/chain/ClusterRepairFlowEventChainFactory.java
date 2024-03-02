@@ -221,16 +221,18 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                         Template groupTemplate = instanceGroupDto.getInstanceGroup().getTemplate();
                         int defaultRootVolumeSize = rootVolumeSizeProvider.getForPlatform(stackDto.getCloudPlatform());
                         if (groupTemplate.getRootVolumeSize() < defaultRootVolumeSize) {
-                            StackVerticalScaleV4Request stackVerticalScaleV4Request = createStackVerticalScaleV4Request(event, group, defaultRootVolumeSize);
+                            StackVerticalScaleV4Request stackVerticalScaleV4Request =
+                                    createStackVerticalScaleV4Request(event, group, defaultRootVolumeSize, groupTemplate.getInstanceType());
                             CoreVerticalScalingTriggerEvent coreVerticalScalingTriggerEvent =
                                     new CoreVerticalScalingTriggerEvent(STACK_VERTICALSCALE_EVENT.event(), event.getStackId(), stackVerticalScaleV4Request);
                             flowTriggers.add(coreVerticalScalingTriggerEvent);
                         }
-            });
+                    });
         }
     }
 
-    private StackVerticalScaleV4Request createStackVerticalScaleV4Request(ClusterRepairTriggerEvent event, String group, int defaultRootVolumeSize) {
+    private StackVerticalScaleV4Request createStackVerticalScaleV4Request(ClusterRepairTriggerEvent event, String group,
+            int defaultRootVolumeSize, String instanceType) {
         StackVerticalScaleV4Request stackVerticalScaleV4Request = new StackVerticalScaleV4Request();
         stackVerticalScaleV4Request.setGroup(group);
         stackVerticalScaleV4Request.setStackId(event.getStackId());
@@ -238,6 +240,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         RootVolumeV4Request rootVolume = new RootVolumeV4Request();
         rootVolume.setSize(defaultRootVolumeSize);
         template.setRootVolume(rootVolume);
+        template.setInstanceType(instanceType);
         stackVerticalScaleV4Request.setTemplate(template);
         return stackVerticalScaleV4Request;
     }
