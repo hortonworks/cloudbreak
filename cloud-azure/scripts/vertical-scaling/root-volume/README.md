@@ -87,6 +87,10 @@ This script has to be run on every node in the cluster. For that, please log in 
 
 It will only modify partition or file system size if it is smaller than the disk size.
 
+### Updating CDP database
+
+In order to reflect the change on CDP side, customer should open an escalation and ask for update the database of CDP using the new root disk size in order to avoid any further inconvenience!
+
 ### Sample output
 Root disk was successfully increased from 100GB to 160GB.
 Output was taken 06/08/2021.
@@ -138,3 +142,4 @@ Output was taken 06/08/2021.
     realtime =none                   extsz=4096   blocks=0, rtextents=0
     data blocks changed from 26086139 to 41814779
     Finished
+    Please open escalation to update CDP database with new root disk size!

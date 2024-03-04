@@ -131,6 +131,7 @@ main() {
     fi
 
     message Finished
+    message "Please open escalation to update CDP database with new root disk size!"
 }
 
 main $*
