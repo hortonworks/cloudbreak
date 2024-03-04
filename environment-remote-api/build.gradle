@@ -1,0 +1,17 @@
+plugins {
+  id 'java'
+}
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation project(':common')
+  implementation project(':auth-connector')
+  implementation project(":authorization-common-api")
+  implementation project(":structuredevent-api-cdp")
+  implementation project(":structuredevent-model")
+
+  testImplementation project(path: ':common', configuration: 'tests')
+}
