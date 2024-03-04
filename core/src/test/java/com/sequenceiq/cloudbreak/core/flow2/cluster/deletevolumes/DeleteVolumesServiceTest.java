@@ -267,7 +267,7 @@ class DeleteVolumesServiceTest {
         doReturn(1L).when(cluster).getId();
         doReturn(cluster).when(stack).getCluster();
         doReturn(bp).when(stack).getBlueprint();
-        doReturn("bp").when(bp).getBlueprintText();
+        doReturn("bp").when(bp).getBlueprintJsonText();
         CmTemplateProcessor processor = mock(CmTemplateProcessor.class);
         doReturn(processor).when(cmTemplateProcessorFactory).get("bp");
         doReturn(1L).when(stack).getId();
@@ -300,7 +300,7 @@ class DeleteVolumesServiceTest {
         doReturn(1L).when(cluster).getId();
         doReturn(cluster).when(stack).getCluster();
         doReturn(bp).when(stack).getBlueprint();
-        doReturn("bp").when(bp).getBlueprintText();
+        doReturn("bp").when(bp).getBlueprintJsonText();
         CmTemplateProcessor processor = mock(CmTemplateProcessor.class);
         doReturn(processor).when(cmTemplateProcessorFactory).get("bp");
         doReturn(1L).when(stack).getId();

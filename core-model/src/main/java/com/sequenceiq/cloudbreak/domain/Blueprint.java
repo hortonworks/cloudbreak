@@ -112,6 +112,11 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
         this.id = id;
     }
 
+    /**
+     * Default blueprints might have a null Vault path, after CB-24813, therefore this method might return null.
+     * @deprecated use {@link #getBlueprintJsonText()} instead!
+     */
+    @Deprecated
     public String getBlueprintText() {
         return blueprintText.getRaw();
     }

@@ -88,7 +88,7 @@ public class AddVolumesService {
     private CloudConnectorHelper cloudConnectorHelper;
 
     public Map<String, Map<String, String>> redeployStatesAndMountDisks(Stack stack, String requestGroup) throws Exception {
-        String blueprintText = stack.getBlueprint().getBlueprintText();
+        String blueprintText = stack.getBlueprint().getBlueprintJsonText();
         CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
         Set<ServiceComponent> hostTemplateServiceComponents = processor.getServiceComponentsByHostGroup().get(requestGroup);
         InMemoryStateStore.putStack(stack.getId(), PollGroup.POLLABLE);

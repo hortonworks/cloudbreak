@@ -148,7 +148,7 @@ public class AddVolumesServiceTest {
         Blueprint bp = mock(Blueprint.class);
         lenient().when(stack.getBlueprint()).thenReturn(bp);
         lenient().when(stack.getId()).thenReturn(1L);
-        lenient().when(bp.getBlueprintText()).thenReturn("test");
+        lenient().when(bp.getBlueprintJsonText()).thenReturn("test");
         lenient().when(cmTemplateProcessorFactory.get("test")).thenReturn(processor);
         lenient().when(stackDtoService.getById(1L)).thenReturn(mock(StackDto.class));
 

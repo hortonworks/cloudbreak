@@ -70,7 +70,7 @@ class DeleteVolumesCMConfigHandlerTest {
         doReturn(stackDto).when(stackDtoService).getById(STACK_ID);
         handlerEvent = new Event<>(new DeleteVolumesCMConfigEvent(STACK_ID, "test"));
         Blueprint bp = mock(Blueprint.class);
-        doReturn("test blueprint").when(bp).getBlueprintText();
+        doReturn("test blueprint").when(bp).getBlueprintJsonText();
         doReturn(bp).when(stackDto).getBlueprint();
         doReturn(processor).when(cmTemplateProcessorFactory).get(any());
     }
