@@ -40,7 +40,7 @@ public class CertRotateInRedbeamsHandler extends ExceptionCatcherEventHandler<Ce
     protected Selectable doAccept(HandlerEvent<CertRotateInRedbeamsRequest> event) {
         LOGGER.debug("CERT rotation has been started");
         CertRotateInRedbeamsRequest data = event.getData();
-        dbStackUpdater.updateSslConfig(data.getResourceId());
+        dbStackUpdater.updateSslConfig(data.getResourceId(), data.getCloudContext(), data.getCloudCredential(), data.getDbStack());
         return new CertRotateInRedbeamsSuccess(data.getResourceId());
     }
 }

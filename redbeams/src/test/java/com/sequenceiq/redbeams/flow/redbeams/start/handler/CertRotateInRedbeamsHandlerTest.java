@@ -11,6 +11,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -32,17 +34,23 @@ public class CertRotateInRedbeamsHandlerTest {
     @Mock
     private CloudContext cloudContext;
 
+    @Mock
+    private CloudCredential cloudCredential;
+
+    @Mock
+    private DatabaseStack databaseStack;
+
     @Test
     public void testDoAccept() {
         when(cloudContext.getId()).thenReturn(STACK_ID);
 
-        CertRotateInRedbeamsRequest request = new CertRotateInRedbeamsRequest(cloudContext);
+        CertRotateInRedbeamsRequest request = new CertRotateInRedbeamsRequest(cloudContext, cloudCredential, databaseStack);
         Event<CertRotateInRedbeamsRequest> event = new Event<>(request);
         HandlerEvent<CertRotateInRedbeamsRequest> handlerEvent = new HandlerEvent<>(event);
 
         Selectable selectable = underTest.doAccept(handlerEvent);
         Assertions.assertThat(selectable.getClass()).isEqualTo(CertRotateInRedbeamsSuccess.class);
         Assertions.assertThat(selectable.selector()).isEqualTo("CERTROTATEINREDBEAMSSUCCESS");
-        verify(dbStackUpdater).updateSslConfig(STACK_ID);
+        verify(dbStackUpdater).updateSslConfig(STACK_ID, cloudContext, cloudCredential, databaseStack);
     }
 }

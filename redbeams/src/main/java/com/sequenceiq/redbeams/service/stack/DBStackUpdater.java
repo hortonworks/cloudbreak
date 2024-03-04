@@ -11,12 +11,17 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType;
 import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
 import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
+import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificateSyncService;
 import com.sequenceiq.redbeams.service.sslcertificate.SslConfigService;
 
 @Service
@@ -33,7 +38,10 @@ public class DBStackUpdater {
     @Inject
     private SslConfigService sslConfigService;
 
-    public void updateSslConfig(long id) {
+    @Inject
+    private DatabaseServerSslCertificateSyncService databaseServerSslCertificateSyncService;
+
+    public void updateSslConfig(long id, CloudContext cloudContext, CloudCredential cloudCredential, DatabaseStack databaseStack) {
         Optional<DBStack> dbStackOpt = dbStackService.findById(id);
         dbStackOpt.ifPresent(dbStack -> {
             Optional<SslConfig> sslConfig = sslConfigService.fetchById(dbStack.getSslConfig());
@@ -62,6 +70,27 @@ public class DBStackUpdater {
                 }
                 LOGGER.debug("SSL config will be untouched, SSL is {}null and cert type is {}", sslNullPrefix, sslTypeString);
             }
+            syncSslCertFromCloudProvider(cloudContext, cloudCredential, databaseStack, dbStack, sslConfig);
         });
+    }
+
+    private void syncSslCertFromCloudProvider(
+            CloudContext cloudContext,
+            CloudCredential cloudCredential,
+            DatabaseStack databaseStack,
+            DBStack dbStack,
+            Optional<SslConfig> sslConfig) {
+        try {
+            if (sslConfig.isPresent() && sslConfig.get().getSslCertificateType() == SslCertificateType.CLOUD_PROVIDER_OWNED) {
+                databaseServerSslCertificateSyncService.syncSslCertificateIfNeeded(
+                        cloudContext,
+                        cloudCredential,
+                        dbStack,
+                        databaseStack);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Sync back ssl cert from cloud provider side failed because {}.", e.toString());
+            throw new CloudbreakServiceException(e);
+        }
     }
 }

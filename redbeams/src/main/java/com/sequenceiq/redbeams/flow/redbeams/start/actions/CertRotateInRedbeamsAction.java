@@ -16,6 +16,6 @@ public class CertRotateInRedbeamsAction extends AbstractRedbeamsStartAction<Star
 
     @Override
     protected Selectable createRequest(RedbeamsContext context) {
-        return new CertRotateInRedbeamsRequest(context.getCloudContext());
+        return new CertRotateInRedbeamsRequest(context.getCloudContext(), context.getCloudCredential(), context.getDatabaseStack());
     }
 }
