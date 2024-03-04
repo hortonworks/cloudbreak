@@ -4,6 +4,7 @@ import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -123,7 +124,7 @@ class AwsNativeInstanceResourceBuilderTest {
     }
 
     @Test
-    void testBuildWhenInstanceNoExist() throws Exception {
+    void testBuildWhenInstanceNotExist() throws Exception {
         Instance instance = Instance.builder().instanceId(INSTANCE_ID).build();
         RunInstancesResponse runInstancesResponse = RunInstancesResponse.builder().instances(instance).build();
         InstanceAuthentication authentication = mock(InstanceAuthentication.class);
@@ -157,6 +158,10 @@ class AwsNativeInstanceResourceBuilderTest {
         assertEquals("sg-id", runInstancesRequest.securityGroupIds().get(0));
         assertThat(runInstancesRequest.tagSpecifications().get(0)).matches(ts -> ts.tags().stream()
                 .anyMatch(t -> "Name".equals(t.key()) && "stackname".equals(t.value())));
+        verify(awsTaggingService, times(1)).prepareEc2TagSpecification(anyMap(),
+                eq(software.amazon.awssdk.services.ec2.model.ResourceType.INSTANCE));
+        verify(awsTaggingService, times(1)).prepareEc2TagSpecification(anyMap(),
+                eq(software.amazon.awssdk.services.ec2.model.ResourceType.VOLUME));
     }
 
     @Test
@@ -192,6 +197,10 @@ class AwsNativeInstanceResourceBuilderTest {
         RunInstancesRequest runInstancesRequest = runInstancesRequestArgumentCaptor.getValue();
         assertThat(runInstancesRequest.tagSpecifications().get(0)).matches(ts -> ts.tags().stream()
                 .anyMatch(t -> "Name".equals(t.key()) && "doNotOverride".equals(t.value())));
+        verify(awsTaggingService, times(1)).prepareEc2TagSpecification(anyMap(),
+                eq(software.amazon.awssdk.services.ec2.model.ResourceType.INSTANCE));
+        verify(awsTaggingService, times(1)).prepareEc2TagSpecification(anyMap(),
+                eq(software.amazon.awssdk.services.ec2.model.ResourceType.VOLUME));
     }
 
     @Test
@@ -268,6 +277,10 @@ class AwsNativeInstanceResourceBuilderTest {
 
         List<CloudResource> actual = underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
         assertEquals(actual.get(0).getInstanceId(), INSTANCE_ID);
+        verify(awsTaggingService, times(1)).prepareEc2TagSpecification(anyMap(),
+                eq(software.amazon.awssdk.services.ec2.model.ResourceType.INSTANCE));
+        verify(awsTaggingService, times(1)).prepareEc2TagSpecification(anyMap(),
+                eq(software.amazon.awssdk.services.ec2.model.ResourceType.VOLUME));
     }
 
     @Test

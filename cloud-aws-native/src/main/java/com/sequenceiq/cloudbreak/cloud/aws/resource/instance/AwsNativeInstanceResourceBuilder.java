@@ -132,15 +132,17 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
             Map<String, String> tags = new HashMap<>(awsCloudStackView.getTags());
             tags.putIfAbsent("Name", awsStackNameCommonUtil.getInstanceName(ac, group.getName(), privateId));
             tags.putIfAbsent("instanceGroup", group.getName());
-            TagSpecification tagSpecification = awsTaggingService.prepareEc2TagSpecification(tags,
+            TagSpecification tagSpecificationOfInstance = awsTaggingService.prepareEc2TagSpecification(tags,
                     software.amazon.awssdk.services.ec2.model.ResourceType.INSTANCE);
+            TagSpecification tagSpecificationOfVolume = awsTaggingService.prepareEc2TagSpecification(tags,
+                    software.amazon.awssdk.services.ec2.model.ResourceType.VOLUME);
             RunInstancesRequest request = RunInstancesRequest.builder()
                     .instanceType(instanceTemplate.getFlavor())
                     .imageId(cloudStack.getImage().getImageName())
                     .subnetId(cloudInstance.getSubnetId())
                     .securityGroupIds(securityGroupBuilderUtil.getSecurityGroupIds(context, group))
                     .ebsOptimized(isEbsOptimized(instanceTemplate))
-                    .tagSpecifications(tagSpecification)
+                    .tagSpecifications(tagSpecificationOfInstance, tagSpecificationOfVolume)
                     .iamInstanceProfile(getIamInstanceProfile(group))
                     .userData(getUserData(cloudStack, group))
                     .minCount(1)
