@@ -1,4 +1,4 @@
-FROM docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-21-runtime-cis:1.18-2.1705519635-stig-29022024
+FROM docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-21-runtime-cis:1.19-1-stig-01032024
 MAINTAINER info@cloudera.com
 
 # REPO URL to download jar
