@@ -79,4 +79,25 @@ class GcpStackUtilTest {
         assertThrows(CloudbreakServiceException.class, () -> gcpStackUtil.getGroupTypeTag(null));
     }
 
+    @Test
+    void testGetBucketNameOnlyOneSegment() {
+        String result = gcpStackUtil.getBucketName("bucketname");
+
+        assertEquals("bucketname", result);
+    }
+
+    @Test
+    void testGetBucketNameOnlyOneSegmentWithProtocol() {
+        String result = gcpStackUtil.getBucketName("gs://bucketname");
+
+        assertEquals("bucketname", result);
+    }
+
+    @Test
+    void testGetBucketNameMoreSegmentWithProtocol() {
+        String result = gcpStackUtil.getBucketName("gs://bucketname/bucket/bucket");
+
+        assertEquals("bucketname", result);
+    }
+
 }

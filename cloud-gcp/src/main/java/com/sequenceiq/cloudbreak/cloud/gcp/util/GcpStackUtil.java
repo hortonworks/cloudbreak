@@ -223,7 +223,7 @@ public class GcpStackUtil {
 
     public String getBucketName(String objectStorageLocation) {
         String[] parts = createParts(objectStorageLocation.replaceAll(FileSystemType.GCS.getProtocol() + "://", ""));
-        if (!StringUtils.isEmpty(objectStorageLocation) && parts.length > 1) {
+        if (!StringUtils.isEmpty(objectStorageLocation) && parts.length >= 1) {
             return parts[FIRST];
         } else {
             LOGGER.debug("No bucket found in object storage location.");
