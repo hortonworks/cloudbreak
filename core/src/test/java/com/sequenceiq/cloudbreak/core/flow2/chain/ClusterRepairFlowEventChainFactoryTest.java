@@ -591,6 +591,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
         when(instanceGroupView.getGroupName()).thenReturn("core");
         Template template = mock(Template.class);
         when(template.getRootVolumeSize()).thenReturn(100);
+        when(template.getInstanceType()).thenReturn("instance");
         when(instanceGroupView.getTemplate()).thenReturn(template);
         when(instanceGroupDto.getInstanceGroup()).thenReturn(instanceGroupView);
         when(stackDto.getInstanceGroupDtos()).thenReturn(List.of(instanceGroupDto));
