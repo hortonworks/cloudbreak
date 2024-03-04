@@ -59,7 +59,7 @@ cbd_services_sanity_check() {
 }
 
 TRACE=1 ./cbd regenerate
-./cbd start-wait traefik dev-gateway core-gateway commondb vault cloudbreak environment periscope freeipa redbeams datalake haveged mock-infrastructure idbmms cluster-proxy cadence cluster-proxy-health-check-worker thunderhead-mock
+./cbd start-wait traefik dev-gateway core-gateway commondb vault cloudbreak environment periscope freeipa redbeams datalake externalized-compute haveged mock-infrastructure idbmms cluster-proxy cadence cluster-proxy-health-check-worker thunderhead-mock
 RESULT=$?
 cbd_services_sanity_check
 
@@ -94,6 +94,7 @@ if [ "${CB_TARGET_BRANCH}" == "master" ] && [ "${PRIMARYKEY_CHECK}" == "true" ];
     check_primary_key "environmentdb"
     check_primary_key "freeipadb"
     check_primary_key "redbeamsdb"
+    check_primary_key "externalizedcomputedb"
 fi
 
 cd ..
@@ -114,6 +115,7 @@ curl -k http://${PUBLIC_IP}:8090/freeipa/api/openapi.json -o ./apidefinitions/fr
 curl -k http://${PUBLIC_IP}:8087/redbeams/api/openapi.json -o ./apidefinitions/redbeams.json
 curl -k http://${PUBLIC_IP}:8086/dl/api/openapi.json -o ./apidefinitions/datalake.json
 curl -k http://${PUBLIC_IP}:8085/as/api/openapi.json -o ./apidefinitions/autoscale.json
+curl -k http://${PUBLIC_IP}:8091/externalizedcompute/api/openapi.json -o ./apidefinitions/externalizedcompute.json
 
 docker rm -f cbreak_periscope_1
 

@@ -34,6 +34,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentAuthenticationTes
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentSecurityAccessTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.externalizedcompute.ExternalizedComputeClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
@@ -124,6 +125,10 @@ public interface CloudProvider {
     SdxCustomTestDto sdxCustom(SdxCustomTestDto sdxCustom);
 
     SdxRepairTestDto sdxRepair(SdxRepairTestDto sdxRepair);
+
+    default ExternalizedComputeClusterTestDto externalizedComputeCluster(ExternalizedComputeClusterTestDto computeClusterDto) {
+        return computeClusterDto;
+    }
 
     SdxCloudStorageTestDto cloudStorage(SdxCloudStorageTestDto cloudStorage);
 

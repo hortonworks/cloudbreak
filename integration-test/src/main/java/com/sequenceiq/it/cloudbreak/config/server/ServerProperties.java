@@ -35,6 +35,8 @@ public class ServerProperties {
 
     private static final int DEFAULT_SDX_PORT = 8086;
 
+    private static final int DEFAULT_EXTERNALIZED_COMPUTE_PORT = 8091;
+
     @Value("${cloudbreak.url:localhost:" + DEFAULT_CLOUDBREAK_PORT + "}")
     private String cloudbreakUrl;
 
@@ -77,6 +79,15 @@ public class ServerProperties {
     @Value("${sdx.server.contextPath:/dl}")
     private String sdxRootContextPath;
 
+    @Value("${integrationtest.externalizedcompute.server}")
+    private String externalizedComputeServer;
+
+    @Value("${externalizedcompute.url:localhost:" + DEFAULT_EXTERNALIZED_COMPUTE_PORT + "}")
+    private String externalizedComputeUrl;
+
+    @Value("${externalizedcompute.server.contextPath:/externalizedcompute}")
+    private String externalizedComputeRootContextPath;
+
     @Value("${integrationtest.ums.host:localhost}")
     private String umsHost;
 
@@ -115,6 +126,9 @@ public class ServerProperties {
 
     @Value("${integrationtest.redbeams.port:0}")
     private int redbeamsPort;
+
+    @Value("${integrationtest.externalizedcompute.port:0}")
+    private int externalizedComputePort;
 
     private String cbVersion;
 
@@ -181,6 +195,14 @@ public class ServerProperties {
             return sdxServer + ":" + sdxPort + sdxRootContextPath;
         } else {
             return sdxServer + sdxRootContextPath;
+        }
+    }
+
+    public String getExternalizedComputeAddress() {
+        if (externalizedComputePort != 0) {
+            return externalizedComputeServer + ":" + externalizedComputePort + externalizedComputeRootContextPath;
+        } else {
+            return externalizedComputeServer + externalizedComputeRootContextPath;
         }
     }
 

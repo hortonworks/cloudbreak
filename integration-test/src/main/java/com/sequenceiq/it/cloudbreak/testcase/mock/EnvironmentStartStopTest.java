@@ -8,14 +8,11 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlowF
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Map;
 
 import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.assertion.audit.EnvironmentAuditGrpcServiceAssertion;
@@ -24,7 +21,6 @@ import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
-import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -42,12 +38,6 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
     private static final String DX_1 = "dx1";
 
     private static final String DX_2 = "dx2";
-
-    private static final Map<String, InstanceStatus> INSTANCES_HEALTHY = new HashMap<>() {{
-        put(HostGroupType.MASTER.getName(), InstanceStatus.SERVICES_HEALTHY);
-        put(HostGroupType.COMPUTE.getName(), InstanceStatus.SERVICES_HEALTHY);
-        put(HostGroupType.WORKER.getName(), InstanceStatus.SERVICES_HEALTHY);
-    }};
 
     @Inject
     private EnvironmentTestClient environmentTestClient;

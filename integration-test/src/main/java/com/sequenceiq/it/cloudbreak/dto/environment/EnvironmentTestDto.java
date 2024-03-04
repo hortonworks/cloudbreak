@@ -29,6 +29,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeI
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.ExternalizedComputeCreateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.FreeIpaImageRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
@@ -108,7 +109,7 @@ public class EnvironmentTestDto
         return getCloudProvider()
                 .environment(withName(getResourcePropertyProvider().getEnvironmentName(getCloudPlatform()))
                         .withDescription(getResourcePropertyProvider().getDescription("environment")))
-                .withCredentialName(getTestContext().get(CredentialTestDto.class) == null ?  null :
+                .withCredentialName(getTestContext().get(CredentialTestDto.class) == null ? null :
                         getTestContext().get(CredentialTestDto.class).getName())
                 .withAuthentication(getTestContext().given(EnvironmentAuthenticationTestDto.class))
                 .withCloudplatform(getCloudPlatform().toString())
@@ -276,6 +277,13 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withTelemetry(TelemetryRequest telemetry) {
         getRequest().setTelemetry(telemetry);
+        return this;
+    }
+
+    public EnvironmentTestDto withExternalizedComputeCluster() {
+        ExternalizedComputeCreateRequest externalizedComputeCreateRequest = new ExternalizedComputeCreateRequest();
+        externalizedComputeCreateRequest.setCreate(true);
+        getRequest().setExternalizedComputeCreateRequest(externalizedComputeCreateRequest);
         return this;
     }
 

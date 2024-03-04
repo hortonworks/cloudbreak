@@ -84,6 +84,9 @@ dependencies {
   implementation (project(':environment-api')) {
     transitive = false;
   }
+  implementation (project(':externalized-compute-api')) {
+    transitive = false;
+  }
   implementation (project(':custom-configurations-api')) {
     transitive = false;
   }

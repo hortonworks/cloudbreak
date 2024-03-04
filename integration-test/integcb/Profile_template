@@ -6,6 +6,7 @@ export DOCKER_TAG_ENVIRONMENT=dev
 export DOCKER_TAG_DATALAKE=dev
 export DOCKER_TAG_REDBEAMS=dev
 export DOCKER_TAG_PERISCOPE=dev
+export DOCKER_TAG_EXTERNALIZED_COMPUTE=dev
 export DOCKER_TAG_MOCK_INFRASTRUCTURE=dev
 export THUNDERHEAD_MOCK_VOLUME_HOST=../../mock-thunderhead/build/libs/mock-thunderhead.jar
 export REMOVE_CONTAINER=
@@ -33,6 +34,9 @@ export CPUS_FOR_CLOUDBREAK=8.0
 export CPUS_FOR_SERVICES=4.0
 export MEMORY_FOR_CLOUDBREAK=4096M
 export MEMORY_FOR_SERVICES=2048M
+
+export LIFTIE_HOST=thunderhead-mock
+export LIFTIE_PORT=8080
 
 # hibernate.session.circuitbreak.* is intended to catch inefficient queries in IT time
 # We can add 400 instances at once. It can cause a false N+1 error.

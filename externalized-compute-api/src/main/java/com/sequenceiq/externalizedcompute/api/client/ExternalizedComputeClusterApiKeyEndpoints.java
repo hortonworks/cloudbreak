@@ -2,14 +2,14 @@ package com.sequenceiq.externalizedcompute.api.client;
 
 import jakarta.ws.rs.client.WebTarget;
 
-import com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint;
+import com.sequenceiq.cloudbreak.client.AbstractKeyBasedServiceEndpoint;
 import com.sequenceiq.externalizedcompute.api.endpoint.ExternalizedComputeClusterEndpoint;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 
-public class ExternalizedComputeClusterCrnEndpoint extends AbstractUserCrnServiceEndpoint implements ExternalizedComputeClusterClient {
+public class ExternalizedComputeClusterApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint implements ExternalizedComputeClusterClient {
 
-    public ExternalizedComputeClusterCrnEndpoint(WebTarget webTarget, String crn) {
-        super(webTarget, crn);
+    ExternalizedComputeClusterApiKeyEndpoints(WebTarget webTarget, String accessKey, String secretKey) {
+        super(webTarget, accessKey, secretKey);
     }
 
     @Override

@@ -78,3 +78,17 @@ if grep -q ERROR "datalakedb-revert.result" || grep -q 'Permission denied' "data
     then echo -e "\033[0;91m--- !!! REVERT DATALAKE DB FAILED !!! ---\n"; exit 1;
     else echo -e "\n\033[0;92m+++ !!! REVERT DATALAKE DB SUCCESSFULLY FINISHED !!! +++\n";
 fi
+
+echo "Revert EXTERNALIZED_COMPUTE database test"
+
+sudo rm -rf .schema
+sudo ./cbd migrate externalizedcomputedb pending
+sudo rm -rf .schema
+sudo ./cbd migrate externalizedcomputedb down 10 > externalizedcomputedb-revert.result 2>&1
+
+cat externalizedcomputedb-revert.result
+
+if grep -q ERROR "externalizedcomputedb-revert.result" || grep -q 'Permission denied' "externalizedcomputedb-revert.result";
+    then echo -e "\033[0;91m--- !!! REVERT EXTERNALIZED_COMPUTE DB FAILED !!! ---\n"; exit 1;
+    else echo -e "\n\033[0;92m+++ !!! REVERT EXTERNALIZED_COMPUTE DB SUCCESSFULLY FINISHED !!! +++\n";
+fi

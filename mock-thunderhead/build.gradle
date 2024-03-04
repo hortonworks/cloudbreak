@@ -1,18 +1,20 @@
 import org.ajoberstar.grgit.Grgit
 
 buildscript {
-  repositories {
-    maven { url = "$repoUrl" }
-    maven { url = "$springRepoUrl" }
-    mavenCentral()
-  }
-  dependencies {
-    classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-  }
+    repositories {
+        maven { url = "$repoUrl" }
+        maven { url = "$springRepoUrl" }
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+        classpath "org.openapitools:openapi-generator-gradle-plugin:$openapiGeneratorGradlePlugin"
+    }
 }
 
 plugins {
     id "maven-publish"
+    id 'org.openapi.generator' version "$openapiGeneratorGradlePlugin"
 }
 
 apply plugin: 'org.springframework.boot'
@@ -20,24 +22,44 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: 'java'
 
 bootRun {
-  systemProperty "spring.profiles.active", System.properties["spring.profiles.active"]
-  systemProperty "spring.config.location", System.properties["spring.config.location"]
-  if (project.hasProperty("jvmArgs")) {
-    jvmArgs += project.jvmArgs.split("\\s+").toList()
-  }
+    systemProperty "spring.profiles.active", System.properties["spring.profiles.active"]
+    systemProperty "spring.config.location", System.properties["spring.config.location"]
+    if (project.hasProperty("jvmArgs")) {
+        jvmArgs += project.jvmArgs.split("\\s+").toList()
+    }
+}
+
+springBoot {
+    mainClass = "com.sequenceiq.thunderhead.MockThunderheadApplication"
 }
 
 bootRun {
-  mainClass = 'com.sequenceiq.thunderhead.MockThunderheadApplication'
+    mainClass = 'com.sequenceiq.thunderhead.MockThunderheadApplication'
 }
 
 bootJar {
-  archiveBaseName = 'mock-thunderhead'
-  archiveFileName= 'mock-thunderhead.jar'
-  manifest {
-    def grgit = Grgit.open(currentDir: project.projectDir)
-    attributes "Implementation-Version": grgit.describe()
-  }
+    archiveBaseName = 'mock-thunderhead'
+    archiveFileName = 'mock-thunderhead.jar'
+    manifest {
+        def grgit = Grgit.open(currentDir: project.projectDir)
+        attributes "Implementation-Version": grgit.describe()
+    }
+}
+
+openApiGenerate {
+    generatorName = "spring"
+    //library = "spring"
+    inputSpec = "$projectDir/../externalized-compute/src/main/resources/liftie-swagger.json"
+    outputDir = "$projectDir/src/generated"
+    apiPackage = "com.cloudera.api"
+    modelPackage = "com.cloudera.model"
+    invokerPackage = "com.sequenceiq.externalizedcompute"
+    configOptions.set([
+            dateLibrary : "java8",
+            useSwaggerUI: "false",
+            useJakartaEe: "true",
+            interfaceOnly: "true"
+    ])
 }
 
 publishing {
@@ -59,30 +81,44 @@ publishing {
 }
 
 dependencies {
-  implementation group:  'org.springframework.boot',     name: 'spring-boot-starter',            version: springBootVersion
-  implementation group:  'org.springframework.boot',     name: 'spring-boot-starter-security',   version: springBootVersion
-  implementation group:  'org.springframework.boot',     name: 'spring-boot-starter-jersey',     version: springBootVersion
-  implementation group:  'org.springframework.boot',     name: 'spring-boot-starter-web',        version: springBootVersion
-  implementation group:  'org.springframework.boot',     name: 'spring-boot-starter-actuator',   version: springBootVersion
-  implementation group:  'org.springframework',          name: 'spring-context-support',         version: springFrameworkVersion
-  implementation group:  'org.springframework.security', name: 'spring-security-jwt',            version: springSecurityJwtVersion
-  implementation group:  'org.springframework.security', name: 'spring-security-web',            version: springSecurityVersion
-  implementation group:  'com.fasterxml.jackson.core',   name: 'jackson-core',                   version: jacksonVersion
-  implementation group:  'com.google.protobuf',          name: 'protobuf-java-util',             version: protobufVersion
-  implementation group:  'io.jsonwebtoken',              name: 'jjwt',                           version: '0.9.1'
-  testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
-  testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
-  testImplementation group: 'org.assertj',        name: 'assertj-core',                   version: assertjVersion
-  testImplementation project(path: ':common', configuration: 'tests')
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter', version: springBootVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: springBootVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jersey', version: springBootVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springBootVersion
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springBootVersion
+    implementation group: 'org.springframework', name: 'spring-context-support', version: springFrameworkVersion
+    implementation group: 'org.springframework.security', name: 'spring-security-jwt', version: springSecurityJwtVersion
+    implementation group: 'org.springframework.security', name: 'spring-security-web', version: springSecurityVersion
+    implementation group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationApiVersion
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
+    implementation group: 'com.google.protobuf', name: 'protobuf-java-util', version: protobufVersion
+    implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+    implementation group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart', version: jerseyCoreVersion
+    implementation group: 'io.swagger.core.v3', name: 'swagger-jaxrs2-jakarta', version: swaggerCoreVersion
+    implementation group: 'javax.xml.bind', name: 'jaxb-api', version: javaxXmlBindJaxbApiVersion
+    implementation group: 'org.openapitools', name: 'jackson-databind-nullable', version: "$jacksonDatabindNullable"
 
-  implementation project(':auth-connector')
-  implementation (project(':audit-connector')) {
-    transitive = false;
-  }
-  implementation project(':datalake-dr-connector')
-  implementation project(':cluster-dns-connector')
-  implementation project(':sdx-connector')
-  implementation project(':auth-distributor-connector')
-  implementation project(':metering-connector')
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: assertjVersion
+    testImplementation project(path: ':common', configuration: 'tests')
 
+    implementation project(':auth-connector')
+    implementation(project(':audit-connector')) {
+        transitive = false;
+    }
+    implementation project(':datalake-dr-connector')
+    implementation project(':cluster-dns-connector')
+    implementation project(':sdx-connector')
+    implementation project(':auth-distributor-connector')
+    implementation project(':metering-connector')
+
+}
+
+compileJava.dependsOn tasks.openApiGenerate
+
+sourceSets {
+    main {
+        java.srcDirs += "${projectDir}/src/generated/src/main/java"
+    }
 }

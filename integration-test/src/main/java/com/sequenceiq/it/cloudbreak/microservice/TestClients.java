@@ -86,6 +86,7 @@ public class TestClients {
             FreeIpaClient freeIpaClient = createFreeipaClient(cloudbreakUser);
             EnvironmentClient environmentClient = createEnvironmentClient(cloudbreakUser);
             SdxClient sdxClient = createSdxClient(cloudbreakUser);
+            ExternalizedComputeClusterClient externalizedComputeClusterClient = createExternalizedComputeClusterClient(cloudbreakUser);
             UmsClient umsClient = createUmsClient();
             AuthDistributorClient authDistributorClient = createAuthDistributorClient();
             RedbeamsClient redbeamsClient = createRedbeamsClient(cloudbreakUser);
@@ -96,12 +97,13 @@ public class TestClients {
                     EnvironmentClient.class, environmentClient,
                     SdxClient.class, sdxClient,
                     RedbeamsClient.class, redbeamsClient,
+                    ExternalizedComputeClusterClient.class, externalizedComputeClusterClient,
                     UmsClient.class, umsClient,
                     AuthDistributorClient.class, authDistributorClient,
                     PeriscopeClient.class, periscopeClient);
             clients.put(cloudbreakUser.getAccessKey(), clientMap);
             LOGGER.info(" Microservice clients have been initialized successfully for account: \nDisplay name: {} \nAccess key: {} \nSecret key: {} " +
-                    "\nCrn: {} \nAdmin: {}", cloudbreakUser.getDisplayName(), cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey(),
+                            "\nCrn: {} \nAdmin: {}", cloudbreakUser.getDisplayName(), cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey(),
                     cloudbreakUser.getCrn(), cloudbreakUser.getAdmin());
         }
     }
@@ -132,6 +134,10 @@ public class TestClients {
     private SdxClient createSdxClient(CloudbreakUser cloudbreakUser) {
         return new SdxClient(cloudbreakUser, serverProperties.getSdxAddress(), serverProperties.getSdxInternalAddress(),
                 regionAwareInternalCrnGeneratorFactory.iam());
+    }
+
+    private ExternalizedComputeClusterClient createExternalizedComputeClusterClient(CloudbreakUser cloudbreakUser) {
+        return new ExternalizedComputeClusterClient(cloudbreakUser, serverProperties.getExternalizedComputeAddress());
     }
 
     private UmsClient createUmsClient() {
