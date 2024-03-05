@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.azure.connector.resource;
 
+import static com.azure.resourcemanager.postgresql.models.ServerState.DISABLED;
+import static com.azure.resourcemanager.postgresql.models.ServerState.DROPPING;
+import static com.azure.resourcemanager.postgresql.models.ServerState.INACCESSIBLE;
+import static com.azure.resourcemanager.postgresql.models.ServerState.READY;
 import static com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView.DB_VERSION;
 import static com.sequenceiq.common.api.type.ResourceType.ARM_TEMPLATE;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE;
@@ -22,7 +26,6 @@ import org.springframework.stereotype.Service;
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerState;
 import com.azure.resourcemanager.resources.models.Deployment;
-import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDatabaseTemplateBuilder;
@@ -32,6 +35,8 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.ResourceGroupUsage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureFlexibleServerClient;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureSingleServerClient;
 import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTransientDeploymentService;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureFlexibleServerPermissionValidator;
@@ -70,7 +75,15 @@ public class AzureDatabaseResourceService {
             ServerState.STOPPING, ExternalDatabaseStatus.STOP_IN_PROGRESS,
             ServerState.STOPPED, ExternalDatabaseStatus.STOPPED,
             ServerState.STARTING, ExternalDatabaseStatus.START_IN_PROGRESS,
-            ServerState.UPDATING, ExternalDatabaseStatus.UPDATE_IN_PROGRESS);
+            ServerState.UPDATING, ExternalDatabaseStatus.UPDATE_IN_PROGRESS,
+            AzureFlexibleServerClient.UNKNOWN, ExternalDatabaseStatus.UNKNOWN);
+
+    private static final Map<com.azure.resourcemanager.postgresql.models.ServerState, ExternalDatabaseStatus> SINGLESERVER_STATE_MAP = Map.of(
+            DISABLED, ExternalDatabaseStatus.DELETED,
+            READY, ExternalDatabaseStatus.STARTED,
+            DROPPING, ExternalDatabaseStatus.DELETE_IN_PROGRESS,
+            INACCESSIBLE, ExternalDatabaseStatus.UNKNOWN,
+            AzureSingleServerClient.UNKNOWN, ExternalDatabaseStatus.UNKNOWN);
 
     @Inject
     private AzureDatabaseTemplateBuilder azureDatabaseTemplateBuilder;
@@ -311,30 +324,37 @@ public class AzureDatabaseResourceService {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
-
         try {
-            AzureDatabaseServerView databaseServerView = new AzureDatabaseServerView(stack.getDatabaseServer());
-            if (databaseServerView.getAzureDatabaseType() == AzureDatabaseType.FLEXIBLE_SERVER) {
-                LOGGER.debug("Getting flexible server status from Azure for {} database", databaseServerView.getDbServerName());
-                return convertFlexibleStatus(
-                        client.getFlexibleServerClient().getFlexibleServerStatus(resourceGroupName, stack.getDatabaseServer().getServerId()));
-            } else {
-                LOGGER.debug("Checking single server existance on Azure for {} database", databaseServerView.getDbServerName());
-                ResourceGroup resourceGroup = client.getResourceGroup(resourceGroupName);
-                if (resourceGroup == null) {
-                    LOGGER.debug("Resource group for {} is null", resourceGroupName);
-                    return ExternalDatabaseStatus.DELETED;
-                }
-                return ExternalDatabaseStatus.STARTED;
-            }
+            return getExternalDatabaseStatus(stack, client, resourceGroupName);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             throw new CloudConnectorException(e);
         }
     }
 
+    private ExternalDatabaseStatus getExternalDatabaseStatus(DatabaseStack stack, AzureClient client, String resourceGroupName) {
+        AzureDatabaseServerView databaseServerView = new AzureDatabaseServerView(stack.getDatabaseServer());
+        if (databaseServerView.getAzureDatabaseType() == AzureDatabaseType.FLEXIBLE_SERVER) {
+            LOGGER.debug("Getting flexible server status from Azure for {} database", databaseServerView.getDbServerName());
+            return convertFlexibleStatus(
+                    client.getFlexibleServerClient().getFlexibleServerStatus(resourceGroupName, stack.getDatabaseServer().getServerId()));
+        } else {
+            LOGGER.debug("Getting single server status from Azure for {} database", databaseServerView.getDbServerName());
+            return convertSingleStatus(
+                    client.getSingleServerClient().getSingleServerStatus(resourceGroupName, stack.getDatabaseServer().getServerId()));
+        }
+    }
+
     private ExternalDatabaseStatus convertFlexibleStatus(ServerState serverState) {
-        return Optional.ofNullable(serverState).map(FLEXIBLESERVER_STATE_MAP::get).orElse(ExternalDatabaseStatus.DELETED);
+        return Optional.ofNullable(serverState)
+                .map(state -> FLEXIBLESERVER_STATE_MAP.getOrDefault(state, ExternalDatabaseStatus.UNKNOWN))
+                .orElse(ExternalDatabaseStatus.DELETED);
+    }
+
+    private ExternalDatabaseStatus convertSingleStatus(com.azure.resourcemanager.postgresql.models.ServerState serverState) {
+        return Optional.ofNullable(serverState)
+                .map(state -> SINGLESERVER_STATE_MAP.getOrDefault(state, ExternalDatabaseStatus.UNKNOWN))
+                .orElse(ExternalDatabaseStatus.DELETED);
     }
 
     public String getDBStackTemplate(DatabaseStack databaseStack) {
@@ -372,7 +392,7 @@ public class AzureDatabaseResourceService {
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(authenticatedContext.getCloudContext(), databaseStack);
         try {
             LOGGER.info("Update default admin user password for database: {}", serverName);
-            client.updateAdministratorLoginPassword(resourceGroupName, serverName, newPassword);
+            client.getSingleServerClient().updateAdministratorLoginPassword(resourceGroupName, serverName, newPassword);
             LOGGER.info("Default admin user password updated for database: {}", serverName);
         } catch (Exception e) {
             LOGGER.warn("Update default admin user password failed for database: {}, reason: {}", serverName, e.getMessage());

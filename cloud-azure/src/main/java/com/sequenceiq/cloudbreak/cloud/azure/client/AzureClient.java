@@ -1099,16 +1099,6 @@ public class AzureClient {
         });
     }
 
-    public void updateAdministratorLoginPassword(String resourceGroupName, String serverName, String newPassword) {
-        handleException(() -> {
-            postgreSqlManager.servers()
-                    .getByResourceGroup(resourceGroupName, serverName)
-                    .update()
-                    .withAdministratorLoginPassword(newPassword)
-                    .apply();
-        });
-    }
-
     public String getServicePrincipalId() {
         return azure.accessManagement().servicePrincipals().getByName(azureClientFactory.getAccessKey()).id();
     }
@@ -1119,6 +1109,10 @@ public class AzureClient {
 
     public List<RoleAssignment> listRoleAssignmentsByServicePrincipal(String servicePrincipalId) {
         return azureListResultFactory.create(getRoleAssignments().listByServicePrincipal(servicePrincipalId)).getAll();
+    }
+
+    public AzureSingleServerClient getSingleServerClient() {
+        return new AzureSingleServerClient(postgreSqlManager, azureExceptionHandler);
     }
 
     public AzureFlexibleServerClient getFlexibleServerClient() {

@@ -15,6 +15,10 @@ public abstract class AbstractAzureServiceClient {
         return azureExceptionHandler.handleException(function);
     }
 
+    protected <T> T handleException(Supplier<T> function, T defaultValue) {
+        return azureExceptionHandler.handleException(function, defaultValue);
+    }
+
     protected void handleException(Runnable function) {
         azureExceptionHandler.handleException(function);
     }
