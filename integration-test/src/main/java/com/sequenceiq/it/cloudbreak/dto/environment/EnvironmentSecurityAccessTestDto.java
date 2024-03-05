@@ -22,8 +22,8 @@ public class EnvironmentSecurityAccessTestDto extends AbstractCloudbreakTestDto<
         return getCloudProvider().environmentSecurityAccess(this);
     }
 
-    public EnvironmentSecurityAccessTestDto withCidr(String publicKey) {
-        getRequest().setCidr(publicKey);
+    public EnvironmentSecurityAccessTestDto withCidr(String cidrNotation) {
+        getRequest().setCidr(cidrNotation);
         return this;
     }
 

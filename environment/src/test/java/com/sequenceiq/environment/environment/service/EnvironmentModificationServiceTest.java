@@ -24,6 +24,7 @@ import java.util.UUID;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -905,6 +906,8 @@ class EnvironmentModificationServiceTest {
                 .build();
         Environment environment = new Environment();
         environment.setAccountId(ACCOUNT_ID);
+        when(environmentDtoConverter.environmentToDto(environment)).thenReturn(EnvironmentDto.builder().build());
+        when(environmentFlowValidatorService.validateEnvironmentDataServices(any())).thenReturn(ValidationResult.builder().build());
 
         environmentModificationServiceUnderTest.edit(environment, environmentDto);
 
@@ -914,6 +917,31 @@ class EnvironmentModificationServiceTest {
         assertThat(saved.getDataServices()).isNotNull();
         assertThat(saved.getDataServices().azure()).isNotNull();
         assertThat(saved.getDataServices().azure().sharedManagedIdentity()).isEqualTo(newIdentity);
+    }
+
+    @Test
+    void editDataServicesShouldThrowBadRequestExceptionWhenDataServicesIsNotValid() {
+        String newIdentity = "newIdentity";
+        AzureDataServiceParameters azureDataServiceParams = AzureDataServiceParameters.builder()
+                .withSharedManagedIdentity(newIdentity)
+                .build();
+        EnvironmentDataServices dataServices = EnvironmentDataServices.builder().withAzure(azureDataServiceParams).build();
+        EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withDataServices(dataServices)
+                .build();
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+        when(environmentDtoConverter.environmentToDto(environment)).thenReturn(EnvironmentDto.builder().build());
+        ValidationResult validationResult = ValidationResult.builder()
+                .error("The custom docker registry CRN is not valid for example")
+                .build();
+        when(environmentFlowValidatorService.validateEnvironmentDataServices(any())).thenReturn(validationResult);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> environmentModificationServiceUnderTest.edit(environment, environmentDto));
+
+        Assertions.assertEquals("The custom docker registry CRN is not valid for example", badRequestException.getMessage());
     }
 
     private Environment environmentMock() {

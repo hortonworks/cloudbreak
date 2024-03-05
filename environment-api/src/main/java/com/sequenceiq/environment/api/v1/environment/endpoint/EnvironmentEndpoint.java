@@ -111,7 +111,7 @@ public interface EnvironmentEndpoint {
     @Operation(summary = EnvironmentOpDescription.EDIT_BY_NAME, description = ENVIRONMENT_NOTES,
             operationId = "editEnvironmentV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    DetailedEnvironmentResponse editByName(@PathParam("name") String environmentName, @NotNull EnvironmentEditRequest request);
+    DetailedEnvironmentResponse editByName(@PathParam("name") String environmentName, @NotNull @Valid EnvironmentEditRequest request);
 
     @GET
     @Path("")
@@ -204,7 +204,7 @@ public interface EnvironmentEndpoint {
             operationId = "editEnvironmentV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DetailedEnvironmentResponse editByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
-            @NotNull EnvironmentEditRequest request);
+            @NotNull @Valid EnvironmentEditRequest request);
 
     @PUT
     @Path("/crn/{crn}/change_credential")

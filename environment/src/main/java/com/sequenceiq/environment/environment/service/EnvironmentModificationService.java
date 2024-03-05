@@ -490,11 +490,7 @@ public class EnvironmentModificationService {
 
     private void validateAwsParameters(Environment environment, ParametersDto parametersDto) {
         if (parametersDto.getAwsParametersDto() != null) {
-            EnvironmentDto environmentDto = environmentDtoConverter.environmentToDto(environment);
-            EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder()
-                    .withEnvironmentDto(environmentDto)
-                    .withValidationType(ValidationType.ENVIRONMENT_EDIT)
-                    .build();
+            EnvironmentValidationDto environmentValidationDto = getEnvironmentValidationDto(environment);
             ValidationResult validationResult = environmentFlowValidatorService
                     .validateParameters(environmentValidationDto, parametersDto);
             if (validationResult.hasError()) {
@@ -517,7 +513,19 @@ public class EnvironmentModificationService {
         EnvironmentDataServices dataServices = editDto.getDataServices();
         if (dataServices != null) {
             environment.setDataServices(dataServices);
+            EnvironmentValidationDto environmentValidationDto = getEnvironmentValidationDto(environment);
+            ValidationResult validationResult = environmentFlowValidatorService.validateEnvironmentDataServices(environmentValidationDto);
+            if (validationResult.hasError()) {
+                throw new BadRequestException(validationResult.getFormattedErrors());
+            }
         }
     }
 
+    private EnvironmentValidationDto getEnvironmentValidationDto(Environment environment) {
+        EnvironmentDto environmentDto = environmentDtoConverter.environmentToDto(environment);
+        return EnvironmentValidationDto.builder()
+                .withEnvironmentDto(environmentDto)
+                .withValidationType(ValidationType.ENVIRONMENT_EDIT)
+                .build();
+    }
 }

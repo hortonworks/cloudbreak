@@ -201,7 +201,7 @@ public class EnvironmentEditTest extends AbstractMockTest {
                 .await(EnvironmentStatus.AVAILABLE)
 
                 .given(EnvironmentSecurityAccessTestDto.class)
-                .withCidr("cidr")
+                .withCidr("151.151.0.0/16")
                 .given(EnvironmentTestDto.class)
                 .withSecurityAccess()
                 .whenException(environmentTestClient.changeSecurityAccess(), BadRequestException.class,
@@ -209,6 +209,25 @@ public class EnvironmentEditTest extends AbstractMockTest {
                                 "1. Please add the default or knox security groups, we cannot edit with empty value.\n" +
                                 "2. The CIDR can be replaced with the default and knox security groups, please add to the request\n" +
                                 "3. The CIDR could not be updated in the environment"))
+
+                .given(EnvironmentSecurityAccessTestDto.class)
+                .withCidr("10.blahblah")
+                .given(EnvironmentTestDto.class)
+                .withSecurityAccess()
+                .whenException(environmentTestClient.changeSecurityAccess(), BadRequestException.class,
+                        expectedMessage(
+                                "The format of the CIDR is not accepted."))
+
+                .given(EnvironmentSecurityAccessTestDto.class)
+                .withCidr("10.")
+                .given(EnvironmentTestDto.class)
+                .withSecurityAccess()
+                .whenException(environmentTestClient.changeSecurityAccess(), BadRequestException.class,
+                        expectedMessage(
+                                "^More than one validation errors happened: \\n" +
+                                "(The format of the CIDR is not accepted.\\nThe list of CIDRs must consist of characters between 5 and 4000|" +
+                                "The list of CIDRs must consist of characters between 5 and 4000\\nThe format of the CIDR is not accepted\\.)+$"))
+
                 .validate();
     }
 }

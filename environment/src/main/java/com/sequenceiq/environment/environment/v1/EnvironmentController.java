@@ -284,7 +284,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
-    public DetailedEnvironmentResponse editByName(@ResourceName String environmentName, @NotNull EnvironmentEditRequest request) {
+    public DetailedEnvironmentResponse editByName(@ResourceName String environmentName, @NotNull @Valid EnvironmentEditRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Environment environment = environmentModificationService.getEnvironment(accountId, NameOrCrn.ofName(environmentName));
         EnvironmentEditDto editDto = environmentApiConverter.initEditDto(environment, request);
@@ -295,7 +295,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
     public DetailedEnvironmentResponse editByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn,
-            @NotNull EnvironmentEditRequest request) {
+            @NotNull @Valid EnvironmentEditRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Environment environment = environmentModificationService.getEnvironment(accountId, NameOrCrn.ofCrn(crn));
         EnvironmentEditDto editDto = environmentApiConverter.initEditDto(environment, request);
