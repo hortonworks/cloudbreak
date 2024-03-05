@@ -32,14 +32,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import com.azure.core.http.rest.PagedIterable;
 import com.azure.resourcemanager.compute.models.VirtualMachineSize;
 import com.azure.resourcemanager.msi.models.Identity;
 import com.azure.resourcemanager.network.models.Network;
 import com.azure.resourcemanager.network.models.NetworkSecurityGroup;
 import com.azure.resourcemanager.network.models.Subnet;
 import com.azure.resourcemanager.privatedns.models.PrivateDnsZone;
-import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.google.common.base.Splitter;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -90,6 +88,10 @@ public class AzurePlatformResources implements PlatformResources {
 
     private static final int NO_RESOURCE_DISK_ATTACHED_TO_INSTANCE = 0;
 
+    private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> AZURE_ENABLED_TYPES_LIST.stream()
+            .filter(it -> !it.isEmpty())
+            .anyMatch(di -> vmt.value().equals(di));
+
     @Value("${cb.azure.default.max.disk.size:32767}")
     private int maxDiskSize;
 
@@ -98,10 +100,6 @@ public class AzurePlatformResources implements PlatformResources {
 
     @Value("${distrox.restrict.instance.types:true}")
     private boolean restrictInstanceTypes;
-
-    private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> AZURE_ENABLED_TYPES_LIST.stream()
-            .filter(it -> !it.isEmpty())
-            .anyMatch(di -> vmt.value().equals(di));
 
     @Inject
     private AzureClientService azureClientService;
@@ -207,7 +205,7 @@ public class AzurePlatformResources implements PlatformResources {
             NetworkSecurityGroup networkSecurityGroup = getNetworkSecurityGroup(client, groupId);
             convertAndAddToResult(region, result, networkSecurityGroup);
         } else {
-            for (NetworkSecurityGroup securityGroup : client.getSecurityGroups().list()) {
+            for (NetworkSecurityGroup securityGroup : client.getSecurityGroupsList().getAll()) {
                 convertAndAddToResult(region, result, securityGroup);
             }
         }
@@ -245,7 +243,7 @@ public class AzurePlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
     public CloudRegions regions(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters,
-                                boolean availabilityZonesNeeded) {
+            boolean availabilityZonesNeeded) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Collection<com.azure.core.management.Region> azureRegions = client.getRegion(region);
         return azureRegionProvider.regions(region, azureRegions, cloudCredential.getEntitlements());
@@ -381,8 +379,10 @@ public class AzurePlatformResources implements PlatformResources {
 
     @Override
     public CloudResourceGroups resourceGroups(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        PagedIterable<ResourceGroup> resourceGroupPagedList = azureClientService.getClient(cloudCredential).getResourceGroups().list();
-        List<CloudResourceGroup> resourceGroups = resourceGroupPagedList.stream().map(rg -> new CloudResourceGroup(rg.name())).collect(Collectors.toList());
+        List<CloudResourceGroup> resourceGroups = azureClientService.getClient(cloudCredential).getResourceGroups()
+                .getStream()
+                .map(rg -> new CloudResourceGroup(rg.name()))
+                .collect(Collectors.toList());
         return new CloudResourceGroups(resourceGroups);
     }
 

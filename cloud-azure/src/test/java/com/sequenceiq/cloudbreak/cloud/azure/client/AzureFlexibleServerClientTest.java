@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -12,12 +14,14 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 
 import com.azure.core.http.HttpResponse;
 import com.azure.core.http.rest.PagedIterable;
@@ -45,8 +49,20 @@ class AzureFlexibleServerClientTest {
     @Mock
     private PostgreSqlManager postgreSqlFlexibleManager;
 
+    @Mock
+    private AzureListResultFactory azureListResultFactory;
+
     @InjectMocks
     private AzureFlexibleServerClient underTest;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(azureListResultFactory.create(any())).thenAnswer((Answer<AzureListResult>) invocationOnMock -> {
+            PagedIterable pagedIterable = invocationOnMock.getArgument(0, PagedIterable.class);
+            return new AzureListResult(pagedIterable, azureExceptionHandler);
+        });
+        lenient().when(azureListResultFactory.list(any())).thenCallRealMethod();
+    }
 
     @Test
     void testStartFlexibleServer() {

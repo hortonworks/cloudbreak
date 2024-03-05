@@ -44,7 +44,6 @@ import com.azure.resourcemanager.compute.models.PolicyViolation;
 import com.azure.resourcemanager.network.models.Subnet;
 import com.azure.resourcemanager.resources.models.Deployment;
 import com.azure.resourcemanager.resources.models.DeploymentOperation;
-import com.azure.resourcemanager.resources.models.DeploymentOperations;
 import com.azure.resourcemanager.resources.models.GenericResource;
 import com.google.common.base.Splitter;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -130,15 +129,6 @@ public class AzureUtils {
     @Inject
     private AzureExceptionHandler azureExceptionHandler;
 
-    public CloudResource getTemplateResource(Iterable<CloudResource> resourceList) {
-        for (CloudResource resource : resourceList) {
-            if (resource.getType() == ResourceType.ARM_TEMPLATE) {
-                return resource;
-            }
-        }
-        throw new CloudConnectorException(String.format("No resource found: %s", ResourceType.ARM_TEMPLATE));
-    }
-
     public static String getGroupName(String group) {
         String shortened = WordUtils.initials(group.replaceAll("_", " ")).toLowerCase(Locale.ROOT);
         return shortened.length() <= HOST_GROUP_LENGTH ? shortened : shortened.substring(0, HOST_GROUP_LENGTH);
@@ -154,10 +144,6 @@ public class AzureUtils {
         sb.delete(j, sb.length());
     }
 
-    public String getFullInstanceId(String stackName, String groupName, String privateId, String dbId) {
-        return stackName + getInstanceIdWithoutStackName(groupName, privateId, dbId);
-    }
-
     public static String getInstanceIdWithoutStackName(String groupName, String privateId, String dbId) {
         if (dbId != null) {
             return String.format("%s%s-%s", getGroupName(groupName), privateId,
@@ -165,6 +151,19 @@ public class AzureUtils {
         } else {
             return String.format("%s%s", getGroupName(groupName), privateId);
         }
+    }
+
+    public CloudResource getTemplateResource(Iterable<CloudResource> resourceList) {
+        for (CloudResource resource : resourceList) {
+            if (resource.getType() == ResourceType.ARM_TEMPLATE) {
+                return resource;
+            }
+        }
+        throw new CloudConnectorException(String.format("No resource found: %s", ResourceType.ARM_TEMPLATE));
+    }
+
+    public String getFullInstanceId(String stackName, String groupName, String privateId, String dbId) {
+        return stackName + getInstanceIdWithoutStackName(groupName, privateId, dbId);
     }
 
     public String getStackName(CloudContext cloudContext) {
@@ -190,8 +189,8 @@ public class AzureUtils {
         if (ResourceStatus.FAILED.equals(resourceStatus)) {
             LOGGER.debug("Cloud resource status: {}", resourceStatus);
             try {
-                DeploymentOperations templateDeploymentOperations = access.getTemplateDeploymentOperations(stackName, stackName);
-                for (DeploymentOperation deploymentOperation : templateDeploymentOperations.list()) {
+                List<DeploymentOperation> templateDeploymentOperations = access.getTemplateDeploymentOperations(stackName, stackName).getAll();
+                for (DeploymentOperation deploymentOperation : templateDeploymentOperations) {
 
                     if ("Failed".equals(deploymentOperation.provisioningState())) {
                         String statusMessage = (String) deploymentOperation.statusMessage();

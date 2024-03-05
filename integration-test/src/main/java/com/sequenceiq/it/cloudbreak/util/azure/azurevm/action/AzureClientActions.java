@@ -79,7 +79,7 @@ public class AzureClientActions {
 
     public List<String> listInstanceTypes(String clusterName, List<String> instanceIds) {
         return instanceIds.stream().map(
-                id ->  {
+                id -> {
                     String resourceGroup = getResourceGroupName(clusterName, id);
                     return Optional.ofNullable(azure.virtualMachines()).orElseThrow()
                             .getByResourceGroup(resourceGroup, id).size().toString().toLowerCase(Locale.ROOT);
@@ -255,9 +255,9 @@ public class AzureClientActions {
         if (!instanceIds.isEmpty()) {
             String resourceGroup = getResourceGroupName(clusterName, instanceIds.get(0));
             List<VirtualMachine> virtualMachines = getVmList(instanceIds, resourceGroup);
-            availabilityZoneForVms = virtualMachines.stream().collect(Collectors.toMap(VirtualMachine::name,
-                    vm -> vm.availabilityZones().stream().
-                    map(AvailabilityZoneId::toString).collect(Collectors.toSet())));
+            availabilityZoneForVms = virtualMachines.stream()
+                    .collect(Collectors.toMap(VirtualMachine::name,
+                            vm -> vm.availabilityZones().stream().map(AvailabilityZoneId::toString).collect(Collectors.toSet())));
             LOGGER.info("Availability zones for Vms are {}", availabilityZoneForVms);
             LOGGER.info("Fetching availability zones for instances finished successfully");
         } else {

@@ -80,7 +80,7 @@ class SaltJobIdTrackerTest {
                 .isInstanceOf(CloudbreakOrchestratorInProgressException.class);
         verify(saltStateService).jobIsRunning(any(), eq(jobId));
         checkTargets(targets, targetCaptor.getAllValues());
-        verify(saltJobRunner, times(2)).getJobState();
+        verify(saltJobRunner, times(3)).getJobState();
         verify(saltJobRunner, times(2)).setJobState(JobState.IN_PROGRESS);
     }
 

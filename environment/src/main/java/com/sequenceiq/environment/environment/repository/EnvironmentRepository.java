@@ -48,11 +48,11 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
     Set<Environment> findAllByIdNotArchived(@Param("ids") List<Long> ids);
 
     @Query("SELECT e.resourceCrn FROM Environment e WHERE e.deletionTimestamp > :date AND e.archived = true")
-    Set<String> findAllArchivedAndDeletionOlderThan(Long date);
+    Set<String> findAllArchivedAndDeletionOlderThan(@Param("date") Long date);
 
     @Modifying
     @Query("DELETE FROM Environment e WHERE e.resourceCrn = :crn AND e.archived = true")
-    void deleteByResourceCrn(String crn);
+    void deleteByResourceCrn(@Param("crn") String crn);
 
     @Modifying
     @Query(value = "DELETE FROM environment_network e WHERE e.environment_id = :environmentId", nativeQuery = true)

@@ -26,7 +26,6 @@ import com.azure.resourcemanager.resources.models.Subscription;
 import com.azure.resourcemanager.storage.fluent.models.StorageAccountInner;
 import com.azure.resourcemanager.storage.models.Kind;
 import com.azure.resourcemanager.storage.models.StorageAccount;
-import com.azure.resourcemanager.storage.models.StorageAccounts;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureStorageAccountBuilderService;
@@ -193,8 +192,8 @@ public class AzureStorage {
 
     private Optional<StorageAccount> findStorageAccount(AzureClient client, String storageName) {
         try {
-            StorageAccounts storageAccounts = client.getStorageAccounts();
-            for (StorageAccount account : storageAccounts.list()) {
+            List<StorageAccount> storageAccounts = client.getStorageAccounts().getAll();
+            for (StorageAccount account : storageAccounts) {
                 if (account.name().equals(storageName)) {
                     return Optional.of(account);
                 }

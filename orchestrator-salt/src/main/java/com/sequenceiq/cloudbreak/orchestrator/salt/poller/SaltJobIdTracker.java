@@ -68,7 +68,7 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
         }
         if (JobState.IN_PROGRESS.equals(saltJobRunner.getJobState())) {
             String errorMessage = buildErrorMessage();
-            LOGGER.warn(String.format("Job: %s is running currently. Details: %s", saltJobRunner.getJid(), errorMessage));
+            LOGGER.info(String.format("Job: %s is running currently. Details: %s", saltJobRunner.getJid(), errorMessage));
             throw new CloudbreakOrchestratorInProgressException(errorMessage, saltJobRunner.getNodesWithError());
         }
         if (JobState.FAILED == saltJobRunner.getJobState() || JobState.AMBIGUOUS == saltJobRunner.getJobState()) {
@@ -113,7 +113,9 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
     private String buildErrorMessage() {
         String jobId = saltJobRunner.getJid().getJobId();
         StringBuilder errorMessageBuilder = new StringBuilder();
-        LOGGER.warn(String.format("There are missing nodes from job (jid: %s), target: %s", jobId, saltJobRunner.getTargetHostnames()));
+        if (JobState.FAILED == saltJobRunner.getJobState()) {
+            LOGGER.warn(String.format("There are missing nodes from job (jid: %s), target: %s", jobId, saltJobRunner.getTargetHostnames()));
+        }
         errorMessageBuilder.append(String.format("Target: %s", saltJobRunner.getTargetHostnames()));
         if (saltJobRunner.getNodesWithError() != null) {
             for (String host : saltJobRunner.getNodesWithError().keySet()) {

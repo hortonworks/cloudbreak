@@ -79,6 +79,7 @@ import com.azure.resourcemanager.network.models.LoadBalancingRule;
 import com.azure.resourcemanager.network.models.Network;
 import com.azure.resourcemanager.network.models.NetworkInterface;
 import com.azure.resourcemanager.network.models.NetworkInterfaces;
+import com.azure.resourcemanager.network.models.NetworkSecurityGroup;
 import com.azure.resourcemanager.network.models.NetworkSecurityGroups;
 import com.azure.resourcemanager.network.models.PublicIpAddress;
 import com.azure.resourcemanager.network.models.Subnet;
@@ -92,18 +93,16 @@ import com.azure.resourcemanager.resources.fluentcore.arm.AvailabilityZoneId;
 import com.azure.resourcemanager.resources.fluentcore.model.HasInnerModel;
 import com.azure.resourcemanager.resources.models.Deployment;
 import com.azure.resourcemanager.resources.models.DeploymentMode;
-import com.azure.resourcemanager.resources.models.DeploymentOperations;
+import com.azure.resourcemanager.resources.models.DeploymentOperation;
 import com.azure.resourcemanager.resources.models.DeploymentWhatIf;
 import com.azure.resourcemanager.resources.models.DeploymentWhatIfProperties;
 import com.azure.resourcemanager.resources.models.GenericResource;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
-import com.azure.resourcemanager.resources.models.ResourceGroups;
 import com.azure.resourcemanager.resources.models.Subscription;
 import com.azure.resourcemanager.storage.fluent.models.StorageAccountInner;
 import com.azure.resourcemanager.storage.models.Kind;
 import com.azure.resourcemanager.storage.models.StorageAccount;
 import com.azure.resourcemanager.storage.models.StorageAccountKey;
-import com.azure.resourcemanager.storage.models.StorageAccounts;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobClientBuilder;
 import com.azure.storage.blob.BlobContainerClient;
@@ -173,25 +172,21 @@ public class AzureClient {
         this.azureListResultFactory = azureListResultFactory;
     }
 
-    public AzureResourceManager getAzure() {
-        return azure;
-    }
-
     public ResourceGroup getResourceGroup(String name) {
         return handleException(() -> azure.resourceGroups().getByName(name));
     }
 
-    public ResourceGroups getResourceGroups() {
-        return handleException(azure::resourceGroups);
+    public AzureListResult<ResourceGroup> getResourceGroups() {
+        return azureListResultFactory.list(azure.resourceGroups());
     }
 
     public AzureListResult<Network> getNetworks() {
-        return handleException(() -> azureListResultFactory.create(azure.networks().list()));
+        return azureListResultFactory.list(azure.networks());
     }
 
     public boolean resourceGroupExists(String name) {
         try {
-            return getResourceGroups().contain(name);
+            return handleException(() -> azure.resourceGroups().contain(name));
         } catch (ManagementException e) {
             if (azureExceptionHandler.isForbidden(e)) {
                 LOGGER.info("Resource group {} does not exist or insufficient permission to access it", name, e);
@@ -253,12 +248,12 @@ public class AzureClient {
         return handleException(() -> azure.deployments().getByResourceGroup(resourceGroupName, deploymentName));
     }
 
-    public DeploymentOperations getTemplateDeploymentOperations(String resourceGroupName, String deploymentName) {
-        return handleException(() -> getTemplateDeployment(resourceGroupName, deploymentName).deploymentOperations());
+    public AzureListResult<DeploymentOperation> getTemplateDeploymentOperations(String resourceGroupName, String deploymentName) {
+        return azureListResultFactory.list(getTemplateDeployment(resourceGroupName, deploymentName).deploymentOperations());
     }
 
-    public StorageAccounts getStorageAccounts() {
-        return handleException(azure::storageAccounts);
+    public AzureListResult<StorageAccount> getStorageAccounts() {
+        return azureListResultFactory.list(azure.storageAccounts());
     }
 
     public StorageAccountKey getStorageAccountKey(String resourceGroup, String storageName) {
@@ -274,17 +269,16 @@ public class AzureClient {
     }
 
     public Optional<StorageAccount> getStorageAccount(String storageName, Kind accountKind) {
-        return handleException(() -> azure.storageAccounts().list().stream()
+        return azureListResultFactory.list(azure.storageAccounts())
+                .getStream()
                 .filter(account -> account.kind().equals(accountKind)
                         && account.name().equalsIgnoreCase(storageName))
-                .findAny());
+                .findAny();
     }
 
     public Optional<StorageAccountInner> getStorageAccountBySubscription(String storageName, String subscriptionId, Kind accountKind) {
-        return azureClientFactory.getAzureResourceManager(subscriptionId)
-                .storageAccounts()
-                .list()
-                .stream()
+        return azureListResultFactory.list(azureClientFactory.getAzureResourceManager(subscriptionId).storageAccounts())
+                .getStream()
                 .filter(account -> account.kind().equals(accountKind) && account.name().equalsIgnoreCase(storageName))
                 .map(HasInnerModel::innerModel)
                 .findAny();
@@ -665,6 +659,10 @@ public class AzureClient {
         return handleException(azure::networkSecurityGroups);
     }
 
+    public AzureListResult<NetworkSecurityGroup> getSecurityGroupsList() {
+        return azureListResultFactory.list(azure.networkSecurityGroups());
+    }
+
     public Set<VirtualMachineSize> getVmTypes(String region) throws ProviderAuthenticationFailedException {
         return handleException(() -> {
             Set<VirtualMachineSize> resultList = new HashSet<>();
@@ -696,13 +694,13 @@ public class AzureClient {
 
     /**
      * Returns the Frontends (frontend name + IP address) associated with a particular Load Balancer in a particular Azure Resource Group.
-     *
+     * <p>
      * Load balancer type is used to determine whether to return private or public IP addresses for the frontends, it's possible for a
      * load balancer to have both private and public IP addresses.
      *
      * @param resourceGroupName the name of the resource group containing the load balancer
-     * @param loadBalancerName the name of the load balancer
-     * @param loadBalancerType corresponds to load balancer IP address types to retrieve.
+     * @param loadBalancerName  the name of the load balancer
+     * @param loadBalancerType  corresponds to load balancer IP address types to retrieve.
      * @return Frontends (frontend name + IP addresses)
      */
     public List<AzureLoadBalancerFrontend> getLoadBalancerFrontends(String resourceGroupName, String loadBalancerName, LoadBalancerType loadBalancerType) {
@@ -754,7 +752,7 @@ public class AzureClient {
     }
 
     public AzureListResult<Identity> listIdentities() {
-        return handleException(() -> azureListResultFactory.list(azure.identities()));
+        return azureListResultFactory.list(azure.identities());
     }
 
     public List<Identity> listIdentitiesByRegion(String region) {
@@ -779,7 +777,7 @@ public class AzureClient {
     }
 
     public AzureListResult<RoleAssignment> listRoleAssignmentsByScope(String scope) {
-        return handleException(() -> azureListResultFactory.create(getRoleAssignments().listByScope(scope)));
+        return azureListResultFactory.create(getRoleAssignments().listByScope(scope));
     }
 
     public List<RoleAssignmentInner> listRoleAssignmentsByScopeInner(String scope) {
@@ -832,9 +830,8 @@ public class AzureClient {
     }
 
     public List<PrivateDnsZone> getPrivateDnsZoneListFromAllSubscriptions() {
-        return azure.subscriptions()
-                .list()
-                .stream()
+        return azureListResultFactory.list(azure.subscriptions())
+                .getStream()
                 .map(s -> getPrivateDnsZones(s.subscriptionId()))
                 .flatMap(AzureListResult::getStream)
                 .collect(Collectors.toList());
@@ -920,7 +917,7 @@ public class AzureClient {
     }
 
     private DiskEncryptionSetInner createDiskEncryptionSetInner(String sourceVaultId, String encryptionKeyUrl,
-        Optional<String> optionalManagedIdentity, String location, Map<String, String> tags) {
+            Optional<String> optionalManagedIdentity, String location, Map<String, String> tags) {
         SourceVault sourceVault = new SourceVault().withId(sourceVaultId);
         KeyForDiskEncryptionSet keyForDiskEncryptionSet = new KeyForDiskEncryptionSet().withKeyUrl(encryptionKeyUrl).withSourceVault(sourceVault);
         return new DiskEncryptionSetInner()
@@ -1119,11 +1116,11 @@ public class AzureClient {
     }
 
     public AzureSingleServerClient getSingleServerClient() {
-        return new AzureSingleServerClient(postgreSqlManager, azureExceptionHandler);
+        return new AzureSingleServerClient(postgreSqlManager, azureExceptionHandler, azureListResultFactory);
     }
 
     public AzureFlexibleServerClient getFlexibleServerClient() {
-        return new AzureFlexibleServerClient(postgreSqlFlexibleManager, azureExceptionHandler);
+        return new AzureFlexibleServerClient(postgreSqlFlexibleManager, azureExceptionHandler, azureListResultFactory);
     }
 
     public Optional<ManagementError> runWhatIfAnalysis(String resourceGroupName, String deploymentName, String template) {

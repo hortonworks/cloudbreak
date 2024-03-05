@@ -4,6 +4,7 @@ import java.util.concurrent.ExecutorService;
 
 import jakarta.inject.Inject;
 
+import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -52,11 +53,17 @@ public class AzureClientService {
     private AzureClient getClient(CloudContext cloudContext, AzureCredentialView credentialView) {
         AzureClientFactory azureClientFactory = new AzureClientFactory(cloudContext, credentialView, mdcCopyingThreadPoolExecutor,
                 azureHttpClientConfigurer);
-        return new AzureClient(azureClientFactory, azureExceptionHandler, azureListResultFactory);
+        return proxy(new AzureClient(azureClientFactory, azureExceptionHandler, azureListResultFactory));
     }
 
     private boolean credentialIsInKeyGeneratedStatus(AzureCredentialView credentialView) {
         return AppAuthenticationType.CERTIFICATE.name().equals(credentialView.getAuthenticationType())
                 && AppCertificateStatus.KEY_GENERATED.name().equals(credentialView.getStatus());
+    }
+
+    protected <T> T proxy(T client) {
+        AspectJProxyFactory proxyFactory = new AspectJProxyFactory(client);
+        proxyFactory.addAspect(new AzureClientExceptionHandler(azureExceptionHandler));
+        return proxyFactory.getProxy();
     }
 }

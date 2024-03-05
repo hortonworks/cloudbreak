@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -14,13 +13,16 @@ import java.util.List;
 
 import jakarta.ws.rs.BadRequestException;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 
-import com.microsoft.aad.msal4j.MsalServiceException;
+import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformDatabaseCapabilityRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformDatabaseCapabilityResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNoSqlTablesRequest;
@@ -45,6 +47,11 @@ class CloudParameterServiceTest {
 
     @InjectMocks
     private CloudParameterService underTest;
+
+    @BeforeEach
+    void setUp() {
+        when(eventFactory.createEvent(any())).then((Answer<Event>) invocationOnMock -> new Event(invocationOnMock.getArgument(0, CloudPlatformRequest.class)));
+    }
 
     @Test
     void getNoSqlTables() {
@@ -78,11 +85,9 @@ class CloudParameterServiceTest {
 
     @Test
     void getDatabaseCapabilitiesFailsWithAuthorizationError() {
-        MsalServiceException errorResponse = mock(MsalServiceException.class);
-        when(errorResponse.statusCode()).thenReturn(401);
         doAnswer(invocation -> {
             Event<GetPlatformDatabaseCapabilityRequest> ev = invocation.getArgument(1);
-            ev.getData().getResult().onNext(new GetPlatformDatabaseCapabilityResult("Unauthorized", errorResponse, 1L));
+            ev.getData().getResult().onNext(new GetPlatformDatabaseCapabilityResult("Unauthorized", new ProviderAuthenticationFailedException("error"), 1L));
             return null;
         }).when(eventBus).notify(anyString(), any(Event.class));
         assertThrows(BadRequestException.class, () -> underTest.getDatabaseCapabilities(
@@ -92,11 +97,9 @@ class CloudParameterServiceTest {
 
     @Test
     void getDatabaseCapabilitiesFailsWithTooManyRequestError() {
-        MsalServiceException errorResponse = mock(MsalServiceException.class);
-        when(errorResponse.statusCode()).thenReturn(427);
         doAnswer(invocation -> {
             Event<GetPlatformDatabaseCapabilityRequest> ev = invocation.getArgument(1);
-            ev.getData().getResult().onNext(new GetPlatformDatabaseCapabilityResult("Unauthorized", errorResponse, 1L));
+            ev.getData().getResult().onNext(new GetPlatformDatabaseCapabilityResult("Too many requests", new RuntimeException("error"), 1L));
             return null;
         }).when(eventBus).notify(anyString(), any(Event.class));
         assertThrows(GetCloudParameterException.class, () -> underTest.getDatabaseCapabilities(

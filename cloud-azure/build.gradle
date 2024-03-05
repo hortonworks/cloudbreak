@@ -40,6 +40,8 @@ dependencies {
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-marketplaceordering',      version: azureSdkResourceManagerMarketplaceVersion
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-datalakestore',            version: azureSdkResourceManagerDataLakeStoreVersion
 
+  implementation group: 'org.springframework',          name: 'spring-aspects',                             version: springFrameworkVersion
+
   implementation group: 'io.micrometer',                name: 'micrometer-core',                            version: micrometerVersion
 
   implementation group: 'javax.xml.bind',               name: 'jaxb-api',                                   version: javaxXmlBindJaxbApiVersion

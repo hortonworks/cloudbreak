@@ -21,16 +21,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.azure.core.http.rest.PagedIterable;
 import com.azure.resourcemanager.compute.models.OSDisk;
 import com.azure.resourcemanager.compute.models.StorageProfile;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.azure.resourcemanager.network.models.Subnet;
 import com.azure.resourcemanager.resources.models.Deployment;
-import com.azure.resourcemanager.resources.models.DeploymentOperation;
 import com.azure.resourcemanager.resources.models.TargetResource;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResultFactory;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -48,6 +47,9 @@ public class AzureCloudResourceService {
     @Inject
     private AzureUtils azureUtils;
 
+    @Inject
+    private AzureListResultFactory azureListResultFactory;
+
     public List<CloudResource> getNetworkResources(List<CloudResource> resources) {
         return resources.stream()
                 .filter(cloudResource -> List.of(
@@ -64,8 +66,8 @@ public class AzureCloudResourceService {
     }
 
     public List<CloudResource> getDeploymentCloudResources(Deployment templateDeployment) {
-        PagedIterable<DeploymentOperation> operations = templateDeployment.deploymentOperations().list();
-        List<CloudResource> resourceList = operations.stream()
+        List<CloudResource> resourceList = azureListResultFactory.list(templateDeployment.deploymentOperations())
+                .getStream()
                 .filter(Predicate.not(Predicate.isEqual(null)))
                 .filter(deploymentOperation -> Objects.nonNull(deploymentOperation.targetResource())
                         && StringUtils.isNotBlank(deploymentOperation.provisioningState()))

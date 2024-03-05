@@ -19,14 +19,16 @@ import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 
 public class AzureFlexibleServerClient extends AbstractAzureServiceClient {
+
     public static final ServerState UNKNOWN = ServerState.fromString("UNKNOWN");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureFlexibleServerClient.class);
 
     private final PostgreSqlManager postgreSqlFlexibleManager;
 
-    public AzureFlexibleServerClient(PostgreSqlManager postgreSqlFlexibleManager, AzureExceptionHandler azureExceptionHandler) {
-        super(azureExceptionHandler);
+    public AzureFlexibleServerClient(PostgreSqlManager postgreSqlFlexibleManager, AzureExceptionHandler azureExceptionHandler,
+            AzureListResultFactory azureListResultFactory) {
+        super(azureExceptionHandler, azureListResultFactory);
         this.postgreSqlFlexibleManager = postgreSqlFlexibleManager;
     }
 
@@ -59,14 +61,14 @@ public class AzureFlexibleServerClient extends AbstractAzureServiceClient {
 
     private Optional<FlexibleServerCapability> getFlexibleServerCapability(String locationName) {
         try {
-            List<FlexibleServerCapability> flexibleServerCapabilities = postgreSqlFlexibleManager.locationBasedCapabilities()
-                    .execute(locationName)
-                    .stream()
+            List<FlexibleServerCapability> flexibleServerCapabilities = getAzureListResultFactory().create(
+                            postgreSqlFlexibleManager.locationBasedCapabilities().execute(locationName))
+                    .getStream()
                     .filter(capability -> !CapabilityStatus.DISABLED.equals(capability.status()))
                     .toList();
             if (flexibleServerCapabilities.size() > 1) {
                 LOGGER.warn("There are more than one flexible server capability has been provided, will use the first one." +
-                        " Provided flexible server capabilites in region {}: {}", locationName,
+                                " Provided flexible server capabilites in region {}: {}", locationName,
                         flexibleServerCapabilities.stream().map(FlexibleServerCapability::name).collect(Collectors.joining(",")));
             }
             return flexibleServerCapabilities.isEmpty() ? Optional.empty() : Optional.of(flexibleServerCapabilities.get(0));

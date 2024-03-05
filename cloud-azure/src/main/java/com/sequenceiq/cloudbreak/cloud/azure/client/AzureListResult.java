@@ -18,7 +18,7 @@ public class AzureListResult<T> {
 
     private final AzureExceptionHandler azureExceptionHandler;
 
-    AzureListResult(PagedIterable<T> pagedIterable, AzureExceptionHandler azureExceptionHandler) {
+    public AzureListResult(PagedIterable<T> pagedIterable, AzureExceptionHandler azureExceptionHandler) {
         this.pagedIterable = Objects.requireNonNull(pagedIterable);
         this.azureExceptionHandler = azureExceptionHandler;
     }

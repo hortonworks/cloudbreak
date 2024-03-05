@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -65,7 +66,7 @@ class AzureSingleServerClientTest {
         when(server.userVisibleState()).thenReturn(ServerState.DISABLED);
         when(servers.getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME))).thenReturn(server);
         ServerState serverState = underTest.getSingleServerStatus(RESOURCE_GROUP_NAME, SERVER_NAME);
-        Assertions.assertEquals(ServerState.DISABLED, serverState);
+        assertEquals(ServerState.DISABLED, serverState);
     }
 
     @Test
@@ -73,7 +74,7 @@ class AzureSingleServerClientTest {
         Servers servers = mock(Servers.class);
         when(postgreSqlManager.servers()).thenReturn(servers);
         ServerState serverState = underTest.getSingleServerStatus(RESOURCE_GROUP_NAME, SERVER_NAME);
-        Assertions.assertEquals(AzureSingleServerClient.UNKNOWN, serverState);
+        assertEquals(AzureSingleServerClient.UNKNOWN, serverState);
     }
 
     @Test
@@ -85,7 +86,7 @@ class AzureSingleServerClientTest {
         when(servers.getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME))).thenThrow(managementException);
         when(postgreSqlManager.servers()).thenReturn(servers);
         ServerState serverState = underTest.getSingleServerStatus(RESOURCE_GROUP_NAME, SERVER_NAME);
-        Assertions.assertNull(serverState);
+        assertEquals(AzureSingleServerClient.UNKNOWN, serverState);
     }
 
     @Test

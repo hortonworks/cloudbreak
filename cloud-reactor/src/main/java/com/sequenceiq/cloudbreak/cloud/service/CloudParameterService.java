@@ -12,50 +12,31 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
-import com.microsoft.aad.msal4j.MsalServiceException;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesRequest;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudAccessConfigsRequest;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudAccessConfigsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudGatewaysRequest;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudGatewaysResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudIpPoolsRequest;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudIpPoolsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformDatabaseCapabilityRequest;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformDatabaseCapabilityResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformEncryptionKeysRequest;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformEncryptionKeysResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformInstanceGroupParameterRequest;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformInstanceGroupParameterResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNetworksRequest;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNetworksResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNoSqlTablesRequest;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNoSqlTablesResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformOrchestratorsRequest;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformOrchestratorsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformPrivateDnsZonesRequest;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformPrivateDnsZonesResult;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsRequestV2;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsResult;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsResultV2;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformResourceGroupsRequest;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformResourceGroupsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformSecurityGroupsRequest;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformSecurityGroupsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformSshKeysRequest;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformSshKeysResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVariantsRequest;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVariantsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVmTypesRequest;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVmTypesResult;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineRecommendationResponse;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineRecommendtaionRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParametersRequest;
-import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParametersResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
@@ -72,13 +53,11 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.dns.CloudPrivateDnsZones;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
-import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.util.PermanentlyFailedException;
@@ -106,204 +85,65 @@ public class CloudParameterService {
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public PlatformVariants getPlatformVariants() {
         LOGGER.debug("Get platform variants");
-        GetPlatformVariantsRequest getPlatformVariantsRequest = new GetPlatformVariantsRequest();
-        eventBus.notify(getPlatformVariantsRequest.selector(), eventFactory.createEvent(getPlatformVariantsRequest));
-        try {
-            GetPlatformVariantsResult res = getPlatformVariantsRequest.await();
-            LOGGER.debug("Platform variants result: {}", res);
-            if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get platform variants", res.getErrorDetails());
-                throw createExceptionBasedOnErrorType(getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
-            }
-            return res.getPlatformVariants();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform variants", e);
-            throw new OperationException(e);
-        }
+        GetPlatformVariantsRequest request = new GetPlatformVariantsRequest();
+        return executeRequestAndHandleErrors(request, "platform variants").getPlatformVariants();
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public PlatformDisks getDiskTypes() {
         LOGGER.debug("Get platform disktypes");
-        GetDiskTypesRequest getDiskTypesRequest = new GetDiskTypesRequest();
-        eventBus.notify(getDiskTypesRequest.selector(), eventFactory.createEvent(getDiskTypesRequest));
-        try {
-            GetDiskTypesResult res = getDiskTypesRequest.await();
-            LOGGER.debug("Platform disk types result: {}", res);
-            if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get platform disk types", res.getErrorDetails());
-                throw createExceptionBasedOnErrorType(getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
-            }
-            return res.getPlatformDisks();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform disk types", e);
-            throw new OperationException(e);
-        }
-    }
-
-    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
-    public PlatformRegions getRegions() {
-        LOGGER.debug("Get platform regions");
-        GetPlatformRegionsRequest getPlatformRegionsRequest = new GetPlatformRegionsRequest();
-        eventBus.notify(getPlatformRegionsRequest.selector(), eventFactory.createEvent(getPlatformRegionsRequest));
-        try {
-            GetPlatformRegionsResult res = getPlatformRegionsRequest.await();
-            LOGGER.debug("Platform regions result: {}", res);
-            if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get platform regions", res.getErrorDetails());
-                throw createExceptionBasedOnErrorType(getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
-            }
-            return res.getPlatformRegions();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform regions", e);
-            throw new OperationException(e);
-        }
+        GetDiskTypesRequest request = new GetDiskTypesRequest();
+        return executeRequestAndHandleErrors(request, "platform disk types").getPlatformDisks();
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public PlatformOrchestrators getOrchestrators() {
         LOGGER.debug("Get platform orchestrators");
-        GetPlatformOrchestratorsRequest getPlatformOrchestratorsRequest = new GetPlatformOrchestratorsRequest();
-        eventBus.notify(getPlatformOrchestratorsRequest.selector(), eventFactory.createEvent(getPlatformOrchestratorsRequest));
-        try {
-            GetPlatformOrchestratorsResult res = getPlatformOrchestratorsRequest.await();
-            LOGGER.debug("Platform orchestrators result: {}", res);
-            if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get platform orchestrators", res.getErrorDetails());
-                throw createExceptionBasedOnErrorType(getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
-            }
-            return res.getPlatformOrchestrators();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform orchestrators", e);
-            throw new OperationException(e);
-        }
+        GetPlatformOrchestratorsRequest request = new GetPlatformOrchestratorsRequest();
+        return executeRequestAndHandleErrors(request, "platform orchestrators").getPlatformOrchestrators();
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public Map<Platform, PlatformParameters> getPlatformParameters() {
-        LOGGER.debug("Get platform parameters for");
-        PlatformParametersRequest parametersRequest = new PlatformParametersRequest();
-        eventBus.notify(parametersRequest.selector(), eventFactory.createEvent(parametersRequest));
-        try {
-            PlatformParametersResult res = parametersRequest.await();
-            LOGGER.debug("Platform parameter result: {}", res);
-            if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get platform parameters", res.getErrorDetails());
-                throw createExceptionBasedOnErrorType(getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
-            }
-            return res.getPlatformParameters();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting platform parameters", e);
-            throw new OperationException(e);
-        }
+        LOGGER.debug("Get platform parameters");
+        PlatformParametersRequest request = new PlatformParametersRequest();
+        return executeRequestAndHandleErrors(request, "platform parameters").getPlatformParameters();
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public PlatformDatabaseCapabilities getDatabaseCapabilities(ExtendedCloudCredential cloudCredential, String region,
             String variant, Map<String, String> filters) {
         LOGGER.debug("Get database capabilities");
-        GetPlatformDatabaseCapabilityRequest getDatabaseCapabilityRequest =
-                new GetPlatformDatabaseCapabilityRequest(cloudCredential, cloudCredential, variant, region, filters);
-        eventBus.notify(getDatabaseCapabilityRequest.selector(), Event.wrap(getDatabaseCapabilityRequest));
-        try {
-            GetPlatformDatabaseCapabilityResult result = getDatabaseCapabilityRequest.await();
-            LOGGER.debug("Platform database capabilities result: {}", result);
-            if (result.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get database capabilities", result.getErrorDetails());
-                throw createExceptionBasedOnErrorType(getCauseMessages(result.getErrorDetails()), result.getErrorDetails());
-            }
-            return result.getPlatformDatabaseCapabilities();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the database capabilities", e);
-            throw new OperationException(e);
-        }
+        GetPlatformDatabaseCapabilityRequest request = new GetPlatformDatabaseCapabilityRequest(cloudCredential, cloudCredential, variant, region, filters);
+        return executeRequestAndHandleErrors(request, "database capabilities").getPlatformDatabaseCapabilities();
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudNetworks getCloudNetworks(ExtendedCloudCredential cloudCredential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform cloudnetworks");
-
-        GetPlatformNetworksRequest getPlatformNetworksRequest =
-                new GetPlatformNetworksRequest(cloudCredential, cloudCredential, variant, region, filters);
-        eventBus.notify(getPlatformNetworksRequest.selector(), eventFactory.createEvent(getPlatformNetworksRequest));
-        try {
-            GetPlatformNetworksResult res = getPlatformNetworksRequest.await();
-            LOGGER.debug("Platform networks types result: {}", res);
-            if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get platform networks", res.getErrorDetails());
-                throw createExceptionBasedOnErrorType("Failed to get networks for the cloud provider. "
-                        + getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
-            }
-            return res.getCloudNetworks();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform networks", e);
-            throw new OperationException(e);
-        }
+        GetPlatformNetworksRequest request = new GetPlatformNetworksRequest(cloudCredential, cloudCredential, variant, region, filters);
+        return executeRequestAndHandleErrors(request, "networks").getCloudNetworks();
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudSshKeys getCloudSshKeys(ExtendedCloudCredential cloudCredential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform sshkeys");
-        GetPlatformSshKeysRequest getPlatformSshKeysRequest =
-                new GetPlatformSshKeysRequest(cloudCredential, cloudCredential, variant, region, filters);
-        eventBus.notify(getPlatformSshKeysRequest.selector(), eventFactory.createEvent(getPlatformSshKeysRequest));
-        try {
-            GetPlatformSshKeysResult res = getPlatformSshKeysRequest.await();
-            LOGGER.debug("Platform sshkeys types result: {}", res);
-            if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get platform sshkeys", res.getErrorDetails());
-                throw createExceptionBasedOnErrorType("Failed to get SSH keys for the cloud provider. "
-                        + getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
-            }
-            return res.getCloudSshKeys();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform sshkeys", e);
-            throw new OperationException(e);
-        }
+        GetPlatformSshKeysRequest request = new GetPlatformSshKeysRequest(cloudCredential, cloudCredential, variant, region, filters);
+        return executeRequestAndHandleErrors(request, "SSH keys").getCloudSshKeys();
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudSecurityGroups getSecurityGroups(ExtendedCloudCredential cloudCredential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform securitygroups");
-        GetPlatformSecurityGroupsRequest getPlatformSecurityGroupsRequest =
-                new GetPlatformSecurityGroupsRequest(cloudCredential, cloudCredential, variant, region, filters);
-        eventBus.notify(getPlatformSecurityGroupsRequest.selector(), eventFactory.createEvent(getPlatformSecurityGroupsRequest));
-        try {
-            GetPlatformSecurityGroupsResult res = getPlatformSecurityGroupsRequest.await();
-            LOGGER.debug("Platform securitygroups types result: {}", res);
-            if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get platform securitygroups", res.getErrorDetails());
-                throw createExceptionBasedOnErrorType("Failed to get security groups for the cloud provider. "
-                        + getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
-            }
-            if (res.getStatus().equals(EventStatus.PERMANENTLY_FAILED)) {
-                LOGGER.debug("Failed to get platform accessConfigs", res.getErrorDetails());
-                throw new BadRequestException(res.getStatusReason());
-            }
-            return res.getCloudSecurityGroups();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform securitygroups", e);
-            throw new OperationException(e);
-        }
+        GetPlatformSecurityGroupsRequest request = new GetPlatformSecurityGroupsRequest(cloudCredential, cloudCredential, variant, region, filters);
+        return executeRequestAndHandleErrors(request, "security groups").getCloudSecurityGroups();
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public VmRecommendations getRecommendation(String platform) {
         LOGGER.debug("Get platform vm recommendation");
-        GetVirtualMachineRecommendtaionRequest getVirtualMachineRecommendtaionRequest = new GetVirtualMachineRecommendtaionRequest(platform);
-        eventBus.notify(getVirtualMachineRecommendtaionRequest.selector(), eventFactory.createEvent(getVirtualMachineRecommendtaionRequest));
-        try {
-            GetVirtualMachineRecommendationResponse res = getVirtualMachineRecommendtaionRequest.await();
-            LOGGER.debug("Platform vm recommendation result: {}", res);
-            if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get platform vm recommendation", res.getErrorDetails());
-                throw createExceptionBasedOnErrorType(getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
-            }
-            return res.getRecommendations();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform vm recommendation", e);
-            throw new OperationException(e);
-        }
+        GetVirtualMachineRecommendtaionRequest request = new GetVirtualMachineRecommendtaionRequest(platform);
+        return executeRequestAndHandleErrors(request, "platform VM recommendation").getRecommendations();
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
@@ -311,234 +151,106 @@ public class CloudParameterService {
             CdpResourceType stackType, Map<String, String> filters) {
         LOGGER.debug("Get platform vmtypes");
         boolean hasEnableDistroxInstanceTypesEnabled = entitlementService.enableDistroxInstanceTypesEnabled(cloudCredential.getAccountId());
-        GetPlatformVmTypesRequest getPlatformVmTypesRequest =
-                new GetPlatformVmTypesRequest(cloudCredential, cloudCredential, variant, region, stackType,
-                        hasEnableDistroxInstanceTypesEnabled, filters);
-        eventBus.notify(getPlatformVmTypesRequest.selector(), Event.wrap(getPlatformVmTypesRequest));
-        try {
-            GetPlatformVmTypesResult res = getPlatformVmTypesRequest.await();
-            LOGGER.debug("Platform vmtypes result: {}", res);
-            if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get platform vmtypes", res.getErrorDetails());
-                throw createExceptionBasedOnErrorType("Failed to get VM types for the cloud provider. "
-                        + getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
-            }
-            return res.getCloudVmTypes();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform vmtypes", e);
-            throw new OperationException(e);
-        }
+        GetPlatformVmTypesRequest request =
+                new GetPlatformVmTypesRequest(cloudCredential, cloudCredential, variant, region, stackType, hasEnableDistroxInstanceTypesEnabled, filters);
+        return executeRequestAndHandleErrors(request, "Vm types").getCloudVmTypes();
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudRegions getRegionsV2(ExtendedCloudCredential cloudCredential, String region, String variant,
             Map<String, String> filters, boolean availabilityZonesNeeded) {
         LOGGER.debug("Get platform regions");
-        GetPlatformRegionsRequestV2 getPlatformRegionsRequest =
+        GetPlatformRegionsRequestV2 request =
                 new GetPlatformRegionsRequestV2(cloudCredential, cloudCredential, variant, region, filters, availabilityZonesNeeded);
-        eventBus.notify(getPlatformRegionsRequest.selector(), Event.wrap(getPlatformRegionsRequest));
-        try {
-            GetPlatformRegionsResultV2 res = getPlatformRegionsRequest.await();
-            LOGGER.debug("Platform regions result: {}", res);
-            if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get platform regions", res.getErrorDetails());
-                throw createExceptionBasedOnErrorType("Failed to get regions from the cloud provider due to network issues or invalid credential. "
-                        + getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
-            }
-            return res.getCloudRegions();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform regions", e);
-            throw new OperationException(e);
-        }
+        return executeRequestAndHandleErrors(request, "regions").getCloudRegions();
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudGateWays getGateways(ExtendedCloudCredential cloudCredential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform gateways");
-        GetPlatformCloudGatewaysRequest getPlatformCloudGatewaysRequest =
-                new GetPlatformCloudGatewaysRequest(cloudCredential, cloudCredential, variant, region, filters);
-        eventBus.notify(getPlatformCloudGatewaysRequest.selector(), Event.wrap(getPlatformCloudGatewaysRequest));
-        try {
-            GetPlatformCloudGatewaysResult res = getPlatformCloudGatewaysRequest.await();
-            LOGGER.debug("Platform gateways result: {}", res);
-            if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get platform gateways", res.getErrorDetails());
-                throw createExceptionBasedOnErrorType("Failed to get gateways for the cloud provider. "
-                        + getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
-            }
-            return res.getCloudGateWays();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform gateways", e);
-            throw new OperationException(e);
-        }
+        GetPlatformCloudGatewaysRequest request = new GetPlatformCloudGatewaysRequest(cloudCredential, cloudCredential, variant, region, filters);
+        return executeRequestAndHandleErrors(request, "gateways").getCloudGateWays();
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudIpPools getPublicIpPools(ExtendedCloudCredential cloudCredential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform publicIpPools");
-        GetPlatformCloudIpPoolsRequest getPlatformCloudIpPoolsRequest =
-                new GetPlatformCloudIpPoolsRequest(cloudCredential, cloudCredential, variant, region, filters);
-        eventBus.notify(getPlatformCloudIpPoolsRequest.selector(), Event.wrap(getPlatformCloudIpPoolsRequest));
-        try {
-            GetPlatformCloudIpPoolsResult res = getPlatformCloudIpPoolsRequest.await();
-            LOGGER.debug("Platform publicIpPools result: {}", res);
-            if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get platform publicIpPools", res.getErrorDetails());
-                throw createExceptionBasedOnErrorType("Failed to get public IP pools for the cloud provider. "
-                        + getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
-            }
-            return res.getCloudIpPools();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform publicIpPools", e);
-            throw new OperationException(e);
-        }
+        GetPlatformCloudIpPoolsRequest request = new GetPlatformCloudIpPoolsRequest(cloudCredential, cloudCredential, variant, region, filters);
+        return executeRequestAndHandleErrors(request, "public IP pools").getCloudIpPools();
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudAccessConfigs getCloudAccessConfigs(ExtendedCloudCredential cloudCredential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform accessConfigs");
-        GetPlatformCloudAccessConfigsRequest getPlatformCloudAccessConfigsRequest =
-                new GetPlatformCloudAccessConfigsRequest(cloudCredential, cloudCredential, variant, region, filters);
-        eventBus.notify(getPlatformCloudAccessConfigsRequest.selector(), Event.wrap(getPlatformCloudAccessConfigsRequest));
-        try {
-            GetPlatformCloudAccessConfigsResult res = getPlatformCloudAccessConfigsRequest.await();
-            LOGGER.debug("Platform accessConfigs result: {}", res);
-            if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get platform accessConfigs, retry again", res.getErrorDetails());
-                throw createExceptionBasedOnErrorType("Failed to get access configs for the cloud provider. "
-                        + getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
-            }
-            if (res.getStatus().equals(EventStatus.PERMANENTLY_FAILED)) {
-                LOGGER.debug("Failed to get platform accessConfigs", res.getErrorDetails());
-                throw new PermanentlyFailedException(res.getErrorDetails());
-            }
-            return res.getCloudAccessConfigs();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform accessConfigs", e);
-            throw new OperationException(e);
-        }
+        GetPlatformCloudAccessConfigsRequest request = new GetPlatformCloudAccessConfigsRequest(cloudCredential, cloudCredential, variant, region, filters);
+        return executeRequestAndHandleErrors(request, "access configs").getCloudAccessConfigs();
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudEncryptionKeys getCloudEncryptionKeys(ExtendedCloudCredential cloudCredential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform encryptionKeys");
-        GetPlatformEncryptionKeysRequest getPlatformEncryptionKeysRequest =
-                new GetPlatformEncryptionKeysRequest(cloudCredential, cloudCredential, variant, region, filters);
-        eventBus.notify(getPlatformEncryptionKeysRequest.selector(), Event.wrap(getPlatformEncryptionKeysRequest));
-        try {
-            GetPlatformEncryptionKeysResult res = getPlatformEncryptionKeysRequest.await();
-            LOGGER.debug("Platform encryptionKeys result: {}", res);
-            if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get platform encryptionKeys", res.getErrorDetails());
-                throw createExceptionBasedOnErrorType("Failed to get encryption keys for the cloud provider. "
-                        + getCauseMessages(res.getErrorDetails()), res.getErrorDetails());
-            }
-            return res.getCloudEncryptionKeys();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform encryptionKeys", e);
-            throw new OperationException(e);
-        }
+        GetPlatformEncryptionKeysRequest request = new GetPlatformEncryptionKeysRequest(cloudCredential, cloudCredential, variant, region, filters);
+        return executeRequestAndHandleErrors(request, "encryption keys").getCloudEncryptionKeys();
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public Map<String, InstanceGroupParameterResponse> getInstanceGroupParameters(ExtendedCloudCredential cloudCredential,
             Set<InstanceGroupParameterRequest> instanceGroups) {
         LOGGER.debug("Get platform instanceGroupParameters");
-
-        GetPlatformInstanceGroupParameterRequest getPlatformInstanceGroupParameterRequest =
-                new GetPlatformInstanceGroupParameterRequest(cloudCredential, cloudCredential, instanceGroups, null);
-        eventBus.notify(getPlatformInstanceGroupParameterRequest.selector(), Event.wrap(getPlatformInstanceGroupParameterRequest));
-        try {
-            GetPlatformInstanceGroupParameterResult res = getPlatformInstanceGroupParameterRequest.await();
-            LOGGER.debug("Platform instanceGroupParameterResult result: {}", res);
-            if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get platform instanceGroupParameterResult", res.getErrorDetails());
-                throw createExceptionBasedOnErrorType(String.format("Failed to get instance group parameters for the cloud provider: %s. %s",
-                        res.getStatusReason(), getCauseMessages(res.getErrorDetails())), res.getErrorDetails());
-            }
-            return res.getInstanceGroupParameterResponses();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform instanceGroupParameterResult", e);
-            throw new OperationException(e);
-        }
+        GetPlatformInstanceGroupParameterRequest request = new GetPlatformInstanceGroupParameterRequest(cloudCredential, cloudCredential, instanceGroups, null);
+        return executeRequestAndHandleErrors(request, "instance group parameters").getInstanceGroupParameterResponses();
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudNoSqlTables getNoSqlTables(ExtendedCloudCredential cloudCredential, String region, String platformVariant, Map<String, String> filters) {
         LOGGER.debug("Get platform noSqlTables");
-
         GetPlatformNoSqlTablesRequest request = new GetPlatformNoSqlTablesRequest(cloudCredential, cloudCredential, platformVariant, region, null);
-        eventBus.notify(request.selector(), Event.wrap(request));
-        try {
-            GetPlatformNoSqlTablesResult result = request.await();
-            LOGGER.debug("Platform NoSqlTablesResult result: {}", result);
-            if (result.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get platform NoSqlTablesResult", result.getErrorDetails());
-                throw createExceptionBasedOnErrorType(String.format("Failed to get NoSQL tables for the cloud provider: %s. %s",
-                        result.getStatusReason(), getCauseMessages(result.getErrorDetails())), result.getErrorDetails());
-            }
-            return result.getNoSqlTables();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform NoSqlTablesResult", e);
-            throw new OperationException(e);
-        }
+        return executeRequestAndHandleErrors(request, "NoSQL tables").getNoSqlTables();
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudResourceGroups getResourceGroups(ExtendedCloudCredential cloudCredential, String region, String platformVariant, Map<String, String> filters) {
         LOGGER.debug("Get platform resource groups for credential: [{}]", cloudCredential.getName());
-
         GetPlatformResourceGroupsRequest request = new GetPlatformResourceGroupsRequest(cloudCredential, cloudCredential, platformVariant, region, null);
-        eventBus.notify(request.selector(), Event.wrap(request));
-        try {
-            GetPlatformResourceGroupsResult result = request.await();
-            LOGGER.debug("Platform ResourceGroupsResult result: {}", result);
-            if (result.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get platform ResourceGroupsResult", result.getErrorDetails());
-                throw createExceptionBasedOnErrorType(String.format("Failed to get resource groups tables for the cloud provider: %s. %s",
-                        result.getStatusReason(), getCauseMessages(result.getErrorDetails())), result.getErrorDetails());
-            }
-            return result.getResourceGroups();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform ResourceGroupsResult", e);
-            throw new OperationException(e);
-        }
+        return executeRequestAndHandleErrors(request, "resource group tables").getResourceGroups();
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudPrivateDnsZones getPrivateDnsZones(ExtendedCloudCredential cloudCredential, String platformVariant, Map<String, String> filters) {
         LOGGER.debug("Get platform private DNS zones for credential: [{}]", cloudCredential.getName());
-
         GetPlatformPrivateDnsZonesRequest request = new GetPlatformPrivateDnsZonesRequest(cloudCredential, cloudCredential, platformVariant, null);
-        eventBus.notify(request.selector(), Event.wrap(request));
+        return executeRequestAndHandleErrors(request, "private DNS zones").getPrivateDnsZones();
+    }
+
+    private <T extends CloudPlatformRequest<U>, U extends CloudPlatformResult> U executeRequestAndHandleErrors(T request, String responseName) {
+        eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {
-            GetPlatformPrivateDnsZonesResult result = request.await();
-            LOGGER.debug("Platform PrivateDnsZonesResult result: {}", result);
+            U result = request.await();
+            LOGGER.debug("{} result: {}", result.getClass().getSimpleName(), result);
             if (result.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.debug("Failed to get platform PrivateDnsZonesResult", result.getErrorDetails());
-                throw createExceptionBasedOnErrorType(String.format("Failed to get private dns zones for the cloud provider: %s. %s",
-                        result.getStatusReason(), getCauseMessages(result.getErrorDetails())), result.getErrorDetails());
+                LOGGER.warn("Failed to get {}", result.getClass().getSimpleName(), result.getErrorDetails());
+                throw createExceptionBasedOnErrorType(result, responseName);
             }
-            return result.getPrivateDnsZones();
+            if (result.getStatus().equals(EventStatus.PERMANENTLY_FAILED)) {
+                LOGGER.warn("Failed to get {}", result.getClass().getSimpleName(), result.getErrorDetails());
+                throw new PermanentlyFailedException(result.getStatusReason());
+            }
+            return result;
         } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform PrivateDnsZonesResult", e);
+            LOGGER.error("Error while executing request {}", request.getClass().getSimpleName(), e);
             throw new OperationException(e);
         }
     }
 
-    private RuntimeException createExceptionBasedOnErrorType(String errorMessage, Exception errorDetails) {
-        if (isRetryableException(errorDetails)) {
-            return new GetCloudParameterException(errorMessage, errorDetails);
-        } else {
+    private RuntimeException createExceptionBasedOnErrorType(CloudPlatformResult result, String responseName) {
+        Exception errorDetails = result.getErrorDetails();
+        String errorMessage = String.format("Failed to get %s for the cloud provider: %s. %s",
+                responseName, result.getStatusReason(), getCauseMessages(errorDetails));
+        if (errorDetails instanceof ProviderAuthenticationFailedException) {
             return new BadRequestException(errorDetails);
+        } else {
+            return new GetCloudParameterException(errorMessage, errorDetails);
         }
-    }
-
-    private boolean isRetryableException(Exception errorDetails) {
-        if (!(errorDetails instanceof MsalServiceException msalServiceException)) {
-            return true;
-        }
-        return msalServiceException.statusCode() != UNAUTHORIZED && msalServiceException.statusCode() != FORBIDDEN;
     }
 
     private String getCauseMessages(Exception e) {

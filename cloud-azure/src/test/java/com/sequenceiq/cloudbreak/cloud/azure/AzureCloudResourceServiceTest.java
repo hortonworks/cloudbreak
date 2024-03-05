@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -9,12 +10,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.resourcemanager.compute.models.ManagedDiskParameters;
@@ -27,6 +30,8 @@ import com.azure.resourcemanager.resources.models.DeploymentOperations;
 import com.azure.resourcemanager.resources.models.TargetResource;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResultFactory;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -70,6 +75,21 @@ public class AzureCloudResourceServiceTest {
 
     @Spy
     private Deployment deployment;
+
+    @Mock
+    private AzureListResultFactory azureListResultFactory;
+
+    @Spy
+    private AzureExceptionHandler azureExceptionHandler;
+
+    @BeforeEach
+    void init() {
+        lenient().when(azureListResultFactory.create(any())).thenAnswer((Answer<AzureListResult>) invocationOnMock -> {
+            PagedIterable pagedIterable = invocationOnMock.getArgument(0, PagedIterable.class);
+            return new AzureListResult(pagedIterable, azureExceptionHandler);
+        });
+        lenient().when(azureListResultFactory.list(any())).thenCallRealMethod();
+    }
 
     @Test
     public void getListWithKnownSucceededCloudResource() {
