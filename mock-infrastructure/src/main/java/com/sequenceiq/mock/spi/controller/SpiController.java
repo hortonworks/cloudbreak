@@ -154,7 +154,7 @@ public class SpiController {
         return cloudVmMetaDataStatuses;
     }
 
-    @PostMapping("/update/{group}/instance_type/{instanceType}")
+    @GetMapping("/update/{group}/instance_type/{instanceType}")
     public List<CloudVmInstanceStatus> updateInstancetypeInGroup(@PathVariable("mock_uuid") String mockuuid,
             @PathVariable("instanceType") String instanceType,
             @PathVariable("group") String group) {

@@ -61,6 +61,9 @@ fetch-secrets-docker:
 docker-compose:
 	CB_VERSION=$(CB_VERSION) CB_TARGET_BRANCH=$(CB_TARGET_BRANCH) ./scripts/docker-compose.sh
 
+docker-compose-after-config-change:
+	CB_VERSION=$(CB_VERSION) CB_TARGET_BRANCH=$(CB_TARGET_BRANCH) ./scripts/docker-compose-after-config-change.sh
+
 check-results:
 	./scripts/check-results.sh
 

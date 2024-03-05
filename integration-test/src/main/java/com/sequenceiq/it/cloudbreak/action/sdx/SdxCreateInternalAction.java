@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.action.sdx;
 
 import java.util.Collections;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,13 +21,14 @@ public class SdxCreateInternalAction implements Action<SdxInternalTestDto, SdxCl
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
         Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
         Log.whenJson(LOGGER, " SDX create request: ", testDto.getRequest());
-        SdxClusterResponse sdxClusterResponse = client.getDefaultClient()
-                .sdxInternalEndpoint()
-                .create(testDto.getName(), testDto.getRequest());
-        testDto.setFlow("SDX create internal", sdxClusterResponse.getFlowIdentifier());
-        testDto.setResponse(client.getDefaultClient()
-                .sdxEndpoint()
-                .getDetailByCrn(sdxClusterResponse.getCrn(), Collections.emptySet()));
+        if (!StringUtils.equals(testContext.getExistingResourceNames().get(SdxInternalTestDto.class), testDto.getName())) {
+            SdxClusterResponse sdxClusterResponse = client.getDefaultClient().sdxInternalEndpoint().create(testDto.getName(), testDto.getRequest());
+            testDto.setFlow("SDX create internal", sdxClusterResponse.getFlowIdentifier());
+            testDto.setResponse(client.getDefaultClient().sdxEndpoint().getDetailByCrn(sdxClusterResponse.getCrn(), Collections.emptySet()));
+        } else {
+            Log.whenJson(LOGGER, " SDX already exists %s.", testDto.getName());
+            testDto.setResponse(client.getDefaultClient().sdxEndpoint().getDetail(testDto.getName(), Collections.emptySet()));
+        }
         Log.whenJson(LOGGER, " SDX create response: ", testDto.getResponse());
         return testDto;
     }

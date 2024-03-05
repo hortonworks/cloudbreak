@@ -9,6 +9,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import jakarta.inject.Inject;
@@ -16,7 +17,9 @@ import jakarta.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
@@ -165,13 +168,18 @@ public class MockSdxRepairTests extends AbstractMockTest {
                 .given(EnvironmentTestDto.class)
                 .withNetwork()
                 .withCreateFreeIpa(Boolean.FALSE)
-                .withName(resourcePropertyProvider().getEnvironmentName())
+                .withName(Optional.ofNullable(testContext.getExistingResourceNames().get(EnvironmentTestDto.class))
+                        .orElse(resourcePropertyProvider().getName(CloudPlatform.MOCK)))
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
+                .withName(Optional.ofNullable(testContext.getExistingResourceNames().get(FreeIpaTestDto.class))
+                        .orElse(resourcePropertyProvider().getName(CloudPlatform.MOCK)))
                 .when(freeIpaTestClient.create())
-                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
+                .await(Status.AVAILABLE)
                 .given(sdxInternal, SdxInternalTestDto.class)
+                .withName(Optional.ofNullable(testContext.getExistingResourceNames().get(SdxInternalTestDto.class))
+                        .orElse(resourcePropertyProvider().getName(CloudPlatform.MOCK)))
                 .withDatabase(sdxDatabaseRequest)
                 .withCustomDomain(customDomain)
                 .when(sdxTestClient.createInternal(), key(sdxInternal))

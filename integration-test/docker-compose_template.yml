@@ -13,6 +13,7 @@ services:
     volumes:
       - ./:/it
       - ./dumps:/it/dumps
+      - ./testuser_home:/home/jboss
       - /etc/localtime:/etc/localtime:ro
     command: java -XX:OnOutOfMemoryError="kill -9 %p" -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/it/dumps -jar /it/build/libs/cloudbreak-integration-test.jar com.sequenceiq.it.IntegrationTestApp --integrationtest.command=suiteurls --integrationtest.suiteFiles=${INTEGRATIONTEST_SUITEFILES} | tee cbtest.log
     environment:
@@ -89,6 +90,8 @@ services:
       - INTEGRATIONTEST_PROXY_PASSWORD
       - INTEGRATIONTEST_PROXY_USER2
       - INTEGRATIONTEST_PROXY_PASSWORD2
+      - INTEGRATIONTEST_TESTSUITE_CLEANUP
+      - INTEGRATIONTEST_TESTSUITE_CLEANUPONFAILURE
     image: docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-21-runtime-cis:1.19-1-stig-25032024
     deploy:
       resources:

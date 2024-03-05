@@ -2,11 +2,13 @@ package com.sequenceiq.it.cloudbreak.action.freeipa;
 
 import static java.lang.String.format;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
@@ -17,10 +19,12 @@ public class FreeIpaCreateAction implements Action<FreeIpaTestDto, FreeIpaClient
 
     public FreeIpaTestDto action(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
         Log.whenJson(LOGGER, format(" FreeIPA post request:%n"), testDto.getRequest());
-        testDto.setResponse(
-                client.getDefaultClient()
-                        .getFreeIpaV1Endpoint()
-                        .create(testDto.getRequest()));
+        if (!StringUtils.equals(testContext.getExistingResourceNames().get(FreeIpaTestDto.class), testDto.getName())) {
+            testDto.setResponse(client.getDefaultClient().getFreeIpaV1Endpoint().create(testDto.getRequest()));
+        } else {
+            Log.when(LOGGER, format(" FreeIPA already exists: %s", testDto.getName()));
+            testDto.setResponse(client.getDefaultClient().getFreeIpaV1Endpoint().describe(testContext.given(EnvironmentTestDto.class).getCrn()));
+        }
         Log.whenJson(LOGGER, format(" FreeIPA created  successfully:%n"), testDto.getResponse());
         Log.when(LOGGER, format(" FreeIPA CRN: %s", testDto.getResponse().getCrn()));
         return testDto;

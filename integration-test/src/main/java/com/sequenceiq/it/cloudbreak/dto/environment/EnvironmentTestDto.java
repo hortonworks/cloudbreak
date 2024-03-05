@@ -64,7 +64,7 @@ public class EnvironmentTestDto
         extends DeletableEnvironmentTestDto<EnvironmentRequest, DetailedEnvironmentResponse, EnvironmentTestDto, SimpleEnvironmentResponse>
         implements Searchable, Assignable, Investigable {
 
-    private static final String ENVIRONMENT_RESOURCE_NAME = "environmentName";
+    public static final String ENVIRONMENT_RESOURCE_NAME = "environmentName";
 
     private static final int ORDER = 100;
 

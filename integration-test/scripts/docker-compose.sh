@@ -9,6 +9,8 @@ set -ex
 : ${INTEGCB_LOCATION?"integcb location"}
 : ${INTEGRATIONTEST_USER_ACCESSKEY:="Y3JuOmFsdHVzOmlhbTp1cy13ZXN0LTE6Y2xvdWRlcmE6dXNlcjptb2NrdXNlckB1bXMubW9jaw=="}
 : ${INTEGRATIONTEST_USER_SECRETKEY:="nHkdxgZR0BaNHaSYM3ooS6rIlpV5E+k1CIkr+jFId2g="}
+: ${INTEGRATIONTEST_TESTSUITE_CLEANUPONFAILURE:="true"}
+: ${INTEGRATIONTEST_TESTSUITE_CLEANUP:="true"}
 
 date
 echo -e "\n\033[1;96m--- Kill running cbd containers\033[0m\n"
@@ -136,6 +138,9 @@ if [[ "$CIRCLECI" && "$CIRCLECI" == "true" ]]; then
     export INTEGRATIONTEST_UMS_JSONSECRET_DESTINATIONPATH=$INTEGRATIONTEST_UMS_JSONSECRET_DESTINATIONPATH
     export INTEGRATIONTEST_UMS_JSONSECRET_NAME=$INTEGRATIONTEST_UMS_JSONSECRET_NAME
 
+    export INTEGRATIONTEST_TESTSUITE_CLEANUP=$INTEGRATIONTEST_TESTSUITE_CLEANUP
+    export INTEGRATIONTEST_TESTSUITE_CLEANUPONFAILURE=$INTEGRATIONTEST_TESTSUITE_CLEANUPONFAILURE
+
     if [[ -n "${INTEGRATIONTEST_YARN_QUEUE}" ]]; then
         date
         echo -e "\n\033[1;96m--- YARN smoke testing variables:\033[0m\n"
@@ -158,19 +163,22 @@ if [[ "$CIRCLECI" && "$CIRCLECI" == "true" ]]; then
     fi
 
     date
-    echo -e "\n\033[1;96m--- Env variables started with INTEGRATIONTEST :\033[0m\n"
-    env | grep -i INTEGRATIONTEST
-
-    date
-    echo -e "\n\033[1;96m--- Tests to run:\033[0m\n"
-    echo $INTEGRATIONTEST_SUITEFILES
-
-    date
     echo -e "\n\033[1;96m--- Start testing... (it may take few minutes to finish.)\033[0m\n"
     rm -rf test-output
 
     export DOCKER_CLIENT_TIMEOUT=120
     export COMPOSE_HTTP_TIMEOUT=120
+
+    date
+    echo -e "\n\033[1;96m--- Env variables started with INTEGRATIONTEST :\033[0m\n"
+    env | grep -i INTEGRATIONTEST
+
+    date
+    env | grep -i INTEGRATIONTEST > integrationtest.properties
+
+    date
+    echo -e "\n\033[1;96m--- Tests to run:\033[0m\n"
+    echo $INTEGRATIONTEST_SUITEFILES
 
     set -o pipefail ; docker compose --compatibility up --remove-orphans --exit-code-from test test | tee test.out
     echo -e "\n\033[1;96m--- Test finished\033[0m\n"

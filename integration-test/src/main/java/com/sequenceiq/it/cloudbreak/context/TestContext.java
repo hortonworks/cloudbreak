@@ -81,6 +81,8 @@ public abstract class TestContext implements ApplicationContextAware {
 
     private final Map<String, Exception> exceptionMap = new HashMap<>();
 
+    private final Map<Class<? extends CloudbreakTestDto>, String> existingResourceNames = new ConcurrentHashMap<>();
+
     private boolean shutdown;
 
     private final Map<String, String> statuses = new HashMap<>();
@@ -193,6 +195,10 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public Map<String, CloudbreakTestDto> getResourceCrns() {
         return resourceCrns;
+    }
+
+    public Map<Class<? extends CloudbreakTestDto>, String> getExistingResourceNames() {
+        return existingResourceNames;
     }
 
     public Map<String, Map<Class<? extends MicroserviceClient>, MicroserviceClient>> getClients() {

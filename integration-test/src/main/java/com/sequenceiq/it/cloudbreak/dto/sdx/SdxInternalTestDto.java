@@ -88,7 +88,7 @@ import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterRequest, SdxClusterDetailResponse, SdxInternalTestDto>
         implements Purgable<SdxClusterResponse, SdxClient>, Investigable, Searchable {
 
-    private static final String SDX_RESOURCE_NAME = "sdxName";
+    public static final String SDX_RESOURCE_NAME = "sdxName";
 
     private static final String DEFAULT_SDX_NAME = "test-sdx" + '-' + UUID.randomUUID().toString().replaceAll("-", "");
 

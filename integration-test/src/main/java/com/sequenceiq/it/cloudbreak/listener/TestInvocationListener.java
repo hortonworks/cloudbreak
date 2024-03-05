@@ -1,14 +1,21 @@
 package com.sequenceiq.it.cloudbreak.listener;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,9 +25,13 @@ import org.testng.IInvokedMethod;
 import org.testng.IInvokedMethodListener;
 import org.testng.ITestResult;
 
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.it.cloudbreak.context.CompareByOrder;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 
 public class TestInvocationListener implements IInvokedMethodListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestInvocationListener.class);
@@ -29,6 +40,35 @@ public class TestInvocationListener implements IInvokedMethodListener {
     public void beforeInvocation(IInvokedMethod invokedMethod, ITestResult testResult) {
         LOGGER.info("Before Invocation of: " + invokedMethod.getTestMethod().getMethodName()
                 + " with parameters: " + Arrays.toString(testResult.getParameters()));
+        TestContext testContext;
+        Object[] parameters = testResult.getParameters();
+        if (parameters == null || parameters.length == 0) {
+            LOGGER.warn("Test context could not be found because parameters array is empty in test result.");
+            return;
+        }
+        try {
+            testContext = (TestContext) parameters[0];
+        } catch (ClassCastException e) {
+            LOGGER.warn("Test context could not be casted from test result parameters.");
+            return;
+        }
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(""))) {
+            for (Path path : stream) {
+                String fileName = path.getFileName().toString();
+                if (fileName.contains("resource_names_" + testContext.getTestMethodName().orElseGet(this::getDefaultFileNameTag) + ".json")) {
+                    Map<String, String> resourceNameMap =
+                            JsonUtil.readValue(FileUtils.readFileToString(Paths.get(fileName).toFile(), Charset.defaultCharset()), Map.class);
+                    resourceNameMap.computeIfPresent(EnvironmentTestDto.ENVIRONMENT_RESOURCE_NAME,
+                            (key, name) -> testContext.getExistingResourceNames().put(EnvironmentTestDto.class, name));
+                    resourceNameMap.computeIfPresent(FreeIpaTestDto.FREEIPA_RESOURCE_NAME,
+                            (key, name) -> testContext.getExistingResourceNames().put(FreeIpaTestDto.class, name));
+                    resourceNameMap.computeIfPresent(SdxInternalTestDto.SDX_RESOURCE_NAME,
+                            (key, name) -> testContext.getExistingResourceNames().put(SdxInternalTestDto.class, name));
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to read resource names from file: ", e);
+        }
     }
 
     /**
@@ -54,6 +94,8 @@ public class TestInvocationListener implements IInvokedMethodListener {
             LOGGER.warn("Test context could not be casted from test result parameters.");
             return;
         }
+
+        removeOldResourceFile(testContext);
 
         List<CloudbreakTestDto> testDtos = new ArrayList<>(testContext.getResourceNames().values());
         List<CloudbreakTestDto> orderedTestDtos = testDtos.stream().sorted(new CompareByOrder()).collect(Collectors.toList());
@@ -89,8 +131,9 @@ public class TestInvocationListener implements IInvokedMethodListener {
         if (jsonObject.length() != 0) {
             String fileName = "resource_names_" + testContext.getTestMethodName().orElseGet(this::getDefaultFileNameTag) + ".json";
             try {
-                Files.writeString(Paths.get(fileName), jsonObject.toString());
-                LOGGER.info("Resource file have been created with name: {} and content: {}.", fileName, jsonObject);
+                Path path = Paths.get(fileName);
+                Files.writeString(path, jsonObject.toString());
+                LOGGER.info("Resource file have been created with name: {}, path: {} and content: {}.", fileName, path.toAbsolutePath(), jsonObject);
             } catch (IOException e) {
                 LOGGER.info("Creating/Appending resource file throws exception: {}", e.getMessage(), e);
             } catch (Exception e) {
@@ -98,6 +141,30 @@ public class TestInvocationListener implements IInvokedMethodListener {
             }
         } else {
             LOGGER.info("No resources found, no output file needs to be created.");
+        }
+    }
+
+    private void removeOldResourceFile(TestContext testContext) {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(""))) {
+            for (Path path : stream) {
+                String fileName = path.getFileName().toString();
+                if (fileName.contains("resource_names_" + testContext.getTestMethodName().orElseGet(this::getDefaultFileNameTag) + ".json")) {
+                    try {
+                        FileTime creationTime = Files.readAttributes(Path.of(fileName), BasicFileAttributes.class).creationTime();
+                        if (path.toFile().delete()) {
+                            LOGGER.info("Old resource file: {} (creation time: {}) have been found and deleted at: {}.",
+                                    fileName, creationTime, path.toAbsolutePath());
+                        } else {
+                            LOGGER.info("Old resource file: {} (creation time: {}) have NOT been deleted at: {}.",
+                                    fileName, creationTime, path.toAbsolutePath());
+                        }
+                    } catch (Exception e) {
+                        LOGGER.info("{} resource file cleanup has been failed, because of: {}", fileName, e.getMessage(), e);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error("Failed to remove old resource file: ", e);
         }
     }
 

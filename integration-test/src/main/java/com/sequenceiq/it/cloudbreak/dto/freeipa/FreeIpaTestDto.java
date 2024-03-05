@@ -89,7 +89,7 @@ import com.sequenceiq.it.cloudbreak.util.yarn.YarnCloudFunctionality;
 public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest, DescribeFreeIpaResponse, FreeIpaTestDto>
         implements Purgable<ListFreeIpaResponse, FreeIpaClient>, Searchable, Investigable, EnvironmentAware {
 
-    private static final String FREEIPA_RESOURCE_NAME = "freeipaName";
+    public static final String FREEIPA_RESOURCE_NAME = "freeipaName";
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;

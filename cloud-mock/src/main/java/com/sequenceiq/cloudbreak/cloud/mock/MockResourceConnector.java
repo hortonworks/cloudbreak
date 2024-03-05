@@ -19,6 +19,7 @@ import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -176,12 +177,22 @@ public class MockResourceConnector implements ResourceConnector {
         List<CloudResourceStatus> cloudResourceStatuses = resources.stream().map(r -> {
                     Group group = stack.getGroups().stream().filter(g -> g.getName().equals(r.getGroup())).findFirst()
                             .orElseThrow(NotFoundException.notFound("Group", r.getGroup()));
-                    String path = "/spi/update/" + r.getGroup() + "/instance_type/" + group.getReferenceInstanceTemplate().getFlavor();
-                    mockUrlFactory.get(authenticatedContext, path).post(Entity.entity(stack, MediaType.APPLICATION_JSON_TYPE), CloudVmInstanceStatus[].class);
+                    String path = "/spi/update/" + r.getGroup() + "/instance_type/" + getFlavorFromGroup(group);
+                    mockUrlFactory.get(authenticatedContext, path).get(CloudVmInstanceStatus[].class);
                     return new CloudResourceStatus(r, UPDATED);
                 })
                 .collect(Collectors.toList());
         return cloudResourceStatuses;
+    }
+
+    private String getFlavorFromGroup(Group group) {
+        if (!CollectionUtils.isEmpty(group.getInstances())) {
+            return group.getInstances().getFirst().getTemplate().getFlavor();
+        } else if (!CollectionUtils.isEmpty(group.getDeletedInstances())) {
+            return group.getDeletedInstances().getFirst().getTemplate().getFlavor();
+        } else {
+            throw NotFoundException.notFound("Flavor for group.", group.getName()).get();
+        }
     }
 
     @Override
