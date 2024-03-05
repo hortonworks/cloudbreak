@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.FAIL_HANDLED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_FAIL_HANDLED_EVENT;
 
 import java.util.StringJoiner;
 
@@ -19,7 +19,7 @@ public class DeleteVolumesFailedEvent extends StackFailureEvent {
     public DeleteVolumesFailedEvent(@JsonProperty("statusReason") String statusReason,
             @JsonProperty("exception") Exception exception,
             @JsonProperty("resourceId") Long resourceId) {
-        super(FAIL_HANDLED_EVENT.event(), resourceId, exception);
+        super(DELETE_VOLUMES_FAIL_HANDLED_EVENT.event(), resourceId, exception);
         this.statusReason = statusReason;
         this.resourceStatus = ResourceStatus.FAILED;
     }

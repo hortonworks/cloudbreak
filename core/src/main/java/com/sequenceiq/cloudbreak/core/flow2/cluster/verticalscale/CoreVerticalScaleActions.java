@@ -167,7 +167,7 @@ public class CoreVerticalScaleActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(CoreVerticalScaleEvent.FAIL_HANDLED_EVENT.event(), context.getStackId());
+                return new StackEvent(CoreVerticalScaleEvent.STACK_VERTICALSCALE_FAIL_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }

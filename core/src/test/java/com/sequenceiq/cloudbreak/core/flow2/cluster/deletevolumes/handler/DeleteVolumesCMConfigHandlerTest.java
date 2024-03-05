@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.handler;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_CM_CONFIG_FINISHED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.FAIL_HANDLED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_FAIL_HANDLED_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -112,6 +112,6 @@ class DeleteVolumesCMConfigHandlerTest {
         verify(configUpdateUtilService, times(0)).updateCMConfigsForComputeAndStartServices(eq(stackDto), anySet(),
                 anyList(), eq("test"));
         verify(deleteVolumesService, times(1)).startClouderaManagerService(stackDto, serviceComponents);
-        assertEquals(FAIL_HANDLED_EVENT.event(), response.getSelector());
+        assertEquals(DELETE_VOLUMES_FAIL_HANDLED_EVENT.event(), response.getSelector());
     }
 }

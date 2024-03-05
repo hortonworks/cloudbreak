@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_DELETE_VOLUMES_CM_CONFIG_START;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_DELETE_VOLUMES_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_DELETE_VOLUMES_FINISHED;
@@ -24,7 +25,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolum
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DeleteVolumesTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
@@ -161,7 +161,7 @@ public class DeleteVolumesActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(CoreVerticalScaleEvent.FAIL_HANDLED_EVENT.event(), context.getStackId());
+                return new StackEvent(DELETE_VOLUMES_FAIL_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }

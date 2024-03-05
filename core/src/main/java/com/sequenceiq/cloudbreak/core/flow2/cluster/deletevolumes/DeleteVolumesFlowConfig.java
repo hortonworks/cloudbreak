@@ -6,10 +6,10 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCluste
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNSET;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_CM_CONFIG_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_UNMOUNT_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.FINALIZED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesState.DELETE_VOLUMES_CM_CONFIG_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesState.DELETE_VOLUMES_CM_CONFIG_STATE;
@@ -39,32 +39,32 @@ public class DeleteVolumesFlowConfig  extends StackStatusFinalizerAbstractFlowCo
                     .from(INIT_STATE)
                     .to(DELETE_VOLUMES_VALIDATION_STATE)
                     .event(DELETE_VOLUMES_VALIDATION_EVENT)
-                    .failureEvent(FAIL_HANDLED_EVENT)
+                    .failureEvent(DELETE_VOLUMES_FAIL_HANDLED_EVENT)
 
                     .from(DELETE_VOLUMES_VALIDATION_STATE)
                     .to(DELETE_VOLUMES_UNMOUNT_STATE)
                     .event(DELETE_VOLUMES_EVENT)
-                    .failureEvent(FAIL_HANDLED_EVENT)
+                    .failureEvent(DELETE_VOLUMES_FAIL_HANDLED_EVENT)
 
                     .from(DELETE_VOLUMES_UNMOUNT_STATE)
                     .to(DELETE_VOLUMES_STATE)
                     .event(DELETE_VOLUMES_UNMOUNT_FINISHED_EVENT)
-                    .failureEvent(FAIL_HANDLED_EVENT)
+                    .failureEvent(DELETE_VOLUMES_FAIL_HANDLED_EVENT)
 
                     .from(DELETE_VOLUMES_STATE)
                     .to(DELETE_VOLUMES_CM_CONFIG_STATE)
                     .event(DELETE_VOLUMES_FINISHED_EVENT)
-                    .failureEvent(FAIL_HANDLED_EVENT)
+                    .failureEvent(DELETE_VOLUMES_FAIL_HANDLED_EVENT)
 
                     .from(DELETE_VOLUMES_CM_CONFIG_STATE)
                     .to(DELETE_VOLUMES_CM_CONFIG_FINISHED_STATE)
                     .event(DELETE_VOLUMES_CM_CONFIG_FINISHED_EVENT)
-                    .failureEvent(FAIL_HANDLED_EVENT)
+                    .failureEvent(DELETE_VOLUMES_FAIL_HANDLED_EVENT)
 
                     .from(DELETE_VOLUMES_CM_CONFIG_FINISHED_STATE)
                     .to(FINAL_STATE)
                     .event(FINALIZED_EVENT)
-                    .failureEvent(FAIL_HANDLED_EVENT)
+                    .failureEvent(DELETE_VOLUMES_FAIL_HANDLED_EVENT)
 
                     .build();
 
@@ -72,7 +72,7 @@ public class DeleteVolumesFlowConfig  extends StackStatusFinalizerAbstractFlowCo
             INIT_STATE,
             FINAL_STATE,
             DELETE_VOLUMES_FAILED_STATE,
-            FAIL_HANDLED_EVENT);
+            DELETE_VOLUMES_FAIL_HANDLED_EVENT);
 
     public DeleteVolumesFlowConfig() {
         super(DeleteVolumesState.class, DeleteVolumesEvent.class);

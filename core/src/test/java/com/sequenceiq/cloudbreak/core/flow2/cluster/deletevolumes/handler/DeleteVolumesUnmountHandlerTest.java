@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.handler;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_UNMOUNT_FINISHED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.FAIL_HANDLED_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -85,6 +85,6 @@ class DeleteVolumesUnmountHandlerTest {
         doThrow(new CloudbreakOrchestratorFailedException("TEST")).when(deleteVolumesService).unmountBlockStorageDisks(stack, "test");
         Selectable response = underTest.doAccept(new HandlerEvent<>(handlerEvent));
         verify(deleteVolumesService, times(1)).unmountBlockStorageDisks(eq(stack), eq("test"));
-        assertEquals(FAIL_HANDLED_EVENT.event(), response.getSelector());
+        assertEquals(DELETE_VOLUMES_FAIL_HANDLED_EVENT.event(), response.getSelector());
     }
 }

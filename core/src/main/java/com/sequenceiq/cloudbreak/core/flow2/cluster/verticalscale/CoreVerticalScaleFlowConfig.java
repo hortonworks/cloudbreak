@@ -5,9 +5,9 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCluste
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.VERTICAL_SCALE_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.VERTICAL_SCALE_STARTED;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.FAILURE_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.FINALIZED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.STACK_VERTICALSCALE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.STACK_VERTICALSCALE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.STACK_VERTICALSCALE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.STACK_VERTICALSCALE_FINISHED_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleState.FINAL_STATE;
@@ -54,7 +54,7 @@ public class CoreVerticalScaleFlowConfig extends StackStatusFinalizerAbstractFlo
             INIT_STATE,
             FINAL_STATE,
             STACK_VERTICALSCALE_FAILED_STATE,
-            FAIL_HANDLED_EVENT);
+            STACK_VERTICALSCALE_FAIL_HANDLED_EVENT);
 
     public CoreVerticalScaleFlowConfig() {
         super(CoreVerticalScaleState.class, CoreVerticalScaleEvent.class);
