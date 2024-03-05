@@ -49,6 +49,7 @@ public class GcpObjectStorageConnector implements ObjectStorageConnector {
             storage.buckets().get(gcpStackUtil.getBucketName(request.getObjectStoragePath())).execute();
             return ObjectStorageMetadataResponse.builder()
                     .withStatus(ResponseStatus.OK)
+                    .withRegion(request.getRegion())
                     .build();
         } catch (Exception e) {
             LOGGER.debug(e.getMessage());
