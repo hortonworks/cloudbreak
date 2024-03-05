@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -11,17 +9,17 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.azure.core.http.HttpResponse;
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.postgresqlflexibleserver.PostgreSqlManager;
@@ -41,7 +39,7 @@ class AzureFlexibleServerClientTest {
 
     private static final String SERVER_NAME = "serverName";
 
-    @Mock
+    @Spy
     private AzureExceptionHandler azureExceptionHandler;
 
     @Mock
@@ -49,12 +47,6 @@ class AzureFlexibleServerClientTest {
 
     @InjectMocks
     private AzureFlexibleServerClient underTest;
-
-    @BeforeEach
-    void setUp() {
-        lenient().when(azureExceptionHandler.handleException(any(Supplier.class))).thenAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get());
-        lenient().doCallRealMethod().when(azureExceptionHandler).handleException(any(Runnable.class));
-    }
 
     @Test
     void testStartFlexibleServer() {
@@ -90,7 +82,29 @@ class AzureFlexibleServerClientTest {
         Servers servers = mock(Servers.class);
         when(postgreSqlFlexibleManager.servers()).thenReturn(servers);
         ServerState serverState = underTest.getFlexibleServerStatus(RESOURCE_GROUP_NAME, SERVER_NAME);
+        Assertions.assertEquals(AzureFlexibleServerClient.UNKNOWN, serverState);
+    }
+
+    @Test
+    void testGetFlexibleServerStatusWhenNotFound() {
+        Servers servers = mock(Servers.class);
+        HttpResponse httpResponse = mock(HttpResponse.class);
+        when(httpResponse.getStatusCode()).thenReturn(404);
+        ManagementException managementException = new ManagementException("", httpResponse);
+        when(servers.getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME))).thenThrow(managementException);
+        when(postgreSqlFlexibleManager.servers()).thenReturn(servers);
+        ServerState serverState = underTest.getFlexibleServerStatus(RESOURCE_GROUP_NAME, SERVER_NAME);
         Assertions.assertNull(serverState);
+    }
+
+    @Test
+    void testGetFlexibleServerStatusWhenUnhandledException() {
+        Servers servers = mock(Servers.class);
+        HttpResponse httpResponse = mock(HttpResponse.class);
+        ManagementException managementException = new ManagementException("", httpResponse);
+        when(servers.getByResourceGroup(eq(RESOURCE_GROUP_NAME), eq(SERVER_NAME))).thenThrow(managementException);
+        when(postgreSqlFlexibleManager.servers()).thenReturn(servers);
+        Assertions.assertThrows(ManagementException.class, () -> underTest.getFlexibleServerStatus(RESOURCE_GROUP_NAME, SERVER_NAME));
     }
 
     @Test

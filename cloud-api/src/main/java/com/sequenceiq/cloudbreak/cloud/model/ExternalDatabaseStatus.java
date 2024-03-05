@@ -7,7 +7,8 @@ public enum ExternalDatabaseStatus {
     STOPPED(StatusGroup.PERMANENT),
     UPDATE_IN_PROGRESS(StatusGroup.TRANSIENT),
     DELETE_IN_PROGRESS(StatusGroup.TRANSIENT),
-    DELETED(StatusGroup.PERMANENT);
+    DELETED(StatusGroup.PERMANENT),
+    UNKNOWN(StatusGroup.TRANSIENT);
 
     private final StatusGroup statusGroup;
 

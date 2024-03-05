@@ -19,6 +19,8 @@ import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 
 public class AzureFlexibleServerClient extends AbstractAzureServiceClient {
+    public static final ServerState UNKNOWN = ServerState.fromString("UNKNOWN");
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureFlexibleServerClient.class);
 
     private final PostgreSqlManager postgreSqlFlexibleManager;
@@ -42,10 +44,10 @@ public class AzureFlexibleServerClient extends AbstractAzureServiceClient {
                     .getByResourceGroup(resourceGroupName, serverName);
             if (server == null) {
                 LOGGER.debug("Flexible server not found with name {} in resourcegroup {}", serverName, resourceGroupName);
-                return null;
+                return UNKNOWN;
             } else {
                 LOGGER.debug("Flexible server status on Azure is {}", server.state());
-                return server.state();
+                return server.state() != null ? server.state() : UNKNOWN;
             }
         });
     }
