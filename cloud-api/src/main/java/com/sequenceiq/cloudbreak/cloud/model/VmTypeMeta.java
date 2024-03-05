@@ -22,6 +22,8 @@ public class VmTypeMeta {
 
     public static final String HOST_ENCRYPTION_SUPPORTED = "HostEncryptionSupported";
 
+    public static final String ENHANCED_NETWORK = "EnhancedNetwork";
+
     private VolumeParameterConfig magneticConfig;
 
     private VolumeParameterConfig autoAttachedConfig;
@@ -269,6 +271,11 @@ public class VmTypeMeta {
 
         public VmTypeMetaBuilder withHostEncryptionSupport(boolean hostEncryptionSupport) {
             properties.put(HOST_ENCRYPTION_SUPPORTED, hostEncryptionSupport);
+            return this;
+        }
+
+        public VmTypeMetaBuilder withEnhancedNetwork(boolean enhancedNetwork) {
+            properties.put(ENHANCED_NETWORK, enhancedNetwork);
             return this;
         }
 

@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureRegionProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureAcceleratedNetworkValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureHostEncryptionValidator;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -122,6 +123,9 @@ public class AzurePlatformResources implements PlatformResources {
 
     @Inject
     private AzureHostEncryptionValidator azureHostEncryptionValidator;
+
+    @Inject
+    private AzureAcceleratedNetworkValidator azureAcceleratedNetworkValidator;
 
     @Override
     public CloudNetworks networks(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
@@ -267,7 +271,8 @@ public class AzurePlatformResources implements PlatformResources {
             LOGGER.debug("Availability Zones for VM type {} are {}", virtualMachineSize.name(), availabilityZonesForVm);
             if (matchAvailabilityZones(filters, availabilityZonesForVm)) {
                 float memoryInGB = virtualMachineSize.memoryInMB() / NO_MB_PER_GB;
-                VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder().withCpuAndMemory(virtualMachineSize.numberOfCores(), memoryInGB);
+                VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder()
+                        .withCpuAndMemory(virtualMachineSize.numberOfCores(), memoryInGB);
                 for (VolumeParameterType volumeParameterType : VolumeParameterType.values()) {
                     if (volumeParameterType.in(MAGNETIC, SSD)) {
                         volumeParameterType.buildForVmTypeMetaBuilder(builder, virtualMachineSize.maxDataDiskCount(), maxDiskSize);
@@ -279,6 +284,7 @@ public class AzurePlatformResources implements PlatformResources {
                     builder.withResourceDiskAttached(false);
                 }
                 builder.withHostEncryptionSupport(azureHostEncryptionValidator.isVmSupported(virtualMachineSize.name(), hostEncryptionSupport));
+                builder.withEnhancedNetwork(azureAcceleratedNetworkValidator.isSupportedForVm(virtualMachineSize.name()));
                 builder.withAvailabilityZones(availabilityZonesForVm);
                 VmType vmType = VmType.vmTypeWithMeta(virtualMachineSize.name(), builder.create(), true);
                 types.add(vmType);

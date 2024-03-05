@@ -114,7 +114,7 @@ public class VerticalScaleInstanceProviderTest {
         });
 
         assertEquals("Unable to resize since changing from host encrypted m3.xlarge instance type " +
-                        "to m2.xlarge instance type which does not supporting host encryption.",
+                        "to m2.xlarge instance type which does not support host encryption.",
                 badRequestException.getMessage());
     }
 

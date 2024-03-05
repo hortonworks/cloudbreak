@@ -39,7 +39,7 @@ public class AzureAcceleratedNetworkValidator {
         return azureVirtualMachineTypeProvider.getVmTypes(azureStackView);
     }
 
-    private boolean isSupportedForVm(String vmType) {
+    public boolean isSupportedForVm(String vmType) {
         LOGGER.debug("Validating vm type: " + vmType);
         String[] parts = vmType.split("_");
         String transformedFlavor = "";

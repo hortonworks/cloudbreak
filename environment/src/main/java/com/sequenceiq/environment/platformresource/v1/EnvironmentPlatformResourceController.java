@@ -164,7 +164,10 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
         }
         LOGGER.debug("Get /platform_resources/machine_types_for_vertical_scaling, request: {}", request);
         CloudVmTypes cloudVmTypes = platformParameterService.getVmTypesByCredential(request);
-        cloudVmTypes = verticalScaleInstanceProvider.listInstanceTypes(null, instanceType, cloudVmTypes);
+        cloudVmTypes = verticalScaleInstanceProvider.listInstanceTypes(
+                null,
+                instanceType,
+                cloudVmTypes);
         PlatformVmtypesResponse response = cloudVmTypesToPlatformVmTypesV1ResponseConverter.convert(cloudVmTypes);
         LOGGER.debug("Resp /platform_resources/machine_types_for_vertical_scaling, request: {}, cloudVmTypes: {}, response: {}",
                 request, cloudVmTypes, response);

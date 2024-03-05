@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureListResult;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureRegionProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureAcceleratedNetworkValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureHostEncryptionValidator;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -83,6 +84,9 @@ class AzurePlatformResourcesTest {
     @Mock
     private AzureHostEncryptionValidator azureHostEncryptionValidator;
 
+    @Mock
+    private AzureAcceleratedNetworkValidator azureAcceleratedNetworkValidator;
+
     @InjectMocks
     private AzurePlatformResources underTest;
 
@@ -95,6 +99,7 @@ class AzurePlatformResourcesTest {
         when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
         when(azureClient.getAvailabilityZones(region.value())).thenReturn(Map.of());
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureAcceleratedNetworkValidator.isSupportedForVm(any())).thenReturn(true);
 
         CloudVmTypes actual = underTest.virtualMachines(cloudCredential, region, Map.of());
 
@@ -141,6 +146,7 @@ class AzurePlatformResourcesTest {
         zoneInfo.put("Standard_DS2_v2", List.of("1"));
         zoneInfo.put("Standard_E64ds_v4", List.of("1", "2", "3"));
         when(azureClient.getAvailabilityZones(region.value())).thenReturn(zoneInfo);
+        when(azureAcceleratedNetworkValidator.isSupportedForVm(any())).thenReturn(true);
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         when(azureHostEncryptionValidator.isVmSupported(any(), anyMap())).thenReturn(true);
 
@@ -241,6 +247,7 @@ class AzurePlatformResourcesTest {
         Set<VirtualMachineSize> virtualMachineSizes = zoneInfo.keySet().stream().map(vname -> createVirtualMachineSize(vname, 0))
                 .collect(Collectors.toSet());
 
+        when(azureAcceleratedNetworkValidator.isSupportedForVm(any())).thenReturn(true);
         when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         when(azureClient.getAvailabilityZones(region.value())).thenReturn(zoneInfo);

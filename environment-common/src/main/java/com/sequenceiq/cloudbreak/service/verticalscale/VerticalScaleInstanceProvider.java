@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.verticalscale;
 
+import static com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.ENHANCED_NETWORK;
 import static com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.HOST_ENCRYPTION_SUPPORTED;
 import static com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.RESOURCE_DISK_ATTACHED;
 import static com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED;
@@ -54,7 +55,6 @@ public class VerticalScaleInstanceProvider {
             LOGGER.warn("Invalid availabilityZoneForSelection; no corresponding key found in cloudVmResponses.");
             return new CloudVmTypes(Map.of(availabilityZoneForSelection, Set.of()), Map.of());
         }
-
         Optional<VmType> currentInstance = getInstance(currentInstanceType, vmTypes);
         LOGGER.debug("currentInstance: {}", currentInstance);
         Set<VmType> suitableInstances = vmTypes
@@ -116,6 +116,7 @@ public class VerticalScaleInstanceProvider {
                     currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
             validateResourceDisk(currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
             validateHostEncryption(currentInstanceType, requestedInstanceType, additionalProperties);
+            validateEnhancedNetwork(currentInstanceType, requestedInstanceType);
             if (instanceGroupAvailabilityZones != null) {
                 validateInstanceSupportsExistingZones(instanceGroupAvailabilityZones, requestedInstanceTypeMetaData.getAvailabilityZones(),
                         requestedInstanceTypeName);
@@ -133,7 +134,20 @@ public class VerticalScaleInstanceProvider {
             if (!requestedHostEncryptionSupported) {
                 throw new BadRequestException("Unable to resize since changing from host encrypted "
                         + currentVmType.getValue() + " instance type to " + requestedVmType.getValue()
-                        + " instance type which does not supporting host encryption.");
+                        + " instance type which does not support host encryption.");
+            }
+        }
+    }
+
+    private void validateEnhancedNetwork(VmType currentVmType, VmType requestedVmType) {
+        Boolean currentEnhancedNetworkActivated = (Boolean) currentVmType.getMetaData().getProperties().get(ENHANCED_NETWORK);
+        Boolean requestedEnhancedNetworkSupported = (Boolean) requestedVmType.getMetaData().getProperties().get(ENHANCED_NETWORK);
+
+        if (currentEnhancedNetworkActivated != null && requestedEnhancedNetworkSupported != null && currentEnhancedNetworkActivated) {
+            if (!requestedEnhancedNetworkSupported) {
+                throw new BadRequestException("Unable to resize since changing from enhanced network supported "
+                        + currentVmType.getValue() + " instance type to " + requestedVmType.getValue()
+                        + " instance type which does not support enhanced network.");
             }
         }
     }
