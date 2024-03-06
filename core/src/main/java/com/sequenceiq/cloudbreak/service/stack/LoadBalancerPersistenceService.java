@@ -19,6 +19,10 @@ public class LoadBalancerPersistenceService {
         return repository.save(loadBalancer);
     }
 
+    public void deleteByStackId(Long stackId) {
+        repository.deleteByStackId(stackId);
+    }
+
     public Iterable<LoadBalancer> saveAll(Iterable<LoadBalancer> loadBalancers) {
         return repository.saveAll(loadBalancers);
     }

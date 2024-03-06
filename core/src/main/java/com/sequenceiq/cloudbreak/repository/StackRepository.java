@@ -116,10 +116,16 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             "AND (s.type <> 'TEMPLATE' OR s.type is null)")
     Optional<Stack> findOneByCrnWithLists(@Param("crn") String crn);
 
-    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData LEFT JOIN FETCH ig.template " +
-            "LEFT JOIN FETCH ig.securityGroup LEFT JOIN FETCH ig.instanceGroupNetwork LEFT JOIN FETCH s.cluster c " +
-            "LEFT JOIN FETCH c.components WHERE s.id= :id " +
-            "AND (s.type <> 'TEMPLATE' OR s.type is null)")
+    @Query("SELECT s FROM Stack s "
+            + "LEFT JOIN FETCH s.instanceGroups ig "
+            + "LEFT JOIN FETCH ig.instanceMetaData "
+            + "LEFT JOIN FETCH ig.template "
+            + "LEFT JOIN FETCH ig.securityGroup "
+            + "LEFT JOIN FETCH ig.instanceGroupNetwork "
+            + "LEFT JOIN FETCH s.cluster c "
+            + "LEFT JOIN FETCH c.components "
+            + "WHERE s.id= :id "
+            + "AND (s.type <> 'TEMPLATE' OR s.type is null)")
     Optional<Stack> findOneWithCluster(@Param("id") Long id);
 
     @Query("SELECT s.id as id, s.name as name, s.stackStatus as status FROM Stack s WHERE s.id IN (:ids) AND (s.type <> 'TEMPLATE' OR s.type is null)")
@@ -517,4 +523,15 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
 
     @Query("SELECT s.database.id FROM Stack s WHERE s.id = :stackId")
     Optional<Long> findDatabaseIdByStackId(@Param("stackId") Long stackId);
+
+    @Query("SELECT s.resourceCrn FROM Stack s WHERE s.terminated < :date")
+    Set<String> findAllTerminatedBefore(Long date);
+
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups "
+            + "WHERE s.resourceCrn = :resourceCrn")
+    Optional<Stack> findByResourceCrnArchivedIsTrue(@Param("resourceCrn") String resourceCrn);
+
+    @Modifying
+    void deleteByResourceCrn(String crn);
+
 }

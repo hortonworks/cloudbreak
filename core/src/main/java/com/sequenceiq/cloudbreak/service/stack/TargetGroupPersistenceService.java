@@ -30,4 +30,8 @@ public class TargetGroupPersistenceService {
     public Set<TargetGroup> findByInstanceGroupId(Long instanceGroupId) {
         return repository.findByInstanceGroupId(instanceGroupId);
     }
+
+    public void delete(Long targetGroupId) {
+        repository.deleteById(targetGroupId);
+    }
 }

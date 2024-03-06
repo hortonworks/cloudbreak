@@ -7,6 +7,7 @@ import java.util.Optional;
 import jakarta.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 
 import com.sequenceiq.cloudbreak.domain.stack.StackPatch;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
@@ -19,4 +20,7 @@ public interface StackPatchRepository extends JpaRepository<StackPatch, Long> {
     Optional<StackPatch> findByStackIdAndType(Long stackId, StackPatchType stackPatchType);
 
     List<StackPatch> findByTypeAndStackIdIn(StackPatchType stackPatchType, Collection<Long> stackIds);
+
+    @Modifying
+    void deleteByStackId(Long stackId);
 }

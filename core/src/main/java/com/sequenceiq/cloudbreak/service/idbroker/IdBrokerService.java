@@ -36,6 +36,16 @@ public class IdBrokerService {
         return repository.findByClusterId(clusterId);
     }
 
+    public void deleteByClusterId(Long clusterId) {
+        IdBroker idBroker = getByCluster(clusterId);
+        if (idBroker != null) {
+            LOGGER.debug("IdBroker was presented for clusterId {}.", clusterId);
+            repository.deleteById(idBroker.getId());
+        } else {
+            LOGGER.debug("IdBroker was null for clusterid {}", clusterId);
+        }
+    }
+
     public void generateIdBrokerSignKey(Long stackId) {
         Cluster cluster = clusterService.findOneByStackIdOrNotFoundError(stackId);
         IdBroker idBroker = repository.findByClusterId(cluster.getId());

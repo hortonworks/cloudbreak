@@ -121,6 +121,10 @@ public class InstanceGroupService {
         return repository.save(instanceGroup);
     }
 
+    public void delete(Long id) {
+        repository.deleteById(id);
+    }
+
     public Set<InstanceGroup> findBySecurityGroup(SecurityGroup securityGroup) {
         return repository.findBySecurityGroup(securityGroup);
     }

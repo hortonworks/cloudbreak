@@ -77,8 +77,8 @@ import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
-import com.sequenceiq.cloudbreak.repository.ClusterCommandRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.ClusterCommandService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
@@ -139,7 +139,7 @@ public class ClouderaManagerSetupServiceTest {
     private ClouderaManagerYarnSetupService clouderaManagerYarnSetupService;
 
     @Mock
-    private ClusterCommandRepository clusterCommandRepository;
+    private ClusterCommandService clusterCommandService;
 
     @Mock
     private ClouderaManagerStorageErrorMapper clouderaManagerStorageErrorMapper;
@@ -169,7 +169,7 @@ public class ClouderaManagerSetupServiceTest {
         ReflectionTestUtils.setField(underTest, "clouderaManagerMgmtLaunchService", clouderaManagerMgmtLaunchService);
         ReflectionTestUtils.setField(underTest, "clouderaManagerSupportSetupService", clouderaManagerSupportSetupService);
         ReflectionTestUtils.setField(underTest, "clouderaManagerYarnSetupService", clouderaManagerYarnSetupService);
-        ReflectionTestUtils.setField(underTest, "clusterCommandRepository", clusterCommandRepository);
+        ReflectionTestUtils.setField(underTest, "clusterCommandService", clusterCommandService);
         ReflectionTestUtils.setField(underTest, "clouderaManagerFedRAMPService", clouderaManagerFedRAMPService);
         ReflectionTestUtils.setField(underTest, "apiClient", mock(ApiClient.class));
         ReflectionTestUtils.setField(underTest, "blueprintUtils", blueprintUtils);
@@ -1001,14 +1001,14 @@ public class ClouderaManagerSetupServiceTest {
                 .thenReturn(clouderaManagerRepo);
         when(clouderaManagerApiFactory.getClustersResourceApi(any(ApiClient.class))).thenReturn(clustersResourceApi);
         when(clustersResourceApi.readCluster(anyString())).thenReturn(apiCluster);
-        when(clusterCommandRepository.findTopByClusterIdAndClusterCommandType(anyLong(), any(ClusterCommandType.class)))
+        when(clusterCommandService.findTopByClusterIdAndClusterCommandType(anyLong(), any(ClusterCommandType.class)))
                 .thenReturn(Optional.empty());
         when(apiCommand.getId()).thenReturn(BigDecimal.ONE);
         when(clusterCommand.getCommandId()).thenReturn(BigDecimal.ONE);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
                 .thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.importClusterTemplate(anyBoolean(), any(ApiClusterTemplate.class))).thenReturn(apiCommand);
-        when(clusterCommandRepository.save(any(ClusterCommand.class))).thenReturn(clusterCommand);
+        when(clusterCommandService.save(any(ClusterCommand.class))).thenReturn(clusterCommand);
         when(clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(any(Stack.class), any(ApiClient.class), any(BigDecimal.class)))
                 .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().exit().build());
 
@@ -1016,7 +1016,7 @@ public class ClouderaManagerSetupServiceTest {
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmTemplateInstallation(
                 any(Stack.class), any(ApiClient.class), any(BigDecimal.class));
-        verify(clusterCommandRepository, times(1)).save(any(ClusterCommand.class));
+        verify(clusterCommandService, times(1)).save(any(ClusterCommand.class));
     }
 
     @Test

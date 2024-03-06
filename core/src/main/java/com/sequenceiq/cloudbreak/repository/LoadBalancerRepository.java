@@ -16,4 +16,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 public interface LoadBalancerRepository extends CrudRepository<LoadBalancer, Long> {
 
     Set<LoadBalancer> findByStackId(@Param("stackId") Long stackId);
+
+    void deleteByStackId(@Param("stackId") Long stackId);
+
 }

@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.ArchivedInstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.job.instancemetadata.ArchiveInstanceMetaDataConfig;
+import com.sequenceiq.cloudbreak.job.archiver.instancemetadata.ArchiveInstanceMetaDataConfig;
 import com.sequenceiq.cloudbreak.repository.ArchivedInstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;

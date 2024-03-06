@@ -79,4 +79,6 @@ public interface CDPStructuredEventRepository extends AccountAwareResourceReposi
     @Query("DELETE FROM CDPStructuredEventEntity cdse WHERE cdse.resourceCrn = :resourceCrn AND cdse.timestamp <= :timestamp")
     void deleteByResourceCrnOlderThan(@Param("resourceCrn") String resourceCrn, @Param("timestamp") Long timestamp);
 
+    @Modifying
+    void deleteByResourceCrn(String resourceCrn);
 }

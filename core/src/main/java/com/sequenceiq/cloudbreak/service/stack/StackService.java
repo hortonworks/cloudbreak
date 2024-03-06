@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -94,7 +95,10 @@ import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
@@ -106,7 +110,9 @@ import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.ClusterCommandService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
@@ -114,11 +120,16 @@ import com.sequenceiq.cloudbreak.service.environment.credential.OpenSshPublicKey
 import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService;
 import com.sequenceiq.cloudbreak.service.environment.telemetry.AccountTelemetryClientService;
 import com.sequenceiq.cloudbreak.service.externaldatabase.AzureDatabaseServerParameterDecorator;
+import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClusterConfigService.ShowTerminatedClustersAfterConfig;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
+import com.sequenceiq.cloudbreak.service.stackpatch.StackPatchService;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
@@ -195,6 +206,9 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     private StackStatusService stackStatusService;
 
     @Inject
+    private SecurityConfigService securityConfigService;
+
+    @Inject
     private TransactionService transactionService;
 
     @Inject
@@ -206,6 +220,27 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     @Inject
     private StackRepository stackRepository;
+
+    @Inject
+    private ClusterService clusterService;
+
+    @Inject
+    private IdBrokerService idBrokerService;
+
+    @Inject
+    private UserDataService userDataService;
+
+    @Inject
+    private TargetGroupPersistenceService targetGroupPersistenceService;
+
+    @Inject
+    private ClusterCommandService clusterCommandService;
+
+    @Inject
+    private ResourceService resourceService;
+
+    @Inject
+    private StackPatchService stackPatchService;
 
     @Inject
     private ImageService imageService;
@@ -230,9 +265,6 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     @Inject
     private LoadBalancerPersistenceService loadBalancerPersistenceService;
-
-    @Inject
-    private TargetGroupPersistenceService targetGroupPersistenceService;
 
     @Inject
     private StackToStackV4ResponseConverter stackToStackV4ResponseConverter;
@@ -1109,6 +1141,73 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     public List<StackClusterStatusView> getDeletedStacks(Long since) {
         validateMaxLimitForDeletedClusters(since);
         return stackRepository.getDeletedStacks(since);
+    }
+
+    public Set<String> getAllForArchive(long dateFrom) {
+        return stackRepository.findAllTerminatedBefore(dateFrom);
+    }
+
+    public void deleteArchivedByResourceCrn(String crn) {
+        Optional<Stack> stackOptional = stackRepository.findByResourceCrnArchivedIsTrue(crn);
+        if (stackOptional.isPresent()) {
+            // detaching all related entity on stack and orphan removal must delete all of them
+            Stack stack = stackOptional.get();
+            try {
+                Long stackId = stack.getId();
+                cleanupInstanceGroups(stack);
+                cleanupCluster(stack, stackId);
+
+                LOGGER.debug("Cleanup security config for stack {}", stackId);
+                securityConfigService.deleteByStackId(stackId);
+
+                LOGGER.debug("Cleanup userData for stack {}", stackId);
+                userDataService.deleteByStackId(stackId);
+
+                LOGGER.debug("Cleanup resources for stack {}", stackId);
+                resourceService.deleteByStackId(stackId);
+
+                LOGGER.debug("Cleanup loadBalancer for stack {}", stackId);
+                loadBalancerPersistenceService.deleteByStackId(stackId);
+
+                LOGGER.debug("Cleanup stackPatch for stack {}", stackId);
+                stackPatchService.deleteByStackId(stackId);
+            } catch (Exception e) {
+                LOGGER.error("Could not delete archived {} stack from database.", stack.getResourceCrn(), e.getMessage());
+            }
+        }
+        stackRepository.deleteByResourceCrn(crn);
+    }
+
+    private void cleanupCluster(Stack stack, Long stackId) {
+        LOGGER.debug("Cleanup cluster for stack {}", stack.getResourceCrn());
+        if (stack.getCluster() != null) {
+            Optional<Cluster> cluster = clusterService.findOneByStackId(stackId);
+            if (cluster.isPresent()) {
+                Long clusterId = cluster.get().getId();
+                LOGGER.debug("Cleanup idBroker entity for cluster {}", clusterId);
+                idBrokerService.deleteByClusterId(clusterId);
+                LOGGER.debug("Cleanup clusterCommand entity for cluster {}", clusterId);
+                clusterCommandService.deleteByClusterId(clusterId);
+                clusterService.pureDelete(stack.getCluster());
+            }
+        }
+    }
+
+    private void cleanupInstanceGroups(Stack stack) {
+        LOGGER.debug("Cleanup instancegroups for stack {}", stack.getResourceCrn());
+        if (stack.getInstanceGroups() != null) {
+            for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+                instanceGroup.setTargetGroups(new HashSet<>());
+                instanceGroupService.save(instanceGroup);
+
+                LOGGER.debug("Cleanup targetgroups for instanceGroup {}", instanceGroup.getId());
+                Set<TargetGroup> targetGroups = targetGroupPersistenceService.findByInstanceGroupId(instanceGroup.getId());
+                for (TargetGroup targetGroup : targetGroups) {
+                    targetGroupPersistenceService.delete(targetGroup.getId());
+                }
+                instanceGroupService.delete(instanceGroup.getId());
+            }
+        }
     }
 
     private void validateMaxLimitForDeletedClusters(Long since) {

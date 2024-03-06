@@ -16,6 +16,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
@@ -86,9 +87,13 @@ import com.sequenceiq.cloudbreak.domain.projection.StackImageView;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.ClusterCommandService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
@@ -97,12 +102,16 @@ import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
 import com.sequenceiq.cloudbreak.service.environment.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.externaldatabase.AzureDatabaseServerParameterDecorator;
+import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
+import com.sequenceiq.cloudbreak.service.stackpatch.StackPatchService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -163,6 +172,21 @@ class StackServiceTest {
 
     @Mock
     private StackAuthentication stackAuthentication;
+
+    @Mock
+    private IdBrokerService idBrokerService;
+
+    @Mock
+    private ClusterCommandService clusterCommandService;
+
+    @Mock
+    private UserDataService userDataService;
+
+    @Mock
+    private ResourceService resourceService;
+
+    @Mock
+    private StackPatchService stackPatchService;
 
     @Mock
     private ComponentConfigProviderService componentConfigProviderService;
@@ -797,5 +821,38 @@ class StackServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.getDeletedStacks(since));
         assertEquals("Fetching deleted clusters is only allowed for last 2 days", badRequestException.getMessage());
+    }
+
+    @Test
+    void testDeleteArchivedByResourceCrn() {
+        String crn = "crn";
+
+        Stack stackForTest = new Stack();
+        Cluster cluster = new Cluster();
+        stackForTest.setCluster(cluster);
+        stackForTest.setId(1L);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setId(1L);
+        TargetGroup targetGroup = new TargetGroup();
+        instanceGroup.setTargetGroups(Set.of(targetGroup));
+        stackForTest.setInstanceGroups(Set.of(instanceGroup));
+
+        when(instanceGroupService.save(any())).thenReturn(instanceGroup);
+        doNothing().when(instanceGroupService).delete(anyLong());
+        when(targetGroupPersistenceService.findByInstanceGroupId(anyLong())).thenReturn(Set.of(targetGroup));
+        doNothing().when(targetGroupPersistenceService).delete(anyLong());
+        when(stackRepository.findByResourceCrnArchivedIsTrue(anyString())).thenReturn(Optional.of(stackForTest));
+        when(clusterService.findOneByStackId(anyLong())).thenReturn(Optional.of(cluster));
+        doNothing().when(idBrokerService).deleteByClusterId(any());
+        doNothing().when(clusterCommandService).deleteByClusterId(any());
+        doNothing().when(clusterService).pureDelete(any());
+        doNothing().when(securityConfigService).deleteByStackId(anyLong());
+        doNothing().when(userDataService).deleteByStackId(anyLong());
+        doNothing().when(resourceService).deleteByStackId(anyLong());
+        doNothing().when(loadBalancerPersistenceService).deleteByStackId(anyLong());
+        doNothing().when(stackPatchService).deleteByStackId(anyLong());
+        doNothing().when(stackRepository).deleteByResourceCrn(anyString());
+
+        underTest.deleteArchivedByResourceCrn(crn);
     }
 }

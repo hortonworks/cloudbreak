@@ -68,4 +68,8 @@ public class StackPatchService {
     public List<StackPatch> findAllByTypeForStackIds(StackPatchType stackPatchType, Collection<Long> stackIds) {
         return stackPatchRepository.findByTypeAndStackIdIn(stackPatchType, stackIds);
     }
+
+    public void deleteByStackId(Long stackId) {
+        stackPatchRepository.deleteByStackId(stackId);
+    }
 }

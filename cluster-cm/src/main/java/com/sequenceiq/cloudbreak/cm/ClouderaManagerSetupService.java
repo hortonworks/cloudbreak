@@ -77,8 +77,8 @@ import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
-import com.sequenceiq.cloudbreak.repository.ClusterCommandRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.ClusterCommandService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -129,7 +129,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     private ClouderaManagerYarnSetupService clouderaManagerYarnSetupService;
 
     @Inject
-    private ClusterCommandRepository clusterCommandRepository;
+    private ClusterCommandService clusterCommandService;
 
     @Inject
     private ClouderaManagerStorageErrorMapper clouderaManagerStorageErrorMapper;
@@ -280,7 +280,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         try {
             Optional<ApiCluster> cmCluster = getCmClusterByName(cluster.getName());
             boolean prewarmed = isPrewarmed(cluster.getId());
-            Optional<ClusterCommand> importCommand = clusterCommandRepository.findTopByClusterIdAndClusterCommandType(cluster.getId(),
+            Optional<ClusterCommand> importCommand = clusterCommandService.findTopByClusterIdAndClusterCommandType(cluster.getId(),
                     ClusterCommandType.IMPORT_CLUSTER);
             if (cmCluster.isEmpty() || importCommand.isEmpty()) {
                 ApiClusterTemplate apiClusterTemplate = JsonUtil.readValue(template, ApiClusterTemplate.class);
@@ -294,7 +294,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                 clusterCommand.setClusterId(cluster.getId());
                 clusterCommand.setCommandId(apiCommand.getId());
                 clusterCommand.setClusterCommandType(ClusterCommandType.IMPORT_CLUSTER);
-                importCommand = Optional.of(clusterCommandRepository.save(clusterCommand));
+                importCommand = Optional.of(clusterCommandService.save(clusterCommand));
                 LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
             }
             importCommand.ifPresent(cmd -> clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(stack, apiClient, cmd.getCommandId()));

@@ -83,6 +83,16 @@ public class UserDataService {
     @Inject
     private EnvironmentClientService environmentClientService;
 
+    public void deleteByStackId(Long stackId) {
+        Optional<Userdata> userdataOptional = userdataRepository.findByStackId(stackId);
+        if (userdataOptional.isPresent()) {
+            LOGGER.debug("Userdata was presented for stackid {}.", stackId);
+            userdataRepository.deleteById(userdataOptional.get().getId());
+        } else {
+            LOGGER.debug("Userdata was not found for stackid {}", stackId);
+        }
+    }
+
     public void updateJumpgateFlagOnly(Long stackId) {
         LOGGER.debug("Updating Jumpgate flag in user data for stack {}", stackId);
         Map<InstanceGroupType, String> userdata = getUserData(stackId);

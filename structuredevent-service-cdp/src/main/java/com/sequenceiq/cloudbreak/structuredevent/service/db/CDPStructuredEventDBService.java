@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.db;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -170,9 +169,16 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
     }
 
     public Optional<Exception> deleteStructuredEventByResourceCrn(String resourceCrn) {
-        long now = new Date().getTime();
-        LOGGER.trace("About to delete structured event(s) for CRN: {} that has a smaller - or equal - timestamp than the following: {}", resourceCrn, now);
-        return deleteStructuredEventByResourceCrnThatIsOlderThan(resourceCrn, now);
+        Optional<Exception> exception = Optional.empty();
+        try {
+            LOGGER.trace("About to delete structured event(s) for CRN: {} that has a smaller - or equal - timestamp than the following: {}", resourceCrn);
+            structuredEventRepository.deleteByResourceCrn(resourceCrn);
+        } catch (Exception e) {
+            LOGGER.debug("deleteByResourceCrnOlderThan() repository deletion has failed for {} due to: {}",
+                    CDPStructuredEventEntity.class.getSimpleName(), e.getMessage());
+            exception = Optional.of(e);
+        }
+        return exception;
     }
 
     private List<StructuredEventType> getAllEventTypeIfEmpty(List<StructuredEventType> eventTypes) {

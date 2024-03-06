@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.job.instancemetadata;
+package com.sequenceiq.cloudbreak.job.archiver.instancemetadata;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;

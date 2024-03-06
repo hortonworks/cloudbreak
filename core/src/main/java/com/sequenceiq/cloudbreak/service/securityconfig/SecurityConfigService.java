@@ -42,6 +42,16 @@ public class SecurityConfigService {
         return securityConfigRepository.findOneByStackId(stackId);
     }
 
+    public void deleteByStackId(Long stackId) {
+        Optional<SecurityConfig> securityConfig = findOneByStackId(stackId);
+        if (securityConfig.isPresent()) {
+            LOGGER.debug("Security config was presented for stackid {}.", stackId);
+            securityConfigRepository.deleteById(securityConfig.get().getId());
+        } else {
+            LOGGER.debug("Security config was not found for stackid {}.", stackId);
+        }
+    }
+
     public SecurityConfig getOneByStackId(Long stackId) {
         return findOneByStackId(stackId)
                 .orElseThrow(() -> new NotFoundException("Stack does not have a security config"));

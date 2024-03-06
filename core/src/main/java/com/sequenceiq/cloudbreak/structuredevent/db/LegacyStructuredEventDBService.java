@@ -181,6 +181,11 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
                 "Cleaning up StructuredEvent(s) (for resourceId: " + resourceId + ") that are older than 3 months");
     }
 
+    public void deleteEntriesByResourceCrn(String resourceCrn) {
+        measureAndWarnIfLong(() -> repository.deleteByResourceCrn(resourceCrn), LOGGER,
+                "Cleaning up StructuredEvent(s) (for resourceCrn: " + resourceCrn + ")");
+    }
+
     public StructuredEventEntity findByWorkspaceIdAndId(Long workspaceId, Long id) {
         return repository.findByWorkspaceIdAndId(workspaceId, id);
     }

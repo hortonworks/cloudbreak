@@ -85,6 +85,10 @@ public interface ResourceRepository extends CrudRepository<Resource, Long> {
     void deleteByStackIdAndNameAndType(@Param("stackId") Long stackId, @Param("name") String name, @Param("type") ResourceType type);
 
     @Modifying
+    @Query("DELETE FROM Resource r WHERE r.stack.id = :stackId")
+    void deleteByStackId(@Param("stackId") Long stackId);
+
+    @Modifying
     @Query("DELETE FROM Resource r WHERE r.resourceReference = :resourceReference AND r.resourceType = :type AND r.stack.id is null")
     boolean deleteByResourceReferenceAndType(@Param("resourceReference") String resourceReference, @Param("type") ResourceType type);
 
