@@ -90,15 +90,15 @@ class SdxRecommendationServiceTest {
 
     @Test
     public void testGetDefaultTemplateWhenMissingRequiredParameters() {
-        assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplateResponse(null,  "7.2.14", "AWS"));
-        assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplateResponse(LIGHT_DUTY,  null, "AWS"));
-        assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplateResponse(LIGHT_DUTY,  "7.2.14", null));
+        assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplateResponse(null, "7.2.14", "AWS"));
+        assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplateResponse(LIGHT_DUTY, null, "AWS"));
+        assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplateResponse(LIGHT_DUTY, "7.2.14", null));
     }
 
     @Test
     public void testGetDefaultTemplateWhenMissingTemplateForParameters() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(null);
-        assertThrows(NotFoundException.class, () -> underTest.getDefaultTemplateResponse(LIGHT_DUTY,  "7.2.14", "AWS"));
+        assertThrows(NotFoundException.class, () -> underTest.getDefaultTemplateResponse(LIGHT_DUTY, "7.2.14", "AWS"));
     }
 
     @Test
@@ -136,16 +136,27 @@ class SdxRecommendationServiceTest {
     }
 
     @Test
-    public void testGetRecommendationFailed() {
+    public void testGetRecommendationFailedWithBadRequestException() {
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
+        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any()))
+                .thenThrow(new jakarta.ws.rs.BadRequestException("bad request"));
+
+        jakarta.ws.rs.BadRequestException badRequestException = assertThrows(jakarta.ws.rs.BadRequestException.class,
+                () -> underTest.getRecommendation("cred", LIGHT_DUTY, "7.2.14", "AWS", "ec-central-1", null));
+
+        assertEquals("bad request", badRequestException.getMessage());
+    }
+
+    @Test
+    public void testGetRecommendationFailedWithProvidedClientSecretKeysError() {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
         when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any()))
                 .thenThrow(new jakarta.ws.rs.BadRequestException("The provided client secret keys for app 1234."));
 
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+        RuntimeException runtimeException = assertThrows(RuntimeException.class,
                 () -> underTest.getRecommendation("cred", LIGHT_DUTY, "7.2.14", "AWS", "ec-central-1", null));
 
-        assertEquals("The provided client secret keys for app 1234. Please update your CDP Credential with the newly generated application key value!",
-                badRequestException.getMessage());
+        assertEquals("The provided client secret keys for app 1234.", runtimeException.getMessage());
     }
 
     @Test

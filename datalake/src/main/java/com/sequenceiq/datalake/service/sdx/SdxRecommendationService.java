@@ -113,7 +113,7 @@ public class SdxRecommendationService {
                             "runtimeVersion: {}, cloudPlatform: {}, region: {}, availabilityZone: {}",
                     clusterShape, runtimeVersion, cloudPlatform, region, availabilityZone);
             return new SdxRecommendationResponse(defaultTemplate, availableVmTypesByInstanceGroup);
-        } catch (NotFoundException | BadRequestException e) {
+        } catch (NotFoundException | BadRequestException | jakarta.ws.rs.BadRequestException e) {
             throw e;
         } catch (Exception e) {
             if (e.getMessage().contains("The provided client secret keys for app")) {
