@@ -48,6 +48,11 @@ public class DatabaseServerConverter {
             if (sslConfig.getSslCertificateType() != null) {
                 databaseServerSslConfig.setSslCertificateType(sslCertificateTypeToDatabaseServerSslCertificateType(sslConfig.getSslCertificateType()));
             }
+            if (sslConfig.getSslCertificatesStatus() != null) {
+                databaseServerSslConfig.setSslCertificatesStatus(sslConfig.getSslCertificatesStatus().name());
+            }
+            databaseServerSslConfig.setSslCertificateExpirationDate(sslConfig.getSslCertificateExpirationDate());
+            databaseServerSslConfig.setSslCertificateExpirationDateAsDateString(sslConfig.getSslCertificateExpirationDateAsDateString());
             stackDatabaseServerResponse.setSslConfig(databaseServerSslConfig);
         }
         return stackDatabaseServerResponse;

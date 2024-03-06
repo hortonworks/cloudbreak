@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.Databa
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslCertStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType;
@@ -47,6 +48,9 @@ class DatabaseServerConverterTest {
         sourceSslConfig.setSslCertificates(Set.of("cert1", "cert2"));
         sourceSslConfig.setSslMode(SslMode.ENABLED);
         sourceSslConfig.setSslCertificateType(SslCertificateType.CLOUD_PROVIDER_OWNED);
+        sourceSslConfig.setSslCertificatesStatus(SslCertStatus.UP_TO_DATE);
+        sourceSslConfig.setSslCertificateExpirationDate(1L);
+        sourceSslConfig.setSslCertificateExpirationDateAsDateString("expirationDate");
         source.setSslConfig(sourceSslConfig);
         source.setMajorVersion(MajorVersion.VERSION_10);
 
@@ -68,6 +72,9 @@ class DatabaseServerConverterTest {
         DatabaseServerSslConfig resultSslConfig = result.getSslConfig();
         assertThat(resultSslConfig.getSslMode()).isEqualTo(DatabaseServerSslMode.ENABLED);
         assertThat(resultSslConfig.getSslCertificateType()).isEqualTo(DatabaseServerSslCertificateType.CLOUD_PROVIDER_OWNED);
+        assertThat(resultSslConfig.getSslCertificatesStatus()).isEqualTo(sourceSslConfig.getSslCertificatesStatus().name());
+        assertThat(resultSslConfig.getSslCertificateExpirationDate()).isEqualTo(sourceSslConfig.getSslCertificateExpirationDate());
+        assertThat(resultSslConfig.getSslCertificateExpirationDateAsDateString()).isEqualTo(sourceSslConfig.getSslCertificateExpirationDateAsDateString());
         assertThat(resultSslConfig.getSslCertificates()).isEqualTo(sourceSslConfig.getSslCertificates());
     }
 

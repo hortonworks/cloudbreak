@@ -516,6 +516,9 @@ public class ModelDescriptions {
         public static final String SSL_CERTIFICATE_TYPE = "SSL certificate type";
         public static final String SSL_MODE = "SSL enforcement mode for the actual database server";
         public static final String SSL_CONFIG = "SSL config of the database server";
+        public static final String SSL_CERTIFICATE_STATUS = "Current status of the set of relevant SSL certificates for the database server";
+        public static final String SSL_CERTIFICATE_EXPIRATION_DATE_AS_LONG = "Expiration date of the the SSL cert as long.";
+        public static final String SSL_CERTIFICATE_EXPIRATION_DATE_AS_STRING = "Expiration date of the the SSL cert as date string.";
     }
 
     public static class FileSystem {

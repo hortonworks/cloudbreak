@@ -21,6 +21,15 @@ public class DatabaseServerSslConfig {
     @Schema(description = DatabaseServerModelDescription.SSL_MODE)
     private DatabaseServerSslMode sslMode;
 
+    @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATE_STATUS)
+    private String sslCertificatesStatus;
+
+    @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATE_EXPIRATION_DATE_AS_LONG)
+    private long sslCertificateExpirationDate;
+
+    @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATE_EXPIRATION_DATE_AS_STRING)
+    private String sslCertificateExpirationDateAsDateString;
+
     public DatabaseServerSslConfig() {
     }
 
@@ -46,6 +55,30 @@ public class DatabaseServerSslConfig {
 
     public void setSslMode(DatabaseServerSslMode sslMode) {
         this.sslMode = sslMode;
+    }
+
+    public String getSslCertificatesStatus() {
+        return sslCertificatesStatus;
+    }
+
+    public void setSslCertificatesStatus(String sslCertificatesStatus) {
+        this.sslCertificatesStatus = sslCertificatesStatus;
+    }
+
+    public long getSslCertificateExpirationDate() {
+        return sslCertificateExpirationDate;
+    }
+
+    public void setSslCertificateExpirationDate(long sslCertificateExpirationDate) {
+        this.sslCertificateExpirationDate = sslCertificateExpirationDate;
+    }
+
+    public String getSslCertificateExpirationDateAsDateString() {
+        return sslCertificateExpirationDateAsDateString;
+    }
+
+    public void setSslCertificateExpirationDateAsDateString(String sslCertificateExpirationDateAsDateString) {
+        this.sslCertificateExpirationDateAsDateString = sslCertificateExpirationDateAsDateString;
     }
 
     @Override
