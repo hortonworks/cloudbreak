@@ -118,7 +118,8 @@ public class StackProvisionService {
     public void setupTls(StackContext context) throws CloudbreakException {
         Stack stack = context.getStack();
         Set<InstanceMetaData> instanceMetaDataSet =
-                stack.getInstanceGroups().stream().flatMap(instanceGroup -> instanceGroup.getAllInstanceMetaData().stream()).collect(Collectors.toSet());
+                stack.getInstanceGroups().stream().flatMap(instanceGroup -> instanceGroup.getNotDeletedInstanceMetaDataSet().stream())
+                        .collect(Collectors.toSet());
         for (InstanceMetaData gwInstance : instanceMetaDataSet) {
             tlsSetupService.setupTls(stack.getId(), gwInstance);
         }

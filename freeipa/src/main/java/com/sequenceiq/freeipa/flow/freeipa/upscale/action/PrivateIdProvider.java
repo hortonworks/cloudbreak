@@ -20,8 +20,8 @@ public class PrivateIdProvider {
                 .flatMap(ig -> ig.getAllInstanceMetaData().stream())
                 .filter(im -> im.getPrivateId() != null)
                 .map(InstanceMetaData::getPrivateId)
-                .map(i -> i + 1)
                 .max(Long::compare)
+                .map(maxId -> maxId + 1)
                 .orElse(0L);
         LOGGER.debug("First valid privateId: {}", id);
         return id;

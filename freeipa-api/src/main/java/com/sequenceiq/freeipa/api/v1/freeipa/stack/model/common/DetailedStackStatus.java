@@ -92,7 +92,8 @@ public enum DetailedStackStatus {
     MODIFY_PROXY_CONFIG_IN_PROGRESS(Status.MODIFY_PROXY_CONFIG_IN_PROGRESS, AvailabilityStatus.AVAILABLE),
     MODIFY_PROXY_CONFIG_FAILED(Status.MODIFY_PROXY_CONFIG_FAILED, AvailabilityStatus.AVAILABLE),
     UPGRADE_FAILED(Status.UPGRADE_FAILED, AvailabilityStatus.AVAILABLE),
-    REBUILD_IN_PROGRESS(Status.REBUILD_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE);
+    REBUILD_IN_PROGRESS(Status.REBUILD_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    REBUILD_FAILED(Status.REBUILD_FAILED, AvailabilityStatus.UNAVAILABLE);
 
     public static final Collection<DetailedStackStatus> AVAILABLE_STATUSES;
 

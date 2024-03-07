@@ -14,14 +14,13 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCA
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_METADATA_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATE_INSTANCES_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATE_INSTANCES_FINISHED_EVENT;
-import static java.lang.String.format;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -49,13 +48,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
-import com.sequenceiq.common.api.type.CommonResourceType;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -112,6 +108,7 @@ import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceValidationService;
 import com.sequenceiq.freeipa.service.stack.instance.MetadataSetupService;
 
 @Configuration
@@ -182,6 +179,7 @@ public class FreeIpaUpscaleActions {
     @Bean(name = "UPSCALE_ADD_INSTANCES_STATE")
     public Action<?, ?> addInstancesAction() {
         return new AbstractUpscaleAction<>(StackEvent.class) {
+
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
@@ -190,22 +188,16 @@ public class FreeIpaUpscaleActions {
                 List<CloudInstance> newInstances = buildNewInstances(context.getStack(), getInstanceCountByGroup(variables));
                 LOGGER.debug("Freeipa upscale new instances: {}", newInstances);
                 if (newInstances.isEmpty()) {
-                    skipAddingNewInstances(context, stack);
+                    skipAddingNewInstances(context, stack.getId());
                 } else {
-                    List<String> instanceIdsToRemove = getInstanceIds(variables);
-                    if (instanceIdsToRemove == null) {
-                        instanceIdsToRemove = new ArrayList<>();
-                    }
+                    List<String> instanceIdsToRemove = Optional.ofNullable(getInstanceIds(variables)).orElseGet(ArrayList::new);
                     addNewInstances(context, stack, newInstances, instanceIdsToRemove);
                 }
             }
 
-            private void skipAddingNewInstances(StackContext context, Stack stack) {
-                List<CloudResourceStatus> list = resourceService.getAllAsCloudResourceStatus(stack.getId());
-                UpscaleStackRequest<UpscaleStackResult> request = new UpscaleStackRequest<>(
-                        context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(), ResourceLists.transform(list),
-                        new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L));
-                UpscaleStackResult result = new UpscaleStackResult(request.getResourceId(), ResourceStatus.CREATED, list);
+            private void skipAddingNewInstances(StackContext context, Long stackId) {
+                List<CloudResourceStatus> list = resourceService.getAllAsCloudResourceStatus(stackId);
+                UpscaleStackResult result = new UpscaleStackResult(stackId, ResourceStatus.CREATED, list);
                 sendEvent(context, result.selector(), result);
             }
 
@@ -285,12 +277,16 @@ public class FreeIpaUpscaleActions {
     @Bean(name = "UPSCALE_VALIDATE_INSTANCES_STATE")
     public Action<?, ?> validateInstancesAction() {
         return new AbstractUpscaleAction<>(UpscaleStackResult.class) {
+
+            @Inject
+            private InstanceValidationService instanceValidationService;
+
             @Override
             protected void doExecute(StackContext context, UpscaleStackResult payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Validating new instances");
                 try {
-                    finishAddInstances(context, payload);
+                    instanceValidationService.finishAddInstances(context, payload);
                     sendEvent(context, UPSCALE_VALIDATE_INSTANCES_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
                 } catch (Exception e) {
                     LOGGER.error("Failed to validate the instances", e);
@@ -299,61 +295,6 @@ public class FreeIpaUpscaleActions {
                 }
             }
 
-            private void finishAddInstances(StackContext context, UpscaleStackResult payload) {
-                LOGGER.debug("Upscale stack result: {}", payload);
-                List<CloudResourceStatus> results = payload.getResults();
-                validateResourceResults(context, payload.getErrorDetails(), results);
-                Set<Resource> resourceSet = transformResults(results, context.getStack());
-                if (resourceSet.isEmpty()) {
-                    metadataSetupService.cleanupRequestedInstances(context.getStack());
-                    throw new OperationException("Failed to upscale the cluster since all create request failed. Resource set is empty");
-                }
-                LOGGER.debug("Adding new instances to the stack is DONE");
-            }
-
-            private void validateResourceResults(StackContext context, Exception exception, List<CloudResourceStatus> results) {
-                if (exception != null) {
-                    LOGGER.info(format("Failed to upscale stack: %s", context.getCloudContext()), exception);
-                    throw new OperationException(exception);
-                }
-                List<CloudResourceStatus> missingResources = results.stream()
-                        .filter(result -> CommonResourceType.TEMPLATE == result.getCloudResource().getType().getCommonResourceType())
-                        .filter(status -> status.isFailed() || status.isDeleted())
-                        .collect(Collectors.toList());
-
-                if (!missingResources.isEmpty()) {
-                    StringBuilder message = new StringBuilder("Failed to upscale the stack for ")
-                            .append(context.getCloudContext())
-                            .append(" due to: ");
-                    missingResources.forEach(res ->
-                            message.append("[privateId: ")
-                                    .append(res.getPrivateId())
-                                    .append(", statusReason: ")
-                                    .append(res.getStatusReason())
-                                    .append("] "));
-                    LOGGER.warn(message.toString());
-                    throw new OperationException(message.toString());
-                }
-            }
-
-            private Set<Resource> transformResults(Iterable<CloudResourceStatus> cloudResourceStatuses, Stack stack) {
-                Set<Resource> retSet = new HashSet<>();
-                for (CloudResourceStatus cloudResourceStatus : cloudResourceStatuses) {
-                    if (!cloudResourceStatus.isFailed()) {
-                        CloudResource cloudResource = cloudResourceStatus.getCloudResource();
-                        Resource resource = new Resource(
-                                cloudResource.getType(),
-                                cloudResource.getName(),
-                                cloudResource.getReference(),
-                                cloudResource.getStatus(),
-                                stack,
-                                null,
-                                cloudResource.getAvailabilityZone());
-                        retSet.add(resource);
-                    }
-                }
-                return retSet;
-            }
         };
     }
 

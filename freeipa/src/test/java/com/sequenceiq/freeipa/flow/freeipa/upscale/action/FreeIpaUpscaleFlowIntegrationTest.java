@@ -125,6 +125,7 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceValidationService;
 import com.sequenceiq.freeipa.service.stack.instance.MetadataSetupService;
 import com.sequenceiq.freeipa.sync.FreeipaJobService;
 
@@ -396,5 +397,8 @@ class FreeIpaUpscaleFlowIntegrationTest {
 
         @MockBean
         private FreeIpaSafeInstanceHealthDetailsService freeIpaSafeInstanceHealthDetailsService;
+
+        @MockBean
+        private InstanceValidationService instanceValidationService;
     }
 }

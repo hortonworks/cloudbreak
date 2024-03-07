@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.action.FreeIpaUpscaleActions;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
@@ -37,6 +38,7 @@ public class RebuildExtendMetadataAction extends AbstractRebuildAction<StackEven
 
     @Override
     protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+        stackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.REBUILD_IN_PROGRESS, "Extending metadata");
         List<CloudResource> cloudResources = resourceService.getAllCloudResource(context.getStack());
         List<CloudInstance> allKnownInstances = cloudStackConverter.buildInstances(context.getStack());
         CollectMetadataRequest request = new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources,

@@ -17,6 +17,7 @@ import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildOrchestratorCon
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildPostInstallAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildRegisterClusterProxyAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildRemoveInstancesAction;
+import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildRemoveInstancesFinishedAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildRestoreFreeIpaAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildSaveMetadataAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildStartAction;
@@ -35,6 +36,7 @@ public enum FreeIpaRebuildState implements FlowState {
     REBUILD_UPDATE_METADATA_FOR_DELETION_REQUEST_STATE(RebuildUpdateMetadataForDeletionAction.class),
     REBUILD_COLLECT_RESOURCES_STATE(RebuildCollectResourcesAction.class),
     REBUILD_REMOVE_INSTANCES_STATE(RebuildRemoveInstancesAction.class),
+    REBUILD_REMOVE_INSTANCES_FINISHED_STATE(RebuildRemoveInstancesFinishedAction.class),
     REBUILD_ADD_INSTANCE_STATE(RebuildAddInstanceAction.class),
     REBUILD_VALIDATE_INSTANCE_STATE(RebuildValidateInstanceAction.class),
     REBUILD_EXTEND_METADATA_STATE(RebuildExtendMetadataAction.class),

@@ -60,6 +60,11 @@ public class CloudPlatformResult implements Payload {
     }
 
     @Override
+    public Exception getException() {
+        return getErrorDetails();
+    }
+
+    @Override
     public String toString() {
         return "CloudPlatformResult{"
                 + "status=" + status

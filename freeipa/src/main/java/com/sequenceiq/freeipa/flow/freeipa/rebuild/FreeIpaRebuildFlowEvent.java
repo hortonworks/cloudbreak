@@ -38,6 +38,7 @@ public enum FreeIpaRebuildFlowEvent implements FlowEvent {
     COLLECT_RESOURCES_FAILED_EVENT(EventSelectorUtil.failureSelector(DownscaleStackCollectResourcesResult.class)),
     REMOVE_INSTANCES_FINISHED_EVENT(EventSelectorUtil.selector(DownscaleStackResult.class)),
     REMOVE_INSTANCES_FAILED_EVENT(EventSelectorUtil.failureSelector(DownscaleStackResult.class)),
+    ADD_INSTANCE_EVENT,
     ADD_INSTANCE_FINISHED_EVENT(CloudPlatformResult.selector(UpscaleStackResult.class)),
     ADD_INSTANCE_FAILED_EVENT(CloudPlatformResult.failureSelector(UpscaleStackResult.class)),
     VALIDATE_INSTANCE_FINISHED_EVENT,

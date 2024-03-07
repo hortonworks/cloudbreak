@@ -47,6 +47,7 @@ import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
+import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -68,6 +69,7 @@ import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildOrchestratorCon
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildPostInstallAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildRegisterClusterProxyAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildRemoveInstancesAction;
+import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildRemoveInstancesFinishedAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildRestoreFreeIpaAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildSaveMetadataAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildStartAction;
@@ -84,7 +86,9 @@ import com.sequenceiq.freeipa.flow.freeipa.rebuild.handler.FreeIpaCleanupAfterRe
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.handler.FreeIpaRestoreHandler;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.handler.RebuildValidateHealthHandler;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.handler.ValidateBackupHandler;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.action.PrivateIdProvider;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.handler.FreeipaUpscaleStackHandler;
+import com.sequenceiq.freeipa.flow.stack.provision.action.StackProvisionService;
 import com.sequenceiq.freeipa.flow.stack.provision.handler.ClusterProxyRegistrationHandler;
 import com.sequenceiq.freeipa.flow.stack.termination.action.TerminationService;
 import com.sequenceiq.freeipa.service.BootstrapService;
@@ -94,11 +98,14 @@ import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaInstallService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaOrchestrationConfigService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaPostInstallService;
+import com.sequenceiq.freeipa.service.resource.ResourceAttributeUtil;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceValidationService;
+import com.sequenceiq.freeipa.service.stack.instance.MetadataSetupService;
 
 @ActiveProfiles("integration-test")
 @ExtendWith(SpringExtension.class)
@@ -177,6 +184,18 @@ class RebuildFlowIntegrationTest {
     @MockBean
     private TerminationService terminationService;
 
+    @MockBean
+    private PrivateIdProvider privateIdProvider;
+
+    @MockBean
+    private InstanceValidationService instanceValidationService;
+
+    @MockBean
+    private MetadataSetupService metadataSetupService;
+
+    @MockBean
+    private StackProvisionService stackProvisionService;
+
     @BeforeEach
     public void setup() {
         Stack stack = new Stack();
@@ -237,6 +256,7 @@ class RebuildFlowIntegrationTest {
             RebuildUpdateMetadataForDeletionAction.class,
             RebuildCollectResourcesAction.class,
             RebuildRemoveInstancesAction.class,
+            RebuildRemoveInstancesFinishedAction.class,
             RebuildAddInstanceAction.class,
             RebuildValidateInstanceAction.class,
             RebuildExtendMetadataAction.class,
@@ -272,7 +292,9 @@ class RebuildFlowIntegrationTest {
             PostInstallFreeIpaHandler.class,
             FreeIpaRebuildFlowConfig.class,
             FlowIntegrationTestConfig.class,
-            CloudPlatformInitializer.class
+            CloudPlatformInitializer.class,
+            ResourceToCloudResourceConverter.class,
+            ResourceAttributeUtil.class
     })
     static class Config {
 

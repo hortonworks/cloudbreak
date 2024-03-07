@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
@@ -20,6 +21,7 @@ public class RebuildFinishedAction extends AbstractRebuildAction<StackEvent> {
 
     @Override
     protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+        stackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.AVAILABLE, "Rebuild finished");
         sendEvent(context, new StackEvent(REBUILD_FINISHED_EVENT.event(), payload.getResourceId()));
     }
 }

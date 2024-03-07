@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.action.FreeIpaUpscaleActions;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
@@ -23,6 +24,7 @@ public class RebuildRegisterClusterProxyAction extends AbstractRebuildAction<Sta
 
     @Override
     protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+        stackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.REBUILD_IN_PROGRESS, "Update cluster proxy registration before bootstrap");
         sendEvent(context, new ClusterProxyRegistrationRequest(payload.getResourceId()));
     }
 }

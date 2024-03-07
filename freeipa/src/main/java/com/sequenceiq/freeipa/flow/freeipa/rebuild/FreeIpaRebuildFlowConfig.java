@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.rebuild;
 
+import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.ADD_INSTANCE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.ADD_INSTANCE_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.ADD_INSTANCE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.BOOTSTRAP_MACHINES_FAILED_EVENT;
@@ -51,6 +52,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.RE
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_FREEIPA_INSTALL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_FREEIPA_POST_INSTALL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_ORCHESTRATOR_CONFIG_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_REMOVE_INSTANCES_FINISHED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_REMOVE_INSTANCES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_RESTORE_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_SAVE_METADATA_STATE;
@@ -101,9 +103,14 @@ public class FreeIpaRebuildFlowConfig extends AbstractFlowConfiguration<FreeIpaR
                     .failureEvent(COLLECT_RESOURCES_FAILED_EVENT)
 
                     .from(REBUILD_REMOVE_INSTANCES_STATE)
-                    .to(REBUILD_ADD_INSTANCE_STATE)
+                    .to(REBUILD_REMOVE_INSTANCES_FINISHED_STATE)
                     .event(REMOVE_INSTANCES_FINISHED_EVENT)
                     .failureEvent(REMOVE_INSTANCES_FAILED_EVENT)
+
+                    .from(REBUILD_REMOVE_INSTANCES_FINISHED_STATE)
+                    .to(REBUILD_ADD_INSTANCE_STATE)
+                    .event(ADD_INSTANCE_EVENT)
+                    .defaultFailureEvent()
 
                     .from(REBUILD_ADD_INSTANCE_STATE)
                     .to(REBUILD_VALIDATE_INSTANCE_STATE)

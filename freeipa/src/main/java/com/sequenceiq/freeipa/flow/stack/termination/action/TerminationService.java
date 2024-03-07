@@ -127,7 +127,7 @@ public class TerminationService {
         instanceMetaDataService.saveAll(instanceMetaDatas);
     }
 
-    private void terminateMetaDataInstances(Stack stack, List<String> instanceIds) {
+    public void terminateMetaDataInstances(Stack stack, List<String> instanceIds) {
         List<InstanceMetaData> instanceMetaDatas = new ArrayList<>();
         stack.getAllInstanceMetaDataList().stream()
                 .filter(not(InstanceMetaData::isTerminated))
