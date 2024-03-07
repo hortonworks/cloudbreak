@@ -192,6 +192,7 @@ class Flow2HandlerTest {
         given(flowConfig.getFlowOperationType()).willReturn(OperationType.UNKNOWN);
         given(flowTriggerCondition.isFlowTriggerable(any(Payload.class))).willReturn(FlowTriggerConditionResult.ok());
         given(flow.getCurrentState()).willReturn(flowState);
+        given(flow.sendEvent(any(), any(), any(), any())).willReturn(true);
         Event<Payload> event = new Event<>(payload);
         event.setKey("KEY");
         underTest.accept(event);
@@ -291,6 +292,7 @@ class Flow2HandlerTest {
         given(helloWorldFlowConfig.getFlowOperationType()).willReturn(OperationType.UNKNOWN);
         given(flowTriggerCondition.isFlowTriggerable(any(Payload.class))).willReturn(FlowTriggerConditionResult.ok());
         given(flow.getCurrentState()).willReturn(flowState);
+        given(flow.sendEvent(any(), any(), any(), any())).willReturn(true);
         Event<Payload> event = new Event<>(new Event.Headers(Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USERCRN)), payload);
         event.setKey("KEY");
         underTest.accept(event);
@@ -321,6 +323,7 @@ class Flow2HandlerTest {
         given(runningFlows.get(anyString())).willReturn(flow);
         given(flow.getCurrentState()).willReturn(flowState);
         given(flow.getFlowId()).willReturn(FLOW_ID);
+        given(flow.sendEvent(any(), any(), any(), any())).willReturn(true);
         given(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).willReturn(flowLogOptional);
 
         dummyEvent.setKey("KEY");
@@ -343,6 +346,7 @@ class Flow2HandlerTest {
         given(runningFlows.get(anyString())).willReturn(flow);
         given(flow.getCurrentState()).willReturn(flowState);
         given(flow.getFlowId()).willReturn(FLOW_ID);
+        given(flow.sendEvent(any(), any(), any(), any())).willReturn(true);
         given(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).willReturn(flowLogOptional);
 
         dummyEvent.setKey("KEY");
@@ -385,6 +389,7 @@ class Flow2HandlerTest {
 
         Map<Object, Object> variables = Map.of("repeated", 2);
         given(flow.getVariables()).willReturn(variables);
+        given(flow.sendEvent(any(), any(), any(), any())).willReturn(true);
 
         FlowLog lastFlowLog = new FlowLog();
         lastFlowLog.setNextEvent("KEY");

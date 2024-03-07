@@ -29,6 +29,8 @@ import org.springframework.statemachine.config.builders.StateMachineTransitionCo
 import org.springframework.statemachine.config.common.annotation.ObjectPostProcessor;
 import org.springframework.statemachine.config.configurers.ExternalTransitionConfigurer;
 import org.springframework.statemachine.config.configurers.StateConfigurer;
+import org.springframework.statemachine.config.model.ConfigurationData;
+import org.springframework.statemachine.config.model.DefaultStateMachineModel;
 import org.springframework.statemachine.listener.StateMachineListener;
 import org.springframework.statemachine.listener.StateMachineListenerAdapter;
 import org.springframework.statemachine.state.State;
@@ -78,9 +80,12 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
     public void init() throws Exception {
         MachineConfiguration<S, E> config = getStateMachineConfiguration();
         config.configurationBuilder.withConfiguration().listener(config.listener).taskExecutor(config.executor);
+        ConfigurationData<S, E> configurationData = config.configurationBuilder.build();
+        config.transitionBuilder.setSharedObject(ConfigurationData.class, configurationData);
+        config.stateBuilder.setSharedObject(ConfigurationData.class, configurationData);
         configure(config.stateBuilder, config.transitionBuilder, getEdgeConfig(), getTransitions());
-        stateMachineFactory = new ObjectStateMachineFactory<>(config.configurationBuilder.build(), config.transitionBuilder.build(),
-                config.stateBuilder.build());
+        stateMachineFactory = new ObjectStateMachineFactory<>(
+                new DefaultStateMachineModel<>(configurationData, config.stateBuilder.build(), config.transitionBuilder.build()));
     }
 
     @Override

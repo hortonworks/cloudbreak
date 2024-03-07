@@ -11,7 +11,7 @@ public interface Flow {
 
     void stop();
 
-    void sendEvent(String key, String flowTriggerUserCrn, Object object, String operationType);
+    boolean sendEvent(String key, String flowTriggerUserCrn, Object object, String operationType);
 
     FlowState getCurrentState();
 

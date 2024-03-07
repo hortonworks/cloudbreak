@@ -343,7 +343,11 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 LOGGER.info("Accepting flow {}", flowAcceptResult);
                 ((Acceptable) payload).accepted().accept(flowAcceptResult);
             }
-            flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload, flowParameters.getFlowOperationType());
+            boolean accepted = flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload, flowParameters.getFlowOperationType());
+            if (!accepted) {
+                LOGGER.info("Couldn't trigger {} flow because state machine not accepted {} event", flowConfig.getDisplayName(), key);
+                throw new FlowNotTriggerableException(String.format("Couldn't trigger '%s' flow.", flowConfig.getDisplayName()));
+            }
             LOGGER.info("Flow started '{}'. Start event: {}", flowConfig.getDisplayName(), payload);
             return flowAcceptResult;
         } catch (Exception e) {
@@ -390,7 +394,11 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             }
             if (!flowCancelled.booleanValue()) {
                 LOGGER.debug("Send event: key: {}, flowid: {}, usercrn: {}, payload: {}", key, flowId, flowParameters.getFlowTriggerUserCrn(), payload);
-                flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload, flowParameters.getFlowOperationType());
+                boolean accepted = flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload, flowParameters.getFlowOperationType());
+                if (!accepted) {
+                    LOGGER.info("Couldn't trigger {} flow because state machine not accepted {} event", flow.getFlowConfigClass(), key);
+                    throw new CloudbreakServiceException(String.format("Couldn't trigger state machine with %s event in flow %s.", key, flowId));
+                }
                 if (isAcceptablePayload(payload)) {
                     FlowAcceptResult flowAcceptResult = FlowAcceptResult.runningInFlow(flowId);
                     LOGGER.info("Accepting flow in flow control {}", flowAcceptResult);

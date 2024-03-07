@@ -28,6 +28,8 @@ import org.springframework.statemachine.config.builders.StateMachineConfiguratio
 import org.springframework.statemachine.config.builders.StateMachineStateBuilder;
 import org.springframework.statemachine.config.builders.StateMachineTransitionBuilder;
 import org.springframework.statemachine.config.common.annotation.ObjectPostProcessor;
+import org.springframework.statemachine.config.model.ConfigurationData;
+import org.springframework.statemachine.config.model.DefaultStateMachineModel;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -79,7 +81,10 @@ public class AbstractActionTest {
         StateMachineTransitionBuilder<State, Event> transitionBuilder =
                 new StateMachineTransitionBuilder<>(ObjectPostProcessor.QUIESCENT_POSTPROCESSOR, true);
         transitionBuilder.withExternal().source(State.INIT).target(State.DOING).event(Event.DOIT);
-        stateMachine = new ObjectStateMachineFactory<>(configurationBuilder.build(), transitionBuilder.build(), stateBuilder.build()).getStateMachine();
+        ConfigurationData<State, Event> configurationData = configurationBuilder.build();
+        transitionBuilder.setSharedObject(ConfigurationData.class, configurationData);
+        stateMachine = new ObjectStateMachineFactory<>(
+                new DefaultStateMachineModel<>(configurationData, stateBuilder.build(), transitionBuilder.build())).getStateMachine();
         stateMachine.start();
     }
 

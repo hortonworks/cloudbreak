@@ -1,6 +1,8 @@
 package com.sequenceiq.flow.core.config;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 import java.util.Map;
@@ -15,13 +17,11 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.SyncTaskExecutor;
-import org.springframework.messaging.Message;
 import org.springframework.statemachine.config.builders.StateMachineConfigurationBuilder;
 import org.springframework.statemachine.config.builders.StateMachineStateBuilder;
 import org.springframework.statemachine.config.builders.StateMachineTransitionBuilder;
 import org.springframework.statemachine.config.common.annotation.ObjectPostProcessor;
 import org.springframework.statemachine.listener.StateMachineListener;
-import org.springframework.statemachine.listener.StateMachineListenerAdapter;
 
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.Flow;
@@ -33,7 +33,6 @@ import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.FlowEdgeConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.AbstractFlowConfigurationTest.TestFlowConfiguration.NotAcceptedException;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 
 public class AbstractFlowConfigurationTest {
@@ -52,6 +51,9 @@ public class AbstractFlowConfigurationTest {
     @Mock
     private FlowEventListener<State, Event> flowEventListener;
 
+    @Mock
+    private StateMachineListener<State, Event> stateMachineListener;
+
     private Flow flow;
 
     private List<Transition<State, Event>> transitions;
@@ -64,8 +66,8 @@ public class AbstractFlowConfigurationTest {
         MockitoAnnotations.initMocks(this);
         BDDMockito.given(applicationContext.getBean(ArgumentMatchers.anyString(), ArgumentMatchers.any(Class.class))).willReturn(action);
         BDDMockito.given(applicationContext.getBean(ArgumentMatchers.eq(FlowEventListener.class), ArgumentMatchers.eq(State.INIT),
-                ArgumentMatchers.eq(State.FINAL), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
-                ArgumentMatchers.eq("flowChainId"), ArgumentMatchers.eq("flowId"), ArgumentMatchers.anyLong()))
+                        ArgumentMatchers.eq(State.FINAL), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
+                        ArgumentMatchers.eq("flowChainId"), ArgumentMatchers.eq("flowId"), ArgumentMatchers.anyLong()))
                 .willReturn(flowEventListener);
         transitions = new Builder<State, Event>()
                 .defaultFailureEvent(Event.FAILURE)
@@ -76,7 +78,7 @@ public class AbstractFlowConfigurationTest {
                 .build();
         edgeConfig = new FlowEdgeConfig<>(State.INIT, State.FINAL, State.FAILED, Event.FAIL_HANDLED);
         ((AbstractFlowConfiguration<State, Event>) underTest).init();
-        Mockito.verify(applicationContext, Mockito.times(8)).getBean(ArgumentMatchers.anyString(), ArgumentMatchers.any(Class.class));
+        verify(applicationContext, Mockito.times(8)).getBean(ArgumentMatchers.anyString(), ArgumentMatchers.any(Class.class));
         flow = underTest.createFlow("flowId", "flowChainId", 0L, "flowChainType");
         flow.initialize(Map.of());
     }
@@ -105,30 +107,38 @@ public class AbstractFlowConfigurationTest {
         flow.sendEvent(Event.FAIL_HANDLED.name(), null, null, null);
     }
 
-    @Test(expected = NotAcceptedException.class)
+    @Test
     public void testUnacceptedFlowConfiguration1() {
         flow.sendEvent(Event.START.name(), null, null, null);
         flow.sendEvent(Event.FINISHED.name(), null, null, null);
+
+        verify(stateMachineListener).eventNotAccepted(any());
     }
 
-    @Test(expected = NotAcceptedException.class)
+    @Test
     public void testUnacceptedFlowConfiguration2() {
         flow.sendEvent(Event.START.name(), null, null, null);
         flow.sendEvent(Event.FAILURE2.name(), null, null, null);
+
+        verify(stateMachineListener).eventNotAccepted(any());
     }
 
-    @Test(expected = NotAcceptedException.class)
+    @Test
     public void testUnacceptedFlowConfiguration3() {
         flow.sendEvent(Event.START.name(), null, null, null);
         flow.sendEvent(Event.CONTINUE.name(), null, null, null);
         flow.sendEvent(Event.FAIL_HANDLED.name(), null, null, null);
+
+        verify(stateMachineListener).eventNotAccepted(any());
     }
 
-    @Test(expected = NotAcceptedException.class)
+    @Test
     public void testUnacceptedFlowConfiguration4() {
         flow.sendEvent(Event.START.name(), null, null, null);
         flow.sendEvent(Event.CONTINUE.name(), null, null, null);
         flow.sendEvent(Event.FAILURE.name(), null, null, null);
+
+        verify(stateMachineListener).eventNotAccepted(any());
     }
 
     enum State implements FlowState {
@@ -168,14 +178,7 @@ public class AbstractFlowConfigurationTest {
                     new StateMachineStateBuilder<>(ObjectPostProcessor.QUIESCENT_POSTPROCESSOR, true);
             StateMachineTransitionBuilder<State, Event> transitionBuilder =
                     new StateMachineTransitionBuilder<>(ObjectPostProcessor.QUIESCENT_POSTPROCESSOR, true);
-            StateMachineListener<State, Event> listener =
-                    new StateMachineListenerAdapter<State, Event>() {
-                        @Override
-                        public void eventNotAccepted(Message<Event> event) {
-                            throw new NotAcceptedException();
-                        }
-                    };
-            return new MachineConfiguration<>(configurationBuilder, stateBuilder, transitionBuilder, listener,
+            return new MachineConfiguration<>(configurationBuilder, stateBuilder, transitionBuilder, stateMachineListener,
                     new SyncTaskExecutor());
         }
 
@@ -196,16 +199,12 @@ public class AbstractFlowConfigurationTest {
 
         @Override
         public Event[] getInitEvents() {
-            return new Event[]{Event.START};
+            return new Event[] {Event.START};
         }
 
         @Override
         public String getDisplayName() {
             return "Test flow configuration";
-        }
-
-        class NotAcceptedException extends RuntimeException {
-
         }
     }
 }
