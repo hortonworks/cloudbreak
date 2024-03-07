@@ -101,7 +101,7 @@ public class FreeIpaImageFilter {
     }
 
     Comparator<Image> newestImageWithPreferredOs() {
-        String preferredOs = preferredOsService.getPreferredOs();
+        String preferredOs = preferredOsService.getDefaultOs();
         return Comparator.<Image, Integer>comparing(img -> preferredOs.equalsIgnoreCase(img.getOs()) ? 1 : 0)
                 .thenComparing(Image::getDate);
     }

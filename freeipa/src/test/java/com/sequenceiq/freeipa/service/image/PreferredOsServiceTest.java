@@ -1,8 +1,8 @@
 package com.sequenceiq.freeipa.service.image;
 
+import static com.sequenceiq.common.model.OsType.RHEL8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 
@@ -20,11 +20,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 @ExtendWith(MockitoExtension.class)
 public class PreferredOsServiceTest {
 
-    private static final String CENTOS7 = "centos7";
-
     private static final String REDHAT7 = "redhat7";
-
-    private static final String REDHAT8 = "redhat8";
 
     private static final String ACCOUNT_ID = "cloudera";
 
@@ -38,7 +34,7 @@ public class PreferredOsServiceTest {
 
     @BeforeEach
     public void initTest() {
-        ReflectionTestUtils.setField(victim, PreferredOsService.class, "defaultOs", CENTOS7, null);
+        ReflectionTestUtils.setField(victim, PreferredOsService.class, "defaultOs", RHEL8.getOs(), null);
     }
 
     @Test
@@ -50,28 +46,10 @@ public class PreferredOsServiceTest {
     }
 
     @Test
-    public void shouldPreferTheDefaultOsInCaseOfMissingRequestedOsAndNotGrantedRhel8Support() {
-        when(entitlementService.isRhel8ImagePreferred(ACCOUNT_ID)).thenReturn(false);
-
+    public void getDefaultOs() {
         String actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> victim.getPreferredOs(null));
-        assertEquals(CENTOS7, actual);
+
+        assertEquals(RHEL8.getOs(), actual);
         verifyNoMoreInteractions(entitlementService);
-    }
-
-    @Test
-    public void shouldPreferTheDefaultOsInCaseOfMissingRequestedOsAndNotGrantedRhel8Preference() {
-        when(entitlementService.isRhel8ImagePreferred(ACCOUNT_ID)).thenReturn(false);
-
-        String actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> victim.getPreferredOs(null));
-        assertEquals(CENTOS7, actual);
-        verifyNoMoreInteractions(entitlementService);
-    }
-
-    @Test
-    public void shouldPreferRhel8InCaseOfMissingRequestedOsAndGrantedRhel8SupportAndPreference() {
-        when(entitlementService.isRhel8ImagePreferred(ACCOUNT_ID)).thenReturn(true);
-
-        String actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> victim.getPreferredOs(null));
-        assertEquals(REDHAT8, actual);
     }
 }

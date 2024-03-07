@@ -208,18 +208,6 @@ class EntitlementServiceTest {
         assertThat(function.isEntitlementEnabled(underTest, ACCOUNT_ID)).isEqualTo(enabled);
     }
 
-    @Test
-    void isRhel8ImagePreferredWhenOnlyEnabled() {
-        setUpUmsClient(true, "ENABLE_RHEL8_IMAGES");
-        assertThat(underTest.isRhel8ImagePreferred(ACCOUNT_ID)).isFalse();
-    }
-
-    @Test
-    void isRhel8ImagePreferredWhenEnabledAndPreferred() {
-        setUpUmsClient(true, "ENABLE_RHEL8_IMAGES", "PREFER_RHEL8_IMAGES");
-        assertThat(underTest.isRhel8ImagePreferred(ACCOUNT_ID)).isTrue();
-    }
-
     @ParameterizedTest()
     @ValueSource(booleans = {true, false})
     void testAzureDeleteDiskEnabled(boolean entitled) {

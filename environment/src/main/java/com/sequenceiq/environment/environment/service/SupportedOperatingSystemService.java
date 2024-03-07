@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.service;
 
-import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static com.sequenceiq.common.model.OsType.RHEL8;
 
 import java.util.Arrays;
@@ -47,13 +46,8 @@ public class SupportedOperatingSystemService {
             List<OsTypeResponse> supportedOs = Arrays.stream(OsType.values()).map(osTypeToOsTypeResponseConverter::convert).collect(Collectors.toList());
             response.setOsTypes(supportedOs);
 
-            boolean rhel8Default = entitlementService.isRhel8ImagePreferred(accountId);
-            if (rhel8Default) {
-                response.setDefaultOs(RHEL8.getOs());
-            } else {
-                response.setDefaultOs(CENTOS7.getOs());
-            }
-            LOGGER.info("List of supported OS. rhel8Default: {}, response: {}", rhel8Default, response);
+            response.setDefaultOs(RHEL8.getOs());
+            LOGGER.info("List of supported OS. response: {}", response);
         }
 
         return response;

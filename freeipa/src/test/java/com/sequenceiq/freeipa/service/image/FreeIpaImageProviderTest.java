@@ -96,7 +96,7 @@ public class FreeIpaImageProviderTest {
     public void setup() throws Exception {
         setupImageCatalogProvider();
         lenient().when(providerSpecificImageFilter.filterImages(any(), anyList())).then(returnsSecondArg());
-        lenient().when(preferredOsService.getPreferredOs()).thenReturn(DEFAULT_OS);
+        lenient().when(preferredOsService.getDefaultOs()).thenReturn(DEFAULT_OS);
         lenient().when(supportedOsService.isSupported(any())).thenReturn(true);
         lenient().when(supportedOsService.isSupported(REDHAT8)).thenReturn(false);
 
@@ -117,7 +117,7 @@ public class FreeIpaImageProviderTest {
 
     @Test
     public void testGetImagePreferNewerImageWithOs() {
-        when(preferredOsService.getPreferredOs()).thenReturn(REDHAT8);
+        when(preferredOsService.getDefaultOs()).thenReturn(REDHAT8);
         when(supportedOsService.isSupported(REDHAT8)).thenReturn(true);
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, null, null, false);
 

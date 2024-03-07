@@ -637,7 +637,7 @@ cb:
   image.catalog:
     cache.ttl: 15
     legacy.enabled: true
-    default.os: centos7
+    default.os: redhat8
 
   instance:
     packages:

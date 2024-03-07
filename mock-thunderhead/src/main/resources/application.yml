@@ -94,9 +94,6 @@ auth:
     azure.database.flexibleserver.enabled: true
     azure.database.flexibleserver.upgrade.enabled: true
     secret.rotation.enabled: true
-    rhel8:
-      enabled: true
-      preferred: true
     secret.encryption.enabled: false
     container.ready.env.enabled: true
 crn:

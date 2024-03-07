@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 
 @Component
@@ -26,17 +25,15 @@ public class ImageOsService {
         return os == null || CENTOS7.getOs().equalsIgnoreCase(os) || CENTOS7.getOsType().equalsIgnoreCase(os) || RHEL8.getOs().equalsIgnoreCase(os);
     }
 
-    public String getPreferredOs() {
-        return getPreferredOs(null);
+    public String getDefaultOs() {
+        return defaultOs;
     }
 
     public String getPreferredOs(String requestedOs) {
         if (StringUtils.isNotBlank(requestedOs)) {
             return requestedOs;
-        } else if (entitlementService.isRhel8ImagePreferred(ThreadBasedUserCrnProvider.getAccountId())) {
-            return RHEL8.getOs();
         } else {
-            return defaultOs;
+            return getDefaultOs();
         }
     }
 }

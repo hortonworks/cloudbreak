@@ -98,7 +98,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ON
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.PREFER_RHEL8_IMAGES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.TARGETING_SUBNETS_FOR_ENDPOINT_ACCESS_GATEWAY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_SYNC;
@@ -539,9 +538,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.secret.rotation.enabled}")
     private boolean secretRotationEnabled;
-
-    @Value("${auth.mock.rhel8.preferred}")
-    private boolean rhel8Preferred;
 
     @Value("${auth.mock.secret.encryption.enabled}")
     private boolean secretEncryptionEnabled;
@@ -1002,9 +998,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (secretRotationEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_SECRET_ROTATION));
-        }
-        if (rhel8Preferred) {
-            builder.addEntitlements(createEntitlement(PREFER_RHEL8_IMAGES));
         }
         if (secretEncryptionEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_SECRET_ENCRYPTION));
