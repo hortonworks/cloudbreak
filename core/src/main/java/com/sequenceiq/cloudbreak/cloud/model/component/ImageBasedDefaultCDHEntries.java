@@ -98,7 +98,7 @@ public class ImageBasedDefaultCDHEntries {
 
     private BinaryOperator<ImageBasedDefaultCDHInfo> preferOs() {
         return (i1, i2) -> Stream.of(i1, i2)
-                .filter(i -> imageOsService.getPreferredOs().equalsIgnoreCase(i.getImage().getOs()))
+                .filter(i -> imageOsService.getDefaultOs().equalsIgnoreCase(i.getImage().getOs()))
                 .findFirst()
                 .orElse(i1);
     }

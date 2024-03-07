@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.image;
 
+import static com.sequenceiq.common.model.OsType.RHEL8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -19,11 +20,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 @ExtendWith(MockitoExtension.class)
 public class PreferredOsServiceTest {
 
-    private static final String CENTOS7 = "centos7";
-
     private static final String REDHAT7 = "redhat7";
-
-    private static final String REDHAT8 = "redhat8";
 
     private static final String ACCOUNT_ID = "cloudera";
 
@@ -37,7 +34,7 @@ public class PreferredOsServiceTest {
 
     @BeforeEach
     public void initTest() {
-        ReflectionTestUtils.setField(victim, PreferredOsService.class, "defaultOs", REDHAT8, null);
+        ReflectionTestUtils.setField(victim, PreferredOsService.class, "defaultOs", RHEL8.getOs(), null);
     }
 
     @Test
@@ -52,7 +49,7 @@ public class PreferredOsServiceTest {
     public void getDefaultOs() {
         String actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> victim.getPreferredOs(null));
 
-        assertEquals(REDHAT8, actual);
+        assertEquals(RHEL8.getOs(), actual);
         verifyNoMoreInteractions(entitlementService);
     }
 }

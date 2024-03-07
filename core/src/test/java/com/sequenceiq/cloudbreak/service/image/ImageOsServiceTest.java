@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.image;
 import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static com.sequenceiq.common.model.OsType.RHEL8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.stream.Stream;
@@ -74,6 +75,18 @@ class ImageOsServiceTest {
             boolean result = underTest.isSupported(os.getOsType());
             assertThat(result).isTrue();
         }
+    }
+
+    @Test
+    public void getDefaultOs() {
+        setDefaultOs(RHEL8.getOs());
+        assertEquals(RHEL8.getOs(), underTest.getPreferredOs(null));
+    }
+
+    @Test
+    public void getPreferredOs() {
+        setDefaultOs(CENTOS7.getOs());
+        assertEquals(RHEL8.getOs(), underTest.getPreferredOs(RHEL8.getOs()));
     }
 
     static Stream<Arguments> preferredOsArguments() {

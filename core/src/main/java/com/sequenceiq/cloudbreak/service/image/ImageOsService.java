@@ -25,15 +25,15 @@ public class ImageOsService {
         return os == null || CENTOS7.getOs().equalsIgnoreCase(os) || CENTOS7.getOsType().equalsIgnoreCase(os) || RHEL8.getOs().equalsIgnoreCase(os);
     }
 
-    public String getPreferredOs() {
-        return getPreferredOs(null);
+    public String getDefaultOs() {
+        return defaultOs;
     }
 
     public String getPreferredOs(String requestedOs) {
         if (StringUtils.isNotBlank(requestedOs)) {
             return requestedOs;
         } else {
-            return defaultOs;
+            return getDefaultOs();
         }
     }
 }
