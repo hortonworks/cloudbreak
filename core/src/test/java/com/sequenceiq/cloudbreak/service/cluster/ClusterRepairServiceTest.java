@@ -209,7 +209,6 @@ public class ClusterRepairServiceTest {
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
         when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(stackDto.getNotTerminatedInstanceMetaData()).thenReturn(List.of(host1));
         when(freeipaService.checkFreeipaRunning(stackDto.getEnvironmentCrn())).thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
         when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
@@ -218,6 +217,37 @@ public class ClusterRepairServiceTest {
 
         verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1"))), eq(RepairType.ALL_AT_ONCE), eq(false), any(),
                 eq(false));
+    }
+
+    @Test
+    public void testCMNodeRepairSelectedAndAllStoppedNodesNotSelected() {
+        HostGroup hostGroup1 = new HostGroup();
+        hostGroup1.setName("hostGroup1");
+        hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
+        InstanceMetaData host1 = getHost("host1", hostGroup1.getName(), InstanceStatus.SERVICES_UNHEALTHY, InstanceGroupType.CORE);
+        host1.setClusterManagerServer(true);
+        hostGroup1.setInstanceGroup(host1.getInstanceGroup());
+
+        HostGroup hostGroup2 = new HostGroup();
+        hostGroup2.setName("hostGroup2");
+        hostGroup2.setRecoveryMode(RecoveryMode.MANUAL);
+        InstanceMetaData host2 = getHost("host2", hostGroup2.getName(), InstanceStatus.STOPPED, InstanceGroupType.CORE);
+        hostGroup2.setInstanceGroup(host2.getInstanceGroup());
+
+        when(stackDtoService.getById(1L)).thenReturn(stackDto);
+        when(stackDto.getNotTerminatedInstanceMetaData()).thenReturn(List.of(host1, host2));
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
+                .thenReturn(true);
+        when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("host1"), false));
+        });
+
+        String expectedErrorMessage = "Need to select all stopped nodes as CM node is selected for repair.";
+        assertEquals(expectedErrorMessage,
+                exception.getMessage());
+
     }
 
     @Test
@@ -232,7 +262,6 @@ public class ClusterRepairServiceTest {
         hostGroup1.setInstanceGroup(host1.getInstanceGroup());
 
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(stackDto.getNotTerminatedInstanceMetaData()).thenReturn(List.of(host1));
         when(stackDto.getInstanceGroupDtos()).thenReturn(List.of(new InstanceGroupDto(host1.getInstanceGroup(), List.of(host1, host2))));
         when(stack.getTunnel()).thenReturn(Tunnel.CLUSTER_PROXY);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
@@ -378,7 +407,6 @@ public class ClusterRepairServiceTest {
         flowLog.setStateStatus(StateStatus.SUCCESSFUL);
         when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(stackDto.getNotTerminatedInstanceMetaData()).thenReturn(List.of(instance1md));
         when(resourceService.findByStackIdAndType(stack.getId(), volumeSet.getResourceType())).thenReturn(List.of(volumeSet));
         when(stackStopRestrictionService.isInfrastructureStoppable(stackDto)).thenReturn(StopRestrictionReason.NONE);
 
@@ -402,7 +430,6 @@ public class ClusterRepairServiceTest {
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
         when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(stackDto.getNotTerminatedInstanceMetaData()).thenReturn(List.of(host1));
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
@@ -434,41 +461,6 @@ public class ClusterRepairServiceTest {
 
         assertEquals("Database dbCrn is not in AVAILABLE status, could not start node replacement.", exception.getMessage());
         verifyEventArguments(CLUSTER_MANUALRECOVERY_COULD_NOT_START, "Database dbCrn is not in AVAILABLE status, could not start node replacement.");
-        verifyNoInteractions(stackUpdater);
-    }
-
-    @Test
-    public void shouldNotAllowRepairWhenNodeIsStoppedInNotSelectedInstanceGroup() {
-        HostGroup hostGroup1 = new HostGroup();
-        hostGroup1.setName("hostGroup1");
-        hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
-        InstanceMetaData host1 = getHost("host1", hostGroup1.getName(), InstanceStatus.SERVICES_UNHEALTHY, InstanceGroupType.CORE);
-        hostGroup1.setInstanceGroup(host1.getInstanceGroup());
-
-        HostGroup hostGroup2 = new HostGroup();
-        hostGroup2.setName("hostGroup2");
-        hostGroup2.setRecoveryMode(RecoveryMode.MANUAL);
-        InstanceMetaData host2 = getHost("host2", hostGroup2.getName(), InstanceStatus.STOPPED, InstanceGroupType.CORE);
-        hostGroup2.setInstanceGroup(host2.getInstanceGroup());
-
-        when(stackDtoService.getById(1L)).thenReturn(stackDto);
-        when(stackDto.getNotTerminatedInstanceMetaData()).thenReturn(List.of(host1, host2));
-        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
-                .thenReturn(true);
-        when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
-
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false));
-        });
-
-        String expectedErrorMessage =
-                "Action cannot be performed because there are stopped nodes in the cluster. " +
-                        "Stopped nodes: [host2]. " +
-                        "Please select them for node replacement or start the stopped nodes.";
-        assertEquals(expectedErrorMessage,
-                exception.getMessage());
-        verifyEventArguments(CLUSTER_MANUALRECOVERY_COULD_NOT_START,
-                expectedErrorMessage);
         verifyNoInteractions(stackUpdater);
     }
 

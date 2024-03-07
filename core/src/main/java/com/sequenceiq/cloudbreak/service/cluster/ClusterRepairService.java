@@ -10,7 +10,6 @@ import static java.util.stream.Collectors.toSet;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -212,15 +211,10 @@ public class ClusterRepairService {
     }
 
     public Optional<RepairValidation> validateRepairConditions(ManualClusterRepairMode repairMode, StackDto stack, Set<String> selectedParts) {
-        List<String> stoppedInstanceIds = getStoppedNotSelectedInstanceIds(stack, repairMode, selectedParts);
         if (!freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())) {
             return Optional.of(RepairValidation.of("Action cannot be performed because the FreeIPA isn't available. Please check the FreeIPA state."));
         } else if (!environmentService.environmentStatusInDesiredState(stack.getStack(), Set.of(EnvironmentStatus.AVAILABLE))) {
             return Optional.of(RepairValidation.of("Action cannot be performed because the Environment isn't available. Please check the Environment state."));
-        } else if (!stoppedInstanceIds.isEmpty()) {
-            return Optional.of(RepairValidation.of("Action cannot be performed because there are stopped nodes in the cluster. " +
-                    "Stopped nodes: [" + String.join(", ", stoppedInstanceIds) + "]. " +
-                    "Please select them for node replacement or start the stopped nodes."));
         } else if (hasNotAvailableDatabase(stack)) {
             return Optional.of(RepairValidation.of(String.format("Database %s is not in AVAILABLE status, could not start node replacement.",
                     stack.getCluster().getDatabaseServerCrn())));
@@ -229,9 +223,25 @@ public class ClusterRepairService {
                     "This will be fixed in future releases."));
         } else if (isAnyGWUnhealthyAndItIsNotSelected(repairMode, selectedParts, stack)) {
             return Optional.of(RepairValidation.of("Gateway node is unhealthy, it must be repaired first."));
+        } else if (isCMRepairAndAllStoppedNodesNotSelected(stack.getNotTerminatedInstanceMetaData(), selectedParts)) {
+            return Optional.of(RepairValidation.of("Need to select all stopped nodes as CM node is selected for repair."));
         } else {
             return Optional.empty();
         }
+    }
+
+    private boolean isCMRepairAndAllStoppedNodesNotSelected(List<InstanceMetadataView> nonTerminatedInstanceMetadata, Set<String> selectedInstances) {
+        boolean cmNodeSelectedForRepair = nonTerminatedInstanceMetadata.stream()
+                .anyMatch(i -> selectedInstances.contains(i.getInstanceId()) && i.getClusterManagerServer());
+        if (cmNodeSelectedForRepair) {
+            for (InstanceMetadataView instanceMetadataView : nonTerminatedInstanceMetadata) {
+                if (instanceMetadataView.getInstanceStatus().equals(InstanceStatus.STOPPED) &&
+                        !selectedInstances.contains(instanceMetadataView.getInstanceId())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private boolean isAnyGWUnhealthyAndItIsNotSelected(ManualClusterRepairMode repairMode, Set<String> selectedParts, StackDto stack) {
@@ -281,25 +291,6 @@ public class ClusterRepairService {
             }
         }
         return false;
-    }
-
-    private List<String> getStoppedNotSelectedInstanceIds(StackDto stack, ManualClusterRepairMode repairMode, Set<String> selectedParts) {
-        if (ManualClusterRepairMode.HOST_GROUP.equals(repairMode)) {
-            return stack.getNotTerminatedInstanceMetaData()
-                    .stream()
-                    .filter(im -> !selectedParts.contains(im.getInstanceGroupName()) &&
-                            InstanceStatus.STOPPED.equals(im.getInstanceStatus()))
-                    .map(InstanceMetadataView::getInstanceId)
-                    .collect(Collectors.toList());
-        } else if (ManualClusterRepairMode.NODE_ID.equals(repairMode)) {
-            return stack.getNotTerminatedInstanceMetaData()
-                    .stream()
-                    .filter(im -> !selectedParts.contains(im.getInstanceId()) &&
-                            InstanceStatus.STOPPED.equals(im.getInstanceStatus()))
-                    .map(InstanceMetadataView::getInstanceId)
-                    .collect(Collectors.toList());
-        }
-        return Collections.emptyList();
     }
 
     private boolean isReattachSupportedOnProvider(StackView stack, boolean repairWithReattach) {

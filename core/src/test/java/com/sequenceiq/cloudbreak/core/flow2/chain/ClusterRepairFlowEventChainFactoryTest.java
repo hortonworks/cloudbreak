@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -30,6 +31,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
@@ -66,6 +71,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -105,6 +111,9 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Mock
     private HostGroupService hostGroupService;
+
+    @Mock
+    private StackUtil stackUtil;
 
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
@@ -270,6 +279,40 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
         assertEvents(eventQueues, List.of(
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "FULL_DOWNSCALE_TRIGGER_EVENT",
+                "FULL_UPSCALE_TRIGGER_EVENT",
+                "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
+                "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
+    }
+
+    @Test
+    public void testRepairCoreNodesWithStoppedNodes() {
+        Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
+        setupConnectedCluster();
+        setupHostGroup(InstanceGroupType.CORE);
+
+        HostGroup hostGroup1 = new HostGroup();
+        hostGroup1.setName("hostGroup1");
+        hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
+        InstanceMetaData host1 = getHost("host1", hostGroup1.getName(), InstanceStatus.SERVICES_UNHEALTHY, InstanceGroupType.CORE);
+        host1.setClusterManagerServer(true);
+        hostGroup1.setInstanceGroup(host1.getInstanceGroup());
+
+        HostGroup hostGroup2 = new HostGroup();
+        hostGroup2.setName("hostGroup2");
+        hostGroup2.setRecoveryMode(RecoveryMode.MANUAL);
+        InstanceMetaData host2 = getHost("host2", hostGroup2.getName(), InstanceStatus.STOPPED, InstanceGroupType.CORE);
+        hostGroup2.setInstanceGroup(host2.getInstanceGroup());
+
+        when(stackDto.getNotTerminatedInstanceMetaData()).thenReturn(List.of(host1, host2));
+        when(stackDto.getStack().getType()).thenReturn(StackType.WORKLOAD);
+        lenient().when(stackUtil.stopStartScalingEntitlementEnabled(any())).thenReturn(true);
+
+        FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
+
+        assertEvents(eventQueues, List.of(
+                "FLOWCHAIN_INIT_TRIGGER_EVENT",
+                "STOPSTART_UPSCALE_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
@@ -676,6 +719,21 @@ public class ClusterRepairFlowEventChainFactoryTest {
         when(stackDto.getCluster()).thenReturn(clusterView);
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stackDto)).thenReturn(false);
+    }
+
+    private InstanceMetaData getHost(String hostName, String groupName, InstanceStatus instanceStatus, InstanceGroupType instanceGroupType) {
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setInstanceGroupType(instanceGroupType);
+        instanceGroup.setGroupName(groupName);
+
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN(hostName);
+        instanceMetaData.setInstanceGroup(instanceGroup);
+        instanceMetaData.setInstanceStatus(instanceStatus);
+        instanceMetaData.setInstanceId(hostName);
+        instanceGroup.setInstanceMetaData(Sets.newHashSet(instanceMetaData));
+
+        return instanceMetaData;
     }
 
     private HostGroup setupHostGroup(String hostGroupName, InstanceGroup instanceGroup) {

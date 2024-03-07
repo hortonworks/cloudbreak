@@ -35,6 +35,8 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.RootVolumeV4Request;
@@ -48,17 +50,20 @@ import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.embedded.UpgradeEmbeddedDBPreparationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.AwsVariantMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.CoreVerticalScalingTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.StopStartUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.migration.AwsVariantMigrationEvent;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -74,7 +79,9 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -108,6 +115,9 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     private StackDtoService stackDtoService;
 
     @Inject
+    private StackUtil stackUtil;
+
+    @Inject
     private InstanceGroupService instanceGroupService;
 
     @Inject
@@ -121,6 +131,9 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private CloudbreakEventService cloudbreakEventService;
 
     @Inject
     private EmbeddedDatabaseService embeddedDatabaseService;
@@ -188,8 +201,25 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     private Queue<Selectable> createFlowTriggers(ClusterRepairTriggerEvent event, RepairConfig repairConfig, StackDto stackDto) {
         StackView stackView = stackDto.getStack();
+
+        String hostGroup = "";
+        List<String> stoppedInstances = new ArrayList<>();
+        List<String> selectInstances = new ArrayList<>();
+        for (List<String> instances : event.getFailedNodesMap().values()) {
+            selectInstances.addAll(instances);
+        }
+        for (InstanceMetadataView instanceMetadataView : stackDto.getNotTerminatedInstanceMetaData()) {
+            if (instanceMetadataView.getInstanceStatus().equals(InstanceStatus.STOPPED) && !selectInstances.contains(instanceMetadataView.getDiscoveryFQDN())) {
+                stoppedInstances.add(instanceMetadataView.getInstanceId());
+                hostGroup = instanceMetadataView.getInstanceGroupName();
+            }
+        }
+
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         flowTriggers.add(new FlowChainInitPayload(getName(), event.getResourceId(), event.accepted()));
+        if (!stoppedInstances.isEmpty() && stackView.getType().equals(StackType.WORKLOAD)) {
+            addClusterScaleTriggerEventIfNeeded(stackView, flowTriggers, stoppedInstances, hostGroup);
+        }
         Map<String, Set<String>> repairableGroupsWithHostNames = new HashMap<>();
         boolean singlePrimaryGW = fillRepairableGroupsWithHostNames(repairConfig, repairableGroupsWithHostNames);
         boolean embeddedDBUpgrade = isEmbeddedDBUpgradeNeeded(stackDto, event, targetMajorVersion);
@@ -207,6 +237,19 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         flowTriggers.add(rescheduleStatusCheckEvent(event));
         flowTriggers.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
         return flowTriggers;
+    }
+
+    private void addClusterScaleTriggerEventIfNeeded(StackView stackView, Queue<Selectable> flowEventChain, List<String> stoppedInstances, String hostGroup) {
+        String selector = FlowChainTriggers.STOPSTART_UPSCALE_CHAIN_TRIGGER_EVENT;
+        boolean stopStartFailureRecoveryEnabled = stackUtil.stopStartScalingFailureRecoveryEnabled(stackView);
+        flowEventChain.add(
+                new StopStartUpscaleTriggerEvent(
+                        StopStartUpscaleEvent.STOPSTART_UPSCALE_TRIGGER_EVENT.event(),
+                        stackView.getId(),
+                        hostGroup,
+                        stoppedInstances.size(),
+                        ClusterManagerType.CLOUDERA_MANAGER,
+                        stopStartFailureRecoveryEnabled));
     }
 
     private void addRootDiskUpdateIfNecessary(ClusterRepairTriggerEvent event, StackDto stackDto, Map<String, Set<String>> repairableGroupsWithHostNames,
@@ -421,7 +464,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     private StackAndClusterUpscaleTriggerEvent fullUpscaleEvent(ClusterRepairTriggerEvent event, Map<String, Set<String>> groupsWithHostNames,
             boolean singlePrimaryGateway, boolean restartServices, boolean kerberosSecured, boolean rollingRestartEnabled) {
-        Set<com.sequenceiq.cloudbreak.domain.view.InstanceGroupView> instanceGroupViews = instanceGroupService.findViewByStackId(event.getStackId());
+        Set<InstanceGroupView> instanceGroupViews = instanceGroupService.findViewByStackId(event.getStackId());
         boolean singleNodeCluster = isSingleNode(instanceGroupViews);
         Integer adjustmentSize = groupsWithHostNames.values().stream().map(Set::size).reduce(0, Integer::sum);
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) adjustmentSize);
@@ -434,9 +477,9 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                 event.getTriggeredStackVariant(), rollingRestartEnabled).setRepair();
     }
 
-    public boolean isSingleNode(Set<com.sequenceiq.cloudbreak.domain.view.InstanceGroupView> instanceGroupViews) {
+    public boolean isSingleNode(Set<InstanceGroupView> instanceGroupViews) {
         int nodeCount = 0;
-        for (com.sequenceiq.cloudbreak.domain.view.InstanceGroupView ig : instanceGroupViews) {
+        for (InstanceGroupView ig : instanceGroupViews) {
             nodeCount += ig.getNodeCount();
         }
         return nodeCount == 1;
