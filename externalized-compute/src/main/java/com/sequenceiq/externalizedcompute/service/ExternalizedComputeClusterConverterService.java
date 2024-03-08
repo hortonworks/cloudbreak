@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
@@ -23,6 +25,9 @@ public class ExternalizedComputeClusterConverterService {
     @Inject
     private ExternalizedComputeClusterStatusService externalizedComputeClusterStatusService;
 
+    @Inject
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
     public ExternalizedComputeClusterResponse convertToResponse(ExternalizedComputeCluster externalizedComputeCluster) {
         ExternalizedComputeClusterResponse response = new ExternalizedComputeClusterResponse();
         response.setEnvironmentCrn(externalizedComputeCluster.getEnvironmentCrn());
@@ -35,6 +40,8 @@ public class ExternalizedComputeClusterConverterService {
         }
         if (externalizedComputeCluster.getLiftieName() != null) {
             response.setLiftieClusterName(externalizedComputeCluster.getLiftieName());
+            response.setLiftieClusterCrn(regionAwareCrnGenerator.generateCrnString(CrnResourceDescriptor.COMPUTE_CLUSTER,
+                    externalizedComputeCluster.getLiftieName(), externalizedComputeCluster.getAccountId()));
         }
         ExternalizedComputeClusterStatus actualStatus = externalizedComputeClusterStatusService.getActualStatus(externalizedComputeCluster);
         if (actualStatus != null) {

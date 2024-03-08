@@ -44,7 +44,8 @@ public enum CrnResourceDescriptor {
     DFX_INTERIM(Crn.ResourceType.ENVIRONMENT, Crn.Service.DF),
     DFX(Crn.ResourceType.SERVICE, Crn.Service.DF),
     WXM_ENVIRONMENT(Crn.ResourceType.WXM_ENVIRONMENT, Crn.Service.ENVIRONMENTS),
-    COMPUTE_DOCKER_CONFIG(Crn.ResourceType.DOCKER_CONFIG, Crn.Service.COMPUTE);
+    COMPUTE_DOCKER_CONFIG(Crn.ResourceType.DOCKER_CONFIG, Crn.Service.COMPUTE),
+    COMPUTE_CLUSTER(Crn.ResourceType.CLUSTER, Crn.Service.COMPUTE);
 
     private Crn.ResourceType resourceType;
 

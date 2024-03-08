@@ -12,6 +12,8 @@ public class ExternalizedComputeClusterResponse extends ExternalizedComputeClust
 
     private String liftieClusterName;
 
+    private String liftieClusterCrn;
+
     private ExternalizedComputeClusterApiStatus status;
 
     private String statusReason;
@@ -22,6 +24,14 @@ public class ExternalizedComputeClusterResponse extends ExternalizedComputeClust
 
     public void setLiftieClusterName(String liftieClusterName) {
         this.liftieClusterName = liftieClusterName;
+    }
+
+    public String getLiftieClusterCrn() {
+        return liftieClusterCrn;
+    }
+
+    public void setLiftieClusterCrn(String liftieClusterCrn) {
+        this.liftieClusterCrn = liftieClusterCrn;
     }
 
     public ExternalizedComputeClusterApiStatus getStatus() {
