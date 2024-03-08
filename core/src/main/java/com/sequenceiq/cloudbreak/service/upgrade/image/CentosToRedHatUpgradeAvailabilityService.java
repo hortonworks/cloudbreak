@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.R
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackType.CDH;
 import static com.sequenceiq.cloudbreak.service.upgrade.image.filter.CentosToRedHatUpgradeImageFilter.isCentosToRedhatUpgrade;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,13 +63,20 @@ public class CentosToRedHatUpgradeAvailabilityService {
         return helperImage.isPresent();
     }
 
+    public boolean isHelperImageAvailable(long resourceId, String imageCatalogName, Image targetImage, Set<String> stackRelatedParcels) {
+        StackDto stack = stackDtoService.getById(resourceId);
+        List<Image> cdhImages = getAllCdhImages(stack, imageCatalogName);
+        Optional<Image> helperImage = findHelperImage(cdhImages, targetImage, stackRelatedParcels);
+        return helperImage.isPresent();
+    }
+
     public Optional<Image> findHelperImageIfNecessary(String targetImageId, long resourceId) {
         try {
             UpgradeImageInfo upgradeImageInfo = upgradeImageInfoFactory.create(targetImageId, resourceId);
             StatedImage targetImage = upgradeImageInfo.targetStatedImage();
             if (isCentosToRedhatUpgrade(upgradeImageInfo.currentImage(), targetImage.getImage())) {
                 StackDto stack = stackDtoService.getById(resourceId);
-                List<Image> cdhImages = getAllCdhImages(stack, targetImage);
+                List<Image> cdhImages = getAllCdhImages(stack, targetImage.getImageCatalogName());
                 Optional<Image> helperImage = findHelperImage(cdhImages, targetImage.getImage(), stack);
                 LOGGER.debug("Helper image {} found", helperImage.isPresent() ? helperImage.get().getUuid() : "not");
                 return helperImage;
@@ -121,9 +129,13 @@ public class CentosToRedHatUpgradeAvailabilityService {
         return currentImage.getPackageVersion(ImagePackageVersion.CM_BUILD_NUMBER);
     }
 
-    private List<Image> getAllCdhImages(StackDto stack, StatedImage targetImage) throws CloudbreakImageCatalogException {
-        return imageCatalogService.getAllCdhImages(ThreadBasedUserCrnProvider.getAccountId(), stack.getWorkspaceId(),
-                targetImage.getImageCatalogName(),
-                platformStringTransformer.getPlatformStringForImageCatalogSet(stack.getCloudPlatform(), stack.getPlatformVariant()));
+    private List<Image> getAllCdhImages(StackDto stack, String imageCatalogName)  {
+        try {
+            return imageCatalogService.getAllCdhImages(ThreadBasedUserCrnProvider.getAccountId(), stack.getWorkspaceId(),
+                    imageCatalogName, platformStringTransformer.getPlatformStringForImageCatalogSet(stack.getCloudPlatform(), stack.getPlatformVariant()));
+        } catch (CloudbreakImageCatalogException e) {
+            LOGGER.error("Failed to retrieve images from catalog", e);
+            return Collections.emptyList();
+        }
     }
 }

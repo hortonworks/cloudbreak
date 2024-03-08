@@ -8,15 +8,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.AccountIdService;
 import com.sequenceiq.common.model.UpgradeShowAvailableImages;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXCcmUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeReplaceVms;
@@ -26,9 +31,19 @@ import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Respo
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 
+@ExtendWith(MockitoExtension.class)
 class UpgradeConverterTest {
 
-    private final UpgradeConverter underTest = new UpgradeConverter();
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
+
+    @InjectMocks
+    private UpgradeConverter underTest;
+
+    @Mock
+    private AccountIdService accountIdService;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @ParameterizedTest
     @EnumSource(UpgradeShowAvailableImages.class)
@@ -52,7 +67,7 @@ class UpgradeConverterTest {
         source.setReplaceVms(DistroXUpgradeReplaceVms.DISABLED);
         source.setRuntime("runtime");
 
-        UpgradeV4Request result = underTest.convert(source, new InternalUpgradeSettings(false, true, true));
+        UpgradeV4Request result = underTest.convert(source, USER_CRN, false);
 
         assertEquals(source.getDryRun(), result.getDryRun());
         assertEquals(source.getImageId(), result.getImageId());
@@ -68,7 +83,7 @@ class UpgradeConverterTest {
         // GIVEN
         DistroXUpgradeV1Request source = new DistroXUpgradeV1Request();
         // WHEN
-        UpgradeV4Request result = underTest.convert(source, new InternalUpgradeSettings(true, true, true));
+        UpgradeV4Request result = underTest.convert(source, USER_CRN, true);
         // THEN
         assertTrue(result.getInternalUpgradeSettings().isSkipValidations());
     }
@@ -78,7 +93,7 @@ class UpgradeConverterTest {
         // GIVEN
         DistroXUpgradeV1Request source = new DistroXUpgradeV1Request();
         // WHEN
-        UpgradeV4Request result = underTest.convert(source, new InternalUpgradeSettings(false, true, true));
+        UpgradeV4Request result = underTest.convert(source, USER_CRN, false);
         // THEN
         assertNull(result.getReplaceVms());
     }
@@ -93,10 +108,10 @@ class UpgradeConverterTest {
 
         DistroXUpgradeV1Response result = underTest.convert(source);
 
-        assertEquals(source.getCurrent(), result.getCurrent());
-        assertEquals(source.getFlowIdentifier(), result.getFlowIdentifier());
-        assertEquals(source.getReason(), result.getReason());
-        assertEquals(source.getUpgradeCandidates(), result.getUpgradeCandidates());
+        assertEquals(source.getCurrent(), result.current());
+        assertEquals(source.getFlowIdentifier(), result.flowIdentifier());
+        assertEquals(source.getReason(), result.reason());
+        assertEquals(source.getUpgradeCandidates(), result.upgradeCandidates());
     }
 
     @Test

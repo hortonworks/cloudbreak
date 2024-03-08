@@ -22,15 +22,6 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
     public ImageInfoV4Response() {
     }
 
-    public ImageInfoV4Response(String imageName, String imageId, String imageCatalogName, Long created, String date) {
-        this.imageName = imageName;
-        this.imageId = imageId;
-        this.imageCatalogName = imageCatalogName;
-        this.created = created;
-        this.date = date;
-        this.prepared = false;
-    }
-
     public ImageInfoV4Response(String imageName, String imageId, String imageCatalogName, Long created, String date,
             ImageComponentVersions componentVersions) {
         this.imageName = imageName;

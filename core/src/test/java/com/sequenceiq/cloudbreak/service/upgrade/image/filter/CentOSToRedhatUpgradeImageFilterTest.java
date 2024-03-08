@@ -76,6 +76,25 @@ class CentosToRedHatUpgradeImageFilterTest {
 
     @Test
     //CHECKSTYLE:OFF
+    public void testCentOS_7_2_16_toRedHat_7_2_17_UpgradeIsAllowedWhenCentOSImageIsAvailableWithTheSamePackagesAndTargetImageIsPresent() {
+        //CHECKSTYLE:ON
+        //ImageFilterParams imageFilterParams = centosImageFilterParams(VERSION_7_2_16);
+        ImageFilterParams imageFilterParams = new ImageFilterParams("target-image-id", image(OsType.CENTOS7.getOs(), OsType.CENTOS7.getOsType(), VERSION_7_2_16),
+                "image-catalog-name", false, Map.of(CDH.name(), "7.2.17"), null, null, 1L, null, null, null, null, false);
+        Image redhatImage = redhatCatalogImage(VERSION_7_2_17);
+        Image centosImage = centOSCatalogImage(VERSION_7_2_17);
+        when(centOSToRedHatUpgradeAvailabilityService.isOsUpgradePermitted(imageFilterParams.getCurrentImage(), redhatImage,
+                imageFilterParams.getStackRelatedParcels())).thenReturn(false);
+        when(centOSToRedHatUpgradeAvailabilityService.isHelperImageAvailable(1L, "image-catalog-name", redhatImage,
+                imageFilterParams.getStackRelatedParcels().keySet())).thenReturn(true);
+
+        ImageFilterResult result = testImageFiltering(imageFilterParams, redhatImage, centosImage);
+
+        assertEquals(List.of(redhatImage, centosImage), result.getImages());
+    }
+
+    @Test
+    //CHECKSTYLE:OFF
     public void testCentOS_7_2_17_toRedHat_7_2_17_UpgradeIsAllowed() {
         //CHECKSTYLE:ON
         ImageFilterParams imageFilterParams = centosImageFilterParams(VERSION_7_2_17);

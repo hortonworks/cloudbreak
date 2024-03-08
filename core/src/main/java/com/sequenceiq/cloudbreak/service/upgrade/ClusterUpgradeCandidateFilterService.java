@@ -48,7 +48,7 @@ public class ClusterUpgradeCandidateFilterService {
         upgradeOptions.setUpgradeCandidates(filteredUpgradeCandidates);
     }
 
-    public List<ImageInfoV4Response> filterDatalakeUpgradeCandidates(List<ImageInfoV4Response> upgradeCandidates) {
+    private List<ImageInfoV4Response> filterDatalakeUpgradeCandidates(List<ImageInfoV4Response> upgradeCandidates) {
         return List.of(upgradeCandidates.stream().max(ImageInfoV4Response.creationBasedComparator()).orElseThrow());
     }
 
