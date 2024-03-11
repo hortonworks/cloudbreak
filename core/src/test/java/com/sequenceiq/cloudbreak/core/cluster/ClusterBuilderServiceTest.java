@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -233,8 +234,11 @@ class ClusterBuilderServiceTest {
         when(mockStack.getDatalakeCrn()).thenReturn("dlCrn");
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
         underTest.configureManagementServices(STACK_ID);
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(platformAwareSdxConnector, times(1)).getRemoteDataContext(any());
         verify(platformAwareSdxConnector, times(0)).getSdxCrnByEnvironmentCrn(anyString());
+        verify(mockClusterSetupService, times(1)).configureManagementServices(any(), any(), captor.capture(), any(), any());
+        assertEquals("dlCrn", captor.getValue());
     }
 
     @Test

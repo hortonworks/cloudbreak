@@ -140,7 +140,7 @@ public class ClusterBuilderService implements PaasRemoteDataContextSupplier {
         getClusterSetupService(stackDto).configureManagementServices(
                 stackToTemplatePreparationObjectConverter.convert(stackDto),
                 getSdxContextOptional(datalakeCrn).orElse(null),
-                stackDto.getDatalakeCrn(),
+                datalakeCrn,
                 componentConfigProviderService.getTelemetry(stackId),
                 proxyConfig.orElse(null));
     }
