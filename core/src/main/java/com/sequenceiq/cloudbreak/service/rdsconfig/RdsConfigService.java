@@ -146,8 +146,4 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
     public Set<Cluster> getClustersUsingResource(RDSConfig rdsConfig) {
         return clusterService.findByRdsConfig(rdsConfig.getId());
     }
-
-    public int countOfClustersUsingResource(RDSConfig rdsConfig) {
-        return clusterService.countByRdsConfig(rdsConfig.getId());
-    }
 }

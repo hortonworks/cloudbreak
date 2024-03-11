@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.Postg
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -108,7 +107,7 @@ public class RdsSettingsMigrationService {
         return cmServiceConfigTable;
     }
 
-    public void updateCMServiceConfigs(StackDtoDelegate stackDto, Table<String, String, String> cmServiceConfigs) throws Exception {
+    public void updateCMServiceConfigs(StackDto stackDto, Table<String, String, String> cmServiceConfigs) throws Exception {
         clusterApiConnectors.getConnector(stackDto).clusterModificationService().updateConfigWithoutRestart(cmServiceConfigs);
     }
 

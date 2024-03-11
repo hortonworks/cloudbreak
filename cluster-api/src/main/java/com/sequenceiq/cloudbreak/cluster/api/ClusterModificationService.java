@@ -25,8 +25,6 @@ public interface ClusterModificationService {
 
     void startCluster() throws CloudbreakException;
 
-    void startCluster(boolean servicesOnly) throws CloudbreakException;
-
     void startClusterManagerAndAgents() throws CloudbreakException;
 
     void deployConfigAndStartClusterServices() throws CloudbreakException;

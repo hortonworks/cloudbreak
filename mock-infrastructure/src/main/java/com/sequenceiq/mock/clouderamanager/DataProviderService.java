@@ -170,7 +170,6 @@ public class DataProviderService {
                 .map(s -> new ApiService()
                         .name(s.getRefName())
                         .serviceState(read.getServiceStates().get(s.getRefName()))
-                        .type(s.getServiceType())
                         .displayName(s.getDisplayName())).collect(Collectors.toList());
         return new ApiServiceList().items(services);
     }
