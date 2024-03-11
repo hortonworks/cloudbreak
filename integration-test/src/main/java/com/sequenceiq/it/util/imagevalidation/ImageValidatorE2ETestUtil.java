@@ -3,31 +3,47 @@ package com.sequenceiq.it.util.imagevalidation;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import jakarta.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.ITestResult;
 import org.testng.util.Strings;
 
+import com.dyngr.Polling;
+import com.dyngr.core.AttemptMaker;
+import com.dyngr.core.AttemptResult;
+import com.dyngr.core.AttemptResults;
+import com.dyngr.exception.PollerStoppedException;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
 @Component
 public class ImageValidatorE2ETestUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageValidatorE2ETestUtil.class);
 
+    private static final int IMAGE_WAIT_SLEEP_TIME_IN_SECONDS = 10;
+
     @Inject
     private CommonCloudProperties commonCloudProperties;
 
     @Inject
     private ImageCatalogTestClient imageCatalogTestClient;
+
+    @Value("${integrationtest.imageValidation.imageWait.timeoutInMinutes:15}")
+    private int imageWaitTimeoutInMinutes;
 
     public void setupTest(TestContext testContext, ImageValidatorE2ETest e2ETest) {
         createDefaultUser(testContext);
@@ -59,12 +75,36 @@ public class ImageValidatorE2ETestUtil {
 
         String imageUuid = getImageUuid();
         if (Strings.isNotNullAndNotEmpty(imageUuid)) {
-            if (e2ETest.isPrewarmedImageTest()) {
-                validatePrewarmedImage(testContext, imageUuid);
-            } else {
-                validateBaseImage(testContext, imageUuid);
+            try {
+                Polling.waitPeriodly(IMAGE_WAIT_SLEEP_TIME_IN_SECONDS, TimeUnit.SECONDS)
+                        .stopAfterDelay(imageWaitTimeoutInMinutes, TimeUnit.MINUTES)
+                        .stopIfException(true)
+                        .run(getImageValidateAttemptMaker(testContext, e2ETest, imageUuid));
+            } catch (PollerStoppedException e) {
+                String message = String.format("%s %s image is missing from the '%s' catalog.",
+                        imageUuid, e2ETest.isPrewarmedImageTest() ? "prewarmed" : "base", testContext.get(ImageCatalogTestDto.class).getName());
+                throw new TestFailException(message, e);
             }
         }
+    }
+
+    private AttemptMaker<Void> getImageValidateAttemptMaker(TestContext testContext, ImageValidatorE2ETest e2ETest, String imageUuid) {
+        return e2ETest.isPrewarmedImageTest()
+                ? () -> containsImageAttempt(getImages(testContext).getCdhImages(), imageUuid)
+                : () -> containsImageAttempt(getImages(testContext).getBaseImages(), imageUuid);
+    }
+
+    private ImagesV4Response getImages(TestContext testContext) {
+        testContext.given(ImageCatalogTestDto.class)
+                .when(imageCatalogTestClient.getV4(true))
+                .validate();
+        return testContext.get(ImageCatalogTestDto.class).getResponse().getImages();
+    }
+
+    private <T extends ImageV4Response> AttemptResult<Void> containsImageAttempt(List<T> images, String imageUuid) {
+        return images.stream().anyMatch(img -> img.getUuid().equalsIgnoreCase(imageUuid))
+                ? AttemptResults.justFinish()
+                : AttemptResults.justContinue();
     }
 
     public String getImageCatalogName() {
@@ -73,28 +113,6 @@ public class ImageValidatorE2ETestUtil {
 
     public String getImageUuid() {
         return commonCloudProperties.getImageValidation().getImageUuid();
-    }
-
-    private void validatePrewarmedImage(TestContext testContext, String imageUuid) {
-        testContext.given(ImageCatalogTestDto.class)
-                .when(imageCatalogTestClient.getV4(true))
-                .validate();
-        ImageCatalogTestDto dto = testContext.get(ImageCatalogTestDto.class);
-        dto.getResponse().getImages().getCdhImages().stream()
-                .filter(img -> img.getUuid().equalsIgnoreCase(imageUuid))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException(imageUuid + " prewarmed image is missing from the '" + dto.getName() + "' catalog."));
-    }
-
-    private void validateBaseImage(TestContext testContext, String imageUuid) {
-        testContext.given(ImageCatalogTestDto.class)
-                .when(imageCatalogTestClient.getV4(true))
-                .validate();
-        ImageCatalogTestDto dto = testContext.get(ImageCatalogTestDto.class);
-        dto.getResponse().getImages().getBaseImages().stream()
-                .filter(img -> img.getUuid().equalsIgnoreCase(imageUuid))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException(imageUuid + " base image is missing from the '" + dto.getName() + "' catalog."));
     }
 
     private void createImageValidationSourceCatalog(TestContext testContext, String url, String name) {
