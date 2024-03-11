@@ -8,6 +8,7 @@ import javax.sql.DataSource;
 import jakarta.inject.Inject;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.quartz.QuartzProperties;
@@ -19,6 +20,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SimpleThreadPoolTaskExecutor;
 
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.quartz.configuration.SchedulerFactoryBeanUtil;
 import com.sequenceiq.cloudbreak.quartz.metric.JobMetricsListener;
 import com.sequenceiq.cloudbreak.quartz.metric.SchedulerMetricsListener;
@@ -42,6 +44,8 @@ public class SchedulerFactoryConfig {
 
     private static final String QUARTZ_TASK_EXECUTOR = "quartzTaskExecutor";
 
+    private static final String DEFAULT_SCHEDULER = "quartzScheduler";
+
     @Value("${quartz.default.threadpool.size:15}")
     private int threadpoolSize;
 
@@ -54,11 +58,9 @@ public class SchedulerFactoryConfig {
     @Inject
     private StatusCheckerConfig properties;
 
+    @Qualifier("CommonMetricService")
     @Inject
-    private JobMetricsListener jobMetricsListener;
-
-    @Inject
-    private TriggerMetricsListener triggerMetricsListener;
+    private MetricService metricService;
 
     @Inject
     private ResourceCheckerJobListener resourceCheckerJobListener;
@@ -66,23 +68,21 @@ public class SchedulerFactoryConfig {
     @Inject
     private MeterRegistry meterRegistry;
 
-    @Inject
-    private SchedulerMetricsListener schedulerMetricsListener;
-
     @Primary
     @Bean
     public SchedulerFactoryBean quartzScheduler(QuartzProperties quartzProperties, ObjectProvider<SchedulerFactoryBeanCustomizer> customizers,
             ApplicationContext applicationContext, DataSource dataSource) {
-        return SchedulerFactoryBeanUtil.createSchedulerFactoryBean(quartzProperties, customizers, applicationContext);
+        SchedulerFactoryBean schedulerFactoryBean = SchedulerFactoryBeanUtil.createSchedulerFactoryBean(quartzProperties, customizers, applicationContext);
+        schedulerFactoryBeanCustomizer().customize(schedulerFactoryBean);
+        return schedulerFactoryBean;
     }
 
-    @Bean
-    public SchedulerFactoryBeanCustomizer schedulerFactoryBeanCustomizer() {
+    private SchedulerFactoryBeanCustomizer schedulerFactoryBeanCustomizer() {
         return bean -> {
             bean.setAutoStartup(properties.isAutoSyncEnabled());
-            bean.setGlobalJobListeners(resourceCheckerJobListener, jobMetricsListener);
-            bean.setGlobalTriggerListeners(triggerMetricsListener);
-            bean.setSchedulerListeners(schedulerMetricsListener);
+            bean.setGlobalJobListeners(resourceCheckerJobListener, new JobMetricsListener(metricService, DEFAULT_SCHEDULER));
+            bean.setGlobalTriggerListeners(new TriggerMetricsListener(metricService, DEFAULT_SCHEDULER));
+            bean.setSchedulerListeners(new SchedulerMetricsListener(metricService, DEFAULT_SCHEDULER));
             if (customExecutorEnabled) {
                 bean.setTaskExecutor(quartzTaskExecutor());
             }

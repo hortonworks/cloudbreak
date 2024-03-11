@@ -11,6 +11,7 @@ import javax.sql.DataSource;
 import jakarta.inject.Inject;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.quartz.QuartzProperties;
@@ -21,8 +22,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SimpleThreadPoolTaskExecutor;
 
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.quartz.configuration.SchedulerFactoryBeanUtil;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TimedSimpleThreadPoolTaskExecutor;
+import com.sequenceiq.cloudbreak.quartz.metric.JobMetricsListener;
+import com.sequenceiq.cloudbreak.quartz.metric.SchedulerMetricsListener;
+import com.sequenceiq.cloudbreak.quartz.metric.TriggerMetricsListener;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.ResourceCheckerJobListener;
 
 import io.micrometer.core.instrument.MeterRegistry;
 
@@ -46,6 +52,13 @@ public class MeteringSyncSchedulerFactoryConfig {
     @Inject
     private MeterRegistry meterRegistry;
 
+    @Qualifier("CommonMetricService")
+    @Inject
+    private MetricService metricService;
+
+    @Inject
+    private ResourceCheckerJobListener resourceCheckerJobListener;
+
     @Bean
     public SchedulerFactoryBean meteringSyncScheduler(QuartzProperties quartzProperties, ObjectProvider<SchedulerFactoryBeanCustomizer> customizers,
             ApplicationContext applicationContext, DataSource dataSource) {
@@ -60,6 +73,9 @@ public class MeteringSyncSchedulerFactoryConfig {
             if (customExecutorEnabled) {
                 bean.setTaskExecutor(quartzMeteringSyncTaskExecutor());
             }
+            bean.setGlobalJobListeners(resourceCheckerJobListener, new JobMetricsListener(metricService, METERING_SYNC_SCHEDULER));
+            bean.setGlobalTriggerListeners(new TriggerMetricsListener(metricService, METERING_SYNC_SCHEDULER));
+            bean.setSchedulerListeners(new SchedulerMetricsListener(metricService, METERING_SYNC_SCHEDULER));
         };
     }
 

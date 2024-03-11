@@ -2,22 +2,18 @@ package com.sequenceiq.cloudbreak.quartz.metric;
 
 import static com.sequenceiq.cloudbreak.quartz.metric.QuartzMetricTag.JOB_GROUP;
 import static com.sequenceiq.cloudbreak.quartz.metric.QuartzMetricTag.PROVIDER;
+import static com.sequenceiq.cloudbreak.quartz.metric.QuartzMetricTag.SCHEDULER;
 
 import java.time.Duration;
-
-import jakarta.inject.Inject;
 
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
 import org.quartz.listeners.JobListenerSupport;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 
-@Component
 public class JobMetricsListener extends JobListenerSupport {
 
     private static final int MILLI_SECONDS_5000 = 5000;
@@ -26,9 +22,14 @@ public class JobMetricsListener extends JobListenerSupport {
 
     private static final int MILLI_SECONDS_30000 = 30000;
 
-    @Qualifier("CommonMetricService")
-    @Inject
     private MetricService metricService;
+
+    private String schedulerName;
+
+    public JobMetricsListener(MetricService metricService, String schedulerName) {
+        this.metricService = metricService;
+        this.schedulerName = schedulerName;
+    }
 
     @Override
     public String getName() {
@@ -41,6 +42,7 @@ public class JobMetricsListener extends JobListenerSupport {
         getLog().trace("Job will be executed with group: {}, name: {}, class: {}",
                 jobKey.getGroup(), jobKey.getName(), context.getJobDetail().getJobClass().getName());
         metricService.incrementMetricCounter(QuartzMetricType.JOB_TRIGGERED,
+                SCHEDULER.name(), schedulerName,
                 JOB_GROUP.name(), jobKey.getGroup(),
                 PROVIDER.name(), QuartzMetricUtil.getProvider(context.getJobDetail().getJobDataMap()));
     }
@@ -55,6 +57,7 @@ public class JobMetricsListener extends JobListenerSupport {
         Duration jobRunTime = Duration.ofMillis(context.getJobRunTime());
         logJobDurationIfCritical(context);
         metricService.recordTimerMetric(metricType, jobRunTime,
+                SCHEDULER.name(), schedulerName,
                 JOB_GROUP.name(), jobKey.getGroup(),
                 PROVIDER.name(), QuartzMetricUtil.getProvider(context.getJobDetail().getJobDataMap()));
     }

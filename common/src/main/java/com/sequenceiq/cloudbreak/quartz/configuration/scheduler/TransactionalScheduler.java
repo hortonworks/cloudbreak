@@ -21,6 +21,8 @@ public abstract class TransactionalScheduler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalScheduler.class);
 
+    private static final String UNKNOWN_SCHEDULER_NAME = "UNKNOWN";
+
     @Inject
     private TransactionService transactionService;
 
@@ -72,4 +74,12 @@ public abstract class TransactionalScheduler {
         return getScheduler().getJobKeys(groupMatcher);
     }
 
+    public String getSchedulerName() {
+        try {
+            return getScheduler().getSchedulerName();
+        } catch (SchedulerException e) {
+            LOGGER.warn("Getting scheduler name failed", e);
+            return UNKNOWN_SCHEDULER_NAME;
+        }
+    }
 }

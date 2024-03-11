@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.quartz.metric;
 
 import static com.sequenceiq.cloudbreak.quartz.metric.QuartzMetricTag.JOB_GROUP;
+import static com.sequenceiq.cloudbreak.quartz.metric.QuartzMetricTag.SCHEDULER;
 
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
+import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 
 @Component
 public class JobCountMetricConfigurator {
@@ -26,7 +28,11 @@ public class JobCountMetricConfigurator {
 
     @PostConstruct
     public void init() {
-        jobSchedulerServices.forEach(jobSchedulerService -> metricService.registerGaugeMetric(QuartzMetricType.JOB_COUNT, jobSchedulerService.getJobGroup(),
-                new GroupNameToJobCountFunction(jobSchedulerService.getScheduler()), Map.of(JOB_GROUP.name(), jobSchedulerService.getJobGroup())));
+        jobSchedulerServices.forEach(jobSchedulerService -> {
+            TransactionalScheduler scheduler = jobSchedulerService.getScheduler();
+            metricService.registerGaugeMetric(QuartzMetricType.JOB_COUNT, jobSchedulerService.getJobGroup(),
+                    new GroupNameToJobCountFunction(scheduler), Map.of(JOB_GROUP.name(), jobSchedulerService.getJobGroup(),
+                            SCHEDULER.name(), scheduler.getSchedulerName()));
+        });
     }
 }

@@ -4,5 +4,6 @@ public enum QuartzMetricTag {
 
     JOB_GROUP,
     TRIGGER_GROUP,
-    PROVIDER
+    PROVIDER,
+    SCHEDULER
 }
