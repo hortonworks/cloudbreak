@@ -14,7 +14,7 @@ dependencies {
 
     testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-api',              version: junitJupiterVersion
     testImplementation group: 'org.hibernate.validator',   name: 'hibernate-validator',            version: hibernateValidatorVersion
-    testImplementation group: 'org.apache.tomcat.embed',   name: 'tomcat-embed-el',                version: '10.1.10'
+    testImplementation group: 'org.apache.tomcat.embed',   name: 'tomcat-embed-el',                version: '10.1.19'
 }
 
 test {
