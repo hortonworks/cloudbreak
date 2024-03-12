@@ -2,8 +2,9 @@ package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.cloudbreak.service.identitymapping.AccountMappingSubject.DATA_ACCESS_USERS;
 import static com.sequenceiq.cloudbreak.service.identitymapping.AccountMappingSubject.RANGER_AUDIT_USERS;
+import static com.sequenceiq.datalake.service.sdx.SdxService.WORKSPACE_ID_DEFAULT;
 
-import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
@@ -24,7 +26,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -72,6 +73,9 @@ public class StorageValidationService {
     @Inject
     private CredentialResponseToCloudCredentialConverter credentialResponseToCloudCredentialConverter;
 
+    @Inject
+    private StackV4Endpoint stackV4Endpoint;
+
     public ObjectStorageValidateResponse validateObjectStorage(String credentialCrn, SdxCloudStorageRequest sdxCloudStorageRequest, String blueprintName,
             String clusterName, String dataAccessRole, String rangerAuditRole) {
         CredentialResponse credentialResponse = environmentClientService.getCredentialByCrn(credentialCrn);
@@ -95,15 +99,15 @@ public class StorageValidationService {
 
     public ValidationResult validateBackupStorage(SdxCluster sdxCluster, BackupOperationType backupOperationType, String backupLocation) {
         DetailedEnvironmentResponse environmentResponse = environmentService.getDetailedEnvironmentResponseByName(sdxCluster.getEnvName());
+
         CloudStorageRequest cloudStorageRequest = null;
         try {
-            if (!StringUtils.isBlank(sdxCluster.getStackRequestToCloudbreak())) {
-                StackV4Request stackV4Request = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class);
-                cloudStorageRequest = stackV4Request.getCluster().getCloudStorage();
-                LOGGER.info("Validating backup Storage: {}", JsonUtil.writeValueAsStringSilent(cloudStorageRequest));
+            StackV4Response stack = getStack(sdxCluster);
+            if (stack != null) {
+                cloudStorageRequest = cloudStorageManifester.initCloudStorageRequestFromExistingSdxCluster(stack.getCluster(), sdxCluster);
             }
-        } catch (IOException ioException) {
-            throw new BadRequestException("Failed to validate backup storage");
+        } catch (RuntimeException e) {
+            throw new BadRequestException("Failed to validate backup storage", e);
         }
 
         if (environmentResponse == null || cloudStorageRequest == null) {
@@ -153,6 +157,18 @@ public class StorageValidationService {
             if (!cloudStorage.getBaseLocation().startsWith(FileSystemType.GCS.getProtocol() + "://")) {
                 throw new BadRequestException("GCP baselocation missing protocol. please specify gcs://");
             }
+        }
+    }
+
+    private StackV4Response getStack(SdxCluster cluster) {
+        try {
+            LOGGER.info("Calling cloudbreak for SDX cluster details by name {}", cluster.getName());
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> stackV4Endpoint.get(WORKSPACE_ID_DEFAULT, cluster.getName(), Collections.emptySet(), cluster.getAccountId()));
+        } catch (jakarta.ws.rs.NotFoundException e) {
+            LOGGER.info("Sdx cluster not found on CB side", e);
+            return null;
         }
     }
 

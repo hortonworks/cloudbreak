@@ -13,7 +13,6 @@ import static com.sequenceiq.cloudbreak.common.request.HeaderValueProvider.getHe
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -81,6 +80,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
@@ -98,7 +98,6 @@ import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
@@ -644,16 +643,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         customDomainSettingsV4Request.setHostname(sdxCluster.getClusterName() + SDX_RESIZE_NAME_SUFFIX);
         stackRequest.setCustomDomain(customDomainSettingsV4Request);
 
-        prepareCloudStorageForStack(stackRequest, stackV4Response, newSdxCluster, environment);
-        prepareDefaultSecurityConfigs(shape, stackRequest, cloudPlatform);
-        try {
-            if (!StringUtils.isBlank(sdxCluster.getStackRequestToCloudbreak())) {
-                StackV4Request stackV4RequestOrig = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class);
-                stackRequest.setImage(stackV4RequestOrig.getImage());
-            }
-        } catch (IOException ioException) {
-            LOGGER.error("Failed to re-use the image catalog. Will use default catalog", ioException);
-        }
+        prepareCloudStorageForStack(stackRequest, stackV4Response, newSdxCluster);
+        prepareDefaultSecurityConfigs(null, stackRequest, cloudPlatform);
+        prepareImageForStack(stackRequest, stackV4Response);
+
         stackRequest.setResourceCrn(newSdxCluster.getCrn());
         newSdxCluster.setStackRequest(stackRequest);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxResize(sdxCluster.getId(), newSdxCluster,
@@ -853,10 +846,21 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     private void prepareCloudStorageForStack(StackV4Request stackV4Request, StackV4Response stackV4Response,
-            SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
-        CloudStorageRequest cloudStorageRequest = cloudStorageManifester.initCloudStorageRequestFromExistingSdxCluster(environment,
+            SdxCluster sdxCluster) {
+        CloudStorageRequest cloudStorageRequest = cloudStorageManifester.initCloudStorageRequestFromExistingSdxCluster(
                 stackV4Response.getCluster(), sdxCluster);
         stackV4Request.getCluster().setCloudStorage(cloudStorageRequest);
+    }
+
+    private void prepareImageForStack(StackV4Request stackV4Request, StackV4Response stackV4Response) {
+        StackImageV4Response imageResponse = stackV4Response.getImage();
+        if (imageResponse != null) {
+            ImageSettingsV4Request imageSettingsV4Request = new ImageSettingsV4Request();
+            imageSettingsV4Request.setOs(imageResponse.getOs());
+            imageSettingsV4Request.setCatalog(imageResponse.getCatalogName());
+            imageSettingsV4Request.setId(imageResponse.getId());
+            stackV4Request.setImage(imageSettingsV4Request);
+        }
     }
 
     public FlowIdentifier sync(String name, String accountId) {

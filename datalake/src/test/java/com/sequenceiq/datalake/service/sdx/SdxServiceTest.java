@@ -64,6 +64,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -125,6 +126,10 @@ class SdxServiceTest {
     private static final String SDX_CRN = "crn";
 
     private static final String CLUSTER_NAME = "test-sdx-cluster";
+
+    private static final String OS_NAME = "rhel";
+
+    private static final String CATALOG_NAME = "cdp_default";
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;
@@ -548,6 +553,10 @@ class SdxServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.STOPPED);
+        StackImageV4Response image = new StackImageV4Response();
+        image.setOs(OS_NAME);
+        image.setCatalogName(CATALOG_NAME);
+        stackV4Response.setImage(image);
         when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
 
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->

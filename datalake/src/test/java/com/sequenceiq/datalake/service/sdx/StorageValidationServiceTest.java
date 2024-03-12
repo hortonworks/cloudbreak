@@ -2,13 +2,15 @@ package com.sequenceiq.datalake.service.sdx;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
+import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -18,13 +20,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
+import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
+import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
@@ -50,6 +57,18 @@ class StorageValidationServiceTest {
 
     @Mock
     private CloudStorageValidator cloudStorageValidator;
+
+    @Mock
+    private CloudStorageManifester cloudStorageManifester;
+
+    @Mock
+    private StackV4Endpoint stackV4Endpoint;
+
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @InjectMocks
     private StorageValidationService underTest;
@@ -200,8 +219,6 @@ class StorageValidationServiceTest {
 
     @Test
     public void validateBackupStorageSdxClusterFailure() {
-        when(sdxCluster.getStackRequestToCloudbreak()).thenReturn("StackRequest");
-
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
                 () -> underTest.validateBackupStorage(sdxCluster, BackupOperationType.ANY, null));
         assertEquals(exception.getMessage(), "Failed to validate backup storage");
@@ -209,7 +226,6 @@ class StorageValidationServiceTest {
 
     @Test
     public void validateBackupStorageEnvironmentServiceFailure() {
-        when(sdxCluster.getStackRequestToCloudbreak()).thenReturn("StackRequest");
         when(sdxCluster.getEnvName()).thenReturn("test environment");
         when(environmentService.getDetailedEnvironmentResponseByName(anyString())).thenReturn(new DetailedEnvironmentResponse());
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
@@ -218,22 +234,27 @@ class StorageValidationServiceTest {
     }
 
     @Test
-    public void validateBackupStorageEnvironmentSuccess() throws IOException {
+    public void validateBackupStorageEnvironmentSuccess() {
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
+        cloudStorageRequest.setLocations(List.of(new StorageLocationBase(), new StorageLocationBase()));
+        cloudStorageRequest.setIdentities(List.of(new StorageIdentityBase(), new StorageIdentityBase()));
+        when(cloudStorageManifester.initCloudStorageRequestFromExistingSdxCluster(any(), any())).thenReturn(cloudStorageRequest);
+        StackV4Response stackV4Response = new StackV4Response();
+        when(stackV4Endpoint.get(anyLong(), any(), anySet(), any())).thenReturn(stackV4Response);
         ArgumentCaptor<CloudStorageRequest> cloudStorageRequestArgumentCaptor = ArgumentCaptor.forClass(CloudStorageRequest.class);
         ArgumentCaptor<DetailedEnvironmentResponse> detailedEnvironmentResponseArgumentCaptor = ArgumentCaptor.forClass(DetailedEnvironmentResponse.class);
-        String stackRequest = FileReaderUtils.readFileFromClasspath("/stackRequest.json");
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setParentEnvironmentName("test-environment");
         BackupResponse backupResponse = new BackupResponse();
         backupResponse.setStorageLocation(DEFAULT_BACKUP_LOCATION);
         detailedEnvironmentResponse.setBackup(backupResponse);
-        when(sdxCluster.getStackRequestToCloudbreak()).thenReturn(stackRequest);
         when(sdxCluster.getEnvName()).thenReturn("test environment");
         when(environmentService.getDetailedEnvironmentResponseByName(anyString())).thenReturn(detailedEnvironmentResponse);
         ValidationResult validationResult = underTest.validateBackupStorage(sdxCluster, BackupOperationType.ANY, null);
         verify(cloudStorageValidator, times(1)).validateBackupLocation(cloudStorageRequestArgumentCaptor.capture(),
                 eq(BackupOperationType.ANY), detailedEnvironmentResponseArgumentCaptor.capture(), eq(null), any());
-        Assertions.assertEquals(5, cloudStorageRequestArgumentCaptor.getValue().getLocations().size());
+        Assertions.assertEquals(2, cloudStorageRequestArgumentCaptor.getValue().getLocations().size());
         Assertions.assertEquals(2, cloudStorageRequestArgumentCaptor.getValue().getIdentities().size());
         Assertions.assertNull(cloudStorageRequestArgumentCaptor.getValue().getAws());
         Assertions.assertEquals("test-environment", detailedEnvironmentResponseArgumentCaptor.getValue().getParentEnvironmentName());
@@ -242,19 +263,24 @@ class StorageValidationServiceTest {
     }
 
     @Test
-    public void validateBackupStorageEnvironmentSuccessWithNonDefaultLocation() throws IOException {
+    public void validateBackupStorageEnvironmentSuccessWithNonDefaultLocation() {
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
+        cloudStorageRequest.setLocations(List.of(new StorageLocationBase(), new StorageLocationBase()));
+        cloudStorageRequest.setIdentities(List.of(new StorageIdentityBase(), new StorageIdentityBase()));
+        when(cloudStorageManifester.initCloudStorageRequestFromExistingSdxCluster(any(), any())).thenReturn(cloudStorageRequest);
+        StackV4Response stackV4Response = new StackV4Response();
+        when(stackV4Endpoint.get(anyLong(), any(), anySet(), any())).thenReturn(stackV4Response);
         ArgumentCaptor<CloudStorageRequest> cloudStorageRequestArgumentCaptor = ArgumentCaptor.forClass(CloudStorageRequest.class);
         ArgumentCaptor<DetailedEnvironmentResponse> detailedEnvironmentResponseArgumentCaptor = ArgumentCaptor.forClass(DetailedEnvironmentResponse.class);
-        String stackRequest = FileReaderUtils.readFileFromClasspath("/stackRequest.json");
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setParentEnvironmentName("test-environment");
-        when(sdxCluster.getStackRequestToCloudbreak()).thenReturn(stackRequest);
         when(sdxCluster.getEnvName()).thenReturn("test environment");
         when(environmentService.getDetailedEnvironmentResponseByName(anyString())).thenReturn(detailedEnvironmentResponse);
         ValidationResult validationResult = underTest.validateBackupStorage(sdxCluster, BackupOperationType.ANY, BACKUP_LOCATION);
         verify(cloudStorageValidator, times(1)).validateBackupLocation(cloudStorageRequestArgumentCaptor.capture(),
                 eq(BackupOperationType.ANY), detailedEnvironmentResponseArgumentCaptor.capture(), eq(BACKUP_LOCATION), any());
-        Assertions.assertEquals(5, cloudStorageRequestArgumentCaptor.getValue().getLocations().size());
+        Assertions.assertEquals(2, cloudStorageRequestArgumentCaptor.getValue().getLocations().size());
         Assertions.assertEquals(2, cloudStorageRequestArgumentCaptor.getValue().getIdentities().size());
         Assertions.assertNull(cloudStorageRequestArgumentCaptor.getValue().getAws());
         Assertions.assertEquals("test-environment", detailedEnvironmentResponseArgumentCaptor.getValue().getParentEnvironmentName());
