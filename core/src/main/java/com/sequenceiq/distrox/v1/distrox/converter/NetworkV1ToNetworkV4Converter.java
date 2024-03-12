@@ -144,9 +144,10 @@ public class NetworkV1ToNetworkV4Converter {
             String subnetId = azureNetworkV1Parameters.getSubnetId();
             if (!Strings.isNullOrEmpty(subnetId)) {
                 response.setSubnetId(subnetId);
-            } else if (source.getValue() != null) {
-                response.setSubnetId(source.getValue().getPreferedSubnetId());
+            } else {
+                response.setSubnetId(networkResponse.getPreferedSubnetId());
             }
+            networkResponse.getEndpointGatewaySubnetIds().stream().findFirst().ifPresent(response::setEndpointGatewaySubnetId);
         }
 
         return response;
