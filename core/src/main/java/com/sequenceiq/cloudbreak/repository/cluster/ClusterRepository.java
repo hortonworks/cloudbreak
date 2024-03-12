@@ -63,6 +63,9 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     @Query("SELECT c FROM Cluster c INNER JOIN c.rdsConfigs rc WHERE rc.id= :id AND c.status != 'DELETE_COMPLETED'")
     Set<Cluster> findByRdsConfig(@Param("id") Long rdsConfigId);
 
+    @Query("SELECT count(c) FROM Cluster c INNER JOIN c.rdsConfigs rc WHERE rc.id= :id AND c.status != 'DELETE_COMPLETED'")
+    int countByRdsConfig(@Param("id") Long rdsConfigId);
+
     @Query("SELECT c.name FROM Cluster c INNER JOIN c.rdsConfigs rc WHERE rc.id= :id AND c.status != 'DELETE_COMPLETED'")
     Set<String> findNamesByRdsConfig(@Param("id") Long rdsConfigId);
 

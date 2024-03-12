@@ -26,4 +26,9 @@ public class ServicesResourcesV31Controller implements ServicesResourceApi {
     public ResponseEntity<ApiServiceConfig> readServiceConfig(String mockUuid, String clusterName, String serviceName, @Valid String view) {
         return servicesResourcesOperation.readServiceConfig(mockUuid, clusterName, serviceName, view);
     }
+
+    @Override
+    public ResponseEntity<ApiServiceConfig> updateServiceConfig(String mockUuid, String clusterName, String serviceName, String message, ApiServiceConfig body) {
+        return servicesResourcesOperation.updateServiceConfig(mockUuid, clusterName, serviceName, message, body);
+    }
 }

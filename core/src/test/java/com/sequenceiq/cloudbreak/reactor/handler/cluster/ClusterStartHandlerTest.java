@@ -1,99 +1,89 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
-import com.sequenceiq.cloudbreak.cluster.api.ClusterCommissionService;
-import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.core.cluster.ClusterStartHandlerService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.ClusterServicesRestartService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartResult;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterStartHandlerTest {
     @Mock
-    private CmTemplateProcessor cmTemplateProcessor;
+    private StackService stackService;
 
     @Mock
-    private StackUtil stackUtil;
+    private ClusterStartHandlerService clusterStartHandlerService;
 
     @Mock
-    private ClusterApiConnectors apiConnectors;
-
-    @Mock
-    private ClusterApi connector;
-
-    @Mock
-    private ClusterStatusService clusterStatusService;
-
-    @Mock
-    private ClusterCommissionService clusterCommissionService;
-
-    @Mock
-    private ClusterServicesRestartService clusterServicesRestartService;
+    private EventBus eventBus;
 
     @InjectMocks
     private ClusterStartHandler underTest;
 
-    private Stack stack;
-
-    @BeforeEach
-    void setUp() {
-        underTest = new ClusterStartHandler();
-        MockitoAnnotations.openMocks(this);
-
-        stack = new Stack();
-        stack.setCloudPlatform("AWS");
-        when(stackUtil.stopStartScalingEntitlementEnabled(any())).thenReturn(true);
-        when(apiConnectors.getConnector(any(Stack.class))).thenReturn(connector);
-        when(connector.clusterStatusService()).thenReturn(clusterStatusService);
-        lenient().when(connector.clusterCommissionService()).thenReturn(clusterCommissionService);
-        List<String> decommHosts = new ArrayList<>();
-        decommHosts.add("computing-computing0.foo.bar");
-        decommHosts.add("computing-compute0.foo.bar");
-        decommHosts.add("computing-working0.foo.bar");
-        when(clusterStatusService.getDecommissionedHostsFromCM()).thenReturn(decommHosts);
-        Set<String> computeGroups = new HashSet<>();
-        computeGroups.add("compute");
-        computeGroups.add("computing");
-        when(cmTemplateProcessor.getComputeHostGroups(any())).thenReturn(computeGroups);
+    @Test
+    void testAccept() throws Exception {
+        // GIVEN
+        ClusterStartRequest clusterStartRequest = new ClusterStartRequest(1L);
+        Stack stack = new Stack();
+        Cluster cluster = new Cluster();
+        stack.setCluster(cluster);
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        when(stackService.getByIdWithListsInTransaction(clusterStartRequest.getStackId())).thenReturn(stack);
+        when(clusterStartHandlerService.getCmTemplateProcessor(cluster)).thenReturn(cmTemplateProcessor);
+        // WHEN
+        underTest.accept(Event.wrap(clusterStartRequest));
+        // THEN
+        verify(clusterStartHandlerService).startCluster(stack, cmTemplateProcessor, false);
+        verify(clusterStartHandlerService).handleStopStartScalingFeature(stack, cmTemplateProcessor);
+        ArgumentCaptor<Event<ClusterStartResult>> argumentCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus).notify(eq(EventSelectorUtil.selector(ClusterStartResult.class)), argumentCaptor.capture());
+        Event<ClusterStartResult> event = argumentCaptor.getValue();
+        assertEquals(event.getData().getRequest(), clusterStartRequest);
+        assertNull(event.getData().getRequest().getException());
     }
 
     @Test
-    void stopStartScalingFeatureShouldRecommissionComputeGroups() {
-        underTest.handleStopStartScalingFeature(stack, cmTemplateProcessor);
-        List<String> recommHosts = new ArrayList<>();
-        recommHosts.add("computing-computing0.foo.bar");
-        recommHosts.add("computing-compute0.foo.bar");
-        verify(clusterCommissionService, times(1)).recommissionHosts(eq(recommHosts));
-    }
-
-    @Test
-    void stopStartScalingFeatureShouldNotRecommissionNonComputeGroups() {
-        List<String> decommHosts = new ArrayList<>();
-        decommHosts.add("computing-working0.foo.bar");
-        when(clusterStatusService.getDecommissionedHostsFromCM()).thenReturn(decommHosts);
-        underTest.handleStopStartScalingFeature(stack, cmTemplateProcessor);
-        verify(clusterCommissionService, times(0)).recommissionHosts(any());
+    void testAcceptThrowsException() throws Exception {
+        // GIVEN
+        ClusterStartRequest clusterStartRequest = new ClusterStartRequest(1L);
+        Stack stack = new Stack();
+        Cluster cluster = new Cluster();
+        stack.setCluster(cluster);
+        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
+        Exception exception = new Exception("exception");
+        when(stackService.getByIdWithListsInTransaction(clusterStartRequest.getStackId())).thenReturn(stack);
+        when(clusterStartHandlerService.getCmTemplateProcessor(cluster)).thenReturn(cmTemplateProcessor);
+        doThrow(exception).when(clusterStartHandlerService).startCluster(stack, cmTemplateProcessor, false);
+        // WHEN
+        underTest.accept(Event.wrap(clusterStartRequest));
+        // THEN
+        verify(clusterStartHandlerService).startCluster(stack, cmTemplateProcessor, false);
+        verify(clusterStartHandlerService, never()).handleStopStartScalingFeature(stack, cmTemplateProcessor);
+        ArgumentCaptor<Event<ClusterStartResult>> argumentCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus).notify(eq(EventSelectorUtil.failureSelector(ClusterStartResult.class)), argumentCaptor.capture());
+        Event<ClusterStartResult> event = argumentCaptor.getValue();
+        assertEquals(clusterStartRequest, event.getData().getRequest());
+        assertEquals(exception, event.getData().getErrorDetails());
     }
 }
