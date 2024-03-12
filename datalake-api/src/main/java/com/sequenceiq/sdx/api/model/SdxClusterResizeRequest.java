@@ -1,5 +1,8 @@
 package com.sequenceiq.sdx.api.model;
 
+import java.util.List;
+
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -34,6 +37,14 @@ public class SdxClusterResizeRequest {
 
     @Schema(description = ModelDescriptions.MULTI_AZ_ENABLED)
     private boolean enableMultiAz;
+
+    @Valid
+    @Schema(description = ModelDescriptions.CUSTOM_INSTANCE_GROUP_OPTIONS)
+    private List<SdxInstanceGroupRequest> customInstanceGroups;
+
+    @Valid
+    @Schema(description = ModelDescriptions.INSTANCE_DISK_SIZE)
+    private List<SdxInstanceGroupDiskRequest> customInstanceGroupDiskSize;
 
     public String getEnvironment() {
         return environment;
@@ -91,6 +102,22 @@ public class SdxClusterResizeRequest {
         this.enableMultiAz = enableMultiAz;
     }
 
+    public List<SdxInstanceGroupRequest> getCustomInstanceGroups() {
+        return customInstanceGroups;
+    }
+
+    public void setCustomInstanceGroups(List<SdxInstanceGroupRequest> customInstanceGroups) {
+        this.customInstanceGroups = customInstanceGroups;
+    }
+
+    public List<SdxInstanceGroupDiskRequest> getCustomInstanceGroupDiskSize() {
+        return customInstanceGroupDiskSize;
+    }
+
+    public void setCustomInstanceGroupDiskSize(List<SdxInstanceGroupDiskRequest> customInstanceGroupDiskSize) {
+        this.customInstanceGroupDiskSize = customInstanceGroupDiskSize;
+    }
+
     @Override
     public String toString() {
         return "SdxClusterResizeRequest{" +
@@ -101,6 +128,8 @@ public class SdxClusterResizeRequest {
                 ", skipRangerAudits=" + skipRangerAudits +
                 ", skipRangerMetadata=" + skipRangerMetadata +
                 ", enableMultiAz=" + enableMultiAz +
+                ", customInstanceGroups=" + customInstanceGroups +
+                ", customInstanceGroupDiskSize=" + customInstanceGroupDiskSize +
                 '}';
     }
 }

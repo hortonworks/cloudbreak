@@ -144,6 +144,7 @@ import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxInstanceGroupDiskRequest;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
 import com.sequenceiq.sdx.api.model.SdxRefreshDatahubResponse;
@@ -509,7 +510,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 cloudPlatform, runtimeVersion, imageSettingsV4Request);
         setStackRequestParams(stackRequest, sdxClusterRequest.getJavaVersion(), sdxClusterRequest.isEnableRangerRaz(), sdxClusterRequest.isEnableRangerRms());
 
-        overrideDefaultTemplateValues(stackRequest, sdxClusterRequest.getCustomInstanceGroups());
+        overrideDefaultInstanceType(stackRequest, sdxClusterRequest.getCustomInstanceGroups());
         validateRecipes(sdxClusterRequest, stackRequest, userCrn);
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
         prepareDefaultSecurityConfigs(sdxClusterRequest.getClusterShape(), stackRequest, cloudPlatform);
@@ -539,7 +540,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return Pair.of(savedSdxCluster, flowIdentifier);
     }
 
-    private void overrideDefaultTemplateValues(StackV4Request defaultTemplate, List<SdxInstanceGroupRequest> customInstanceGroups) {
+    private void overrideDefaultInstanceType(StackV4Request defaultTemplate, List<SdxInstanceGroupRequest> customInstanceGroups) {
         if (CollectionUtils.isNotEmpty(customInstanceGroups)) {
             LOGGER.debug("Override default template with custom instance groups from request.");
             customInstanceGroups.forEach(customInstanceGroup -> {
@@ -655,11 +656,43 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             LOGGER.error("Failed to re-use the image catalog. Will use default catalog", ioException);
         }
         stackRequest.setResourceCrn(newSdxCluster.getCrn());
+        overrideDefaultInstanceType(stackRequest, sdxClusterResizeRequest.getCustomInstanceGroups());
+        overrideDefaultInstanceStorage(stackRequest, sdxClusterResizeRequest.getCustomInstanceGroupDiskSize());
         newSdxCluster.setStackRequest(stackRequest);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxResize(sdxCluster.getId(), newSdxCluster,
                 new DatalakeDrSkipOptions(sdxClusterResizeRequest.isSkipValidation(), sdxClusterResizeRequest.isSkipAtlasMetadata(),
                         sdxClusterResizeRequest.isSkipRangerAudits(), sdxClusterResizeRequest.isSkipRangerMetadata()));
         return Pair.of(sdxCluster, flowIdentifier);
+    }
+
+    private void overrideDefaultInstanceStorage(StackV4Request defaultTemplate, List<SdxInstanceGroupDiskRequest> customInstanceGroupDisks) {
+        if (CollectionUtils.isNotEmpty(customInstanceGroupDisks)) {
+            LOGGER.debug("Override default template with custom instance groups from request.");
+            customInstanceGroupDisks.forEach(customInstanceGroupDisk -> {
+                InstanceGroupV4Request templateInstanceGroup =
+                        defaultTemplate
+                                .getInstanceGroups()
+                                .stream()
+                                .filter(templateGroup -> templateGroup.getName() != null && templateGroup.getName().equals(customInstanceGroupDisk.getName()))
+                                .findAny()
+                                .orElseThrow(() -> new BadRequestException("Custom instance group is missing from default template: "
+                                        + customInstanceGroupDisk.getName()));
+                overrideInstanceStorage(templateInstanceGroup, customInstanceGroupDisk.getInstanceDiskSize());
+            });
+        }
+    }
+
+    private void overrideInstanceStorage(InstanceGroupV4Request templateGroup, Integer storageSize) {
+        InstanceTemplateV4Request instanceTemplate = templateGroup.getTemplate();
+        if (instanceTemplate != null && storageSize > 0) {
+            instanceTemplate
+                    .getAttachedVolumes()
+                    .forEach(volumeV4Request -> {
+                        LOGGER.debug("Override instance group {} storage size from {} to {}",
+                                templateGroup.getName(), volumeV4Request.getSize(), storageSize);
+                        volumeV4Request.setSize(storageSize);
+                    });
+        }
     }
 
     public SdxRefreshDatahubResponse refreshDataHub(String clusterName, String datahubName) {

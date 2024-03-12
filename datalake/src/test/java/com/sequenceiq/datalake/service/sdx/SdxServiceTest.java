@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RangerRazEnabledV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
@@ -109,6 +110,8 @@ import com.sequenceiq.sdx.api.model.SdxAwsRequest;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
+import com.sequenceiq.sdx.api.model.SdxInstanceGroupDiskRequest;
+import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("SDX service tests")
@@ -1127,6 +1130,57 @@ class SdxServiceTest {
         verify(sdxReactorFlowManager, times(1)).triggerSdxCreation(any());
         verify(transactionService, times(1)).required(any(Supplier.class));
         verify(ownerAssignmentService, times(1)).assignResourceOwnerRoleIfEntitled(anyString(), any());
+    }
+
+    @Test
+    void testSdxResizeCustomInstances() throws IOException {
+        SdxClusterResizeRequest resizeRequest = new SdxClusterResizeRequest();
+        resizeRequest.setEnvironment("environment");
+        resizeRequest.setClusterShape(ENTERPRISE);
+        SdxInstanceGroupRequest sdxInstanceGroupRequest = new SdxInstanceGroupRequest();
+        sdxInstanceGroupRequest.setName("idbroker");
+        sdxInstanceGroupRequest.setInstanceType("m5.xlarge");
+        resizeRequest.setCustomInstanceGroups(List.of(sdxInstanceGroupRequest));
+        SdxInstanceGroupDiskRequest sdxInstanceGroupDiskRequest = new SdxInstanceGroupDiskRequest();
+        sdxInstanceGroupDiskRequest.setName("master");
+        sdxInstanceGroupDiskRequest.setInstanceDiskSize(256);
+        resizeRequest.setCustomInstanceGroupDiskSize(List.of(sdxInstanceGroupDiskRequest));
+
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setId(1L);
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
+        sdxCluster.setRuntime("7.2.17");
+        sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString()))
+                .thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
+
+        mockEnvironmentCall(resizeRequest, AWS);
+        ArgumentCaptor<SdxCluster> captorResize = ArgumentCaptor.forClass(SdxCluster.class);
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), captorResize.capture(), any(DatalakeDrSkipOptions.class)))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.STOPPED);
+        when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.resizeSdx(USER_CRN, sdxCluster.getClusterName(), resizeRequest));
+
+        StackV4Request stackV4Request = JsonUtil.readValue(captorResize.getValue().getStackRequest(), StackV4Request.class);
+        InstanceGroupV4Request idbrokerInstGroup = stackV4Request.getInstanceGroups().stream().filter(ig -> "idbroker".equals(ig.getName())).findAny().get();
+        InstanceGroupV4Request masterInstGroup = stackV4Request.getInstanceGroups().stream().filter(ig -> "master".equals(ig.getName())).findAny().get();
+        assertEquals("m5.xlarge", idbrokerInstGroup.getTemplate().getInstanceType());
+        assertEquals(256, masterInstGroup.getTemplate().getAttachedVolumes().stream().findAny().get().getSize());
     }
 
     private DetailedEnvironmentResponse getDetailedEnvironmentResponse() {
