@@ -90,6 +90,22 @@ public class ClouderaManagerConfigModificationServiceTest {
         verify(configService, times(0)).modifyRoleConfigGroups(any(), any(), any(), any(), any());
     }
 
+    @Test
+    void testUpdateConfigWhenServiceMissing() throws Exception {
+        mockConfigServiceCalls();
+
+        Table<String, String, String> configTable = getConfigTable();
+        configTable.put("unknownService", "anycolumn", "anyconfigvalue");
+        underTest.updateConfig(configTable, null, new Stack());
+
+        verify(configService, times(3)).readServiceConfig(any(), any(), any());
+        verify(configService, times(2)).readRoleConfigGroupConfigs(any(), any(), any());
+        verify(configService, times(2)).modifyServiceConfigs(any(), any(), any(), any());
+        verify(configService, times(2)).modifyRoleConfigGroups(any(), any(), any(), any(), any());
+        verify(configService, times(0)).modifyServiceConfigs(any(), any(), any(), eq("unknownService"));
+        verify(configService, times(0)).modifyRoleConfigGroups(any(), any(), eq("unknownService"), any(), any());
+    }
+
     private void mockConfigServiceCalls() {
         mockReadServices();
         when(configService.readServiceConfig(any(), any(), eq("service1"))).thenReturn(new ApiServiceConfig()

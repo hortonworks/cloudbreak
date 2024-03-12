@@ -36,95 +36,102 @@ public class ClouderaManagerConfigModificationService {
     @Inject
     private ClouderaManagerServiceManagementService clouderaManagerServiceManagementService;
 
-    public List<String> serviceNames(Table<String, String, String> configTable, ApiClient client, StackDtoDelegate stack) {
+    public List<String> serviceNames(Table<String, String, String> newConfigs, ApiClient client, StackDtoDelegate stack) {
         return clouderaManagerServiceManagementService.readServices(client, stack.getName()).getItems()
                 .stream()
-                .filter(apiService -> configTable.rowKeySet().contains(apiService.getType()))
+                .filter(apiService -> newConfigs.rowKeySet().contains(apiService.getType()))
                 .map(ApiService::getName)
                 .toList();
     }
 
-    public void updateConfig(Table<String, String, String> configTable, ApiClient client, StackDtoDelegate stack) throws Exception {
-        Map<String, String> serviceMap = clouderaManagerServiceManagementService.readServices(client, stack.getName()).getItems()
+    public void updateConfig(Table<String, String, String> newConfigs, ApiClient client, StackDtoDelegate stack) throws Exception {
+        Map<String, String> serviceMapFromCM = clouderaManagerServiceManagementService.readServices(client, stack.getName()).getItems()
                 .stream()
                 .collect(Collectors.toMap(ApiService::getType, ApiService::getName));
-        Map<String, ApiServiceConfig> serviceConfigs = collectServiceConfigs(configTable, serviceMap, client, stack);
+        Map<String, ApiServiceConfig> serviceConfigsFromCM = collectServiceConfigs(newConfigs, serviceMapFromCM, client, stack);
         LOGGER.debug("Collect config groups from CM if collected service configs do not contain all of the necessary configs.");
-        Map<String, ApiRoleConfigGroupList> roleConfigGroupLists =
-                collectRoleConfigGroupConfigsIfNeeded(configTable, serviceMap, serviceConfigs, client, stack);
-        validateConfigKeyBeforeModification(configTable, serviceConfigs, roleConfigGroupLists);
-        for (Cell<String, String, String> cell : configTable.cellSet()) {
-            updateConfigBasedOnCell(client, stack, serviceMap, serviceConfigs, roleConfigGroupLists, cell);
+        Map<String, ApiRoleConfigGroupList> roleConfigGroupListsFromCM =
+                collectRoleConfigGroupConfigsIfNeeded(newConfigs, serviceMapFromCM, serviceConfigsFromCM, client, stack);
+        validateConfigKeyBeforeModification(newConfigs, serviceConfigsFromCM, roleConfigGroupListsFromCM);
+        for (Cell<String, String, String> cell : newConfigs.cellSet()) {
+            updateConfigBasedOnCell(client, stack, serviceMapFromCM, serviceConfigsFromCM, roleConfigGroupListsFromCM, cell);
         }
     }
 
-    private void updateConfigBasedOnCell(ApiClient client, StackDtoDelegate stack, Map<String, String> serviceMap,
-            Map<String, ApiServiceConfig> serviceConfigs, Map<String, ApiRoleConfigGroupList> roleConfigGroupLists, Cell<String, String, String> cell) {
-        String serviceType = cell.getRowKey();
-        String configKey = cell.getColumnKey();
-        String newValue = cell.getValue();
-        Map<String, String> configMap = Map.of(configKey, newValue);
-        String serviceName = serviceMap.get(serviceType);
-        if (roleConfigGroupLists.containsKey(serviceType)) {
-            updateConfigGroup(roleConfigGroupLists.get(serviceType), configKey, configMap, serviceName, client, stack);
-        }
-        if (configExistInConfigList(serviceConfigs.get(serviceType).getItems(), configKey)) {
-            configService.modifyServiceConfigs(client, stack.getName(), configMap, serviceName);
+    private void updateConfigBasedOnCell(ApiClient client, StackDtoDelegate stack, Map<String, String> serviceMapFromCM,
+            Map<String, ApiServiceConfig> serviceConfigsFromCM, Map<String, ApiRoleConfigGroupList> roleConfigGroupListsFromCM,
+            Cell<String, String, String> newConfigCell) {
+        String newConfigServiceType = newConfigCell.getRowKey();
+        String newConfigKey = newConfigCell.getColumnKey();
+        String newConfigValue = newConfigCell.getValue();
+        if (serviceMapFromCM.containsKey(newConfigServiceType)) {
+            Map<String, String> newConfigMap = Map.of(newConfigKey, newConfigValue);
+            String serviceName = serviceMapFromCM.get(newConfigServiceType);
+            if (roleConfigGroupListsFromCM.containsKey(newConfigServiceType)) {
+                updateConfigGroup(roleConfigGroupListsFromCM.get(newConfigServiceType), newConfigKey, newConfigMap, serviceName, client, stack);
+            }
+            if (configExistInConfigList(serviceConfigsFromCM.get(newConfigServiceType).getItems(), newConfigKey)) {
+                configService.modifyServiceConfigs(client, stack.getName(), newConfigMap, serviceName);
+            }
+        } else {
+            LOGGER.info("Service {} for config {} does not exists in CM.", newConfigServiceType, newConfigKey);
         }
     }
 
-    private void validateConfigKeyBeforeModification(Table<String, String, String> configTable, Map<String, ApiServiceConfig> serviceConfigs,
-            Map<String, ApiRoleConfigGroupList> roleConfigGroupLists) {
+    private void validateConfigKeyBeforeModification(Table<String, String, String> newConfigs, Map<String, ApiServiceConfig> serviceConfigsFromCM,
+            Map<String, ApiRoleConfigGroupList> roleConfigGroupListsFromCM) {
         LOGGER.info("Validating configs' existence before modification in CM.");
-        for (Cell<String, String, String> cell : configTable.cellSet()) {
-            String serviceType = cell.getRowKey();
-            String configKey = cell.getColumnKey();
-            if (!configPresentAsServiceConfig(serviceConfigs, serviceType, configKey) && roleConfigGroupLists.get(serviceType).getItems()
+        for (Cell<String, String, String> newConfigCell : newConfigs.cellSet()) {
+            String newConfigServiceType = newConfigCell.getRowKey();
+            String newConfigKey = newConfigCell.getColumnKey();
+            if (serviceConfigsFromCM.containsKey(newConfigServiceType) &&
+                    !configPresentAsServiceConfig(serviceConfigsFromCM, newConfigServiceType, newConfigKey) &&
+                    roleConfigGroupListsFromCM.get(newConfigServiceType).getItems()
                     .stream()
-                    .noneMatch(apiRoleConfigGroup -> apiRoleConfigGroup.getConfig().getItems()
+                    .noneMatch(apiRoleConfigGroupFromCM -> apiRoleConfigGroupFromCM.getConfig().getItems()
                             .stream()
-                            .anyMatch(apiConfig -> StringUtils.equals(apiConfig.getName(), configKey)))) {
-                throw new CloudbreakServiceException(String.format("Config %s is not present in CM for service %s", configKey, serviceType));
+                            .anyMatch(apiConfigFromCM -> StringUtils.equals(apiConfigFromCM.getName(), newConfigKey)))) {
+                throw new CloudbreakServiceException(String.format("Config %s is not present in CM for service %s", newConfigKey, newConfigServiceType));
             }
         }
     }
 
-    private void updateConfigGroup(ApiRoleConfigGroupList apiRoleConfigGroupList, String configKey,
-            Map<String, String> configMap, String serviceName, ApiClient client, StackDtoDelegate stack) {
-        Optional<ApiRoleConfigGroup> roleConfigGroup = apiRoleConfigGroupList.getItems().stream()
-                .filter(apiRoleConfigGroup -> configExistInConfigList(apiRoleConfigGroup.getConfig().getItems(), configKey))
+    private void updateConfigGroup(ApiRoleConfigGroupList apiRoleConfigGroupListFromCM, String newConfigKey,
+            Map<String, String> newConfigMap, String serviceName, ApiClient client, StackDtoDelegate stack) {
+        Optional<ApiRoleConfigGroup> roleConfigGroupFromCM = apiRoleConfigGroupListFromCM.getItems().stream()
+                .filter(apiRoleConfigGroup -> configExistInConfigList(apiRoleConfigGroup.getConfig().getItems(), newConfigKey))
                 .findFirst();
-        roleConfigGroup.ifPresent(apiRoleConfigGroup ->
-                configService.modifyRoleConfigGroups(client, stack.getName(), serviceName, apiRoleConfigGroup.getName(), configMap));
+        roleConfigGroupFromCM.ifPresent(apiRoleConfigGroupFromCM ->
+                configService.modifyRoleConfigGroups(client, stack.getName(), serviceName, apiRoleConfigGroupFromCM.getName(), newConfigMap));
     }
 
-    private Map<String, ApiRoleConfigGroupList> collectRoleConfigGroupConfigsIfNeeded(Table<String, String, String> configTable, Map<String, String> serviceMap,
-            Map<String, ApiServiceConfig> serviceConfigs, ApiClient client, StackDtoDelegate stack) {
-        return serviceMap.entrySet().stream()
-                .filter(serviceEntry -> configTable.rowKeySet().contains(serviceEntry.getKey()))
+    private Map<String, ApiRoleConfigGroupList> collectRoleConfigGroupConfigsIfNeeded(Table<String, String, String> newConfigs,
+            Map<String, String> serviceMapFromCM, Map<String, ApiServiceConfig> serviceConfigsFromCM, ApiClient client, StackDtoDelegate stack) {
+        return serviceMapFromCM.entrySet().stream()
+                .filter(serviceEntry -> newConfigs.rowKeySet().contains(serviceEntry.getKey()))
                 .filter(serviceEntry -> {
                     String serviceType = serviceEntry.getKey();
-                    Set<String> affectedConfigByService = configTable.row(serviceType).keySet();
-                    return !affectedConfigByService.stream().allMatch(config -> configPresentAsServiceConfig(serviceConfigs, serviceType, config));
+                    Set<String> affectedConfigByService = newConfigs.row(serviceType).keySet();
+                    return !affectedConfigByService.stream().allMatch(config -> configPresentAsServiceConfig(serviceConfigsFromCM, serviceType, config));
                 })
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> configService.readRoleConfigGroupConfigs(client, stack.getName(), entry.getValue())));
     }
 
-    private boolean configPresentAsServiceConfig(Map<String, ApiServiceConfig> serviceConfigs, String serviceType, String config) {
-        return serviceConfigs.get(serviceType).getItems().stream()
-                .anyMatch(apiConfig -> org.apache.commons.lang3.StringUtils.equals(apiConfig.getName(), config));
+    private boolean configPresentAsServiceConfig(Map<String, ApiServiceConfig> serviceConfigsFromCM, String newConfigServiceType, String newConfigKey) {
+        return serviceConfigsFromCM.get(newConfigServiceType).getItems().stream()
+                .anyMatch(apiConfig -> StringUtils.equals(apiConfig.getName(), newConfigKey));
     }
 
-    private Map<String, ApiServiceConfig> collectServiceConfigs(Table<String, String, String> configTable, Map<String, String> serviceMap,
+    private Map<String, ApiServiceConfig> collectServiceConfigs(Table<String, String, String> newConfigs, Map<String, String> serviceMapFromCM,
             ApiClient client, StackDtoDelegate stack) {
-        return serviceMap.entrySet().stream()
-                .filter(serviceEntry -> configTable.rowKeySet().contains(serviceEntry.getKey()))
+        return serviceMapFromCM.entrySet().stream()
+                .filter(serviceEntry -> newConfigs.rowKeySet().contains(serviceEntry.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> configService.readServiceConfig(client, stack.getName(), entry.getValue())));
     }
 
-    private boolean configExistInConfigList(List<ApiConfig> apiConfigList, String configKey) {
-        Predicate<ApiConfig> apiConfigPredicate = apiConfig -> org.apache.commons.lang3.StringUtils.equals(apiConfig.getName(), configKey);
-        return apiConfigList.stream().anyMatch(apiConfigPredicate);
+    private boolean configExistInConfigList(List<ApiConfig> apiConfigListFromCM, String newConfigKey) {
+        Predicate<ApiConfig> cmApiConfigPredicate = cmApiConfig -> StringUtils.equals(cmApiConfig.getName(), newConfigKey);
+        return apiConfigListFromCM.stream().anyMatch(cmApiConfigPredicate);
     }
 
 }
