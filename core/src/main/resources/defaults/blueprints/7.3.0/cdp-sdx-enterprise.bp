@@ -6,6 +6,7 @@
   "blueprint":{
     "cdhVersion":"7.3.0",
     "displayName":"enterprise-datalake",
+    "blueprintUpgradeOption": "ROLLING_UPGRADE_ENABLED",
     "hostTemplates":[
       {
         "cardinality":2,
