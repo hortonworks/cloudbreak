@@ -237,7 +237,12 @@ File -> Project Structure -> Project Settings -> Project -> Project Language Lev
 
 Set Gradle JVM
 ```
-IntelliJ IDEA -> Preferences -> Build, Execution, Deployment -> Gradle -> Gradle JVM -> 21
+IntelliJ IDEA -> Settings -> Build, Execution, Deployment -> Gradle -> Gradle JVM -> 21
+```
+
+Set additional command line parameters
+```
+IntelliJ IDEA -> Settings -> Build, Execution, Deployment -> Compiler -> Java Compiler -> Additional command line parameters -> -parameters
 ```
 
 Set Import Order
@@ -261,7 +266,7 @@ Cloudbreak can be imported into IDEA as a Gradle project by specifying the `clou
 
 Also, you need to import inspection settings called `inpsections.xml` located in `config/idea`:
 ```
-IntelliJ IDEA -> Preferences -> Editor -> Inspections -> Settings icon -> Import Profile
+IntelliJ IDEA -> Settings -> Editor -> Inspections -> Settings icon -> Import Profile
 ```
 
 Cloudbreak integrates with GRPC components. This results in generated files inside the project with big file sizes. By default, IDEA ignores anything that is more than 8MB, resulting in unknown classes inside the IDEA context. To circumvent this, you need to add this property to your IDEA properties.
@@ -276,7 +281,7 @@ Restart IDEA, and Rebuild.
 #### Activating Cloudbreak Code Styles
 After importing, be sure to navigate to:
 ```text
-IntelliJ IDEA -> Preferences -> Editor -> Code Style -> Java -> Scheme
+IntelliJ IDEA -> Settings -> Editor -> Code Style -> Java -> Scheme
 ```
 And, select the new scheme `Default (1)`.
 
