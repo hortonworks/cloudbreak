@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.common.json;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.util.Collection;
 import java.util.Collections;
@@ -103,6 +104,10 @@ public class JsonUtil {
 
     public static String writeValueAsString(Object object) throws JsonProcessingException {
         return MAPPER.writeValueAsString(object);
+    }
+
+    public static void writeValueToOutputStream(OutputStream outputStream, Object object) throws IOException {
+        MAPPER.writeValue(outputStream, object);
     }
 
     public static String writeValueAsStringUnchecked(Object object) {
