@@ -65,7 +65,7 @@ public class ClusterCertificatesRotationActions {
             @Override
             protected void doExecute(ClusterCertificateRotationContext context, ClusterCMCARotationSuccess payload, Map<Object, Object> variables) {
                 clusterCertificatesRotationService.hostCertificatesRotationStarted(payload.getResourceId());
-                sendEvent(context, new ClusterHostCertificatesRotationRequest(payload.getResourceId()));
+                sendEvent(context, new ClusterHostCertificatesRotationRequest(payload.getResourceId(), context.getCertificateRotationType()));
             }
         };
     }

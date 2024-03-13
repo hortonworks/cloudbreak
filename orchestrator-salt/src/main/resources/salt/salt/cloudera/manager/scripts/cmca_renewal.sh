@@ -53,3 +53,9 @@ done < "$AUTO_TLS_INIT_FILE"
 echo "$(date '+%d/%m/%Y %H:%M:%S') - Cleaning up leftover after CMCA renewal."
 rm -rf ${CERTMANAGER_DIR}_bkp_*
 rm -f ${CM_SETTINGS_FILE}.bkp.*
+
+{% if gov_cloud == True %}
+echo "$(date '+%d/%m/%Y %H:%M:%S') - Preparing for hosts' certificate rotation."
+rm -rf /srv/salt/agent-tls-tokens/*/agent_token_generated
+rm -rf /srv/salt/agent-tls-tokens/*/agent_token_copied_to_client
+{% endif %}

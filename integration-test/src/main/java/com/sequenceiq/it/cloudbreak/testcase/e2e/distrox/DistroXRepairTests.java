@@ -93,11 +93,8 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 GATEWAY_CERT,
                 // we should enable this again when CDPD-43281 is resolved
                 //CLUSTER_CM_SERVICES_DB_PASSWORD,
-                DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD));
-        if (!testContext.given(DistroXTestDto.class).govCloud()) {
-            // OPSAPS-69621 and CB-24535
-            secretTypes.add(DATAHUB_CM_INTERMEDIATE_CA_CERT);
-        }
+                DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD,
+                DATAHUB_CM_INTERMEDIATE_CA_CERT));
         testContext
                 .given(DistroXTestDto.class)
                 .when(distroXTestClient.rotateSecret(secretTypes))

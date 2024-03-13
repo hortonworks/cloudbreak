@@ -186,11 +186,8 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 DATALAKE_DATABASE_ROOT_PASSWORD,
                 DATALAKE_CM_DB_PASSWORD,
                 DATALAKE_CM_SERVICE_DB_PASSWORD,
-                DATALAKE_GATEWAY_CERT));
-        if (!testContext.given(sdxInternal, SdxInternalTestDto.class).govCloud()) {
-            // OPSAPS-69621 and CB-24535
-            secretTypes.add(DATALAKE_CM_INTERMEDIATE_CA_CERT);
-        }
+                DATALAKE_GATEWAY_CERT,
+                DATALAKE_CM_INTERMEDIATE_CA_CERT));
         testContext
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .when(sdxTestClient.describeInternal(), key(sdxInternal))

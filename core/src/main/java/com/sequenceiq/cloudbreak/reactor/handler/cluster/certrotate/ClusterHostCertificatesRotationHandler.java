@@ -3,22 +3,29 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster.certrotate;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.security.KeyPair;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.CertificateRotationType;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterCertificatesRotationFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterHostCertificatesRotationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterHostCertificatesRotationSuccess;
+import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
 import com.sequenceiq.cloudbreak.san.LoadBalancerSANProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -51,6 +58,9 @@ public class ClusterHostCertificatesRotationHandler extends ExceptionCatcherEven
     @Inject
     private LoadBalancerSANProvider loadBalancerSANProvider;
 
+    @Inject
+    private SecretRotationSaltService saltService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(ClusterHostCertificatesRotationRequest.class);
@@ -67,16 +77,25 @@ public class ClusterHostCertificatesRotationHandler extends ExceptionCatcherEven
         Selectable result;
         try {
             StackDto stackDto = stackDtoService.getById(request.getResourceId());
-            checkNotNull(stackDto);
-            checkNotNull(stackDto.getStack());
-            checkNotNull(stackDto.getCluster());
-            ClusterApi clusterApi = apiConnectors.getConnector(stackDto);
-            StackView stack = stackDto.getStack();
-            String subAltName = loadBalancerSANProvider.getLoadBalancerSAN(stack.getId(), stackDto.getBlueprint()).orElse(null);
-            if (isRootSshAccessNeededForHostCertRotation(stackDto)) {
-                rotateCertsWithSsh(stackDto, clusterApi, subAltName);
+            if (StringUtils.equals(stackDto.getPlatformVariant(), CloudConstants.AWS_NATIVE_GOV) &&
+                    CertificateRotationType.ALL.equals(request.getCertificateRotationType())) {
+                LOGGER.info("In case of GOV cloud and CMCA rotation, CB cannot rely on CM API, since CM agent heartbeat is failing, " +
+                        "because of strict SSL verification, thus CM command is also failing, " +
+                        "so executing hosts' certificate rotation for agents manually using salt.");
+                saltService.executeSaltState(stackDto, stackDto.getAllFunctioningNodes().stream().map(Node::getHostname).collect(Collectors.toSet()),
+                        List.of("cloudera.manager.rotate.host-cert-manual-renewal"));
             } else {
-                clusterApi.rotateHostCertificates(null, null, subAltName);
+                checkNotNull(stackDto);
+                checkNotNull(stackDto.getStack());
+                checkNotNull(stackDto.getCluster());
+                ClusterApi clusterApi = apiConnectors.getConnector(stackDto);
+                StackView stack = stackDto.getStack();
+                String subAltName = loadBalancerSANProvider.getLoadBalancerSAN(stack.getId(), stackDto.getBlueprint()).orElse(null);
+                if (isRootSshAccessNeededForHostCertRotation(stackDto)) {
+                    rotateCertsWithSsh(stackDto, clusterApi, subAltName);
+                } else {
+                    clusterApi.rotateHostCertificates(null, null, subAltName);
+                }
             }
             result = new ClusterHostCertificatesRotationSuccess(request.getResourceId());
         } catch (Exception e) {
