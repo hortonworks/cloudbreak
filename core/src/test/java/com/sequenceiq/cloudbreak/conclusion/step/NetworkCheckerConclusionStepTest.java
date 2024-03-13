@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.conclusion.step;
 
-import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.GATEWAY_NETWORK_STATUS_FAILED;
 import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_CCM_NOT_ACCESSIBLE;
 import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_CCM_NOT_ACCESSIBLE_DETAILS;
 import static com.sequenceiq.cloudbreak.conclusion.step.ConclusionMessage.NETWORK_CLOUDERA_COM_NOT_ACCESSIBLE;
@@ -13,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -55,8 +55,10 @@ class NetworkCheckerConclusionStepTest {
 
     @Test
     public void checkShouldBeSuccessfulIfNetworkReportFailedForOlderImageVersions() throws CloudbreakOrchestratorFailedException {
-        when(cdpDoctorService.getNetworkStatusForMinions(any())).thenThrow(new CloudbreakOrchestratorFailedException("error"));
-        when(cloudbreakMessagesService.getMessage(eq(GATEWAY_NETWORK_STATUS_FAILED))).thenReturn("gateway network status check failed");
+        CloudbreakOrchestratorFailedException error = new CloudbreakOrchestratorFailedException("error");
+        when(cdpDoctorService.getNetworkStatusForMinions(any())).thenThrow(error);
+        when(cloudbreakMessagesService.getMessage(any(), anyList()))
+                .thenReturn("gateway network status check failed");
         Conclusion stepResult = underTest.check(1L);
 
         assertTrue(stepResult.isFailureFound());

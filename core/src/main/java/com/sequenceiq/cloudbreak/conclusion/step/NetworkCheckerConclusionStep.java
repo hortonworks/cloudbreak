@@ -63,7 +63,7 @@ public class NetworkCheckerConclusionStep extends ConclusionStep {
                 LOGGER.warn(conclusion);
                 return failed(conclusion, e.getMessage());
             }
-            return failed(cloudbreakMessagesService.getMessage(GATEWAY_NETWORK_STATUS_FAILED), e.getMessage());
+            return failed(cloudbreakMessagesService.getMessage(GATEWAY_NETWORK_STATUS_FAILED, List.of(e.getMessage())), e.getMessage());
         }
     }
 
