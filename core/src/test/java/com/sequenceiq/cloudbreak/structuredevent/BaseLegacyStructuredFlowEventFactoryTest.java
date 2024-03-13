@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.converter.BlueprintToBlueprintDetailsConverter;
 import com.sequenceiq.cloudbreak.structuredevent.converter.ClusterToClusterDetailsConverter;
@@ -28,7 +29,6 @@ import com.sequenceiq.cloudbreak.structuredevent.event.BlueprintDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
-import com.sequenceiq.flow.ha.NodeConfig;
 
 @ExtendWith(MockitoExtension.class)
 class BaseLegacyStructuredFlowEventFactoryTest {

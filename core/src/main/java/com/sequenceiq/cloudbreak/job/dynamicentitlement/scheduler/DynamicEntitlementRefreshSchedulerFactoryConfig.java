@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.job.dynamicentitlement.scheduler;
 
+import static com.sequenceiq.cloudbreak.quartz.configuration.scheduler.SchedulerFactoryConfig.EXECUTOR_THREAD_NAME_POSTFIX;
 import static com.sequenceiq.cloudbreak.quartz.configuration.scheduler.SchedulerFactoryConfig.METRIC_PREFIX;
-import static com.sequenceiq.cloudbreak.quartz.configuration.scheduler.SchedulerFactoryConfig.QUARTZ_DYNAMIC_ENTITLEMENT_EXECUTOR_THREAD_NAME_PREFIX;
+import static com.sequenceiq.cloudbreak.quartz.configuration.scheduler.SchedulerFactoryConfig.SCHEDULER_POSTFIX;
+import static com.sequenceiq.cloudbreak.quartz.configuration.scheduler.SchedulerFactoryConfig.TASK_EXECUTOR_POSTFIX;
 
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -36,17 +38,22 @@ import io.micrometer.core.instrument.MeterRegistry;
 @Configuration
 public class DynamicEntitlementRefreshSchedulerFactoryConfig {
 
-    private static final String QUARTZ_DYNAMIC_ENTITLEMENT_TASK_EXECUTOR = "quartzDynamicEntitlementTaskExecutor";
+    public static final String QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_PREFIX = "quartzDynamicEntitlementRefresh";
 
-    private static final String DYNAMIC_ENTITLEMENT_SCHEDULER = "dynamicEntitlementScheduler";
+    public static final String QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_SCHEDULER = QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_PREFIX + SCHEDULER_POSTFIX;
 
-    @Value("${quartz.dynamic-entitlement.common.threadpool.size:15}")
+    private static final String QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_EXECUTOR_THREAD_NAME_PREFIX =
+            QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_PREFIX + EXECUTOR_THREAD_NAME_POSTFIX;
+
+    private static final String QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_TASK_EXECUTOR = QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_PREFIX + TASK_EXECUTOR_POSTFIX;
+
+    @Value("${quartz.dynamic-entitlement.threadpool.size:15}")
     private int threadpoolSize;
 
-    @Value("${quartz.dynamic-entitlement.common.threadpool.priority:5}")
+    @Value("${quartz.dynamic-entitlement.threadpool.priority:5}")
     private int threadpoolPriority;
 
-    @Value("${quartz.dynamic-entitlement.common.threadpool.custom.executor:true}")
+    @Value("${quartz.dynamic-entitlement.threadpool.custom.executor:true}")
     private boolean customExecutorEnabled;
 
     @Inject
@@ -59,32 +66,32 @@ public class DynamicEntitlementRefreshSchedulerFactoryConfig {
     @Inject
     private ResourceCheckerJobListener resourceCheckerJobListener;
 
-    @Bean
-    public SchedulerFactoryBean dynamicEntitlementScheduler(QuartzProperties quartzProperties, ObjectProvider<SchedulerFactoryBeanCustomizer> customizers,
-            ApplicationContext applicationContext, DataSource dataSource) {
+    @Bean(name = QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_SCHEDULER)
+    public SchedulerFactoryBean quartzDynamicEntitlementRefreshScheduler(QuartzProperties quartzProperties,
+            ObjectProvider<SchedulerFactoryBeanCustomizer> customizers, ApplicationContext applicationContext, DataSource dataSource) {
         SchedulerFactoryBean schedulerFactoryBean = SchedulerFactoryBeanUtil.createSchedulerFactoryBean(quartzProperties, customizers, applicationContext);
-        dynamicEntitlementSchedulerFactoryBeanCustomizer().customize(schedulerFactoryBean);
+        dynamicEntitlementRefreshSchedulerFactoryBeanCustomizer().customize(schedulerFactoryBean);
         return schedulerFactoryBean;
     }
 
-    private SchedulerFactoryBeanCustomizer dynamicEntitlementSchedulerFactoryBeanCustomizer() {
+    private SchedulerFactoryBeanCustomizer dynamicEntitlementRefreshSchedulerFactoryBeanCustomizer() {
         return bean -> {
-            bean.setSchedulerName(DYNAMIC_ENTITLEMENT_SCHEDULER);
+            bean.setSchedulerName(QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_SCHEDULER);
             if (customExecutorEnabled) {
-                bean.setTaskExecutor(quartzDynamicEntitlementTaskExecutor());
+                bean.setTaskExecutor(quartzDynamicEntitlementRefreshTaskExecutor());
             }
-            bean.setGlobalJobListeners(resourceCheckerJobListener, new JobMetricsListener(metricService, DYNAMIC_ENTITLEMENT_SCHEDULER));
-            bean.setGlobalTriggerListeners(new TriggerMetricsListener(metricService, DYNAMIC_ENTITLEMENT_SCHEDULER));
-            bean.setSchedulerListeners(new SchedulerMetricsListener(metricService, DYNAMIC_ENTITLEMENT_SCHEDULER));
+            bean.setGlobalJobListeners(resourceCheckerJobListener, new JobMetricsListener(metricService, QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_SCHEDULER));
+            bean.setGlobalTriggerListeners(new TriggerMetricsListener(metricService, QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_SCHEDULER));
+            bean.setSchedulerListeners(new SchedulerMetricsListener(metricService, QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_SCHEDULER));
         };
     }
 
-    @Bean(name = QUARTZ_DYNAMIC_ENTITLEMENT_TASK_EXECUTOR)
-    public Executor quartzDynamicEntitlementTaskExecutor() {
+    @Bean(name = QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_TASK_EXECUTOR)
+    public Executor quartzDynamicEntitlementRefreshTaskExecutor() {
         SimpleThreadPoolTaskExecutor executor = new SimpleThreadPoolTaskExecutor();
         executor.setThreadPriority(threadpoolPriority);
         executor.setThreadCount(threadpoolSize);
-        executor.setThreadNamePrefix(QUARTZ_DYNAMIC_ENTITLEMENT_EXECUTOR_THREAD_NAME_PREFIX);
-        return new TimedSimpleThreadPoolTaskExecutor(meterRegistry, executor, QUARTZ_DYNAMIC_ENTITLEMENT_TASK_EXECUTOR, METRIC_PREFIX, Set.of());
+        executor.setThreadNamePrefix(QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_EXECUTOR_THREAD_NAME_PREFIX);
+        return new TimedSimpleThreadPoolTaskExecutor(meterRegistry, executor, QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_TASK_EXECUTOR, METRIC_PREFIX, Set.of());
     }
 }

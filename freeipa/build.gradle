@@ -149,6 +149,7 @@ dependencies {
   implementation project(':cloud-gcp')
   implementation project(':cloud-template')
   implementation project(':ccm-connector')
+  implementation project(':service-common')
 
   implementation project(':orchestrator-salt')
   runtimeOnly project(':cloud-mock')

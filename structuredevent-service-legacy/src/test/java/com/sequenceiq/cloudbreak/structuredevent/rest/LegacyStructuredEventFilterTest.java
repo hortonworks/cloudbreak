@@ -21,11 +21,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyDefaultStructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
-import com.sequenceiq.flow.ha.NodeConfig;
 
 @ExtendWith(MockitoExtension.class)
 class LegacyStructuredEventFilterTest {

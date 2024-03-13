@@ -19,10 +19,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.periscope.config.ScalingActivityCleanupConfig;
 import com.sequenceiq.periscope.model.ScalingActivities;
 import com.sequenceiq.periscope.service.ScalingActivityService;
-import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeService;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,7 +42,7 @@ class CleanupMonitorTest {
     private ScalingActivityService scalingActivityService;
 
     @Mock
-    private PeriscopeNodeConfig nodeConfig;
+    private NodeConfig nodeConfig;
 
     @Mock
     private ScalingActivityCleanupConfig cleanupConfig;

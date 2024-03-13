@@ -1,0 +1,75 @@
+plugins {
+  id "java-library"
+}
+
+repositories {
+  maven { url = "$repoUrl" }
+  mavenCentral()
+  maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }
+  maven { url "https://repo.spring.io/release" }
+  maven { url "https://plugins.gradle.org/m2/" }
+}
+
+jar {
+  archiveBaseName = 'service-common'
+}
+
+dependencies {
+
+  api ("io.grpc:grpc-api:$grpcVersion")
+
+  implementation project(':common')
+
+  implementation group: 'org.slf4j',                        name: 'slf4j-api',                      version: slf4jApiVersion
+  implementation group: 'ch.qos.logback.contrib',           name: 'logback-json-classic',           version: logbackJsonClassicVersion
+  implementation group: 'org.mybatis',                      name: 'mybatis-migrations',             version: mybatisMigrationVersion
+  implementation group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',               version: jacksonDatabindVersion
+  implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-jdk8',          version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-jsr310',        version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-hibernate6',    version: jacksonVersion
+  implementation group: 'net.sf.json-lib',                  name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
+
+  implementation group: 'com.github.ben-manes.caffeine',    name: 'caffeine',                       version: caffeineVersion
+  implementation group: 'org.glassfish.jersey.core',        name: 'jersey-client',                  version: jerseyCoreVersion
+  implementation group: 'org.glassfish.jersey.media',       name: 'jersey-media-multipart',         version: jerseyCoreVersion
+  implementation group: 'org.bouncycastle',                 name: 'bcprov-jdk18on',                 version: bouncycastleVersion
+  implementation group: 'org.bouncycastle',                 name: 'bcpkix-jdk18on',                 version: bouncycastleVersion
+
+  implementation group: 'org.springframework',              name: 'spring-beans',                   version: springFrameworkVersion
+  implementation group: 'org.springframework',              name: 'spring-context',                 version: springFrameworkVersion
+  implementation group: 'org.springframework',              name: 'spring-context-support',         version: springFrameworkVersion
+  implementation group: 'org.postgresql',                   name: 'postgresql',                     version: postgreSQLVersion
+  implementation group: 'net.sf.json-lib',                  name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
+  implementation group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',               version: { strictly jacksonDatabindVersion }
+  implementation group: 'org.aspectj',                      name: 'aspectjtools',                   version: '1.9.20'
+  implementation group: 'dnsjava',                          name: 'dnsjava',                        version: dnsjavaVersion
+
+  testImplementation group: 'org.springframework.boot',     name: 'spring-boot-starter-test',       version: springBootVersion
+  testImplementation group: 'org.springframework.boot',     name: 'spring-boot-starter-validation', version: springBootVersion
+  testImplementation group: 'org.testcontainers',           name: 'junit-jupiter',                  version: testContainersVersion
+}
+
+tasks.register('testJar', Jar) {
+  dependsOn testClasses
+  archiveBaseName = "test-${project.name}"
+  archiveClassifier = 'test'
+  from sourceSets.test.output
+  from sourceSets.main.output
+}
+
+configurations {
+  tests
+}
+
+artifacts {
+  tests testJar
+}
+
+sourceSets {
+  main {
+    java {
+      if (!project.hasProperty("integrationTest"))
+        exclude 'com/sequenceiq/cloudbreak/_patch/glassfish/**'
+    }
+  }
+}

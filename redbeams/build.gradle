@@ -119,6 +119,7 @@ dependencies {
   implementation project(':redbeams-api')
   implementation project(':template-manager-tag')
   implementation project(':structuredevent-service-cdp')
+  implementation project(':service-common')
 
   runtimeOnly project(':cloud-gcp')
   runtimeOnly project(':cloud-aws-cloudformation')

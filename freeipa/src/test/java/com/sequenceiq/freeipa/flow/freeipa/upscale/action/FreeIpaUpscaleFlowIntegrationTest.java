@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -215,6 +216,9 @@ class FreeIpaUpscaleFlowIntegrationTest {
 
     @MockBean
     private RegionAwareInternalCrnGeneratorFactory crnGeneratorFactory;
+
+    @MockBean
+    private NodeConfig nodeConfig;
 
     private ResourceConnector resourceConnector = mock(ResourceConnector.class);
 

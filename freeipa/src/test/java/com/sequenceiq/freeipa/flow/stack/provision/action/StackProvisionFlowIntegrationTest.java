@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -160,6 +161,9 @@ class StackProvisionFlowIntegrationTest {
 
     @MockBean
     private InstanceMetaDataService instanceMetaDataService;
+
+    @MockBean
+    private NodeConfig nodeConfig;
 
     private ResourceConnector resourceConnector = mock(ResourceConnector.class);
 

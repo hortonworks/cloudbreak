@@ -53,10 +53,11 @@ class DynamicEntitlementRefreshSchedulerFactoryConfigTest {
 
     @Test
     void testDynamicEntitlementSchedulerShouldHaveProperConfiguration() throws Exception {
-        SchedulerFactoryBean meteringScheduler = underTest.dynamicEntitlementScheduler(new QuartzProperties(), objectProvider, applicationContext, dataSource);
+        SchedulerFactoryBean meteringScheduler = underTest.quartzDynamicEntitlementRefreshScheduler(new QuartzProperties(), objectProvider, applicationContext,
+                dataSource);
         meteringScheduler.afterPropertiesSet();
         Scheduler scheduler = meteringScheduler.getScheduler();
-        assertEquals("dynamicEntitlementScheduler", scheduler.getSchedulerName());
+        assertEquals("quartzDynamicEntitlementRefreshScheduler", scheduler.getSchedulerName());
         ListenerManager listenerManager = scheduler.getListenerManager();
         assertThat(listenerManager.getSchedulerListeners()).hasSize(1);
         assertEquals(SchedulerMetricsListener.class, listenerManager.getSchedulerListeners().getFirst().getClass());

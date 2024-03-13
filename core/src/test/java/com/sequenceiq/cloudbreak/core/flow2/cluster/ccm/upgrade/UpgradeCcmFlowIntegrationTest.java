@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
@@ -139,6 +140,9 @@ class UpgradeCcmFlowIntegrationTest {
 
     @MockBean
     private CrnUserDetailsService crnUserDetailsService;
+
+    @MockBean
+    private NodeConfig nodeConfig;
 
     @SpyBean
     private UpgradeCcmService upgradeCcmService;

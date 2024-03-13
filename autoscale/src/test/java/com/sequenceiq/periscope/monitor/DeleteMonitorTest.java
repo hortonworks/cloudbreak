@@ -20,6 +20,7 @@ import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.springframework.context.ApplicationContext;
 
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.periscope.domain.PeriscopeJob;
 import com.sequenceiq.periscope.domain.PeriscopeNode;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
@@ -28,7 +29,6 @@ import com.sequenceiq.periscope.repository.PeriscopeJobRepository;
 import com.sequenceiq.periscope.repository.PeriscopeNodeRepository;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
-import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -42,7 +42,7 @@ public class DeleteMonitorTest {
     private PeriscopeJobRepository periscopeJobRepository;
 
     @Mock
-    private PeriscopeNodeConfig periscopeNodeConfig;
+    private NodeConfig periscopeNodeConfig;
 
     @Mock
     private PeriscopeNodeRepository periscopeNodeRepository;
@@ -112,7 +112,7 @@ public class DeleteMonitorTest {
         when(applicationContext.getBean(ExecutorServiceWithRegistry.class)).thenReturn(mock(ExecutorServiceWithRegistry.class));
         when(applicationContext.getBean(RejectedThreadService.class)).thenReturn(mock(RejectedThreadService.class));
         when(applicationContext.getBean(ClusterService.class)).thenReturn(mock(ClusterService.class));
-        when(applicationContext.getBean(PeriscopeNodeConfig.class)).thenReturn(periscopeNodeConfig);
+        when(applicationContext.getBean(NodeConfig.class)).thenReturn(periscopeNodeConfig);
         when(applicationContext.getBean(PeriscopeNodeRepository.class)).thenReturn(periscopeNodeRepository);
         when(applicationContext.getBean(ClusterDeleteHandler.class)).thenReturn(clusterDeleteHandler);
         when(applicationContext.getBean(PeriscopeJobRepository.class)).thenReturn(periscopeJobRepository);

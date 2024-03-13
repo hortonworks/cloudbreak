@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.job.metering.scheduler;
 
+import static com.sequenceiq.cloudbreak.job.metering.scheduler.MeteringSchedulerFactoryConfig.QUARTZ_METERING_SCHEDULER;
+
 import jakarta.inject.Inject;
 
 import org.quartz.Scheduler;
@@ -11,7 +13,7 @@ import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalSch
 @Component("MeteringTransactionalScheduler")
 public class MeteringTransactionalScheduler extends TransactionalScheduler {
 
-    @Qualifier("meteringScheduler")
+    @Qualifier(QUARTZ_METERING_SCHEDULER)
     @Inject
     private Scheduler scheduler;
 

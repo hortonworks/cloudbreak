@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.Retry.ActionFailedException;
 import com.sequenceiq.periscope.domain.PeriscopeNode;
@@ -24,7 +25,7 @@ public class HeartbeatService {
     private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatService.class);
 
     @Inject
-    private PeriscopeNodeConfig periscopeNodeConfig;
+    private NodeConfig periscopeNodeConfig;
 
     @Inject
     private PeriscopeNodeRepository periscopeNodeRepository;

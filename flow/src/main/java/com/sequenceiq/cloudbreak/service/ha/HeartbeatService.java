@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.ha.domain.Node;
 import com.sequenceiq.cloudbreak.ha.service.FlowDistributor;
 import com.sequenceiq.cloudbreak.ha.service.NodeService;
@@ -36,7 +37,6 @@ import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
-import com.sequenceiq.flow.ha.NodeConfig;
 
 @Service
 public class HeartbeatService {

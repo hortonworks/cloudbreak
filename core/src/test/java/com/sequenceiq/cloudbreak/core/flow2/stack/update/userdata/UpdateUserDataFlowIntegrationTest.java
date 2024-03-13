@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UserDataUpdateRequest;
 import com.sequenceiq.cloudbreak.reactor.handler.userdata.UpdateUserDataHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.userdata.UpdateUserDataOnProviderHandler;
@@ -130,6 +131,9 @@ class UpdateUserDataFlowIntegrationTest {
 
     @MockBean
     private CrnUserDetailsService crnUserDetailsService;
+
+    @MockBean
+    private NodeConfig nodeConfig;
 
     @Mock
     private ResourceConnector resourcesApi;

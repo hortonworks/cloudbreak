@@ -32,6 +32,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PeriscopeNode;
 import com.sequenceiq.periscope.domain.TimeAlert;
@@ -51,7 +52,7 @@ class LeaderElectionServiceTest {
     private ApplicationContext applicationContext;
 
     @Mock
-    private PeriscopeNodeConfig periscopeNodeConfig;
+    private NodeConfig periscopeNodeConfig;
 
     @Mock
     private PeriscopeNodeRepository periscopeNodeRepository;
@@ -176,7 +177,7 @@ class LeaderElectionServiceTest {
         Cluster cluster = getValidIsMissedNeeded();
         cluster.setAutoscalingEnabled(false);
 
-        boolean needed = ReflectionTestUtils.invokeMethod(underTest,  "isExecutionOfMissedTimeBasedAlertsNeeded", cluster);
+        boolean needed = ReflectionTestUtils.invokeMethod(underTest, "isExecutionOfMissedTimeBasedAlertsNeeded", cluster);
 
         assertFalse(needed);
     }
@@ -186,7 +187,7 @@ class LeaderElectionServiceTest {
         Cluster cluster = getValidIsMissedNeeded();
         cluster.setCoolDown(1);
 
-        boolean needed = ReflectionTestUtils.invokeMethod(underTest,  "isExecutionOfMissedTimeBasedAlertsNeeded", cluster);
+        boolean needed = ReflectionTestUtils.invokeMethod(underTest, "isExecutionOfMissedTimeBasedAlertsNeeded", cluster);
 
         assertFalse(needed);
     }

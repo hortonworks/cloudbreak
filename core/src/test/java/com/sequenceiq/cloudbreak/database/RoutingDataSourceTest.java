@@ -2,10 +2,12 @@ package com.sequenceiq.cloudbreak.database;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -32,11 +34,20 @@ class RoutingDataSourceTest {
     @Mock(name = "quartzDataSource")
     private DataSource quartzDataSource;
 
+    @Mock(name = "quartzMeteringDataSource")
+    private DataSource quartzMeteringDataSource;
+
+    @Mock
+    private Map<String, DataSource> dataSources;
+
     @Mock
     private Connection defaultConnection;
 
     @Mock
     private Connection quartzConnection;
+
+    @Mock
+    private Connection quartzMeteringConnection;
 
     /**
      * @return Collection of thread names inspected while running quartz jobs
@@ -44,18 +55,27 @@ class RoutingDataSourceTest {
     private static Collection<String> getQuartzThreadNames() {
         return Set.of(
                 "quartzExecutor-6",
-                "quartzMeteringExecutor-6",
-                "quartzMeteringSyncExecutor-6",
-                "quartzDynamicEntitlementExecutor-6",
                 "QuartzScheduler_quartzScheduler-dbajzath1648036370090_ClusterManager",
-                "QuartzScheduler_quartzScheduler-dbajzath1648036370090_MisfireHandler"
-        );
+                "QuartzScheduler_quartzScheduler-dbajzath1648036370090_MisfireHandler",
+                "quartzScheduler_QuartzSchedulerThread");
+    }
+
+    private static Collection<String> getQuartzMeteringThreadNames() {
+        return Set.of(
+                "quartzMeteringExecutor-6",
+                "QuartzScheduler_quartzMeteringScheduler-local1710246430961_MisfireHandler",
+                "QuartzScheduler_quartzMeteringScheduler-local1710246430961_ClusterManager",
+                "quartzMeteringScheduler_QuartzSchedulerThread");
     }
 
     @BeforeEach
     void setUp() throws SQLException {
         lenient().when(defaultDataSource.getConnection()).thenReturn(defaultConnection);
         lenient().when(quartzDataSource.getConnection()).thenReturn(quartzConnection);
+        lenient().when(quartzMeteringDataSource.getConnection()).thenReturn(quartzMeteringConnection);
+        when(dataSources.entrySet()).thenReturn(Map.of("quartzDataSource", quartzDataSource,
+                "defaultDataSource", defaultDataSource,
+                "quartzMeteringDataSource", quartzMeteringDataSource).entrySet());
         underTest.setUp();
         underTest.afterPropertiesSet();
     }
@@ -73,6 +93,14 @@ class RoutingDataSourceTest {
         Connection result = getConnectionInThread(threadName);
 
         assertThat(result).isEqualTo(quartzConnection);
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("getQuartzMeteringThreadNames")
+    void shouldReturnQuartzMeteringDataSourceOnQuartzThread(String threadName) {
+        Connection result = getConnectionInThread(threadName);
+
+        assertThat(result).isEqualTo(quartzMeteringConnection);
     }
 
     private Connection getConnectionInThread(String threadName) {

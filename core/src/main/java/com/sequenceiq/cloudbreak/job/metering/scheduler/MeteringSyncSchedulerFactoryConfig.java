@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.job.metering.scheduler;
 
+import static com.sequenceiq.cloudbreak.quartz.configuration.scheduler.SchedulerFactoryConfig.EXECUTOR_THREAD_NAME_POSTFIX;
 import static com.sequenceiq.cloudbreak.quartz.configuration.scheduler.SchedulerFactoryConfig.METRIC_PREFIX;
-import static com.sequenceiq.cloudbreak.quartz.configuration.scheduler.SchedulerFactoryConfig.QUARTZ_METERING_SYNC_EXECUTOR_THREAD_NAME_PREFIX;
+import static com.sequenceiq.cloudbreak.quartz.configuration.scheduler.SchedulerFactoryConfig.SCHEDULER_POSTFIX;
+import static com.sequenceiq.cloudbreak.quartz.configuration.scheduler.SchedulerFactoryConfig.TASK_EXECUTOR_POSTFIX;
 
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -36,9 +38,13 @@ import io.micrometer.core.instrument.MeterRegistry;
 @Configuration
 public class MeteringSyncSchedulerFactoryConfig {
 
-    private static final String QUARTZ_METERING_SYNC_TASK_EXECUTOR = "quartzMeteringSyncTaskExecutor";
+    public static final String QUARTZ_METERING_SYNC_PREFIX = "quartzMeteringSync";
 
-    private static final String METERING_SYNC_SCHEDULER = "meteringSyncScheduler";
+    public static final String QUARTZ_METERING_SYNC_SCHEDULER = QUARTZ_METERING_SYNC_PREFIX + SCHEDULER_POSTFIX;
+
+    private static final String QUARTZ_METERING_SYNC_EXECUTOR_THREAD_NAME_PREFIX = QUARTZ_METERING_SYNC_PREFIX + EXECUTOR_THREAD_NAME_POSTFIX;
+
+    private static final String QUARTZ_METERING_SYNC_TASK_EXECUTOR = QUARTZ_METERING_SYNC_PREFIX + TASK_EXECUTOR_POSTFIX;
 
     @Value("${quartz.metering.sync.threadpool.size:15}")
     private int threadpoolSize;
@@ -59,8 +65,8 @@ public class MeteringSyncSchedulerFactoryConfig {
     @Inject
     private ResourceCheckerJobListener resourceCheckerJobListener;
 
-    @Bean
-    public SchedulerFactoryBean meteringSyncScheduler(QuartzProperties quartzProperties, ObjectProvider<SchedulerFactoryBeanCustomizer> customizers,
+    @Bean(name = QUARTZ_METERING_SYNC_SCHEDULER)
+    public SchedulerFactoryBean quartzMeteringSyncScheduler(QuartzProperties quartzProperties, ObjectProvider<SchedulerFactoryBeanCustomizer> customizers,
             ApplicationContext applicationContext, DataSource dataSource) {
         SchedulerFactoryBean schedulerFactoryBean = SchedulerFactoryBeanUtil.createSchedulerFactoryBean(quartzProperties, customizers, applicationContext);
         meteringSyncSchedulerFactoryBeanCustomizer().customize(schedulerFactoryBean);
@@ -69,13 +75,13 @@ public class MeteringSyncSchedulerFactoryConfig {
 
     private SchedulerFactoryBeanCustomizer meteringSyncSchedulerFactoryBeanCustomizer() {
         return bean -> {
-            bean.setSchedulerName(METERING_SYNC_SCHEDULER);
+            bean.setSchedulerName(QUARTZ_METERING_SYNC_SCHEDULER);
             if (customExecutorEnabled) {
                 bean.setTaskExecutor(quartzMeteringSyncTaskExecutor());
             }
-            bean.setGlobalJobListeners(resourceCheckerJobListener, new JobMetricsListener(metricService, METERING_SYNC_SCHEDULER));
-            bean.setGlobalTriggerListeners(new TriggerMetricsListener(metricService, METERING_SYNC_SCHEDULER));
-            bean.setSchedulerListeners(new SchedulerMetricsListener(metricService, METERING_SYNC_SCHEDULER));
+            bean.setGlobalJobListeners(resourceCheckerJobListener, new JobMetricsListener(metricService, QUARTZ_METERING_SYNC_SCHEDULER));
+            bean.setGlobalTriggerListeners(new TriggerMetricsListener(metricService, QUARTZ_METERING_SYNC_SCHEDULER));
+            bean.setSchedulerListeners(new SchedulerMetricsListener(metricService, QUARTZ_METERING_SYNC_SCHEDULER));
         };
     }
 

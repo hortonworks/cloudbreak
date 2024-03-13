@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
@@ -183,6 +184,9 @@ class RebuildFlowIntegrationTest {
 
     @MockBean
     private TerminationService terminationService;
+
+    @MockBean
+    private NodeConfig nodeConfig;
 
     @MockBean
     private PrivateIdProvider privateIdProvider;

@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -114,6 +115,9 @@ class UpdateUserDataFlowIntegrationTest {
 
     @MockBean
     private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
+
+    @MockBean
+    private NodeConfig nodeConfig;
 
     @Mock
     private ResourceConnector resourcesApi;

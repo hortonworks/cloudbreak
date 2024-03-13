@@ -18,7 +18,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
         "com.sequenceiq.cloudbreak.rotation",
         "com.sequenceiq.environment",
         "com.sequenceiq.cloudbreak.ha.domain",
-        "com.sequenceiq.cloudbreak.structuredevent.domain"})
+        "com.sequenceiq.cloudbreak.structuredevent.domain",
+        "com.sequenceiq.cloudbreak.database"})
 @Profile("test")
 public class TestConfigurationForServiceIntegration {
 

@@ -18,8 +18,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
-import com.sequenceiq.flow.ha.NodeConfig;
 
 @Component
 class CdpOperationDetailsFactory {

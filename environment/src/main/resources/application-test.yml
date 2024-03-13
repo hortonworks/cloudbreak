@@ -65,21 +65,13 @@ environment:
   sdx:
     url: http://localhost:8086
     contextPath: /dl
-  db:
-    enabled: false
-#    host: localhost
-#    port: 5432
-#    env:
-#      user: postgres
-#      pass:
-#      db: environmentdb
-#      schema: public
-#      cert.file: database.crt
-#      ssl: false
   enabledplatforms: AWS, AZURE, YARN
   tunnel:
     default: DIRECT
     ccm.validate.entitlement: true
+
+db:
+  enabled: false
 
 cb:
   schema:

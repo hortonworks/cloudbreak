@@ -19,9 +19,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.service.ClusterService;
-import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterStatusMonitorTest {
@@ -39,7 +39,7 @@ class ClusterStatusMonitorTest {
     @Test
     void testGetMonitoredForAutoscalingEnabled() {
         ClusterStatusMonitor spy = spy(underTest);
-        PeriscopeNodeConfig periscopeNodeConfig = mock(PeriscopeNodeConfig.class);
+        NodeConfig periscopeNodeConfig = mock(NodeConfig.class);
 
         when(spy.getClusterService()).thenReturn(clusterService);
         when(spy.getPeriscopeNodeConfig()).thenReturn(periscopeNodeConfig);

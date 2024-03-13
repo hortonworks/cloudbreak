@@ -9,13 +9,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PeriscopeJob;
 import com.sequenceiq.periscope.domain.PeriscopeNode;
 import com.sequenceiq.periscope.monitor.handler.ClusterDeleteHandler;
 import com.sequenceiq.periscope.repository.PeriscopeJobRepository;
 import com.sequenceiq.periscope.repository.PeriscopeNodeRepository;
-import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 
 @Component
 @ConditionalOnProperty(prefix = "periscope.enabledAutoscaleMonitors.delete-monitor", name = "enabled", havingValue = "true")
@@ -31,7 +31,7 @@ public class DeleteMonitor extends ClusterMonitor {
 
     private PeriscopeNodeRepository periscopeNodeRepository;
 
-    private PeriscopeNodeConfig periscopeNodeConfig;
+    private NodeConfig periscopeNodeConfig;
 
     @Override
     public String getIdentifier() {
@@ -52,7 +52,7 @@ public class DeleteMonitor extends ClusterMonitor {
     public void execute(JobExecutionContext context) {
         evalContext(context);
         boolean leader = false;
-        periscopeNodeConfig = getApplicationContext().getBean(PeriscopeNodeConfig.class);
+        periscopeNodeConfig = getApplicationContext().getBean(NodeConfig.class);
         if (periscopeNodeConfig.getId() != null) {
             periscopeNodeRepository = getApplicationContext().getBean(PeriscopeNodeRepository.class);
             Optional<PeriscopeNode> periscopeNodeOptional = periscopeNodeRepository.findById(periscopeNodeConfig.getId());

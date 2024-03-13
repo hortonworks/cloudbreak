@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.registry;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.xbill.DNS.Lookup;
@@ -12,10 +10,9 @@ import org.xbill.DNS.Type;
 
 @Component
 public class DNSServiceAddressResolver implements ServiceAddressResolver {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DNSServiceAddressResolver.class);
 
     @Override
-    public String resolveUrl(String serviceUrl, String protocol, String serviceId)  throws ServiceAddressResolvingException {
+    public String resolveUrl(String serviceUrl, String protocol, String serviceId) {
         String resolvedAddress;
         if (!StringUtils.isEmpty(serviceUrl)) {
             resolvedAddress = serviceUrl;
@@ -28,7 +25,7 @@ public class DNSServiceAddressResolver implements ServiceAddressResolver {
     }
 
     @Override
-    public String resolveHostPort(String serviceHost, String servicePort, String serviceId) throws ServiceAddressResolvingException {
+    public String resolveHostPort(String serviceHost, String servicePort, String serviceId) {
         String resolvedAddress;
         if (!StringUtils.isEmpty(serviceHost) && !StringUtils.isEmpty(servicePort)) {
             resolvedAddress = serviceHost + ':' + servicePort;
@@ -40,7 +37,7 @@ public class DNSServiceAddressResolver implements ServiceAddressResolver {
         return resolvedAddress;
     }
 
-    private String dnsSrvLookup(String query) throws ServiceAddressResolvingException {
+    private String dnsSrvLookup(String query) {
         String result;
         try {
             Record[] records = new Lookup(query, Type.SRV).run();
@@ -55,4 +52,5 @@ public class DNSServiceAddressResolver implements ServiceAddressResolver {
         }
         return result;
     }
+
 }

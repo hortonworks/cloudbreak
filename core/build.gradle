@@ -267,6 +267,7 @@ dependencies {
   implementation project(':template-manager-core')
   implementation project(':orchestrator-salt')
   implementation project(path: ':orchestrator-salt')
+  implementation project(':service-common')
 
   runtimeOnly project(':orchestrator-yarn')
   runtimeOnly project(':cloud-reactor')

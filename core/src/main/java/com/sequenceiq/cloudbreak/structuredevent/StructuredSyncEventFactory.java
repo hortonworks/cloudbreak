@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.converter.BlueprintToBlueprintDetailsConverter;
 import com.sequenceiq.cloudbreak.structuredevent.converter.ClusterToClusterDetailsConverter;
@@ -26,7 +27,6 @@ import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.GatewayView;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.flow.ha.NodeConfig;
 
 @Component
 public class StructuredSyncEventFactory {

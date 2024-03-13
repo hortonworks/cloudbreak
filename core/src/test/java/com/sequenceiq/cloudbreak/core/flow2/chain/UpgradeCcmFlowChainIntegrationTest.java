@@ -75,6 +75,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFlowChainTriggerEvent;
@@ -233,6 +234,9 @@ class UpgradeCcmFlowChainIntegrationTest {
 
     @MockBean
     private CrnUserDetailsService crnUserDetailsService;
+
+    @MockBean
+    private NodeConfig nodeConfig;
 
     @SpyBean
     private FlowChains flowChains;

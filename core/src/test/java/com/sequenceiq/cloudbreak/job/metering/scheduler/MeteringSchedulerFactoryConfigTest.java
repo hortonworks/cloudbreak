@@ -53,10 +53,10 @@ class MeteringSchedulerFactoryConfigTest {
 
     @Test
     void testMeteringSchedulerShouldHaveProperConfiguration() throws Exception {
-        SchedulerFactoryBean meteringScheduler = underTest.meteringScheduler(new QuartzProperties(), objectProvider, applicationContext, dataSource);
+        SchedulerFactoryBean meteringScheduler = underTest.quartzMeteringScheduler(new QuartzProperties(), objectProvider, applicationContext, dataSource);
         meteringScheduler.afterPropertiesSet();
         Scheduler scheduler = meteringScheduler.getScheduler();
-        assertEquals("meteringScheduler", scheduler.getSchedulerName());
+        assertEquals("quartzMeteringScheduler", scheduler.getSchedulerName());
         ListenerManager listenerManager = scheduler.getListenerManager();
         assertThat(listenerManager.getSchedulerListeners()).hasSize(1);
         assertEquals(SchedulerMetricsListener.class, listenerManager.getSchedulerListeners().getFirst().getClass());

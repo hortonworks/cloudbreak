@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.cleanup.InMemoryCleanup;
 import com.sequenceiq.flow.core.FlowState.FlowStateConstants;
@@ -69,7 +70,6 @@ import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
-import com.sequenceiq.flow.ha.NodeConfig;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -88,6 +88,8 @@ class Flow2HandlerTest {
     private static final String NEXT_EVENT = "NEXT_EVENT";
 
     private static final String UNKNOWN_OP_TYPE = "UNKNOWN";
+
+    private final Payload payload = () -> 1L;
 
     @InjectMocks
     private Flow2Handler underTest;
@@ -167,8 +169,6 @@ class Flow2HandlerTest {
     private FlowState flowState;
 
     private Event<? extends Payload> dummyEvent;
-
-    private final Payload payload = () -> 1L;
 
     @BeforeEach
     void setUp() throws TransactionExecutionException {

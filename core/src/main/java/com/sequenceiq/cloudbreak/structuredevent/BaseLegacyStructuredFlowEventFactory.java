@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.converter.BlueprintToBlueprintDetailsConverter;
 import com.sequenceiq.cloudbreak.structuredevent.converter.ClusterToClusterDetailsConverter;
@@ -42,7 +43,6 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.LegacyStructuredFlowEventF
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.GatewayView;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.flow.ha.NodeConfig;
 
 @Component
 @Transactional

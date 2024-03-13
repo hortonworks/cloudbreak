@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.domain.PeriscopeNode;
@@ -54,7 +55,7 @@ public class LeaderElectionService {
     private ApplicationContext applicationContext;
 
     @Inject
-    private PeriscopeNodeConfig periscopeNodeConfig;
+    private NodeConfig periscopeNodeConfig;
 
     @Inject
     private PeriscopeNodeRepository periscopeNodeRepository;

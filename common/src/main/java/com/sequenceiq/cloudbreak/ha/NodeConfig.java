@@ -1,4 +1,4 @@
-package com.sequenceiq.flow.ha;
+package com.sequenceiq.cloudbreak.ha;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;

@@ -22,6 +22,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.monitor.executor.EvaluatorExecutorRegistry;
@@ -32,7 +33,6 @@ import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
 import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
-import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 import com.sequenceiq.periscope.service.security.SecurityConfigService;
 import com.sequenceiq.periscope.service.security.TlsSecurityService;
 import com.sequenceiq.periscope.utils.MetricUtils;
@@ -48,7 +48,7 @@ public class StackCollectorContext {
                             PersistRejectedThreadExecutionHandler.class,
                             RejectedThreadService.class,
                             RequestLogging.class,
-                            PeriscopeNodeConfig.class,
+                            NodeConfig.class,
                             ExecutorServiceWithRegistry.class,
                             EvaluatorExecutorRegistry.class,
                             Clock.class
@@ -63,6 +63,11 @@ public class StackCollectorContext {
         @Inject
         private PersistRejectedThreadExecutionHandler persistRejectedThreadExecutionHandler;
 
+        @Bean
+        public static PropertySourcesPlaceholderConfigurer propertiesResolver() {
+            return new PropertySourcesPlaceholderConfigurer();
+        }
+
         @Bean("periscopeListeningScheduledExecutorService")
         ExecutorService listeningScheduledExecutorService() {
             return getThreadPoolExecutorFactoryBean().getObject();
@@ -76,11 +81,6 @@ public class StackCollectorContext {
             executorFactoryBean.setQueueCapacity(2);
             executorFactoryBean.setRejectedExecutionHandler(persistRejectedThreadExecutionHandler);
             return executorFactoryBean;
-        }
-
-        @Bean
-        public static PropertySourcesPlaceholderConfigurer propertiesResolver() {
-            return new PropertySourcesPlaceholderConfigurer();
         }
 
         @Override

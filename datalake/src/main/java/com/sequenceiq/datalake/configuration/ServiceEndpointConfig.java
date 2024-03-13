@@ -1,28 +1,17 @@
 package com.sequenceiq.datalake.configuration;
 
+import jakarta.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
-import com.sequenceiq.cloudbreak.registry.DNSServiceAddressResolver;
-import com.sequenceiq.cloudbreak.registry.RetryingServiceAddressResolver;
 import com.sequenceiq.cloudbreak.registry.ServiceAddressResolver;
 import com.sequenceiq.cloudbreak.registry.ServiceAddressResolvingException;
 
 @Configuration
 public class ServiceEndpointConfig {
-    @Value("${datalake.address.resolving.timeout:60000}")
-    private int resolvingTimeout;
-
-    @Value("${datalake.db.port.5432.tcp.addr:}")
-    private String dbHost;
-
-    @Value("${datalake.db.port.5432.tcp.port:}")
-    private String dbPort;
-
-    @Value("${datalake.db.serviceid:}")
-    private String databaseId;
 
     @Value("${datalake.redbeams.url:}")
     private String redbeamsServerUrl;
@@ -60,38 +49,30 @@ public class ServiceEndpointConfig {
     @Value("${datalake.freeipa.serviceId:}")
     private String freeipaServiceId;
 
-    @Bean
-    public ServiceAddressResolver serviceAddressResolver() {
-        return new RetryingServiceAddressResolver(new DNSServiceAddressResolver(), resolvingTimeout);
-    }
+    @Inject
+    private ServiceAddressResolver serviceAddressResolver;
 
     @Bean
     @DependsOn("serviceAddressResolver")
-    public String databaseAddress(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
-        return serviceAddressResolver.resolveHostPort(dbHost, dbPort, databaseId);
-    }
-
-    @Bean
-    @DependsOn("serviceAddressResolver")
-    public String cloudbreakUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
+    public String cloudbreakUrl() throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveUrl(cloudbreakUrl + cbRootContextPath, "http", cloudbreakServiceId);
     }
 
     @Bean
     @DependsOn("serviceAddressResolver")
-    public String environmentServerUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
+    public String environmentServerUrl() throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveUrl(environmentServerUrl + environmentRootContextPath, "http", environmentServiceId);
     }
 
     @Bean
     @DependsOn("serviceAddressResolver")
-    public String redbeamsServerUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
+    public String redbeamsServerUrl() throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveUrl(redbeamsServerUrl + redbeamsRootContextPath, "http", redbeamsServiceId);
     }
 
     @Bean
     @DependsOn("serviceAddressResolver")
-    public String freeIpaServerUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
+    public String freeIpaServerUrl() throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveUrl(freeipaServiceUrl + freeipaRootContextPath, "http", freeipaServiceId);
     }
 }

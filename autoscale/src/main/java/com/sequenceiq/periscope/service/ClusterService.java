@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;
@@ -37,7 +38,6 @@ import com.sequenceiq.periscope.model.MonitoredStack;
 import com.sequenceiq.periscope.repository.ClusterPertainRepository;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
-import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 import com.sequenceiq.periscope.service.security.SecurityConfigService;
 import com.sequenceiq.periscope.utils.LoggingUtils;
 
@@ -56,7 +56,7 @@ public class ClusterService {
     private ClusterPertainRepository clusterPertainRepository;
 
     @Inject
-    private PeriscopeNodeConfig periscopeNodeConfig;
+    private NodeConfig periscopeNodeConfig;
 
     @Inject
     private PeriscopeMetricService periscopeMetricService;
@@ -152,21 +152,21 @@ public class ClusterService {
 
     public Optional<Cluster> findOneByStackCrnAndTenant(String stackCrn, String tenant) {
         LoggingUtils.buildMdcContextWithCrn(stackCrn);
-        return  clusterRepository.findByStackCrnAndTenant(stackCrn, tenant);
+        return clusterRepository.findByStackCrnAndTenant(stackCrn, tenant);
     }
 
     public Optional<Cluster> findOneByStackCrn(String stackCrn) {
         LoggingUtils.buildMdcContextWithCrn(stackCrn);
-        return  clusterRepository.findByStackCrn(stackCrn);
+        return clusterRepository.findByStackCrn(stackCrn);
     }
 
     public List<Cluster> findByDeleteRetryCount(int maxDeleteRetryCount) {
-        return  clusterRepository.findByDeleteRetryCount(maxDeleteRetryCount);
+        return clusterRepository.findByDeleteRetryCount(maxDeleteRetryCount);
     }
 
     public Optional<Cluster> findOneByStackNameAndTenant(String stackName, String tenant) {
         LoggingUtils.buildMdcContextWithName(stackName);
-        return  clusterRepository.findByStackNameAndTenant(stackName, tenant);
+        return clusterRepository.findByStackNameAndTenant(stackName, tenant);
     }
 
     public Cluster save(Cluster cluster) {

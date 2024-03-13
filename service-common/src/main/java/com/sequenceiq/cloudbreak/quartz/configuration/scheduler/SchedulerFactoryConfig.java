@@ -36,17 +36,19 @@ public class SchedulerFactoryConfig {
 
     public static final String METRIC_PREFIX = "threadpool.";
 
-    public static final String QUARTZ_EXECUTOR_THREAD_NAME_PREFIX = "quartzExecutor";
+    public static final String EXECUTOR_THREAD_NAME_POSTFIX = "Executor";
 
-    public static final String QUARTZ_METERING_EXECUTOR_THREAD_NAME_PREFIX = "quartzMeteringExecutor";
+    public static final String TASK_EXECUTOR_POSTFIX = "TaskExecutor";
 
-    public static final String QUARTZ_METERING_SYNC_EXECUTOR_THREAD_NAME_PREFIX = "quartzMeteringSyncExecutor";
+    public static final String SCHEDULER_POSTFIX = "Scheduler";
 
-    public static final String QUARTZ_DYNAMIC_ENTITLEMENT_EXECUTOR_THREAD_NAME_PREFIX = "quartzDynamicEntitlementExecutor";
+    public static final String QUARTZ_PREFIX = "quartz";
 
-    private static final String QUARTZ_TASK_EXECUTOR = "quartzTaskExecutor";
+    public static final String QUARTZ_SCHEDULER = QUARTZ_PREFIX + SCHEDULER_POSTFIX;
 
-    private static final String DEFAULT_SCHEDULER = "quartzScheduler";
+    private static final String QUARTZ_EXECUTOR_THREAD_NAME_PREFIX = QUARTZ_PREFIX + EXECUTOR_THREAD_NAME_POSTFIX;
+
+    private static final String QUARTZ_TASK_EXECUTOR = QUARTZ_PREFIX + TASK_EXECUTOR_POSTFIX;
 
     @Value("${quartz.default.threadpool.size:15}")
     private int threadpoolSize;
@@ -71,7 +73,7 @@ public class SchedulerFactoryConfig {
     private MeterRegistry meterRegistry;
 
     @Primary
-    @Bean
+    @Bean(name = QUARTZ_SCHEDULER)
     public SchedulerFactoryBean quartzScheduler(QuartzProperties quartzProperties, ObjectProvider<SchedulerFactoryBeanCustomizer> customizers,
             ApplicationContext applicationContext, DataSource dataSource) {
         SchedulerFactoryBean schedulerFactoryBean = SchedulerFactoryBeanUtil.createSchedulerFactoryBean(quartzProperties, customizers, applicationContext);
@@ -82,9 +84,9 @@ public class SchedulerFactoryConfig {
     private SchedulerFactoryBeanCustomizer schedulerFactoryBeanCustomizer() {
         return bean -> {
             bean.setAutoStartup(properties.isAutoSyncEnabled());
-            bean.setGlobalJobListeners(resourceCheckerJobListener, new JobMetricsListener(metricService, DEFAULT_SCHEDULER));
-            bean.setGlobalTriggerListeners(new TriggerMetricsListener(metricService, DEFAULT_SCHEDULER));
-            bean.setSchedulerListeners(new SchedulerMetricsListener(metricService, DEFAULT_SCHEDULER));
+            bean.setGlobalJobListeners(resourceCheckerJobListener, new JobMetricsListener(metricService, QUARTZ_SCHEDULER));
+            bean.setGlobalTriggerListeners(new TriggerMetricsListener(metricService, QUARTZ_SCHEDULER));
+            bean.setSchedulerListeners(new SchedulerMetricsListener(metricService, QUARTZ_SCHEDULER));
             if (customExecutorEnabled) {
                 bean.setTaskExecutor(quartzTaskExecutor());
             }

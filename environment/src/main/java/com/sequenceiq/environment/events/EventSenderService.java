@@ -16,6 +16,7 @@ import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredNotificationDetails;
@@ -24,12 +25,12 @@ import com.sequenceiq.cloudbreak.structuredevent.service.CDPDefaultStructuredEve
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
-import com.sequenceiq.flow.ha.NodeConfig;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.notification.NotificationService;
 
 @Service
 public class EventSenderService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(EventSenderService.class);
 
     private final NotificationService notificationService;

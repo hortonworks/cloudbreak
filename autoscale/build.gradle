@@ -188,8 +188,9 @@ dependencies {
     implementation project(':authorization-common')
     implementation project(':usage-collection')
     implementation(project(":audit-connector")) {
-         transitive = false
+      transitive = false
     }
+    implementation project(':service-common')
 }
 
 test {

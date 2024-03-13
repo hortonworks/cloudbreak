@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredNotificationDetails;
@@ -28,10 +29,10 @@ import com.sequenceiq.cloudbreak.structuredevent.service.CDPDefaultStructuredEve
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.service.sdx.SdxService;
-import com.sequenceiq.flow.ha.NodeConfig;
 
 @Service
 public class EventSenderService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(EventSenderService.class);
 
     private final SdxClusterDtoConverter sdxClusterDtoConverter;
@@ -42,10 +43,10 @@ public class EventSenderService {
 
     private final String serviceVersion;
 
+    private final CloudbreakMessagesService cloudbreakMessagesService;
+
     @Inject
     private SdxService sdxService;
-
-    private final CloudbreakMessagesService cloudbreakMessagesService;
 
     public EventSenderService(SdxClusterDtoConverter sdxClusterDtoConverter,
             CDPDefaultStructuredEventClient cdpDefaultStructuredEventClient, NodeConfig nodeConfig, @Value("${info.app.version:}") String serviceVersion,

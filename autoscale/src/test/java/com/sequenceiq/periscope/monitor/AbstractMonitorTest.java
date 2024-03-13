@@ -19,6 +19,7 @@ import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.springframework.context.ApplicationContext;
 
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
@@ -26,7 +27,6 @@ import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
-import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 
 public class AbstractMonitorTest {
 
@@ -35,7 +35,7 @@ public class AbstractMonitorTest {
     private static final long CLUSTER_ID = 1L;
 
     @Mock
-    private PeriscopeNodeConfig periscopeNodeConfig;
+    private NodeConfig periscopeNodeConfig;
 
     @Mock
     private ClusterService clusterService;
@@ -85,7 +85,7 @@ public class AbstractMonitorTest {
         when(jobDataMap.get("APPLICATION_CONTEXT")).thenReturn(applicationContext);
         when(applicationContext.getBean(ExecutorServiceWithRegistry.class)).thenReturn(executorServiceWithRegistry);
         when(applicationContext.getBean(ClusterService.class)).thenReturn(clusterService);
-        when(applicationContext.getBean(PeriscopeNodeConfig.class)).thenReturn(periscopeNodeConfig);
+        when(applicationContext.getBean(NodeConfig.class)).thenReturn(periscopeNodeConfig);
         when(applicationContext.getBean(testExecutor.getClass().getSimpleName(), EvaluatorExecutor.class)).thenReturn(testExecutor);
         when(applicationContext.getBean(RejectedThreadService.class)).thenReturn(rejectedThreadService);
 
@@ -147,17 +147,17 @@ public class AbstractMonitorTest {
         }
 
         @Override
+        public void setContext(EvaluatorContext context) {
+
+        }
+
+        @Override
         public String getName() {
             return null;
         }
 
         @Override
         public void execute() {
-        }
-
-        @Override
-        public void setContext(EvaluatorContext context) {
-
         }
     }
 }

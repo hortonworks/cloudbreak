@@ -28,19 +28,6 @@ management:
 periscope:
   cert:
     dir: /certs/
-
-  db:
-    enabled: false
-#    env:
-#      user: postgres
-#      pass:
-#      db: periscopedb
-#      schema: public
-#      cert.file: database.crt
-#      ssl: false
-#    port.5432.tcp:
-#      addr: localhost
-#      port: 5432
   cloudbreak.url: http://localhost:9091
   notification:
     endpoint: http://localhost:3000/notifications
@@ -54,6 +41,9 @@ periscope:
       enabled: false
     delete-monitor:
       enabled: false
+
+db:
+  enabled: false
 
 cb:
   server:

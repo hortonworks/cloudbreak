@@ -4,17 +4,17 @@ import java.util.List;
 
 import org.quartz.JobExecutionContext;
 
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.context.ClusterIdEvaluatorContext;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
 import com.sequenceiq.periscope.service.ClusterService;
-import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 
 public abstract class ClusterMonitor extends AbstractMonitor<Cluster> {
 
-    private PeriscopeNodeConfig periscopeNodeConfig;
+    private NodeConfig periscopeNodeConfig;
 
     private ClusterService clusterService;
 
@@ -27,7 +27,7 @@ public abstract class ClusterMonitor extends AbstractMonitor<Cluster> {
     void evalContext(JobExecutionContext context) {
         super.evalContext(context);
         clusterService = getApplicationContext().getBean(ClusterService.class);
-        periscopeNodeConfig = getApplicationContext().getBean(PeriscopeNodeConfig.class);
+        periscopeNodeConfig = getApplicationContext().getBean(NodeConfig.class);
     }
 
     @Override
@@ -36,7 +36,7 @@ public abstract class ClusterMonitor extends AbstractMonitor<Cluster> {
         clusterService.setLastEvaluated(monitored.getId(), monitored.getLastEvaluated());
     }
 
-    PeriscopeNodeConfig getPeriscopeNodeConfig() {
+    NodeConfig getPeriscopeNodeConfig() {
         return periscopeNodeConfig;
     }
 

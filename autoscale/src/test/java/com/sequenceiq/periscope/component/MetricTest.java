@@ -68,13 +68,15 @@ import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.common.dbmigration.CommonDatabaseMigrationConfig;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.service.TransactionExecutorService;
+import com.sequenceiq.cloudbreak.database.DatabaseConfig;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.service.secret.conf.VaultConfig;
 import com.sequenceiq.cloudbreak.workspace.util.CrudRepositoryLookupService;
 import com.sequenceiq.periscope.PeriscopeApplication;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.ClusterState;
-import com.sequenceiq.periscope.config.DatabaseConfig;
+import com.sequenceiq.periscope.config.PeriscopeDatabaseConfig;
 import com.sequenceiq.periscope.controller.AutoScaleClusterV2Controller;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterManager;
@@ -93,7 +95,6 @@ import com.sequenceiq.periscope.repository.TimeAlertRepository;
 import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 import com.sequenceiq.periscope.service.PeriscopeMetricService;
 import com.sequenceiq.periscope.service.ha.LeaderElectionService;
-import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 import com.sequenceiq.periscope.service.security.CloudbreakAuthorizationService;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -107,7 +108,7 @@ import com.zaxxer.hikari.HikariDataSource;
         "periscope.db.port.5432.tcp.addr=1.2.3.4",
         "periscope.db.port.5432.tcp.port=5432",
         "periscope.cloudbreak.url=http://1.2.3.4:8080",
-        "periscope.instance.node.id=" + PERISCOPE_NODE_ID,
+        "instance.node.id=" + PERISCOPE_NODE_ID,
         "server.port=8079",
         "cb.jwt.signKey=signKey",
         "cb.etc.config.dir=/etcConfigDir",
@@ -211,7 +212,7 @@ public class MetricTest {
     private PeriscopeNodeRepository periscopeNodeRepository;
 
     @Inject
-    private PeriscopeNodeConfig periscopeNodeConfig;
+    private NodeConfig periscopeNodeConfig;
 
     @Inject
     private UpdateFailedHandler updateFailedHandler;
@@ -440,6 +441,7 @@ public class MetricTest {
                     type = FilterType.ASSIGNABLE_TYPE,
                     value = {
                             DatabaseConfig.class,
+                            PeriscopeDatabaseConfig.class,
                             CommonDatabaseMigrationConfig.class,
                             PeriscopeApplication.class,
                             MetricService.class,

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
@@ -17,7 +18,6 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEven
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.redbeams.CDPRedbeamsStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.redbeams.RedbeamsDetails;
 import com.sequenceiq.cloudbreak.structuredevent.service.CDPStructuredFlowEventFactory;
-import com.sequenceiq.flow.ha.NodeConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 

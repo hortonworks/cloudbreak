@@ -30,10 +30,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -57,6 +53,7 @@ import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -69,7 +66,6 @@ import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
 import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.domain.StateStatus;
-import com.sequenceiq.flow.ha.NodeConfig;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -547,57 +543,6 @@ class FlowLogDBServiceTest {
         @Override
         public String event() {
             return null;
-        }
-    }
-
-    @Entity
-    public static class TestEntity {
-        @Id
-        private String name;
-
-        @OneToOne
-        private TestClass testClass;
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public TestClass getTestClass() {
-            return testClass;
-        }
-
-        public void setTestClass(TestClass testClass) {
-            this.testClass = testClass;
-        }
-    }
-
-    @Entity
-    public static class TestClass {
-
-        @Id
-        private String value;
-
-        @OneToOne
-        private TestEntity entity;
-
-        public String getValue() {
-            return value;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
-
-        public void setEntity(TestEntity entity) {
-            this.entity = entity;
-        }
-
-        public TestEntity getEntity() {
-            return entity;
         }
     }
 

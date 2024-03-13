@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.common.json.TypedJsonUtil;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.util.Benchmark;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
@@ -50,7 +51,6 @@ import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
 import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.domain.StateStatus;
-import com.sequenceiq.flow.ha.NodeConfig;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 
 @Primary
@@ -82,7 +82,7 @@ public class FlowLogDBService implements FlowLogService {
 
     @Override
     public FlowLog save(FlowParameters flowParameters, String flowChainId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
-                        FlowState currentState) {
+            FlowState currentState) {
         String payloadJackson = JsonUtil.writeValueAsStringSilent(payload);
         String variablesJackson = TypedJsonUtil.writeValueAsStringSilent(variables);
 
@@ -414,7 +414,7 @@ public class FlowLogDBService implements FlowLogService {
         return flowLog -> flowLog.getStateStatus().equals(StateStatus.PENDING) || !flowLog.getFinalized();
     }
 
-    public List<FlowLogWithoutPayload>  getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(Set<String> chainIds) {
+    public List<FlowLogWithoutPayload> getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(Set<String> chainIds) {
         if (null != chainIds && !chainIds.isEmpty()) {
             LOGGER.info("Getting flow logs by these flow chain ids: {}", Joiner.on(",").join(chainIds));
             return flowLogRepository.findAllWithoutPayloadByChainIdsCreatedDesc(chainIds);

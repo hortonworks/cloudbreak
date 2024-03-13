@@ -21,6 +21,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.monitor.evaluator.EventPublisher;
 import com.sequenceiq.periscope.monitor.executor.EvaluatorExecutorRegistry;
@@ -29,7 +30,6 @@ import com.sequenceiq.periscope.monitor.handler.PersistRejectedThreadExecutionHa
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
 import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
-import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 import com.sequenceiq.periscope.utils.MetricUtils;
 
 @TestPropertySource(properties = "profile=dev")
@@ -43,7 +43,7 @@ public class RejectedThreadContext {
                             PersistRejectedThreadExecutionHandler.class,
                             RejectedThreadService.class,
                             RequestLogging.class,
-                            PeriscopeNodeConfig.class,
+                            NodeConfig.class,
                             EventPublisher.class,
                             ExecutorServiceWithRegistry.class,
                             EvaluatorExecutorRegistry.class,

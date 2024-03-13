@@ -46,6 +46,7 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyDefaultStructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
@@ -60,7 +61,6 @@ import com.sequenceiq.cloudbreak.structuredevent.util.LoggingStream;
 import com.sequenceiq.cloudbreak.structuredevent.util.RestFilterPropertyUtil;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
-import com.sequenceiq.flow.ha.NodeConfig;
 
 @Component
 @Priority(CDPJaxRsFilterOrder.CDP_STRUCTURED_EVENT_FILTER_ORDER)

@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogUtil;
 import com.sequenceiq.cloudbreak.util.Benchmark;
@@ -57,7 +58,6 @@ import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
-import com.sequenceiq.flow.ha.NodeConfig;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 
 @Component

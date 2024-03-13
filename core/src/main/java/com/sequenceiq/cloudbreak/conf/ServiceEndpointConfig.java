@@ -1,27 +1,16 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import jakarta.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.sequenceiq.cloudbreak.registry.DNSServiceAddressResolver;
-import com.sequenceiq.cloudbreak.registry.RetryingServiceAddressResolver;
 import com.sequenceiq.cloudbreak.registry.ServiceAddressResolver;
 import com.sequenceiq.cloudbreak.registry.ServiceAddressResolvingException;
 
 @Configuration
 public class ServiceEndpointConfig {
-    @Value("${cb.address.resolving.timeout:}")
-    private int resolvingTimeout;
-
-    @Value("${cb.db.port.5432.tcp.addr:}")
-    private String dbHost;
-
-    @Value("${cb.db.port.5432.tcp.port:}")
-    private String dbPort;
-
-    @Value("${cb.db.serviceid:}")
-    private String databaseId;
 
     @Value("${cb.environment.url}")
     private String environmentServiceUrl;
@@ -68,38 +57,31 @@ public class ServiceEndpointConfig {
     @Value("${cb.periscope.serviceid:}")
     private String autoscaleServiceId;
 
-    @Bean
-    public ServiceAddressResolver serviceAddressResolver() {
-        return new RetryingServiceAddressResolver(new DNSServiceAddressResolver(), resolvingTimeout);
-    }
-
-    @Bean
-    public String databaseAddress() throws ServiceAddressResolvingException {
-        return serviceAddressResolver().resolveHostPort(dbHost, dbPort, databaseId);
-    }
+    @Inject
+    private ServiceAddressResolver serviceAddressResolver;
 
     @Bean
     public String environmentServerUrl() throws ServiceAddressResolvingException {
-        return serviceAddressResolver().resolveUrl(environmentServiceUrl + environmentContextPath, "http", environmentServiceId);
+        return serviceAddressResolver.resolveUrl(environmentServiceUrl + environmentContextPath, "http", environmentServiceId);
     }
 
     @Bean
     public String freeIpaServerUrl() throws ServiceAddressResolvingException {
-        return serviceAddressResolver().resolveUrl(freeipaServiceUrl + freeipaContextPath, "http", freeipaServiceId);
+        return serviceAddressResolver.resolveUrl(freeipaServiceUrl + freeipaContextPath, "http", freeipaServiceId);
     }
 
     @Bean
     public String redbeamsServerUrl() throws ServiceAddressResolvingException {
-        return serviceAddressResolver().resolveUrl(redbeamsServiceUrl + redbeamsContextPath, "http", redbeamsServiceId);
+        return serviceAddressResolver.resolveUrl(redbeamsServiceUrl + redbeamsContextPath, "http", redbeamsServiceId);
     }
 
     @Bean
     public String sdxServerUrl() throws ServiceAddressResolvingException {
-        return serviceAddressResolver().resolveUrl(sdxServiceUrl + sdxContextPath, "http", sdxServiceId);
+        return serviceAddressResolver.resolveUrl(sdxServiceUrl + sdxContextPath, "http", sdxServiceId);
     }
 
     @Bean
     public String autoscaleServerUrl() throws ServiceAddressResolvingException {
-        return serviceAddressResolver().resolveUrl(autoscaleServiceUrl + autoscaleContextPath, "http", autoscaleServiceId);
+        return serviceAddressResolver.resolveUrl(autoscaleServiceUrl + autoscaleContextPath, "http", autoscaleServiceId);
     }
 }
