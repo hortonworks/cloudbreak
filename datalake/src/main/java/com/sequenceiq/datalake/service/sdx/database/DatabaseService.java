@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.sdx.database;
 import static com.sequenceiq.datalake.service.TagUtil.getTags;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -33,6 +35,7 @@ import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.converter.DatabaseServerConverter;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
@@ -58,6 +61,10 @@ public class DatabaseService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseService.class);
 
     private static final String SSL_ENFORCEMENT_MIN_RUNTIME_VERSION = "7.2.2";
+
+    private static final String INSTANCE_TYPE = "instancetype";
+
+    private static final String STORAGE = "storage";
 
     private final Comparator<Versioned> versionComparator = new VersionComparator();
 
@@ -219,7 +226,8 @@ public class DatabaseService {
         return versionComparator.compare(currentVersion, baseVersion) > -1;
     }
 
-    private DatabaseServerV4StackRequest getDatabaseServerRequest(CloudPlatform cloudPlatform, SdxCluster sdxCluster,
+    @VisibleForTesting
+    DatabaseServerV4StackRequest getDatabaseServerRequest(CloudPlatform cloudPlatform, SdxCluster sdxCluster,
             DetailedEnvironmentResponse env, String initiatorUserCrn) {
         DatabaseServerParameterSetter databaseServerParameterSetter = databaseServerParameterSetterMap.get(cloudPlatform);
         DatabaseConfig databaseConfig = dbConfigs.get(new DatabaseConfigKey(cloudPlatform, sdxCluster.getClusterShape(),
@@ -228,10 +236,17 @@ public class DatabaseService {
             throw new BadRequestException("Database config for cloud platform " + cloudPlatform + ", cluster shape "
                     + sdxCluster.getClusterShape() + " not found");
         }
+        SdxDatabase sdxDatabase = sdxCluster.getSdxDatabase();
+        Map<String, Object> attributes = sdxDatabase.getAttributes() != null ? sdxDatabase.getAttributes().getMap() : new HashMap<>();
+        // custom DB instance type and storage size from customer input
+        String instanceType = attributes.containsKey(INSTANCE_TYPE) ? attributes.get(INSTANCE_TYPE).toString() : databaseConfig.getInstanceType();
+        Long storageSize = attributes.containsKey(STORAGE) ? Long.parseLong(attributes.get(STORAGE).toString()) : databaseConfig.getVolumeSize();
+        LOGGER.info("Database instance type: {} and volume size {}", instanceType, storageSize);
+
         DatabaseServerV4StackRequest req = new DatabaseServerV4StackRequest();
-        req.setInstanceType(databaseConfig.getInstanceType());
+        req.setInstanceType(instanceType);
         req.setDatabaseVendor(databaseConfig.getVendor());
-        req.setStorageSize(databaseConfig.getVolumeSize());
+        req.setStorageSize(storageSize);
         databaseServerParameterSetter.setParameters(req, sdxCluster, env, initiatorUserCrn);
         databaseServerParameterSetter.validate(req, sdxCluster, env, initiatorUserCrn);
         return req;

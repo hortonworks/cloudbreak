@@ -46,6 +46,10 @@ public class SdxClusterResizeRequest {
     @Schema(description = ModelDescriptions.INSTANCE_DISK_SIZE)
     private List<SdxInstanceGroupDiskRequest> customInstanceGroupDiskSize;
 
+    @Valid
+    @Schema(description = ModelDescriptions.DATABASE)
+    private SdxDatabaseComputeStorageRequest customSdxDatabaseComputeStorage;
+
     public String getEnvironment() {
         return environment;
     }
@@ -118,6 +122,14 @@ public class SdxClusterResizeRequest {
         this.customInstanceGroupDiskSize = customInstanceGroupDiskSize;
     }
 
+    public SdxDatabaseComputeStorageRequest getCustomSdxDatabaseComputeStorage() {
+        return customSdxDatabaseComputeStorage;
+    }
+
+    public void setCustomSdxDatabaseComputeStorage(SdxDatabaseComputeStorageRequest customSdxDatabaseComputeStorage) {
+        this.customSdxDatabaseComputeStorage = customSdxDatabaseComputeStorage;
+    }
+
     @Override
     public String toString() {
         return "SdxClusterResizeRequest{" +
@@ -130,6 +142,7 @@ public class SdxClusterResizeRequest {
                 ", enableMultiAz=" + enableMultiAz +
                 ", customInstanceGroups=" + customInstanceGroups +
                 ", customInstanceGroupDiskSize=" + customInstanceGroupDiskSize +
+                ", customSdxDatabaseComputeStorage=" + customSdxDatabaseComputeStorage +
                 '}';
     }
 }

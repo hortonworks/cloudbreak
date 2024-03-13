@@ -226,6 +226,10 @@ public class ModelDescriptions {
 
     public static final String DATABASE = "Database details";
 
+    public static final String DATABASE_INSTANCE_TYPE = "Database instance type";
+
+    public static final String DATABASE_INSTANCE_STORAGE = "Database instance storage";
+
     private ModelDescriptions() {
     }
 }

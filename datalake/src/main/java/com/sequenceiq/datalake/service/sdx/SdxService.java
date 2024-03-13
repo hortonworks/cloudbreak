@@ -143,6 +143,7 @@ import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxDatabaseComputeStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupDiskRequest;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
@@ -164,6 +165,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     public static final String SDX_RESIZE_NAME_SUFFIX = "-md";
 
     public static final long WORKSPACE_ID_DEFAULT = 0L;
+
+    public static final String INSTANCE_TYPE = "instancetype";
+
+    public static final String STORAGE = "storage";
 
     public static final Map<CloudPlatform, Versioned> MIN_RUNTIME_VERSION_FOR_RAZ = new HashMap<>() {
         {
@@ -651,6 +656,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         stackRequest.setResourceCrn(newSdxCluster.getCrn());
         overrideDefaultInstanceType(stackRequest, sdxClusterResizeRequest.getCustomInstanceGroups());
         overrideDefaultInstanceStorage(stackRequest, sdxClusterResizeRequest.getCustomInstanceGroupDiskSize());
+        overrideDefaultDatabaseProperties(newSdxCluster.getSdxDatabase(), sdxClusterResizeRequest.getCustomSdxDatabaseComputeStorage());
         newSdxCluster.setStackRequest(stackRequest);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxResize(sdxCluster.getId(), newSdxCluster,
                 new DatalakeDrSkipOptions(sdxClusterResizeRequest.isSkipValidation(), sdxClusterResizeRequest.isSkipAtlasMetadata(),
@@ -685,6 +691,20 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                                 templateGroup.getName(), volumeV4Request.getSize(), storageSize);
                         volumeV4Request.setSize(storageSize);
                     });
+        }
+    }
+
+    private void overrideDefaultDatabaseProperties(SdxDatabase sdxDatabase, SdxDatabaseComputeStorageRequest customSdxDatabase) {
+        if (customSdxDatabase != null && sdxDatabase != null) {
+            Map<String, Object> attributes = sdxDatabase.getAttributes() != null ? sdxDatabase.getAttributes().getMap() : new HashMap<>();
+            LOGGER.debug("Custom database properties: {}", customSdxDatabase);
+            if (isNotEmpty(customSdxDatabase.getInstanceType())) {
+                attributes.put(INSTANCE_TYPE, customSdxDatabase.getInstanceType());
+            }
+            if (customSdxDatabase.getStorageSize() != null && customSdxDatabase.getStorageSize() > 0) {
+                attributes.put(STORAGE, String.valueOf(customSdxDatabase.getStorageSize()));
+            }
+            sdxDatabase.setAttributes(new Json(attributes));
         }
     }
 
