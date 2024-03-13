@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.rebuild.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.ADD_INSTANCE_FAILED_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -39,6 +41,7 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackRequest;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackResult;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
+import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
@@ -109,5 +112,15 @@ class RebuildAddInstanceActionTest {
         assertEquals(cloudResources, payload.getResourceList());
         assertEquals(4L, payload.getResourceId());
         verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.REBUILD_IN_PROGRESS, "Create new instance");
+    }
+
+    @Test
+    void testFailurePayload() {
+        Exception ex = new Exception("test");
+
+        StackFailureEvent result = (StackFailureEvent) underTest.getFailurePayload(new StackEvent(3L), Optional.empty(), ex);
+
+        assertEquals(3L, result.getResourceId());
+        assertEquals(ADD_INSTANCE_FAILED_EVENT.event(), result.selector());
     }
 }

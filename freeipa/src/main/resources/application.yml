@@ -300,6 +300,10 @@ cb:
     salt.modifygrain:
         maxretry: 30
         maxerrorretry: 10
+    salt.restore:
+      dl_and_validate:
+        retry: 90
+        retry.onerror: 5
 
   address.resolving.timeout: 60000
 

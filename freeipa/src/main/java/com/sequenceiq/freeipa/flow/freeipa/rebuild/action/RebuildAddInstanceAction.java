@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.rebuild.action;
 
+import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.ADD_INSTANCE_FAILED_EVENT;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -28,6 +30,7 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackRequest;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackResult;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
+import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
@@ -64,6 +67,11 @@ public class RebuildAddInstanceAction extends AbstractRebuildAction<StackEvent> 
         String instanceToRestoreFqdn = getInstanceToRestoreFqdn(variables);
         List<CloudInstance> newInstances = buildNewInstance(context.getStack(), instanceToRestoreFqdn);
         addNewInstances(context, newInstances);
+    }
+
+    @Override
+    protected Object getFailurePayload(StackEvent payload, Optional<StackContext> flowContext, Exception ex) {
+        return new StackFailureEvent(ADD_INSTANCE_FAILED_EVENT.event(), payload.getResourceId(), ex);
     }
 
     private void addNewInstances(StackContext context, List<CloudInstance> newInstances) {

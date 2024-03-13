@@ -106,7 +106,7 @@ class FreeIpaPostInstallServiceTest {
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
-        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(ipaClient);
+        when(freeIpaClientFactory.getFreeIpaClientForStackIgnoreUnreachable(stack)).thenReturn(ipaClient);
         Set<Node> nodes = Set.of(mock(Node.class));
         when(freeIpaNodeUtilService.mapInstancesToNodes(anySet())).thenReturn(nodes);
         when(freeIpaRecipeService.hasRecipeType(1L, RecipeType.POST_SERVICE_DEPLOYMENT, RecipeType.POST_CLUSTER_INSTALL)).thenReturn(true);
@@ -213,7 +213,7 @@ class FreeIpaPostInstallServiceTest {
         lenient().when(stack.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(freeIpaRecipeService.hasRecipeType(1L, RecipeType.POST_SERVICE_DEPLOYMENT, RecipeType.POST_CLUSTER_INSTALL)).thenReturn(false);
-        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(ipaClient);
+        when(freeIpaClientFactory.getFreeIpaClientForStackIgnoreUnreachable(stack)).thenReturn(ipaClient);
         when(ipaClient.findPermission("Set Password Expiration")).thenReturn(Set.of());
         Config ipaConfig = new Config();
         ipaConfig.setIpamaxusernamelength(5);
@@ -242,7 +242,7 @@ class FreeIpaPostInstallServiceTest {
         FreeIpaClient ipaClient = mock(FreeIpaClient.class);
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
-        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(ipaClient);
+        when(freeIpaClientFactory.getFreeIpaClientForStackIgnoreUnreachable(stack)).thenReturn(ipaClient);
         Set<Node> nodes = Set.of(mock(Node.class));
         when(freeIpaRecipeService.hasRecipeType(1L, RecipeType.POST_SERVICE_DEPLOYMENT, RecipeType.POST_CLUSTER_INSTALL)).thenReturn(false);
         when(userSyncBindUserService.doesBindUserAndConfigAlreadyExist(stack, ipaClient)).thenReturn(true);

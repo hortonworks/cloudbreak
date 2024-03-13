@@ -101,7 +101,7 @@ public class FreeIpaPostInstallService {
     public void postInstallFreeIpa(Long stackId, boolean fullPostInstall) throws Exception {
         LOGGER.debug("Performing post-install configuration for stack {}. {}.", stackId, fullPostInstall ? "Full post install" : "Partial post install");
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
+        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStackIgnoreUnreachable(stack);
         freeIpaTopologyService.updateReplicationTopology(stackId, Set.of(), freeIpaClient);
         hostnameLengthPolicyService.updateMaxHostnameLength(stack, freeIpaClient);
         Benchmark.measure(() -> sidGenerationConfigurator.enableAndTriggerSidGeneration(stack, freeIpaClient), LOGGER, "Post-install configuration took {}ms.");

@@ -188,6 +188,11 @@ public class FreeIpaClientFactory {
         return getFreeIpaClient(stack.getId(), false, false, Optional.empty());
     }
 
+    public FreeIpaClient getFreeIpaClientForStackIgnoreUnreachable(Stack stack) throws FreeIpaClientException {
+        LOGGER.debug("Creating FreeIpaClient for stack {} ignoring unreachable", stack.getResourceCrn());
+        return getFreeIpaClient(stack.getId(), false, true, Optional.empty());
+    }
+
     public FreeIpaClient getFreeIpaClientForInstance(Stack stack, String fqdn) throws FreeIpaClientException {
         LOGGER.debug("Creating FreeIpaClient for stack {}", stack.getResourceCrn());
         return getFreeIpaClient(stack.getId(), false, false, Optional.of(fqdn));

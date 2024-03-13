@@ -20,3 +20,10 @@
     - group: root
     - mode: 700
     - source: salt://freeipa/scripts/backup-log-filter.sh
+
+/usr/local/bin/freeipa_dl_and_validate_backup.sh:
+  file.managed:
+    - source: salt://freeipa/scripts/freeipa_dl_and_validate_backup.sh
+    - user: root
+    - group: root
+    - mode: 750

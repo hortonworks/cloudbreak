@@ -4,6 +4,7 @@ import static com.sequenceiq.common.api.type.Tunnel.CLUSTER_PROXY;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -24,6 +25,7 @@ import org.springframework.boot.test.mock.mockito.MockReset;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -36,11 +38,14 @@ import com.sequenceiq.cloudbreak.cloud.handler.DownscaleStackCollectResourcesHan
 import com.sequenceiq.cloudbreak.cloud.handler.DownscaleStackHandler;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformInitializer;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
@@ -50,6 +55,7 @@ import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConvert
 import com.sequenceiq.freeipa.converter.cloud.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
+import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
@@ -94,6 +100,7 @@ import com.sequenceiq.freeipa.flow.stack.provision.handler.ClusterProxyRegistrat
 import com.sequenceiq.freeipa.flow.stack.termination.action.TerminationService;
 import com.sequenceiq.freeipa.service.BootstrapService;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaCloudStorageValidationService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaInstallService;
@@ -112,6 +119,10 @@ import io.micrometer.core.instrument.MeterRegistry;
 
 @ActiveProfiles("integration-test")
 @ExtendWith(SpringExtension.class)
+@TestPropertySource(properties = {
+        "cb.max.salt.restore.dl_and_validate.retry=90",
+        "cb.max.salt.restore.dl_and_validate.retry.onerror=5"
+})
 class RebuildFlowIntegrationTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
@@ -205,11 +216,19 @@ class RebuildFlowIntegrationTest {
     @MockBean
     private MeterRegistry meterRegistry;
 
+    @MockBean
+    private HostOrchestrator hostOrchestrator;
+
+    @MockBean
+    private GatewayConfigService gatewayConfigService;
+
     @BeforeEach
     public void setup() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setTunnel(CLUSTER_PROXY);
+        InstanceGroup ig = new InstanceGroup();
+        stack.setInstanceGroups(Set.of(ig));
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         CloudConnector cloudConnector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
@@ -220,6 +239,11 @@ class RebuildFlowIntegrationTest {
         when(pollTask.completed(any())).thenReturn(Boolean.TRUE);
         when(cloudConnector.metadata()).thenReturn(mock(MetadataCollector.class));
         when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(Set.of(new InstanceMetaData()));
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
+        when(gatewayConfig.getHostname()).thenReturn("ipaserver0.example.com");
+        when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
+        when(stackToCloudStackConverter.buildInstance(eq(stack), any(InstanceMetaData.class), eq(ig), any(), any(), any()))
+                .thenReturn(mock(CloudInstance.class));
     }
 
     @Test
