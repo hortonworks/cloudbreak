@@ -52,15 +52,17 @@ public class EnvironmentArchiverJob extends MdcQuartzJob {
     public void purgeFinalisedEnvironments(int retentionPeriodDays) throws TransactionService.TransactionExecutionException {
         LOGGER.debug("Cleaning finalised environments");
         long timestampsBefore = timeUtil.getTimestampThatDaysBeforeNow(retentionPeriodDays);
-        environmentService.getAllForArchive(timestampsBefore).stream().forEach(
-                crn -> {
-                    Optional<Exception> exception = structuredEventService.deleteStructuredEventByResourceCrn(crn);
-                    if (exception.isEmpty()) {
-                        environmentService.deleteByResourceCrn(crn);
-                    } else {
-                        LOGGER.error("Could not completely delete environment events for {} with error {}", crn, exception.get());
+        environmentService.getAllForArchive(timestampsBefore, environmentArchiverConfig.getLimitForEnvironment())
+                .stream()
+                .forEach(
+                    crn -> {
+                        Optional<Exception> exception = structuredEventService.deleteStructuredEventByResourceCrn(crn);
+                        if (exception.isEmpty()) {
+                            environmentService.deleteByResourceCrn(crn);
+                        } else {
+                            LOGGER.error("Could not completely delete environment events for {} with error {}", crn, exception.get());
+                        }
                     }
-                }
         );
     }
 }
