@@ -1,4 +1,4 @@
-package com.sequenceiq.redbeams.service.registry;
+package com.sequenceiq.cloudbreak.registry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

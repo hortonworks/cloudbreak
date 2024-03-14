@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RemoteControlPlaneRegistrationResponse {
+public class PrivateControlPlaneDeRegistrationResponse {
 
     @NotEmpty
     @Schema
@@ -34,7 +34,7 @@ public class RemoteControlPlaneRegistrationResponse {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        RemoteControlPlaneRegistrationResponse that = (RemoteControlPlaneRegistrationResponse) o;
+        PrivateControlPlaneDeRegistrationResponse that = (PrivateControlPlaneDeRegistrationResponse) o;
         return Objects.equals(crn, that.crn);
     }
 
@@ -45,7 +45,7 @@ public class RemoteControlPlaneRegistrationResponse {
 
     @Override
     public String toString() {
-        return "RemoteControlPlaneRegistrationResponse{" +
+        return "PrivateControlPlaneDeRegistrationResponse{" +
                 "crn='" + crn + '\'' +
                 '}';
     }

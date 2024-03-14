@@ -86,7 +86,6 @@ dependencies {
 
     implementation     group: "org.yaml",                  name: "snakeyaml",                                version: snakeYamlVersion
     implementation     group: "com.google.code.gson",      name: "gson",                                     version: gsonVersion
-    implementation     group: "dnsjava",                   name: "dnsjava",                                  version: dnsjavaVersion
     implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2-jakarta',                   version: swaggerCoreVersion
     implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                                 version: javaxXmlBindJaxbApiVersion
     implementation     group: "org.glassfish.jersey.core", name: "jersey-server",                            version: jerseyCoreVersion

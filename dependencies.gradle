@@ -30,7 +30,7 @@ ext {
   swaggerCoreVersion = '2.2.20'
 
   // Network
-  dnsjavaVersion = '2.1.7'
+  dnsjavaVersion = '3.5.2'
   httpClientVersion = '5.2.1'
   nettyVersion = '4.1.101.Final'
   reactorNettyHttp = '1.1.15'

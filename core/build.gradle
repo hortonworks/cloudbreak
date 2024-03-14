@@ -137,7 +137,6 @@ dependencyManagement {
     dependency group: 'activation',                         name: 'activation',                  version: '1.0.2'
     dependency group: 'net.jcip',                           name: 'jcip-annotations',            version: '1.0'
     dependency group: 'com.google.http-client',             name: 'google-http-client-jackson2', version: '1.43.3'
-    dependency group: 'dnsjava',                            name: 'dnsjava',                     version: '3.5.2'
 
     dependency group: 'org.springframework.retry',          name: 'spring-retry',                version: springRetryVersion
     dependency group: 'org.springframework',                name: 'spring-context-support',      version: springFrameworkVersion
@@ -185,7 +184,6 @@ dependencies {
   implementation group: 'net.jcip',                           name: 'jcip-annotations'
   implementation group: 'com.google.http-client',             name: 'google-http-client-jackson2'
 
-  implementation group: 'dnsjava',                            name: 'dnsjava'
 
   implementation group: 'io.swagger.core.v3',                 name: 'swagger-jaxrs2-jakarta',      version: swaggerCoreVersion
   implementation group: 'javax.xml.bind',                     name: 'jaxb-api',                    version: javaxXmlBindJaxbApiVersion

@@ -4,10 +4,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.sequenceiq.environment.configuration.registry.DNSServiceAddressResolver;
-import com.sequenceiq.environment.configuration.registry.RetryingServiceAddressResolver;
-import com.sequenceiq.environment.configuration.registry.ServiceAddressResolver;
-import com.sequenceiq.environment.configuration.registry.ServiceAddressResolvingException;
+import com.sequenceiq.cloudbreak.registry.DNSServiceAddressResolver;
+import com.sequenceiq.cloudbreak.registry.RetryingServiceAddressResolver;
+import com.sequenceiq.cloudbreak.registry.ServiceAddressResolver;
+import com.sequenceiq.cloudbreak.registry.ServiceAddressResolvingException;
 
 @Configuration
 public class ServiceEndpointConfig {
@@ -75,12 +75,12 @@ public class ServiceEndpointConfig {
     }
 
     @Bean
-    public String databaseAddress(ServiceAddressResolver serviceAddressResolver) {
+    public String databaseAddress(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveHostPort(dbHost, dbPort, databaseId);
     }
 
     @Bean
-    public String cloudbreakServerUrl(ServiceAddressResolver serviceAddressResolver) {
+    public String cloudbreakServerUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveUrl(cloudbreakUrl + cbRootContextPath, "http", cloudbreakServiceId);
     }
 

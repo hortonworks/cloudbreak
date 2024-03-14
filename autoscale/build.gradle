@@ -127,7 +127,6 @@ dependencyManagement {
         dependency group: 'xerces',              name: 'xercesImpl',            version: xerces
 
         dependency group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonDatabindVersion
-        dependency group: 'dnsjava',                       name: 'dnsjava',                        version: '3.5.2'
         dependency group: 'org.springframework',           name: 'spring-context-support',         version: springFrameworkVersion
         dependency group: 'com.zaxxer',                    name: 'HikariCP',                       version: hikariCPVersion
 
@@ -166,7 +165,6 @@ dependencies {
     implementation group: 'org.mybatis',                   name: 'mybatis-migrations'
     implementation group: 'org.quartz-scheduler',          name: 'quartz'
     implementation group: 'com.zaxxer',                    name: 'HikariCP'
-    implementation group: 'dnsjava',                       name: 'dnsjava'
 
     implementation group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2-jakarta',                   version: swaggerCoreVersion
     implementation group: 'javax.xml.bind',            name: 'jaxb-api',                                 version: javaxXmlBindJaxbApiVersion

@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.registry;
+package com.sequenceiq.cloudbreak.registry;
 
 public interface ServiceAddressResolver {
     String resolveUrl(String serverUrl, String protocol, String serviceId) throws ServiceAddressResolvingException;

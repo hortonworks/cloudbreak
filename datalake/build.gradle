@@ -74,7 +74,6 @@ dependencies {
 
   implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                          version: okhttpVersion
   implementation     group: 'com.google.code.gson',      name: 'gson',                            version: gsonVersion
-  implementation     group: 'dnsjava',                   name: 'dnsjava',                         version: '3.5.2'
   implementation     group: 'com.dyngr',                 name: 'polling',                         version: dyngrPollingVersion
   implementation     group: 'io.swagger.core.v3',        name: 'swagger-jaxrs2-jakarta',          version: swaggerCoreVersion
   implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                        version: javaxXmlBindJaxbApiVersion

@@ -67,4 +67,14 @@ public class PrivateControlPlane implements AuthResource, AccountAwareResource {
     public void setName(String name) {
         this.name = name;
     }
+
+    @java.lang.Override
+    public java.lang.String toString() {
+        return "PrivateControlPlane{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", accountId='" + accountId + '\'' +
+                '}';
+    }
 }

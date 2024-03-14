@@ -52,7 +52,6 @@ dependencies {
 
   implementation     group: 'com.google.guava',          name: 'guava'
   implementation     group: 'com.google.code.gson',      name: 'gson'
-  implementation     group: 'dnsjava',                   name: 'dnsjava'
   implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server'
   implementation     group: 'org.mybatis',               name: 'mybatis-migrations'
   implementation     group: 'org.postgresql',            name: 'postgresql'
@@ -91,7 +90,6 @@ dependencies {
     implementation     group: 'org.yaml',                  name: 'snakeyaml',                      version: snakeYamlVersion
     implementation     group: 'com.google.guava',          name: 'guava',                          version: guavaVersion
     implementation     group: 'com.google.code.gson',      name: 'gson',                           version: gsonVersion
-    implementation     group: 'dnsjava',                   name: 'dnsjava',                        version: '3.5.2'
     implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                  version: jerseyCoreVersion
     implementation     group: 'org.mybatis',               name: 'mybatis-migrations',             version: mybatisMigrationVersion
     implementation     group: 'org.postgresql',            name: 'postgresql',                     version: postgreSQLVersion

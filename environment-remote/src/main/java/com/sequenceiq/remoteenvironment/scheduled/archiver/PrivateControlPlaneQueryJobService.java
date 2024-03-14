@@ -21,9 +21,9 @@ import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 
 @Service
-public class RemoteControlPlaneQueryJobService implements JobSchedulerService {
+public class PrivateControlPlaneQueryJobService implements JobSchedulerService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RemoteControlPlaneQueryJobService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrivateControlPlaneQueryJobService.class);
 
     private static final String JOB_NAME = "query-job";
 
@@ -37,7 +37,7 @@ public class RemoteControlPlaneQueryJobService implements JobSchedulerService {
     private TransactionalScheduler scheduler;
 
     @Inject
-    private RemoteControlPlaneQueryConfig remoteControlPlaneQueryConfig;
+    private PrivateControlPlaneQueryConfig privateControlPlaneQueryConfig;
 
     public void schedule() {
         JobDetail jobDetail = buildJobDetail();
@@ -57,7 +57,7 @@ public class RemoteControlPlaneQueryJobService implements JobSchedulerService {
 
     private JobDetail buildJobDetail() {
         JobDataMap jobDataMap = new JobDataMap();
-        return JobBuilder.newJob(RemoteControlPlaneQueryJob.class)
+        return JobBuilder.newJob(PrivateControlPlaneQueryJob.class)
                 .withIdentity(JOB_NAME, JOB_GROUP)
                 .withDescription("Query Classic clusters for new and removed private control plane configs")
                 .usingJobData(jobDataMap)
@@ -72,7 +72,7 @@ public class RemoteControlPlaneQueryJobService implements JobSchedulerService {
                 .withDescription("Trigger for classic clusters query.")
                 .startAt(delayedFirstStart())
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()
-                        .withIntervalInMinutes(remoteControlPlaneQueryConfig.getIntervalInMintues())
+                        .withIntervalInMinutes(privateControlPlaneQueryConfig.getIntervalInMintues())
                         .repeatForever()
                         .withMisfireHandlingInstructionIgnoreMisfires())
                 .build();

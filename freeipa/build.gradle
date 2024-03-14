@@ -48,7 +48,6 @@ dependencies {
   implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                               version: okhttpVersion
 
   implementation     group: 'com.google.code.gson',      name: 'gson'
-  implementation     group: 'dnsjava',                   name: 'dnsjava'
   // apacheds-kerberos-codec using a pretty old mina-core and that library was not update since 2020
   implementation     group: 'org.apache.mina',           name: 'mina-core',                            version: '2.2.2'
   implementation     group: 'javax.activation',          name: 'activation',                           version: '1.1.1'
@@ -99,7 +98,6 @@ dependencies {
 
   constraints {
     implementation     group: 'com.google.code.gson',      name: 'gson',                           version: gsonVersion
-    implementation     group: 'dnsjava',                   name: 'dnsjava',                        version: '3.5.2'
     implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                  version: jerseyCoreVersion
     implementation     group: 'org.mybatis',               name: 'mybatis-migrations',             version: mybatisMigrationVersion
     implementation     group: 'org.postgresql',            name: 'postgresql',                     version: postgreSQLVersion

@@ -1,4 +1,4 @@
-package com.sequenceiq.periscope.service.registry;
+package com.sequenceiq.cloudbreak.registry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +58,7 @@ public class RetryingServiceAddressResolver implements ServiceAddressResolver {
                 LOGGER.debug("Unsuccessful address resolving: {}, retrying in {}millis", e.getMessage(), SLEEPTIME);
                 Thread.sleep(SLEEPTIME);
             } catch (InterruptedException ie) {
-                LOGGER.info("Interrupted exception occurred: {}", ie.getMessage());
+                LOGGER.error("Interrupted exception occurred: {}", ie.getMessage());
             }
         }
     }

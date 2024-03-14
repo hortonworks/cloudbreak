@@ -5,10 +5,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 
-import com.sequenceiq.remoteenvironment.service.registry.DNSServiceAddressResolver;
-import com.sequenceiq.remoteenvironment.service.registry.RetryingServiceAddressResolver;
-import com.sequenceiq.remoteenvironment.service.registry.ServiceAddressResolver;
-import com.sequenceiq.remoteenvironment.service.registry.ServiceAddressResolvingException;
+import com.sequenceiq.cloudbreak.registry.DNSServiceAddressResolver;
+import com.sequenceiq.cloudbreak.registry.RetryingServiceAddressResolver;
+import com.sequenceiq.cloudbreak.registry.ServiceAddressResolver;
+import com.sequenceiq.cloudbreak.registry.ServiceAddressResolvingException;
 
 @Configuration
 public class ServiceEndpointConfig {

@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.service.openapi.OpenApiController;
 import com.sequenceiq.flow.controller.FlowPublicController;
 import com.sequenceiq.remoteenvironment.api.RemoteEnvironmentApi;
 import com.sequenceiq.remoteenvironment.controller.mapper.WebApplicaitonExceptionMapper;
-import com.sequenceiq.remoteenvironment.controller.v1.controller.RemoteControlPlaneController;
+import com.sequenceiq.remoteenvironment.controller.v1.controller.PrivateControlPlaneController;
 import com.sequenceiq.remoteenvironment.controller.v1.controller.RemoteEnvironmentController;
 
 @ApplicationPath(RemoteEnvironmentApi.API_ROOT_CONTEXT)
@@ -26,7 +26,7 @@ public class EndpointConfig extends ResourceConfig {
 
     private static final List<Class<?>> CONTROLLERS = Arrays.asList(
             RemoteEnvironmentController.class,
-            RemoteControlPlaneController.class,
+            PrivateControlPlaneController.class,
             FlowPublicController.class,
             OpenApiController.class
     );

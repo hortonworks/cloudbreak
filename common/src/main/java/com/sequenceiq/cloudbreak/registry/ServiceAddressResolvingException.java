@@ -1,4 +1,4 @@
-package com.sequenceiq.externalizedcompute.service.registry;
+package com.sequenceiq.cloudbreak.registry;
 
 public class ServiceAddressResolvingException extends Exception {
     public ServiceAddressResolvingException(String message) {
