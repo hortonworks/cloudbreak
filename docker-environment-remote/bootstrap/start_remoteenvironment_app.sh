@@ -35,9 +35,9 @@ echo "Starting the Remote Environment application..."
 
 set -x
 if [ "$SECURE_RANDOM" == "false" ]; then
-  REMOTE_ENVIRONMENT_JAVA_OPTS="REMOTE_ENVIRONMENT_JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"
+  REMOTE_ENVIRONMENT_JAVA_OPTS="$REMOTE_ENVIRONMENT_JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"
 fi
 
-REMOTE_ENVIRONMENT_JAVA_OPTS="REMOTE_ENVIRONMENT_JAVA_OPTS -Djavax.net.ssl.keyStore=NONE -Djavax.net.ssl.keyStoreType=PKCS11 -Djavax.net.ssl.trustStore=NONE -Djavax.net.ssl.trustStoreType=PKCS11"
+REMOTE_ENVIRONMENT_JAVA_OPTS="$REMOTE_ENVIRONMENT_JAVA_OPTS -Djavax.net.ssl.keyStore=NONE -Djavax.net.ssl.keyStoreType=PKCS11 -Djavax.net.ssl.trustStore=NONE -Djavax.net.ssl.trustStoreType=PKCS11"
 
-eval "(java REMOTE_ENVIRONMENT_JAVA_OPTS -jar /remote-environment.jar) & JAVAPID=\$!; trap \"kill \$JAVAPID; wait \$JAVAPID\" SIGINT SIGTERM; wait \$JAVAPID"
+eval "(java $REMOTE_ENVIRONMENT_JAVA_OPTS -jar /remote-environment.jar) & JAVAPID=\$!; trap \"kill \$JAVAPID; wait \$JAVAPID\" SIGINT SIGTERM; wait \$JAVAPID"
