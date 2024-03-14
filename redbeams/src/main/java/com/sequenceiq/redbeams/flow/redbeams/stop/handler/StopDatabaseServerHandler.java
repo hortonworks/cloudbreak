@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
@@ -24,6 +25,7 @@ import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.stop.event.StopDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.stop.event.StopDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.stop.event.StopDatabaseServerSuccess;
+import com.sequenceiq.redbeams.service.rotate.CloudProviderCertRotator;
 
 @Component
 public class StopDatabaseServerHandler implements EventHandler<StopDatabaseServerRequest> {
@@ -42,6 +44,9 @@ public class StopDatabaseServerHandler implements EventHandler<StopDatabaseServe
     @Inject
     private SyncPollingScheduler<ExternalDatabaseStatus> externalDatabaseStatusPollingScheduler;
 
+    @Inject
+    private CloudProviderCertRotator cloudProviderCertRotator;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(StopDatabaseServerRequest.class);
@@ -51,6 +56,7 @@ public class StopDatabaseServerHandler implements EventHandler<StopDatabaseServe
     public void accept(Event<StopDatabaseServerRequest> event) {
         LOGGER.debug("Received event: {}", event);
         StopDatabaseServerRequest request = event.getData();
+        CloudCredential cloudCredential = request.getCloudCredential();
         CloudContext cloudContext = request.getCloudContext();
         try {
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
@@ -59,13 +65,13 @@ public class StopDatabaseServerHandler implements EventHandler<StopDatabaseServe
             ExternalDatabaseStatus status = connector.resources().getDatabaseServerStatus(ac, request.getDbStack());
             if (status != null && status.isTransient()) {
                 LOGGER.debug("Database server '{}' is in '{}' status. Start waiting for a permanent status.", request.getDbStack(), status);
-
                 PollTask<ExternalDatabaseStatus> task = statusCheckFactory.newPollPermanentExternalDatabaseStateTask(ac, request.getDbStack());
                 status = externalDatabaseStatusPollingScheduler.schedule(task);
             }
 
             if (status != STOPPED) {
                 LOGGER.debug("Database server '{}' is in '{}' status. Calling for '{}' status.", request.getDbStack(), status, STOPPED);
+                cloudProviderCertRotator.rotate(request.getResourceId(), cloudContext, cloudCredential, request.getDbStack());
                 connector.resources().stopDatabaseServer(ac, request.getDbStack());
             } else {
                 LOGGER.debug("Database server '{}' is already in '{}' status.", request.getDbStack(), STOPPED);

@@ -79,6 +79,8 @@ public final class Notes {
             + "separate from the database server's administrative user is also created, with full rights to the new database.";
         public static final String START =
                 "Start a previosly stopped database server.";
+        public static final String ROTATE_SSL_CERT =
+                "Rotate the root cert of a database server.";
         public static final String STOP =
                 "Stop a running database server.";
         public static final String CERT_SWAP =

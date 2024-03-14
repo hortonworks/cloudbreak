@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -15,6 +16,7 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.CertRotateInRedbeamsRequest;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.CertRotateInRedbeamsSuccess;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.StartDatabaseServerFailed;
+import com.sequenceiq.redbeams.service.rotate.CloudProviderCertRotator;
 import com.sequenceiq.redbeams.service.stack.DBStackUpdater;
 
 @Component
@@ -24,6 +26,9 @@ public class CertRotateInRedbeamsHandler extends ExceptionCatcherEventHandler<Ce
 
     @Inject
     private DBStackUpdater dbStackUpdater;
+
+    @Inject
+    private CloudProviderCertRotator cloudProviderCertRotator;
 
     @Override
     public String selector() {
@@ -40,7 +45,20 @@ public class CertRotateInRedbeamsHandler extends ExceptionCatcherEventHandler<Ce
     protected Selectable doAccept(HandlerEvent<CertRotateInRedbeamsRequest> event) {
         LOGGER.debug("CERT rotation has been started");
         CertRotateInRedbeamsRequest data = event.getData();
-        dbStackUpdater.updateSslConfig(data.getResourceId(), data.getCloudContext(), data.getCloudCredential(), data.getDbStack());
+        try {
+            cloudProviderCertRotator.rotate(
+                    data.getResourceId(),
+                    data.getCloudContext(),
+                    data.getCloudCredential(),
+                    data.getDbStack());
+            dbStackUpdater.updateSslConfig(
+                    data.getResourceId(),
+                    data.getCloudContext(),
+                    data.getCloudCredential(),
+                    data.getDbStack());
+        } catch (Exception e) {
+            throw new CloudbreakServiceException(e);
+        }
         return new CertRotateInRedbeamsSuccess(data.getResourceId());
     }
 }

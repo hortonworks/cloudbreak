@@ -21,6 +21,7 @@ import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
@@ -67,6 +68,7 @@ import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.rotation.RedbeamsRotationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
+import com.sequenceiq.redbeams.service.stack.RedbeamsRotateSslService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsStartService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsStopService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
@@ -92,6 +94,9 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Inject
     private RedbeamsStopService redbeamsStopService;
+
+    @Inject
+    private RedbeamsRotateSslService redbeamsRotateSslService;
 
     @Inject
     private RedbeamsUpgradeService redbeamsUpgradeService;
@@ -246,6 +251,13 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.START_DATABASE_SERVER)
     public void start(@TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn) {
         redbeamsStartService.startDatabaseServer(crn);
+    }
+
+    @Override
+    @InternalOnly
+    @AccountIdNotNeeded
+    public void rotateSslCert(@TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn) {
+        redbeamsRotateSslService.rotateDatabaseServerSslCert(crn);
     }
 
     @Override

@@ -220,6 +220,16 @@ public interface DatabaseServerV4Endpoint {
     );
 
     @PUT
+    @Path("{crn}/rotate_ssl_cert")
+    @Operation(summary = DatabaseServerOpDescription.ROTATE_SSL_CERT, description = DatabaseServerNotes.ROTATE_SSL_CERT,
+            operationId = "rotateDatabaseServerSSLCert",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void rotateSslCert(
+            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+            @PathParam("crn") String crn
+    );
+
+    @PUT
     @Path("{crn}/stop")
     @Operation(summary = DatabaseServerOpDescription.STOP, description = DatabaseServerNotes.STOP,
             operationId = "stopDatabaseServer",

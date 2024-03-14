@@ -11,6 +11,8 @@ public enum MetricType implements Metric {
     DB_START_FAILED("db.start.failed"),
     DB_STOP_FINISHED("db.stop.finished"),
     DB_STOP_FAILED("db.stop.failed"),
+    DB_ROTATE_CERT_FINISHED("db.rotatecert.finished"),
+    DB_ROTATE_CERT_FAILED("db.rotatecert.failed"),
     DB_UPGRADE_FINISHED("db.upgrade.finished"),
     DB_UPGRADE_FAILED("db.upgrade.failed");
 

@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.CertRotateInRedbeamsRequest;
 import com.sequenceiq.redbeams.flow.redbeams.start.event.CertRotateInRedbeamsSuccess;
+import com.sequenceiq.redbeams.service.rotate.CloudProviderCertRotator;
 import com.sequenceiq.redbeams.service.stack.DBStackUpdater;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,8 +41,11 @@ public class CertRotateInRedbeamsHandlerTest {
     @Mock
     private DatabaseStack databaseStack;
 
+    @Mock
+    private CloudProviderCertRotator cloudProviderCertRotator;
+
     @Test
-    public void testDoAccept() {
+    public void testDoAccept() throws Exception {
         when(cloudContext.getId()).thenReturn(STACK_ID);
 
         CertRotateInRedbeamsRequest request = new CertRotateInRedbeamsRequest(cloudContext, cloudCredential, databaseStack);
@@ -52,5 +56,6 @@ public class CertRotateInRedbeamsHandlerTest {
         Assertions.assertThat(selectable.getClass()).isEqualTo(CertRotateInRedbeamsSuccess.class);
         Assertions.assertThat(selectable.selector()).isEqualTo("CERTROTATEINREDBEAMSSUCCESS");
         verify(dbStackUpdater).updateSslConfig(STACK_ID, cloudContext, cloudCredential, databaseStack);
+        verify(cloudProviderCertRotator).rotate(STACK_ID, cloudContext, cloudCredential, databaseStack);
     }
 }

@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
@@ -36,6 +39,8 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
  * the template resource reference e.g HEAT_STACK to inform the Cloud provider to remove the VM instance from stack.
  */
 public interface ResourceConnector {
+
+    Logger LOGGER = LoggerFactory.getLogger(ResourceConnector.class);
 
     /**
      * Launch a complete stack on Cloud platform. The stack consist of the following resources:
@@ -335,6 +340,18 @@ public interface ResourceConnector {
      * @param newPassword new password for the database root user
      */
     void updateDatabaseRootPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword);
+
+    /**
+     * Updates the database root CA
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param databaseStack contains the full description of infrastructure
+     * @param desiredCertificate the cert which should be applied on the database
+     */
+    default void updateDatabaseServerActiveSslRootCertificate(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack,
+            String desiredCertificate) {
+        LOGGER.warn("Update database root ca is not implemented!");
+    }
 
     /**
      * Modifies attached volumes on an instance.
