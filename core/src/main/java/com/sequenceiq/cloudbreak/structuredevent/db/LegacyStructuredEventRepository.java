@@ -7,6 +7,8 @@ import java.util.Set;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,20 +29,17 @@ public interface LegacyStructuredEventRepository extends WorkspaceResourceReposi
     @Query("SELECT se from StructuredEventEntity se WHERE se.workspace.id = :workspaceId AND se.id = :id")
     StructuredEventEntity findByWorkspaceIdAndId(@Param("workspaceId") Long workspaceId, @Param("id") Long id);
 
-    List<StructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceId(Workspace workspace, String resourceType, Long resourceId);
+    Page<StructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceId(Workspace workspace, String resourceType, Long resourceId, Pageable page);
 
-    List<StructuredEventEntity> findByWorkspaceAndResourceCrn(Workspace workspace, String resourceCrn);
+    Page<StructuredEventEntity> findByWorkspaceAndResourceCrn(Workspace workspace, String resourceCrn, Pageable page);
 
-    List<StructuredEventEntity> findByWorkspaceAndEventType(Workspace workspace, StructuredEventType eventType);
+    Page<StructuredEventEntity> findByWorkspaceAndEventType(Workspace workspace, StructuredEventType eventType, Pageable page);
 
     @Query("SELECT se from StructuredEventEntity se WHERE se.workspace.id = :workspaceId AND se.eventType = :eventType AND se.timestamp >= :since")
     List<StructuredEventEntity> findByWorkspaceIdAndEventTypeSince(@Param("workspaceId") Long workspaceId, @Param("eventType") StructuredEventType eventType,
             @Param("since") Long since);
 
-    List<StructuredEventEntity> findByEventTypeAndResourceTypeAndResourceId(StructuredEventType eventType, String resourceType, Long resourceId);
-
-    @Query("SELECT se from StructuredEventEntity se WHERE se.workspace IS null OR se.user IS null")
-    List<StructuredEventEntity> findAllWithoutWorkspaceOrUser();
+    Page<StructuredEventEntity> findByEventTypeAndResourceTypeAndResourceId(StructuredEventType eventType, String resourceType, Long resourceId, Pageable page);
 
     @Override
     default Optional<StructuredEventEntity> findByNameAndWorkspace(String name, Workspace workspace) {

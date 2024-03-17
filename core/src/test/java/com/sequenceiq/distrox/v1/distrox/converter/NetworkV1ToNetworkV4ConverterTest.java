@@ -67,6 +67,8 @@ class NetworkV1ToNetworkV4ConverterTest {
 
     private static final boolean NO_OUTBOUND_LOAD_BALANCER = true;
 
+    private static final String ENDPOINT_GATEWAY_SUBNET_ID = "egwsubnet-123";
+
     @InjectMocks
     private NetworkV1ToNetworkV4Converter underTest;
 
@@ -208,6 +210,7 @@ class NetworkV1ToNetworkV4ConverterTest {
         assertEquals(networkV4Request.createAzure().getResourceGroupName(), GROUP_NAME);
         assertEquals(networkV4Request.createAzure().getSubnetId(), SUBNET_ID);
         assertEquals(networkV4Request.createAzure().isNoOutboundLoadBalancer(), NO_OUTBOUND_LOAD_BALANCER);
+        assertEquals(networkV4Request.createAzure().getEndpointGatewaySubnetId(), ENDPOINT_GATEWAY_SUBNET_ID);
     }
 
     @Test
@@ -223,6 +226,7 @@ class NetworkV1ToNetworkV4ConverterTest {
         assertEquals(networkV4Request.createAzure().getResourceGroupName(), GROUP_NAME);
         assertTrue(SUBNET_IDS.contains(networkV4Request.createAzure().getSubnetId()));
         assertEquals(networkV4Request.createAzure().isNoOutboundLoadBalancer(), NO_OUTBOUND_LOAD_BALANCER);
+        assertEquals(networkV4Request.createAzure().getEndpointGatewaySubnetId(), ENDPOINT_GATEWAY_SUBNET_ID);
     }
 
     @Test
@@ -435,6 +439,7 @@ class NetworkV1ToNetworkV4ConverterTest {
         EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
         environmentNetworkResponse.setSubnetIds(SUBNET_IDS);
         environmentNetworkResponse.setPreferedSubnetId(SUBNET_ID);
+        environmentNetworkResponse.setEndpointGatewaySubnetIds(Set.of(ENDPOINT_GATEWAY_SUBNET_ID));
 
         EnvironmentNetworkAzureParams environmentNetworkAzureParams = new EnvironmentNetworkAzureParams();
         environmentNetworkAzureParams.setNetworkId(VPC_ID);

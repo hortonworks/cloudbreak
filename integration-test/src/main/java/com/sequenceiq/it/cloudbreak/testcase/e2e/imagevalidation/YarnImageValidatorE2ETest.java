@@ -50,7 +50,8 @@ public class YarnImageValidatorE2ETest extends HybridCloudE2ETest implements Ima
 
     @Override
     public String getImageId(TestContext testContext) {
-        return testContext.given(CHILD_SDX_KEY, SdxInternalTestDto.class, CHILD_CLOUD_PLATFORM).getResponse().getStackV4Response().getImage().getId();
+        SdxInternalTestDto sdxInternalTestDto = testContext.get(CHILD_SDX_KEY);
+        return sdxInternalTestDto.getResponse().getStackV4Response().getImage().getId();
     }
 
     @Override

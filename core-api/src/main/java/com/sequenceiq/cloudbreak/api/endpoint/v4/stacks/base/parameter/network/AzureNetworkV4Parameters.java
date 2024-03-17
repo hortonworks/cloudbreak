@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.AKS_PRIVATE_DNS_ZONE_ID;
 import static com.sequenceiq.cloudbreak.constant.AzureConstants.DATABASE_PRIVATE_DNS_ZONE_ID;
@@ -45,6 +46,9 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
 
     @Schema
     private boolean noOutboundLoadBalancer;
+
+    @Schema(hidden = true)
+    private String endpointGatewaySubnetId;
 
     public Boolean getNoPublicIp() {
         return noPublicIp;
@@ -102,6 +106,14 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
         this.noOutboundLoadBalancer = noOutboundLoadBalancer;
     }
 
+    public String getEndpointGatewaySubnetId() {
+        return endpointGatewaySubnetId;
+    }
+
+    public void setEndpointGatewaySubnetId(String endpointGatewaySubnetId) {
+        this.endpointGatewaySubnetId = endpointGatewaySubnetId;
+    }
+
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
@@ -112,6 +124,7 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
         putIfValueNotNull(map, DATABASE_PRIVATE_DNS_ZONE_ID, databasePrivateDnsZoneId);
         putIfValueNotNull(map, AKS_PRIVATE_DNS_ZONE_ID, aksPrivateDnsZoneId);
         putIfValueNotNull(map, NO_OUTBOUND_LOAD_BALANCER, noOutboundLoadBalancer);
+        putIfValueNotNull(map, ENDPOINT_GATEWAY_SUBNET_ID, endpointGatewaySubnetId);
         return map;
     }
 

@@ -8,6 +8,8 @@ import java.util.Set;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -47,8 +49,8 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
             + "AND e.archived = false")
     Set<Environment> findAllByIdNotArchived(@Param("ids") List<Long> ids);
 
-    @Query("SELECT e.resourceCrn FROM Environment e WHERE e.deletionTimestamp > :date AND e.archived = true")
-    Set<String> findAllArchivedAndDeletionOlderThan(@Param("date") Long date);
+    @Query("SELECT e.resourceCrn FROM Environment e WHERE e.deletionTimestamp > :date AND e.archived = true ORDER BY e.deletionTimestamp DESC")
+    Page<String> findAllArchivedAndDeletionOlderThan(@Param("date") Long date, Pageable pageable);
 
     @Modifying
     @Query("DELETE FROM Environment e WHERE e.resourceCrn = :crn AND e.archived = true")

@@ -16,8 +16,11 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -50,6 +53,9 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
     private static final long THREE_MONTHS = Duration.ofDays(NINETY_DAYS).toMillis();
 
     private static final int MILLISEC_MULTIPLIER = 1000;
+
+    @Value("${cb.structuredevent.maxsize:20000}")
+    private int maxSize;
 
     @Inject
     private LegacyStructuredEventRepository repository;
@@ -95,7 +101,8 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
 
     @Override
     public <T extends StructuredEvent> List<T> getEventsForWorkspaceWithType(Workspace workspace, Class<T> eventClass) {
-        List<StructuredEventEntity> events = repository.findByWorkspaceAndEventType(workspace, StructuredEventType.getByClass(eventClass));
+        List<StructuredEventEntity> events = repository.findByWorkspaceAndEventType(workspace, StructuredEventType.getByClass(eventClass), createPageRequest())
+                .stream().toList();
         return events != null ? (List<T>) events.stream()
                 .map(e -> structuredEventEntityToStructuredEventConverter.convert(e))
                 .collect(Collectors.toList()) : Collections.emptyList();
@@ -113,7 +120,8 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
     @Override
     public <T extends StructuredEvent> List<T> getEventsWithTypeAndResourceId(Class<T> eventClass, String resourceType, Long resourceId) {
         List<StructuredEventEntity> events = repository
-                .findByEventTypeAndResourceTypeAndResourceId(StructuredEventType.getByClass(eventClass), resourceType, resourceId);
+                .findByEventTypeAndResourceTypeAndResourceId(StructuredEventType.getByClass(eventClass), resourceType, resourceId, createPageRequest())
+                .stream().toList();
         return events != null ? (List<T>) events.stream()
                 .map(e -> structuredEventEntityToStructuredEventConverter.convert(e))
                 .collect(Collectors.toList()) : Collections.emptyList();
@@ -178,11 +186,11 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
     }
 
     public List<StructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceCrn(Workspace workspace, String resourceCrn) {
-        return repository.findByWorkspaceAndResourceCrn(workspace, resourceCrn);
+        return repository.findByWorkspaceAndResourceCrn(workspace, resourceCrn, createPageRequest()).stream().toList();
     }
 
     public List<StructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceId(Workspace workspace, String resourceType, Long resourceId) {
-        return repository.findByWorkspaceAndResourceTypeAndResourceId(workspace, resourceType, resourceId);
+        return repository.findByWorkspaceAndResourceTypeAndResourceId(workspace, resourceType, resourceId, createPageRequest()).stream().toList();
     }
 
     private Stack getStackIfAvailable(Long workspaceId, String name, StackType stackType) {
@@ -202,6 +210,10 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
 
     private Long getTimestampThatThreeMonthsBeforeNow() {
         return Instant.now().getEpochSecond() * MILLISEC_MULTIPLIER - THREE_MONTHS;
+    }
+
+    private PageRequest createPageRequest() {
+        return PageRequest.of(0, maxSize, Sort.by("timestamp").descending());
     }
 
 }

@@ -45,7 +45,7 @@ class EnvironmentArchiverJobTest {
         JobExecutionContext context = mock(JobExecutionContext.class);
         when(environmentArchiverConfig.getRetentionPeriodInDays()).thenReturn(7);
         when(timeUtil.getTimestampThatDaysBeforeNow(anyInt())).thenReturn(new Date().getTime());
-        when(environmentService.getAllForArchive(anyLong())).thenReturn(Set.of("crn1"));
+        when(environmentService.getAllForArchive(anyLong(), anyInt())).thenReturn(Set.of("crn1"));
         when(structuredEventService.deleteStructuredEventByResourceCrn("crn1")).thenReturn(Optional.empty());
 
         environmentArchiverJob.executeTracedJob(context);

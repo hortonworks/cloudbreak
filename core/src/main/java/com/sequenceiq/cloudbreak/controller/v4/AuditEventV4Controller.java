@@ -53,8 +53,7 @@ public class AuditEventV4Controller implements AuditEventV4Endpoint {
         StreamingOutput streamingOutput = output -> {
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(output)) {
                 zipOutputStream.putNextEntry(new ZipEntry("struct-events.json"));
-                zipOutputStream.write(JsonUtil.writeValueAsString(auditEventV4Responses).getBytes());
-                zipOutputStream.closeEntry();
+                JsonUtil.writeValueToOutputStream(zipOutputStream, auditEventV4Responses);
             }
         };
         String fileName = String.format("audit-%s.zip", resourceType);

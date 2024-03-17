@@ -1,4 +1,22 @@
-{% if salt['pillar.get']('platform') == 'AZURE' and salt['pillar.get']('gateway:loadbalancers:floatingIpEnabled', False) %}
+{%- set os = salt['grains.get']('os') %}
+{%- if salt['pillar.get']('platform') == 'AZURE' and salt['pillar.get']('gateway:loadbalancers:floatingIpEnabled', False) %}
+{%- if os == "RedHat" %}
+create_loopback_service_unit:
+  file.managed:
+    - name: /etc/systemd/system/loopback.service
+    - source: salt://gateway/services/loopback.service.j2
+    - template: jinja
+    - makedirs: True
+    - user: root
+    - group: root
+    - mode: 664
+
+start_and_enable_loopback_service:
+  service.running:
+    - name: loopback
+    - enable: True
+    - unless: test $(/sbin/ip addr show lo | grep -c inet) -gt 1
+{%- else %}
 rename_original_ifcfg_lo:
   file.rename:
     - makedirs: True
@@ -17,9 +35,10 @@ lo:
     - peerdns: no
     - scope: global
     - ipaddrs:
-{% for lb in salt['pillar.get']('gateway:loadbalancers:frontends') %}
+{%- for lb in salt['pillar.get']('gateway:loadbalancers:frontends') %}
   {%- if lb['type'] == 'GATEWAY_PRIVATE' or lb['type'] == 'PRIVATE' %}
       - {{ lb['ip'] }}/32
   {%- endif %}
-{% endfor %}
-{% endif %}
+{%- endfor %}
+{%- endif %}
+{%- endif %}
