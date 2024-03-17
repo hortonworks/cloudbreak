@@ -6,11 +6,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class EnvironmentArchiverConfig {
 
-    @Value("${environment.archiver.intervalhours:24}")
+    @Value("${environment.archiver.intervalhours:1}")
     private int intervalInHours;
 
     @Value("${environment.archiver.retention.period.days:14}")
     private int retentionPeriodInDays;
+
+    @Value("${environment.archiver.limit:500}")
+    private int limitForEnvironment;
 
     public int getIntervalInHours() {
         return intervalInHours;
@@ -18,5 +21,9 @@ public class EnvironmentArchiverConfig {
 
     public int getRetentionPeriodInDays() {
         return retentionPeriodInDays;
+    }
+
+    public int getLimitForEnvironment() {
+        return limitForEnvironment;
     }
 }

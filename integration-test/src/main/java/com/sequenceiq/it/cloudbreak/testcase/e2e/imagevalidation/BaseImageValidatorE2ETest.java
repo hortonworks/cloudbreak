@@ -95,7 +95,8 @@ public class BaseImageValidatorE2ETest extends AbstractE2ETest implements ImageV
 
     @Override
     public String getImageId(TestContext testContext) {
-        return ((SdxInternalTestDto) testContext.get(sdxInternalKey)).getResponse().getStackV4Response().getImage().getId();
+        SdxInternalTestDto sdxInternalTestDto = testContext.get(sdxInternalKey);
+        return sdxInternalTestDto.getResponse().getStackV4Response().getImage().getId();
     }
 
     @Override

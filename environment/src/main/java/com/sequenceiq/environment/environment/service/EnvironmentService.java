@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFoundException;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto.fromEnvironmentDto;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
@@ -22,6 +23,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -446,27 +449,43 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         save(environment);
     }
 
-    public Set<String> getAllForArchive(long dateFrom) {
-        return environmentRepository.findAllArchivedAndDeletionOlderThan(dateFrom);
+    public Set<String> getAllForArchive(long dateFrom, int limit) {
+        Page<String> allArchived = environmentRepository
+                .findAllArchivedAndDeletionOlderThan(dateFrom, PageRequest.of(0, limit));
+        return allArchived.stream()
+                .collect(Collectors.toSet());
     }
 
     public void deleteByResourceCrn(String crn) {
-        Optional<Environment> environmentOptional = environmentRepository.findByResourceCrnArchivedIsTrue(crn);
-        if (environmentOptional.isPresent()) {
-            // detaching all related entity on environment and orphan removal must delete all of them
-            Environment environment = environmentOptional.get();
-            environment.setAuthentication(null);
-            environment.setParameters(null);
-            if (environment.getNetwork() != null) {
-                environment.getNetwork().setEnvironment(null);
+        try {
+            Optional<Environment> environmentOptional = environmentRepository.findByResourceCrnArchivedIsTrue(crn);
+            if (environmentOptional.isPresent()) {
+                // detaching all related entity on environment and orphan removal must delete all of them
+                Environment environment = environmentOptional.get();
+                environment.setAuthentication(null);
+                environment.setParameters(null);
+                if (environment.getNetwork() != null) {
+                    environment.getNetwork().setEnvironment(null);
+                }
+                environment.setNetwork(null);
+                environment.setParentEnvironment(null);
+                environment.setProxyConfig(null);
+                measure(() -> environmentRepository.save(environment),
+                        LOGGER,
+                        "Environment detach took {} ms for environment {}", crn
+                );
+                measure(() -> environmentRepository.deleteEnvironmentNetwork(environment.getId()),
+                        LOGGER,
+                        "Environment network delete took {} ms for environment {}", crn
+                );
             }
-            environment.setNetwork(null);
-            environment.setParentEnvironment(null);
-            environment.setProxyConfig(null);
-            environmentRepository.save(environment);
-            environmentRepository.deleteEnvironmentNetwork(environment.getId());
+            measure(() -> environmentRepository.deleteByResourceCrn(crn),
+                    LOGGER,
+                    "Environment delete took {} ms for environment {}", crn
+            );
+        } catch (Exception e) {
+            LOGGER.error("Exception happened under environment deletion on {}: {}", crn, e.getMessage());
         }
-        environmentRepository.deleteByResourceCrn(crn);
     }
 
 }

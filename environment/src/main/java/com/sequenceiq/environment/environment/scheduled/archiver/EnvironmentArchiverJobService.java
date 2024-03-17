@@ -91,7 +91,7 @@ public class EnvironmentArchiverJobService implements JobSchedulerService {
         return Date.from(
                 ZonedDateTime.now()
                         .toInstant()
-                        .plus(Duration.ofMinutes(1)));
+                        .plus(Duration.ofMinutes(ONE_HOUR_IN_MINUTES)));
     }
 
     @Override
