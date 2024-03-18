@@ -87,7 +87,7 @@ services:
       - INTEGRATIONTEST_PROXY_PASSWORD
       - INTEGRATIONTEST_PROXY_USER2
       - INTEGRATIONTEST_PROXY_PASSWORD2
-    image: docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-21-runtime-cis:1.19-1-stig-15032024
+    image: docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-21-runtime-cis:1.19-1-stig-17032024
     deploy:
       resources:
         limits:
