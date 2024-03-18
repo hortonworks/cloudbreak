@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
-import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -57,6 +56,7 @@ import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsStartUpgradeR
 import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
 import com.sequenceiq.redbeams.service.operation.OperationService;
+import com.sequenceiq.redbeams.service.validation.DatabaseEncryptionValidator;
 
 @ExtendWith(MockitoExtension.class)
 public class RedbeamsUpgradeServiceTest {
@@ -92,9 +92,6 @@ public class RedbeamsUpgradeServiceTest {
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Mock
-    private PersistenceNotifier persistenceNotifier;
-
-    @Mock
     private CloudConnector cloudConnector;
 
     @Mock
@@ -105,6 +102,9 @@ public class RedbeamsUpgradeServiceTest {
 
     @Mock
     private Authenticator authenticator;
+
+    @Mock
+    private DatabaseEncryptionValidator databaseEncryptionValidator;
 
     @InjectMocks
     private RedbeamsUpgradeService underTest;
@@ -238,7 +238,7 @@ public class RedbeamsUpgradeServiceTest {
         // WHEN
         UpgradeDatabaseResponse actualResponse = underTest.validateUpgradeDatabaseServer(SERVER_CRN_STRING, upgradeDatabaseRequest);
         // THEN
-        verify(resourceConnector, times(1)).validateUpgradeDatabaseServer(authenticatedContext, databaseStack, persistenceNotifier, TARGET_MAJOR_VERSION);
+        verify(resourceConnector, times(1)).validateUpgradeDatabaseServer(authenticatedContext, databaseStack, TARGET_MAJOR_VERSION);
         assertNull(actualResponse.getReason());
     }
 
@@ -261,7 +261,7 @@ public class RedbeamsUpgradeServiceTest {
         when(authenticator.authenticate(any(CloudContext.class), eq(cloudCredential))).thenReturn(authenticatedContext);
         when(databaseStackConverter.convert(dbStack)).thenReturn(databaseStack);
         doThrow(exception).when(resourceConnector)
-                .validateUpgradeDatabaseServer(authenticatedContext, databaseStack, persistenceNotifier, TARGET_MAJOR_VERSION);
+                .validateUpgradeDatabaseServer(authenticatedContext, databaseStack, TARGET_MAJOR_VERSION);
         // WHEN
         UpgradeDatabaseResponse actualResponse = underTest.validateUpgradeDatabaseServer(SERVER_CRN_STRING, upgradeDatabaseRequest);
         // THEN

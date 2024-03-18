@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -44,6 +43,7 @@ import com.sequenceiq.redbeams.flow.redbeams.upgrade.event.RedbeamsStartUpgradeR
 import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.network.NetworkBuilderService;
 import com.sequenceiq.redbeams.service.operation.OperationService;
+import com.sequenceiq.redbeams.service.validation.DatabaseEncryptionValidator;
 
 @Service
 public class RedbeamsUpgradeService {
@@ -74,7 +74,7 @@ public class RedbeamsUpgradeService {
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Inject
-    private PersistenceNotifier persistenceNotifier;
+    private DatabaseEncryptionValidator databaseEncryptionValidator;
 
     @Inject
     private DBStackToDatabaseStackConverter databaseStackConverter;
@@ -105,10 +105,11 @@ public class RedbeamsUpgradeService {
         CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
         AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
         DatabaseStack databaseStack = databaseStackConverter.convert(dbStack);
+        databaseEncryptionValidator.validateEncryption(dbStack.getCloudPlatform(), dbStack.getEnvironmentId(), databaseStack.getDatabaseServer());
 
         ResourceConnector resourceConnector = connector.resources();
         try {
-            resourceConnector.validateUpgradeDatabaseServer(ac, databaseStack, persistenceNotifier, targetVersion);
+            resourceConnector.validateUpgradeDatabaseServer(ac, databaseStack, targetVersion);
             return new UpgradeDatabaseResponse(dbStack.getMajorVersion());
         } catch (Exception ex) {
             LOGGER.warn("RDS upgrade validation failed on provider side", ex);

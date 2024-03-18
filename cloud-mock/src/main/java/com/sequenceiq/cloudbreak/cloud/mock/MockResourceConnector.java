@@ -131,8 +131,7 @@ public class MockResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier,
-            TargetMajorVersion targetMajorVersion) {
+    public void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, TargetMajorVersion targetMajorVersion) {
         mockUrlFactory.get(authenticatedContext, "/db/upgrade")
                 .post(Entity.entity(targetMajorVersion.getMajorVersion(), MediaType.APPLICATION_JSON_TYPE));
     }

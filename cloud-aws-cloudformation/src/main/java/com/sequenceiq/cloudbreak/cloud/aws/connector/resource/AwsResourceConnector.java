@@ -136,8 +136,7 @@ public class AwsResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier,
-            TargetMajorVersion targetMajorVersion) throws Exception {
+    public void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, TargetMajorVersion targetMajorVersion) {
         awsRdsUpgradeValidatorService.validateCustomPropertiesAdded(authenticatedContext, stack);
     }
 

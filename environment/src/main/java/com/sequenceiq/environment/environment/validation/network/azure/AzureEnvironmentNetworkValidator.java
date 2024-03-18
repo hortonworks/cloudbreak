@@ -239,8 +239,7 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
         }
     }
 
-    private void checkFlexibleServerSubnetIds(EnvironmentValidationDto environmentValidationDto, NetworkDto networkDto,
-            ValidationResultBuilder resultBuilder) {
+    private void checkFlexibleServerSubnetIds(EnvironmentValidationDto environmentValidationDto, NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
         EnvironmentDto environmentDto = environmentValidationDto.getEnvironmentDto();
         if (entitlementService.isAzureDatabaseFlexibleServerEnabled(environmentDto.getAccountId())) {
             Set<String> originalFlexibleSubnets = Optional.ofNullable(environmentDto.getNetwork())
@@ -252,8 +251,7 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
                     .orElse(Set.of());
             if (environmentValidationDto.getValidationType() == ENVIRONMENT_EDIT && originalFlexibleSubnets.equals(newFlexibleSubnets)) {
                 LOGGER.info("Flexible server subnet validation is not needed during environment edit as subnet ids has not changed.");
-            } else if (environmentValidationDto.getValidationType() == ENVIRONMENT_EDIT &&
-                    !originalFlexibleSubnets.isEmpty() && newFlexibleSubnets.isEmpty()) {
+            } else if (environmentValidationDto.getValidationType() == ENVIRONMENT_EDIT && !originalFlexibleSubnets.isEmpty() && newFlexibleSubnets.isEmpty()) {
                 String message = "Deletion of all flexible server delegated subnets is not a valid operation";
                 LOGGER.warn(message);
                 resultBuilder.error(message);

@@ -110,8 +110,7 @@ public class YarnResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier,
-            TargetMajorVersion targetMajorVersion) {
+    public void validateUpgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, TargetMajorVersion targetMajorVersion) {
     }
 
     @Override
