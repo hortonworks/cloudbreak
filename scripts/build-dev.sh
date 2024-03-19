@@ -22,4 +22,4 @@ aws s3 cp ./redbeams/build/openapi/redbeams.json "s3://redbeams-swagger/openapi-
 aws s3 cp ./datalake/build/openapi/datalake.json "s3://datalake-swagger/openapi-${VERSION}.json" --acl public-read
 aws s3 cp ./autoscale/build/openapi/autoscale.json "s3://autoscale-swagger/openapi-${VERSION}.json" --acl public-read
 aws s3 cp ./externalized-compute/build/openapi/externalizedcompute.json "s3://externalizedcompute-swagger/openapi-${VERSION}.json" --acl public-read
-aws s3 cp ./environment-remote/build/openapi/externalizedcompute.json "s3://remoteenvironment-swagger/openapi-${VERSION}.json" --acl public-read
+aws s3 cp ./environment-remote/build/openapi/remoteenvironment.json "s3://remoteenvironment-swagger/openapi-${VERSION}.json" --acl public-read
