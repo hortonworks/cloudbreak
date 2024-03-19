@@ -141,7 +141,6 @@ dependencyManagement {
         dependency group: 'org.mybatis',                        name: 'mybatis-migrations',        version: mybatisMigrationVersion
         dependency group: 'org.mockito',                        name: 'mockito-core',              version: mockitoVersion
         dependency group: 'com.openpojo',                       name: 'openpojo',                  version: openPojoVersion
-        dependency group: 'com.sequenceiq',                     name: 'consul-api',                version: '1.10-down'
     }
 }
 
@@ -172,8 +171,6 @@ dependencies {
     implementation group: 'javax.xml.bind',            name: 'jaxb-api',                                 version: javaxXmlBindJaxbApiVersion
 
     implementation group: 'com.dyngr',                 name: 'polling',                                  version: dyngrPollingVersion
-
-    implementation group: 'com.sequenceiq',                name: 'consul-api'
 
     testImplementation group: 'net.bytebuddy',             name: 'byte-buddy',                           version: byteBuddyVersion
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test'
