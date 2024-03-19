@@ -55,23 +55,36 @@ public class MaxHostnameLengthPolicyService {
     }
 
     private Optional<String> findRhel8Instance(Stack stack) {
-        return stack.getNotDeletedInstanceMetaDataSet().stream()
-                .filter(im -> {
-                    Image image = im.getImage().getSilent(Image.class);
-                    return OsType.RHEL8.getOsType().equalsIgnoreCase(image.getOsType());
-                })
-                .map(InstanceMetaData::getDiscoveryFQDN)
-                .findFirst();
+        try {
+            return stack.getNotDeletedInstanceMetaDataSet().stream()
+                    .filter(im -> Objects.nonNull(im.getImage()))
+                    .filter(im -> StringUtils.isNotBlank(im.getImage().getValue()))
+                    .filter(im -> {
+                        Image image = im.getImage().getSilent(Image.class);
+                        return OsType.RHEL8.getOsType().equalsIgnoreCase(image.getOsType());
+                    })
+                    .map(InstanceMetaData::getDiscoveryFQDN)
+                    .findFirst();
+        } catch (Exception e) {
+            LOGGER.warn("Couldn't find RHEL8 instance", e);
+            return Optional.empty();
+        }
     }
 
     private boolean isClientConnectedToRhel8(Stack stack, FreeIpaClient freeIpaClient) {
-        return stack.getNotDeletedInstanceMetaDataSet().stream()
-                .filter(im -> StringUtils.isNotBlank(im.getDiscoveryFQDN()))
-                .filter(im -> im.getDiscoveryFQDN().equals(freeIpaClient.getHostname()))
-                .map(InstanceMetaData::getImage)
-                .filter(Objects::nonNull)
-                .map(image -> image.getSilent(Image.class))
-                .anyMatch(image -> OsType.RHEL8.getOsType().equalsIgnoreCase(image.getOsType()));
+        try {
+            return stack.getNotDeletedInstanceMetaDataSet().stream()
+                    .filter(im -> StringUtils.isNotBlank(im.getDiscoveryFQDN()))
+                    .filter(im -> im.getDiscoveryFQDN().equals(freeIpaClient.getHostname()))
+                    .map(InstanceMetaData::getImage)
+                    .filter(Objects::nonNull)
+                    .filter(image -> StringUtils.isNotBlank(image.getValue()))
+                    .map(image -> image.getSilent(Image.class))
+                    .anyMatch(image -> OsType.RHEL8.getOsType().equalsIgnoreCase(image.getOsType()));
+        } catch (Exception e) {
+            LOGGER.warn("Couldn't identify if client is connected to RHEL8 or not for client: [{}]", freeIpaClient.getHostname(), e);
+            return false;
+        }
     }
 
     private Integer calculateRquiredMaxHostnameLength(Stack stack) {
