@@ -186,4 +186,13 @@ public interface CloudConnector extends CloudPlatformAware {
     default CryptoConnector cryptoConnector() {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
+
+    /**
+     * Access to the {@link SecretConnector} object.
+     *
+     * @return the {@link SecretConnector} object
+     */
+    default SecretConnector secretConnector() {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
 }

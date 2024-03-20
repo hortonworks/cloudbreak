@@ -56,6 +56,12 @@ public class AwsTaggingService {
                 .collect(Collectors.toList());
     }
 
+    public Collection<software.amazon.awssdk.services.secretsmanager.model.Tag> prepareSecretsManagerTags(Map<String, String> userDefinedTags) {
+        return userDefinedTags.entrySet().stream()
+                .map(entry -> prepareSecretsManagerTag(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+    }
+
     public Collection<software.amazon.awssdk.services.efs.model.Tag> prepareEfsTags(Map<String, String> userDefinedTags) {
         return userDefinedTags.entrySet().stream()
                 .map(entry -> prepareEfsTag(entry.getKey(), entry.getValue()))
@@ -126,5 +132,9 @@ public class AwsTaggingService {
 
     private software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag prepareElasticLoadBalancingTag(String key, String value) {
         return software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag.builder().key(key).value(value).build();
+    }
+
+    private software.amazon.awssdk.services.secretsmanager.model.Tag prepareSecretsManagerTag(String key, String value) {
+        return software.amazon.awssdk.services.secretsmanager.model.Tag.builder().key(key).value(value).build();
     }
 }

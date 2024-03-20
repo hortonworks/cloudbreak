@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonKmsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonPricingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonS3Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonSecretsManagerClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AwsApacheClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
@@ -60,6 +61,8 @@ import software.amazon.awssdk.services.rds.RdsClient;
 import software.amazon.awssdk.services.rds.RdsClientBuilder;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
 import software.amazon.awssdk.services.sts.StsClient;
 import software.amazon.awssdk.services.sts.StsClientBuilder;
 
@@ -252,6 +255,15 @@ public abstract class AwsClient {
                 .overrideConfiguration(getDefaultClientConfiguration())
                 .region(Region.of(regionName));
         return new AmazonPricingClient(proxy(clientBuilder.build(), awsCredential, regionName), retry);
+    }
+
+    public AmazonSecretsManagerClient createSecretsManagerClient(AwsCredentialView awsCredential, String regionName) {
+        SecretsManagerClientBuilder clientBuilder = SecretsManagerClient.builder()
+                .httpClient(awsApacheClient.getApacheHttpClient())
+                .credentialsProvider(getCredentialProvider(awsCredential))
+                .overrideConfiguration(getDefaultClientConfiguration())
+                .region(Region.of(regionName));
+        return new AmazonSecretsManagerClient(proxy(clientBuilder.build(), awsCredential, regionName), retry);
     }
 
     public String getKeyPairName(AuthenticatedContext ac) {
