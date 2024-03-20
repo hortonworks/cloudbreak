@@ -108,6 +108,32 @@ class MaxHostnameLengthPolicyServiceTest {
     }
 
     @Test
+    public void testMaxHostnameConfigModInvokedWhenPgwImageHasNoContent() throws Exception {
+        Stack stack = mock(Stack.class);
+        InstanceMetaData gatewayInstanceMetaData = new InstanceMetaData();
+        gatewayInstanceMetaData.setDiscoveryFQDN("shorthostname.domainpart1.domainpart2.clouder.site");
+        gatewayInstanceMetaData.setImage(new Json(null));
+        InstanceMetaData rhel8Instance = new InstanceMetaData();
+        rhel8Instance.setDiscoveryFQDN("rhel8.domainpart1.domainpart2.clouder.site");
+        Image rhel8Image = createImageWithOs(OsType.RHEL8);
+        rhel8Instance.setImage(new Json(rhel8Image));
+        when(stack.getPrimaryGateway()).thenReturn(Optional.of(gatewayInstanceMetaData));
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(gatewayInstanceMetaData, rhel8Instance));
+        FreeIpaClient centosClient = mock(FreeIpaClient.class);
+        when(centosClient.getHostname()).thenReturn("shorthostname.domainpart1.domainpart2.clouder.site");
+        Config ipaConfig = new Config();
+        ipaConfig.setIpamaxusernamelength(5);
+        ipaConfig.setIpamaxhostnamelength(64);
+        when(centosClient.getConfig()).thenReturn(ipaConfig);
+        FreeIpaClient rhel8Client = mock(FreeIpaClient.class);
+        when(freeIpaClientFactory.getFreeIpaClientForInstance(stack, "rhel8.domainpart1.domainpart2.clouder.site")).thenReturn(rhel8Client);
+
+        underTest.updateMaxHostnameLength(stack, centosClient);
+
+        verify(rhel8Client).setMaxHostNameLength(100);
+    }
+
+    @Test
     public void testMaxHostnameConfigModInvokedWhenPgwIsNotRhel8NoRhel8Available() throws Exception {
         Stack stack = mock(Stack.class);
         InstanceMetaData gatewayInstanceMetaData = new InstanceMetaData();

@@ -190,9 +190,9 @@ dependencies {
 
   implementation (group: 'com.nimbusds',                      name: 'nimbus-jose-jwt') {
      version {
-      strictly '9.31'
+      strictly '9.37.2'
     }
-    because 'nimbus-jose-jwt 9.10.1 includes json-smart which is vulnerable so we forcing everywhere'
+    because 'nimbus-jose-jwt 9.31 is vulnerable so we forcing everywhere'
   }
 
   implementation group: 'com.dyngr',                          name: 'polling',                          version: dyngrPollingVersion

@@ -90,7 +90,6 @@ public class StartDatabaseServerHandler implements EventHandler<StartDatabaseSer
             if (STARTED != status) {
                 throw new DatabaseStartFailedException("Unable to start database server!");
             }
-
             RedbeamsEvent success = new StartDatabaseServerSuccess(request.getResourceId());
             eventBus.notify(success.selector(), new Event<>(event.getHeaders(), success));
             LOGGER.debug("Starting the database server successfully finished for {}", cloudContext);

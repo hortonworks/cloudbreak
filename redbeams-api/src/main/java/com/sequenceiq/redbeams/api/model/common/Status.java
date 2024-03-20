@@ -25,10 +25,14 @@ public enum Status {
     DELETE_COMPLETED,
     STOPPED,
     STOP_REQUESTED,
+    SSL_ROTATED,
+    SSL_ROTATE_REQUESTED,
     START_REQUESTED,
     STOP_IN_PROGRESS,
+    SSL_ROTATE_IN_PROGRESS,
     START_IN_PROGRESS,
     START_FAILED,
+    SSL_ROTATE_FAILED,
     STOP_FAILED,
     WAIT_FOR_SYNC,
     MAINTENANCE_MODE_ENABLED,
@@ -52,10 +56,12 @@ public enum Status {
             .put(UPGRADE_REQUESTED, UPGRADE_FAILED)
             .put(UPGRADE_IN_PROGRESS, UPGRADE_FAILED)
             .put(WAIT_FOR_SYNC, AVAILABLE)
+            .put(SSL_ROTATE_REQUESTED, SSL_ROTATE_FAILED)
+            .put(SSL_ROTATE_IN_PROGRESS, SSL_ROTATE_FAILED)
             .build();
 
     private static final List<Status> IS_REMOVABLE_STATUS_LIST = Arrays.asList(AVAILABLE, UPDATE_FAILED, CREATE_FAILED,
-            ENABLE_SECURITY_FAILED, DELETE_FAILED, DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED);
+            ENABLE_SECURITY_FAILED, DELETE_FAILED, DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED, SSL_ROTATE_FAILED);
 
     private static final List<Status> IS_AVAILABLE_LIST = Arrays.asList(AVAILABLE, MAINTENANCE_MODE_ENABLED);
 
@@ -143,6 +149,8 @@ public enum Status {
             case UPGRADE_REQUESTED:
             case UPGRADE_IN_PROGRESS:
             case WAIT_FOR_SYNC:
+            case SSL_ROTATE_IN_PROGRESS:
+            case SSL_ROTATE_REQUESTED:
                 return true;
             default:
                 return false;

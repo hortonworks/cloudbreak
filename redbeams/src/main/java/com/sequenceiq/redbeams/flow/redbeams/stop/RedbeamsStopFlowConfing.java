@@ -26,12 +26,24 @@ public class RedbeamsStopFlowConfing extends AbstractFlowConfiguration<RedbeamsS
     private static final RedbeamsStopEvent[] REDBEAMS_INIT_EVENTS = {REDBEAMS_STOP_EVENT};
 
     private static final List<Transition<RedbeamsStopState, RedbeamsStopEvent>> TRANSITIONS =
-            new Transition.Builder<RedbeamsStopState, RedbeamsStopEvent>().defaultFailureEvent(REDBEAMS_STOP_FAILED_EVENT)
-                    .from(INIT_STATE).to(STOP_DATABASE_SERVER_STATE).event(REDBEAMS_STOP_EVENT)
-                        .defaultFailureEvent()
-                    .from(STOP_DATABASE_SERVER_STATE).to(REDBEAMS_STOP_FINISHED_STATE).event(STOP_DATABASE_SERVER_FINISHED_EVENT)
-                        .failureEvent(STOP_DATABASE_SERVER_FAILED_EVENT)
-                    .from(REDBEAMS_STOP_FINISHED_STATE).to(FINAL_STATE).event(REDBEAMS_STOP_FINISHED_EVENT).defaultFailureEvent()
+            new Transition.Builder<RedbeamsStopState, RedbeamsStopEvent>()
+                    .defaultFailureEvent(REDBEAMS_STOP_FAILED_EVENT)
+
+                    .from(INIT_STATE)
+                    .to(STOP_DATABASE_SERVER_STATE)
+                    .event(REDBEAMS_STOP_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(STOP_DATABASE_SERVER_STATE)
+                    .to(REDBEAMS_STOP_FINISHED_STATE)
+                    .event(STOP_DATABASE_SERVER_FINISHED_EVENT)
+                    .failureEvent(STOP_DATABASE_SERVER_FAILED_EVENT)
+
+                    .from(REDBEAMS_STOP_FINISHED_STATE)
+                    .to(FINAL_STATE)
+                    .event(REDBEAMS_STOP_FINISHED_EVENT)
+                    .defaultFailureEvent()
+
                     .build();
 
     private static final FlowEdgeConfig<RedbeamsStopState, RedbeamsStopEvent> EDGE_CONFIG =

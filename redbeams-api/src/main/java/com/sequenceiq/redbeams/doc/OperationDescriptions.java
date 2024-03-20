@@ -41,6 +41,7 @@ public final class OperationDescriptions {
         public static final String DELETE_MULTIPLE_BY_CRN = "terminate and/or deregister multiple database servers by CRN";
         public static final String CREATE_DATABASE = "create a database on an existing database server";
         public static final String START = "start database server";
+        public static final String ROTATE_SSL_CERT = "rotate database server cert";
         public static final String STOP = "stop database server";
         public static final String CERT_SWAP = "change certificate on mock provider";
 
