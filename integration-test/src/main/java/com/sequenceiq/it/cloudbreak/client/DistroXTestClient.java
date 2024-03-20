@@ -19,6 +19,7 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXCreateInternalAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDeleteDisksAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDiskAddAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDiskUpdateAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXGetAction;
@@ -186,6 +187,10 @@ public class DistroXTestClient {
 
     public Action<DistroXTestDto, CloudbreakClient> instanceMetadataUpdate() {
         return new DistroXInstanceMetadataUpdateAction();
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> addDisks(int size, String volumeType, String instanceGroup, long numDisks) {
+        return new DistroXDiskAddAction(size, volumeType, instanceGroup, numDisks);
     }
 
 }
