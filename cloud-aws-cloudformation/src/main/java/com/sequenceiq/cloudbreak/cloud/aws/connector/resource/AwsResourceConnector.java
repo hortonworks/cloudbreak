@@ -115,6 +115,9 @@ public class AwsResourceConnector implements ResourceConnector {
     @Inject
     private AwsCommonDiskUpdateService awsCommonDiskUpdateService;
 
+    @Inject
+    private AwsDatabaseSslCertRotationService awsDatabaseSslCertRotationService;
+
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
             AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) throws Exception {
@@ -254,6 +257,11 @@ public class AwsResourceConnector implements ResourceConnector {
     @Override
     public void updateDatabaseRootPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword) {
         awsRdsModifyService.updateMasterUserPassword(authenticatedContext, databaseStack, newPassword);
+    }
+
+    @Override
+    public void updateDatabaseServerActiveSslRootCertificate(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String desiredCertificate) {
+        awsDatabaseSslCertRotationService.applyCertificateChange(authenticatedContext, databaseStack, desiredCertificate);
     }
 
     @Override

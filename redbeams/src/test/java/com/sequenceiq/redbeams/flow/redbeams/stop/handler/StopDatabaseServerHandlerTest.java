@@ -1,7 +1,9 @@
 package com.sequenceiq.redbeams.flow.redbeams.stop.handler;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -36,6 +38,7 @@ import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.redbeams.flow.redbeams.stop.event.StopDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.stop.event.StopDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.stop.event.StopDatabaseServerSuccess;
+import com.sequenceiq.redbeams.service.rotate.CloudProviderCertRotator;
 
 @ExtendWith(MockitoExtension.class)
 class StopDatabaseServerHandlerTest {
@@ -79,6 +82,9 @@ class StopDatabaseServerHandlerTest {
     @Mock
     private PollTask<ExternalDatabaseStatus> externalDatabaseStatusPollTask;
 
+    @Mock
+    private CloudProviderCertRotator cloudProviderCertRotator;
+
     @InjectMocks
     private StopDatabaseServerHandler victim;
 
@@ -94,6 +100,7 @@ class StopDatabaseServerHandlerTest {
     @Test
     void shouldCallStopDatabaseAndNotifyEventBusWithoutWaitingForPermanentStatus() throws Exception {
         when(resourceConnector.getDatabaseServerStatus(authenticatedContext, dbStack)).thenReturn(ExternalDatabaseStatus.STARTED);
+        doNothing().when(cloudProviderCertRotator).rotate(anyLong(), any(), any(), any());
 
         victim.accept(anEvent());
 
@@ -107,6 +114,7 @@ class StopDatabaseServerHandlerTest {
         when(resourceConnector.getDatabaseServerStatus(authenticatedContext, dbStack)).thenReturn(ExternalDatabaseStatus.UPDATE_IN_PROGRESS);
         when(statusCheckFactory.newPollPermanentExternalDatabaseStateTask(authenticatedContext, dbStack))
                 .thenReturn(externalDatabaseStatusPollTask);
+        doNothing().when(cloudProviderCertRotator).rotate(anyLong(), any(), any(), any());
         when(externalDatabaseStatusSyncPollingScheduler.schedule(externalDatabaseStatusPollTask)).thenReturn(ExternalDatabaseStatus.STARTED);
         victim.accept(anEvent());
 
@@ -130,6 +138,7 @@ class StopDatabaseServerHandlerTest {
     void shouldCallStopDatabaseAndNotifyEventBusOnFailure() throws Exception {
         when(resourceConnector.getDatabaseServerStatus(authenticatedContext, dbStack)).thenReturn(ExternalDatabaseStatus.STARTED);
         doThrow(new Exception()).when(resourceConnector).stopDatabaseServer(authenticatedContext, dbStack);
+        doNothing().when(cloudProviderCertRotator).rotate(anyLong(), any(), any(), any());
 
         victim.accept(anEvent());
 

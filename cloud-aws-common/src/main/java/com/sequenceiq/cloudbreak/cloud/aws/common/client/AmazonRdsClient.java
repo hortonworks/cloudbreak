@@ -28,6 +28,8 @@ import software.amazon.awssdk.services.rds.model.ModifyDbInstanceResponse;
 import software.amazon.awssdk.services.rds.model.ModifyDbParameterGroupRequest;
 import software.amazon.awssdk.services.rds.model.ModifyDbParameterGroupResponse;
 import software.amazon.awssdk.services.rds.model.Parameter;
+import software.amazon.awssdk.services.rds.model.RebootDbInstanceRequest;
+import software.amazon.awssdk.services.rds.model.RebootDbInstanceResponse;
 import software.amazon.awssdk.services.rds.model.StartDbInstanceRequest;
 import software.amazon.awssdk.services.rds.model.StartDbInstanceResponse;
 import software.amazon.awssdk.services.rds.model.StopDbInstanceRequest;
@@ -111,6 +113,10 @@ public class AmazonRdsClient extends AmazonClient {
 
     public StopDbInstanceResponse stopDBInstance(StopDbInstanceRequest stopDBInstanceRequest) {
         return client.stopDBInstance(stopDBInstanceRequest);
+    }
+
+    public RebootDbInstanceResponse rebootDBInstance(RebootDbInstanceRequest rebootDbInstanceRequest) {
+        return client.rebootDBInstance(rebootDbInstanceRequest);
     }
 
     public List<Certificate> describeCertificates(DescribeCertificatesRequest request) {
