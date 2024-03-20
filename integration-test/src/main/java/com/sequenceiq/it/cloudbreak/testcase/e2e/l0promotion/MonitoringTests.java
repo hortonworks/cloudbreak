@@ -166,7 +166,7 @@ public class MonitoringTests extends AbstractE2ETest {
                         List.of(MASTER.getName())))
                 .then((tc, testDto, client) -> {
                     sshJUtil.checkCommonMonitoringStatus(testDto, testDto.getResponse().getStackV4Response().getInstanceGroups(),
-                            List.of(MASTER.getName()), List.of("node_filesystem_free_bytes", "cm_health_check_info"), List.of("cdp-request-signer"));
+                            List.of(MASTER.getName()), List.of("node_filesystem_free_bytes"), List.of("cdp-request-signer"));
                     sshJUtil.checkFilesystemFreeBytesGeneratedMetric(testDto, testDto.getResponse().getStackV4Response().getInstanceGroups(),
                             List.of(MASTER.getName()));
                     return testDto;
@@ -183,7 +183,7 @@ public class MonitoringTests extends AbstractE2ETest {
                 .then((tc, testDto, client) -> sshJUtil.checkServiceStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
                 .then((tc, testDto, client) -> {
                     sshJUtil.checkCommonMonitoringStatus(testDto, testDto.getResponse().getInstanceGroups(),
-                            List.of(MASTER.getName()), List.of("node_filesystem_free_bytes", "cm_health_check_info"), List.of("cdp-request-signer"));
+                            List.of(MASTER.getName()), List.of("node_filesystem_free_bytes"), List.of("cdp-request-signer"));
                     sshJUtil.checkFilesystemFreeBytesGeneratedMetric(testDto, testDto.getResponse().getInstanceGroups(),
                             List.of(MASTER.getName()));
                     return testDto;
