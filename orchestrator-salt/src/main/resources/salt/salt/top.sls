@@ -26,10 +26,12 @@ base:
 
   'G@roles:manager_upgrade and G@roles:manager_server':
     - match: compound
+    - pkg-mgr-proxy
     - cloudera.manager.upgrade
 
   'G@roles:manager_upgrade and G@roles:manager_agent':
     - match: compound
+    - pkg-mgr-proxy
     - cloudera.agent.upgrade
 
   'G@roles:manager_server':
