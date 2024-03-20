@@ -212,7 +212,7 @@ class AwsCommonDiskUpdateServiceTest {
     void getVolumesInAvailableStatusByTagsFilter() {
         Map<String, List<String>> filterInput = Map.of("tag:created-for", List.of("x1.com"));
         software.amazon.awssdk.services.ec2.model.Volume volume = software.amazon.awssdk.services.ec2.model.Volume.builder()
-                .volumeId("vol-1").state(VolumeState.AVAILABLE).tags(Tag.builder().key("tag:created-for").value("x1.com").build()).build();
+                .volumeId("vol-1").state(VolumeState.AVAILABLE).tags(Tag.builder().key("created-for").value("x1.com").build()).build();
         doReturn(DescribeVolumesResponse.builder().volumes(volume).build()).when(amazonEc2Client).describeVolumes(any());
         Map<String, List<software.amazon.awssdk.services.ec2.model.Volume>> volumesMap =
                 underTest.getVolumesInAvailableStatusByTagsFilter(amazonEc2Client, filterInput);

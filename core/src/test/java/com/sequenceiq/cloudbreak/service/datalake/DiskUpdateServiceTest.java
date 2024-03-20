@@ -273,25 +273,6 @@ class DiskUpdateServiceTest {
     }
 
     @Test
-    void testUpdateDiskTypeAndSizeVolumeTypeNotSpecifiedForAws() throws Exception {
-        Long stackId = 1L;
-        StackDto stack = mock(StackDto.class);
-        doReturn("AWS").when(stack).getCloudPlatform();
-        doReturn("crn:cdp:iam:us-west-1:default:user:someuser").when(stack).getResourceCrn();
-        doReturn(stack).when(stackDtoService).getById(stackId);
-
-        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
-        diskUpdateRequest.setSize(200);
-        diskUpdateRequest.setGroup("master");
-
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.updateDiskTypeAndSize(diskUpdateRequest, List.of(), stackId));
-        assertEquals("Volume Type must be specified for AWS", badRequestException.getMessage());
-
-
-    }
-
-    @Test
     void testUpdateDiskTypeAndSizeEntitlementNotAssignedForAzure() throws Exception {
         Long stackId = 1L;
         String tenant = "default";

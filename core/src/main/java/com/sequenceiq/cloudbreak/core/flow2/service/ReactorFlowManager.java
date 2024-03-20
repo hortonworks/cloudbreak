@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -516,6 +517,7 @@ public class ReactorFlowManager {
         MDCBuilder.buildMdcContext(stack);
         Long stackId = stack.getId();
         String selector = DistroXDiskUpdateStateSelectors.DATAHUB_DISK_UPDATE_VALIDATION_EVENT.selector();
+        updateRequest.setGroup(updateRequest.getGroup().toLowerCase(Locale.ROOT));
         LOGGER.info("Datahub Vertical Scale flow triggered for datahub {}", stack.getName());
         DistroXDiskUpdateEvent datahubDiskUpdateTriggerEvent = DistroXDiskUpdateEvent.builder()
                 .withResourceId(stackId)

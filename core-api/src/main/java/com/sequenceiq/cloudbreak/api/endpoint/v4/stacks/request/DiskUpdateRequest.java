@@ -4,8 +4,6 @@ import java.util.StringJoiner;
 
 import jakarta.validation.constraints.NotNull;
 
-import org.hibernate.validator.constraints.Range;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 
@@ -19,7 +17,6 @@ public class DiskUpdateRequest implements JsonEntity {
     @OneOfEnum(enumClass = SupportedVolumeType.class)
     private String volumeType;
 
-    @Range(min = 1, message = "Value must be greater than 0")
     @Schema(description = "Size of disks in GB")
     private int size;
 

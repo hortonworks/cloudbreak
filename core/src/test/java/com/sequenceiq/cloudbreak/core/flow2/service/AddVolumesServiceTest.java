@@ -4,20 +4,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,18 +30,24 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.converter.spi.CloudResourceToResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -47,15 +58,17 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.ConfigUpdateUtilService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.util.CloudConnectResources;
 import com.sequenceiq.cloudbreak.util.CloudConnectorHelper;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
-public class AddVolumesServiceTest {
+class AddVolumesServiceTest {
 
     @Mock
     private StackUtil stackUtil;
@@ -97,7 +110,16 @@ public class AddVolumesServiceTest {
     private ClusterHostServiceRunner clusterHostServiceRunner;
 
     @Mock
+    private ResourceAttributeUtil resourceAttributeUtil;
+
+    @Mock
     private AwsResourceVolumeConnector awsResourceVolumeConnector;
+
+    @Mock
+    private ResourceService resourceService;
+
+    @Mock
+    private DeleteVolumesService deleteVolumesService;
 
     @InjectMocks
     private AddVolumesService underTest;
@@ -138,7 +160,7 @@ public class AddVolumesServiceTest {
     private Set<Node> nodes = new HashSet<>();
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         lenient().when(node.getHostGroup()).thenReturn("test");
         nodes.add(node);
         lenient().when(stack.getCluster()).thenReturn(cluster);
@@ -151,7 +173,9 @@ public class AddVolumesServiceTest {
         lenient().when(stack.getId()).thenReturn(1L);
         lenient().when(bp.getBlueprintJsonText()).thenReturn("test");
         lenient().when(cmTemplateProcessorFactory.get("test")).thenReturn(processor);
-        lenient().when(stackDtoService.getById(1L)).thenReturn(mock(StackDto.class));
+        lenient().when(stackDtoService.getById(1L)).thenReturn(stackDto);
+        lenient().when(stackDto.getCloudPlatform()).thenReturn("AWS");
+        lenient().when(stackDto.getPlatformVariant()).thenReturn("AWS");
 
         CloudConnectResources cloudConnectorResources = new CloudConnectResources(null, null, cloudConnector, authenticatedContext, cloudStack);
         lenient().when(cloudConnectorHelper.getCloudConnectorResources(stackDto)).thenReturn(cloudConnectorResources);
@@ -192,7 +216,6 @@ public class AddVolumesServiceTest {
         doReturn(List.of(cloudResourceResponse)).when(awsResourceVolumeConnector).createVolumes(any(), any(), any(), any(), eq(2), any());
         doReturn("test").when(convertedResponse).getInstanceGroup();
         doReturn(convertedResponse).when(cloudResourceToResourceConverter).convert(cloudResourceResponse);
-        doReturn(stackDto).when(stackDtoService).getById(eq(1L));
         List<Resource> response = underTest.createVolumes(Set.of(resource), volume, 2, "test", 1L);
         verify(awsResourceVolumeConnector).createVolumes(any(), any(), eq(volume), eq(cloudStack), eq(2), eq(List.of(cloudResource)));
         assertEquals("test", response.get(0).getInstanceGroup());
@@ -200,11 +223,76 @@ public class AddVolumesServiceTest {
 
     @Test
     void testCreateAndAttachVolumesThrowsException() throws CloudbreakServiceException  {
-        doReturn(stackDto).when(stackDtoService).getById(eq(1L));
         doThrow(new CloudbreakServiceException("test")).when(awsResourceVolumeConnector).createVolumes(any(), any(), any(), any(), eq(2), any());
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.createVolumes(Set.of(resource),
                 volume, 2, "test", 1L));
         verify(awsResourceVolumeConnector).createVolumes(any(), any(), eq(volume), eq(cloudStack), eq(2), eq(List.of(cloudResource)));
         assertEquals("test", exception.getMessage());
+    }
+
+    @Test
+    void testUpdateResourceVolumeStatus() {
+        VolumeSetAttributes attributes = mock(VolumeSetAttributes.class);
+        volume = new VolumeSetAttributes.Volume("", "/dev/xvda", 400, "gp2", CloudVolumeUsageType.GENERAL);
+        doReturn(List.of(volume)).when(attributes).getVolumes();
+        doReturn(Optional.of(attributes)).when(resourceAttributeUtil).getTypedAttributes(any(), eq(VolumeSetAttributes.class));
+        Set<Resource> resourceSet = Set.of(resource);
+
+        underTest.updateResourceVolumeStatus(resourceSet, CloudVolumeStatus.CREATED);
+
+        verify(resourceService).saveAll(resourceSet);
+        assertEquals(volume.getCloudVolumeStatus(), CloudVolumeStatus.CREATED);
+    }
+
+    @Test
+    void testRollbackCreatedVolumes() throws Exception {
+        Resource resourceInput = new Resource(ResourceType.AWS_VOLUMESET, "test_resource", stack, "az");
+
+        VolumeSetAttributes.Volume volume1 = new VolumeSetAttributes.Volume("1", "/dev/xvda", 400, "gp2", CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes.Volume volume2 = new VolumeSetAttributes.Volume("2", "/dev/xvda", 400, "gp2", CloudVolumeUsageType.GENERAL);
+        volume2.setCloudVolumeStatus(CloudVolumeStatus.CREATED);
+        VolumeSetAttributes attributes = new VolumeSetAttributes("az", false, "", List.of(volume1, volume2), 400, "gp2");
+        Json attributesJson = convertAttributesToJson(attributes);
+        resourceInput.setAttributes(attributesJson);
+        resourceInput.setInstanceId("instance-id-1");
+        resourceInput.setInstanceGroup("instance-group");
+
+        Resource stackResource = new Resource(ResourceType.AWS_VOLUMESET, "test_resource", stack, "az");
+        VolumeSetAttributes stackAttributes = new VolumeSetAttributes("az", false, "", List.of(volume1), 400, "gp2");
+        Json stackAttributesJson = convertAttributesToJson(stackAttributes);
+        stackResource.setAttributes(stackAttributesJson);
+        stackResource.setInstanceId("instance-id-1");
+        stackResource.setInstanceGroup("instance-group");
+        Set<Resource> resourceSet = Set.of(stackResource);
+        doReturn(resourceSet).when(stackDto).getResources();
+        doCallRealMethod().when(resourceAttributeUtil).getTypedAttributes(any(), any());
+        doReturn(cloudResource).when(resourceToCloudResourceConverter).convert(stackResource);
+
+        underTest.rollbackCreatedVolumes(Set.of(resourceInput), 1L);
+
+        ArgumentCaptor<Set<Resource>> savedResourceArgumentCaptor = ArgumentCaptor.forClass(Set.class);
+        verify(resourceService).saveAll(savedResourceArgumentCaptor.capture());
+        assertEquals(1, savedResourceArgumentCaptor.getValue().size());
+        List<Resource> savedResources = new ArrayList<>(savedResourceArgumentCaptor.getValue());
+        VolumeSetAttributes expectedSavedAttributes = new VolumeSetAttributes("az", false, "", List.of(volume1), 400, "gp2");
+        Json expectedSavedJson = convertAttributesToJson(expectedSavedAttributes);
+        assertEquals(expectedSavedJson, savedResources.get(0).getAttributes());
+
+        ArgumentCaptor<Resource> deletedResourceArgumentCaptor = ArgumentCaptor.forClass(Resource.class);
+        verify(resourceToCloudResourceConverter, times(1)).convert(deletedResourceArgumentCaptor.capture());
+        VolumeSetAttributes expectedDeletedAttributes = new VolumeSetAttributes("az", false, "", List.of(volume2), 400, "gp2");
+        Json expectedDeletedJson = convertAttributesToJson(expectedDeletedAttributes);
+        assertEquals(expectedDeletedJson, deletedResourceArgumentCaptor.getValue().getAttributes());
+
+        verify(deleteVolumesService).detachResources(eq(List.of(cloudResource)), any(CloudPlatformVariant.class), eq(authenticatedContext));
+        verify(deleteVolumesService).deleteResources(eq(List.of(cloudResource)), any(CloudPlatformVariant.class), eq(authenticatedContext));
+    }
+
+    private static Json convertAttributesToJson(VolumeSetAttributes attributes) {
+        try {
+            return new Json(attributes);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException("Cannot parse resource attributes");
+        }
     }
 }

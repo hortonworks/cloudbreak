@@ -194,7 +194,9 @@ public class ReactorFlowManagerTest {
         underTest.triggerOsUpgradeByUpgradeSetsFlow(STACK_ID, "AWS", new ImageChangeDto(STACK_ID, null), List.of());
         underTest.triggerDetermineDatalakeDataSizes(STACK_ID, "asdf");
         underTest.triggerDeleteVolumes(STACK_ID, new StackDeleteVolumesRequest());
-        underTest.triggerStackUpdateDisks(stackDto, new DiskUpdateRequest());
+        DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
+        diskUpdateRequest.setGroup("test");
+        underTest.triggerStackUpdateDisks(stackDto, diskUpdateRequest);
         underTest.triggerSecretRotation(STACK_ID, "CRN", Lists.newArrayList(), RotationFlowExecutionType.ROTATE, null);
         underTest.triggerInstanceMetadataUpdate(stackDto, InstanceMetadataUpdateType.IMDS_HTTP_TOKEN_REQUIRED);
         underTest.triggerRefreshEntitlementParams(STACK_ID, "CRN", Collections.emptyMap(), Boolean.FALSE);
@@ -358,6 +360,7 @@ public class ReactorFlowManagerTest {
         StackDto stackDto = mock(StackDto.class);
         doReturn(1L).when(stackDto).getId();
         DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
+        doReturn("TEST").when(diskUpdateRequest).getGroup();
         ClusterView clusterView = mock(ClusterView.class);
         doReturn(clusterView).when(stackDto).getCluster();
         underTest.triggerStackUpdateDisks(stackDto, diskUpdateRequest);

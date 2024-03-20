@@ -110,7 +110,9 @@ public class DistroXDiskUpdateValidationHandler extends ExceptionCatcherEventHan
             LOGGER.debug("Checking if the attached volumes have size less than the requested volumes.");
             VolumeSetAttributes volumeSetAttributes = resource.getAttributes().get(VolumeSetAttributes.class);
             attachedVolumes.addAll(volumeSetAttributes.getVolumes().stream()
-                    .filter(volume -> volume.getSize() < diskUpdateRequest.getSize()).toList());
+                    .filter(volume -> volume.getSize() < diskUpdateRequest.getSize()
+                    || (null != diskUpdateRequest.getVolumeType()
+                            && !diskUpdateRequest.getVolumeType().equalsIgnoreCase(volume.getType()))).toList());
         }
         return attachedVolumes;
     }

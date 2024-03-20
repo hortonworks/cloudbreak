@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -169,12 +170,16 @@ public class AzureResourceVolumeConnector implements ResourceVolumeConnector {
             String hashableString = cloudStack.getParameters().get(PlatformParametersConsts.RESOURCE_CRN_PARAMETER)
                     + System.currentTimeMillis();
             List<VolumeSetAttributes.Volume> newVolumes = IntStream.range(0, numNewVolumesToAdd)
-                    .mapToObj((num) -> new VolumeSetAttributes.Volume(volumeRequest.getId() != null ? volumeRequest.getId() :
-                            resourceNameService.attachedDisk(authenticatedContext.getCloudContext().getName(), group.getName(),
-                                    cloudInstance.getTemplate().getPrivateId(), existingVolumes.size() + num, hashableString),
-                            volumeRequest.getDevice(),
-                            volumeRequest.getSize(), volumeRequest.getType(),
-                            volumeRequest.getCloudVolumeUsageType())).collect(Collectors.toList());
+                    .mapToObj(num -> {
+                        VolumeSetAttributes.Volume vol = new VolumeSetAttributes.Volume(volumeRequest.getId() != null ? volumeRequest.getId() :
+                                resourceNameService.attachedDisk(authenticatedContext.getCloudContext().getName(), group.getName(),
+                                        cloudInstance.getTemplate().getPrivateId(), existingVolumes.size() + num, hashableString),
+                                volumeRequest.getDevice(),
+                                volumeRequest.getSize(), volumeRequest.getType(),
+                                volumeRequest.getCloudVolumeUsageType());
+                        vol.setCloudVolumeStatus(CloudVolumeStatus.REQUESTED);
+                        return vol;
+                    }).toList();
             existingVolumes.addAll(newVolumes);
         }
     }

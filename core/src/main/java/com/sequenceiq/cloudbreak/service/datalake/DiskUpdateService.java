@@ -133,8 +133,7 @@ public class DiskUpdateService {
                 List<VolumeSetAttributes.Volume> volumes = volumeSetAttributes.getVolumes();
                 for (VolumeSetAttributes.Volume volume : volumes) {
                     if (volumeIds.contains(volume.getId())) {
-                        volume.setSize(diskUpdateRequest.getSize());
-                        volume.setType(diskUpdateRequest.getVolumeType());
+                        updateVolumeTypeAndSize(diskUpdateRequest, volume);
                     }
                 }
                 volumeSetAttributes.setVolumes(volumes);
@@ -144,6 +143,15 @@ public class DiskUpdateService {
         LOGGER.info("Updated resources for disk update flow::{}", stackDto.getDiskResources());
         resourceService.saveAll(stackDto.getDiskResources());
         updateTemplate(stackId, diskUpdateRequest);
+    }
+
+    private static void updateVolumeTypeAndSize(DiskUpdateRequest diskUpdateRequest, VolumeSetAttributes.Volume volume) {
+        if (diskUpdateRequest.getSize() > 0) {
+            volume.setSize(diskUpdateRequest.getSize());
+        }
+        if (null != diskUpdateRequest.getVolumeType()) {
+            volume.setType(diskUpdateRequest.getVolumeType());
+        }
     }
 
     public void stopCMServices(long stackId) throws Exception {
@@ -198,8 +206,12 @@ public class DiskUpdateService {
             InstanceGroupView instanceGroup = optionalGroup.get();
             Template template = instanceGroup.getTemplate();
             for (VolumeTemplate volumeTemplateInTheDatabase : template.getVolumeTemplates()) {
-                volumeTemplateInTheDatabase.setVolumeType(diskUpdateRequest.getVolumeType());
-                volumeTemplateInTheDatabase.setVolumeSize(diskUpdateRequest.getSize());
+                if (null != diskUpdateRequest.getVolumeType()) {
+                    volumeTemplateInTheDatabase.setVolumeType(diskUpdateRequest.getVolumeType());
+                }
+                if (diskUpdateRequest.getSize() > 0) {
+                    volumeTemplateInTheDatabase.setVolumeSize(diskUpdateRequest.getSize());
+                }
             }
             templateService.savePure(template);
         }
@@ -270,8 +282,8 @@ public class DiskUpdateService {
                 throw new BadRequestException("Changing Volume Type is not supported for Azure");
             }
         } else if (cloudPlatform == CloudPlatform.AWS) {
-            if (StringUtils.isEmpty(diskUpdateRequest.getVolumeType())) {
-                throw new BadRequestException("Volume Type must be specified for AWS");
+            if (StringUtils.isEmpty(diskUpdateRequest.getVolumeType()) && diskUpdateRequest.getSize() == 0) {
+                throw new BadRequestException("Volume Type or Disk Size must be specified for AWS disk modification.");
             }
         }
     }

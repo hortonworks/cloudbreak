@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
+import static java.util.stream.Collectors.toList;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,18 +20,26 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.converter.spi.CloudResourceToResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesService;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -38,12 +49,14 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.ConfigUpdateUtilService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.util.CloudConnectResources;
 import com.sequenceiq.cloudbreak.util.CloudConnectorHelper;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class AddVolumesService {
@@ -53,6 +66,9 @@ public class AddVolumesService {
     private static final Set<String> BLACKLISTED_ROLES = ImmutableSet.of("DATANODE", "ZEPPELIN_SERVER", "KAFKA_BROKER",
             "SCHEMA_REGISTRY_SERVER", "STREAMS_MESSAGING_MANAGER_SERVER", "SERVER", "NIFI_NODE", "NAMENODE", "STATESTORE",
             "CATALOGSERVER", "KUDU_MASTER", "KUDU_TSERVER", "SOLR_SERVER", "NIFI_REGISTRY_SERVER", "HUE_LOAD_BALANCER", "KNOX_GATEWAY");
+
+    private static final Map<String, ResourceType> CLOUD_RESOURCE_TYPE_CONSTANTS = Map.of(CloudPlatform.AZURE.name(), ResourceType.AZURE_VOLUMESET,
+            CloudPlatform.AWS.name(), ResourceType.AWS_VOLUMESET);
 
     @Inject
     private StackUtil stackUtil;
@@ -89,6 +105,15 @@ public class AddVolumesService {
 
     @Inject
     private CloudConnectorHelper cloudConnectorHelper;
+
+    @Inject
+    private ResourceAttributeUtil resourceAttributeUtil;
+
+    @Inject
+    private ResourceService resourceService;
+
+    @Inject
+    private DeleteVolumesService deleteVolumesService;
 
     public Map<String, Map<String, String>> redeployStatesAndMountDisks(Stack stack, String requestGroup) throws Exception {
         String blueprintText = stack.getBlueprint().getBlueprintJsonText();
@@ -190,5 +215,81 @@ public class AddVolumesService {
                 resource.setStack(stack);
             }
         }).toList();
+    }
+
+    public void updateResourceVolumeStatus(Set<Resource> resources, CloudVolumeStatus volumeStatus) {
+        resources.forEach(res -> {
+            Optional<VolumeSetAttributes> volumeSetOptional = resourceAttributeUtil.getTypedAttributes(res, VolumeSetAttributes.class);
+            if (volumeSetOptional.isPresent()) {
+                VolumeSetAttributes volumeSet = volumeSetOptional.get();
+                List<VolumeSetAttributes.Volume> volumes = volumeSet.getVolumes();
+                for (VolumeSetAttributes.Volume volume : volumes) {
+                    volume.setCloudVolumeStatus(volumeStatus);
+                }
+            }
+        });
+        resourceService.saveAll(resources);
+    }
+
+    public void rollbackCreatedVolumes(Set<Resource> resources, Long stackId) throws Exception {
+        Map<String, List<VolumeSetAttributes.Volume>> createdVolumesByInstancesMap = new HashMap<>();
+        resources.forEach(res -> {
+            Optional<VolumeSetAttributes> volumeSetOptional = resourceAttributeUtil.getTypedAttributes(res, VolumeSetAttributes.class);
+            if (volumeSetOptional.isPresent()) {
+                VolumeSetAttributes volumeSet = volumeSetOptional.get();
+                List<VolumeSetAttributes.Volume> volumes = volumeSet.getVolumes();
+                List<VolumeSetAttributes.Volume> volumeList = new ArrayList<>();
+                List<VolumeSetAttributes.Volume> deleteVolumeList = new ArrayList<>();
+                for (VolumeSetAttributes.Volume volume : volumes) {
+                    if (null != volume.getCloudVolumeStatus() && (CloudVolumeStatus.CREATED.equals(volume.getCloudVolumeStatus())
+                        || CloudVolumeStatus.REQUESTED.equals(volume.getCloudVolumeStatus()))) {
+                        deleteVolumeList.add(volume);
+                    } else {
+                        volumeList.add(volume);
+                    }
+                }
+                if (!deleteVolumeList.isEmpty()) {
+                    volumeSet.setVolumes(volumeList);
+                    setAttributes(res, volumeSet);
+                    createdVolumesByInstancesMap.put(res.getInstanceId(), deleteVolumeList);
+                }
+            }
+        });
+        detachAndDeleteCreatedVolumes(stackId, createdVolumesByInstancesMap);
+        resourceService.saveAll(resources);
+    }
+
+    private static void setAttributes(Resource res, VolumeSetAttributes volumeSet) {
+        try {
+            Json attributesJson = new Json(volumeSet);
+            res.setAttributes(attributesJson);
+        } catch (IllegalArgumentException e) {
+            LOGGER.info("Failed to parse resource attributes. Attributes: [{}]", volumeSet, e);
+            throw new IllegalStateException("Cannot parse stored resource attributes");
+        }
+    }
+
+    private void detachAndDeleteCreatedVolumes(Long stackId, Map<String, List<VolumeSetAttributes.Volume>> createdVolumesByInstancesMap) throws Exception {
+        StackDto stack = stackDtoService.getById(stackId);
+        CloudConnectResources cloudConnectResources = cloudConnectorHelper.getCloudConnectorResources(stack);
+        AuthenticatedContext ac = cloudConnectResources.getAuthenticatedContext();
+        List<CloudResource> cloudResourcesToBeDeleted = stack.getResources().stream().filter(resource -> null != resource.getInstanceGroup()
+                        && null != resource.getInstanceId()
+                        && createdVolumesByInstancesMap.containsKey(resource.getInstanceId())
+                        && null != CLOUD_RESOURCE_TYPE_CONSTANTS.get(stack.getCloudPlatform())
+                        && CLOUD_RESOURCE_TYPE_CONSTANTS.get(stack.getCloudPlatform()).equals(resource.getResourceType()))
+                .map(resource -> {
+                    VolumeSetAttributes attributes = resourceAttributeUtil.getTypedAttributes(resource, VolumeSetAttributes.class).get();
+                    attributes.setVolumes(createdVolumesByInstancesMap.get(resource.getInstanceId()));
+                    setAttributes(resource, attributes);
+                    return resource;
+                })
+                .map(s -> resourceToCloudResourceConverter.convert(s)).collect(toList());
+        CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(Platform.platform(stack.getCloudPlatform()),
+                Variant.variant(stack.getPlatformVariant()));
+        LOGGER.debug("Detaching cloud volume resources that were orphaned: {}.", createdVolumesByInstancesMap);
+        deleteVolumesService.detachResources(cloudResourcesToBeDeleted, cloudPlatformVariant, ac);
+        LOGGER.debug("Deleting cloud volume resources that were orphaned: {}.", createdVolumesByInstancesMap);
+        deleteVolumesService.deleteResources(cloudResourcesToBeDeleted, cloudPlatformVariant, ac);
     }
 }

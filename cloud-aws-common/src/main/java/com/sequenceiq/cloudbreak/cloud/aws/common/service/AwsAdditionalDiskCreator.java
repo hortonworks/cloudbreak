@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -169,6 +170,7 @@ public class AwsAdditionalDiskCreator {
         VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume(createResponse.volumeId(), deviceName,
                 createVolumesRequest.getVolumeRequest().getSize(), createVolumesRequest.getVolumeRequest().getType(),
                 createVolumesRequest.getVolumeRequest().getCloudVolumeUsageType());
+        volume.setCloudVolumeStatus(CloudVolumeStatus.CREATED);
         volumeSetMap.get(resource.getName()).add(volume);
         return createResponse.volumeId();
     }
@@ -199,10 +201,7 @@ public class AwsAdditionalDiskCreator {
                 awsCommonDiskUpdateService.getVolumesInAvailableStatusByTagsFilter(client, Map.of("tag:created-for", fqdns));
         Map<String, Integer> availableVolumesMapByFqdn = new HashMap<>();
         for (String fqdn: fqdns) {
-            if (availableVolumesMap.containsKey(fqdn)) {
-                availableVolumesMapByFqdn.put(fqdn, volumesToAddPerInstance - availableVolumesMap.get(fqdn).size());
-            }
-            availableVolumesMapByFqdn.put(fqdn, volumesToAddPerInstance);
+            availableVolumesMapByFqdn.put(fqdn, Math.max(volumesToAddPerInstance - availableVolumesMap.getOrDefault(fqdn, new ArrayList<>()).size(), 0));
         }
         return availableVolumesMapByFqdn;
     }
@@ -222,7 +221,9 @@ public class AwsAdditionalDiskCreator {
 
     private VolumeSetAttributes.Volume convertEc2VolumeToVolume(software.amazon.awssdk.services.ec2.model.Volume volResponse,
             CreateVolumesRequest createVolumesRequest, String deviceName) {
-        return new VolumeSetAttributes.Volume(volResponse.volumeId(), deviceName, volResponse.size(),
+        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume(volResponse.volumeId(), deviceName, volResponse.size(),
                 volResponse.volumeType().toString(), createVolumesRequest.getVolumeRequest().getCloudVolumeUsageType());
+        volume.setCloudVolumeStatus(CloudVolumeStatus.CREATED);
+        return volume;
     }
 }

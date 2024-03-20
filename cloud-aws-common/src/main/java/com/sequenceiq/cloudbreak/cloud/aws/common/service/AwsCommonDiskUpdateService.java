@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
@@ -35,6 +36,7 @@ import software.amazon.awssdk.services.ec2.model.Ec2Exception;
 import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.ModifyVolumeRequest;
 import software.amazon.awssdk.services.ec2.model.Tag;
+import software.amazon.awssdk.services.ec2.model.Volume;
 import software.amazon.awssdk.services.ec2.model.VolumeModification;
 import software.amazon.awssdk.services.ec2.model.VolumeModificationState;
 import software.amazon.awssdk.services.ec2.model.VolumeState;
@@ -57,9 +59,10 @@ public class AwsCommonDiskUpdateService {
         for (String volume: volumeIds) {
             LOGGER.debug("Modifying volume {} to disk type {} and size {}", volume, diskType, size);
             try {
-                ModifyVolumeRequest modifyVolumeRequest = ModifyVolumeRequest.builder().volumeId(volume).volumeType(diskType).size(size).build();
-                amazonEC2Client.modifyVolume(modifyVolumeRequest);
-            } catch (Ec2Exception ex) {
+                ModifyVolumeRequest.Builder modifyVolumeRequestBuilder = ModifyVolumeRequest.builder().volumeId(volume);
+                buildModifyVolumeRequest(modifyVolumeRequestBuilder, diskType, size);
+                amazonEC2Client.modifyVolume(modifyVolumeRequestBuilder.build());
+            } catch (Ec2Exception | BadRequestException ex) {
                 LOGGER.error("AWS threw BAD Request exception, while modifying volume: {}, exception: {}", volume, ex.getMessage());
                 throw new CloudbreakException(format("Exception while modifying disk volume: %s, exception: %s", volume, ex.getMessage()));
             }
@@ -82,6 +85,18 @@ public class AwsCommonDiskUpdateService {
         if (!CollectionUtils.isEmpty(failedVolumes)) {
             throw new CloudbreakException(format("Some volumes were not modified: %s, please retry after 6 hours",
                     String.join("'", failedVolumes)));
+        }
+    }
+
+    private void buildModifyVolumeRequest(ModifyVolumeRequest.Builder modifyVolumeRequestBuilder, String diskType, int size) throws BadRequestException {
+        if (null == diskType && size == 0) {
+            throw new BadRequestException("At least one of disk type or size should be provided for disk modification.");
+        }
+        if (null != diskType) {
+            modifyVolumeRequestBuilder.volumeType(diskType);
+        }
+        if (size > 0) {
+            modifyVolumeRequestBuilder.size(size);
         }
     }
 
@@ -155,7 +170,7 @@ public class AwsCommonDiskUpdateService {
         }
     }
 
-    protected Map<String, List<software.amazon.awssdk.services.ec2.model.Volume>> getVolumesInAvailableStatusByTagsFilter(AmazonEc2Client amazonEC2Client,
+    protected Map<String, List<Volume>> getVolumesInAvailableStatusByTagsFilter(AmazonEc2Client amazonEC2Client,
             Map<String, List<String>> tagsFilter) {
         DescribeVolumesRequest.Builder describeVolumesRequestBuilder = DescribeVolumesRequest.builder();
         List<Filter> filterRequest = getFiltersForDescribeVolumeRequest(tagsFilter);
@@ -164,15 +179,14 @@ public class AwsCommonDiskUpdateService {
             DescribeVolumesResponse volumesResponse = amazonEC2Client.describeVolumes(describeVolumesRequestBuilder.build());
             if (volumesResponse.hasVolumes()) {
                 return volumesResponse.volumes().stream().collect(Collectors.groupingBy(vol -> vol.tags().stream()
-                                .filter(tag -> tag.key().equals("tag:created-for")).map(Tag::value).findAny().orElse("")));
+                                .filter(tag -> tag.key().equals("created-for")).map(Tag::value).findAny().orElseThrow()));
             }
-            return Map.of("", List.of());
         } catch (Exception ex) {
             String exceptionMessage = format("Exception while querying the volume for volume filters - %s. returning empty map. Exception - %s",
                     tagsFilter, ex.getMessage());
             LOGGER.warn(exceptionMessage);
-            throw new CloudbreakServiceException(exceptionMessage);
         }
+        return Map.of();
     }
 
     protected void pollVolumeStates(AmazonEc2Client amazonEC2Client, List<String> volumeIdsToPoll) {
@@ -200,6 +214,8 @@ public class AwsCommonDiskUpdateService {
             Filter filter = Filter.builder().name(key).values(filterInputs.get(key)).build();
             filters.add(filter);
         }
+        Filter availableFilter = Filter.builder().name("status").values("available").build();
+        filters.add(availableFilter);
         return filters;
     }
 }

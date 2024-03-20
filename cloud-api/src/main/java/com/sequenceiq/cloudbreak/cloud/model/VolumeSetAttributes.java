@@ -134,6 +134,8 @@ public class VolumeSetAttributes {
 
         private CloudVolumeUsageType cloudVolumeUsageType;
 
+        private CloudVolumeStatus cloudVolumeStatus;
+
         public Volume(@JsonProperty("id") String id,
                 @JsonProperty("device") String device,
                 @JsonProperty("size") Integer size,
@@ -144,6 +146,7 @@ public class VolumeSetAttributes {
             this.type = type;
             this.size = size;
             this.cloudVolumeUsageType = cloudVolumeUsageType;
+            this.cloudVolumeStatus = null;
         }
 
         public String getId() {
@@ -184,6 +187,14 @@ public class VolumeSetAttributes {
 
         public void setCloudVolumeUsageType(CloudVolumeUsageType cloudVolumeUsageType) {
             this.cloudVolumeUsageType = cloudVolumeUsageType;
+        }
+
+        public CloudVolumeStatus getCloudVolumeStatus() {
+            return cloudVolumeStatus;
+        }
+
+        public void setCloudVolumeStatus(CloudVolumeStatus cloudVolumeStatus) {
+            this.cloudVolumeStatus = cloudVolumeStatus;
         }
 
         @Override
