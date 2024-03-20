@@ -8,5 +8,6 @@ docker_images:
   cloudbreak-mock-thunderhead: hortonworks/cloudbreak-mock-thunderhead
   cloudbreak-mock-infrastructure: hortonworks/cloudbreak-mock-infrastructure
   cloudbreak-externalizedcompute: hortonworks/cloudbreak-externalizedcompute
+  cloudbreak-remote-environment: hortonworks/cloudbreak-remote-environment
 external_images:
   java-init-container: docker-private.infra.cloudera.com/cloudera/thunderhead-java-init-container-17:1.0.0-b10775
