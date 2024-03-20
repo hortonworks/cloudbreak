@@ -15,7 +15,7 @@ WORKDIR /
 RUN microdnf install unzip
 
 # install the remote environment app
-ADD ${REPO_URL}/com/sequenceiq/remoteenvironment/$VERSION/remote-environment-$VERSION.jar /remote-environment.jar
+ADD ${REPO_URL}/com/sequenceiq/environment-remote/$VERSION/environment-remote-$VERSION.jar /remote-environment.jar
 
 # extract schema files
 RUN ( unzip remote-environment.jar schema/* -d / ) || \
