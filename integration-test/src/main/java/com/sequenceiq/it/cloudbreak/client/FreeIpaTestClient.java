@@ -20,8 +20,8 @@ import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDownscaleAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaFindGroupsAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaFindUsersAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaFindUsersInGroupAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaGetHealthDetailsAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaGetLastSyncOperationStatus;
-import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaHealthDetailsAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRebuildAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRepairAction;
@@ -163,8 +163,7 @@ public class FreeIpaTestClient {
         return new FreeIpaRotateSecretInternalAction();
     }
 
-    public Action<FreeIpaHealthDetailsDto, FreeIpaClient> healthDetails() {
-        return new FreeIpaHealthDetailsAction();
+    public Action<FreeIpaHealthDetailsDto, FreeIpaClient> getHealthDetails() {
+        return new FreeIpaGetHealthDetailsAction();
     }
-
 }

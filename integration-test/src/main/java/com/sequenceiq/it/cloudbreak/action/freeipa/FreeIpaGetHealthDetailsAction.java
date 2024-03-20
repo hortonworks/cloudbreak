@@ -11,17 +11,18 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaHealthDetailsDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
-public class FreeIpaHealthDetailsAction implements Action<FreeIpaHealthDetailsDto, FreeIpaClient> {
+public class FreeIpaGetHealthDetailsAction implements Action<FreeIpaHealthDetailsDto, FreeIpaClient> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaHealthDetailsAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaGetHealthDetailsAction.class);
 
     @Override
     public FreeIpaHealthDetailsDto action(TestContext testContext, FreeIpaHealthDetailsDto testDto, FreeIpaClient client) throws Exception {
-        Log.whenJson(LOGGER, format(" FreeIPA health details request with crn :%n"), testDto.getEnvironmentCrn());
+        Log.when(LOGGER, format(" Getting FreeIpa Health Details for environment: [%s] and freeIpa: %s", testDto.getEnvironmentCrn(),
+                testDto.getFreeIpaCrn()));
         testDto.setResponse(client.getDefaultClient()
                 .getFreeIpaV1Endpoint()
                 .healthDetails(testDto.getEnvironmentCrn()));
-        Log.whenJson(LOGGER, format(" FreeIPA health details: %n"), testDto.getResponse());
+        Log.whenJson(LOGGER, format(" FreeIpa Health Details respone: %n"), testDto.getResponse());
         return testDto;
     }
 }

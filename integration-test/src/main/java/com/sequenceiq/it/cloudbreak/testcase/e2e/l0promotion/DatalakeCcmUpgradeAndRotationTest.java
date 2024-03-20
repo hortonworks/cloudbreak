@@ -145,6 +145,8 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest {
                 .when(freeIpaTestClient.rotateSecret())
                 .awaitForFlow()
                 .given(FreeIpaHealthDetailsDto.class)
+                    .withEnvironmentCrn()
+                .when(freeIpaTestClient.getHealthDetails())
                 .then(validateCcmV2JumpgateAgentAccessKeyRotation())
                 .validate();
     }
@@ -152,15 +154,21 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest {
     private static Assertion<FreeIpaHealthDetailsDto, FreeIpaClient> validateCcmV2JumpgateAgentAccessKeyRotation() {
         return (testContext, freeIpaHealthDetailsDto, freeIpaClient) -> {
             HealthDetailsFreeIpaResponse healthDetailsResponse = freeIpaHealthDetailsDto.getResponse();
-            if (Status.AVAILABLE != healthDetailsResponse.getStatus()) {
-                throw new TestFailException(format("FreeIPA status should be AVAILABLE but actual status is: %s", healthDetailsResponse.getStatus()));
-            }
-            List<String> unhealthyInstances = healthDetailsResponse.getNodeHealthDetails().stream()
-                    .filter(nodeHealthDetails -> !nodeHealthDetails.getStatus().isAvailable())
-                    .map(NodeHealthDetails::getInstanceId)
-                    .toList();
-            if (!unhealthyInstances.isEmpty()) {
-                throw new TestFailException(format("FreeIPA unhealthy instances: %s", unhealthyInstances));
+            if (healthDetailsResponse != null) {
+                if (Status.AVAILABLE != healthDetailsResponse.getStatus()) {
+                    throw new TestFailException(format("FreeIPA status should be AVAILABLE but actual status is: %s", healthDetailsResponse.getStatus()));
+                }
+                List<String> unhealthyInstances = healthDetailsResponse.getNodeHealthDetails().stream()
+                        .filter(nodeHealthDetails -> !nodeHealthDetails.getStatus().isAvailable())
+                        .map(NodeHealthDetails::getInstanceId)
+                        .toList();
+                if (!unhealthyInstances.isEmpty()) {
+                    throw new TestFailException(format("FreeIPA unhealthy instances: %s", unhealthyInstances));
+                }
+            } else {
+                String freeIpaCrn = testContext.get(FreeIpaTestDto.class).getCrn();
+                String environmentCrn = testContext.get(EnvironmentTestDto.class).getCrn();
+                throw new TestFailException(format("FreeIPA Health Details response is null for freeIpa: %s at environment: %s!", freeIpaCrn, environmentCrn));
             }
             return freeIpaHealthDetailsDto;
         };
@@ -190,7 +198,10 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest {
 
     private void repairMasterNodes(TestContext testContext) {
         testContext
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.describe())
                 .given(SdxInternalTestDto.class)
+                    .withEnvironment()
                 .then((tc, testDto, client) -> {
                     String sdxName = testDto.getName();
                     List<String> instancesToRepair = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
