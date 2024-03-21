@@ -23,7 +23,7 @@ public class ExceptionResponseWriter implements MessageBodyWriter<ExceptionRespo
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-        return ExceptionResponse.class.isAssignableFrom(type);
+        return MediaType.TEXT_PLAIN_TYPE.equals(mediaType) && ExceptionResponse.class.isAssignableFrom(type);
     }
 
     @Override
