@@ -19,7 +19,7 @@ public enum CrnResourceDescriptor {
     CREDENTIAL(Crn.ResourceType.CREDENTIAL, Crn.Service.ENVIRONMENTS),
     ENVIRONMENT(Crn.ResourceType.ENVIRONMENT, Crn.Service.ENVIRONMENTS),
     NETWORK(Crn.ResourceType.NETWORK, Crn.Service.ENVIRONMENTS),
-    PROXY(Crn.ResourceType.PROXY_CONIFG, Crn.Service.ENVIRONMENTS),
+    PROXY(Crn.ResourceType.PROXY_CONFIG, Crn.Service.ENVIRONMENTS),
     // cloudbreak (datahub) service
     CLUSTER_DEF(Crn.ResourceType.CLUSTER_DEFINITION, Crn.Service.DATAHUB),
     CLUSTER_TEMPLATE(Crn.ResourceType.CLUSTER_TEMPLATE, Crn.Service.DATAHUB),
@@ -45,7 +45,8 @@ public enum CrnResourceDescriptor {
     DFX(Crn.ResourceType.SERVICE, Crn.Service.DF),
     WXM_ENVIRONMENT(Crn.ResourceType.WXM_ENVIRONMENT, Crn.Service.ENVIRONMENTS),
     COMPUTE_DOCKER_CONFIG(Crn.ResourceType.DOCKER_CONFIG, Crn.Service.COMPUTE),
-    COMPUTE_CLUSTER(Crn.ResourceType.CLUSTER, Crn.Service.COMPUTE);
+    COMPUTE_CLUSTER(Crn.ResourceType.CLUSTER, Crn.Service.COMPUTE),
+    HYBRID(Crn.ResourceType.PVC_CONTROL_PLANE, Crn.Service.HYBRID);
 
     private Crn.ResourceType resourceType;
 

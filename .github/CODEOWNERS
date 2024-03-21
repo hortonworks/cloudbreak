@@ -27,12 +27,16 @@ common/src/java/com/sequenceiq/cloudbreak/quartz/*StatusCheckerJob.java         
 environment/                                                                    @cloudbreak/cloudbreak-wolf
 environment-api/                                                                @cloudbreak/cloudbreak-wolf
 environment-common/                                                             @cloudbreak/cloudbreak-wolf
+environment-remote/                                                             @cloudbreak/cloudbreak-wolf
+environment-remote-api/                                                         @cloudbreak/cloudbreak-wolf
 
 # By default, unless overridden later,
 # Wolf should review every policy change:
 cloud-aws-cloudformation/src/main/resources/definitions/                        @cloudbreak/cloudbreak-wolf
 cloud-aws-common/src/main/resources/definitions/                                @cloudbreak/cloudbreak-wolf
 cloud-azure/src/main/resources/definitions/                                     @cloudbreak/cloudbreak-wolf
+cloud-gcp/src/main/resources/definitions/                                       @cloudbreak/cloudbreak-wolf
+
 
 # DB SSL related changes in core shall be assigned to lrodek
 core/**/ClusterDbCertRotationHandler.java                                       @lrodek

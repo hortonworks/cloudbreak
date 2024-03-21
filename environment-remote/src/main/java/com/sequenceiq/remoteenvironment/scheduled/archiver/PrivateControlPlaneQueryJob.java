@@ -3,12 +3,10 @@ package com.sequenceiq.remoteenvironment.scheduled.archiver;
 import java.util.Optional;
 
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.MdcQuartzJob;
 
@@ -23,17 +21,11 @@ public class PrivateControlPlaneQueryJob extends MdcQuartzJob {
     }
 
     @Override
-    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
-        try {
-            queryPrivateControlPlaneConfigs();
-        } catch (TransactionService.TransactionExecutionException e) {
-            LOGGER.error("Transaction failed for classic cluster fetch.", e);
-            throw new JobExecutionException(e);
-        }
+    protected void executeTracedJob(JobExecutionContext context) {
+        queryPrivateControlPlaneConfigs();
     }
 
-    public void queryPrivateControlPlaneConfigs() throws TransactionService.TransactionExecutionException {
-        LOGGER.debug("query all config from classic clusters");
-        //TODO here comes the classic cluster fetch and merging with our database
+    public void queryPrivateControlPlaneConfigs() {
+        LOGGER.trace("query all config from classic clusters");
     }
 }

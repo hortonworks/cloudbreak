@@ -1,0 +1,157 @@
+syntax = "proto3";
+
+package remotecluster;
+
+option java_package = "com.cloudera.thunderhead.service.remotecluster";
+option java_outer_classname = "RemoteClusterProto";
+
+import "options.proto";
+
+option (options.FileExtension.audit) = true;
+
+// RemoteCluster Service :: RemoteCluster Service is a web service to manage the on-prem clusters.
+service RemoteCluster {
+
+  option (options.ServiceExtension.apiServiceName) = {
+    lowercase: "remotecluster"
+    camelcase: "RemoteCluster"
+  };
+
+  // Register a Private Cloud control plane. :: Register a Private Cloud control plane in Public Cloud.
+  rpc RegisterPvcControlPlane (RegisterPvcControlPlaneRequest)
+      returns (RegisterPvcControlPlaneResponse) {
+    option (options.MethodExtension.right) = "remotecluster/registerPvcControlPlane";
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.entitlement) = "CDP_HYBRID_CLOUD";
+  }
+
+  // Unregister a Private Cloud control plane. :: Unregister a Private Cloud control plane from the Public Cloud.
+  rpc UnregisterPvcControlPlane (UnregisterPvcControlPlaneRequest)
+      returns (UnregisterPvcControlPlaneResponse) {
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.entitlement) = "CDP_HYBRID_CLOUD";
+  }
+
+  // Describe a registered Private Cloud control plane configuration. :: Describe a registered Private Cloud control plane configuration.
+  rpc DescribePvcControlPlane (DescribePvcControlPlaneRequest)
+      returns (DescribePvcControlPlaneResponse) {
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.entitlement) = "CDP_HYBRID_CLOUD";
+  }
+
+  // List registered Private Cloud control plane configurations. :: List registered Private Cloud control plane configurations.
+  rpc ListPvcControlPlanes (ListPvcControlPlanesRequest)
+      returns (ListPvcControlPlanesResponse) {
+    option (options.MethodExtension.paginates) = true;
+    option (options.MethodExtension.pagingDefaultMaxItems) = 20;
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.entitlement) = "CDP_HYBRID_CLOUD";
+  }
+
+  // Test the connectivity to the Private Cloud control plane. :: Test the connectivity from Public Cloud control plane to the registered Private Cloud control plane.
+  rpc TestPvcControlPlaneConnectivity (TestPvcControlPlaneConnectivityRequest)
+    returns (TestPvcControlPlaneConnectivityResponse) {
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.entitlement) = "CDP_HYBRID_CLOUD";
+  }
+}
+
+// Request object for the RegisterPvcControlPlaneRequest method.
+message RegisterPvcControlPlaneRequest {
+  // The account ID of the Private Cloud control plane.
+  string pvcId = 1 [(options.FieldExtension.required) = true];
+  // The name of the Private Cloud control plane.
+  string name = 2 [(options.FieldExtension.required) = true];
+  // The base URL of the Private Cloud control plane.
+  string baseUrl = 3 [(options.FieldExtension.required) = true, (options.FieldExtension.noParamfile) = true];
+  // The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+  string accessKeyId = 4;
+  // The private key of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+  string privateKey = 5 [(options.FieldExtension.sensitive) = true];
+  // The description of the Private Cloud control plane.
+  string description = 6;
+}
+
+// Response object for the RegisterPvcControlPlaneResponse method.
+message RegisterPvcControlPlaneResponse {
+  // The Private Cloud control plane configuration.
+  PvcControlPlaneConfiguration controlPlaneConfiguration = 1;
+}
+
+// Request object for the UnregisterPvcControlPlaneRequest method.
+message UnregisterPvcControlPlaneRequest {
+  // The account ID or CRN of the Private Cloud control plane.
+  string pvc = 1 [(options.FieldExtension.required) = true];
+}
+
+// Response object for the UnregisterPvcControlPlaneResponse method.
+message UnregisterPvcControlPlaneResponse {
+}
+
+// Request object for the DescribePvcControlPlaneRequest method.
+message DescribePvcControlPlaneRequest {
+  // The account ID or CRN of the Private Cloud control plane.
+  string pvc = 1 [(options.FieldExtension.required) = true];
+}
+
+// Response object for the DescribePvcControlPlaneResponse method.
+message DescribePvcControlPlaneResponse {
+  // The Private Cloud control plane configuration.
+  PvcControlPlaneConfiguration controlPlaneConfiguration = 1;
+}
+
+// Request object for the ListPvcControlPlanesRequest method.
+message ListPvcControlPlanesRequest {
+  // The page size.
+  int32 pageSize = 1 [(options.FieldExtension.pagingPageSize) = true,
+    (options.FieldExtension.minimum) = 1,
+    (options.FieldExtension.maximum) = 100];
+  // A token to specify where to start paginating. This is the nextToken from a previously truncated response.
+  string pageToken = 2 [(options.FieldExtension.pagingInputToken) = true];
+}
+
+// Response object for the ListPvcControlPlanesResponse method.
+message ListPvcControlPlanesResponse {
+  // The Private Cloud control plane configurations.
+  repeated PvcControlPlaneConfiguration controlPlaneConfigurations = 1 [(options.FieldExtension.pagingResult) = true];
+  // The token to use when requesting the next set of results. If not present, there are no additional results.
+  string nextPageToken = 2 [(options.FieldExtension.pagingOutputToken) = true];
+}
+
+// Request object for the TestPvcControlPlaneConnectivity method.
+message TestPvcControlPlaneConnectivityRequest {
+  // The account ID or CRN of the Private Cloud control plane.
+  string pvc = 1 [(options.FieldExtension.required) = true];
+}
+
+// Response object for the TestPvcControlPlaneConnectivity method.
+message TestPvcControlPlaneConnectivityResponse {
+}
+
+// Private Cloud control plane configuration.
+message PvcControlPlaneConfiguration {
+  // The account ID of the Private Cloud control plane.
+  string pvcId = 1;
+  // The CRN of the Private Cloud control plane.
+  string pvcCrn = 2;
+  // The type for the Private Cloud control plane, this is always be CDP_PVC.
+  ClusterType.Value type = 3;
+  // The name of the Private Cloud control plane.
+  string name = 4;
+  // The description of the Private Cloud control plane.
+  string description = 5;
+  // The base URL of the Private Cloud control plane.
+  string baseUrl = 6;
+  // The access key ID of a machine user in Private Cloud control plane to authenticate and authorize the communication between Public Cloud control plane and Private Cloud control plane.
+  string accessKeyId = 7;
+  // The jump-gate agent configuration to be used by the Private Cloud control plane.
+  string jumpgateAgentConfiguration = 8;
+}
+
+// The type of a remote cluster.
+message ClusterType {
+  enum Value {
+    // CDP Private Cloud control plane.
+    CDP_PVC = 0;
+  }
+}

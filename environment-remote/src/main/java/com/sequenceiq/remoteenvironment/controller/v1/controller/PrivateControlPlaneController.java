@@ -7,9 +7,10 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.remoteenvironment.api.v1.controlplane.endpoint.PrivateControlPlaneEndpoint;
-import com.sequenceiq.remoteenvironment.api.v1.controlplane.model.PrivateControlPlaneDeRegistrationResponse;
-import com.sequenceiq.remoteenvironment.api.v1.controlplane.model.PrivateControlPlaneRegistrationRequest;
-import com.sequenceiq.remoteenvironment.api.v1.controlplane.model.PrivateControlPlaneRegistrationResponse;
+import com.sequenceiq.remoteenvironment.api.v1.controlplane.model.deregistration.PrivateControlPlaneDeRegistrationRequests;
+import com.sequenceiq.remoteenvironment.api.v1.controlplane.model.deregistration.PrivateControlPlaneDeRegistrationResponses;
+import com.sequenceiq.remoteenvironment.api.v1.controlplane.model.registration.PrivateControlPlaneRegistrationRequests;
+import com.sequenceiq.remoteenvironment.api.v1.controlplane.model.registration.PrivateControlPlaneRegistrationResponses;
 import com.sequenceiq.remoteenvironment.service.PrivateControlPlaneService;
 
 @Controller
@@ -21,14 +22,14 @@ public class PrivateControlPlaneController implements PrivateControlPlaneEndpoin
     @Override
     @InternalOnly
     @AccountIdNotNeeded
-    public PrivateControlPlaneRegistrationResponse register(PrivateControlPlaneRegistrationRequest request) {
+    public PrivateControlPlaneRegistrationResponses register(PrivateControlPlaneRegistrationRequests request) {
         return remoteControlPlaneService.register(request);
     }
 
     @Override
     @InternalOnly
     @AccountIdNotNeeded
-    public PrivateControlPlaneDeRegistrationResponse deregister(String crn) {
-        return remoteControlPlaneService.deregister(crn);
+    public PrivateControlPlaneDeRegistrationResponses deregister(PrivateControlPlaneDeRegistrationRequests request) {
+        return remoteControlPlaneService.deregister(request);
     }
 }

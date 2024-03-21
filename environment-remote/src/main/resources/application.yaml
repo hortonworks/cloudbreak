@@ -54,6 +54,22 @@ management:
     env:
       enabled: true
 
+secret:
+  application: remoteenv/shared
+  engine: "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine"
+vault:
+  addr: localhost
+  port: 8200
+  ssl.enabled: false
+  kv.engine.v2.path: secret
+  config.enabled: true
+  auth:
+    type: "token"
+    kubernetes:
+      service.account.token.path: /var/run/secrets/kubernetes.io/serviceaccount/token
+      mount.path: "dps-dev"
+      login.role: "cloudbreak.default"
+
 altus:
   ums:
     host: localhost
@@ -61,6 +77,21 @@ altus:
   audit:
     enabled: true
     endpoint: localhost:8982
+
+remotecluster:
+  host: localhost
+  port: 8982
+
+clusterProxy:
+  url: https://localhost:8080/cluster-proxy
+  enabled: true
+  disabledPlatforms: MOCK
+  readConfigPath: /rpc/readConfig
+  registerConfigPath: /rpc/forceRegisterConfig
+  updateConfigPath: /rpc/updateConfig
+  removeConfigPath: /rpc/removeConfig
+  maxAttempts: 20
+  maxFailure: 1
 
 remoteenvironment:
   cert.dir: /certs/

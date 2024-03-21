@@ -175,7 +175,64 @@ public class Crn {
         SDXSVC("sdxsvc", NON_ADMIN_SERVICE),
         SDXSVCADMIN("sdxsvcadmin", ADMIN_SERVICE),
         RECIPE("recipe", NON_ADMIN_SERVICE),
-        COMPUTE("compute", NON_ADMIN_SERVICE);
+        COMPUTE("compute", NON_ADMIN_SERVICE),
+        MONITORING("monitoring", NON_ADMIN_SERVICE),
+        SERVICEDISCOVERY("servicediscovery", NON_ADMIN_SERVICE),
+        METERING("metering", NON_ADMIN_SERVICE),
+        METERINGADMIN("meteringadmin", ADMIN_SERVICE),
+        PUBLICENDPOINTMANAGEMENTADMIN("publicendpointmanagementadmin", ADMIN_SERVICE),
+        MINASSHDADMIN("minasshdadmin", ADMIN_SERVICE),
+        AUDIT("audit", NON_ADMIN_SERVICE),
+        AUDITADMIN("auditadmin", ADMIN_SERVICE),
+        CDPDEMOAPP("cdpdemoapp", NON_ADMIN_SERVICE),
+        MLADMIN("mladmin", ADMIN_SERVICE),
+        MINASSHDMANAGEMENT("minasshdmanagment", NON_ADMIN_SERVICE),
+        CLASSICCLUSTERS("classicclusters", NON_ADMIN_SERVICE),
+        OPDB("opdb", NON_ADMIN_SERVICE),
+        DW("dw", NON_ADMIN_SERVICE),
+        DATACATALOG("datacatalog", NON_ADMIN_SERVICE),
+        SDX2("sdx2", NON_ADMIN_SERVICE),
+        CSMCHARGEBACK("csmchargeback", NON_ADMIN_SERVICE),
+        KERBEROSMGMT("kerberosmgmt", NON_ADMIN_SERVICE),
+        DIAGNOSTICS("diagnostics", NON_ADMIN_SERVICE),
+        CONSOLEAUTHENTICATION("consoleauthentication", NON_ADMIN_SERVICE),
+        AUTH("auth", NON_ADMIN_SERVICE),
+        UNIFIEDDIAGNOSTICS("unifieddiagnostics", NON_ADMIN_SERVICE),
+        CONTAINERIMAGECATALOG("containerimagecatalog", NON_ADMIN_SERVICE),
+        IMAGECATALOG("imagecatalog", NON_ADMIN_SERVICE),
+        OPDBADMIN("opdbadmin", ADMIN_SERVICE),
+        METERINGEVENTSMONITORADMIN("meteringeventsmonitoradmin", ADMIN_SERVICE),
+        CLOUDBREAKADMIN("cloudbreakadmin", ADMIN_SERVICE),
+        MESSAGEBROKERADMIN("messagebrokeradmin", ADMIN_SERVICE),
+        REPLICATIONMANAGER("replicationmanager", NON_ADMIN_SERVICE),
+        CLUSTERCONNECTIVITYADMIN("clusterconnectivityadmin", ADMIN_SERVICE),
+        CLUSTERPROXY("clusterproxy", NON_ADMIN_SERVICE),
+        CLUSTERCONNECTIVITYMANAGEMENTV2("clusterconnectivitymanagementv2", NON_ADMIN_SERVICE),
+        SCIM("scim", NON_ADMIN_SERVICE),
+        CERTIFICATEMANAGEMENTADMIN("certificatemanagementadmin", ADMIN_SERVICE),
+        COMPUTEADMIN("computeadmin", ADMIN_SERVICE),
+        PUBLICENDPOINTMANAGEMENT("publicendpointmanagement", NON_ADMIN_SERVICE),
+        CONSUMPTION("consumption", NON_ADMIN_SERVICE),
+        CONSUMPTIONADMIN("consumptionadmin", ADMIN_SERVICE),
+        ENVOYAUTHENTICATION("envoyauthentication", NON_ADMIN_SERVICE),
+        JUMPGATESERVER("jumpgateserver", NON_ADMIN_SERVICE),
+        ONE("one", NON_ADMIN_SERVICE),
+        ONEADMIN("oneadmin", ADMIN_SERVICE),
+        STUDIO("studio", NON_ADMIN_SERVICE),
+        STUDIOADMIN("studioadmin", ADMIN_SERVICE),
+        TRIALMANAGER("trialmanager", NON_ADMIN_SERVICE),
+        TRIALMANAGERADMIN("trialmanageradmin", ADMIN_SERVICE),
+        LENSSUPPORTADMIN("lenssupportadmin", ADMIN_SERVICE),
+        DRS("drs", NON_ADMIN_SERVICE),
+        WORKLOADCONNECTIVITY("workloadconnectivity", NON_ADMIN_SERVICE),
+        CLOUDPRIVATELINKS("cloudprivatelinks", NON_ADMIN_SERVICE),
+        DRSCP("drscp", NON_ADMIN_SERVICE),
+        WORKLOADCONNECTIVITYADMIN("workloadconnectivityadmin", ADMIN_SERVICE),
+        NOTIFICATIONADMIN("notificationadmin", ADMIN_SERVICE),
+        NOTIFICATION("notification", NON_ADMIN_SERVICE),
+        COMMONCONSOLE("commonconsole", NON_ADMIN_SERVICE),
+        HYBRID("hybrid", NON_ADMIN_SERVICE),
+        REMOTECLUSTER("remotecluster", NON_ADMIN_SERVICE);
 
         private static final ImmutableMap<String, Service> FROM_STRING;
 
@@ -328,6 +385,7 @@ public class Crn {
      */
     public enum ResourceType {
         ACCESS_KEY("accesskey"),
+        ACCESS_TOKEN("accessToken"),
         CLUSTER("cluster"),
         /**
          * @deprecated {@link #SDX_CLUSTER} was replaced by {@link #DATALAKE} and is kept here for backward compatibility reasons (e.g., dynamodb serialized
@@ -379,13 +437,35 @@ public class Crn {
         ACCOUNT_TAG("accountTag"),
         ACCOUNT_TELEMETRY("accountTelemetry"),
         DATAHUB_AUTOSCALE_CONFIG("datahubAutoscaleConfig"),
-        PROXY_CONIFG("proxyConfig"),
         SERVICE("service"),
         AGENT("agent"),
         WXM_ENVIRONMENT("wxm_environment"),
         INSTANCE("instance"),
         CONNECTION("connection"),
-        DOCKER_CONFIG("dockerConfig");
+        DOCKER_CONFIG("dockerConfig"),
+        LDAP_PROVIDER("ldapProvider"),
+        LOCAL_PROVIDER("localProvider"),
+        WORKLOAD("workload"),
+        MINA_SSHD_SERVICE("minaSshdService"),
+        ACCOUNT("account"),
+        PROXY_CONFIG("proxyConfig"),
+        FLOW("flow"),
+        DEPLOYMENT("deployment"),
+        DEPLOYMENT_REQUEST("deploymentRequest"),
+        ASSET_UPDATE_REQUEST("assetUpdateRequest"),
+        PROJECT("project"),
+        EVENT("event"),
+        AUTO_ACTION("autoAction"),
+        COST_CENTER("costCenter"),
+        SYNC_EVENT("syncEvent"),
+        FUNCTION_DEPLOYMENT("functionDeployment"),
+        COMPUTE_CLUSTER("computeCluster"),
+        BACKUP("backup"),
+        RESTORE("restore"),
+        DELETE_BACKUP_REQUEST("deleteBackupRequest"),
+        USERSYNC("usersync"),
+        PVC_CONTROL_PLANE("pvcControlPlane"),
+        MLSERVING("mlserving");
 
         private static final ImmutableMap<String, ResourceType> FROM_STRING;
 
@@ -529,7 +609,7 @@ public class Crn {
      */
     public String getUserId() {
         checkState(resourceType == ResourceType.USER || resourceType == ResourceType.MACHINE_USER,
-            String.format("CRN %s has no user ID because it is of type %s", toString(), resourceType));
+                String.format("CRN %s has no user ID because it is of type %s", toString(), resourceType));
         int idx = resource.indexOf('/');
         return idx == -1 ? resource : resource.substring(idx + 1);
     }

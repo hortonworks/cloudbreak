@@ -137,4 +137,5 @@ public class ClusterProxyConfiguration {
     public String getReadConfigUrl() {
         return clusterProxyUrl + readConfigPath;
     }
+
 }

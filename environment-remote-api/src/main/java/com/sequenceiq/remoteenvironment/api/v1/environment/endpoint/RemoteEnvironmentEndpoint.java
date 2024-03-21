@@ -19,10 +19,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Validated
-@Path("/env")
+@Path("/v1/env")
 @RetryAndMetrics
 @Consumes(MediaType.APPLICATION_JSON)
-@Tag(name = "/env", description = "Remote Environment operations")
+@Tag(name = "/v1/env", description = "Remote Environment operations")
 public interface RemoteEnvironmentEndpoint {
 
     @GET

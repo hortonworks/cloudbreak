@@ -33,6 +33,10 @@ public class RegionAwareInternalCrnGeneratorFactory {
         return init(Crn.Service.AUTOSCALE);
     }
 
+    public RegionAwareInternalCrnGenerator remoteCluster() {
+        return init(Crn.Service.REMOTECLUSTER);
+    }
+
     private RegionAwareInternalCrnGenerator init(Crn.Service serviceType) {
         return regionalAwareInternalCrnGenerator(serviceType, partition, region);
     }

@@ -30,6 +30,9 @@ public class PrivateControlPlane implements AuthResource, AccountAwareResource {
     @Column(nullable = false)
     private String accountId;
 
+    @Column(nullable = false)
+    private String url;
+
     @Override
     public String getAccountId() {
         return accountId;
@@ -68,12 +71,21 @@ public class PrivateControlPlane implements AuthResource, AccountAwareResource {
         this.name = name;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     @java.lang.Override
     public java.lang.String toString() {
         return "PrivateControlPlane{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", resourceCrn='" + resourceCrn + '\'' +
+                ", url='" + url + '\'' +
                 ", accountId='" + accountId + '\'' +
                 '}';
     }

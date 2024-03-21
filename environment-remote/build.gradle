@@ -9,6 +9,7 @@ buildscript {
     dependencies {
         classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:${sonarVersion}"
         classpath "org.openapitools:openapi-generator-gradle-plugin:$openapiGeneratorGradlePlugin"
+        classpath "com.google.protobuf:protobuf-gradle-plugin:${protobufPluginVersion}"
     }
 }
 
@@ -20,10 +21,12 @@ plugins {
     id 'org.springframework.boot' version "${springBootVersion}"
     id "org.sonarqube" version "${sonarVersion}"
     id 'org.openapi.generator' version "$openapiGeneratorGradlePlugin"
+    id 'com.google.protobuf' version "${protobufPluginVersion}"
 }
 
 apply plugin: org.sonarqube.gradle.SonarQubePlugin
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'com.google.protobuf'
 
 configurations.all {
     resolutionStrategy {
@@ -68,17 +71,20 @@ dependencies {
     implementation project(':flow')
     implementation project(":common")
     implementation project(':environment-remote-api')
+    implementation project(':cluster-proxy')
+    implementation project(':secret-engine')
 
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter', version: springBootVersion
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: springBootVersion
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: springBootVersion
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jersey', version: springBootVersion
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springBootVersion
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: springBootVersion
-    implementation group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart', version: jerseyCoreVersion
-    implementation group: 'io.swagger.core.v3', name: 'swagger-jaxrs2-jakarta', version: swaggerCoreVersion
-    implementation group: 'javax.xml.bind', name: 'jaxb-api', version: javaxXmlBindJaxbApiVersion
-    implementation group: 'org.openapitools', name: 'jackson-databind-nullable', version: "$jacksonDatabindNullable"
+    implementation group: 'org.springframework.boot',   name: 'spring-boot-starter',            version: springBootVersion
+    implementation group: 'org.springframework.boot',   name: 'spring-boot-starter-web',        version: springBootVersion
+    implementation group: 'org.springframework.boot',   name: 'spring-boot-starter-actuator',   version: springBootVersion
+    implementation group: 'org.springframework.boot',   name: 'spring-boot-starter-jersey',     version: springBootVersion
+    implementation group: 'org.springframework.boot',   name: 'spring-boot-starter-data-jpa',   version: springBootVersion
+    implementation group: 'org.springframework.boot',   name: 'spring-boot-starter-security',   version: springBootVersion
+    implementation group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart',         version: jerseyCoreVersion
+    implementation group: 'io.swagger.core.v3',         name: 'swagger-jaxrs2-jakarta',         version: swaggerCoreVersion
+    implementation group: 'javax.xml.bind',             name: 'jaxb-api',                       version: javaxXmlBindJaxbApiVersion
+    implementation group: 'org.openapitools',           name: 'jackson-databind-nullable',      version: "$jacksonDatabindNullable"
+    implementation group: 'javax.annotation',           name: 'javax.annotation-api',           version: javaxAnnotationApiVersion
 
     testImplementation project(path: ':authorization-common', configuration: 'tests')
     testImplementation project(path: ':common', configuration: 'tests')
@@ -87,15 +93,13 @@ dependencies {
     testImplementation(group: "org.springframework.boot",  name: "spring-boot-starter-test",                 version: springBootVersion) {
         exclude group: "junit"
     }
-
     testImplementation group: "com.openpojo",              name: "openpojo",                                 version: openPojoVersion
     testImplementation group: "com.h2database",            name: "h2",                                       version: h2databaseVersion
     testImplementation group: "org.mockito",               name: "mockito-core",                             version: mockitoVersion
     testImplementation group: "com.google.guava",          name: "guava",                                    version: guavaVersion
     testImplementation group: 'org.assertj',               name: 'assertj-core',                             version: assertjVersion
-
-    testRuntimeOnly group: 'org.testcontainers',      name: 'postgresql',                               version: testContainersVersion
-    testRuntimeOnly group: 'org.awaitility',          name: 'awaitility',                               version: awaitilityVersion
+    testRuntimeOnly    group: 'org.testcontainers',        name: 'postgresql',                               version: testContainersVersion
+    testRuntimeOnly    group: 'org.awaitility',            name: 'awaitility',                               version: awaitilityVersion
 }
 
 
@@ -140,8 +144,26 @@ publishing {
     }
 }
 
-sourceSets {
-    main {
-        java.srcDirs += "${projectDir}/src/generated/src/main/java"
+protobuf {
+    protoc {
+        // The version of protoc must match protobuf-java. If you don't depend on
+        // protobuf-java directly, you will be transitively depending on the
+        // protobuf-java version that grpc depends on.
+        artifact = "com.google.protobuf:protoc:$protobufVersion"
     }
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion"
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+    generatedFilesBaseDir = "$projectDir/src/generated"
+}
+
+checkstyle {
+    checkstyleMain.exclude '**/generated/**'
 }

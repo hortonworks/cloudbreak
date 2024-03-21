@@ -177,6 +177,6 @@ public class ProxyConfigService implements CompositeAuthResourcePropertyProvider
 
     @Override
     public EnumSet<Crn.ResourceType> getSupportedCrnResourceTypes() {
-        return EnumSet.of(Crn.ResourceType.PROXY_CONIFG);
+        return EnumSet.of(Crn.ResourceType.PROXY_CONFIG);
     }
 }

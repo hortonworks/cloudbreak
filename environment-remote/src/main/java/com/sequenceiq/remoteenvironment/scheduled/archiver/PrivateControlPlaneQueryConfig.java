@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class PrivateControlPlaneQueryConfig {
 
-    @Value("${remoteenvironment.controlplane.query.intervalminutes:5}")
+    @Value("${remoteenvironment.controlplane.query.intervalminutes:60}")
     private int intervalInMinutes;
 
     public int getIntervalInMintues() {

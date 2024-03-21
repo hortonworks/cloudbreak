@@ -15,6 +15,7 @@
         + [Running FreeIPA in IDEA](#running-freeipa-in-idea)
         + [Running Redbeams in IDEA](#running-redbeams-in-idea)
         + [Running the Environment Service in IDEA](#running-the-environment-service-in-idea)
+        + [Running the Remote Environment Service in IDEA](#running-the-remote-environment-service-in-idea)
         + [Running the Externalized Compute Service in IDEA](#running-the-externalized-compute-service-in-idea)
         + [Running Thunderhead Mock in IDEA](#running-thunderhead-mock-in-idea)
         + [Running Mock-Infrastructure in IDEA](#running-mock-infrastructure-in-idea)
@@ -25,6 +26,7 @@
         + [Running FreeIPA from the Command Line](#running-freeipa-from-the-command-line)
         + [Running Redbeams from the Command Line](#running-redbeams-from-the-command-line)
         + [Running the Environment Service from the Command Line](#running-the-environment-service-from-the-command-line)
+        + [Running the Remote Environment Service from the Command Line](#running-the-remote-environment-service-from-the-command-line)
         + [Running the Externalized Compute Service from the Command Line](#running-the-externalized-compute-service-from-the-command-line)
         + [Running Thunderhead Mock from the Command Line](#running-thunderhead-mock-from-the-command-line)
         + [Running Mock-Infrastructure from the Command Line](#running-mock-infrastructure-from-the-command-line)
@@ -75,6 +77,7 @@ export FREEIPA_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/clo
 export PERISCOPE_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/autoscale/src/main/resources/schema
 export REDBEAMS_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/redbeams/src/main/resources/schema
 export EXTERNALIZEDCOMPUTE_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/externalized-compute/src/main/resources/schema
+export REMOTE_ENVIRONMENT_SCHEMA_SCRIPTS_LOCATION=/Users/YOUR_USERNAME/YOUR_PROJECT_DIR/cloudbreak/environment-remote/src/main/resources/schema
 export ULU_SUBSCRIBE_TO_NOTIFICATIONS=true
 export CB_INSTANCE_UUID=$(uuidgen | tr '[:upper:]' '[:lower:]')
 export CB_INSTANCE_NODE_ID=5743e6ed-3409-420b-b08b-f688f2fc5db1
@@ -116,7 +119,7 @@ export CB_LOCAL_DEV_LIST=
 
 When this setup works, you can remove services from cbd, and run them locally. For example, in order to run Cloudbreak, Periscope, Datalake, FreeIPA, Redbeams, Environment, Thunderhead Mock (and Thunderhead API), IDBroker Mapping Management, and Environments2 API services locally (from IDEA or the command line), put this into your `Profile`:
 ```
-export CB_LOCAL_DEV_LIST=cloudbreak,periscope,datalake,freeipa,redbeams,environment,thunderhead-mock,thunderhead-api,idbmms,environments2-api
+export CB_LOCAL_DEV_LIST=cloudbreak,periscope,datalake,freeipa,redbeams,environment,remote-environment,thunderhead-mock,thunderhead-api,idbmms,environments2-api
 ```
 
 Containers for these applications won't be started and Uluwatu (or the `cdp` & `dp` CLI tools) will connect to Java processes running on your host.
@@ -133,6 +136,7 @@ You don't have to put all the applications into local-dev mode; the value of the
 - `datalake-dr`
 - `distrox-api`
 - `environment`
+- `remote-environment`
 - `environments2-api`
 - `freeipa`
 - `idbmms`
@@ -177,6 +181,9 @@ cbd migrate redbeamsdb pending
 
 cbd migrate environmentdb up
 cbd migrate environmentdb pending
+
+cbd migrate remoteenvironmentdb up
+cbd migrate remoteenvironmentdb pending
 ```
 You can track any other application's logs to check the results by executing the following command:
 ```
@@ -471,6 +478,46 @@ AWS_GOV_SECRET_ACCESS_KEY=
 CB_AWS_GOV_ACCOUNT_ID=
 ```
 
+### Running the Remote Environment Service in IDEA
+
+After importing the `cloudbreak` repo root, launch the Remote Environment application by executing the `com.sequenceiq.remoteenvironment.RemoteEnvironmentApplication` class (set `Use classpath of module` to `cloudbreak.remoteenvironment.main`) with the following JVM options:
+```
+-Dremoteenvironment.identity.server.url=http://localhost:8089
+-Dserver.port=8089
+-Daltus.ums.host=localhost
+-Dvault.root.token=<VAULT_ROOT_TOKEN>
+-Dremotecluster.host=localhost
+-Dremotecluster.port=9983
+-DclusterProxy.url=<CLUSTER_PROXY_URL>
+```
+
+Replace `<VAULT_ROOT_TOKEN>` with the value of `VAULT_ROOT_TOKEN` respectively from the `Profile` file.
+
+You need remote cluster service from thunderhead with:
+```
+kubectl port-forward deployment/thunderhead-remotecluster 9983:8982 --namespace thunderhead-remotecluster
+```
+
+Also if you want to test the e2e flow then you need cluster proxy with:
+```
+kubectl port-forward deployment/thunderhead-remotecluster 9983:8982 --namespace thunderhead-remotecluster
+```
+
+You can register a control with:
+```
+curl -X POST -H "Content-Type: application/json" \
+-d '{"items":[{"crn":"<CRN example crn:cdp:hybrid:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:pvcControlPlane:b3654f5f-bd9c-4399-a4e5-e1628970712b>","url":"http://test.com","name":"test"}]}' \
+-H "x-cdp-actor-crn: crn:cdp:iam:us-west-1:altus:user:__internal__actor__" \
+http://localhost:8089/remoteenvironmentservice/api/v1/control_plane
+```
+
+You can list environments with:
+```
+curl -X GET -H "Content-Type: application/json" \
+-H "x-cdp-actor-crn: crn:cdp:iam:us-west-1:hortonworks:user:rdoktorics@hortonworks.com" \
+http://localhost:8089/remoteenvironmentservice/api/v1/env
+```
+
 ### Running the Externalized Compute Service in IDEA
 
 After importing the `cloudbreak` repo root, launch the Externalized Compute application by executing the `com.sequenceiq.externalizedcompute.ExternalizedComputeClusterApplication` class (set `Use classpath of module` to `cloudbreak.externalized-compute.main`) with the following JVM options:
@@ -647,6 +694,16 @@ then run the following Gradle command:
 -Dspring.config.location=$(pwd)/environment/src/main/resources/application.yml,$(pwd)/environment/build/resources/main/application.properties"
 ```
 
+### Running the Remote Environment Service from the Command Line
+To run the Remote Environment service from the command line:
+
+```
+./gradlew :environment-remote:bootRun -PjvmArgs="\
+-Dremoteenvironment.cloudbreak.url=http://localhost:8080 \
+-Dvault.root.token=<VAULT_ROOT_TOKEN> \
+-Dspring.config.location=$(pwd)/remoteenvironment/src/main/resources/application.yml,$(pwd)/remoteenvironment/build/resources/main/application.properties"
+```
+
 ### Running the Externalized Compute Service from the Command Line
 To run the Externalized Compute service from the command line run the following Gradle command:
 
@@ -690,7 +747,7 @@ Please make sure that `mock-infrastructure` has been added to `CB_LOCAL_DEV_LIST
 
 ## Database Development
 
-If any schema change is required in Cloudbreak services databases (`cbdb` / `periscopedb` / `datalakedb` / `redbeamsdb` / `environmentdb` / `freeipadb`), then the developer needs to write SQL scripts
+If any schema change is required in Cloudbreak services databases (`cbdb` / `periscopedb` / `datalakedb` / `redbeamsdb` / `environmentdb` / `freeipadb`/ `remoteenvironmentdb`), then the developer needs to write SQL scripts
  to migrate the database accordingly. The schema migration is managed by [MyBatis Migrations](https://github.com/mybatis/migrations) in Cloudbreak and the cbd tool provides an easy-to-use wrapper for it. The syntax for using the migration commands is `cbd migrate <database name> <command> [parameters]` e.g. `cbd migrate cbdb status`.
 Create a SQL template for schema changes:
 ```

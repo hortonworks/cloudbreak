@@ -1,4 +1,4 @@
-package com.sequenceiq.remoteenvironment.api.v1.controlplane.model;
+package com.sequenceiq.remoteenvironment.api.v1.controlplane.model.registration;
 
 import java.util.Objects;
 
@@ -9,10 +9,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema
+@Schema(name = "PrivateControlPlaneRegistrationResponse")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PrivateControlPlaneDeRegistrationResponse {
+public class PrivateControlPlaneRegistrationResponse {
 
     @NotEmpty
     @Schema
@@ -34,7 +34,7 @@ public class PrivateControlPlaneDeRegistrationResponse {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        PrivateControlPlaneDeRegistrationResponse that = (PrivateControlPlaneDeRegistrationResponse) o;
+        PrivateControlPlaneRegistrationResponse that = (PrivateControlPlaneRegistrationResponse) o;
         return Objects.equals(crn, that.crn);
     }
 
@@ -45,7 +45,7 @@ public class PrivateControlPlaneDeRegistrationResponse {
 
     @Override
     public String toString() {
-        return "PrivateControlPlaneDeRegistrationResponse{" +
+        return "PrivateControlPlaneRegistrationResponse{" +
                 "crn='" + crn + '\'' +
                 '}';
     }
