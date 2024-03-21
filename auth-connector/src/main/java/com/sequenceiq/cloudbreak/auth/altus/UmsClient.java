@@ -33,6 +33,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetId
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse;
@@ -53,6 +54,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListW
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RightsCheck;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadAdministrationGroup;
@@ -1080,5 +1082,23 @@ public class UmsClient {
     private void validateAccountIdWithWarning(String accountId) {
         checkNotNull(accountId, "accountId should not be null.");
         warnIfAccountIdIsInternal(accountId);
+    }
+
+    public void grantEntitlement(String accountId, String entitlementName) {
+        checkNotNull(accountId, "accountId should not be null.");
+        GrantEntitlementRequest request = GrantEntitlementRequest.newBuilder()
+                .setAccountId(UserManagementProto.AccountId.newBuilder().setAccountId(accountId).build())
+                .setEntitlementName(entitlementName)
+                .build();
+        newStub().grantEntitlement(request);
+    }
+
+    public void revokeEntitlement(String accountId, String entitlementName) {
+        checkNotNull(accountId, "accountId should not be null.");
+        RevokeEntitlementRequest request = RevokeEntitlementRequest.newBuilder()
+                .setAccountId(UserManagementProto.AccountId.newBuilder().setAccountId(accountId).build())
+                .setEntitlementName(entitlementName)
+                .build();
+        newStub().revokeEntitlement(request);
     }
 }

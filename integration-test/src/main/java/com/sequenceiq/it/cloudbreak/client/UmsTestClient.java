@@ -9,8 +9,10 @@ import com.sequenceiq.it.cloudbreak.action.ums.AssignResourceRoleUserAction;
 import com.sequenceiq.it.cloudbreak.action.ums.CreateUserGroupAction;
 import com.sequenceiq.it.cloudbreak.action.ums.DeleteUserGroupAction;
 import com.sequenceiq.it.cloudbreak.action.ums.GetUserDetailsAction;
+import com.sequenceiq.it.cloudbreak.action.ums.GrantEntitlementAction;
 import com.sequenceiq.it.cloudbreak.action.ums.ListGroupMembersAction;
 import com.sequenceiq.it.cloudbreak.action.ums.RemoveUserFromGroupAction;
+import com.sequenceiq.it.cloudbreak.action.ums.RevokeEntitlementAction;
 import com.sequenceiq.it.cloudbreak.action.ums.SetWorkloadPasswordAction;
 import com.sequenceiq.it.cloudbreak.action.ums.UnassignResourceRoleAction;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsGroupTestDto;
@@ -38,6 +40,14 @@ public class UmsTestClient {
 
     public Action<UmsTestDto, UmsClient> getUserDetails(String userCrn) {
         return new GetUserDetailsAction(userCrn);
+    }
+
+    public Action<UmsTestDto, UmsClient> grantEntitlement(String accountId, String entitlementName) {
+        return new GrantEntitlementAction(accountId, entitlementName);
+    }
+
+    public Action<UmsTestDto, UmsClient> revokeEntitlement(String accountId, String entitlementName) {
+        return new RevokeEntitlementAction(accountId, entitlementName);
     }
 
     public Action<UmsGroupTestDto, UmsClient> createUserGroup(String groupName) {

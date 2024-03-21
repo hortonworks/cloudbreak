@@ -121,6 +121,7 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -183,6 +184,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUs
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest;
@@ -214,6 +217,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Polic
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.PolicyStatement;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ResourceAssignee;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ResourceAssignment;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Role;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RoleAssignment;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest;
@@ -562,6 +567,10 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.cm.observability.dmp}")
     private boolean cmObservabilityDmp;
+
+    private Set<String> grantedEntitlements = new HashSet<>();
+
+    private Set<String> revokedEntitlements = new HashSet<>();
 
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
@@ -963,7 +972,8 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (enableSdxSaasIntegration) {
             builder.addEntitlements(createEntitlement(CDP_SAAS_SDX_INTEGRATION));
         }
-        if (enableComputeMonitoring) {
+        if ((enableComputeMonitoring || grantedEntitlements.contains(CDP_CENTRAL_COMPUTE_MONITORING.name()))
+                && !revokedEntitlements.contains(CDP_CENTRAL_COMPUTE_MONITORING.name())) {
             builder.addEntitlements(createEntitlement(CDP_CENTRAL_COMPUTE_MONITORING));
         }
         if (enableSalRotatePassword) {
@@ -1093,6 +1103,29 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private Entitlement createEntitlement(com.sequenceiq.cloudbreak.auth.altus.model.Entitlement entitlement) {
         return createEntitlement(entitlement.name());
+    }
+
+    @Override
+    public void grantEntitlement(GrantEntitlementRequest request, StreamObserver<GrantEntitlementResponse> responseObserver) {
+        LOGGER.info("Grant entitlement '{}' for account: {}", request.getEntitlementName(), request.getAccountId());
+        if (request.getEntitlementName().equalsIgnoreCase("CLEAN_UP")) {
+            grantedEntitlements.clear();
+            revokedEntitlements.clear();
+        } else {
+            grantedEntitlements.add(request.getEntitlementName());
+            revokedEntitlements.remove(request.getEntitlementName());
+        }
+        responseObserver.onNext(GrantEntitlementResponse.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void revokeEntitlement(RevokeEntitlementRequest request, StreamObserver<RevokeEntitlementResponse> responseObserver) {
+        LOGGER.info("Revoke entitlement '{}' for account: {}", request.getEntitlementName(), request.getAccountId());
+        grantedEntitlements.remove(request.getEntitlementName());
+        revokedEntitlements.add(request.getEntitlementName());
+        responseObserver.onNext(RevokeEntitlementResponse.newBuilder().build());
+        responseObserver.onCompleted();
     }
 
     @Override

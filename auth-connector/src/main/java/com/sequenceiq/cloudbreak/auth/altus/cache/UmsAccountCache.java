@@ -15,7 +15,7 @@ public class UmsAccountCache extends AbstractCacheDefinition {
     /**
      * @deprecated {@link #ttlMinutes} was replaced by {@link #ttlSeconds} because it was not providing enough flexibility on ttl.
      */
-    @Value("${altus.ums.account.cache.ttl:5}")
+    @Value("${altus.ums.account.cache.ttl:1}")
     @Deprecated
     private long ttlMinutes;
 

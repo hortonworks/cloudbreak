@@ -98,7 +98,7 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
     }
 
     public CloudbreakInternalCrnClient createCloudbreakInternalCrnClient(String serverRoot,
-        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
+            RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
         CloudbreakServiceUserCrnClient cbUserCrnClient = new CloudbreakUserCrnClientBuilder(serverRoot)
                 .withCertificateValidation(false)
                 .withIgnorePreValidation(true)
@@ -142,6 +142,11 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
     @Override
     public CloudbreakServiceCrnEndpoints getInternalClient(TestContext testContext) {
         checkIfInternalClientAllowed(testContext);
+        return cloudbreakInternalCrnClient.withInternalCrn();
+    }
+
+    @Override
+    public CloudbreakServiceCrnEndpoints getInternalClientWithoutChecks(TestContext testContext) {
         return cloudbreakInternalCrnClient.withInternalCrn();
     }
 

@@ -842,6 +842,11 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     }
 
     @Override
+    public List<Long> getResourceIdsByResourceCrn(String resourceCrn) {
+        return List.of(getResourceIdByResourceCrn(resourceCrn));
+    }
+
+    @Override
     public Long getResourceIdByResourceName(String resourceName) {
         Long workspaceId = workspaceService.getForCurrentUser().getId();
         return Optional.ofNullable(getIdByNameInWorkspace(resourceName, workspaceId)).orElseThrow(notFound("Stack", resourceName));

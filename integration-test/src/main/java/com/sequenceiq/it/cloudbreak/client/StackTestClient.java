@@ -11,6 +11,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.stack.StackDeleteInstanceAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackRefreshAction;
+import com.sequenceiq.it.cloudbreak.action.v4.stack.StackRefreshEntitlementParamInternalAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackRequestAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackStartAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackStopAction;
@@ -67,5 +68,9 @@ public class StackTestClient {
 
     public Action<StackTestDto, CloudbreakClient> attachRecipeV4() {
         return new StackAttachRecipeAction();
+    }
+
+    public Action<StackTestDto, CloudbreakClient> refreshEntitlementParamsV4() {
+        return new StackRefreshEntitlementParamInternalAction();
     }
 }

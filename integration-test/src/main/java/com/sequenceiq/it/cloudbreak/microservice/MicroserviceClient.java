@@ -59,6 +59,10 @@ public abstract class MicroserviceClient<C, I, E extends Enum<E>, W extends Wait
         throw new TestFailException("There is no internal client for this microservice");
     }
 
+    public I getInternalClientWithoutChecks(TestContext testContext) {
+        throw new TestFailException("There is no internal client for this microservice");
+    }
+
     public void checkIfInternalClientAllowed(TestContext testContext) {
         if (!(testContext instanceof MockedTestContext)) {
             throw new TestFailException("You can use internal client only for mock tests!");

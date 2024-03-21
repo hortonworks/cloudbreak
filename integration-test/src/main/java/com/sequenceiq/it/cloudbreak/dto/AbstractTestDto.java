@@ -347,6 +347,9 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
                     Log.when(LOGGER, format(" %s flow chain %s started ", marker, flowIdentifier.getPollableId()));
                     setLastKnownFlowChainId(flowIdentifier.getPollableId());
                     break;
+                case NOT_TRIGGERED:
+                    Log.when(LOGGER, format(" %s flow was not triggered ", marker));
+                    break;
                 default:
                     throw new TestFailException("Flow identifier's type must be FLOW or FLOW_CHAIN. Current value: " + flowIdentifier);
             }

@@ -897,4 +897,12 @@ public class GrpcUmsClient {
             metricService.recordTimerMetric(metric, duration, tags);
         }
     }
+
+    public void grantEntitlement(String accountId, String entitlementName) {
+        makeClient().grantEntitlement(accountId, entitlementName);
+    }
+
+    public void revokeEntitlement(String accountId, String entitlementName) {
+        makeClient().revokeEntitlement(accountId, entitlementName);
+    }
 }

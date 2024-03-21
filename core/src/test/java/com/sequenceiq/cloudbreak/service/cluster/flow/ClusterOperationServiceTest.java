@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RECOVERED_NODES_REPORTED_CLUSTER_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyCollection;
@@ -358,6 +359,7 @@ public class ClusterOperationServiceTest {
 
         underTest.refreshEntitlementParams(stackDto);
 
+        assertTrue(changedEntitlements.get(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()));
         verify(flowManager).triggerRefreshEntitlementParams(eq(STACK_ID), eq(STACK_CRN), eq(changedEntitlements), eq(true));
     }
 
