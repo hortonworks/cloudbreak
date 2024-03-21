@@ -109,6 +109,14 @@ public class CloudResource extends DynamicModel {
         return availabilityZone;
     }
 
+    public String getDetailedInfo() {
+        if (instanceId != null  && !name.equals(instanceId)) {
+            return getType() + " - " + getName() + " (" + instanceId + ")";
+        } else {
+            return getType() + " - " + getName();
+        }
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", CloudResource.class.getSimpleName() + "[", "]")

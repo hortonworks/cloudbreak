@@ -137,11 +137,11 @@ public class AwsUpscaleService {
                     .buildComputeResourcesForUpscale(ac, stack, groupsWithNewInstances, newInstances, reattachableVolumeSets, networkResources,
                             adjustmentTypeWithThreshold);
 
-            List<String> failedResources = cloudResourceStatuses.stream().map(CloudResourceStatus::getCloudResource)
-                    .filter(cloudResource -> CommonStatus.FAILED == cloudResource.getStatus())
-                    .map(cloudResource -> cloudResource.getType() + " - " + cloudResource.getName())
-                    .toList();
+            List<String> failedResources = cloudResourceStatuses.stream()
+                    .filter(cloudResourceStatus -> ResourceStatus.FAILED == cloudResourceStatus.getStatus())
+                    .map(status -> status.getCloudResource().getDetailedInfo() + ": " + status.getStatusReason()).toList();
             if (!failedResources.isEmpty()) {
+                awsComputeResourceService.deleteComputeResources(ac, stack, cloudResourceStatuses.stream().map(CloudResourceStatus::getCloudResource).toList());
                 throw new RuntimeException("Additional resource creation failed: " + failedResources);
             }
             cloudResourceHelper.updateDeleteOnTerminationFlag(reattachableVolumeSets, true, ac.getCloudContext());

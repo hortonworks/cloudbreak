@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.template.compute;
 
 import static com.sequenceiq.cloudbreak.cloud.template.compute.CloudFailureHandler.ScaleContext;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -13,9 +14,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Callable;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,9 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.task.AsyncTaskExecutor;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -35,9 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
-import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -51,16 +48,13 @@ class CloudFailureHandlerTest {
     private CloudFailureHandler cloudFailureHandler;
 
     @Mock
-    private AsyncTaskExecutor resourceBuilderExecutor;
-
-    @Spy
-    private ResourceActionFactory resourceActionFactory;
-
-    @Mock
     private Optional<CloudbreakEventService> cloudbreakEventServiceOptional;
 
     @Mock
     private CloudbreakEventService cloudbreakEventService;
+
+    @Mock
+    private ComputeResourceService computeResourceService;
 
     @BeforeEach
     void init() {
@@ -69,7 +63,7 @@ class CloudFailureHandlerTest {
     }
 
     @Test
-    void rollbackOnExactDoesNotReachThreshold() throws Exception {
+    void rollbackOnExactDoesNotReachThreshold() {
         ScaleContext scaleContext = new ScaleContext(true, AdjustmentType.EXACT, 4L);
         Group group = mock(Group.class);
 
@@ -83,7 +77,7 @@ class CloudFailureHandlerTest {
 
         AuthenticatedContext auth = new AuthenticatedContext(mock(CloudContext.class), mock(CloudCredential.class));
         ResourceBuilderContext resourceBuilderContext = mock(ResourceBuilderContext.class);
-        List<CloudResourceStatus> resourceStatuses = new ArrayList<>(failuresList);
+        List<CloudResourceStatus> resourceStatuses = new LinkedList<>(failuresList);
 
         CloudResource volume2 = newResource("vol-2", ResourceType.AWS_VOLUMESET, CommonStatus.CREATED);
         resourceStatuses.add(new CloudResourceStatus(volume2, ResourceStatus.CREATED, 2L));
@@ -102,38 +96,27 @@ class CloudFailureHandlerTest {
         resourceStatuses.add(new CloudResourceStatus(instance6, ResourceStatus.CREATED, 6L));
         CloudResource volume6 = newResource("vol-6", ResourceType.AWS_VOLUMESET, CommonStatus.CREATED);
         resourceStatuses.add(new CloudResourceStatus(volume6, ResourceStatus.CREATED, 6L));
-        ResourceBuilders resourceBuilders = mock(ResourceBuilders.class);
-
-        ArrayList<ComputeResourceBuilder<ResourceBuilderContext>> computeResourceBuilders = new ArrayList<>();
-        ComputeResourceBuilder instanceResourceBuilder = mock(ComputeResourceBuilder.class);
-        when(instanceResourceBuilder.resourceType()).thenReturn(ResourceType.AWS_INSTANCE);
-        computeResourceBuilders.add(instanceResourceBuilder);
-        ComputeResourceBuilder volumeResourceBuilder = mock(ComputeResourceBuilder.class);
-        when(volumeResourceBuilder.resourceType()).thenReturn(ResourceType.AWS_VOLUMESET);
-        computeResourceBuilders.add(volumeResourceBuilder);
-        when(resourceBuilders.compute(any())).thenReturn(computeResourceBuilders);
-
-        ArgumentCaptor<ResourceDeletionCallable> callableArgumentCaptor = ArgumentCaptor.forClass(ResourceDeletionCallable.class);
-        when(resourceBuilderExecutor.submit(callableArgumentCaptor.capture()))
-                .thenAnswer(invocation -> ((Callable) invocation.getArgument(0)).call());
 
         RolledbackResourcesException rolledbackResourcesException = assertThrows(RolledbackResourcesException.class,
                 () -> cloudFailureHandler.rollbackIfNecessary(new CloudFailureContext(auth,
-                        scaleContext, resourceBuilderContext), failuresList, resourceStatuses, group, resourceBuilders, 6));
+                        scaleContext, resourceBuilderContext), failuresList, resourceStatuses, group, 6));
 
         assertEquals("Resources are rolled back because successful node count was lower than threshold. 3 nodes are failed. Error reason: failed instance",
                 rolledbackResourcesException.getMessage());
 
-        verifyDeleteAll(instanceResourceBuilder, resourceBuilderContext, auth, instance1, instance5, instance6);
-        verifyDeleteAll(volumeResourceBuilder, resourceBuilderContext, auth, volume1, volume2, volume4, volume5, volume6);
-
-        verify(resourceBuilderExecutor, times(11)).submit(any(Callable.class));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), eq("CLOUD_PROVIDER_RESOURCE_CREATION_FAILED"),
                 eq(ResourceEvent.CLOUD_PROVIDER_RESOURCE_CREATION_FAILED), any());
+
+        ArgumentCaptor<Iterable> iterableArgumentCaptor = ArgumentCaptor.forClass(Iterable.class);
+        verify(computeResourceService, times(1)).deleteResources(eq(resourceBuilderContext), eq(auth),
+                iterableArgumentCaptor.capture(),
+                eq(false), eq(false));
+        assertThat(iterableArgumentCaptor.getValue())
+                .containsExactly(instance2, instance3, instance4, volume2, volume4, instance1, volume1, instance5, volume5, instance6, volume6);
     }
 
     @Test
-    void dontRollbackWhenExactReachThreshold() throws Exception {
+    void dontRollbackWhenExactReachThreshold() {
         ScaleContext scaleContext = new ScaleContext(true, AdjustmentType.EXACT, 3L);
         Group group = mock(Group.class);
 
@@ -166,33 +149,22 @@ class CloudFailureHandlerTest {
         resourceStatuses.add(new CloudResourceStatus(instance6, ResourceStatus.CREATED, 6L));
         CloudResource volume6 = newResource("vol-6", ResourceType.AWS_VOLUMESET, CommonStatus.CREATED);
         resourceStatuses.add(new CloudResourceStatus(volume6, ResourceStatus.CREATED, 6L));
-        ResourceBuilders resourceBuilders = mock(ResourceBuilders.class);
 
-        ArrayList<ComputeResourceBuilder<ResourceBuilderContext>> computeResourceBuilders = new ArrayList<>();
-        ComputeResourceBuilder instanceResourceBuilder = mock(ComputeResourceBuilder.class);
-        when(instanceResourceBuilder.resourceType()).thenReturn(ResourceType.AWS_INSTANCE);
-        computeResourceBuilders.add(instanceResourceBuilder);
-        ComputeResourceBuilder volumeResourceBuilder = mock(ComputeResourceBuilder.class);
-        when(volumeResourceBuilder.resourceType()).thenReturn(ResourceType.AWS_VOLUMESET);
-        computeResourceBuilders.add(volumeResourceBuilder);
-        when(resourceBuilders.compute(any())).thenReturn(computeResourceBuilders);
+        cloudFailureHandler.rollbackIfNecessary(new CloudFailureContext(auth, scaleContext, resourceBuilderContext), failuresList, resourceStatuses, group, 6);
 
-        ArgumentCaptor<ResourceDeletionCallable> callableArgumentCaptor = ArgumentCaptor.forClass(ResourceDeletionCallable.class);
-        when(resourceBuilderExecutor.submit(callableArgumentCaptor.capture()))
-                .thenAnswer(invocation -> ((Callable) invocation.getArgument(0)).call());
-
-        cloudFailureHandler.rollbackIfNecessary(new CloudFailureContext(auth, scaleContext, resourceBuilderContext), failuresList, resourceStatuses, group,
-                resourceBuilders, 6);
-
-        verifyDeleteAll(volumeResourceBuilder, resourceBuilderContext, auth, volume2, volume4);
-
-        verify(resourceBuilderExecutor, times(5)).submit(any(Callable.class));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), eq("CLOUD_PROVIDER_RESOURCE_CREATION_FAILED"),
                 eq(ResourceEvent.CLOUD_PROVIDER_RESOURCE_CREATION_FAILED), any());
+
+        ArgumentCaptor<Iterable> iterableArgumentCaptor = ArgumentCaptor.forClass(Iterable.class);
+        verify(computeResourceService, times(1)).deleteResources(eq(resourceBuilderContext), eq(auth),
+                iterableArgumentCaptor.capture(),
+                eq(false), eq(false));
+        assertThat(iterableArgumentCaptor.getValue())
+                .containsExactly(instance2, instance3, instance4, volume2, volume4);
     }
 
     @Test
-    void rollbackOnPercentageDoesNotReachThreshold() throws Exception {
+    void rollbackOnPercentageDoesNotReachThreshold() {
         ScaleContext scaleContext = new ScaleContext(true, AdjustmentType.PERCENTAGE, 60L);
         Group group = mock(Group.class);
 
@@ -225,38 +197,27 @@ class CloudFailureHandlerTest {
         resourceStatuses.add(new CloudResourceStatus(instance6, ResourceStatus.CREATED, 6L));
         CloudResource volume6 = newResource("vol-6", ResourceType.AWS_VOLUMESET, CommonStatus.CREATED);
         resourceStatuses.add(new CloudResourceStatus(volume6, ResourceStatus.CREATED, 6L));
-        ResourceBuilders resourceBuilders = mock(ResourceBuilders.class);
-
-        ArrayList<ComputeResourceBuilder<ResourceBuilderContext>> computeResourceBuilders = new ArrayList<>();
-        ComputeResourceBuilder instanceResourceBuilder = mock(ComputeResourceBuilder.class);
-        when(instanceResourceBuilder.resourceType()).thenReturn(ResourceType.AWS_INSTANCE);
-        computeResourceBuilders.add(instanceResourceBuilder);
-        ComputeResourceBuilder volumeResourceBuilder = mock(ComputeResourceBuilder.class);
-        when(volumeResourceBuilder.resourceType()).thenReturn(ResourceType.AWS_VOLUMESET);
-        computeResourceBuilders.add(volumeResourceBuilder);
-        when(resourceBuilders.compute(any())).thenReturn(computeResourceBuilders);
-
-        ArgumentCaptor<ResourceDeletionCallable> callableArgumentCaptor = ArgumentCaptor.forClass(ResourceDeletionCallable.class);
-        when(resourceBuilderExecutor.submit(callableArgumentCaptor.capture()))
-                .thenAnswer(invocation -> ((Callable) invocation.getArgument(0)).call());
 
         RolledbackResourcesException rolledbackResourcesException = assertThrows(RolledbackResourcesException.class,
                 () -> cloudFailureHandler.rollbackIfNecessary(new CloudFailureContext(auth,
-                        scaleContext, resourceBuilderContext), failuresList, resourceStatuses, group, resourceBuilders, 6));
+                        scaleContext, resourceBuilderContext), failuresList, resourceStatuses, group, 6));
 
         assertEquals("Resources are rolled back because successful node count was lower than threshold. 3 nodes are failed. Error reason: failed instance",
                 rolledbackResourcesException.getMessage());
 
-        verifyDeleteAll(instanceResourceBuilder, resourceBuilderContext, auth, instance1, instance5, instance6);
-        verifyDeleteAll(volumeResourceBuilder, resourceBuilderContext, auth, volume1, volume2, volume4, volume5, volume6);
-
-        verify(resourceBuilderExecutor, times(11)).submit(any(Callable.class));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), eq("CLOUD_PROVIDER_RESOURCE_CREATION_FAILED"),
                 eq(ResourceEvent.CLOUD_PROVIDER_RESOURCE_CREATION_FAILED), any());
+
+        ArgumentCaptor<Iterable> iterableArgumentCaptor = ArgumentCaptor.forClass(Iterable.class);
+        verify(computeResourceService, times(1)).deleteResources(eq(resourceBuilderContext), eq(auth),
+                iterableArgumentCaptor.capture(),
+                eq(false), eq(false));
+        assertThat(iterableArgumentCaptor.getValue())
+                .containsExactly(instance2, instance3, instance4, volume2, volume4, instance1, volume1, instance5, volume5, instance6, volume6);
     }
 
     @Test
-    void dontRollbackWhenPercentageReachThreshold() throws Exception {
+    void dontRollbackWhenPercentageReachThreshold() {
         ScaleContext scaleContext = new ScaleContext(true, AdjustmentType.PERCENTAGE, 40L);
         Group group = mock(Group.class);
 
@@ -289,33 +250,22 @@ class CloudFailureHandlerTest {
         resourceStatuses.add(new CloudResourceStatus(instance6, ResourceStatus.CREATED, 6L));
         CloudResource volume6 = newResource("vol-6", ResourceType.AWS_VOLUMESET, CommonStatus.CREATED);
         resourceStatuses.add(new CloudResourceStatus(volume6, ResourceStatus.CREATED, 6L));
-        ResourceBuilders resourceBuilders = mock(ResourceBuilders.class);
 
-        ArrayList<ComputeResourceBuilder<ResourceBuilderContext>> computeResourceBuilders = new ArrayList<>();
-        ComputeResourceBuilder instanceResourceBuilder = mock(ComputeResourceBuilder.class);
-        when(instanceResourceBuilder.resourceType()).thenReturn(ResourceType.AWS_INSTANCE);
-        computeResourceBuilders.add(instanceResourceBuilder);
-        ComputeResourceBuilder volumeResourceBuilder = mock(ComputeResourceBuilder.class);
-        when(volumeResourceBuilder.resourceType()).thenReturn(ResourceType.AWS_VOLUMESET);
-        computeResourceBuilders.add(volumeResourceBuilder);
-        when(resourceBuilders.compute(any())).thenReturn(computeResourceBuilders);
+        cloudFailureHandler.rollbackIfNecessary(new CloudFailureContext(auth, scaleContext, resourceBuilderContext), failuresList, resourceStatuses, group, 6);
 
-        ArgumentCaptor<ResourceDeletionCallable> callableArgumentCaptor = ArgumentCaptor.forClass(ResourceDeletionCallable.class);
-        when(resourceBuilderExecutor.submit(callableArgumentCaptor.capture()))
-                .thenAnswer(invocation -> ((Callable) invocation.getArgument(0)).call());
-
-        cloudFailureHandler.rollbackIfNecessary(new CloudFailureContext(auth, scaleContext, resourceBuilderContext), failuresList, resourceStatuses, group,
-                resourceBuilders, 6);
-
-        verifyDeleteAll(volumeResourceBuilder, resourceBuilderContext, auth, volume2, volume4);
-
-        verify(resourceBuilderExecutor, times(5)).submit(any(Callable.class));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), eq("CLOUD_PROVIDER_RESOURCE_CREATION_FAILED"),
                 eq(ResourceEvent.CLOUD_PROVIDER_RESOURCE_CREATION_FAILED), any());
+
+        ArgumentCaptor<Iterable> iterableArgumentCaptor = ArgumentCaptor.forClass(Iterable.class);
+        verify(computeResourceService, times(1)).deleteResources(eq(resourceBuilderContext), eq(auth),
+                iterableArgumentCaptor.capture(),
+                eq(false), eq(false));
+        assertThat(iterableArgumentCaptor.getValue())
+                .containsExactly(instance2, instance3, instance4, volume2, volume4);
     }
 
     @Test
-    void dontRollbackOnBestEffort() throws Exception {
+    void dontRollbackOnBestEffort() {
         ScaleContext scaleContext = new ScaleContext(true, AdjustmentType.BEST_EFFORT, 0L);
         Group group = mock(Group.class);
 
@@ -348,40 +298,22 @@ class CloudFailureHandlerTest {
         resourceStatuses.add(new CloudResourceStatus(instance6, ResourceStatus.CREATED, 6L));
         CloudResource volume6 = newResource("vol-6", ResourceType.AWS_VOLUMESET, CommonStatus.CREATED);
         resourceStatuses.add(new CloudResourceStatus(volume6, ResourceStatus.CREATED, 6L));
-        ResourceBuilders resourceBuilders = mock(ResourceBuilders.class);
 
-        ArrayList<ComputeResourceBuilder<ResourceBuilderContext>> computeResourceBuilders = new ArrayList<>();
-        ComputeResourceBuilder instanceResourceBuilder = mock(ComputeResourceBuilder.class);
-        when(instanceResourceBuilder.resourceType()).thenReturn(ResourceType.AWS_INSTANCE);
-        computeResourceBuilders.add(instanceResourceBuilder);
-        ComputeResourceBuilder volumeResourceBuilder = mock(ComputeResourceBuilder.class);
-        when(volumeResourceBuilder.resourceType()).thenReturn(ResourceType.AWS_VOLUMESET);
-        computeResourceBuilders.add(volumeResourceBuilder);
-        when(resourceBuilders.compute(any())).thenReturn(computeResourceBuilders);
+        cloudFailureHandler.rollbackIfNecessary(new CloudFailureContext(auth, scaleContext, resourceBuilderContext), failuresList, resourceStatuses, group, 6);
 
-        ArgumentCaptor<ResourceDeletionCallable> callableArgumentCaptor = ArgumentCaptor.forClass(ResourceDeletionCallable.class);
-        when(resourceBuilderExecutor.submit(callableArgumentCaptor.capture()))
-                .thenAnswer(invocation -> ((Callable) invocation.getArgument(0)).call());
-
-        cloudFailureHandler.rollbackIfNecessary(new CloudFailureContext(auth, scaleContext, resourceBuilderContext), failuresList, resourceStatuses, group,
-                resourceBuilders, 6);
-
-        verifyDeleteAll(volumeResourceBuilder, resourceBuilderContext, auth, volume2, volume4);
-
-        verify(resourceBuilderExecutor, times(5)).submit(any(Callable.class));
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), eq("CLOUD_PROVIDER_RESOURCE_CREATION_FAILED"),
                 eq(ResourceEvent.CLOUD_PROVIDER_RESOURCE_CREATION_FAILED), any());
+
+        ArgumentCaptor<Iterable> iterableArgumentCaptor = ArgumentCaptor.forClass(Iterable.class);
+        verify(computeResourceService, times(1)).deleteResources(eq(resourceBuilderContext), eq(auth),
+                iterableArgumentCaptor.capture(),
+                eq(false), eq(false));
+        assertThat(iterableArgumentCaptor.getValue())
+                .containsExactly(instance2, instance3, instance4, volume2, volume4);
     }
 
-    private void verifyDeleteAll(ComputeResourceBuilder computeResourceBuilder, ResourceBuilderContext resourceBuilderContext, AuthenticatedContext auth,
-            CloudResource... cloudResources) throws Exception {
-        for (CloudResource cloudResource : cloudResources) {
-            verify(computeResourceBuilder).delete(resourceBuilderContext, auth, cloudResource);
-        }
-    }
-
-    private CloudResource newResource(String s, ResourceType awsVolumeset, CommonStatus created) {
-        return CloudResource.builder().withName(s).withType(awsVolumeset).withStatus(created)
+    private CloudResource newResource(String s, ResourceType resourceType, CommonStatus created) {
+        return CloudResource.builder().withName(s).withType(resourceType).withStatus(created)
                 .withParameters(new HashMap<>()).build();
     }
 

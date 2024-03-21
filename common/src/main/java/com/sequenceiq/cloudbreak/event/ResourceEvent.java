@@ -551,6 +551,7 @@ public enum ResourceEvent {
     CLOUD_CONFIG_VALIDATION_FAILED("cluster.cloudconfig.validation.failed"),
     CLOUD_PROVIDER_VALIDATION_WARNING("cluster.provider.validation.warning"),
     CLOUD_PROVIDER_RESOURCE_CREATION_FAILED("cluster.provider.resource.creation.failed"),
+    CLOUD_PROVIDER_RESOURCE_ROLLBACK_FAILED("cluster.provider.resource.rollback.failed"),
 
     STACK_RETRY_FLOW_START("retry.flow.start"),
 
