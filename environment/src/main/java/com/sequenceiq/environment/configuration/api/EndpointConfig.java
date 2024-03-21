@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.MessageBodyWriter;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.beans.factory.annotation.Value;
@@ -75,21 +76,26 @@ public class EndpointConfig extends ResourceConfig {
 
     private final List<ExceptionMapper<?>> exceptionMappers;
 
+    private final List<MessageBodyWriter<?>> messageBodyWriters;
+
     private final OpenApiProvider openApiProvider;
 
     public EndpointConfig(@Value("${info.app.version:unspecified}") String applicationVersion,
             @Value("${environment.structuredevent.rest.enabled}") Boolean auditEnabled,
             @Value("${server.servlet.context-path:}") String contextPath,
             List<ExceptionMapper<?>> exceptionMappers,
+            List<MessageBodyWriter<?>> messageBodyWriters,
             OpenApiProvider openApiProvider) {
         this.applicationVersion = applicationVersion;
         this.auditEnabled = auditEnabled;
         this.contextPath = contextPath;
         this.exceptionMappers = exceptionMappers;
+        this.messageBodyWriters = messageBodyWriters;
         this.openApiProvider = openApiProvider;
         registerFilters();
         registerEndpoints();
         registerExceptionMappers();
+        registerMessageBodyWriters();
         registerSwagger();
     }
 
@@ -106,6 +112,12 @@ public class EndpointConfig extends ResourceConfig {
     private void registerExceptionMappers() {
         for (ExceptionMapper<?> mapper : exceptionMappers) {
             register(mapper);
+        }
+    }
+
+    private void registerMessageBodyWriters() {
+        for (MessageBodyWriter<?> writer : messageBodyWriters) {
+            register(writer);
         }
     }
 
