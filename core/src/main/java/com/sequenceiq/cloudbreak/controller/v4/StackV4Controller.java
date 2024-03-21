@@ -481,8 +481,9 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    @SuppressWarnings("ParameterNumber")
     public BackupV4Response backupDatabaseByName(Long workspaceId, String name, String backupLocation, String backupId, List<String> skipDatabaseNames,
-            @AccountId String accountId, int databaseMaxDurationInMin) {
+            @AccountId String accountId, int databaseMaxDurationInMin, boolean dryRun) {
         FlowIdentifier flowIdentifier = stackOperations.backupClusterDatabase(NameOrCrn.ofName(name),
                 restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId, true, skipDatabaseNames,
                 databaseMaxDurationInMin);
@@ -493,7 +494,8 @@ public class StackV4Controller extends NotificationController implements StackV4
     @InternalOnly
     @SuppressWarnings("ParameterNumber")
     public BackupV4Response backupDatabaseByNameInternal(Long workspaceId, String name, String backupId, String backupLocation,
-            boolean closeConnections, List<String> skipDatabaseNames, @InitiatorUserCrn String initiatorUserCrn, int databaseMaxDurationInMin) {
+            boolean closeConnections, List<String> skipDatabaseNames, @InitiatorUserCrn String initiatorUserCrn, int databaseMaxDurationInMin,
+            boolean dryRun) {
         FlowIdentifier flowIdentifier = stackOperations.backupClusterDatabase(NameOrCrn.ofName(name),
                 restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId, closeConnections, skipDatabaseNames,
                 databaseMaxDurationInMin);
@@ -502,8 +504,9 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    @SuppressWarnings("ParameterNumber")
     public RestoreV4Response restoreDatabaseByName(Long workspaceId, String name, String backupLocation, String backupId,
-            @AccountId String accountId, int databaseMaxDurationInMin) {
+            @AccountId String accountId, int databaseMaxDurationInMin, boolean dryRun) {
         FlowIdentifier flowIdentifier = stackOperations.restoreClusterDatabase(NameOrCrn.ofName(name),
                 restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId, databaseMaxDurationInMin);
         return new RestoreV4Response(flowIdentifier);
@@ -511,8 +514,9 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
+    @SuppressWarnings("ParameterNumber")
     public RestoreV4Response restoreDatabaseByNameInternal(Long workspaceId, String name, String backupLocation, String backupId,
-            @InitiatorUserCrn String initiatorUserCrn, int databaseMaxDurationInMin) {
+            @InitiatorUserCrn String initiatorUserCrn, int databaseMaxDurationInMin, boolean dryRun) {
         FlowIdentifier flowIdentifier = stackOperations.restoreClusterDatabase(NameOrCrn.ofName(name),
                 restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId, databaseMaxDurationInMin);
         return new RestoreV4Response(flowIdentifier);

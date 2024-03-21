@@ -254,7 +254,7 @@ public class SdxBackupRestoreService {
                         regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> stackV4Endpoint.backupDatabaseByNameInternal(0L, sdxCluster.getClusterName(),
                                 backupRequest.getBackupId(), backupRequest.getBackupLocation(), backupRequest.isCloseConnections(),
-                                backupRequest.getSkipDatabaseNames(), initiatorUserCrn, backupRequest.getDatabaseMaxDurationInMin()));
+                                backupRequest.getSkipDatabaseNames(), initiatorUserCrn, backupRequest.getDatabaseMaxDurationInMin(), false));
                 updateSuccessStatus(drStatus.getOperationId(), sdxCluster, backupV4Response.getFlowIdentifier(),
                         SdxOperationStatus.TRIGGERRED);
             }, () -> {
@@ -275,7 +275,7 @@ public class SdxBackupRestoreService {
                 RestoreV4Response restoreV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(
                         regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> stackV4Endpoint.restoreDatabaseByNameInternal(0L, sdxCluster.getClusterName(),
-                                backupLocation, backupId, initiatorUserCrn, databaseMaxDurationInMin));
+                                backupLocation, backupId, initiatorUserCrn, databaseMaxDurationInMin, false));
                 updateSuccessStatus(drStatus.getOperationId(), sdxCluster, restoreV4Response.getFlowIdentifier(),
                         SdxOperationStatus.TRIGGERRED);
             }, () -> {

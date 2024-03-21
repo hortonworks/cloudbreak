@@ -605,6 +605,7 @@ public interface StackV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier updatePillarConfigurationByCrn(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn);
 
+    @SuppressWarnings("ParameterNumber")
     @POST
     @Path("{name}/database_backup")
     @Produces(MediaType.APPLICATION_JSON)
@@ -613,7 +614,8 @@ public interface StackV4Endpoint {
     BackupV4Response backupDatabaseByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("backupLocation") String backupLocation, @QueryParam("backupId") String backupId,
             @QueryParam("skipDatabaseNames") List<String> skipDatabaseNames,
-            @AccountId @QueryParam("accountId") String accountId, @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin);
+            @AccountId @QueryParam("accountId") String accountId, @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin,
+            @QueryParam("dryRun") boolean dryRun);
 
     @SuppressWarnings("ParameterNumber")
     @POST
@@ -625,8 +627,10 @@ public interface StackV4Endpoint {
             @QueryParam("backupId") String backupId, @QueryParam("backupLocation") String backupLocation,
             @QueryParam("closeConnections") boolean closeConnections,
             @QueryParam("skipDatabaseNames") List<String> skipDatabaseNames, @QueryParam("initiatorUserCrn") String initiatorUserCrn,
-            @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin);
+            @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin,
+            @QueryParam("dryRun") boolean dryRun);
 
+    @SuppressWarnings("ParameterNumber")
     @POST
     @Path("{name}/database_restore")
     @Produces(MediaType.APPLICATION_JSON)
@@ -634,8 +638,10 @@ public interface StackV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RestoreV4Response restoreDatabaseByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("backupLocation") String backupLocation, @QueryParam("backupId") String backupId,
-            @AccountId @QueryParam("accountId") String accountId, @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin);
+            @AccountId @QueryParam("accountId") String accountId, @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin,
+            @QueryParam("dryRun") boolean dryRun);
 
+    @SuppressWarnings("ParameterNumber")
     @POST
     @Path("internal/{name}/database_restore")
     @Produces(MediaType.APPLICATION_JSON)
@@ -643,7 +649,8 @@ public interface StackV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     RestoreV4Response restoreDatabaseByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("backupLocation") String backupLocation, @QueryParam("backupId") String backupId,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn, @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin);
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn, @QueryParam("databaseMaxDurationInMin") int databaseMaxDurationInMin,
+            @QueryParam("dryRun") boolean dryRun);
 
     @POST
     @Path("internal/{name}/cluster_recover")
