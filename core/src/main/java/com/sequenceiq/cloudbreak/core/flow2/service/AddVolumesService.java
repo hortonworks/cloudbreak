@@ -14,14 +14,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
-import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
-import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -50,6 +49,10 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 public class AddVolumesService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AddVolumesService.class);
+
+    private static final Set<String> BLACKLISTED_ROLES = ImmutableSet.of("DATANODE", "ZEPPELIN_SERVER", "KAFKA_BROKER",
+            "SCHEMA_REGISTRY_SERVER", "STREAMS_MESSAGING_MANAGER_SERVER", "SERVER", "NIFI_NODE", "NAMENODE", "STATESTORE",
+            "CATALOGSERVER", "KUDU_MASTER", "KUDU_TSERVER", "SOLR_SERVER", "NIFI_REGISTRY_SERVER", "HUE_LOAD_BALANCER", "KNOX_GATEWAY");
 
     @Inject
     private StackUtil stackUtil;
@@ -91,14 +94,12 @@ public class AddVolumesService {
         String blueprintText = stack.getBlueprint().getBlueprintJsonText();
         CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
         Set<ServiceComponent> hostTemplateServiceComponents = processor.getServiceComponentsByHostGroup().get(requestGroup);
-        InMemoryStateStore.putStack(stack.getId(), PollGroup.POLLABLE);
         stopClouderaManagerServices(stack.getId(), requestGroup, hostTemplateServiceComponents);
         LOGGER.info("RE-Bootstrap machines");
         clusterBootstrapper.reBootstrapMachines(stack.getId());
         Map<String, Map<String, String>> fstabInformation = formatAndMountAfterAddingDisks(stack, requestGroup);
         StackDto stackDto = stackDtoService.getById(stack.getId());
         clusterHostServiceRunner.updateClusterConfigs(stackDto, true);
-        InMemoryStateStore.deleteStack(stack.getId());
         LOGGER.info("Successfully mounted additional block storages for stack {} and group {}", stack.getId(), requestGroup);
         return fstabInformation;
     }
@@ -118,7 +119,16 @@ public class AddVolumesService {
     private void stopClouderaManagerServices(Long stackId, String requestGroup, Set<ServiceComponent> hostTemplateServiceComponents) {
         try {
             StackDto stack = stackDtoService.getById(stackId);
-            configUpdateUtilService.stopClouderaManagerServices(stack, hostTemplateServiceComponents);
+            Set<String> hostTemplateComponents = hostTemplateServiceComponents.stream().map(ServiceComponent::getComponent).collect(Collectors.toSet());
+            boolean restartServices = true;
+            for (String service : hostTemplateComponents) {
+                if (BLACKLISTED_ROLES.contains(service)) {
+                    restartServices = false;
+                }
+            }
+            if (restartServices) {
+                configUpdateUtilService.stopClouderaManagerServices(stack, hostTemplateServiceComponents);
+            }
         } catch (Exception ex) {
             LOGGER.warn("Exception while trying to stop cloudera manager services for group: {}", requestGroup);
             throw new CloudbreakServiceException(ex.getMessage());

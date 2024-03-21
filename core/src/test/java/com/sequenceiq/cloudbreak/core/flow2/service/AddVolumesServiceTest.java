@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.service.ConfigUpdateUtilService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.util.CloudConnectResources;
 import com.sequenceiq.cloudbreak.util.CloudConnectorHelper;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -165,6 +166,7 @@ public class AddVolumesServiceTest {
     @Test
     void testRedeployStatesAndMountDisks() throws Exception {
         Map<String, Map<String, String>> fstabInformation = Map.of("test", Map.of("fstab", "test-fstab", "uuid", "123"));
+        doReturn(Map.of("test", Set.of(ServiceComponent.of("TEST", "TEST")))).when(processor).getServiceComponentsByHostGroup();
         doReturn(fstabInformation).when(hostOrchestrator).formatAndMountDisksAfterModifyingVolumesOnNodes(eq(gatewayConfigs), eq(nodes),
                 eq(nodes), any());
         Map<String, Map<String, String>> response = underTest.redeployStatesAndMountDisks(stack, "test");
@@ -174,6 +176,7 @@ public class AddVolumesServiceTest {
 
     @Test
     void testRedeployStatesAndMountDisksThrowsException() throws Exception  {
+        doReturn(Map.of("test", Set.of(ServiceComponent.of("TEST", "TEST")))).when(processor).getServiceComponentsByHostGroup();
         doThrow(new CloudbreakOrchestratorFailedException("test")).when(hostOrchestrator).formatAndMountDisksAfterModifyingVolumesOnNodes(any(), any(),
                 any(), any());
         CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class,
