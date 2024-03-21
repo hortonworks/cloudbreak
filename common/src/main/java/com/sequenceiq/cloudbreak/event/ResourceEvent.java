@@ -668,10 +668,7 @@ public enum ResourceEvent {
     CLUSTER_ADDING_VOLUMES("cluster.changing.add.volumes"),
     CLUSTER_ADDED_VOLUMES("cluster.changed.add.volumes"),
     CLUSTER_ATTACHING_VOLUMES("cluster.changing.attach.volumes"),
-    ADDING_VOLUMES_FAILED("cluster.add.volumes.failed"),
-    DATALAKE_ADD_VOLUMES_FAILED("datalake.add.volumes.failed"),
-    DATALAKE_ADD_VOLUMES_IN_PROGRESS("datalake.add.volumes.in.progress"),
-    DATALAKE_ADD_VOLUMES_COMPLETE("datalake.add.volumes.complete");
+    ADDING_VOLUMES_FAILED("cluster.add.volumes.failed");
 
     private final String message;
 

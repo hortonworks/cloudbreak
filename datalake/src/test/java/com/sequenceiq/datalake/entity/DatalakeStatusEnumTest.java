@@ -3,8 +3,6 @@ package com.sequenceiq.datalake.entity;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.CERT_ROTATION_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.CERT_ROTATION_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.CHANGE_IMAGE_IN_PROGRESS;
-import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_ADD_VOLUMES_FAILED;
-import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_ADD_VOLUMES_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_DISK_UPDATE_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_DISK_UPDATE_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_ROLLING_UPGRADE_IN_PROGRESS;
@@ -70,8 +68,7 @@ class DatalakeStatusEnumTest {
                     entry(DATALAKE_SECRET_ROTATION_IN_PROGRESS, DATALAKE_SECRET_ROTATION_FAILED),
                     entry(DATALAKE_SECRET_ROTATION_ROLLBACK_IN_PROGRESS, DATALAKE_SECRET_ROTATION_ROLLBACK_FAILED),
                     entry(DATALAKE_SECRET_ROTATION_FINALIZE_IN_PROGRESS, DATALAKE_SECRET_ROTATION_FINALIZE_FAILED),
-                    entry(DATALAKE_DISK_UPDATE_IN_PROGRESS, DATALAKE_DISK_UPDATE_FAILED),
-                    entry(DATALAKE_ADD_VOLUMES_IN_PROGRESS, DATALAKE_ADD_VOLUMES_FAILED))
+                    entry(DATALAKE_DISK_UPDATE_IN_PROGRESS, DATALAKE_DISK_UPDATE_FAILED))
     );
 
     private static final Set<DatalakeStatusEnum> STOP_STATE_SET = EnumSet.of(STOPPED, STOP_IN_PROGRESS);
