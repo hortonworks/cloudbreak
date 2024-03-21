@@ -7,11 +7,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import jakarta.inject.Inject;
 
@@ -21,8 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import com.dyngr.Polling;
-import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
@@ -38,10 +34,6 @@ import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 public class ConfigUpdateUtilService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigUpdateUtilService.class);
-
-    private static final int MAX_READ_COUNT = 15;
-
-    private static final int SLEEP_INTERVAL = 10;
 
     private static final String YARN_LOCAL_DIR = "yarn_nodemanager_local_dirs";
 
@@ -113,8 +105,7 @@ public class ConfigUpdateUtilService {
         for (ServiceComponent serviceComponent : hostTemplateServiceComponents) {
             try {
                 LOGGER.debug("Stopping CM service {}, in stack {}", serviceComponent.getService(), stackDto.getId());
-                clusterApi.clusterModificationService().stopClouderaManagerService(serviceComponent.getService(), false);
-                pollClouderaManagerServices(clusterApi, serviceComponent.getService(), "STOPPED");
+                clusterApi.clusterModificationService().stopClouderaManagerService(serviceComponent.getService(), true);
             } catch (Exception e) {
                 LOGGER.error("Unable to stop CM services for service {}, in stack {}", serviceComponent.getService(), stackDto.getId());
                 throw new CloudbreakServiceException(String.format("Unable to stop CM services for " +
@@ -156,19 +147,6 @@ public class ConfigUpdateUtilService {
             localMountPaths.append(',');
             logMountPaths.append(',');
         }
-    }
-
-    private void pollClouderaManagerServices(ClusterApi clusterApi, String service, String status) throws Exception {
-        LOGGER.debug("Starting polling on CM Service {} to check if {}", service, status);
-        Polling.waitPeriodly(SLEEP_INTERVAL, TimeUnit.SECONDS).stopIfException(true).stopAfterAttempt(MAX_READ_COUNT)
-            .run(() -> {
-                LOGGER.debug("Polling CM Service {} to check if {}", service, status);
-                Map<String, String> readResults = clusterApi.clusterModificationService().fetchServiceStatuses();
-                if (status.equals(readResults.get(service.toLowerCase(Locale.ROOT)))) {
-                    return AttemptResults.justFinish();
-                }
-                return AttemptResults.justContinue();
-            });
     }
 
     private List<String> getEphemeralMountPoints(InstanceGroupDto instanceGroup) {

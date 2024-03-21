@@ -702,7 +702,7 @@ public interface DistroXV1Endpoint {
     @Operation(summary = ADD_VOLUMES_BY_STACK_CRN, operationId = "addVolumesByStackCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier addVolumesByStackCrn(
-            @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+            @ValidCrn(resource = { CrnResourceDescriptor.DATALAKE, CrnResourceDescriptor.DATAHUB }) @PathParam("crn") String crn,
             @Valid StackAddVolumesRequest addVolumesRequest);
 
     @PUT
