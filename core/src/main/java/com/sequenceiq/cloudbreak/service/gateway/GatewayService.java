@@ -6,16 +6,13 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
-import com.sequenceiq.cloudbreak.clusterproxy.ReadConfigResponse;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.repository.GatewayRepository;
-import com.sequenceiq.cloudbreak.service.ClusterProxyRotationService;
 import com.sequenceiq.cloudbreak.view.GatewayView;
 
 @Service
@@ -26,9 +23,6 @@ public class GatewayService {
 
     @Inject
     private GatewayRepository repository;
-
-    @Inject
-    private ClusterProxyRotationService clusterProxyRotationService;
 
     public Gateway save(Gateway gateway) {
         gateway.setGatewayPort(Integer.valueOf(httpsPort));
@@ -84,28 +78,6 @@ public class GatewayService {
         gateway.setSignPubDeprecated(gatewayView.getSignPub());
         gateway.setTokenCertDeprecated(gatewayView.getTokenCert());
         save(gateway);
-    }
-
-    public GatewayView putLegacyTokenCertIntoVaultIfNecessary(GatewayView gatewayView, ReadConfigResponse readConfigResponse) {
-        if (shouldStoreTokenKeysFromClusterProxy(readConfigResponse)) {
-            Gateway gateway = repository.findById(gatewayView.getId()).orElseThrow(NotFoundException.notFound("Gateway should exist"));
-            KeyPair keyPairFromClusterProxy = clusterProxyRotationService.readClusterProxyTokenKeys(readConfigResponse);
-            if (gateway.getTokenKeySecret() == null || gateway.getTokenKeySecret().getRaw() == null) {
-                gateway.setTokenKeySecret(PkiUtil.convert(keyPairFromClusterProxy.getPrivate()));
-                gateway.setTokenPubSecret(PkiUtil.convert(keyPairFromClusterProxy.getPublic()));
-            }
-            if (gateway.getTokenCertSecret() == null || gateway.getTokenCertSecret().getRaw() == null) {
-                gateway.setTokenCertSecret(gateway.getTokenCert());
-            }
-            return save(gateway);
-
-        }
-        return gatewayView;
-    }
-
-    private boolean shouldStoreTokenKeysFromClusterProxy(ReadConfigResponse readConfigResponse) {
-        return StringUtils.isNotBlank(readConfigResponse.getKnoxSecretRef())
-                && readConfigResponse.getKnoxSecretRef().startsWith("cluster-proxy/");
     }
 
 }
