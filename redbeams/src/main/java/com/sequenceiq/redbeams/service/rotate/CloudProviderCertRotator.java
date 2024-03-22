@@ -54,7 +54,7 @@ public class CloudProviderCertRotator {
         ResourceConnector resources = connector.resources();
 
         ExternalDatabaseStatus status = resources.getDatabaseServerStatus(ac, databaseStack);
-        if (status != null && status == ExternalDatabaseStatus.STARTED) {
+        if (status == ExternalDatabaseStatus.STARTED) {
             int maxVersion = databaseServerSslCertificateConfig.getMaxVersionByCloudPlatformAndRegion(
                     cloudContext.getPlatform().getValue(),
                     cloudContext.getLocation().getRegion().getRegionName());
@@ -62,24 +62,28 @@ public class CloudProviderCertRotator {
                     dbStack.getCloudPlatform(),
                     dbStack.getRegion(),
                     maxVersion);
-            Optional<String> desiredCertificate = databaseServerSslCertificatePrescriptionService.prescribeSslCertificateIfNeeded(
-                    cloudContext,
-                    cloudCredential,
-                    dbStack,
-                    cert.cloudProviderIdentifier(),
-                    databaseStack);
-            if (desiredCertificate.isPresent()) {
-                resources.updateDatabaseServerActiveSslRootCertificate(
-                        ac,
-                        databaseStack,
-                        desiredCertificate.get());
-                databaseServerSslCertificateSyncService.syncSslCertificateIfNeeded(
+            if (cert != null) {
+                Optional<String> desiredCertificate = databaseServerSslCertificatePrescriptionService.prescribeSslCertificateIfNeeded(
                         cloudContext,
                         cloudCredential,
                         dbStack,
+                        cert.cloudProviderIdentifier(),
                         databaseStack);
+                if (desiredCertificate.isPresent()) {
+                    resources.updateDatabaseServerActiveSslRootCertificate(
+                            ac,
+                            databaseStack,
+                            desiredCertificate.get());
+                    databaseServerSslCertificateSyncService.syncSslCertificateIfNeeded(
+                            cloudContext,
+                            cloudCredential,
+                            dbStack,
+                            databaseStack);
+                } else {
+                    LOGGER.warn("The desired certificate {} not found.", desiredCertificate);
+                }
             } else {
-                LOGGER.warn("The desired certificate {} not found.", desiredCertificate);
+                LOGGER.warn("SSL certificate entry not found");
             }
         } else {
             LOGGER.debug("Database server {} must be in started status.", dbStack);

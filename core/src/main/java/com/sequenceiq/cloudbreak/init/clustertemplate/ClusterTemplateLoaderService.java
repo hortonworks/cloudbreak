@@ -121,9 +121,7 @@ public class ClusterTemplateLoaderService {
         List<ClusterTemplate> defaultTemplatesInDb = filterTemplatesForDefaults(templatesInDb);
         Collection<String> templateNamesMissingFromDb = collectTemplatesMissingFromDb(defaultTemplateNames, defaultTemplatesInDb);
         Collection<ClusterTemplate> updatedTemplates = collectOutdatedTemplatesInDb(defaultTemplatesInDb);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Cluster definitions missing from DB: {}", templateNamesMissingFromDb);
-        }
+        LOGGER.debug("Cluster definitions missing from DB: {}", templateNamesMissingFromDb);
         Set<Blueprint> blueprints = blueprintService.getAllAvailableInWorkspaceWithoutUpdate(workspace);
         Collection<ClusterTemplate> templatesMissingFromDb = measure(() ->
                         defaultClusterTemplateCache.defaultClusterTemplatesByNames(templateNamesMissingFromDb, blueprints), LOGGER,

@@ -31,9 +31,7 @@ public class RedbeamsStartService {
         DBStack dbStack = dbStackService.getByCrn(crn);
         MDCBuilder.addEnvironmentCrn(dbStack.getEnvironmentId());
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Start called for: {}", dbStack);
-        }
+        LOGGER.debug("Start called for: {}", dbStack);
         if (dbStack.getStatus().isStartInProgressOrCompleted()) {
             LOGGER.debug("DatabaseServer with crn {} is already being started", dbStack.getResourceCrn());
             return;
