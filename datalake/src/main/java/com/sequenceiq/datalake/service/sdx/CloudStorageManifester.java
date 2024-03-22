@@ -78,8 +78,7 @@ public class CloudStorageManifester {
         return cloudStorageRequest;
     }
 
-    public CloudStorageRequest initCloudStorageRequestFromExistingSdxCluster(DetailedEnvironmentResponse environment,
-            ClusterV4Response clusterV4Response, SdxCluster sdxCluster) {
+    public CloudStorageRequest initCloudStorageRequestFromExistingSdxCluster(ClusterV4Response clusterV4Response, SdxCluster sdxCluster) {
         boolean anyCloudStorageIsConfigured = !Strings.isNullOrEmpty(sdxCluster.getCloudStorageBaseLocation());
         CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
         if (anyCloudStorageIsConfigured) {

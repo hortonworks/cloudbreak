@@ -31,9 +31,7 @@ public class RedbeamsStopService {
         DBStack dbStack = dbStackService.getByCrn(crn);
         MDCBuilder.addEnvironmentCrn(dbStack.getEnvironmentId());
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Stop called for: {}", dbStack);
-        }
+        LOGGER.debug("Stop called for: {}", dbStack);
         if (dbStack.getStatus().isStopInProgressOrCompleted()) {
             LOGGER.debug("DatabaseServer with crn {} is already being stopped", dbStack.getResourceCrn());
             return;

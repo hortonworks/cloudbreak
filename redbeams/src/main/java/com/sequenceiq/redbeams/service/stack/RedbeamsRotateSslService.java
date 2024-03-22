@@ -29,11 +29,7 @@ public class RedbeamsRotateSslService {
     public void rotateDatabaseServerSslCert(String crn) {
         DBStack dbStack = dbStackService.getByCrn(crn);
         MDCBuilder.addEnvironmentCrn(dbStack.getEnvironmentId());
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Rotate ssl called for: {}", dbStack);
-        }
-
+        LOGGER.debug("Rotate ssl called for: {}", dbStack);
         flowManager.notify(RedbeamsSslCertRotateEvent.REDBEAMS_SSL_CERT_ROTATE_EVENT.selector(),
                 new RedbeamsEvent(RedbeamsSslCertRotateEvent.REDBEAMS_SSL_CERT_ROTATE_EVENT.selector(), dbStack.getId()));
     }
