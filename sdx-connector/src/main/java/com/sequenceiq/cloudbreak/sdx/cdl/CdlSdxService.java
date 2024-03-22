@@ -54,9 +54,9 @@ public class CdlSdxService extends AbstractSdxService<CdlCrudProto.StatusType.Va
             try {
                 return Optional.of(grpcServiceDiscoveryClient.getRemoteDataContext(crn));
             } catch (JsonProcessingException | InvalidProtocolBufferException e) {
-                LOGGER.warn("Json processing failed, thus we cannot query remote data context. Crn: {}", crn, e);
+                LOGGER.info("Json processing failed, thus we cannot query remote data context. Crn: {}, Exception message: {}", crn, e.getMessage());
             } catch (RuntimeException exception) {
-                LOGGER.warn("Not able to fetch the RDC for CDL from Service Discovery. CRN: {}", crn, exception);
+                LOGGER.info("Not able to fetch the RDC for CDL from Service Discovery. CRN: {}, Exception message: {}", crn, exception.getMessage());
             }
         }
         return Optional.empty();
@@ -68,7 +68,7 @@ public class CdlSdxService extends AbstractSdxService<CdlCrudProto.StatusType.Va
             try {
                 grpcClient.deleteDatalake(sdxCrn);
             } catch (RuntimeException exception) {
-                LOGGER.info("We are not able to delete CDL with CRN: {}, Exception: {}", sdxCrn, exception);
+                LOGGER.info("We are not able to delete CDL with CRN: {}, Exception: {}", sdxCrn, exception.getMessage());
             }
         }
     }
@@ -81,7 +81,7 @@ public class CdlSdxService extends AbstractSdxService<CdlCrudProto.StatusType.Va
                 return Set.of(datalake.getCrn());
             } catch (RuntimeException exception) {
                 LOGGER.info("CDL not found for environment. CRN: {}. Name: {}. Exception: {}",
-                        environmentCrn, environmentName, exception);
+                        environmentCrn, environmentName, exception.getMessage());
                 return Collections.emptySet();
             }
         }
@@ -90,14 +90,17 @@ public class CdlSdxService extends AbstractSdxService<CdlCrudProto.StatusType.Va
 
     @Override
     public Optional<String> getSdxCrnByEnvironmentCrn(String environmentCrn) {
-        try {
-            CdlCrudProto.DatalakeResponse datalake = grpcClient.findDatalake(environmentCrn, "");
-            return Optional.of(datalake.getCrn());
-        } catch (RuntimeException exception) {
-            LOGGER.error("Exception while fetching CRN for containerized datalake with Environment:{} {}",
-                    environmentCrn, exception.getMessage(), exception);
-            return Optional.empty();
+        if  (isEnabled(environmentCrn)) {
+            try {
+                CdlCrudProto.DatalakeResponse datalake = grpcClient.findDatalake(environmentCrn, "");
+                return Optional.of(datalake.getCrn());
+            } catch (RuntimeException exception) {
+                LOGGER.info("Exception while fetching CRN for containerized datalake with Environment:{} {}",
+                    environmentCrn, exception.getMessage());
+                return Optional.empty();
+            }
         }
+        return Optional.empty();
     }
 
     @Override
@@ -162,7 +165,7 @@ public class CdlSdxService extends AbstractSdxService<CdlCrudProto.StatusType.Va
     public boolean isEnabled(String crn) {
         boolean enabled = cdlEnabled && isPlatformEntitled(Crn.safeFromString(crn).getAccountId());
         if (!cdlEnabled) {
-            LOGGER.info("CDL is not enabled. {} {}",
+            LOGGER.debug("CDL is not enabled. {} {}",
                     cdlEnabled, isPlatformEntitled(Crn.safeFromString(crn).getAccountId()));
         }
         return enabled;

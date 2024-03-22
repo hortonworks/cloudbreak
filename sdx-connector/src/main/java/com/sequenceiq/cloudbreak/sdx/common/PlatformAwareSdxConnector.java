@@ -45,8 +45,8 @@ public class PlatformAwareSdxConnector {
 
     public Set<String> listSdxCrns(String environmentName, String environmentCrn) {
         LOGGER.info("Getting SDX CRN'S for the datalakes in the environment {}", environmentName);
-        Set<String> saasSdxCrns = platformDependentServiceMap.get(TargetPlatform.CDL).listSdxCrns(environmentName, environmentCrn);
         Set<String> paasSdxCrns = platformDependentServiceMap.get(TargetPlatform.PAAS).listSdxCrns(environmentName, environmentCrn);
+        Set<String> saasSdxCrns = platformDependentServiceMap.get(TargetPlatform.CDL).listSdxCrns(environmentName, environmentCrn);
         if (!paasSdxCrns.isEmpty() && !saasSdxCrns.isEmpty()) {
             throw new IllegalStateException(String.format("Environment %s should not have SDX from both PaaS and SaaS platform", environmentCrn));
         }
@@ -54,15 +54,8 @@ public class PlatformAwareSdxConnector {
     }
 
     public Optional<String> getSdxCrnByEnvironmentCrn(String environmentCrn) {
-        Optional<String> cdlCrn = platformDependentServiceMap.get(TargetPlatform.CDL).getSdxCrnByEnvironmentCrn(environmentCrn);
-        Optional<String> paasSdxCrn = platformDependentServiceMap.get(TargetPlatform.PAAS).getSdxCrnByEnvironmentCrn(environmentCrn);
-        if (!paasSdxCrn.isEmpty() && !cdlCrn.isEmpty()) {
-            throw new IllegalStateException(String.format("Environment %s should not have SDX from both PaaS and SaaS platform", environmentCrn));
-        } else if (!paasSdxCrn.isEmpty()) {
-            return paasSdxCrn;
-        } else {
-            return cdlCrn;
-        }
+        return platformDependentServiceMap.get(TargetPlatform.PAAS).getSdxCrnByEnvironmentCrn(environmentCrn)
+            .or(() -> platformDependentServiceMap.get(TargetPlatform.CDL).getSdxCrnByEnvironmentCrn(environmentCrn));
     }
 
     public Set<Pair<String, StatusCheckResult>> listSdxCrnsWithAvailability(String environmentName, String environmentCrn, Set<String> sdxCrns) {

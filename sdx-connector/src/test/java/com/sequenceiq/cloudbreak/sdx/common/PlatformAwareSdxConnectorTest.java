@@ -108,13 +108,6 @@ public class PlatformAwareSdxConnectorTest {
     }
 
     @Test
-    public void testGetSdxCrnByEnvironmentCrnBothTypes() {
-        when(paasSdxService.getSdxCrnByEnvironmentCrn(anyString())).thenReturn(Optional.of(PAAS_CRN));
-        when(cdlSdxService.getSdxCrnByEnvironmentCrn(anyString())).thenReturn(Optional.of(SAAS_CRN));
-        assertThrows(IllegalStateException.class, () -> underTest.getSdxCrnByEnvironmentCrn("envCrn"));
-    }
-
-    @Test
     public void testGetSdxCrnByEnvironmentCrnCDL() {
         when(paasSdxService.getSdxCrnByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
         when(cdlSdxService.getSdxCrnByEnvironmentCrn(anyString())).thenReturn(Optional.of(SAAS_CRN));
@@ -126,7 +119,6 @@ public class PlatformAwareSdxConnectorTest {
     @Test
     public void testGetSdxCrnByEnvironmentCrnPaaS() {
         when(paasSdxService.getSdxCrnByEnvironmentCrn(anyString())).thenReturn(Optional.of(PAAS_CRN));
-        when(cdlSdxService.getSdxCrnByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
         underTest.getSdxCrnByEnvironmentCrn("envCrn");
         Optional<String> crn = underTest.getSdxCrnByEnvironmentCrn("envCrn");
         assertEquals(PAAS_CRN, crn.get());
