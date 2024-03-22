@@ -90,11 +90,14 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 CLUSTER_MGMT_CM_ADMIN_PASSWORD,
                 CLUSTER_CB_CM_ADMIN_PASSWORD,
                 CLUSTER_CM_DB_PASSWORD,
-                GATEWAY_CERT,
                 // we should enable this again when CDPD-43281 is resolved
                 //CLUSTER_CM_SERVICES_DB_PASSWORD,
                 DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD,
                 DATAHUB_CM_INTERMEDIATE_CA_CERT));
+        if (testContext.given(DistroXTestDto.class).govCloud()) {
+            // CB-24849
+            secretTypes.add(GATEWAY_CERT);
+        }
         testContext
                 .given(DistroXTestDto.class)
                 .when(distroXTestClient.rotateSecret(secretTypes))
