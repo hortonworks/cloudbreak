@@ -178,13 +178,10 @@ public class SdxRuntimeUpgradeService {
 
     private void validateRollingUpgrade(String userCrn, SdxUpgradeRequest request, SdxCluster cluster) {
         boolean rollingUpgradeEnabled = Boolean.TRUE.equals(request.getRollingUpgradeEnabled());
+        // Enable rolling upgrade for MD as well, however from the UI we only advertise Enterprise DL for rolling upgrade
         if (rollingUpgradeEnabled && !cluster.getClusterShape().isHA()) {
             String message = String.format("The rolling upgrade is not allowed for %s cluster shape.",
                     cluster.getClusterShape().name());
-            LOGGER.warn(message);
-            throw new BadRequestException(message);
-        } else if (rollingUpgradeEnabled && !entitlementService.isDatalakeZduOSUpgradeEnabled(sdxService.getAccountIdFromCrn(userCrn))) {
-            String message = "The rolling upgrade is not allowed because the CDP_DATALAKE_ZDU_OS_UPGRADE entitlement is not enabled for this account.";
             LOGGER.warn(message);
             throw new BadRequestException(message);
         }

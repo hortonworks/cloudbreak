@@ -299,7 +299,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
         setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
         setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
         setupHostGroup(HG_AUXILIARY, setupInstanceGroup(InstanceGroupType.CORE));
-        when(entitlementService.isDatalakeZduOSUpgradeEnabled(anyString())).thenReturn(true);
         setupPrimaryGateway();
 
         InstanceMetaData primaryGWInstanceMetadata = new InstanceMetaData();
@@ -371,7 +370,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
         setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
         setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
         setupHostGroup(HG_AUXILIARY, setupInstanceGroup(InstanceGroupType.CORE));
-        when(entitlementService.isDatalakeZduOSUpgradeEnabled(anyString())).thenReturn(true);
         setupPrimaryGateway();
 
         InstanceMetaData primaryGWInstanceMetadata = new InstanceMetaData();
@@ -449,7 +447,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
         setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
         setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
         setupHostGroup(HG_AUXILIARY, setupInstanceGroup(InstanceGroupType.CORE));
-        when(entitlementService.isDatalakeZduOSUpgradeEnabled(anyString())).thenReturn(true);
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         setupPrimaryGateway();
 
