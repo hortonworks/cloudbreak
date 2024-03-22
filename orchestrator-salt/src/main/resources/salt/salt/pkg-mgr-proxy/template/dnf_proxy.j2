@@ -1,0 +1,5 @@
+proxy={{ pillar['proxy']['protocol'] }}://{{ pillar['proxy']['host'] }}:{{ pillar['proxy']['port'] }}
+{% if 'user' in pillar['proxy'] %}
+proxy_username={{ pillar['proxy']['user'] }}
+proxy_password={{ pillar['proxy']['password'] }}
+{% endif %}

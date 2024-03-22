@@ -7,6 +7,16 @@ configure_yum_proxy:
     - template: jinja
     - source: salt://pkg-mgr-proxy/template/yum_proxy.j2
     - unless: grep "proxy=" /etc/yum.conf
+
+{% if grains['osmajorrelease'] | int == 8 %}
+configure_dnf_proxy:
+  file.append:
+    - name: /etc/dnf/dnf.conf
+    - template: jinja
+    - source: salt://pkg-mgr-proxy/template/dnf_proxy.j2
+    - unless: grep "proxy=" /etc/dnf/dnf.conf
+{% endif %}
+
 {% elif grains['os_family'] == 'Suse' %}
 configure_suse_proxy:
   file.managed:

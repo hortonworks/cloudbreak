@@ -36,7 +36,7 @@ public class DatabaseServerSslCertificatePrescriptionService {
     private SslConfigService sslConfigService;
 
     public Optional<String> prescribeSslCertificateIfNeeded(CloudContext cloudContext, CloudCredential cloudCredential,
-        DBStack dbStack, DatabaseStack databaseStack) throws Exception {
+            DBStack dbStack, DatabaseStack databaseStack) throws Exception {
         Optional<SslConfig> sslConfig = sslConfigService.fetchById(dbStack.getSslConfig());
         if (sslConfig.isPresent()) {
             return prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack,
@@ -46,7 +46,7 @@ public class DatabaseServerSslCertificatePrescriptionService {
     }
 
     public Optional<String> prescribeSslCertificateIfNeeded(CloudContext cloudContext, CloudCredential cloudCredential,
-        DBStack dbStack, String sslCertificateActiveCloudProviderIdentifier, DatabaseStack databaseStack) throws Exception {
+            DBStack dbStack, String sslCertificateActiveCloudProviderIdentifier, DatabaseStack databaseStack) throws Exception {
         Optional<SslConfig> sslConfig = sslConfigService.fetchById(dbStack.getSslConfig());
         String cloudPlatform = dbStack.getCloudPlatform();
         if (sslConfig.isPresent() && CLOUD_PROVIDER_OWNED.equals(sslConfig.get().getSslCertificateType())
