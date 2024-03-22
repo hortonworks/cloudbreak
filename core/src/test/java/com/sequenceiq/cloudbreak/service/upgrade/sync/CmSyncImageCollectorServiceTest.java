@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.sync;
 
 import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
+import static com.sequenceiq.common.model.OsType.RHEL8;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.emptyCollectionOf;
@@ -11,6 +12,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -33,6 +35,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
 @ExtendWith(MockitoExtension.class)
@@ -66,12 +69,9 @@ public class CmSyncImageCollectorServiceTest {
     @InjectMocks
     private CmSyncImageCollectorService underTest;
 
-    @Mock
-    private Stack stack;
-
     @Test
     void testCollectImagesWhenImageUuidPresentThenCurrentImageAdded() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        setupStack(true, false);
+        Stack stack = setupStack(true, false);
         Set<String> candidateImageUuids = Set.of(IMAGE_UUID_1);
         StatedImage currentStatedImage = getCurrentStatedImage();
         StatedImage anotherStatedImage = getStatedImage(IMAGE_UUID_1);
@@ -95,10 +95,12 @@ public class CmSyncImageCollectorServiceTest {
     @Test
     void testCollectImagesWhenNoImageUuidThenAllImagesCollected() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(CURRENT_CLOUD_PLATFORM);
-        setupStack(true, true);
+        Stack stack = setupStack(true, true);
         Set<String> candidateImageUuids = Set.of();
         List<Image> allCdhImages = List.of(getImage(IMAGE_UUID_1));
-        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
+        stack.setResourceCrn(STACK_CRN);
+        StatedImage currentStatedImage = getCurrentStatedImage();
+        when(imageService.getCurrentImage(WORKSPACE_ID, STACK_ID)).thenReturn(currentStatedImage);
         when(imageService.getCurrentImageCatalogName(STACK_ID)).thenReturn(CURRENT_IMAGE_CATALOG_NAME);
         when(imageCatalogService.getAllCdhImages(ACCOUNT_ID, WORKSPACE_ID, CURRENT_IMAGE_CATALOG_NAME, Set.of(imageCatalogPlatform))).thenReturn(allCdhImages);
         when(platformStringTransformer.getPlatformStringForImageCatalogSet(any(), anyString()))
@@ -112,13 +114,12 @@ public class CmSyncImageCollectorServiceTest {
         ));
         verify(imageService).getCurrentImageCatalogName(STACK_ID);
         verify(imageCatalogService).getAllCdhImages(ACCOUNT_ID, WORKSPACE_ID, CURRENT_IMAGE_CATALOG_NAME, Set.of(imageCatalogPlatform));
-        verify(imageService, never()).getCurrentImage(anyLong(), anyLong());
         verify(imageCatalogService, never()).getImageByCatalogName(anyLong(), anyString(), anyString());
     }
 
     @Test
     void testCollectImagesWhenImageCatalogNameNotFoundThenReturnsEmpty() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        setupStack(false, false);
+        Stack stack = setupStack(false, false);
         Set<String> candidateImageUuids = Set.of();
         when(imageService.getCurrentImageCatalogName(STACK_ID)).thenThrow(new CloudbreakImageNotFoundException("The image was not found"));
 
@@ -134,12 +135,14 @@ public class CmSyncImageCollectorServiceTest {
     @Test
     void testCollectImagesWhenNoImageUuidAndImageCatalogExceptionThenReturnsEmpty() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(CURRENT_CLOUD_PLATFORM);
-        setupStack(true, true);
+        Stack stack = setupStack(true, true);
         Set<String> candidateImageUuids = Set.of();
-        when(stack.getResourceCrn()).thenReturn(STACK_CRN);
+        stack.setResourceCrn(STACK_CRN);
         when(imageCatalogService.getAllCdhImages(ACCOUNT_ID, WORKSPACE_ID, CURRENT_IMAGE_CATALOG_NAME, Set.of(imageCatalogPlatform(CURRENT_CLOUD_PLATFORM))))
                 .thenThrow(new CloudbreakImageCatalogException("My custom image catalog exception"));
         when(imageService.getCurrentImageCatalogName(STACK_ID)).thenReturn(CURRENT_IMAGE_CATALOG_NAME);
+        StatedImage currentStatedImage = getCurrentStatedImage();
+        when(imageService.getCurrentImage(WORKSPACE_ID, STACK_ID)).thenReturn(currentStatedImage);
         when(platformStringTransformer.getPlatformStringForImageCatalogSet(any(), anyString()))
                 .thenReturn(Set.of(imageCatalogPlatform));
 
@@ -148,7 +151,6 @@ public class CmSyncImageCollectorServiceTest {
         assertThat(collectedImages, emptyCollectionOf(Image.class));
         verify(imageService).getCurrentImageCatalogName(STACK_ID);
         verify(imageCatalogService).getAllCdhImages(ACCOUNT_ID, WORKSPACE_ID, CURRENT_IMAGE_CATALOG_NAME, Set.of(imageCatalogPlatform));
-        verify(imageService, never()).getCurrentImage(anyLong(), anyLong());
         verify(imageCatalogService, never()).getImageByCatalogName(anyLong(), anyString(), anyString());
     }
 
@@ -162,19 +164,25 @@ public class CmSyncImageCollectorServiceTest {
 
     private Image getImage(String uuid) {
         Image image = mock(Image.class);
-        when(image.getUuid()).thenReturn(uuid);
+        lenient().when(image.getUuid()).thenReturn(uuid);
+        lenient().when(image.getOs()).thenReturn(RHEL8.getOs());
+        lenient().when(image.getOsType()).thenReturn(RHEL8.getOsType());
         return image;
     }
 
-    private void setupStack(boolean setupWorkspace, boolean setupCloudPlatform) {
-        when(stack.getId()).thenReturn(STACK_ID);
+    private Stack setupStack(boolean setupWorkspace, boolean setupCloudPlatform) {
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
         if (setupWorkspace) {
-            when(stack.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+            Workspace workspace = new Workspace();
+            workspace.setId(WORKSPACE_ID);
+            stack.setWorkspace(workspace);
         }
         if (setupCloudPlatform) {
-            when(stack.getCloudPlatform()).thenReturn(CURRENT_CLOUD_PLATFORM);
-            when(stack.getPlatformVariant()).thenReturn(CURRENT_CLOUD_PLATFORM);
+            stack.setCloudPlatform(CURRENT_CLOUD_PLATFORM);
+            stack.setPlatformVariant(CURRENT_CLOUD_PLATFORM);
         }
+        return stack;
     }
 
 }
