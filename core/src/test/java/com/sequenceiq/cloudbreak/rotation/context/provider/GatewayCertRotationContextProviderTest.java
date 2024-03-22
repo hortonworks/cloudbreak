@@ -31,6 +31,8 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.context.CMServiceRoleRestartRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
+import com.sequenceiq.cloudbreak.service.ClusterProxyRotationService;
+import com.sequenceiq.cloudbreak.service.TokenCertInfo;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
@@ -67,7 +69,13 @@ class GatewayCertRotationContextProviderTest {
     private ClusterProxyService clusterProxyService;
 
     @Mock
+    private ClusterProxyRotationService clusterProxyRotationService;
+
+    @Mock
     private ReadConfigResponse readConfigResponse;
+
+    @Mock
+    private TokenCertInfo tokenCertInfo;
 
     @InjectMocks
     private GatewayCertRotationContextProvider underTest;
@@ -84,13 +92,17 @@ class GatewayCertRotationContextProviderTest {
         when(gatewayService.putLegacyFieldsIntoVaultIfNecessary(any())).thenAnswer(invocation -> {
             return invocation.getArgument(0);
         });
+        when(gatewayService.putLegacyTokenCertIntoVaultIfNecessary(any(), any())).thenAnswer(invocation -> {
+            return invocation.getArgument(0);
+        });
+        when(clusterProxyService.readConfig(any())).thenReturn(readConfigResponse);
     }
 
     @Test
     void testGetContexts() {
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
 
-        assertEquals(3, contexts.size());
+        assertEquals(4, contexts.size());
         assertTrue(CloudbreakSecretType.GATEWAY_CERT.getSteps().stream().allMatch(contexts::containsKey));
 
         CMServiceRoleRestartRotationContext roleRestartContext = (CMServiceRoleRestartRotationContext) contexts.get(CM_SERVICE_ROLE_RESTART);
@@ -98,6 +110,17 @@ class GatewayCertRotationContextProviderTest {
         assertEquals("KNOX_GATEWAY", roleRestartContext.getRoleType());
         VaultRotationContext vaultRotationContext = (VaultRotationContext) contexts.get(VAULT);
         assertEquals(3, vaultRotationContext.getVaultPathSecretMap().size());
+    }
+
+    @Test
+    void testGetContextsWithTokenCertRotation() {
+        when(readConfigResponse.getKnoxSecretRef()).thenReturn("cluster-proxy/path:field");
+        when(clusterProxyRotationService.generateTokenCert()).thenReturn(new TokenCertInfo("private", "public", "cert"));
+
+        Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
+
+        VaultRotationContext vaultRotationContext = (VaultRotationContext) contexts.get(VAULT);
+        assertEquals(6, vaultRotationContext.getVaultPathSecretMap().size());
     }
 
     private Gateway getGateway(String suffix) {
@@ -117,7 +140,7 @@ class GatewayCertRotationContextProviderTest {
         lenient().when(signCertSecret.getSecret()).thenReturn("signCert");
         Secret tokenKeySecret = mock(Secret.class);
         lenient().when(result.getTokenKeySecret()).thenReturn(tokenKeySecret);
-        lenient().when(tokenKeySecret.getSecret()).thenReturn(null);
+        lenient().when(tokenKeySecret.getSecret()).thenReturn("tokenKeyCert");
         Secret tokenCertSecret = mock(Secret.class);
         lenient().when(result.getTokenCertSecret()).thenReturn(tokenCertSecret);
         lenient().when(tokenCertSecret.getSecret()).thenReturn("tokenCert");

@@ -86,17 +86,14 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
     @Deprecated
     private String tokenCert;
 
-    @Deprecated
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret tokenCertSecret = Secret.EMPTY;
 
-    @Deprecated
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret tokenKeySecret = Secret.EMPTY;
 
-    @Deprecated
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret tokenPubSecret = Secret.EMPTY;
@@ -270,41 +267,35 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
         }
     }
 
-    @Deprecated
     public String getTokenCert() {
         return Optional.ofNullable(tokenCertSecret)
                 .map(Secret::getRaw)
                 .orElse(tokenCert);
     }
 
-    @Deprecated
     public void setTokenCert(String tokenCert) {
         setTokenCertSecret(tokenCert);
         this.tokenCert = tokenCert;
     }
 
-    @Deprecated
     public void setTokenKeySecret(String tokenPrivateKey) {
         if (tokenPrivateKey != null) {
             this.tokenKeySecret = new Secret(tokenPrivateKey);
         }
     }
 
-    @Deprecated
     public void setTokenPubSecret(String tokenPublicKey) {
         if (tokenPublicKey != null) {
             this.tokenPubSecret = new Secret(tokenPublicKey);
         }
     }
 
-    @Deprecated
     public void setTokenCertSecret(String tokenCert) {
         if (tokenCert != null) {
             this.tokenCertSecret = new Secret(tokenCert);
         }
     }
 
-    @Deprecated
     public Secret getTokenCertSecret() {
         return tokenCertSecret;
     }
@@ -318,12 +309,10 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource, Gateway
         return tokenPubSecret;
     }
 
-    @Deprecated
     public Secret getTokenKeySecret() {
         return tokenKeySecret;
     }
 
-    @Deprecated
     public String getTokenKeyPath() {
         return tokenKeySecret.getSecret();
     }

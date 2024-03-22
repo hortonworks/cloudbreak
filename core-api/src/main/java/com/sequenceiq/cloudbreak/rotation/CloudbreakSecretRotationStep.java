@@ -7,6 +7,7 @@ public enum CloudbreakSecretRotationStep implements SecretRotationStep {
     SALT_STATE_APPLY,
     SALT_STATE_RUN,
     CLUSTER_PROXY_REREGISTER,
+    CLUSTER_PROXY_UPDATE,
     CM_SERVICE_ROLE_RESTART,
     CM_SERVICE,
     UMS_DATABUS_CREDENTIAL;
