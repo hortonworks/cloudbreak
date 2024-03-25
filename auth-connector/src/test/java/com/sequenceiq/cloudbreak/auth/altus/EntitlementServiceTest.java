@@ -146,9 +146,6 @@ class EntitlementServiceTest {
                 {"E2E_TEST_ONLY", (EntitlementCheckFunction) EntitlementService::isE2ETestOnlyEnabled, false},
                 {"E2E_TEST_ONLY", (EntitlementCheckFunction) EntitlementService::isE2ETestOnlyEnabled, true},
 
-                {"CDP_DATALAKE_ZDU_OS_UPGRADE", (EntitlementCheckFunction) EntitlementService::isDatalakeZduOSUpgradeEnabled, false},
-                {"CDP_DATALAKE_ZDU_OS_UPGRADE", (EntitlementCheckFunction) EntitlementService::isDatalakeZduOSUpgradeEnabled, true},
-
                 {"CDP_ENVIRONMENT_PRIVILEGED_USER", (EntitlementCheckFunction) EntitlementService::isEnvironmentPrivilegedUserEnabled, false},
                 {"CDP_ENVIRONMENT_PRIVILEGED_USER", (EntitlementCheckFunction) EntitlementService::isEnvironmentPrivilegedUserEnabled, true},
 

@@ -45,7 +45,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAK
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_RESIZE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_DB_BACKUP_ENABLE_COMPRESSION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_RESIZE_RECOVERY;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_ZDU_OS_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_BACKUP_RESTORE_PERMISSION_CHECKS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
@@ -408,10 +407,6 @@ public class EntitlementService {
 
     public boolean targetedUpscaleSupported(String accountId) {
         return isEntitlementRegistered(accountId, CDP_TARGETED_UPSCALE);
-    }
-
-    public boolean isDatalakeZduOSUpgradeEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_DATALAKE_ZDU_OS_UPGRADE);
     }
 
     public boolean isSkipRollingUpgradeValidationEnabled(String accountId) {
