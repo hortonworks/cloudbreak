@@ -23,6 +23,7 @@ import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.client.UtilTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.yarn.YarnCloudProvider;
@@ -42,6 +43,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXC
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
@@ -63,6 +65,8 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
     protected static final String CHILD_SDX_KEY = "childDataLake";
 
     protected static final String CHILD_DISTROX_KEY = "childDataHub";
+
+    protected static final String YARN_IMAGE_CATALOG = "yarnImageCatalog";
 
     protected static final String CHILD_SDX_IMAGE_SETTINGS_KEY = "childDataLakeImageSettings";
 
@@ -98,6 +102,9 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
     private DistroXTestClient distroXTestClient;
 
     @Inject
+    private ImageCatalogTestClient imageCatalogTestClient;
+
+    @Inject
     private YarnCloudProvider yarnCloudProvider;
 
     @Value("${integrationtest.aws.hybridCloudSecurityGroupID}")
@@ -125,6 +132,8 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
         createEnvironmentWithFreeIpa(testContext);
 
         testContext
+                .given(YARN_IMAGE_CATALOG, ImageCatalogTestDto.class)
+                .when(imageCatalogTestClient.createIfNotExistV4(), key(YARN_IMAGE_CATALOG))
                 .given("childtelemetry", TelemetryTestDto.class)
                     .withLogging(CHILD_CLOUD_PLATFORM)
                     .withReportClusterLogs()

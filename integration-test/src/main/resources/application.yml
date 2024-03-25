@@ -333,6 +333,7 @@ integrationtest:
     queue: infrastructure-services
     networkCidr: 10.140.0.0/16
     baseimage:
+      imageCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-cb-image-catalog.json
       imageId:
       osType:
     diskEncryption:

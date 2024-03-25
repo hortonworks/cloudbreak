@@ -235,17 +235,28 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getImageCatalogName() {
+        return "yarn-image-catalog";
+    }
+
+    @Override
+    public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
+        return imageCatalog.withName(getImageCatalogName())
+                .withUrl(yarnProperties.getBaseimage().getImageCatalogUrl());
+    }
+
+    @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
         return imageSettings.withImageId(yarnProperties.getBaseimage().getImageId())
                 .withOs(getOsType().getOs())
-                .withImageCatalog(commonCloudProperties().getImageCatalogName());
+                .withImageCatalog(getImageCatalogName());
     }
 
     @Override
     public DistroXImageTestDto imageSettings(DistroXImageTestDto imageSettings) {
         return imageSettings.withImageId(yarnProperties.getBaseimage().getImageId())
                 .withOs(getOsType().getOs())
-                .withImageCatalog(commonCloudProperties().getImageCatalogName());
+                .withImageCatalog(getImageCatalogName());
     }
 
     @Override
@@ -375,6 +386,6 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     public OsType getOsType() {
-        return Objects.requireNonNullElse(yarnProperties.getBaseimage().getOsType(), OsType.CENTOS7);
+        return Objects.requireNonNullElse(yarnProperties.getBaseimage().getOsType(), OsType.RHEL8);
     }
 }

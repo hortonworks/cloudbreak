@@ -159,9 +159,19 @@ public class YarnProperties {
     }
 
     public static class Baseimage {
+        private String imageCatalogUrl;
+
         private String imageId;
 
         private OsType osType;
+
+        public String getImageCatalogUrl() {
+            return imageCatalogUrl;
+        }
+
+        public void setImageCatalogUrl(String imageCatalogUrl) {
+            this.imageCatalogUrl = imageCatalogUrl;
+        }
 
         public String getImageId() {
             return imageId;
