@@ -604,28 +604,32 @@ public class ImageServiceTest {
     }
 
     @Test
-    public void testUpdateSupportedImdsIfEntitlementDisabled() {
+    public void testGetSupportedImdsIfEntitlementDisabled() {
         when(entitlementService.isAwsImdsV2Enforced(any())).thenReturn(Boolean.FALSE);
 
-        assertFalse(underTest.getSupportedImdsVersion("acc", "AWS", StatedImage.statedImage(null, null, null)).isPresent());
+        Optional<String> supportedImdsVersion = underTest.getSupportedImdsVersion("acc", "AWS", StatedImage.statedImage(null, null, null));
+        assertTrue(supportedImdsVersion.isPresent());
+        assertEquals("v1", supportedImdsVersion.get());
     }
 
     @Test
-    public void testUpdateSupportedImdsIfPlatformNotAws() {
+    public void testGetSupportedImdsIfPlatformNotAws() {
         assertFalse(underTest.getSupportedImdsVersion("acc", "AZURE", StatedImage.statedImage(null, null, null)).isPresent());
     }
 
     @Test
-    public void testUpdateSupportedImdsIfPkgVersionMissing() {
+    public void testGetSupportedImdsIfPkgVersionMissing() {
         Image image = new Image(null, null, null, null, null, null, null, Map.of(), Map.of(), null, null,
                 Map.of(), List.of(), List.of(), null, false, null, null);
         when(entitlementService.isAwsImdsV2Enforced(any())).thenReturn(Boolean.TRUE);
 
-        assertFalse(underTest.getSupportedImdsVersion("acc", "AWS", StatedImage.statedImage(image, null, null)).isPresent());
+        Optional<String> supportedImdsVersion = underTest.getSupportedImdsVersion("acc", "AWS", StatedImage.statedImage(image, null, null));
+        assertTrue(supportedImdsVersion.isPresent());
+        assertEquals("v1", supportedImdsVersion.get());
     }
 
     @Test
-    public void testUpdateSupportedImds() {
+    public void testGetSupportedImds() {
         Image image = new Image(null, null, null, null, null, null, null, Map.of(), Map.of(), null, null,
                 Map.of("imds", "v2"), List.of(), List.of(), null, false, null, null);
         when(entitlementService.isAwsImdsV2Enforced(any())).thenReturn(Boolean.TRUE);

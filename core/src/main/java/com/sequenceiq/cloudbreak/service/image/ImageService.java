@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.CM_REPO_DETAILS;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.IMAGE;
+import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_V1;
 import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_V2;
 import static com.sequenceiq.cloudbreak.service.image.ImageCatalogService.CDP_DEFAULT_CATALOG_NAME;
 
@@ -367,6 +368,7 @@ public class ImageService {
                     return Optional.of(AWS_IMDS_VERSION_V2);
                 }
             }
+            return Optional.of(AWS_IMDS_VERSION_V1);
         }
         return Optional.empty();
     }

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_V1;
 import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_V2;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
@@ -204,10 +205,13 @@ public class FreeIpaCreationService {
     }
 
     private Optional<Stack> setSupportedImdsVersionForStackIfNecessary(Stack stack, ImageEntity image, String accountId) {
-        if (CloudPlatform.AWS.equals(CloudPlatform.valueOf(stack.getCloudPlatform())) &&
-                StringUtils.equals(image.getImdsVersion(), AWS_IMDS_VERSION_V2) &&
-                entitlementService.isAwsImdsV2Enforced(accountId)) {
-            stack.setSupportedImdsVersion(AWS_IMDS_VERSION_V2);
+        if (CloudPlatform.AWS.equals(CloudPlatform.valueOf(stack.getCloudPlatform()))) {
+            if (StringUtils.equals(image.getImdsVersion(), AWS_IMDS_VERSION_V2) &&
+                    entitlementService.isAwsImdsV2Enforced(accountId)) {
+                stack.setSupportedImdsVersion(AWS_IMDS_VERSION_V2);
+            } else {
+                stack.setSupportedImdsVersion(AWS_IMDS_VERSION_V1);
+            }
             return Optional.of(stackService.save(stack));
         }
         return Optional.empty();
