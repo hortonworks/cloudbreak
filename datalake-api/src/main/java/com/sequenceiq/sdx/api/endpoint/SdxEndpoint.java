@@ -48,7 +48,6 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
-import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
 import com.sequenceiq.sdx.api.model.SdxRecommendationResponse;
@@ -304,14 +303,6 @@ public interface SdxEndpoint {
     @Operation(summary = "Set the rangerRazEnabled flag of the cluster if Raz is installed manually", operationId = "enableRangerRazByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void enableRangerRazByName(@PathParam("name") String name);
-
-    @Deprecated
-    @POST
-    @Path("{name}/custom_image")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "[deprecated] please use createSdx endpoint instead", operationId = "createCustomSdx",
-            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    SdxClusterResponse create(@PathParam("name") String name, @Valid SdxCustomClusterRequest createSdxClusterRequest);
 
     @POST
     @Path("validate_cloud_storage/{name}")
