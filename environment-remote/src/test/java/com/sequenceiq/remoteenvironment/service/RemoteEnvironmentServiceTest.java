@@ -52,13 +52,17 @@ class RemoteEnvironmentServiceTest {
 
         RemoteEnvironmentResponses environmentResponses1 = new RemoteEnvironmentResponses();
         environmentResponses1.setEnvironments(Set.of(environment1));
+
         RemoteEnvironmentResponses environmentResponses2 = new RemoteEnvironmentResponses();
         environmentResponses2.setEnvironments(Set.of(environment2));
+
         when(clusterProxyHybridClientMock.readConfig(eq("CRN1"))).thenReturn(environmentResponses1);
         when(clusterProxyHybridClientMock.readConfig(eq("CRN2"))).thenReturn(environmentResponses2);
 
         SimpleRemoteEnvironmentResponse response1 = new SimpleRemoteEnvironmentResponse();
+        response1.setName("NAME1");
         SimpleRemoteEnvironmentResponse response2 = new SimpleRemoteEnvironmentResponse();
+        response2.setName("NAME2");
         when(converterMock.convert(eq(environment1), eq(privateControlPlane1))).thenReturn(response1);
         when(converterMock.convert(eq(environment2), eq(privateControlPlane2))).thenReturn(response2);
 
