@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.freeipa;
 
+import static com.sequenceiq.cloudbreak.rotation.common.RotationPollingSvcOutageUtils.pollWithSvcOutageErrorHandling;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
+import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -78,7 +81,7 @@ public class FreeipaService {
         if (flowIdentifier == null) {
             handleUnsuccessfulFlow(environmentCrn, flowIdentifier, null);
         } else {
-            pollUntilFlowFinished(environmentCrn, flowIdentifier);
+            pollWithSvcOutageErrorHandling(() -> pollUntilFlowFinished(environmentCrn, flowIdentifier), PollerStoppedException.class);
         }
     }
 

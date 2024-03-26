@@ -126,7 +126,7 @@ public class SecretRotationValidationService {
                     throwBadRequest("There is already a running rotation for %s secret type.", secretType);
                 } else {
                     switch (requestedExecutionType) {
-                        case ROTATE -> expectStepsWithExecutionTypes(progress, PREVALIDATE);
+                        case ROTATE -> expectStepsWithExecutionTypes(progress, PREVALIDATE, ROTATE);
                         case ROLLBACK, FINALIZE -> expectStepsWithExecutionTypes(progress, ROTATE);
                         default -> throwBadRequest("There is already a running rotation for %s secret type.", secretType);
                     }

@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.service.rotation;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.rotation.common.RotationPollingSvcOutageUtils.pollWithSvcOutageErrorHandling;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_ROLLBACK_FINISHED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.RUNNING;
 
@@ -17,6 +18,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackV4SecretRotationRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -142,7 +144,9 @@ public class SdxRotationService {
 
         PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES)
                 .withStopPollingIfExceptionOccurred(true);
-        cloudbreakPoller.pollFlowStateByFlowIdentifierUntilComplete("Secret rotation", flowIdentifier, sdxCluster.getId(), pollingConfig);
+        pollWithSvcOutageErrorHandling(
+                () -> cloudbreakPoller.pollFlowStateByFlowIdentifierUntilComplete("Secret rotation", flowIdentifier, sdxCluster.getId(), pollingConfig),
+                        PollerStoppedException.class);
     }
 
     public void rotateRedbeamsSecret(String datalakeCrn, SecretType secretType, RotationFlowExecutionType executionType,
@@ -166,7 +170,9 @@ public class SdxRotationService {
 
         PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES)
                 .withStopPollingIfExceptionOccurred(true);
-        redbeamsPoller.pollFlowStateByFlowIdentifierUntilComplete("Secret rotation", flowIdentifier, sdxCluster.getId(), pollingConfig);
+        pollWithSvcOutageErrorHandling(
+                () -> redbeamsPoller.pollFlowStateByFlowIdentifierUntilComplete("Secret rotation", flowIdentifier, sdxCluster.getId(), pollingConfig),
+                PollerStoppedException.class);
     }
 
     public FlowIdentifier triggerSecretRotation(String datalakeCrn, List<String> secrets, RotationFlowExecutionType requestedExecutionType,
@@ -229,7 +235,9 @@ public class SdxRotationService {
 
         PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES)
                 .withStopPollingIfExceptionOccurred(true);
-        freeipaPoller.pollFlowStateByFlowIdentifierUntilComplete("Secret rotation", flowIdentifier, sdxCluster.getId(), pollingConfig);
+        pollWithSvcOutageErrorHandling(
+                () -> freeipaPoller.pollFlowStateByFlowIdentifierUntilComplete("Secret rotation", flowIdentifier, sdxCluster.getId(), pollingConfig),
+                PollerStoppedException.class);
     }
 
     public void preValidateFreeipaRotation(String datalakeCrn) {

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.externaldatabase;
 
+import static com.sequenceiq.cloudbreak.rotation.common.RotationPollingSvcOutageUtils.pollWithSvcOutageErrorHandling;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
+import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
@@ -212,7 +215,7 @@ public class ExternalDatabaseService {
         if (flowIdentifier == null) {
             handleUnsuccessfulFlow(databaseServerCrn, flowIdentifier, null);
         } else {
-            pollUntilFlowFinished(databaseServerCrn, flowIdentifier);
+            pollWithSvcOutageErrorHandling(() -> pollUntilFlowFinished(databaseServerCrn, flowIdentifier), PollerStoppedException.class);
         }
     }
 

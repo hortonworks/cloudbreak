@@ -140,7 +140,7 @@ public class SecretRotationValidationServiceTest {
                 Arguments.of(PREVALIDATE, Optional.of(FINALIZE), true),
                 Arguments.of(ROTATE, Optional.empty(), true),
                 Arguments.of(ROTATE, Optional.of(PREVALIDATE), false),
-                Arguments.of(ROTATE, Optional.of(ROTATE), true),
+                Arguments.of(ROTATE, Optional.of(ROTATE), false),
                 Arguments.of(ROTATE, Optional.of(ROLLBACK), true),
                 Arguments.of(ROTATE, Optional.of(FINALIZE), true),
                 Arguments.of(ROLLBACK, Optional.empty(), true),

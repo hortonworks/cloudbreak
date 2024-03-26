@@ -6,9 +6,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.rotation.common.RotationPollerExternalSvcOutageException;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.ExecuteRotationFailedEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.ExecuteRotationFinishedEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.ExecuteRotationTriggerEvent;
+import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.RotationFailedEvent;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationOrchestrationService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -27,6 +29,9 @@ public class ExecuteRotationHandler extends ExceptionCatcherEventHandler<Execute
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ExecuteRotationTriggerEvent> event) {
+        if (e.getCause() instanceof RotationPollerExternalSvcOutageException) {
+            return RotationFailedEvent.fromPayload(event.getData(), e);
+        }
         return ExecuteRotationFailedEvent.fromPayload(event.getData(), e);
     }
 

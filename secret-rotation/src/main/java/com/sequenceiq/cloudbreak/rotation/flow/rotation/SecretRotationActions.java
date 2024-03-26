@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.rotation.common.RotationPollerExternalSvcOutageException;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.config.SecretRotationState;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.config.SecretRotationStateSelectors;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.ExecuteRotationFailedEvent;
@@ -82,6 +83,9 @@ public class SecretRotationActions {
 
             @Override
             protected Object getFailurePayload(PreValidateRotationFinishedEvent payload, Optional<RotationFlowContext> flowContext, Exception ex) {
+                if (ex.getCause() instanceof RotationPollerExternalSvcOutageException) {
+                    return RotationFailedEvent.fromPayload(payload, ex);
+                }
                 return ExecuteRotationFailedEvent.fromPayload(payload, ex);
             }
         };
