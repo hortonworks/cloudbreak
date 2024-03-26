@@ -21,26 +21,7 @@
         "enabled": true
       }
     },
-    "instance_groups": [
-      {
-        "autoscaling": {
-          "enabled": true,
-          "max_instance": 4,
-          "min_instance": 2
-        },
-        "instance_count": 4,
-        "instance_tier": "ON_DEMAND",
-        "instance_type": "m5.xlarge",
-        "labels": {
-          "project": "SDX-SaaS"
-        },
-        "name": "cdl-instance-group-1",
-        "root_volume": {
-          "size": 50
-        },
-        "taints": {}
-      }
-    ],
+    "instance_groups": [],
     "security": {
       "apiServer": {
         "enabled": true
