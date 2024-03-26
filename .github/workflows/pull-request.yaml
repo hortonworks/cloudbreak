@@ -19,6 +19,7 @@ concurrency:
 
 jobs:
   jira-update:
+    permissions: write-all
     name: Jira Update
     runs-on: [cb-ubi8-jdk21]
 
@@ -49,6 +50,7 @@ jobs:
           ./scripts/jira.sh
 
   unit-test:
+    permissions: write-all
     name: Unit Test
     runs-on: [cb-ubi8-jdk21]
 
@@ -147,6 +149,7 @@ jobs:
           update-comment: true
 
   checkstyle-main:
+    permissions: write-all
     name: Checkstyle Main
     runs-on: [cb-ubi8-jdk21]
 
@@ -206,6 +209,7 @@ jobs:
           path: '**/checkstyle/main.xml'
 
   checkstyle-test:
+    permissions: write-all
     name: Checkstyle Test
     runs-on: [cb-ubi8-jdk21]
 
@@ -265,6 +269,7 @@ jobs:
           path: '**/checkstyle/test.xml'
 
   spotbugs-test:
+    permissions: write-all
     name: Spotbugs Test
     runs-on: [cb-ubi8-jdk21]
 
@@ -324,6 +329,7 @@ jobs:
           path: '**/spotbugsXml.xml'
 
   spotbugs-main:
+    permissions: write-all
     name: Spotbugs Main
     runs-on: [cb-ubi8-jdk21]
 
