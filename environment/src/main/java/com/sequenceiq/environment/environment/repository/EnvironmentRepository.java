@@ -49,7 +49,7 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
             + "AND e.archived = false")
     Set<Environment> findAllByIdNotArchived(@Param("ids") List<Long> ids);
 
-    @Query("SELECT e.resourceCrn FROM Environment e WHERE e.deletionTimestamp > :date AND e.archived = true ORDER BY e.deletionTimestamp DESC")
+    @Query("SELECT e.resourceCrn FROM Environment e WHERE e.deletionTimestamp < :date AND e.archived = true ORDER BY e.deletionTimestamp DESC")
     Page<String> findAllArchivedAndDeletionOlderThan(@Param("date") Long date, Pageable pageable);
 
     @Modifying
