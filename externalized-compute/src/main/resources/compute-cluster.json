@@ -21,15 +21,6 @@
         "enabled": true
       }
     },
-    "instance_groups": [],
-    "security": {
-      "apiServer": {
-        "enabled": true
-      },
-      "private": false,
-      "secretEncryption": {
-        "enabled": false
-      }
-    }
+    "instance_groups": []
   }
 }
