@@ -1,6 +1,8 @@
 package com.sequenceiq.flow.core;
 
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.Test;
 
 public class EventConverterAdapterTest {
@@ -9,7 +11,14 @@ public class EventConverterAdapterTest {
     @Test
     public void convertTest() {
         TestEvent event = eventConverter.convert("TestEvent");
-        Assert.assertEquals(TestEvent.TEST_EVENT, event);
+        assertEquals(TestEvent.TEST_EVENT, event);
+    }
+
+    @Test
+    public void convertTestWhenUnknownEvent() {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> eventConverter.convert("UnknownEvent"));
+        assertEquals("Cannot convert class com.sequenceiq.flow.core.EventConverterAdapterTest$TestEvent enum type to UnknownEvent key," +
+                " most probably this is an event from a different flow!", exception.getMessage());
     }
 
     private enum TestEvent implements FlowEvent {
