@@ -28,12 +28,12 @@ class PrivateControlPlaneEnvironmentToRemoteEnvironmentConverterTest {
         SimpleRemoteEnvironmentResponse response = converter.convert(source, privateControlPlane);
 
         assertEquals("ACTIVE", response.getStatus());
-        assertEquals("AWS", response.getCloudPlatform());
+        assertEquals("PRIVATE_CLOUD", response.getCloudPlatform());
         assertNotNull(response.getCreated());
         assertEquals("SAMPLE_CRN", response.getCrn());
         assertEquals("Test Control Plane", response.getPrivateControlPlaneName());
         assertEquals("Sample Environment", response.getName());
-        assertEquals("PRIVATE_CONTROL_PLANE", response.getRegion());
+        assertEquals("PRIVATE_CLOUD", response.getRegion());
         assertEquals("https://example.com", response.getUrl());
     }
 }

@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(name = "PrivateControlPlaneRegistrationRequest")
+@Schema(name = "PrivateControlPlaneRegistrationV1Request")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PrivateControlPlaneRegistrationRequest {

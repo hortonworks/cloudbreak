@@ -14,12 +14,12 @@ public class PrivateControlPlaneEnvironmentToRemoteEnvironmentConverter {
     public SimpleRemoteEnvironmentResponse convert(RemoteEnvironmentResponse source, PrivateControlPlane privateControlPlane) {
         SimpleRemoteEnvironmentResponse response = new SimpleRemoteEnvironmentResponse();
         response.setStatus(source.getStatus());
-        response.setCloudPlatform(source.getCloudPlatform());
+        response.setCloudPlatform("PRIVATE_CLOUD");
         response.setCreated(new Date().getTime());
         response.setCrn(source.getCrn());
         response.setPrivateControlPlaneName(privateControlPlane.getName());
         response.setName(source.getEnvironmentName());
-        response.setRegion("PRIVATE_CONTROL_PLANE");
+        response.setRegion("PRIVATE_CLOUD");
         response.setUrl(privateControlPlane.getUrl());
         return response;
     }

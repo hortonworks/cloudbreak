@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(name = "PrivateControlPlaneRegistrationResponses")
+@Schema(name = "PrivateControlPlaneRegistrationV1Responses")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PrivateControlPlaneRegistrationResponses {

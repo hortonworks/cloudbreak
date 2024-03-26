@@ -72,7 +72,6 @@ dependencies {
     implementation project(":common")
     implementation project(':environment-remote-api')
     implementation project(':cluster-proxy')
-    implementation project(':secret-engine')
 
     implementation group: 'org.springframework.boot',   name: 'spring-boot-starter',            version: springBootVersion
     implementation group: 'org.springframework.boot',   name: 'spring-boot-starter-web',        version: springBootVersion
