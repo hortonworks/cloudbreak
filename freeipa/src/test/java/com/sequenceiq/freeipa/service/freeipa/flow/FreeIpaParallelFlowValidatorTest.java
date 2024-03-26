@@ -29,6 +29,8 @@ import org.reflections.scanners.SubTypesScanner;
 
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.core.chain.finalize.config.FlowChainFinalizeEvent;
+import com.sequenceiq.flow.core.chain.init.config.FlowChainInitEvent;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
 import com.sequenceiq.flow.service.FlowNameFormatService;
@@ -141,7 +143,7 @@ class FreeIpaParallelFlowValidatorTest {
     @Test
     public void testNewParallelFlows() {
         List<String> allowedParallelFlows = new FreeIpaFlowInformation().getAllowedParallelFlows();
-        assertEquals(17, allowedParallelFlows.size(),
+        assertEquals(19, allowedParallelFlows.size(),
                 "You have changed parallel flows for FreeIPA. Please make sure 'FreeIpaParallelFlowValidator' is adjusted if necessary");
         assertTrue(Set.of(
                         FreeIpaCleanupEvent.CLEANUP_EVENT.event(),
@@ -160,7 +162,9 @@ class FreeIpaParallelFlowValidatorTest {
                         UpdateUserDataEvents.UPDATE_USERDATA_TRIGGER_EVENT.event(),
                         UpgradeCcmStateSelector.UPGRADE_CCM_TRIGGER_EVENT.event(),
                         RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_EVENT.event(),
-                        ModifyProxyConfigEvent.MODIFY_PROXY_TRIGGER_EVENT.event()).containsAll(allowedParallelFlows),
+                        ModifyProxyConfigEvent.MODIFY_PROXY_TRIGGER_EVENT.event(),
+                        FlowChainInitEvent.FLOWCHAIN_INIT_TRIGGER_EVENT.event(),
+                        FlowChainFinalizeEvent.FLOWCHAIN_FINALIZE_TRIGGER_EVENT.event()).containsAll(allowedParallelFlows),
                 "You have changed parallel flows for FreeIPA. Please make sure 'FreeIpaParallelFlowValidator' is adjusted if necessary");
     }
 }

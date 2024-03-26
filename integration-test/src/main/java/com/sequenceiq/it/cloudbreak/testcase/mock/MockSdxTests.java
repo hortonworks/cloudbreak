@@ -24,7 +24,6 @@ import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCustomTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
@@ -73,12 +72,12 @@ public class MockSdxTests extends AbstractMockTest {
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
-                .given(sdxCustom, SdxCustomTestDto.class)
-                .withCustomInstanceGroup("master", "xlarge")
-                .when(sdxTestClient.createCustom(), key(sdxCustom))
+                .given(sdxCustom, SdxInternalTestDto.class)
+                .withInstanceType("xlarge")
+                .when(sdxTestClient.createInternal(), key(sdxCustom))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxCustom))
                 .then(this::validateInstanceGroupInstanceTypeIsModified)
-                .then((tc, testDto, client) -> sdxTestClient.deleteCustom().action(tc, testDto, client))
+                .when(sdxTestClient.deleteInternal())
                 .await(SdxClusterStatusResponse.DELETED, key(sdxCustom))
                 .validate();
     }
@@ -244,7 +243,7 @@ public class MockSdxTests extends AbstractMockTest {
                 .validate();
     }
 
-    private SdxCustomTestDto validateInstanceGroupInstanceTypeIsModified(TestContext testContext, SdxCustomTestDto testDto, SdxClient client) {
+    private SdxInternalTestDto validateInstanceGroupInstanceTypeIsModified(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) {
         InstanceGroupV4Response instanceGroupResponse = testDto.getResponse().getStackV4Response().getInstanceGroups().stream()
                 .filter(instanceGroup -> "master".equals(instanceGroup.getName()))
                 .findAny().orElseThrow(() -> new TestFailException("Could not find master instance group."));
