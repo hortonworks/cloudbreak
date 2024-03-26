@@ -38,7 +38,6 @@ import com.sequenceiq.it.cloudbreak.dto.externalizedcompute.ExternalizedComputeC
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCustomTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxRepairTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
@@ -121,8 +120,6 @@ public interface CloudProvider {
     SdxTestDto sdx(SdxTestDto sdx);
 
     SdxInternalTestDto sdxInternal(SdxInternalTestDto sdxInternal);
-
-    SdxCustomTestDto sdxCustom(SdxCustomTestDto sdxCustom);
 
     SdxRepairTestDto sdxRepair(SdxRepairTestDto sdxRepair);
 

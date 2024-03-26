@@ -31,7 +31,8 @@ public class CmSyncImageFinderService {
     @Inject
     private ClouderaManagerProductTransformer clouderaManagerProductTransformer;
 
-    Optional<Image> findTargetImageForImageSync(CmSyncOperationSummary cmSyncResult, Set<Image> candidateImages, String currentImageId, boolean datalake) {
+    public Optional<Image> findTargetImageForImageSync(CmSyncOperationSummary cmSyncResult, Set<Image> candidateImages, String currentImageId,
+            boolean datalake) {
         LOGGER.debug("Searching for new image after CM sync. Current imageId: {}, Candidate imageIds: {}", currentImageId,
                 candidateImages.stream().map(Image::getUuid).collect(Collectors.toSet()));
         Optional<Image> targetImage = findTargetImage(cmSyncResult, candidateImages, currentImageId, datalake);
@@ -45,11 +46,12 @@ public class CmSyncImageFinderService {
     }
 
     private Optional<Image> findTargetImage(CmSyncOperationSummary cmSyncResult, Set<Image> candidateImages, String currentImageId, boolean datalake) {
+        Image currentImage = findCurrentImageFromImageCatalog(currentImageId, candidateImages);
         return candidateImages.stream()
                 .filter(candidateImage ->
                         cmVersionMatches(candidateImage, cmSyncResult) &&
                                 cdhVersionsMatches(candidateImage, cmSyncResult) &&
-                                (datalake || allParcelVersionMatches(candidateImage, cmSyncResult, currentImageId, candidateImages)))
+                                (datalake || allParcelVersionMatches(candidateImage, cmSyncResult, currentImage)))
                 .max(Comparator.comparing(Image::getCreated));
     }
 
@@ -69,11 +71,9 @@ public class CmSyncImageFinderService {
                 .anyMatch(activeParcel -> activeParcel.getName().equals(CDH) && activeParcel.getVersion().equals(cdhVersionFromImage));
     }
 
-    private boolean allParcelVersionMatches(Image candidateImage, CmSyncOperationSummary cmSyncOperationSummary, String currentImageId,
-            Set<Image> candidateImages) {
+    private boolean allParcelVersionMatches(Image candidateImage, CmSyncOperationSummary cmSyncOperationSummary, Image currentImage) {
         Set<ClouderaManagerProduct> productsFromCandidateImage = clouderaManagerProductTransformer.transform(candidateImage, false, true);
         Set<ParcelInfo> activeParcels = cmSyncOperationSummary.getSyncOperationResult().getCmParcelSyncOperationResult().getActiveParcels();
-        Image currentImage = findCurrentImageFromImageCatalog(currentImageId, candidateImages);
         Set<String> parcelsOnCurrentImage = getParcelsFromCurrentImage(currentImage);
         return activeParcels.stream()
                 .filter(activeParcel -> !activeParcel.getName().equals(CDH) && parcelsOnCurrentImage.contains(activeParcel.getName()))

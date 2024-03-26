@@ -39,7 +39,8 @@ public class CmSyncImageCollectorService {
      * Will collect all images using the stack's image catalog.
      * If the candidateImageUuids are empty, all images for the given cloud platform are returned.
      * TODO: Currently, however, if no candidateImageUuids are supplied, only the last patch for every line is returned. This needs to be fixed
-     * @param stack The stack for which the image uuid are to be resolved
+     *
+     * @param stack               The stack for which the image uuid are to be resolved
      * @param candidateImageUuids A set of image uuids that are resolved to images. If empty, all applicable images are returned
      * @return A set of found images
      */
@@ -47,21 +48,25 @@ public class CmSyncImageCollectorService {
         try {
             String imageCatalogName = imageService.getCurrentImageCatalogName(stack.getId());
             Long workspaceId = stack.getWorkspaceId();
-            return candidateImageUuids.isEmpty()
+            Image currentImage = imageService.getCurrentImage(stack.getWorkspaceId(), stack.getId()).getImage();
+            Set<Image> images = candidateImageUuids.isEmpty()
                     ? getAllImagesFromCatalog(stack, imageCatalogName, workspaceId)
-                    : getCurrentAndSelectedImagesFromCatalog(stack, candidateImageUuids, imageCatalogName, workspaceId);
+                    : getCurrentAndSelectedImagesFromCatalog(currentImage, candidateImageUuids, imageCatalogName, workspaceId);
+            return images.stream()
+                    .filter(image -> currentImage.getOs().equalsIgnoreCase(image.getOs())
+                            && currentImage.getOsType().equalsIgnoreCase(image.getOsType()))
+                    .collect(Collectors.toSet());
         } catch (Exception e) {
             LOGGER.warn("It is not possible to collect images for CM sync, returning empty collection: ", e);
             return Set.of();
         }
     }
 
-    private Set<Image> getCurrentAndSelectedImagesFromCatalog(Stack stack, Set<String> candidateImageUuids, String imageCatalogName, Long workspaceId)
-            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    private Set<Image> getCurrentAndSelectedImagesFromCatalog(Image currentImage, Set<String> candidateImageUuids, String imageCatalogName, Long workspaceId) {
         Set<Image> candidateImages = candidateImageUuids.stream()
                 .map(uuid -> getImage(imageCatalogName, workspaceId, uuid))
                 .collect(Collectors.toCollection(HashSet::new));
-        candidateImages.add(imageService.getCurrentImage(stack.getWorkspaceId(), stack.getId()).getImage());
+        candidateImages.add(currentImage);
         return candidateImages;
     }
 

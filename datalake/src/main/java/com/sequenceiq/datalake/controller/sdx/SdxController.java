@@ -82,7 +82,6 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
-import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
 import com.sequenceiq.sdx.api.model.SdxInstanceMetadataUpdateRequest;
@@ -173,14 +172,6 @@ public class SdxController implements SdxEndpoint {
         sdxClusterResponse.setName(sdxCluster.getClusterName());
         sdxClusterResponse.setFlowIdentifier(result.getRight());
         return sdxClusterResponse;
-    }
-
-    @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
-    public SdxClusterResponse create(String name, @Valid SdxCustomClusterRequest sdxCustomClusterRequest) {
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxCustomClusterRequest.copyTo(sdxClusterRequest);
-        return create(name, sdxClusterRequest);
     }
 
     @Override

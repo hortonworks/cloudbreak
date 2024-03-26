@@ -9,7 +9,7 @@ import com.sequenceiq.it.cloudbreak.config.user.TestUserCreator;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCustomTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class MockSdxBlueprintLoadTests extends AbstractMockTest {
@@ -34,9 +34,9 @@ public class MockSdxBlueprintLoadTests extends AbstractMockTest {
             when = "a valid SDX request is sent",
             then = "SDX should be available AND deletable without loading blueprints explicitly"
     )
-    public void testCustomSDXCanBeCreatedThenDeletedSuccessfully(MockedTestContext testContext) {
-        testContext.given(SdxCustomTestDto.class)
-                .when(sdxTestClient.createCustom())
+    public void testSDXCanBeCreatedThenDeletedSuccessfullyWithoutLoadingBlueprints(MockedTestContext testContext) {
+        testContext.given(SdxInternalTestDto.class)
+                .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .validate();
     }

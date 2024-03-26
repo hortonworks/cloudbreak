@@ -9,6 +9,8 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
+import com.sequenceiq.flow.core.chain.finalize.config.FlowChainFinalizeEvent;
+import com.sequenceiq.flow.core.chain.init.config.FlowChainInitEvent;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -53,7 +55,9 @@ public class FreeIpaFlowInformation implements ApplicationFlowInformation {
             UpdateUserDataEvents.UPDATE_USERDATA_TRIGGER_EVENT.event(),
             UpgradeCcmStateSelector.UPGRADE_CCM_TRIGGER_EVENT.event(),
             RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_EVENT.event(),
-            ModifyProxyConfigEvent.MODIFY_PROXY_TRIGGER_EVENT.event());
+            ModifyProxyConfigEvent.MODIFY_PROXY_TRIGGER_EVENT.event(),
+            FlowChainInitEvent.FLOWCHAIN_INIT_TRIGGER_EVENT.event(),
+            FlowChainFinalizeEvent.FLOWCHAIN_FINALIZE_TRIGGER_EVENT.event());
 
     private static final List<Class<? extends FlowConfiguration<?>>> TERMINATION_FLOWS = List.of(StackTerminationFlowConfig.class);
 
