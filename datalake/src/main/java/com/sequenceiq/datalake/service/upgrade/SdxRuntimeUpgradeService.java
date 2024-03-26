@@ -107,8 +107,8 @@ public class SdxRuntimeUpgradeService {
         MDCBuilder.buildMdcContext(cluster);
         SdxUpgradeResponse sdxUpgradeResponse = checkForUpgradeByName(clusterName, upgradeRequest, accountId, upgradePreparation);
         validateUpgradeCandidates(clusterName, sdxUpgradeResponse);
-        return upgradePreparation ? initSdxUpgradePreparation(userCrn, sdxUpgradeResponse.getUpgradeCandidates(), upgradeRequest, cluster, skipBackup)
-                : initSdxUpgrade(userCrn, sdxUpgradeResponse.getUpgradeCandidates(), upgradeRequest, cluster);
+        return upgradePreparation ? initSdxUpgradePreparation(userCrn, sdxUpgradeResponse, upgradeRequest, cluster, skipBackup)
+                : initSdxUpgrade(userCrn, sdxUpgradeResponse, upgradeRequest, cluster);
     }
 
     public SdxUpgradeResponse triggerUpgradeByCrn(String userCrn, String clusterCrn, SdxUpgradeRequest upgradeRequest, String accountId,
@@ -118,8 +118,8 @@ public class SdxRuntimeUpgradeService {
         MDCBuilder.buildMdcContext(cluster);
         SdxUpgradeResponse sdxUpgradeResponse = checkForUpgradeByCrn(userCrn, clusterCrn, upgradeRequest, accountId, upgradePreparation);
         validateUpgradeCandidates(cluster.getClusterName(), sdxUpgradeResponse);
-        return upgradePreparation ? initSdxUpgradePreparation(userCrn, sdxUpgradeResponse.getUpgradeCandidates(), upgradeRequest, cluster, skipBackup)
-                : initSdxUpgrade(userCrn, sdxUpgradeResponse.getUpgradeCandidates(), upgradeRequest, cluster);
+        return upgradePreparation ? initSdxUpgradePreparation(userCrn, sdxUpgradeResponse, upgradeRequest, cluster, skipBackup)
+                : initSdxUpgrade(userCrn, sdxUpgradeResponse, upgradeRequest, cluster);
     }
 
     private boolean isInternalRepoAllowedForUpgrade(String userCrn) {
@@ -148,10 +148,11 @@ public class SdxRuntimeUpgradeService {
         return request;
     }
 
-    private SdxUpgradeResponse initSdxUpgrade(String userCrn, List<ImageInfoV4Response> upgradeCandidates, SdxUpgradeRequest request, SdxCluster cluster) {
+    private SdxUpgradeResponse initSdxUpgrade(String userCrn, SdxUpgradeResponse sdxUpgradeResponse, SdxUpgradeRequest request, SdxCluster cluster) {
+        List<ImageInfoV4Response> upgradeCandidates = sdxUpgradeResponse.getUpgradeCandidates();
         verifyPaywallAccess(userCrn, request);
         validateRollingUpgrade(userCrn, request, cluster);
-        String targetImageId = determineImageId(request, upgradeCandidates);
+        String targetImageId = determineImageId(request, upgradeCandidates, sdxUpgradeResponse.getCurrent().getComponentVersions().getOs());
         String targetCdhVersion = getTargetCdhVersion(upgradeCandidates, targetImageId);
         FlowIdentifier flowIdentifier = triggerDatalakeUpgradeFlow(request, cluster, targetImageId);
         String message = messagesService.getMessage(ResourceEvent.DATALAKE_UPGRADE.getMessage(), List.of(targetCdhVersion, targetImageId));
@@ -187,13 +188,14 @@ public class SdxRuntimeUpgradeService {
         }
     }
 
-    private SdxUpgradeResponse initSdxUpgradePreparation(String userCrn, List<ImageInfoV4Response> upgradeCandidates, SdxUpgradeRequest request,
+    private SdxUpgradeResponse initSdxUpgradePreparation(String userCrn, SdxUpgradeResponse sdxUpgradeResponse, SdxUpgradeRequest request,
             SdxCluster cluster, boolean skipBackup) {
         if (Boolean.TRUE.equals(request.getLockComponents())) {
             throw new BadRequestException("Upgrade preparation is not necessary in case of OS upgrade.");
         }
         verifyPaywallAccess(userCrn, request);
-        String imageId = determineImageId(request, upgradeCandidates);
+        List<ImageInfoV4Response> upgradeCandidates = sdxUpgradeResponse.getUpgradeCandidates();
+        String imageId = determineImageId(request, upgradeCandidates, sdxUpgradeResponse.getCurrent().getComponentVersions().getOs());
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeRuntimeUpgradePreparationFlow(cluster, imageId, skipBackup);
         String targetCdhVersion = getTargetCdhVersion(upgradeCandidates, imageId);
         String message = messagesService.getMessage(ResourceEvent.DATALAKE_UPGRADE_PREPARATION.getMessage(), List.of(targetCdhVersion, imageId));
@@ -216,7 +218,7 @@ public class SdxRuntimeUpgradeService {
         paywallAccessChecker.checkPaywallAccess(license, paywallUrl);
     }
 
-    private String determineImageId(SdxUpgradeRequest upgradeRequest, List<ImageInfoV4Response> upgradeCandidates) {
+    private String determineImageId(SdxUpgradeRequest upgradeRequest, List<ImageInfoV4Response> upgradeCandidates, String currentOs) {
         if (Objects.isNull(upgradeRequest) || upgradeRequest.isEmpty() || Boolean.TRUE.equals(upgradeRequest.getLockComponents())) {
             ImageInfoV4Response imageInfoV4Response = upgradeCandidates.stream().max(ImageInfoV4Response.creationBasedComparator()).orElseThrow();
             String imageId = imageInfoV4Response.getImageId();
@@ -230,7 +232,7 @@ public class SdxRuntimeUpgradeService {
                 LOGGER.debug("Chosen image with id {} as it was specified in the request", imageId);
                 return imageId;
             } else if (StringUtils.isNotEmpty(runtime)) {
-                String imageId = validateRuntime(upgradeCandidates, runtime);
+                String imageId = validateRuntime(upgradeCandidates, runtime, currentOs);
                 LOGGER.debug("Chosen image with id {} for {} runtime specified in the request", imageId, runtime);
                 return imageId;
             } else {
@@ -249,9 +251,10 @@ public class SdxRuntimeUpgradeService {
         }
     }
 
-    private String validateRuntime(List<ImageInfoV4Response> upgradeCandidates, String runtime) {
-        Supplier<Stream<ImageInfoV4Response>> imagesWithMatchingRuntime = () -> upgradeCandidates.stream().filter(
-                imageInfoV4Response -> runtime.equals(imageInfoV4Response.getComponentVersions().getCdp()));
+    private String validateRuntime(List<ImageInfoV4Response> upgradeCandidates, String runtime, String currentOs) {
+        Supplier<Stream<ImageInfoV4Response>> imagesWithMatchingRuntime = () -> upgradeCandidates.stream()
+                .filter(imageInfoV4Response -> runtime.equals(imageInfoV4Response.getComponentVersions().getCdp())
+                        && currentOs.equals(imageInfoV4Response.getComponentVersions().getOs()));
         boolean hasCompatibleImageWithRuntime = imagesWithMatchingRuntime.get().anyMatch(e -> true);
         if (!hasCompatibleImageWithRuntime) {
             String availableRuntimes = upgradeCandidates

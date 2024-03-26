@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.util.TestConstants;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.datalake.controller.sdx.SdxUpgradeClusterConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
@@ -140,6 +141,7 @@ public class SdxRuntimeUpgradeServiceTest {
     public void setUp() {
         response = new UpgradeV4Response();
         sdxUpgradeResponse = new SdxUpgradeResponse();
+        sdxUpgradeResponse.setCurrent(createCurrentImage(OsType.CENTOS7));
         sdxCluster = getValidEnterpriseCluster();
         sdxUpgradeRequest = getFullSdxUpgradeRequest();
         when(sdxUpgradeFilter.filterSdxUpgradeResponse(any(), any())).thenCallRealMethod();
@@ -779,6 +781,7 @@ public class SdxRuntimeUpgradeServiceTest {
         ImageComponentVersions imageComponentVersions = new ImageComponentVersions();
         imageComponentVersions.setCm(V_7_0_3);
         imageComponentVersions.setCdp(V_7_0_2);
+        imageComponentVersions.setOs(OsType.CENTOS7.getOs());
         return imageComponentVersions;
     }
 
@@ -786,6 +789,15 @@ public class SdxRuntimeUpgradeServiceTest {
         ImageComponentVersions imageComponentVersions = new ImageComponentVersions();
         imageComponentVersions.setCm(cmVersion);
         imageComponentVersions.setCdp(cdpVersion);
+        imageComponentVersions.setOs(OsType.CENTOS7.getOs());
         return imageComponentVersions;
+    }
+
+    private ImageInfoV4Response createCurrentImage(OsType osType) {
+        ImageInfoV4Response imageInfoV4Response = new ImageInfoV4Response();
+        ImageComponentVersions imageComponentVersions = new ImageComponentVersions();
+        imageComponentVersions.setOs(osType.getOs());
+        imageInfoV4Response.setComponentVersions(imageComponentVersions);
+        return imageInfoV4Response;
     }
 }

@@ -125,7 +125,7 @@ public class DistroXUpgradeService {
         UpgradeV4Response upgradeV4Response = upgradeAvailabilityService.checkForUpgrade(cluster, workspaceId, request, userCrn);
         validateUpgradeCandidates(cluster, upgradeV4Response);
         verifyPaywallAccess(userCrn, request);
-        ImageInfoV4Response targetImage = imageSelector.determineImageId(request, upgradeV4Response.getUpgradeCandidates());
+        ImageInfoV4Response targetImage = imageSelector.determineImageId(request, upgradeV4Response);
         StackDto stack = stackDtoService.getByNameOrCrn(cluster, ThreadBasedUserCrnProvider.getAccountId());
         MDCBuilder.buildMdcContext(stack);
         boolean lockComponents = determineLockComponentsParam(request, targetImage, stack);
