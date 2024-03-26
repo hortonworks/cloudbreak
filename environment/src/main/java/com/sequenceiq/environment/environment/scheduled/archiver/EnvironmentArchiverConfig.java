@@ -9,7 +9,7 @@ public class EnvironmentArchiverConfig {
     @Value("${environment.archiver.intervalhours:1}")
     private int intervalInHours;
 
-    @Value("${environment.archiver.retention.period.days:14}")
+    @Value("${environment.archiver.retention.period.days:90}")
     private int retentionPeriodInDays;
 
     @Value("${environment.archiver.limit:500}")
