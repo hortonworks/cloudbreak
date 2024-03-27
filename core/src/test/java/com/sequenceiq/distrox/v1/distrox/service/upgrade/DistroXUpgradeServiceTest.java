@@ -185,7 +185,7 @@ class DistroXUpgradeServiceTest {
         when(entitlementService.isInternalRepositoryForUpgradeAllowed(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
         when(clouderaManagerLicenseProvider.getLicense(any())).thenReturn(new JsonCMLicense());
         ImageInfoV4Response imageInfoV4Response = getImage();
-        when(imageSelector.determineImageId(request, response.getUpgradeCandidates())).thenReturn(imageInfoV4Response);
+        when(imageSelector.determineImageId(request, response)).thenReturn(imageInfoV4Response);
         ArgumentCaptor<StackImageChangeV4Request> imageChangeRequestArgumentCaptor = ArgumentCaptor.forClass(StackImageChangeV4Request.class);
         ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, imageInfoV4Response.getImageId());
         when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture()))
@@ -215,7 +215,7 @@ class DistroXUpgradeServiceTest {
         when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
         when(entitlementService.isInternalRepositoryForUpgradeAllowed(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
         ImageInfoV4Response imageInfoV4Response = getImage();
-        when(imageSelector.determineImageId(request, response.getUpgradeCandidates())).thenReturn(imageInfoV4Response);
+        when(imageSelector.determineImageId(request, response)).thenReturn(imageInfoV4Response);
         ArgumentCaptor<StackImageChangeV4Request> imageChangeRequestArgumentCaptor = ArgumentCaptor.forClass(StackImageChangeV4Request.class);
         ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, imageInfoV4Response.getImageId());
         when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture()))
@@ -248,7 +248,7 @@ class DistroXUpgradeServiceTest {
         when(entitlementService.isInternalRepositoryForUpgradeAllowed(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
         when(clouderaManagerLicenseProvider.getLicense(any())).thenReturn(new JsonCMLicense());
         ImageInfoV4Response imageInfoV4Response = getImage();
-        when(imageSelector.determineImageId(request, response.getUpgradeCandidates())).thenReturn(imageInfoV4Response);
+        when(imageSelector.determineImageId(request, response)).thenReturn(imageInfoV4Response);
         ArgumentCaptor<StackImageChangeV4Request> imageChangeRequestArgumentCaptor = ArgumentCaptor.forClass(StackImageChangeV4Request.class);
         ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, imageInfoV4Response.getImageId());
         when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture())).thenReturn(imageChangeDto);
@@ -276,7 +276,7 @@ class DistroXUpgradeServiceTest {
         when(entitlementService.isInternalRepositoryForUpgradeAllowed(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
         when(clouderaManagerLicenseProvider.getLicense(any())).thenReturn(new JsonCMLicense());
         ImageInfoV4Response imageInfoV4Response = getImage();
-        when(imageSelector.determineImageId(request, response.getUpgradeCandidates())).thenReturn(imageInfoV4Response);
+        when(imageSelector.determineImageId(request, response)).thenReturn(imageInfoV4Response);
         ArgumentCaptor<StackImageChangeV4Request> imageChangeRequestArgumentCaptor = ArgumentCaptor.forClass(StackImageChangeV4Request.class);
         ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, imageInfoV4Response.getImageId());
         when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture())).thenReturn(imageChangeDto);
@@ -304,7 +304,7 @@ class DistroXUpgradeServiceTest {
         when(entitlementService.isInternalRepositoryForUpgradeAllowed(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
         when(clouderaManagerLicenseProvider.getLicense(any())).thenReturn(new JsonCMLicense());
         ImageInfoV4Response imageInfoV4Response = getImage();
-        when(imageSelector.determineImageId(request, response.getUpgradeCandidates())).thenReturn(imageInfoV4Response);
+        when(imageSelector.determineImageId(request, response)).thenReturn(imageInfoV4Response);
         ArgumentCaptor<StackImageChangeV4Request> imageChangeRequestArgumentCaptor = ArgumentCaptor.forClass(StackImageChangeV4Request.class);
         ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, imageInfoV4Response.getImageId());
         when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture())).thenReturn(imageChangeDto);
