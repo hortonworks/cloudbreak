@@ -122,6 +122,7 @@ integrationtest:
     location: eu-central-1
     availabilityZone: eu-central-1a
     verticalScale:
+      volumeType: gp3
       supported: true
       datalake:
         group: master
@@ -179,6 +180,7 @@ integrationtest:
     region: West US 2
     location: West US 2
     verticalScale:
+      volumeType: StandardSSD_LRS
       supported: true
       datalake:
         group: master

@@ -421,4 +421,9 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     protected String trimObjectName(String name) {
         return (name.length() > OBJECT_NAME_MAX_LENGTH) ? name.substring(0, OBJECT_NAME_MAX_LENGTH) : name;
     }
+
+    @Override
+    public String verticalScaleVolumeType() {
+        return null;
+    }
 }

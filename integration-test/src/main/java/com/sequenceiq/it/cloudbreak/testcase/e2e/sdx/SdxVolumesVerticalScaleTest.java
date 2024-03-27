@@ -3,14 +3,15 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 import static java.lang.String.format;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -32,6 +33,14 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
 
     private static final int UPDATE_SIZE = 300;
 
+    private static final Long ADD_DISKS_SIZE = 200L;
+
+    private static final Long DISKS_COUNT = 2L;
+
+    private static final String ADD_DISKS = "ADD_DISKS";
+
+    private static final String MODIFY_DISKS = "MODIFY_DISKS";
+
     @Inject
     private SdxTestClient sdxTestClient;
 
@@ -44,7 +53,6 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
     )
     public void testSdxVolumesVerticalScale(TestContext testContext) {
         CloudPlatform cloudPlatform = testContext.getCloudPlatform();
-        String volumeType = CloudPlatform.AWS.equals(cloudPlatform) ? "gp3" : null;
         String instanceType = CloudPlatform.AWS.equals(cloudPlatform) ? "m5.2xlarge" : "Standard_D8s_v3";
         testContext
             .given("telemetry", TelemetryTestDto.class)
@@ -60,20 +68,32 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
             .await(SdxClusterStatusResponse.RUNNING)
             .awaitForHealthyInstances()
             .given(SdxInternalTestDto.class)
-            .when(sdxTestClient.updateDisks(UPDATE_SIZE, volumeType, "master"))
+            .when(sdxTestClient.updateDisks(UPDATE_SIZE, getVolumeType(MODIFY_DISKS, cloudPlatform, testContext), "master"))
             .awaitForFlow()
             .await(SdxClusterStatusResponse.RUNNING)
             .awaitForHealthyInstances()
             .given(SdxInternalTestDto.class)
             .when(sdxTestClient.describeInternal())
             .then((tc, testDto, client) -> {
-                validateVerticalScale(testDto, tc, cloudPlatform, volumeType);
+                validateVerticalScale(testDto, tc, cloudPlatform, getVolumeType(MODIFY_DISKS, cloudPlatform, testContext), MODIFY_DISKS);
+                return testDto;
+            })
+            .given(SdxInternalTestDto.class)
+            .when(sdxTestClient.addDisks(ADD_DISKS_SIZE, DISKS_COUNT, getVolumeType(ADD_DISKS, cloudPlatform, testContext), "master",
+                    CloudVolumeUsageType.GENERAL))
+            .awaitForFlow()
+            .await(SdxClusterStatusResponse.RUNNING)
+            .awaitForHealthyInstances()
+            .given(SdxInternalTestDto.class)
+            .when(sdxTestClient.describeInternal())
+            .then((tc, testDto, client) -> {
+                validateVerticalScale(testDto, tc, cloudPlatform, getVolumeType(ADD_DISKS, cloudPlatform, testContext), ADD_DISKS);
                 return testDto;
             })
             .validate();
     }
 
-    private void validateVerticalScale(SdxInternalTestDto sdxTestDto, TestContext tc, CloudPlatform cloudPlatform, String volumeType) {
+    private void validateVerticalScale(SdxInternalTestDto sdxTestDto, TestContext tc, CloudPlatform cloudPlatform, String volumeType, String operationType) {
 
         SdxClusterDetailResponse sdxClusterDetailResponse = sdxTestDto.getResponse();
         InstanceGroupV4Response instanceGroup = sdxClusterDetailResponse.getStackV4Response().getInstanceGroups().stream()
@@ -83,16 +103,28 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
         CloudFunctionality cloudFunctionality = getCloudFunctionality(tc);
         List<String> attachedVolumes = cloudFunctionality.listInstancesVolumeIds(sdxTestDto.getName(), updatedInstances);
         List<Volume> attachedVolumesAttributes = cloudFunctionality.describeVolumes(attachedVolumes);
+        AtomicInteger cbVolumesCount = new AtomicInteger();
         instanceGroup.getTemplate().getAttachedVolumes().forEach(vol -> {
-            if (vol.getSize() != UPDATE_SIZE || (CloudPlatform.AWS.equals(cloudPlatform) && !volumeType.equals(vol.getType().toLowerCase(Locale.ROOT)))) {
-                throw new TestFailException(getExceptionMessage(cloudPlatform, vol.getSize(), vol.getType().toLowerCase(Locale.ROOT), volumeType, false));
+            if (operationType.equals(MODIFY_DISKS) && (vol.getSize() != UPDATE_SIZE
+                    || (CloudPlatform.AWS.equals(cloudPlatform) && !volumeType.equalsIgnoreCase(vol.getType())))) {
+                throw new TestFailException(getExceptionMessage(cloudPlatform, vol.getSize(), vol.getType(), volumeType, false));
+            } else if (operationType.equals(ADD_DISKS) && vol.getSize() == ADD_DISKS_SIZE.intValue() && vol.getType().equalsIgnoreCase(volumeType)) {
+                cbVolumesCount.getAndUpdate(val -> vol.getCount());
             }
         });
+        AtomicInteger cloudProviderVolumesCount = new AtomicInteger();
         attachedVolumesAttributes.forEach(vol -> {
-            if (vol.getSize() != UPDATE_SIZE || (CloudPlatform.AWS.equals(cloudPlatform) && !volumeType.equals(vol.getType().toLowerCase(Locale.ROOT)))) {
-                throw new TestFailException(getExceptionMessage(cloudPlatform, vol.getSize(), vol.getType().toLowerCase(Locale.ROOT), volumeType, true));
+            if (operationType.equals(MODIFY_DISKS) && (vol.getSize() != UPDATE_SIZE
+                    || (CloudPlatform.AWS.equals(cloudPlatform) && !volumeType.equalsIgnoreCase(vol.getType())))) {
+                throw new TestFailException(getExceptionMessage(cloudPlatform, vol.getSize(), vol.getType(), volumeType, true));
+            } else if (operationType.equals(ADD_DISKS) && vol.getSize() == ADD_DISKS_SIZE.intValue() && vol.getType().equalsIgnoreCase(volumeType)) {
+                cloudProviderVolumesCount.getAndIncrement();
             }
         });
+        if (operationType.equals(ADD_DISKS)) {
+            validateOrThrow(cbVolumesCount.get(), "DATABASE");
+            validateOrThrow(cbVolumesCount.get(), "CLOUD_PROVIDER");
+        }
     }
 
     protected CloudFunctionality getCloudFunctionality(TestContext testContext) {
@@ -109,5 +141,20 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
             sb.append(format(", expected disk type: %s :: actual disk type: %s", expectedVolumeType, volumeType));
         }
         return sb.toString();
+    }
+
+    private void validateOrThrow(int volumesAdded, String exceptionType) {
+        if (volumesAdded != DISKS_COUNT.intValue()) {
+            String exceptionMessage = "Add Volumes Flow failed: " + (("DATABASE").equals(exceptionType) ? "Failed to update database"
+                    : "Failed to add disks on cloud provider");
+            throw new TestFailException(exceptionMessage);
+        }
+    }
+
+    private String getVolumeType(String operationType, CloudPlatform cloudPlatform, TestContext testContext) {
+        if ((cloudPlatform == CloudPlatform.AWS) || (cloudPlatform == CloudPlatform.AZURE && ADD_DISKS.equals(operationType))) {
+            return testContext.getCloudProvider().verticalScaleVolumeType();
+        }
+        return null;
     }
 }

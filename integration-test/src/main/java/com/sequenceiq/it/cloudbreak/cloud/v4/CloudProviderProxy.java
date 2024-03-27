@@ -84,6 +84,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public String verticalScaleVolumeType() {
+        return delegate.verticalScaleVolumeType();
+    }
+
+    @Override
     public String availabilityZone() {
         return delegate.availabilityZone();
     }

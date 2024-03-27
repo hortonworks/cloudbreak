@@ -296,6 +296,11 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String verticalScaleVolumeType() {
+        return azureProperties.getVerticalScale().getVolumeType();
+    }
+
+    @Override
     public String availabilityZone() {
         return azureProperties.getAvailabilityZone();
     }

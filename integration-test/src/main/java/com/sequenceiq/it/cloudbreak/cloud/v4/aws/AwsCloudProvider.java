@@ -314,6 +314,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String verticalScaleVolumeType() {
+        return awsProperties.getVerticalScale().getVolumeType();
+    }
+
+    @Override
     public String availabilityZone() {
         return awsProperties.getAvailabilityZone();
     }

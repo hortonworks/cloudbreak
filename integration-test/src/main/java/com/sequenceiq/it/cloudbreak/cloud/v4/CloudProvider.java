@@ -50,6 +50,8 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 public interface CloudProvider {
 
+    String verticalScaleVolumeType();
+
     String availabilityZone();
 
     String region();

@@ -6,7 +6,9 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxAddDisksAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxAutotlsCertRotationAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxBackupAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxBackupInternalAction;
@@ -277,5 +279,10 @@ public class SdxTestClient {
 
     public Action<SdxInternalTestDto, SdxClient> instanceMetadataUpdate() {
         return new SdxInstanceMetadataUpdateAction();
+    }
+
+    public Action<SdxInternalTestDto, SdxClient> addDisks(Long size, Long numOfDisks, String volumeType, String instanceGroup,
+            CloudVolumeUsageType cloudVolumeUsageType) {
+        return new SdxAddDisksAction(size, numOfDisks, volumeType, instanceGroup, cloudVolumeUsageType);
     }
 }

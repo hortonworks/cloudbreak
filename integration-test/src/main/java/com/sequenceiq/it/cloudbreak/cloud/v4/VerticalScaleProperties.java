@@ -10,6 +10,16 @@ public class VerticalScaleProperties {
 
     private FreeIpaProperties freeipa;
 
+    private String volumeType;
+
+    public String getVolumeType() {
+        return volumeType;
+    }
+
+    public void setVolumeType(String volumeType) {
+        this.volumeType = volumeType;
+    }
+
     public FreeIpaProperties getFreeipa() {
         return freeipa;
     }
