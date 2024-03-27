@@ -319,7 +319,7 @@ public class DatalakeRestoreActions {
                 Exception exception = payload.getException();
                 LOGGER.error("Datalake restore failed for datalake with id: {}", payload.getResourceId(), exception);
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
-                        ResourceEvent.DATALAKE_RESTORE_FINISHED,
+                        ResourceEvent.DATALAKE_RESTORE_FAILED,
                         getFailureReason(variables, exception), payload.getResourceId());
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
                 flow.setFlowFailed(payload.getException());
