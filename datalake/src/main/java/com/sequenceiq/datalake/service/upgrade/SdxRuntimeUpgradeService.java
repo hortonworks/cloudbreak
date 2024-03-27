@@ -38,6 +38,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
@@ -178,9 +179,8 @@ public class SdxRuntimeUpgradeService {
 
     private void validateRollingUpgrade(String userCrn, SdxUpgradeRequest request, SdxCluster cluster) {
         boolean rollingUpgradeEnabled = Boolean.TRUE.equals(request.getRollingUpgradeEnabled());
-        // Enable rolling upgrade for MD as well, however from the UI we only advertise Enterprise DL for rolling upgrade
-        if (rollingUpgradeEnabled && !cluster.getClusterShape().isHA()) {
-            String message = String.format("The rolling upgrade is not allowed for %s cluster shape.",
+        if (rollingUpgradeEnabled && cluster.getClusterShape() != SdxClusterShape.ENTERPRISE) {
+            String message = String.format("Rolling upgrade is not supported for %s cluster shape.",
                     cluster.getClusterShape().name());
             LOGGER.warn(message);
             throw new BadRequestException(message);
