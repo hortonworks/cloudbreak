@@ -150,6 +150,10 @@ public class InstanceGroupService {
         return repository.getPrimaryGatewayInstanceGroupByStackId(stackId).orElseThrow(notFound("Gateway Instance Group for Stack", stackId));
     }
 
+    public InstanceGroup getPrimaryGatewayInstanceGroupWithTemplateByStackId(Long stackId) {
+        return repository.getPrimaryGatewayInstanceGroupWithTemplateByStackId(stackId).orElseThrow(notFound("Gateway Instance Group for Stack", stackId));
+    }
+
     public Set<InstanceGroup> getByStackAndFetchTemplates(Long stackId) {
         return repository.getByStackAndFetchTemplates(stackId);
     }

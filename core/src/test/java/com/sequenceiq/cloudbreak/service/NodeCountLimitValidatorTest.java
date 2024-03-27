@@ -134,7 +134,7 @@ public class NodeCountLimitValidatorTest {
         when(stackView.getEnvironmentCrn()).thenReturn(ENV_CRN);
         when(instanceMetaDataService.getPrimaryGatewayInstanceMetadataOrError(anyLong())).thenReturn(primaryGateway);
         when(primaryGateway.getInstanceId()).thenReturn("instance-1");
-        when(instanceGroupService.getPrimaryGatewayInstanceGroupByStackId(anyLong())).thenReturn(gatewayGroup);
+        when(instanceGroupService.getPrimaryGatewayInstanceGroupWithTemplateByStackId(anyLong())).thenReturn(gatewayGroup);
         when(gatewayGroup.getTemplate()).thenReturn(template);
         when(template.getInstanceType()).thenReturn("m5.xlarge");
         when(instanceMetaDataService.countByStackId(anyLong())).thenReturn(count(48));

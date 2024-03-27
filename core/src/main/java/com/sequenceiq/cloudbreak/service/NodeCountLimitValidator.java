@@ -68,7 +68,7 @@ public class NodeCountLimitValidator {
             validateNodeCount(targetNodeCount, accountId);
             nodeCountLimitConfiguration.getPrimaryGatewayRequirement(targetNodeCount).ifPresent(nodeRequirement -> {
                 InstanceMetadataView primaryGateway = instanceMetaDataService.getPrimaryGatewayInstanceMetadataOrError(stackView.getId());
-                InstanceGroup primaryGatewayGroup = instanceGroupService.getPrimaryGatewayInstanceGroupByStackId(stackView.getId());
+                InstanceGroup primaryGatewayGroup = instanceGroupService.getPrimaryGatewayInstanceGroupWithTemplateByStackId(stackView.getId());
                 CloudPlatform cloudPlatform = CloudPlatform.fromName(stackView.getCloudPlatform());
                 validatePrimaryGatewayInstanceType(nodeRequirement, stackView.getEnvironmentCrn(), cloudPlatform, stackView.getRegion(),
                         getInstanceType(primaryGatewayGroup), primaryGateway.getInstanceId(), targetNodeCount);
