@@ -127,6 +127,7 @@ public class ImageService {
         imageEntity.setDate(image.getDate());
         imageEntity.setLdapAgentVersion(imageConverter.extractLdapAgentVersion(image));
         imageEntity.setSourceImage(imageConverter.extractSourceImage(image));
+        imageEntity.setImdsVersion(imageConverter.extractImdsVersion(image));
         imageEntity.setOs(imageWrapper.getImage().getOs());
         imageEntity.setOsType(imageWrapper.getImage().getOsType());
         return imageEntity;
