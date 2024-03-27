@@ -34,6 +34,10 @@ auth:
     microdutysdx.enable: true
     upgrade.internalrepo.enable: true
     hbase.cloudstorage.enable: false
+    cm.observability.saas.premium: false
+    cm.observability.saas.trial: false
+    cm.observability.realtimejobs: false
+    cm.observability.dmp: false
     datalake:
       efs.enable: false
       customimage.enable: true

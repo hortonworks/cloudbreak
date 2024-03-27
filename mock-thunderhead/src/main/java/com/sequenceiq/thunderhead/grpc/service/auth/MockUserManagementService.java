@@ -98,6 +98,10 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_L
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_DMP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_REAL_TIME_JOBS;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_SAAS_PREMIUM;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_SAAS_TRIAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.TARGETING_SUBNETS_FOR_ENDPOINT_ACCESS_GATEWAY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
@@ -546,6 +550,18 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.aws.imdsv2.enforced}")
     private boolean awsImdsV2Enforced;
+
+    @Value("${auth.mock.cm.observability.saas.premium}")
+    private boolean cmObservabilitySaasPremium;
+
+    @Value("${auth.mock.cm.observability.saas.trial}")
+    private boolean cmObservabilitySaasTrial;
+
+    @Value("${auth.mock.cm.observability.realtimejobs}")
+    private boolean cmObservabilityRealtimeJobs;
+
+    @Value("${auth.mock.cm.observability.dmp}")
+    private boolean cmObservabilityDmp;
 
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
@@ -1014,6 +1030,18 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (awsImdsV2Enforced) {
             builder.addEntitlements(createEntitlement(CDP_ENFORCE_AWS_IMDSV2));
+        }
+        if (cmObservabilitySaasPremium) {
+            builder.addEntitlements(createEntitlement(OBSERVABILITY_SAAS_PREMIUM));
+        }
+        if (cmObservabilitySaasTrial) {
+            builder.addEntitlements(createEntitlement(OBSERVABILITY_SAAS_TRIAL));
+        }
+        if (cmObservabilityRealtimeJobs) {
+            builder.addEntitlements(createEntitlement(OBSERVABILITY_REAL_TIME_JOBS));
+        }
+        if (cmObservabilityDmp) {
+            builder.addEntitlements(createEntitlement(OBSERVABILITY_DMP));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

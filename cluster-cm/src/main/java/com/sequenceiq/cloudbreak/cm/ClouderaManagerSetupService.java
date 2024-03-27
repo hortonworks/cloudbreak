@@ -92,6 +92,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     private static final String SDX_ENTERPRISE_DATALAKE_TEXT = "enterprise-datalake";
 
+    private static final int BAD_REQUEST_ERROR_CODE = 400;
+
     @Inject
     private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
 
@@ -357,10 +359,37 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                     .addItemsItem(setHeader(stackType))
                     .addItemsItem(disableGoogleAnalytics());
             clouderaManagerResourceApi.updateConfig("Updated configurations.", apiConfigList);
+            updateClouderaManagerMonitoringConfig();
         } catch (ApiException e) {
             throw mapApiException(e);
         } catch (Exception e) {
             throw mapException(e);
+        }
+    }
+
+    private void updateClouderaManagerMonitoringConfig() throws ApiException {
+        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
+        ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
+        if ((entitlementService.isObservabilitySaasPremiumEnabled(accountId) || entitlementService.isObservabilitySaasTrialEnabled(accountId)) &&
+                entitlementService.isObservabilityRealTimeJobsEnabled(accountId)) {
+            updateCmConfigSilentlyIfNotSupportedByCm("enable_observability_real_time_jobs", "true");
+        }
+        if (entitlementService.isObservabilityDmpEnabled(accountId)) {
+            updateCmConfigSilentlyIfNotSupportedByCm("enable_observability_metrics_dmp", "true");
+        }
+    }
+
+    private void updateCmConfigSilentlyIfNotSupportedByCm(String parameterName, String value) throws ApiException {
+        try {
+            ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
+            ApiConfigList apiConfigList = new ApiConfigList().addItemsItem(new ApiConfig().name(parameterName).value(value));
+            clouderaManagerResourceApi.updateConfig("Updated configurations.", apiConfigList);
+        } catch (ApiException e) {
+            if (e.getCode() == BAD_REQUEST_ERROR_CODE && e.getResponseBody() != null && e.getResponseBody().contains("Unknown configuration attribute")) {
+                LOGGER.debug("CM parameter '{}' is not supported by this CM version.", parameterName);
+            } else {
+                throw e;
+            }
         }
     }
 

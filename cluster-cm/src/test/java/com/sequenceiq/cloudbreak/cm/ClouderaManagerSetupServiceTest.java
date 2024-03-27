@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -54,6 +55,7 @@ import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiRemoteDataContext;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -150,6 +152,9 @@ public class ClouderaManagerSetupServiceTest {
     @Mock
     private BlueprintUtils blueprintUtils;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private ClouderaManagerSetupService underTest;
 
@@ -173,6 +178,7 @@ public class ClouderaManagerSetupServiceTest {
         ReflectionTestUtils.setField(underTest, "clouderaManagerFedRAMPService", clouderaManagerFedRAMPService);
         ReflectionTestUtils.setField(underTest, "apiClient", mock(ApiClient.class));
         ReflectionTestUtils.setField(underTest, "blueprintUtils", blueprintUtils);
+        ReflectionTestUtils.setField(underTest, "entitlementService", entitlementService);
     }
 
     @Test
@@ -569,6 +575,50 @@ public class ClouderaManagerSetupServiceTest {
         underTest.updateConfig();
 
         verify(clouderaManagerResourceApi, times(1)).updateConfig(
+                anyString(),
+                any(ApiConfigList.class)
+        );
+    }
+
+    @Test
+    public void testUpdateConfigWhenUpdateConfigWithDmpEntitlement() throws Exception {
+        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
+
+        lenient().when(entitlementService.isObservabilityDmpEnabled(any())).thenReturn(true);
+        lenient().when(entitlementService.isObservabilityRealTimeJobsEnabled(any())).thenReturn(true);
+        lenient().when(entitlementService.isObservabilitySaasPremiumEnabled(any())).thenReturn(false);
+        lenient().when(entitlementService.isObservabilitySaasTrialEnabled(any())).thenReturn(false);
+
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
+                .thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerResourceApi.updateConfig(anyString(), any(ApiConfigList.class)))
+                .thenReturn(new ApiConfigList());
+
+        underTest.updateConfig();
+
+        verify(clouderaManagerResourceApi, times(2)).updateConfig(
+                anyString(),
+                any(ApiConfigList.class)
+        );
+    }
+
+    @Test
+    public void testUpdateConfigWhenUpdateConfigWithAllObservabilityEntitlement() throws Exception {
+        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
+
+        lenient().when(entitlementService.isObservabilityDmpEnabled(any())).thenReturn(true);
+        lenient().when(entitlementService.isObservabilityRealTimeJobsEnabled(any())).thenReturn(true);
+        lenient().when(entitlementService.isObservabilitySaasPremiumEnabled(any())).thenReturn(true);
+        lenient().when(entitlementService.isObservabilitySaasTrialEnabled(any())).thenReturn(true);
+
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
+                .thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerResourceApi.updateConfig(anyString(), any(ApiConfigList.class)))
+                .thenReturn(new ApiConfigList());
+
+        underTest.updateConfig();
+
+        verify(clouderaManagerResourceApi, times(3)).updateConfig(
                 anyString(),
                 any(ApiConfigList.class)
         );

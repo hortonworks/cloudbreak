@@ -100,6 +100,10 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ON
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_RMS_ON_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_DMP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_REAL_TIME_JOBS;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_SAAS_PREMIUM;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_SAAS_TRIAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH_ONE_HOUR_TOKEN;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.PERSONAL_VIEW_CB_BY_RIGHT;
@@ -544,6 +548,22 @@ public class EntitlementService {
 
     public boolean isAwsImdsV2Enforced(String accountId) {
         return isEntitlementRegistered(accountId, CDP_ENFORCE_AWS_IMDSV2);
+    }
+
+    public boolean isObservabilitySaasPremiumEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, OBSERVABILITY_SAAS_PREMIUM);
+    }
+
+    public boolean isObservabilitySaasTrialEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, OBSERVABILITY_SAAS_TRIAL);
+    }
+
+    public boolean isObservabilityRealTimeJobsEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, OBSERVABILITY_REAL_TIME_JOBS);
+    }
+
+    public boolean isObservabilityDmpEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, OBSERVABILITY_DMP);
     }
 
     public List<String> getEntitlements(String accountId) {
