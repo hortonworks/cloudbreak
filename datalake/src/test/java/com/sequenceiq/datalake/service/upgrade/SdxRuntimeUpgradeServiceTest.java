@@ -140,7 +140,7 @@ public class SdxRuntimeUpgradeServiceTest {
     public void setUp() {
         response = new UpgradeV4Response();
         sdxUpgradeResponse = new SdxUpgradeResponse();
-        sdxCluster = getValidSdxCluster();
+        sdxCluster = getValidEnterpriseCluster();
         sdxUpgradeRequest = getFullSdxUpgradeRequest();
         when(sdxUpgradeFilter.filterSdxUpgradeResponse(any(), any())).thenCallRealMethod();
         ReflectionTestUtils.setField(underTest, "paywallUrl", "https://archive.coudera.com/p/cdp-public/");
@@ -310,6 +310,38 @@ public class SdxRuntimeUpgradeServiceTest {
         verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE, SKIP_BACKUP,
                 skipOptions, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
         assertTrue(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
+    }
+
+    @Test
+    public void testMediumDutyRollingUpgradeMustBeRejected() {
+        DatalakeDrSkipOptions skipOptions = new DatalakeDrSkipOptions(true, true, true, true);
+        sdxUpgradeRequest.setSkipValidation(true);
+        sdxUpgradeRequest.setSkipAtlasMetadata(true);
+        sdxUpgradeRequest.setSkipRangerAudits(true);
+        sdxUpgradeRequest.setSkipRangerMetadata(true);
+        sdxUpgradeRequest.setRollingUpgradeEnabled(ROLLING_UPGRADE_ENABLED);
+
+        // override the cluster shape for this test
+        sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+
+        when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
+        ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
+        when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), upgradeV4RequestCaptor.capture(), eq(ACCOUNT_ID))).thenReturn(response);
+        when(sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(sdxUpgradeRequest)).thenCallRealMethod();
+        when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(any(UpgradeV4Response.class))).thenReturn(sdxUpgradeResponse);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(sdxService.getAccountIdFromCrn(USER_CRN)).thenReturn(ACCOUNT_ID);
+        ImageInfoV4Response imageInfo = new ImageInfoV4Response();
+        imageInfo.setImageId(IMAGE_ID);
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
+        response.setUpgradeCandidates(List.of(imageInfo));
+        sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo));
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID, false)));
+
+        assertEquals("Rolling upgrade is not supported for MEDIUM_DUTY_HA cluster shape.", exception.getMessage());
     }
 
     @Test
@@ -491,9 +523,9 @@ public class SdxRuntimeUpgradeServiceTest {
         sdxUpgradeRequest.setRollingUpgradeEnabled(true);
         sdxCluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
 
-        Exception exception = assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID, false)));
-        assertEquals("The rolling upgrade is not allowed for LIGHT_DUTY cluster shape.", exception.getMessage());
+        assertEquals("Rolling upgrade is not supported for LIGHT_DUTY cluster shape.", exception.getMessage());
 
         verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE,
                 SKIP_BACKUP, SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
@@ -725,11 +757,11 @@ public class SdxRuntimeUpgradeServiceTest {
         assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
     }
 
-    private SdxCluster getValidSdxCluster() {
+    private SdxCluster getValidEnterpriseCluster() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setClusterName(STACK_NAME);
         sdxCluster.setCrn(STACK_CRN);
-        sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+        sdxCluster.setClusterShape(SdxClusterShape.ENTERPRISE);
         sdxCluster.setEnvName("test-env");
         sdxCluster.setId(1L);
         sdxCluster.setAccountId("accountid");
