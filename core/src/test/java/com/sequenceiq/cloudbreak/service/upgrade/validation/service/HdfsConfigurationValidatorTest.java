@@ -11,7 +11,10 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,8 +23,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles;
+import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedService;
+import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedServices;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 
@@ -38,6 +45,8 @@ class HdfsConfigurationValidatorTest {
     private static final String HDFS_DATANODE_ON_FAILURE_ENABLED_PROPERTY =
             "<property><name>dfs.client.block.write.replace-datanode-on-failure.enable</name><value>false</value></property>";
 
+    private static final String BLUEPRINT_TEXT = "blueprint";
+
     @InjectMocks
     private HdfsConfigurationValidator underTest;
 
@@ -53,15 +62,36 @@ class HdfsConfigurationValidatorTest {
     @Mock
     private ClusterApi connector;
 
+    @Mock
+    private CmTemplateGeneratorService clusterTemplateGeneratorService;
+
+    @BeforeEach
+    void before() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(BLUEPRINT_TEXT);
+        lenient().when(stack.getBlueprint()).thenReturn(blueprint);
+    }
+
     @Test
     void testValidateShouldNotThrowExceptionWhenTheRollingUpgradeIsNotEnabled() {
         underTest.validate(createRequest(false));
-        verifyNoInteractions(clusterApiConnectors, connector, entitlementService);
+        verifyNoInteractions(clusterApiConnectors, connector, entitlementService, clusterTemplateGeneratorService);
     }
 
     @Test
     void testValidateShouldNotThrowExceptionWhenTheRollingUpgradeIsEnabledAndSkipRollingUpgradeValidationIsEnabled() {
         when(entitlementService.isSkipRollingUpgradeValidationEnabled(any())).thenReturn(true);
+
+        doAs(ACTOR, () -> underTest.validate(createRequest(true)));
+
+        verify(entitlementService).isSkipRollingUpgradeValidationEnabled(any());
+        verifyNoInteractions(clusterApiConnectors, connector, clusterTemplateGeneratorService);
+    }
+
+    @Test
+    void testValidateShouldNotThrowExceptionWhenTheHdfsServiceIsNotPresentInTheCluster() {
+        when(entitlementService.isSkipRollingUpgradeValidationEnabled(any())).thenReturn(false);
+        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(createSupportedServices(Set.of("HIVE", "RANGER")));
 
         doAs(ACTOR, () -> underTest.validate(createRequest(true)));
 
@@ -74,6 +104,7 @@ class HdfsConfigurationValidatorTest {
         String expectedConfig = HDFS_REPLACE_DATANODE_ON_FAILURE_POLICY_PROPERTY + HDFS_DATANODE_ON_FAILURE_ENABLED_PROPERTY;
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
         when(entitlementService.isSkipRollingUpgradeValidationEnabled(any())).thenReturn(false);
+        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(createSupportedServices(Set.of("HIVE", "HDFS", "RANGER")));
         when(connector.getRoleConfigValueByServiceType(STACK_NAME, HdfsRoles.GATEWAY, HdfsRoles.HDFS, HDFS_CLIENT_CONFIG_SAFETY_VALVE))
                 .thenReturn(Optional.of(expectedConfig));
 
@@ -87,6 +118,7 @@ class HdfsConfigurationValidatorTest {
     void testValidateShouldThrowExceptionWhenTheRequiredConfigsAreNotPresent() {
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
         when(entitlementService.isSkipRollingUpgradeValidationEnabled(any())).thenReturn(false);
+        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(createSupportedServices(Set.of("HIVE", "HDFS", "RANGER")));
         when(connector.getRoleConfigValueByServiceType(STACK_NAME, HdfsRoles.GATEWAY, HdfsRoles.HDFS, HDFS_CLIENT_CONFIG_SAFETY_VALVE))
                 .thenReturn(Optional.empty());
 
@@ -104,6 +136,7 @@ class HdfsConfigurationValidatorTest {
     void testValidateShouldThrowExceptionWhenOnlyThePolicyTypeIsPresent() {
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
         when(entitlementService.isSkipRollingUpgradeValidationEnabled(any())).thenReturn(false);
+        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(createSupportedServices(Set.of("HIVE", "HDFS", "RANGER")));
         when(connector.getRoleConfigValueByServiceType(STACK_NAME, HdfsRoles.GATEWAY, HdfsRoles.HDFS, HDFS_CLIENT_CONFIG_SAFETY_VALVE))
                 .thenReturn(Optional.of(HDFS_REPLACE_DATANODE_ON_FAILURE_POLICY_PROPERTY));
 
@@ -119,6 +152,7 @@ class HdfsConfigurationValidatorTest {
     void testValidateShouldThrowExceptionWhenOnlyThePolicyIsPresent() {
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
         when(entitlementService.isSkipRollingUpgradeValidationEnabled(any())).thenReturn(false);
+        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(createSupportedServices(Set.of("HIVE", "HDFS", "RANGER")));
         when(connector.getRoleConfigValueByServiceType(STACK_NAME, HdfsRoles.GATEWAY, HdfsRoles.HDFS, HDFS_CLIENT_CONFIG_SAFETY_VALVE))
                 .thenReturn(Optional.of(HDFS_DATANODE_ON_FAILURE_ENABLED_PROPERTY));
 
@@ -133,5 +167,17 @@ class HdfsConfigurationValidatorTest {
     private ServiceUpgradeValidationRequest createRequest(boolean rollingUpgradeEnabled) {
         lenient().when(stack.getName()).thenReturn(STACK_NAME);
         return new ServiceUpgradeValidationRequest(stack, false, rollingUpgradeEnabled, null, false);
+    }
+
+    private SupportedServices createSupportedServices(Set<String> services) {
+        SupportedServices supportedServices = new SupportedServices();
+        supportedServices.setServices(services.stream().map(this::createService).collect(Collectors.toSet()));
+        return supportedServices;
+    }
+
+    private SupportedService createService(String name) {
+        SupportedService supportedService = new SupportedService();
+        supportedService.setName(name);
+        return supportedService;
     }
 }

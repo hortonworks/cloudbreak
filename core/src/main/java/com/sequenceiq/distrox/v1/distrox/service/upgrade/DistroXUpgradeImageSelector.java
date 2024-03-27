@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
 @Component
@@ -26,21 +27,24 @@ public class DistroXUpgradeImageSelector {
                 .orElseThrow(() -> new BadRequestException("Invalid upgrade request, we can't find proper image"));
     }
 
-    public ImageInfoV4Response determineImageId(UpgradeV4Request request, List<ImageInfoV4Response> upgradeCandidates) {
+    public ImageInfoV4Response determineImageId(UpgradeV4Request request, UpgradeV4Response upgradeV4Response) {
+        List<ImageInfoV4Response> upgradeCandidates = upgradeV4Response.getUpgradeCandidates();
         Optional<ImageInfoV4Response> image = Optional.empty();
         if (Objects.isNull(request) || request.isEmpty() || Boolean.TRUE.equals(request.getLockComponents())) {
             image = selectLatestImageFromCandidates(upgradeCandidates);
         } else if (StringUtils.isNotEmpty(request.getImageId())) {
             image = selectRequestedImage(request.getImageId(), upgradeCandidates);
         } else if (StringUtils.isNotEmpty(request.getRuntime())) {
-            image = selectLatestImageByRuntime(upgradeCandidates, request.getRuntime());
+            image = selectLatestImageByRuntime(upgradeCandidates, request.getRuntime(), upgradeV4Response.getCurrent().getComponentVersions().getOs());
         }
         return image.orElseThrow(() -> new BadRequestException(String.format("Invalid upgrade request, please validate the contents: %s", request)));
     }
 
-    private Optional<ImageInfoV4Response> selectLatestImageByRuntime(List<ImageInfoV4Response> upgradeCandidates, String runtime) {
-        List<ImageInfoV4Response> imagesWithMatchingRuntime = upgradeCandidates.stream().filter(
-                imageInfoV4Response -> runtime.equals(imageInfoV4Response.getComponentVersions().getCdp())).collect(Collectors.toList());
+    private Optional<ImageInfoV4Response> selectLatestImageByRuntime(List<ImageInfoV4Response> upgradeCandidates, String runtime, String currentOs) {
+        List<ImageInfoV4Response> imagesWithMatchingRuntime = upgradeCandidates.stream()
+                .filter(imageInfoV4Response -> runtime.equals(imageInfoV4Response.getComponentVersions().getCdp())
+                        && imageInfoV4Response.getComponentVersions().getOs().equals(currentOs))
+                .collect(Collectors.toList());
         validateThereIsMatchingRuntime(upgradeCandidates, imagesWithMatchingRuntime, runtime);
         Optional<ImageInfoV4Response> imageInfoV4Response = imagesWithMatchingRuntime.stream().max(ImageInfoV4Response.creationBasedComparator());
         LOGGER.debug("Chosen image {} for {} runtime specified in the request", imageInfoV4Response, runtime);
