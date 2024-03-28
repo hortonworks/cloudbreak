@@ -9,22 +9,22 @@ public class ExternalizedComputeClusterContext extends CommonContext {
 
     private Long externalizedComputeId;
 
-    private String userId;
+    private String actorCrn;
 
     @JsonCreator
     public ExternalizedComputeClusterContext(
             @JsonProperty("flowParameters") FlowParameters flowParameters,
             @JsonProperty("externalizedComputeId") Long externalizedComputeId,
-            @JsonProperty("userId") String userId) {
+            @JsonProperty("actorCrn") String actorCrn) {
         super(flowParameters);
         this.externalizedComputeId = externalizedComputeId;
-        this.userId = userId;
+        this.actorCrn = actorCrn;
     }
 
     public ExternalizedComputeClusterContext(FlowParameters flowParameters, ExternalizedComputeClusterEvent event) {
         super(flowParameters);
         externalizedComputeId = event.getResourceId();
-        userId = event.getUserId();
+        actorCrn = event.getActorCrn();
     }
 
     public static ExternalizedComputeClusterContext from(FlowParameters flowParameters, ExternalizedComputeClusterEvent event) {
@@ -39,19 +39,19 @@ public class ExternalizedComputeClusterContext extends CommonContext {
         this.externalizedComputeId = externalizedComputeId;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getActorCrn() {
+        return actorCrn;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setActorCrn(String actorCrn) {
+        this.actorCrn = actorCrn;
     }
 
     @Override
     public String toString() {
         return "ExternalizedComputeClusterContext{" +
                 "externalizedComputeId=" + externalizedComputeId +
-                ", userId='" + userId + '\'' +
+                ", actorCrn='" + actorCrn + '\'' +
                 "} " + super.toString();
     }
 }

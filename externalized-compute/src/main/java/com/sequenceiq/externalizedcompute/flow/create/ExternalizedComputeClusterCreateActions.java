@@ -40,7 +40,7 @@ public class ExternalizedComputeClusterCreateActions {
             @Override
             protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterEvent payload, Map<Object, Object> variables) {
                 ExternalizedComputeClusterCreateEnvWaitRequest externalizedComputeClusterCreateEnvWaitRequest =
-                        new ExternalizedComputeClusterCreateEnvWaitRequest(context.getExternalizedComputeId(), context.getUserId());
+                        new ExternalizedComputeClusterCreateEnvWaitRequest(context.getExternalizedComputeId(), context.getActorCrn());
                 sendEvent(context, externalizedComputeClusterCreateEnvWaitRequest.selector(), externalizedComputeClusterCreateEnvWaitRequest);
             }
 
@@ -58,9 +58,9 @@ public class ExternalizedComputeClusterCreateActions {
             @Override
             protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterCreateEnvWaitSuccessResponse payload,
                     Map<Object, Object> variables) {
-                externalizedComputeClusterCreateService.initiateCreation(context.getExternalizedComputeId(), context.getUserId());
+                externalizedComputeClusterCreateService.initiateCreation(context.getExternalizedComputeId(), context.getActorCrn());
                 ExternalizedComputeClusterCreateWaitRequest externalizedComputeClusterCreateWaitRequest =
-                        new ExternalizedComputeClusterCreateWaitRequest(context.getExternalizedComputeId(), context.getUserId());
+                        new ExternalizedComputeClusterCreateWaitRequest(context.getExternalizedComputeId(), context.getActorCrn());
                 sendEvent(context, externalizedComputeClusterCreateWaitRequest.selector(), externalizedComputeClusterCreateWaitRequest);
             }
 

@@ -10,11 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
@@ -28,16 +25,14 @@ public class ExternalizedComputeClusterConverterServiceTest {
     @Mock
     private ExternalizedComputeClusterStatusService externalizedComputeClusterStatusService;
 
-    @Spy
-    private RegionAwareCrnGenerator regionAwareCrnGenerator;
+    @Mock
+    private ExternalizedComputeClusterService externalizedComputeClusterService;
 
     @InjectMocks
     private ExternalizedComputeClusterConverterService externalizedComputeClusterConverterService;
 
     @Test
     void convertToResponse() {
-        ReflectionTestUtils.setField(regionAwareCrnGenerator, "partition", "cdp");
-        ReflectionTestUtils.setField(regionAwareCrnGenerator, "region", "us-west-1");
         ExternalizedComputeCluster externalizedComputeCluster = new ExternalizedComputeCluster();
         externalizedComputeCluster.setName("ext-cluster");
         externalizedComputeCluster.setEnvironmentCrn("envCrn");
@@ -51,18 +46,19 @@ public class ExternalizedComputeClusterConverterServiceTest {
         status.setExternalizedComputeCluster(externalizedComputeCluster);
         status.setStatus(ExternalizedComputeClusterStatusEnum.AVAILABLE);
         status.setStatusReason("available");
+        String liftieCrn = "crn:cdp:compute:us-west-1:accid:cluster:liftiename";
+        when(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster))
+                .thenReturn(liftieCrn);
         when(externalizedComputeClusterStatusService.getActualStatus(externalizedComputeCluster)).thenReturn(status);
         ExternalizedComputeClusterResponse externalizedComputeClusterResponse = externalizedComputeClusterConverterService.convertToResponse(
                 externalizedComputeCluster);
-        assertEquals("crn:cdp:compute:us-west-1:accid:cluster:liftiename", externalizedComputeClusterResponse.getLiftieClusterCrn());
+        assertEquals(liftieCrn, externalizedComputeClusterResponse.getLiftieClusterCrn());
         assertEquals(ExternalizedComputeClusterApiStatus.AVAILABLE, externalizedComputeClusterResponse.getStatus());
         assertEquals("available", externalizedComputeClusterResponse.getStatusReason());
     }
 
     @Test
     void convertToResponseNoLiftieName() {
-        ReflectionTestUtils.setField(regionAwareCrnGenerator, "partition", "cdp");
-        ReflectionTestUtils.setField(regionAwareCrnGenerator, "region", "us-west-1");
         ExternalizedComputeCluster externalizedComputeCluster = new ExternalizedComputeCluster();
         externalizedComputeCluster.setName("ext-cluster");
         externalizedComputeCluster.setEnvironmentCrn("envCrn");

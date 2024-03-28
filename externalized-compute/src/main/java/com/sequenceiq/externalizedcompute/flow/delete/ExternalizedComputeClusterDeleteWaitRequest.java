@@ -11,8 +11,8 @@ public class ExternalizedComputeClusterDeleteWaitRequest extends ExternalizedCom
     @JsonCreator
     public ExternalizedComputeClusterDeleteWaitRequest(
             @JsonProperty("resourceId") Long externalizedComputeClusterId,
-            @JsonProperty("userId") String userId) {
-        super(externalizedComputeClusterId, userId);
+            @JsonProperty("actorCrn") String actorCrn) {
+        super(externalizedComputeClusterId, actorCrn);
     }
 
     public ExternalizedComputeClusterDeleteWaitRequest(ExternalizedComputeClusterContext context) {

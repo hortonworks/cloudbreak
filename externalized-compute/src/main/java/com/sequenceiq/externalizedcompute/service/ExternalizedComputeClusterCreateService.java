@@ -1,7 +1,6 @@
 package com.sequenceiq.externalizedcompute.service;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -11,25 +10,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.api.DefaultApi;
-import com.cloudera.model.CommonClusterMetadata;
-import com.cloudera.model.CommonClusterOwner;
-import com.cloudera.model.CommonClusterSpec;
-import com.cloudera.model.CommonCreateClusterRequest;
-import com.cloudera.model.CommonCreateClusterResponse;
-import com.cloudera.model.CommonKubernetes;
-import com.cloudera.model.CommonNetwork;
-import com.cloudera.model.CommonNetworkTopology;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CommonClusterMetadata;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CommonClusterOwner;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CommonKubernetes;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CommonNetwork;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CommonNetworkTopology;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CreateClusterRequest;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CreateClusterResponse;
+import com.google.protobuf.util.JsonFormat;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
 import com.sequenceiq.externalizedcompute.repository.ExternalizedComputeClusterRepository;
 import com.sequenceiq.externalizedcompute.util.TagUtil;
+import com.sequenceiq.liftie.client.LiftieGrpcClient;
 
 @Service
 public class ExternalizedComputeClusterCreateService {
@@ -42,7 +40,7 @@ public class ExternalizedComputeClusterCreateService {
     private String kubernetesVersion;
 
     @Inject
-    private LiftieService liftieService;
+    private LiftieGrpcClient liftieGrpcClient;
 
     @Inject
     private EnvironmentEndpoint environmentEndpoint;
@@ -62,14 +60,14 @@ public class ExternalizedComputeClusterCreateService {
     }
 
     private void createLiftieCluster(String userCrn, ExternalizedComputeCluster externalizedComputeCluster) {
-        DefaultApi defaultApi = liftieService.getDefaultApi();
         String databaseTemplateJson = FileReaderUtils.readFileFromClasspathQuietly(COMPUTE_CLUSTER_JSON);
         try {
-            CommonCreateClusterRequest commonCreateClusterRequest = JsonUtil.readValue(databaseTemplateJson, CommonCreateClusterRequest.class);
-            CommonCreateClusterRequest cluster = setupLiftieCluster(commonCreateClusterRequest, userCrn, externalizedComputeCluster);
+            CreateClusterRequest.Builder createClusterBuilder = CreateClusterRequest.newBuilder();
+            JsonFormat.parser().merge(databaseTemplateJson, createClusterBuilder);
+            CreateClusterRequest cluster = setupLiftieCluster(createClusterBuilder, userCrn, externalizedComputeCluster);
             try {
                 LOGGER.info("Send request to liftie: {}", cluster);
-                CommonCreateClusterResponse clusterResponse = defaultApi.createCluster(cluster);
+                CreateClusterResponse clusterResponse = liftieGrpcClient.createCluster(cluster, userCrn);
                 externalizedComputeCluster.setLiftieName(clusterResponse.getClusterId());
                 externalizedComputeClusterRepository.save(externalizedComputeCluster);
                 LOGGER.info("Liftie create response: {}", clusterResponse);
@@ -78,52 +76,47 @@ public class ExternalizedComputeClusterCreateService {
                 throw new RuntimeException(e);
             }
         } catch (IOException e) {
-            LOGGER.error("Can't read cluster json to CommonCreateClusterRequest", e);
-            throw new CloudbreakServiceException("Can't read cluster json to CommonCreateClusterRequest", e);
+            LOGGER.error("Can't read cluster json to create cluster object", e);
+            throw new CloudbreakServiceException("Can't read cluster json to create cluster object", e);
         }
     }
 
-    private CommonCreateClusterRequest setupLiftieCluster(CommonCreateClusterRequest cluster, String userCrn,
+    private CreateClusterRequest setupLiftieCluster(CreateClusterRequest.Builder createClusterBuilder, String userCrn,
             ExternalizedComputeCluster externalizedComputeCluster) {
-        fillMetadata(cluster.getMetadata(), externalizedComputeCluster, userCrn);
-        CommonClusterSpec spec = cluster.getSpec();
-        if (spec == null) {
-            throw new IllegalStateException("CommonClusterSpec can not be null!");
-        }
-        setKubernetes(spec);
-        fillNetworkSettings(spec, externalizedComputeCluster);
-        return cluster;
+        fillMetadata(createClusterBuilder, externalizedComputeCluster, userCrn);
+        setKubernetes(createClusterBuilder);
+        fillNetworkSettings(createClusterBuilder, externalizedComputeCluster);
+        return createClusterBuilder.build();
     }
 
-    private void fillNetworkSettings(CommonClusterSpec spec, ExternalizedComputeCluster externalizedComputeCluster) {
+    private void fillNetworkSettings(CreateClusterRequest.Builder commonClusterBuilder, ExternalizedComputeCluster externalizedComputeCluster) {
         DetailedEnvironmentResponse environment = environmentEndpoint.getByCrn(externalizedComputeCluster.getEnvironmentCrn());
         CommonNetwork network = getNetworkFromEnvResponse(environment);
-        spec.setNetwork(network);
+        commonClusterBuilder.getSpecBuilder().setNetwork(network);
     }
 
-    private void setKubernetes(CommonClusterSpec spec) {
-        CommonKubernetes kubernetes = new CommonKubernetes();
-        kubernetes.setVersion(kubernetesVersion);
-        spec.setKubernetes(kubernetes);
+    private void setKubernetes(CreateClusterRequest.Builder commonClusterBuilder) {
+        CommonKubernetes.Builder kubernetesBuilder = commonClusterBuilder.getSpecBuilder().getKubernetesBuilder();
+        kubernetesBuilder.setVersion(kubernetesVersion);
     }
 
-    private void fillMetadata(CommonClusterMetadata metadata, ExternalizedComputeCluster externalizedComputeCluster, String userCrn) {
+    private void fillMetadata(CreateClusterRequest.Builder commonClusterBuilder, ExternalizedComputeCluster externalizedComputeCluster,
+            String userCrn) {
+        CommonClusterMetadata.Builder metadataBuilder = commonClusterBuilder.getMetadataBuilder();
         CrnUser crnUser = crnUserDetailsService.loadUserByUsername(userCrn);
-        metadata.setOwnerEmail(crnUser.getEmail());
-        CommonClusterOwner clusterOwner = new CommonClusterOwner().crn(crnUser.getUserCrn()).accountId(crnUser.getTenant());
-        metadata.setEnv(externalizedComputeCluster.getEnvironmentCrn());
-        metadata.setClusterOwner(clusterOwner);
+        CommonClusterOwner commonClusterOwner = CommonClusterOwner.newBuilder().setCrn(crnUser.getUserCrn())
+                .setAccountId(crnUser.getTenant()).build();
+        metadataBuilder.setClusterOwner(commonClusterOwner);
+        metadataBuilder.setEnvironmentCrn(externalizedComputeCluster.getEnvironmentCrn());
         Map<String, String> tags = TagUtil.getTags(externalizedComputeCluster.getTags());
-        metadata.setLabels(tags);
-        metadata.setName(externalizedComputeCluster.getName());
+        metadataBuilder.putAllLabels(tags);
+        metadataBuilder.setName(externalizedComputeCluster.getName());
     }
 
     private CommonNetwork getNetworkFromEnvResponse(DetailedEnvironmentResponse environment) {
-        CommonNetwork network = new CommonNetwork();
-        CommonNetworkTopology topology = new CommonNetworkTopology();
-        topology.setSubnets(new ArrayList<>(environment.getNetwork().getLiftieSubnets().keySet()));
-        network.setTopology(topology);
-        return network;
+        CommonNetworkTopology topology = CommonNetworkTopology.newBuilder()
+                .addAllSubnets(environment.getNetwork().getLiftieSubnets().keySet()).build();
+        return CommonNetwork.newBuilder().setTopology(topology).build();
     }
 
 }

@@ -11,8 +11,8 @@ public class ExternalizedComputeClusterDeleteWaitSuccessResponse extends Externa
     @JsonCreator
     public ExternalizedComputeClusterDeleteWaitSuccessResponse(
             @JsonProperty("resourceId") Long externalizedComputeClusterId,
-            @JsonProperty("userId") String userId) {
-        super(externalizedComputeClusterId, userId);
+            @JsonProperty("actorCrn") String actorCrn) {
+        super(externalizedComputeClusterId, actorCrn);
     }
 
     public ExternalizedComputeClusterDeleteWaitSuccessResponse(ExternalizedComputeClusterContext context) {

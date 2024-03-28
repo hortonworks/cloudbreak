@@ -19,22 +19,22 @@ public class ExternalizedComputeClusterEvent implements IdempotentEvent<External
 
     private final String externalizedComputeName;
 
-    private final String userId;
+    private final String actorCrn;
 
     private final Promise<AcceptResult> accepted;
 
-    public ExternalizedComputeClusterEvent(Long externalizedComputeId, String userId) {
-        this(null, externalizedComputeId, userId);
+    public ExternalizedComputeClusterEvent(Long externalizedComputeId, String actorCrn) {
+        this(null, externalizedComputeId, actorCrn);
     }
 
     public ExternalizedComputeClusterEvent(ExternalizedComputeClusterContext context) {
-        this(null, context.getExternalizedComputeId(), context.getUserId());
+        this(null, context.getExternalizedComputeId(), context.getActorCrn());
     }
 
-    public ExternalizedComputeClusterEvent(String selector, Long externalizedComputeId, String userId) {
+    public ExternalizedComputeClusterEvent(String selector, Long externalizedComputeId, String actorCrn) {
         this.selector = selector;
         this.externalizedComputeId = externalizedComputeId;
-        this.userId = userId;
+        this.actorCrn = actorCrn;
         accepted = new Promise<>();
         externalizedComputeName = null;
     }
@@ -44,22 +44,22 @@ public class ExternalizedComputeClusterEvent implements IdempotentEvent<External
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long externalizedComputeId,
             @JsonProperty("externalizedComputeName") String externalizedComputeName,
-            @JsonProperty("userId") String userId) {
+            @JsonProperty("actorCrn") String actorCrn) {
         this.selector = selector;
         this.externalizedComputeId = externalizedComputeId;
         this.externalizedComputeName = externalizedComputeName;
-        this.userId = userId;
+        this.actorCrn = actorCrn;
         accepted = new Promise<>();
     }
 
     public ExternalizedComputeClusterEvent(String selector, ExternalizedComputeClusterContext context) {
-        this(selector, context.getExternalizedComputeId(), context.getUserId());
+        this(selector, context.getExternalizedComputeId(), context.getActorCrn());
     }
 
-    public ExternalizedComputeClusterEvent(String selector, Long externalizedComputeId, String userId, Promise<AcceptResult> accepted) {
+    public ExternalizedComputeClusterEvent(String selector, Long externalizedComputeId, String actorCrn, Promise<AcceptResult> accepted) {
         this.selector = selector;
         this.externalizedComputeId = externalizedComputeId;
-        this.userId = userId;
+        this.actorCrn = actorCrn;
         this.accepted = accepted;
         this.externalizedComputeName = null;
     }
@@ -69,8 +69,8 @@ public class ExternalizedComputeClusterEvent implements IdempotentEvent<External
         return externalizedComputeId;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getActorCrn() {
+        return actorCrn;
     }
 
     @Override
@@ -112,7 +112,7 @@ public class ExternalizedComputeClusterEvent implements IdempotentEvent<External
                 "selector='" + selector + '\'' +
                 ", externalizedComputeId=" + externalizedComputeId +
                 ", externalizedComputeName='" + externalizedComputeName + '\'' +
-                ", userId='" + userId + '\'' +
+                ", actorCrn='" + actorCrn + '\'' +
                 ", accepted=" + accepted +
                 '}';
     }

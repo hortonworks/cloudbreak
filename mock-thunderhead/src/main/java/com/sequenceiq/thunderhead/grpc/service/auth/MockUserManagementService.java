@@ -1449,6 +1449,13 @@ public class MockUserManagementService extends UserManagementImplBase {
         responseObserver.onCompleted();
     }
 
+    @Override
+    public void checkRights(UserManagementProto.CheckRightsRequest request, StreamObserver<UserManagementProto.CheckRightsResponse> responseObserver) {
+        LOGGER.info("Check {} rights for {}, ", request.getCheckList(), request.getActorCrn());
+        responseObserver.onNext(UserManagementProto.CheckRightsResponse.newBuilder().build());
+        responseObserver.onCompleted();
+    }
+
     private UserManagementProto.ResourceRole getResourceRole(UmsResourceRole resourceRole) {
         checkNotNull(resourceRole);
         return UserManagementProto.ResourceRole.newBuilder()

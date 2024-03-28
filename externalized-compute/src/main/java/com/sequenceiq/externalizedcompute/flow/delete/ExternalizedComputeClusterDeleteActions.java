@@ -42,7 +42,7 @@ public class ExternalizedComputeClusterDeleteActions {
             protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterEvent payload, Map<Object, Object> variables) {
                 externalizedComputeClusterStatusService.setStatus(context.getExternalizedComputeId(), ExternalizedComputeClusterStatusEnum.DELETE_IN_PROGRESS,
                         "Cluster delete initiated");
-                externalizedComputeClusterService.initiateDelete(context.getExternalizedComputeId());
+                externalizedComputeClusterService.initiateDelete(context.getExternalizedComputeId(), context.getActorCrn());
                 sendEvent(context, EXTERNALIZED_COMPUTE_CLUSTER_DELETE_STARTED_EVENT.event(), payload);
             }
 
@@ -60,7 +60,7 @@ public class ExternalizedComputeClusterDeleteActions {
             @Override
             protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterEvent payload, Map<Object, Object> variables) {
                 ExternalizedComputeClusterDeleteWaitRequest externalizedComputeClusterDeleteWaitRequest =
-                        new ExternalizedComputeClusterDeleteWaitRequest(context.getExternalizedComputeId(), context.getUserId());
+                        new ExternalizedComputeClusterDeleteWaitRequest(context.getExternalizedComputeId(), context.getActorCrn());
                 sendEvent(context, externalizedComputeClusterDeleteWaitRequest.selector(), externalizedComputeClusterDeleteWaitRequest);
             }
 

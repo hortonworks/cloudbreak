@@ -8,13 +8,11 @@ buildscript {
     }
     dependencies {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
-        classpath "org.openapitools:openapi-generator-gradle-plugin:$openapiGeneratorGradlePlugin"
     }
 }
 
 plugins {
     id "maven-publish"
-    id 'org.openapi.generator' version "$openapiGeneratorGradlePlugin"
 }
 
 apply plugin: 'org.springframework.boot'
@@ -44,22 +42,6 @@ bootJar {
         def grgit = Grgit.open(currentDir: project.projectDir)
         attributes "Implementation-Version": grgit.describe()
     }
-}
-
-openApiGenerate {
-    generatorName = "spring"
-    //library = "spring"
-    inputSpec = "$projectDir/../externalized-compute/src/main/resources/liftie-swagger.json"
-    outputDir = "$projectDir/src/generated"
-    apiPackage = "com.cloudera.api"
-    modelPackage = "com.cloudera.model"
-    invokerPackage = "com.sequenceiq.externalizedcompute"
-    configOptions.set([
-            dateLibrary : "java8",
-            useSwaggerUI: "false",
-            useJakartaEe: "true",
-            interfaceOnly: "true"
-    ])
 }
 
 publishing {
@@ -93,10 +75,6 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
     implementation group: 'com.google.protobuf', name: 'protobuf-java-util', version: protobufVersion
     implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
-    implementation group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart', version: jerseyCoreVersion
-    implementation group: 'io.swagger.core.v3', name: 'swagger-jaxrs2-jakarta', version: swaggerCoreVersion
-    implementation group: 'javax.xml.bind', name: 'jaxb-api', version: javaxXmlBindJaxbApiVersion
-    implementation group: 'org.openapitools', name: 'jackson-databind-nullable', version: "$jacksonDatabindNullable"
 
     testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
@@ -115,8 +93,6 @@ dependencies {
     implementation project(':metering-connector')
 
 }
-
-compileJava.dependsOn tasks.openApiGenerate
 
 sourceSets {
     main {

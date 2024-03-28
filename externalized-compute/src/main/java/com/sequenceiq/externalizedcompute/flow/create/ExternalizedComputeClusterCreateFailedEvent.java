@@ -11,13 +11,13 @@ public class ExternalizedComputeClusterCreateFailedEvent extends ExternalizedCom
         @JsonCreator
         public ExternalizedComputeClusterCreateFailedEvent(
                 @JsonProperty("resourceId") Long externalizedComputeClusterId,
-                @JsonProperty("userId") String userId,
+                @JsonProperty("actorCrn") String actorCrn,
                 @JsonProperty("exception") Exception exception) {
-            super(externalizedComputeClusterId, userId, exception);
+            super(externalizedComputeClusterId, actorCrn, exception);
         }
 
         public static ExternalizedComputeClusterCreateFailedEvent from(ExternalizedComputeClusterEvent event, Exception exception) {
-            return new ExternalizedComputeClusterCreateFailedEvent(event.getResourceId(), event.getUserId(), exception);
+            return new ExternalizedComputeClusterCreateFailedEvent(event.getResourceId(), event.getActorCrn(), exception);
         }
 
         @Override

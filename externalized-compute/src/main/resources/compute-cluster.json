@@ -1,12 +1,7 @@
 {
-  "api_version": "compute.cloud.cloudera.io/v1alpha1",
-  "kind": "ManagedK8sCluster",
   "metadata": {
-    "cluster_type": "Dedicated",
-    "description": "Common compute cluster",
-    "experimental": {
-      "deleteClusterOnError": true
-    }
+    "clusterType": "Dedicated",
+    "description": "Common compute cluster"
   },
   "spec": {
     "deployments": {
@@ -20,7 +15,6 @@
       "monitoring": {
         "enabled": true
       }
-    },
-    "instance_groups": []
+    }
   }
 }

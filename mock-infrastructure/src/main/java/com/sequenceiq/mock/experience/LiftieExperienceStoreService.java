@@ -23,12 +23,13 @@ public class LiftieExperienceStoreService {
         return String.valueOf(idCounter.getAndIncrement());
     }
 
-    public void create(String env, String tenant) {
+    public String create(String env, String tenant) {
         String id = "liftie" + createID();
         StatusMessage clusterStatus = new StatusMessage();
         clusterStatus.setMessage("");
         clusterStatus.setStatus("RUNNING");
         store.put(id, new LiftieClusterView(id, id, env, tenant, "X", clusterStatus));
+        return id;
     }
 
     public void createIfNotExist(String env, String tenant) {

@@ -35,8 +35,8 @@ export CPUS_FOR_SERVICES=4.0
 export MEMORY_FOR_CLOUDBREAK=4096M
 export MEMORY_FOR_SERVICES=2048M
 
-export LIFTIE_HOST=thunderhead-mock
-export LIFTIE_PORT=8080
+export LIFTIE_GRPC_HOST=mock-infrastructure
+export LIFTIE_GRPC_PORT=8987
 
 # hibernate.session.circuitbreak.* is intended to catch inefficient queries in IT time
 # We can add 400 instances at once. It can cause a false N+1 error.

@@ -42,7 +42,7 @@ public class ExternalizedComputeClusterCreateEnvWaitHandler extends ExceptionCat
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ExternalizedComputeClusterCreateEnvWaitRequest> event) {
-        return new ExternalizedComputeClusterCreateFailedEvent(resourceId, event.getData().getUserId(), e);
+        return new ExternalizedComputeClusterCreateFailedEvent(resourceId, event.getData().getActorCrn(), e);
     }
 
     @Override
@@ -61,19 +61,19 @@ public class ExternalizedComputeClusterCreateEnvWaitHandler extends ExceptionCat
                         LOGGER.debug("Environment status: {}", environmentStatus);
                         if (environmentStatus == null) {
                             LOGGER.error("Environment status is null");
-                            return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, event.getData().getUserId(),
+                            return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, event.getData().getActorCrn(),
                                     new RuntimeException("Environment status is null")));
                         } else if (environmentStatus.isComputeClusterCreationInProgress()) {
                             LOGGER.info("Environment is in COMPUTE_CLUSTER_CREATION_IN_PROGRESS state, proceed to compute cluster creation.");
                             return AttemptResults.finishWith(
-                                    new ExternalizedComputeClusterCreateEnvWaitSuccessResponse(resourceId, event.getData().getUserId()));
+                                    new ExternalizedComputeClusterCreateEnvWaitSuccessResponse(resourceId, event.getData().getActorCrn()));
                         } else if (environmentStatus.isFailed()) {
                             LOGGER.error("Environment is in failed status: {}", environmentStatus);
-                            return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, event.getData().getUserId(),
+                            return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, event.getData().getActorCrn(),
                                     new RuntimeException(String.format("Environment creation failed. Status: %s. Message: %s", environmentStatus,
                                             environmentStatus.getDescription()))));
                         } else if (environmentStatus.isDeleteInProgress()) {
-                            return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, event.getData().getUserId(),
+                            return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, event.getData().getActorCrn(),
                                     new RuntimeException(String.format("Environment is deleted. Status: %s. Message: %s", environmentStatus,
                                             environmentStatus.getDescription()))));
                         } else {
@@ -82,7 +82,7 @@ public class ExternalizedComputeClusterCreateEnvWaitHandler extends ExceptionCat
                         }
                     } catch (NotFoundException notFoundException) {
                         LOGGER.warn("Environment not found: {}", environmentCrn);
-                        return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, event.getData().getUserId(),
+                        return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, event.getData().getActorCrn(),
                                 new RuntimeException("Environment not found")));
                     }
                 });

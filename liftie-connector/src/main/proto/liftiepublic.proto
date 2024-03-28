@@ -1,0 +1,2188 @@
+syntax = "proto3";
+
+package liftiepublic;
+
+option java_package = "com.cloudera.thunderhead.service.liftiepublic";
+option java_outer_classname = "LiftiePublicProto";
+option go_package = "/liftiepublic_grpc";
+
+import "options.proto";
+
+// Compute Public API service :: Using Liftie Public GRPC service.
+service LiftiePublic {
+
+  option (options.ServiceExtension.formFactor) = "public,private";
+  option (options.ServiceExtension.apiServiceName) = {
+    lowercase: "liftiepublic"
+    camelcase: "LiftiePublic"
+  };
+
+  // Create compute cluster :: Creates compute cluster.
+  rpc CreateCluster(CreateClusterRequest)
+      returns (CreateClusterResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+
+  // Validate compute cluster :: Validates compute cluster.
+  rpc ValidateCluster(ValidateClusterRequest)
+      returns (ValidateClusterResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+
+  // Delete compute cluster :: Deletes compute cluster.
+  rpc DeleteCluster(DeleteClusterRequest)
+      returns (DeleteClusterResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+
+  // Describe compute cluster :: Gets status of compute cluster.
+  rpc DescribeCluster(DescribeClusterRequest)
+      returns (DescribeClusterResponse) {
+  }
+
+  // List compute clusters :: Lists compute clusters for an environment.
+  rpc ListClusters(ListClustersRequest)
+      returns (ListClustersResponse) {
+    option (options.MethodExtension.pagingDefaultMaxItems) = 100;
+  }
+
+  // Get kube config content :: Get kubernetes configuration content for a compute cluster.
+  rpc GetKubeConfig(GetKubeConfigRequest)
+      returns (GetKubeConfigResponse) {
+  }
+
+  // Installs a deployment :: Installs a new deployment in the specified namespace.
+  rpc InstallDeployment (InstallDeploymentRequest)
+      returns (InstallDeploymentResponse) {
+    option (options.MethodExtension.entitlement) = "COMPUTE_SECURITY_UPDATES";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.mutating) = true;
+  }
+
+  // Deletes a deployment :: Deletes a deployment that is currently installed and managed for this cluster.
+  rpc DeleteDeployment (DeleteDeploymentRequest)
+      returns (DeleteDeploymentResponse) {
+    option (options.MethodExtension.entitlement) = "COMPUTE_SECURITY_UPDATES";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.mutating) = true;
+  }
+
+  // Describes a deployment :: Gets a single deployment along with its extended history. This can also include all of the known templates.
+  rpc DescribeDeployment (DescribeDeploymentRequest)
+      returns (DescribeDeploymentResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+
+  // Upgrades a deployment to a different chart :: This will perform an upgrade.
+  rpc UpgradeDeployment (UpgradeDeploymentRequest)
+      returns (UpgradeDeploymentResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+
+  // Rollbacks a deployment to a previous revision :: This will perform a rollback.
+  rpc RollbackDeployment (RollbackDeploymentRequest)
+      returns (RollbackDeploymentResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+
+  // List deployments in the cluster :: Gets the helm charts that are available for deployment or have already been deployed in this cluster.
+  rpc ListDeployments (ListDeploymentsRequest)
+      returns (ListDeploymentsResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+
+  // Update compute cluster :: Updates compute cluster.
+  rpc UpdateCluster(UpdateClusterRequest)
+      returns (UpdateClusterResponse){
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+
+  // Create instance groups :: Creates instance groups in a compute cluster.
+  rpc CreateInstanceGroups(CreateInstanceGroupsRequest)
+      returns (CreateInstanceGroupsResponse){
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+
+  // Delete instance group :: Deletes an instance group of a compute cluster.
+  rpc DeleteInstanceGroup(DeleteInstanceGroupRequest)
+      returns (DeleteInstanceGroupResponse){
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+
+  // Update instance group :: Updates an instance group of a compute cluster.
+  rpc UpdateInstanceGroup(UpdateInstanceGroupRequest)
+      returns (UpdateInstanceGroupResponse){
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+
+  // Upgrade k8s version of the cluster :: Upgrades the k8s version of the cluster to the specified version.
+  rpc UpgradeCluster (UpgradeClusterRequest)
+      returns (UpgradeClusterResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+
+  // Add User :: Adds a user or a role to a compute cluster.
+  rpc AddUser(AddUserRequest)
+      returns (AddUserResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+  // Delete User :: Deletes a user or a role of a compute cluster.
+  rpc DeleteUser(DeleteUserRequest)
+      returns (DeleteUserResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+  // Describe User :: Describes a user or a role of a compute cluster.
+  rpc DescribeUser(DescribeUserRequest)
+      returns (DescribeUserResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+  // List Users :: Lists users and roles of a compute cluster.
+  rpc ListUsers(ListUsersRequest)
+      returns (ListUsersResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+  // Get prerequisite :: Retrieves all the prerequisite detail for a given cloud provider.
+  rpc GetPrerequisite (GetPrerequisiteRequest)
+      returns (GetPrerequisiteResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+  // Refresh service account tokens :: Refreshes service account tokens for a cluster.
+  rpc RefreshServiceAccountTokens (RefreshServiceAccountTokensRequest)
+      returns (RefreshServiceAccountTokensResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+
+  // Recommend Instance types :: Recommend cloud provider instance types based on provided requirements.
+  rpc RecommendInstanceTypes(RecommendInstanceTypesRequest)
+      returns (RecommendInstanceTypesResponse) {
+    option (options.MethodExtension.formFactor) = "public";
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+  }
+}
+
+// Kubernetes specs.
+message CommonKubernetes {
+  // Kubernetes version (default 1.17). Deprecated.
+  string version = 1 [(options.FieldExtension.deprecated) = true];
+}
+
+// Network topology structure.
+message CommonNetworkTopology {
+  // Subnets.
+  repeated string subnets = 1;
+}
+
+// Network structure.
+message CommonNetwork {
+  // VPC CIDR.
+  string cidr = 1;
+  // Network plugin.
+  string plugin = 2;
+  // Network topology.
+  CommonNetworkTopology topology = 3;
+  // Allow these CIDR for inbound communication when using environment proxy settings. Only if backend supports it.
+  repeated string inboundProxyCidr = 4;
+  // The pod CIDR to use if the backend provider supports setting this.
+  string podCidr = 5;
+  // The CIDR for services declared inside of Kubernetes if the backend provider supports setting this.
+  string serviceCidr = 6;
+  // AWS specific network configurations
+  CommonAwsNetworking aws = 7;
+}
+
+// AWS networking structure
+message CommonAwsNetworking {
+  // Flag to enable aws-vpc-cni
+  bool useAwsVpcCni = 1;
+}
+
+
+// API server request structure.
+message CommonApiServer {
+  // An array of IPv4 CIDR blocks.
+  repeated string authorizedIpRanges = 1;
+  // Flag to enable whitelist of IP Ranges (CIDR block) for public access to the K8s API server.
+  bool enabled = 2;
+}
+
+// Secret encryption request structure.
+message CommonSecretEncryption {
+  // The KMS key ARN used.
+  string customerKmsKeyArn = 1 [(options.FieldExtension.sensitive) = true];
+  // Flag to enable secret encryption (default true). Deprecated.
+  bool enabled = 2 [(options.FieldExtension.deprecated) = true];
+}
+
+// Volume encryption request structure.
+message CommonVolumeEncryption {
+  // The KMS key ARN used.
+  string customerKmsKeyArn = 1 [(options.FieldExtension.sensitive) = true];
+}
+
+// Security request structure.
+message CommonSecurity {
+  // API server.
+  CommonApiServer apiServer = 1;
+  // Secret encryption.
+  CommonSecretEncryption secretEncryption = 2;
+  // Volume encryption.
+  CommonVolumeEncryption volumeEncryption = 3;
+  // Flag set to true for a private cluster.
+  // Flag set to true for a private cluster with API Server having internal IP addressees.
+  bool private = 4;
+}
+
+// AutoScaling structure.
+message CommonAutoScaling {
+  // Max instances.
+  int64 maxInstance = 1 [(options.FieldExtension.required) = true];
+  // Min instances.
+  int64 minInstance = 2 [(options.FieldExtension.required) = true];
+  // Enable flag.
+  bool enabled = 3;
+}
+
+// Root volume structure.
+message CommonRootVolume {
+  // Root volume size.
+  int64 size = 1;
+}
+
+// Accelerator structure.
+message CommonAccelerator {
+  // GPU count.
+  int64 count = 1;
+  // GPU type.
+  string type = 2;
+}
+
+// Instance requirements structure.
+message CommonInstanceRequirements {
+  // Instance types to include.
+  repeated string allowedInstanceTypes = 1;
+  // CPU types required. For eg. intel, amd, amazon-web-services etc.
+  repeated string cpuTypes = 2;
+  // Instance types to exclude, ignored if AllowedInstanceTypes is set.
+  repeated string excludedInstanceTypes = 3;
+  // Select GPU instances.
+  bool gpu = 4;
+  // Maximum vCpu count.
+  int64 maxCpu = 5;
+  // Minimum vCpu count.
+  int64 minCpu = 6;
+  // Maximum memory requirement in MiB.
+  int64 maxMemory = 7;
+  // Minimum memory requirement in MiB.
+  int64 minMemory = 8;
+}
+
+// Instance requirements with metadata structure.
+message CommonInstanceRequirementsWithMetadata {
+  // The architecture type. For eg, i386, x86_64, arm64, x86_64_mac, arm64_mac.
+  repeated string architectureTypes = 1;
+  // The virtualization type. For eg. hvm, paravirtual.
+  repeated string virtualizationTypes = 2;
+  // The attributes for the instance types. When you specify instance attributes, Amazon EC2 will identify instance types with those attributes.
+  CommonInstanceRequirements instanceRequirements = 3;
+}
+
+// AWS instance group config structure.
+message CommonAwsInstanceGroupConfig {
+  // Instance requirements are an alternative to instance type/instance types for EKS instance groups.
+  CommonInstanceRequirementsWithMetadata instanceRequirementsWithMetadata = 1;
+  // Instance profile.
+  string instanceProfile = 2;
+}
+
+// Instance group structure.
+message CommonInstanceGroup {
+  // Name.
+  string name = 1 [(options.FieldExtension.required) = true];
+  // Instance count.
+  int64 instanceCount = 2;
+  // Autoscaling specs.
+  CommonAutoScaling autoscaling = 3;
+  // Enables CPU CFS quota. Defaults to true if not specified.
+  bool enableCfsQuota = 4 [(options.FieldExtension.default) = "true"];
+  // Instance image.
+  string instanceImage = 5;
+  // Instance tier.
+  string instanceTier = 6;
+  // Reserved kubelet CPU in millicpu.
+  int64 kubeReservedCpu = 7;
+  // Reserved kubelet memory in MiB.
+  int64 kubeReservedMemory = 8;
+  // Reserved kubelet ephemeral storage in MiB.
+  int64 kubeReservedStorage = 9;
+  // Labels.
+  map<string,string> labels = 10;
+  // Root volume specs. Recommended 50.
+  CommonRootVolume rootVolume = 11;
+  // Use single availability zone. Simple boolean for EKS. AKS is used in conjunction with UseAvailabilityZones.
+  bool singleZone = 12;
+  // Reserved OS CPU in millicpu.
+  int64 systemReservedCpu = 13;
+  // Reserved OS memory in MiB.
+  int64 systemReservedMemory = 14;
+  // Reserved OS ephemeral storage in MiB.
+  int64 systemReservedStorage = 15;
+  // Taints.
+  map<string,string> taints = 16;
+  // Used for Azure clusters only.
+  bool useAvailabilityZones = 17;
+  // Instance types.
+  // General purpose: M4, M5, M5a, M5ad, and M5d.
+  // Compute optimized: C3, C4, C5, C5d, C5n, and cc2.8xlarge.
+  // Memory optimized: cr1.8xlarge, R3, R4, R5, R5a, R5ad, R5d, X1, X1e, and z1d.
+  // Storage optimized: D2, H1, hs1.8xlarge, I2, I3, and I3en.
+  // Accelerated computing: F1, G2, G3, P2, and P3.
+  repeated string instanceTypes = 18;
+  // Used only for GCP clusters. This is used to set GPU type and count for the cluster.
+  CommonAccelerator accelerator = 19;
+  // AWS specific configuration used only for EKS InstanceGroups
+  CommonAwsInstanceGroupConfig aws = 21;
+}
+
+// YuniKorn request structure.
+message CommonYuniKorn {
+  // Flag to enable yunikorn (default true). Deprecated.
+  bool enabled = 1 [(options.FieldExtension.deprecated) = true];
+  // Version is ignored for overrides will be removed soon. Deprecated.
+  string version = 2 [(options.FieldExtension.deprecated) = true];
+  // The app sorting policy is ignored for overrides will be removed soon. Deprecated.
+  string appSortingPolicy = 3 [(options.FieldExtension.deprecated) = true];
+  // The node sorting policy is ignored for overrides will be removed soon. Deprecated.
+  string nodeSortingPolicy = 4 [(options.FieldExtension.deprecated) = true];
+}
+
+// Nvidia request structure.
+message CommonNvidia {
+  // GPU label key.
+  string gpuLabelKey = 1;
+  // GPU label value.
+  string gpuLabelValue = 2;
+}
+
+// Alertmanager request structure.
+message CommonAlertmanager {
+  // Flag to enable alertmanager.
+  bool enabled = 1;
+}
+
+// Resource limits request structure.
+message CommonResourceLimit {
+  // Prometheus server CPU limit (default 1000m).
+  string cpu = 1;
+  // Prometheus server memory limit (default 2048M).
+  string memory = 2;
+}
+
+// Monitoring request structure.
+message CommonMonitoring {
+  // Flag to enable Monitoring installation.
+  bool enabled = 1;
+  // Alertmanager.
+  CommonAlertmanager alertmanager = 2;
+  // Server resource limits.
+  CommonResourceLimit serverResourceLimit = 3;
+}
+
+// Metering service request structure.
+message CommonMeteringService {
+  // Service type.
+  string serviceType = 1;
+  // Service version.
+  string serviceVersion = 2;
+  // Workload CRN.
+  string workloadCrn = 3;
+  // Cluster CRN.
+  string clusterCrn = 4;
+  // Service configuration.
+  string serviceConfiguration = 5;
+}
+
+// Metering request structure.
+message CommonMetering {
+  // Flag to enable metering installation.
+  bool enabled = 1;
+  // Array of services.
+  repeated CommonMeteringService services = 2;
+}
+
+// Logging request structure.
+message CommonLogging {
+  // True to enable logging installation (default false).
+  bool enabled = 1;
+}
+
+// Istio request structure.
+message CommonIstio {
+  reserved 2,3,4;
+  // True to enable istio installation (default true). Deprecated.
+  bool enabled = 1 [(options.FieldExtension.deprecated) = true];
+  // Deployment profile to use. Currently supported are common, cml and cde (default common). Deprecated.
+  string deploymentProfile = 5 [(options.FieldExtension.deprecated) = true];
+}
+
+// Horizontal pod autoscaler request structure.
+message CommonHorizontalPodAutoScaler {
+  // Enable flag.
+  bool enabled = 1;
+}
+
+// Autoscaler request structure.
+message CommonAutoscaler {
+  // How long after scale up that scale down evaluation resumes.
+  // (Azure/AWS Support).
+  string scaleDownDelayAfterAdd = 1;
+  // How long after node deletion that scale down evaluation resumes, defaults to scanInterval.
+  // (Azure/AWS Support).
+  string scaleDownDelayAfterDelete = 2;
+  // How long after scale down failure that scale down evaluation resumes.
+  // (Azure/AWS Support).
+  string scaleDownDelayAfterFailure = 3;
+  // Scale down flag.
+  // (AWS Support).
+  bool scaleDownEnabled = 4;
+  // Maximum number of non empty nodes considered in one iteration as candidates for scale down with drain.
+  // Lower value means better CA responsiveness but possible slower scale down latency.
+  // Higher value can affect CA performance with big clusters (100s of nodes).
+  // Set to non positive value to turn this heuristic off - CA will not limit the number of nodes it considers.
+  // (AWS Support).
+  int32 scaleDownNonEmptyCandidatesCount = 5;
+  // How long a node should be unneeded before it is eligible for scale down.
+  // (Azure/AWS Support).
+  string scaleDownUnneededTime = 6;
+  // Node utilization level, defined as the sum of requested resources divided by capacity,.
+  // below which a node can be considered for scale down.
+  // (Azure/AWS Support).
+  double scaleDownUtilizationThreshold = 7;
+  // Scan interval.
+  // (Azure/AWS Support).
+  string scanInterval = 8;
+  // Skip nodes with local storage flag.
+  // (AWS Support).
+  bool skipNodesWithLocalStorage = 9;
+  // Skip nodes with system pods.
+  // (AWS Support).
+  bool skipNodesWithSystemPods = 10;
+  // Maximum number of seconds CA waits for pod termination when trying to scale down a node.
+  // (Azure Support).
+  int64 maxGracefulTerminationSec = 11;
+  // How long an unready node should be unneeded before it is eligible for scale down.
+  // (Azure Support).
+  string scaleDownUnreadyTime = 12;
+}
+
+// Deployments request structure.
+message CommonDeployments {
+  // Autoscaler specs.
+  CommonAutoscaler autoscaler = 1;
+  // Horizontal pod autoscaler specs.
+  CommonHorizontalPodAutoScaler horizontalPodAutoscaler = 2;
+  // Istio specs. Deprecated.
+  CommonIstio istio = 3 [(options.FieldExtension.deprecated) = true];
+  // Logging specs.
+  CommonLogging logging = 4;
+  // Metering specs.
+  CommonMetering metering = 5;
+  // Monitoring specs.
+  CommonMonitoring monitoring = 6;
+  // Nvidia specs.
+  CommonNvidia nvidia = 7;
+  // Repository for images.
+  string repository = 8;
+  // Yunikorn specs. Deprecated.
+  CommonYuniKorn yunikorn = 9 [(options.FieldExtension.deprecated) = true];
+  // Telemetry KMS key ARN.
+  string telemetryKmsKeyArn = 10;
+}
+
+// Image catalog request structure.
+message CommonImageCatalog {
+  // The catalog CRN (either CRN or name is required).
+  string crn = 1;
+  // The catalog name (either CRN or name is required).
+  string name = 2;
+}
+
+// Storage spec request structure.
+message CommonStorageSpec {
+  // Flag to enable Container Storage Interface (CSI). It further sets specific inline cloud formation policies required for CSI.
+  bool csiEnabled = 1;
+}
+
+// Cluster spec request structure.
+message CommonClusterSpec {
+  // Bootstrap script.
+  string bootstrapScript = 1 [(options.FieldExtension.skipLogging) = true];
+  // Deployments.
+  CommonDeployments deployments = 2;
+  // Instance groups.
+  repeated CommonInstanceGroup instanceGroups = 3;
+  // K8s details. Deprecated.
+  CommonKubernetes kubernetes = 4 [(options.FieldExtension.deprecated) = true];
+  // Network.
+  CommonNetwork network = 5;
+  // Security.
+  CommonSecurity security = 6;
+  // SSH keypair.
+  string sshKeypairName = 7 [(options.FieldExtension.sensitive) = true];
+  // Array of egress rules of the form protocol:fromPort[:toPort[:CIDR]].
+  repeated string workerEgressRules = 8;
+  // Array of ingress rules of the form protocol:fromPort[:toPort[:CIDR]].
+  repeated string workerIngressRules = 9;
+  // The image catalog details.
+  CommonImageCatalog imageCatalog = 10;
+  // The storage specifications.
+  CommonStorageSpec storage = 11;
+}
+
+// Cluster owner structure.
+message CommonClusterOwner {
+  // Owner's email.
+  string email = 1;
+  // Owner's firstname.
+  string firstName = 2;
+  // Owner's lastname.
+  string lastName = 3;
+  // Owner's user ID.
+  string userId = 4;
+  // Owner's account ID.
+  string accountId = 5;
+  // Owner's actor CRN.
+  string crn = 6;
+}
+
+// Experimental structure.
+message CommonExperimental {
+  // Example: node.role.kubernetes.io/liftie-infra or foo.bar.baz/liftie-infra.
+  string liftieInfraNodeRole = 1;
+}
+
+// Cluster metadata structure.
+message CommonClusterMetadata {
+  // Environment CRN.
+  string environmentCrn = 1 [(options.FieldExtension.required) = true];
+  // Cluster name.
+  string name = 2 [(options.FieldExtension.required) = true];
+  // Cluster owner.
+  CommonClusterOwner clusterOwner = 3;
+  // Cluster type. Supported values are Dedicated, Shared and DedicatedExternal. Default is DedicatedExternal.
+  string clusterType = 4;
+  // Cluster description.
+  string description = 5;
+  // Labels.
+  map<string,string> labels = 6;
+  // Cluster workloads.
+  repeated string workloads = 7;
+  // Experimental.
+  CommonExperimental experimental = 8;
+  // Experience Type.
+  string experienceType = 9;
+}
+
+// Cluster status structure.
+message CommonStatusMessage {
+  // Message.
+  string message = 1;
+  // Status.
+  string status = 2;
+}
+
+// Request object for creating a cluster.
+message CreateClusterRequest {
+  option (options.MessageExtension.formFactor) = "public";
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Specifies the metadata.
+  CommonClusterMetadata metadata = 1 [(options.FieldExtension.required) = true];
+  // Specifies the spec.
+  CommonClusterSpec spec = 2;
+  // Skip validation.
+  bool skipValidation = 3;
+}
+
+// Request object for validating a cluster.
+message ValidateClusterRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Metadata of the cluster being validated.
+  CommonClusterMetadata metadata = 1 [(options.FieldExtension.required) = true];
+  // Specifies the spec.
+  CommonClusterSpec spec = 2;
+}
+
+// Validation summary structure.
+message ValidationSummary {
+  // Total number of passed validations.
+  int32 passed = 1;
+  // Total number of validations that passed but have warnings associated with them.
+  int32 warning = 2;
+  // Total number of failed validations.
+  int32 failed = 3;
+  // Total number of skipped validations.
+  int32 skipped = 4;
+  // Total number of validations.
+  int32 total = 5;
+}
+
+// Validation result structure.
+message ValidationResult {
+  // Name.
+  string name = 1;
+  // Description.
+  string description = 2;
+  // Validation check categories such as COMMON, ENTITLEMENTS, CONTROL_PLANE, NETWORK, or DEPLOYMENT. New values may be added in the future.
+  string category = 3;
+  // Validation check status such as PASSED, FAILED, or SKIPPED. New values may be added in the future.
+  string status = 4;
+  // A short, human-readable message that describes the end result of the validation.
+  string message = 5;
+  // A supporting message which contains additional details, such as subnet names, instance types, etc.
+  string detailedMessage = 6;
+  // Time taken to get the end result of the validation in a human-readable time format.
+  string duration = 7;
+}
+
+// Pre-flight validation check response structure.
+message ValidationResponse {
+  // Validation result.
+  string result = 1;
+  // Numerical summary of the validations.
+  ValidationSummary summary = 2;
+  // A message describing end result of the validations.
+  string message = 3;
+  // The list of detailed validation result.
+  repeated ValidationResult validations = 4;
+}
+
+// Create cluster response.
+message CreateClusterResponse {
+  option (options.MessageExtension.formFactor) = "public";
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster ID.
+  string clusterId = 1;
+  // Cluster status.
+  CommonStatusMessage clusterStatus = 2;
+  // Uniform Resource Identifier of cluster.
+  string uri = 3;
+  // Compute cluster CRN.
+  string clusterCrn = 4;
+  // Pre-flight validation check response. Only given on a validation failure.
+  ValidationResponse validationResponse = 5;
+}
+
+// Response object for validating a cluster.
+message ValidateClusterResponse {
+  // Validation result.
+  string result = 1;
+  // Numerical summary of the validations.
+  ValidationSummary summary = 2;
+  // A message describing the end result of the validations.
+  string message = 3;
+  // The list of detailed validation results.
+  repeated ValidationResult validations = 4;
+}
+
+// Request object for deleting a cluster.
+message DeleteClusterRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+}
+
+// Delete cluster response.
+message DeleteClusterResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Cluster Status.
+  CommonStatusMessage clusterStatus = 1;
+}
+
+// Object representing compute cluster types.
+message ComputeClusterType {
+  enum Value {
+    // Value respresenting an external dedicated compute cluster.
+    DedicatedExternal = 0;
+    // Value respresenting a shared compute cluster.
+    Shared = 1;
+    // Value respresenting an embedded dedicated compute cluster.
+    Dedicated = 2;
+  }
+}
+
+// Compute cluster owner structure.
+message ComputeClusterOwner {
+  option (options.MessageExtension.formFactor) = "public";
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Owner's email.
+  string email = 1;
+  // Owner's firstname.
+  string firstName = 2;
+  // Owner's lastname.
+  string lastName = 3;
+  // Owner's user ID.
+  string userId = 4;
+  // Owner's account ID.
+  string accountId = 5;
+  // Owner's actor CRN.
+  string crn = 6;
+}
+
+// Request object for describing a cluster.
+message DescribeClusterRequest {
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+}
+
+// API server response structure.
+message CommonApiServerResp {
+  // An array of IPv4 CIDR blocks.
+  repeated string authorizedIpRanges = 1;
+  // Flag to indicate if whitelist of IP Ranges (CIDR block) for public access to the K8s API server is enabled.
+  bool enabled = 2;
+}
+
+// Secret Encryption response structure.
+message CommonSecretEncryptionResp {
+  // The KMS key ARN used.
+  string customerKmsKeyArn = 1;
+  // Flag to indicate if secret encryption is enabled.
+  bool enabled = 2;
+}
+
+// Volume encryption response structure.
+message CommonVolumeEncryptionResp {
+  // The KMS key ARN used.
+  string customerKmsKeyArn = 1;
+}
+
+// Security response structure.
+message CommonSecurityResp {
+  // API server.
+  CommonApiServerResp apiServer = 1;
+  // Secret encryption.
+  CommonSecretEncryptionResp secretEncryption = 2;
+  // Volume encryption.
+  CommonVolumeEncryptionResp volumeEncryption = 3;
+  // Flag to indicate if this is a private cluster with API Server having internal IP addressees.
+  bool private = 4;
+}
+
+// YuniKorn response structure.
+message CommonYuniKornResp {
+  // Flag to indicate if yunikorn is enabled.
+  bool enabled = 1;
+  // Version. Deprecated.
+  string version = 2 [(options.FieldExtension.deprecated) = true];
+  // The app sorting policy. Deprecated.
+  string appSortingPolicy = 3 [(options.FieldExtension.deprecated) = true];
+  // The node sorting policy. Deprecated.
+  string nodeSortingPolicy = 4 [(options.FieldExtension.deprecated) = true];
+}
+
+// Nvidia response structure.
+message CommonNvidiaResp {
+  // GPU label key.
+  string gpuLabelKey = 1;
+  // GPU label value.
+  string gpuLabelValue = 2;
+}
+
+// Alertmanager response structure.
+message CommonAlertmanagerResp {
+  // Flag to indicate if Alertmanager is enabled.
+  bool enabled = 1;
+}
+
+// Resource limits response structure.
+message CommonResourceLimitsResp {
+  // Prometheus server CPU limit (default 1000m).
+  string cpu = 1;
+  // Prometheus server memory limit (default 2048M).
+  string memory = 2;
+}
+
+// Monitoring response structure.
+message CommonMonitoringResp {
+  // Flag to indicate if Monitoring is enabled.
+  bool enabled = 1;
+  // Alertmanager.
+  CommonAlertmanagerResp alertmanager = 2;
+  // Server resource limits.
+  CommonResourceLimitsResp serverResourceLimits = 3;
+}
+
+// Metering service response structure.
+message CommonMeteringServiceResp {
+  // Service type.
+  string serviceType = 1;
+  // Service version.
+  string serviceVersion = 2;
+  // Workload CRN.
+  string workloadCrn = 3;
+  // Cluster CRN.
+  string clusterCrn = 4;
+  // Service configuration.
+  string serviceConfiguration = 5;
+}
+
+// Metering response structure.
+message CommonMeteringResp {
+  // Flag to indicate if Monitoring is enabled.
+  bool enabled = 1;
+  // Array of services.
+  repeated CommonMeteringServiceResp services = 2;
+}
+
+// Logging response structure.
+message CommonLoggingResp {
+  // True to enable logging installation (default false).
+  bool enabled = 1;
+}
+
+// Deployment Profile details response structure.
+message CommonDeploymentProfileDetailsResp {
+  // Deployment enable flag.
+  bool enabled = 1;
+  // Deployment profile used. Currently supported is common.
+  string deploymentProfile = 2;
+}
+
+// Horizontal pod autoscaler response structure.
+message CommonHorizontalPodAutoScalerResp {
+  // Enable flag.
+  bool enabled = 1;
+}
+
+// Autoscaler response structure.
+message CommonAutoscalerResp {
+  // How long after scale up that scale down evaluation resumes.
+  // (Azure/AWS Support).
+  string scaleDownDelayAfterAdd = 1;
+  // How long after node deletion that scale down evaluation resumes, defaults to scanInterval.
+  // (Azure/AWS Support).
+  string scaleDownDelayAfterDelete = 2;
+  // How long after scale down failure that scale down evaluation resumes.
+  // (Azure/AWS Support).
+  string scaleDownDelayAfterFailure = 3;
+  // Scale down flag.
+  // (AWS Support).
+  bool scaleDownEnabled = 4;
+  // Maximum number of non empty nodes considered in one iteration as candidates for scale down with drain.
+  // Lower value means better CA responsiveness but possible slower scale down latency.
+  // Higher value can affect CA performance with big clusters (100s of nodes).
+  // Set to non positive value to turn this heuristic off - CA will not limit the number of nodes it considers.
+  // (AWS Support).
+  int32 scaleDownNonEmptyCandidatesCount = 5;
+  // How long a node should be unneeded before it is eligible for scale down.
+  // (Azure/AWS Support).
+  string scaleDownUnneededTime = 6;
+  // Node utilization level, defined as the sum of requested resources divided by capacity,.
+  // below which a node can be considered for scale down.
+  // (Azure/AWS Support).
+  double scaleDownUtilizationThreshold = 7;
+  // Scan interval.
+  // (Azure/AWS Support).
+  string scanInterval = 8;
+  // Skip nodes with local storage flag.
+  // (AWS Support).
+  bool skipNodesWithLocalStorage = 9;
+  // Skip nodes with system pods.
+  // (AWS Support).
+  bool skipNodesWithSystemPods = 10;
+  // Maximum number of seconds CA waits for pod termination when trying to scale down a node.
+  // (Azure Support).
+  int64 maxGracefulTerminationSec = 11;
+  // How long an unready node should be unneeded before it is eligible for scale down.
+  // (Azure Support).
+  string scaleDownUnreadyTime = 12;
+}
+
+// Deployments response structure.
+message CommonDeploymentsResp {
+  // Autoscaler specs.
+  CommonAutoscalerResp autoscaler = 1;
+  // Horizontal pod autoscaler specs.
+  CommonHorizontalPodAutoScalerResp horizontalPodAutoscaler = 2;
+  // Istio specs.
+  CommonDeploymentProfileDetailsResp istio = 3;
+  // Logging specs.
+  CommonLoggingResp logging = 4;
+  // Metering specs.
+  CommonMeteringResp metering = 5;
+  // Monitoring specs.
+  CommonMonitoringResp monitoring = 6;
+  // Nvidia specs.
+  CommonNvidiaResp nvidia = 7;
+  // Repository for images.
+  string repository = 8;
+  // Yunikorn specs.
+  CommonYuniKornResp yunikorn = 9;
+  // Telemetry KMS key ARN.
+  string telemetryKmsKeyArn = 10;
+  // Knox specs.
+  CommonDeploymentProfileDetailsResp knox = 11;
+}
+
+// Instance state counts response structure.
+message CommonInstanceStateCounts {
+  // Number of instances in running state.
+  int64 running = 1;
+  // Number of instances in creating state.
+  int64 creating = 2;
+  // Number of instances in terminating state.
+  int64 terminating = 3;
+  // Total number of instances.
+  int64 total = 4;
+}
+
+// AKS pool instance response structure.
+message AksPoolInstance {
+  // Name.
+  string name = 1;
+  // Instance ID.
+  string instanceId = 2;
+  // Availability zone.
+  string availabilityZone = 3;
+}
+
+// AKS node pool response structure.
+message AksNodePool {
+  // Name.
+  string name = 1;
+  // Type.
+  string type = 2;
+  // Provisioning state.
+  string provisioningState = 3;
+  // AKS pool instance.
+  repeated AksPoolInstance instances = 4;
+  // Availability zones.
+  repeated string availabilityZones = 5;
+}
+
+// AKS instance group response structure.
+message AksInstanceGroup {
+  // Instance group name.
+  string instanceGroupName = 1;
+  // Instance group ID.
+  string instanceGroupId = 2;
+  // Instance type.
+  string instanceType = 3;
+  // Instance tier.
+  string instanceTier = 4;
+  // Instance states
+  CommonInstanceStateCounts instanceStates = 5;
+  // Instance count.
+  int64 instanceCount = 6;
+  // Node volume size.
+  int64 nodeVolumeSize = 7;
+  // Enable auto scaling.
+  bool enableAutoScaling = 8;
+  // Min instances.
+  int64 minInstance = 9;
+  // Max instances.
+  int64 maxInstance = 10;
+  // Single zone.
+  bool singleZone = 11;
+  // Labels.
+  map<string,string> labels = 12;
+  // Taints.
+  map<string,string> taints = 13;
+  // Tags.
+  map<string,string> tags = 14;
+  // Kube reserved CPU.
+  int64 kubeReservedCpu = 15;
+  // Kube reserved memory.
+  int64 kubeReservedMemory = 16;
+  // Kube reserved storage.
+  int64 kubeReservedStorage = 17;
+  // System reserved CPU.
+  int64 systemReservedCpu = 18;
+  // System reserved memory.
+  int64 systemReservedMemory = 19;
+  // System reserved storage.
+  int64 systemReservedStorage = 20;
+  // Availability zones.
+  repeated int32 availabilityZones = 21;
+  // AKS node pool.
+  AksNodePool nodePool = 22;
+  // AKS pool instance.
+  repeated AksPoolInstance instances = 23;
+  // True for a system node.
+  bool isSystem = 24;
+}
+
+// AKS state response structure.
+message AksState {
+  option (options.MessageExtension.formFactor) = "public";
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Cloud provider.
+  string provider = 1;
+  // Cluster display name.
+  string clusterDisplayName = 2;
+  // The Cluster ResourceGroup. Filled based on Parent ResourceGroup or ClusterDisplayName.
+  string clusterResourceGroup = 3;
+  // Specifies whether ClusterResourceGroup was created or not.
+  bool clusterResourceGroupCreated = 4;
+  // Specifies whether httpApplicationRouting addon is enabled or not.
+  bool enableHttpApplicationRouting = 5;
+  // Specifies whether monitoring addon is enabled or not.
+  bool enableMonitoring = 6;
+  // The resource group for the Azure Log Analytics Workspace.
+  string logAnalyticsWorkspaceResourceGroup = 7;
+  // An existing Azure Log Analytics Workspace for monitoring addon.
+  string logAnalyticsWorkspace = 8;
+  // The resource group for the Azure Virtual Network. Composite of agent virtual network subnet ID.
+  string virtualNetworkResourceGroup = 9;
+  // An existing Azure Virtual Network. Composite of agent virtual network subnet ID.
+  string virtualNetwork = 10;
+  // An array specifying existing Azure Virtual Subnets. Composite of agent virtual network subnet IDs.
+  repeated string subnets = 11;
+  // Selected Subnet from the list that is provided
+  string selectedSubnet = 12;
+  // The ResourceGroup which may be used for almost all the Azure
+  // resources created (with VirtualNetwork and Node ResourceGroup being exceptions).
+  string parentResourceGroup = 13;
+  // The username to use for Linux VMs.
+  string adminUsername = 14;
+  // The content of the SSH configuration for Linux VMs, Opposite to sshPublicKey.
+  string sshPublicKeyContents = 15;
+  // The local path of the SSH configuration for Linux VMs, Opposite to sshPublicKeyContents.
+  string sshPublicKey = 16;
+  // An IP address assigned to the K8s DNS service, it must be within the K8s Service address range specified in serviceCidr.
+  string dnsServiceIp = 17;
+  // A CIDR notation IP range assigned to the Docker bridge network, it must not overlap with any Azure Subnet IP ranges or the K8s Service address range.
+  string dockerBridgeCidr = 18;
+  // The plugin used for K8s network.
+  string networkPlugin = 19;
+  // The policy used for K8s network.
+  string networkPolicy = 20;
+  // A CIDR notation IP range from which to assign pod IPs when networkPlugin is using kubenet.
+  string podCidr = 21;
+  // A CIDR notation IP range from which to assign service cluster IPs, it must not overlap with any Azure Subnet IP ranges.
+  string serviceCidr = 22;
+  // The actual CIDR ranges of the virtual network.
+  repeated string networkCidrs = 23;
+  // Ingress rules for worker nodes.
+  repeated string workerIngressRules = 24;
+  // Egress rules for worker nodes.
+  repeated string workerEgressRules = 25;
+  // DNS prefix used for hostnames in the cluster.
+  string masterDnsPrefix = 26;
+  // Tags.
+  map<string,string> tags = 27;
+  // Instance groups.
+  map<string,AksInstanceGroup> instanceGroups = 28;
+  // Deployments.
+  CommonDeploymentsResp deployments = 29;
+  // User data.
+  string userData = 30;
+  // Security.
+  CommonSecurityResp security = 31;
+}
+
+// Event response structure.
+message CommonEvent {
+  // Details.
+  string details = 1;
+  // Event name.
+  string name = 2;
+  // Progress.
+  string progress = 3;
+  // Resource type.
+  string resourceType = 4;
+  // Status.
+  string status = 5;
+  // Status reason.
+  string statusReason = 6;
+  // Timestamp.
+  string timestamp = 7;
+}
+
+// EKS instance response structure.
+message EksInstance {
+  // Instance ID.
+  string instanceId = 1;
+  // Availability zone.
+  string availabilityZone = 2;
+}
+
+// Instance requirements structure.
+message CommonInstanceRequirementsResp {
+  // Instance types to include.
+  repeated string allowedInstanceTypes = 1;
+  // CPU types required. For eg. intel, amd, amazon-web-services etc.
+  repeated string cpuTypes = 2;
+  // Instance types to exclude, ignored if AllowedInstanceTypes is set.
+  repeated string excludedInstanceTypes = 3;
+  // Select GPU instances.
+  bool gpu = 4;
+  // Maximum vCpu count.
+  int64 maxCpu = 5;
+  // Minimum vCpu count.
+  int64 minCpu = 6;
+  // Maximum memory requirement in MiB.
+  int64 maxMemory = 7;
+  // Minimum memory requirement in MiB.
+  int64 minMemory = 8;
+}
+
+// Instance requirements with metadata response structure.
+message CommonInstanceRequirementsWithMetadataResp {
+  // The architecture type. For eg, i386, x86_64, arm64, x86_64_mac, arm64_mac.
+  repeated string architectureTypes = 1;
+  // The virtualization type. For eg. hvm, paravirtual.
+  repeated string virtualizationTypes = 2;
+  // The attributes for the instance types. When you specify instance attributes, Amazon EC2 will identify instance types with those attributes.
+  CommonInstanceRequirementsResp instanceRequirements = 3;
+}
+
+// EKS instance group response structure.
+message EksInstanceGroup {
+  // AMI.
+  string ami = 1;
+  // Image param.
+  string imageParam = 2;
+  // Instance group name.
+  string instanceGroupName = 3;
+  // Instance group ID.
+  string instanceGroupId = 4;
+  // Instance tier.
+  string instanceTier = 5;
+  // Instance types.
+  repeated string instanceTypes = 6;
+  // Instance count.
+  int64 instanceCount = 7;
+  // Instance states
+  CommonInstanceStateCounts instanceStates = 8;
+  // Single zone.
+  bool singleZone = 9;
+  // Min instances.
+  int64 minInstance = 10;
+  // Max instances.
+  int64 maxInstance = 11;
+  // Node instance role.
+  string nodeInstanceRole = 12;
+  // Node volume size.
+  int64 nodeVolumeSize = 13;
+  // Labels.
+  map<string,string> labels = 14;
+  // Taints.
+  map<string,string> taints = 15;
+  // Tags.
+  map<string,string> tags = 16;
+  // Autoscaling enabled.
+  bool autoscalingEnabled = 17;
+  // Kube reserved CPU.
+  int64 kubeReservedCpu = 18;
+  // Kube reserved memory.
+  int64 kubeReservedMemory = 19;
+  // Kube reserved storage.
+  int64 kubeReservedStorage = 20;
+  // System reserved CPU.
+  int64 systemReservedCpu = 21;
+  // System reserved memory.
+  int64 systemReservedMemory = 22;
+  // System reserved storage.
+  int64 systemReservedStorage = 23;
+  // Enable cfs quota.
+  bool enableCfsQuota = 24;
+  // EKS Instance.
+  repeated EksInstance instances = 25;
+  // Events.
+  repeated CommonEvent events = 26;
+  // Instance group status.
+  string instanceGroupStatus = 27;
+  // Launch Template name suffix.
+  string lTNameSuffix = 28;
+  // Instance requirements.
+  CommonInstanceRequirementsWithMetadataResp instanceRequirementswithMetadata = 29;
+  // Instance profile name.
+  string instanceProfile = 30;
+  // IMDS versions.
+  repeated string imdsVersions = 31;
+}
+
+// EKS state response structure.
+message EksState {
+  option (options.MessageExtension.formFactor) = "public";
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Provider.
+  string provider = 1;
+  // Cluster display name.
+  string clusterDisplayName = 2;
+  // User data for this cluster.
+  string userData = 3;
+  // Virtual network details.
+  string virtualNetwork = 4;
+  // Existing virtual network if used.
+  bool existingVirtualNetwork = 5;
+  // Subnets.
+  repeated string subnets = 6;
+  // Worker subnets.
+  repeated string workerSubnets = 7;
+  // Security groups.
+  repeated string securityGroups = 8;
+  // Service role.
+  string serviceRole = 9;
+  // Worker instance profile.
+  string workerInstanceProfile = 10;
+  // Associate worker node public IP.
+  bool associateWorkerNodePublicIp = 11;
+  // VPC CIDR.
+  string vpcCidr = 12;
+  // Ingress rules for worker nodes.
+  repeated string workerIngressRules = 13;
+  // Egress rules for worker nodes.
+  repeated string workerEgressRules = 14;
+  // Worker security group.
+  string workerSecurityGroup = 15;
+  // Telemetry enabled.
+  bool telemetryEnabled = 16;
+  // Telemetry logging enabled.
+  bool telemetryLoggingEnabled = 17;
+  // Telemetry logging storage location.
+  string telemetryLoggingStorageLocation = 18;
+  // Telemetry logging bucket.
+  string telemetryLoggingBucket = 19;
+  // Telemetry logging root dir.
+  string telemetryLoggingRootDir = 20;
+  // Telemetry logging root dir.
+  string telemetryKmsKeyArn = 21;
+  // Tags.
+  map<string,string> tags = 22;
+  // SSH key pair name.
+  string sshKeyPairName = 23;
+  // KMS key ARN.
+  string kmsKeyArn = 24;
+  // Instance groups.
+  map<string,EksInstanceGroup> instanceGroups = 25;
+  // Deployments.
+  CommonDeploymentsResp deployments = 26;
+  // SSH public key.
+  string sshPublicKey = 27;
+  // Network plugin.
+  string networkPlugin = 28;
+  // Service CIDR.
+  string serviceCidr = 29;
+  // Array of inbound proxy CIDRs.
+  repeated string inboundProxyCidr = 30;
+  // Security.
+  CommonSecurityResp security = 31;
+  // Suspended processes.
+  repeated string suspendedProcesses = 32;
+  // Whether to stop deletion on error.
+  bool stopDeleteOnError = 33;
+  // Whether CSI is enabled.
+  bool csiEnabled = 34;
+  // Whether lacework is enabled.
+  bool laceworkEnabled = 35;
+}
+
+// Image catalog response structure.
+message CommonImageCatalogResp {
+  option (options.MessageExtension.formFactor) = "public";
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // The catalog CRN (either CRN or name is required).
+  string crn = 1;
+  // The catalog name (either CRN or name is required).
+  string name = 2;
+}
+
+// Storage spec response structure.
+message CommonStorageSpecResp {
+  option (options.MessageExtension.formFactor) = "public";
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Flag to enable CSI (Container Storage Interface). It further sets specific inline cloud formation policies required for CSI.
+  bool csiEnabled = 1;
+}
+
+// Node image available upgrade structure.
+message CommonNodeImageAvailableUpgrade {
+  // Instance group name.
+  string instanceGroup = 1;
+  // Currently used node image version.
+  string current = 2;
+  // Available node image upgrade versions.
+  repeated string upgrades = 3;
+}
+
+// Describe cluster response.
+message DescribeClusterResponse {
+  // CDP environment name.
+  string envName = 1;
+  // CDP environment cloud provider.
+  string envCloudProvider = 2;
+  // Compute cluster name.
+  string clusterName = 3;
+  // Compute cluster CRN.
+  string clusterCrn = 4;
+  // Description about the cluster.
+  string description = 5 [(options.FieldExtension.formFactor) = "private"];
+  // Compute cluster status.
+  string status = 6;
+  // Compute cluster platform provider.
+  string computePlatform = 7;
+  // Compute cluster platform version.
+  string computePlatformVersion = 8 [(options.FieldExtension.formFactor) = "private"];
+  // Kubernetes version.
+  string kubernetesVersion = 9;
+  // Number of nodes in the cluster.
+  int32 clusterSize = 10 [(options.FieldExtension.formFactor) = "private"];
+  // Compute cluster platform dashboard url.
+  string dashboardUrl = 11;
+  // Is compute cluster cloudera managed or not.
+  bool isClouderaManaged = 12 [(options.FieldExtension.formFactor) = "private"];
+  // Compute cluster type.
+  ComputeClusterType.Value clusterType = 13;
+  // Compute cluster creation time in ISO format.
+  string creationTime = 14;
+  // Compute cluster ID.
+  string clusterId = 15;
+  // CDP environment CRN.
+  string envCrn = 16;
+  // API endpoint.
+  string apiEndPoint = 17 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // Cluster state version.
+  int32 clusterStateVersion = 18 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // Compute cluster deletion time in ISO format.
+  string deletionTime = 19 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // Compute cluster update time in ISO format.
+  string updateTime = 20 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // Workloads.
+  repeated string workloads = 21 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // Cluster owner.
+  ComputeClusterOwner clusterOwner = 22 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // Region.
+  string region = 23 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // Message with additional details about the cluster status.
+  string message = 24 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // CDP account ID.
+  string account = 25 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // List of available K8s Upgrades.
+  repeated string availableUpgrades = 26 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // The image catalog details.
+  CommonImageCatalogResp imageCatalog = 27 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // The storage specifications.
+  CommonStorageSpecResp storage = 28 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // Map of labels associated with this cluster.
+  map<string,string> labels = 29;
+  // Bootstrap script used to setup this cluster.
+  string bootstrapScript = 30;
+  // Cloud provider states. More Cloud providers will be added in future.
+  oneof cloud {
+    // AKS state.
+    AksState aks = 31 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+    // EKS state.
+    EksState eks = 32 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  }
+  // Is a node image upgrade available.
+  bool nodeImageUpgradeAvailable = 33 [(options.FieldExtension.formFactor) = "public"];
+  // Lists the currently used images and the new upgrades available.
+  repeated CommonNodeImageAvailableUpgrade nodeImageUpgrades = 34 [(options.FieldExtension.formFactor) = "public"];
+}
+
+// Object representing sorting filters.
+message SortingFilters {
+  enum Value {
+    // No sorting filter is specified.
+    NONE = 0;
+    // Sorting based on env name.
+    ENV_NAME = 1;
+    // Sorting based on cluster status.
+    STATUS = 2;
+    // Sorting based on cluster name.
+    CLUSTER_NAME = 3;
+    // Sorting based on creation time.
+    CREATION_TIME = 4;
+    // Sorting based on last updation time.
+    UPDATION_TIME = 5;
+    // Sorting based on k8s versions.
+    K8S_VERSION = 6;
+  }
+}
+
+// Object representing sorting orders.
+message SortingOrders {
+  enum Value {
+    // Sorting in ascending order.
+    ASC = 0;
+    // Sorting in descending order.
+    DESC = 1;
+  }
+}
+
+// Request Object for Sorting spec.
+message Sort {
+  // Sort By.
+  SortingFilters.Value sortBy = 1;
+  // Sorting Order.
+  SortingOrders.Value sortOrder = 2;
+}
+
+// Request object to list clusters.
+message ListClustersRequest {
+  // Environment name or crn.
+  string envNameOrCrn = 1 [(options.FieldExtension.required) = true];
+  // Workloads for workload filtering.
+  string workloads = 2 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // Cluster Status for status filtering.
+  string status = 3 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // The size of each page. Default is 100.
+  int32 pageSize = 4 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.pagingPageSize) = true, (options.FieldExtension.minimum) = 1, (options.FieldExtension.maximum) = 500, (options.FieldExtension.formFactor) = "public"];
+  // A token to specify where to start paginating. This is the nextToken from a previously truncated response. 1 or empty for first page.
+  string startingToken = 5 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.pagingInputToken) = true, (options.FieldExtension.formFactor) = "public"];
+  // Include deleted clusters in the response. Optional.
+  bool includeDeleted = 6 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // Sorting Specs.
+  repeated Sort sort = 7 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+}
+
+// List clusters item structure.
+message ListClusterItem {
+  // CDP environment name.
+  string envName = 1;
+  // CDP environment cloud provider.
+  string envCloudProvider = 2;
+  // Compute cluster name.
+  string clusterName = 3;
+  // Compute cluster CRN.
+  string clusterCrn = 4;
+  // Compute cluster status.
+  string status = 5;
+  // Compute cluster platform provider.
+  string computePlatform = 6;
+  // Compute cluster platform version.
+  string computePlatformVersion = 7 [(options.FieldExtension.formFactor) = "private"];
+  // Kubernetes version.
+  string kubernetesVersion = 8;
+  // Number of nodes in the cluster.
+  int32 clusterSize = 9 [(options.FieldExtension.formFactor) = "private"];
+  // Compute cluster ID.
+  string clusterId = 10;
+  // CDP environment CRN.
+  string envCrn = 11;
+  // Compute cluster type.
+  ComputeClusterType.Value clusterType = 12 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // Compute cluster creation time in ISO format.
+  string  creationTime = 13 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // Compute cluster deletion time in ISO format.
+  string  deletionTime = 14 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // Compute cluster update time in ISO format.
+  string  updateTime = 15 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // Cluster state version.
+  int32 clusterStateVersion = 16 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // Cluster owner.
+  ComputeClusterOwner clusterOwner = 17 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // Region.
+  string region = 18 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // Message with additional details about the cluster status.
+  string message = 24 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  /// CDP account ID.
+  string account = 25 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // List of available K8s Upgrades.
+  repeated string availableUpgrades = 26 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // The image catalog details.
+  CommonImageCatalogResp imageCatalog = 27 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // The storage specifications.
+  CommonStorageSpecResp storage = 28 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // Map of labels associated with this cluster.
+  map<string,string> labels = 29;
+}
+
+// List clusters response.
+message ListClustersResponse {
+  // Array of CDP compute clusters.
+  repeated ListClusterItem clusters = 1 [(options.FieldExtension.pagingResult) = true];
+  // The token to use when requesting the next set of results. If not present, there are no additional results.
+  string nextToken = 2 [(options.FieldExtension.pagingOutputToken) = true, (options.FieldExtension.formFactor) = "public"];
+  // Total number of clusters.
+  int32 totalClusters = 3 [(options.FieldExtension.formFactor) = "public"];
+  // Total number of pages.
+  int32 totalPages = 4 [(options.FieldExtension.formFactor) = "public"];
+}
+
+// Request object for getting kube config of a cluster.
+message GetKubeConfigRequest {
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+  // Service name.
+  string service = 2 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // Namespace.
+  string namespace = 3 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+  // Gets a kube config with a proxy as the K8s API server.
+  bool proxy = 4 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
+}
+
+// Get kube config response.
+message GetKubeConfigResponse {
+  // Kube config in the content field.
+  string content = 1 [(options.FieldExtension.sensitive) = true];
+}
+
+// Request structure for installing a deployment.
+message InstallDeploymentRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+  // The namespace of the deployment.
+  string namespace = 2 [(options.FieldExtension.required) = true];
+  // The name of the deployment.
+  string name = 3 [(options.FieldExtension.required) = true];
+  // The name of the chart to install.
+  string chartName = 4 [(options.FieldExtension.required) = true];
+  // The version of the chart to install. Defaults to latest version.
+  string chartVersion = 5;
+  // JSON overrides for the deployment's properties.
+  string overrides = 6;
+  // Deployment profile to use. Currently supported are cml and cde.
+  string deploymentProfile = 7;
+}
+
+// Response structure for installing a deployment.
+message InstallDeploymentResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // The name of the deployment.
+  string name = 1;
+  // The namespace of the deployment.
+  string namespace = 2;
+  // Helm revision.
+  int32 revision = 3;
+  // Status of the deployment. Currently supported values are UNKNOWN, DEPLOYED, UNINSTALLED, SUPERSEDED, and FAILED. New values may be added in the future.
+  string status = 4;
+  // JSON overrides for the deployment's properties.
+  string overrides = 5;
+  // Chart that the deployment was created from.
+  Chart chart = 6;
+}
+
+// Request structure for deleting a deployment.
+message DeleteDeploymentRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+  // The namespace of the deployment.
+  string namespace = 2 [(options.FieldExtension.required) = true];
+  // The name of the deployment.
+  string name = 3 [(options.FieldExtension.required) = true];
+}
+
+// Response structure for deleting a deployment.
+message DeleteDeploymentResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // A message returned about the status of the delete operation.
+  string message = 1;
+}
+
+// Request structure for describing a deployment.
+message DescribeDeploymentRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+  // The namespace of the deployment.
+  string namespace = 2 [(options.FieldExtension.required) = true];
+  // The name of the deployment.
+  string name = 3 [(options.FieldExtension.required) = true];
+}
+
+// Chart structure.
+message Chart {
+  // The version (usually of the images) of the components being deployed.
+  string applicationVersion = 1;
+  // The version of this chart (which is not the version of the components being deployed).
+  string deploymentVersion = 2;
+  // The chart description.
+  string description = 3;
+  // The chart name.
+  string name = 4;
+  // JSON for values.yaml of that chart.
+  string values = 5;
+  // A URL to an SVG or PNG image to be used as an icon.
+  string icon = 6;
+}
+
+// Available deployment upgrade structure.
+message AvailableDeploymentUpgrade {
+  // The version of the components which would be installed from this deployment.
+  string applicationVersion = 1;
+  // The version of the deployment that is available to upgrade to.
+  string deploymentVersion = 2;
+}
+
+// Deployment structure.
+message Deployment {
+  // The name of the deployment.
+  string name = 1;
+  // The namespace of the deployment.
+  string namespace = 2;
+  // Helm revision.
+  int32 revision = 3;
+  // True if Liftie is managing this deployment.
+  bool liftieManaged = 4;
+  // Chart that the deployment was created from.
+  Chart chart = 5;
+  // Status of the deployment. Currently supported values are UNKNOWN, DEPLOYED, UNINSTALLED, SUPERSEDED, and FAILED. New values may be added in the future.
+  string status = 6;
+  // Any upgrades available for this deployment.
+  repeated AvailableDeploymentUpgrade upgrades = 7;
+  // JSON overrides for the deployment's properties.
+  string overrides = 8;
+}
+
+// History structure.
+message History {
+  // Helm revision.
+  int32 revision = 1;
+  // Status of the deployment. Currently supported values are UNKNOWN, DEPLOYED, UNINSTALLED, SUPERSEDED, and FAILED. New values may be added in the future.
+  string status = 2;
+  // Chart that the deployment was created from.
+  Chart chart = 3;
+  // JSON overrides for the deployment's properties for given revision.
+  string overrides = 4;
+}
+
+// Response structure for describing a deployment.
+message DescribeDeploymentResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Deployment details.
+  Deployment deployment = 1;
+  // History of the deployment.
+  repeated History history = 2;
+  // JSON overrides for the deployment's properties. Deprecated.
+  string overrides = 3;
+}
+
+// Request structure for upgrading a deployment.
+message UpgradeDeploymentRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+  // The namespace of the deployment.
+  string namespace = 2 [(options.FieldExtension.required) = true];
+  // The name of the deployment.
+  string name = 3 [(options.FieldExtension.required) = true];
+  // The version of the deployment to upgrade to. Defaults to latest version.
+  string chartVersion = 4;
+  // JSON overrides for the deployment's properties.
+  string overrides = 5;
+}
+
+// Response structure for upgrading a deployment.
+message UpgradeDeploymentResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // The name of the deployment.
+  string name = 1;
+  // The namespace of the deployment.
+  string namespace = 2;
+  // Helm revision.
+  int32 revision = 3;
+  // A message returned about the status of the upgrade operation.
+  string message = 4;
+  // Status of the deployment. Currently supported values are UNKNOWN, DEPLOYED, UNINSTALLED, SUPERSEDED, and FAILED. New values may be added in the future.
+  string status = 5;
+  // Chart that the deployment was created from.
+  Chart chart = 6;
+}
+
+// Request structure to rollback a deployment.
+message RollbackDeploymentRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+  // The namespace of the deployment.
+  string namespace = 2 [(options.FieldExtension.required) = true];
+  // The name of the deployment.
+  string name = 3 [(options.FieldExtension.required) = true];
+  // The revision of the deployment to rollback to. Defaults to previous revision.
+  int32 revision = 4;
+}
+
+// Response structure to rollback a deployment.
+message RollbackDeploymentResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // A message returned about the status of the rollback operation.
+  string message = 1;
+}
+
+// Request structure to list deployments in the cluster.
+message ListDeploymentsRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+  // The namespace of the deployment. Lists deployments in all namespaces if not specified.
+  string namespace = 2;
+  // Set true to get detailed chart response. Default is false.
+  bool verbose = 3;
+}
+
+// Response structure to list deployments in the cluster.
+message ListDeploymentsResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Array of available charts.
+  repeated Chart availableCharts = 1;
+  // Array of unavailable charts.
+  repeated Chart unavailableCharts = 2;
+  // Array of installed deployments.
+  repeated Deployment installedDeployments = 3;
+}
+
+// Update compute cluster request.
+message UpdateClusterRequest {
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+  // Spec for updating compute cluster.
+  CommonUpdateClusterSpec spec = 2 [(options.FieldExtension.required) = true];
+  // Current cluster state version of the compute cluster being updated.
+  int64 clusterStateVersion = 3 [(options.FieldExtension.required) = true];
+  // Compute cluster update metadata.
+  CommonUpdateClusterMetadata metadata = 4;
+  // Whether to skip validation.
+  bool skipValidation = 5;
+}
+
+// Update compute cluster response.
+message UpdateClusterResponse {
+  // Compute cluster CRN.
+  string clusterCrn = 1;
+  // Status of the compute cluster.
+  CommonStatusMessage clusterStatus = 2;
+  // Uniform resource identifier of the compute cluster.
+  string uri = 3;
+  // Pre-flight validation check response. Only given on a validation failure and `skipValidation` is false.
+  ValidationResponse validationResponse = 4;
+}
+
+// Compute cluster update spec.
+message CommonUpdateClusterSpec {
+  // Update deployments on the compute cluster.
+  CommonUpdateClusterDeployments deployments = 1;
+  // Update Helm on the compute cluster.
+  CommonHelm helm = 2;
+  // Update security settings for the compute cluster.
+  CommonSecurity security = 3;
+  // Update storage settings for the compute cluster.
+  CommonStorageSpec storage = 4;
+  // Update image catalog for the compute cluster.
+  CommonImageCatalog imageCatalog = 5;
+  // Whether to refresh instance groups belonging to the compute cluster.
+  bool refreshInstanceGroups = 6;
+  // Azure specific update options.
+  CommonAzureUpdateClusterSpec azure = 7;
+}
+
+// Update cluster metadata structure.
+message CommonUpdateClusterMetadata {
+  // Description of compute cluster update.
+  string description = 1;
+}
+
+// Update cluster deployments structure.
+message CommonUpdateClusterDeployments {
+  // Autoscaler.
+  CommonAutoscaler autoscaler = 1;
+}
+
+// Helm structure.
+message CommonHelm {
+  // Helm version to be upgraded to.
+  string version = 1;
+}
+
+// Azure specific update cluster spec
+message CommonAzureUpdateClusterSpec {
+  // Updates the ManagedIdentity used by the AKS cluster.
+  bool updateAksManagedIdentity = 1;
+}
+
+// Request object for creating instance groups in a cluster.
+message CreateInstanceGroupsRequest {
+  option (options.MessageExtension.formFactor) = "public";
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+  // Instance groups to be created in the cluster.
+  repeated CommonInstanceGroup instanceGroups = 2 [(options.FieldExtension.required) = true];
+  // Cluster state version.
+  int64 clusterStateVersion = 3 [(options.FieldExtension.required) = true];
+  // Whether to skip validation.
+  bool skipValidation = 4;
+}
+
+// Create instance groups response.
+message CreateInstanceGroupsResponse {
+  option (options.MessageExtension.formFactor) = "public";
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster CRN.
+  string clusterCrn = 1;
+  // Cluster status.
+  CommonStatusMessage clusterStatus = 2;
+  // Uniform resource identifier of cluster.
+  string uri = 3;
+  // Pre-flight validation check response. Only given on a validation failure and `skipValidation` is false.
+  ValidationResponse validationResponse = 4;
+}
+
+// Request object for deleting an instance group.
+message DeleteInstanceGroupRequest {
+  option (options.MessageExtension.formFactor) = "public";
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+  // Instance group name.
+  string instanceGroupName = 2 [(options.FieldExtension.required) = true];
+  // Cluster state version.
+  int64 clusterStateVersion = 3 [(options.FieldExtension.required) = true];
+}
+
+// Delete instance group response.
+message DeleteInstanceGroupResponse {
+  option (options.MessageExtension.formFactor) = "public";
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster CRN.
+  string clusterCrn = 1;
+  // Cluster status.
+  CommonStatusMessage clusterStatus = 2;
+  // Uniform resource identifier of cluster.
+  string uri = 3;
+}
+
+// Request object for updating an instance group.
+message UpdateInstanceGroupRequest {
+  option (options.MessageExtension.formFactor) = "public";
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+  // Instance group to be updated in the cluster.
+  CommonInstanceGroup instanceGroup = 2 [(options.FieldExtension.required) = true];
+  // Cluster state version.
+  int64 clusterStateVersion = 3 [(options.FieldExtension.required) = true];
+  // Whether to skip validation.
+  bool skipValidation = 4;
+}
+
+// Update instance group response.
+message UpdateInstanceGroupResponse {
+  option (options.MessageExtension.formFactor) = "public";
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster CRN.
+  string clusterCrn = 1;
+  // Cluster status.
+  CommonStatusMessage clusterStatus = 2;
+  // Uniform resource identifier of cluster.
+  string uri = 3;
+  // Pre-flight validation check response. Only given on a validation failure and `skipValidation` is false.
+  ValidationResponse validationResponse = 4;
+}
+
+// Request structure to upgrade the cluster k8s version.
+message UpgradeClusterRequest {
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+  // Current cluster state version of the compute cluster being updated.
+  int64 clusterStateVersion = 2 [(options.FieldExtension.required) = true];
+  // K8s version to upgrade cluster to.
+  string kubernetesVersion = 3 [(options.FieldExtension.required) = true];
+  // Whether to skip validation.
+  bool skipValidation = 4;
+}
+
+// Response structure for upgrading the cluster k8s version.
+message UpgradeClusterResponse {
+  // Cluster status.
+  CommonStatusMessage clusterStatus = 1;
+  // Pre-flight validation check response. Only given on a validation failure and `skipValidation` is false.
+  ValidationResponse validationResponse = 2;
+}
+
+// Request object for adding a user or a role to a cluster.
+message AddUserRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+  // User ID. Specify user or role ARN.
+  string id = 2 [(options.FieldExtension.required) = true];
+  // K8s RBAC cluster role bindings.
+  repeated string groups = 3;
+  // True if added user is an admin.
+  bool isAdmin = 4;
+  // True if user ID is a role.
+  bool isRole = 5;
+  // Username.
+  string username = 6;
+}
+
+// Add user response.
+message AddUserResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // User ID.
+  string id = 1;
+  // User Status.
+  string status = 2;
+}
+
+// Request object for deleting a user from a cluster.
+message DeleteUserRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+  // ID of user to be deleted.
+  string id = 2 [(options.FieldExtension.required) = true];
+}
+
+// Delete user response.
+message DeleteUserResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // User ID.
+  string id = 1;
+  // User Status.
+  string status = 2;
+}
+
+// Request object for describing a user of a cluster.
+message DescribeUserRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+  // User ID.
+  string id = 2 [(options.FieldExtension.required) = true];
+}
+
+// User details.
+message User {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // K8s RBAC cluster role bindings.
+  repeated string groups = 1;
+  // User ID.
+  string id = 2;
+  // True if added user is an admin.
+  bool isAdmin = 3;
+  // True if user ID is a role.
+  bool isRole = 4;
+  // Username.
+  string username = 5;
+}
+
+// Describe user response.
+message DescribeUserResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // User details.
+  User user = 1;
+}
+
+// Request object to list users of a cluster.
+message ListUsersRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+  // Set true to list only admin users.
+  bool onlyAdmins = 2;
+}
+
+// List users response.
+message ListUsersResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // List of Users.
+  repeated User users = 1;
+}
+
+// Request structure to get prerequisite.
+message GetPrerequisiteRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // The name of the cloud platform for which prerequisites are being retrieved.
+  string cloudPlatform = 1 [(options.FieldExtension.required) = true];
+}
+
+// Response structure for get prerequisite.
+message GetPrerequisiteResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Cloud provider states. More Cloud providers could be added in the future.
+  oneof cloud {
+    // AWS prerequisite detail.
+    AwsPrerequisiteDetail aws = 1;
+    // Azure prerequisite detail.
+    AzurePrerequisiteDetail azure = 2;
+  }
+}
+
+// AWS prerequisite detail object.
+message AwsPrerequisiteDetail {
+  // JSON for restricted policy.
+  string policy = 1;
+  // JSON for cloud formation IAM creator template.
+  string cloudFormationIamCreatorTemplate = 2;
+  // JSON for Container Storage Interface(CSI) policy.
+  string csiPolicy = 3;
+}
+
+// Azure prerequisite detail object.
+message AzurePrerequisiteDetail {
+  // JSON for restricted policy.
+  string policy = 1;
+}
+
+// Request structure to refresh service account tokens for a cluster..
+message RefreshServiceAccountTokensRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Compute cluster CRN.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+}
+
+// Response structure for refreshing service account tokens for a cluster..
+message RefreshServiceAccountTokensResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Cluster Status.
+  CommonStatusMessage clusterStatus = 1;
+}
+
+// Request structure for RecommendInstanceTypes.
+message RecommendInstanceTypesRequest{
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // CDP environment to be used fetch cloud credentials.
+  string envCrn = 1 [(options.FieldExtension.required) = true];
+  // Instance type requirements for the returned instance types.
+  RecommendInstanceTypesRequirements requirements = 2;
+}
+
+// Instance type requirements.
+message RecommendInstanceTypesRequirements {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // CPU Architechture 
+  repeated CpuArch.Value cpuArchs = 1;
+  // Minimum CPU count.
+  int64 cpuMin = 2;
+  // Maximum CPU count.
+  int64 cpuMax = 3;
+  // Minimum memory size as a human-readable string.
+  string memoryMin = 4;
+  // Maximum memory size as a human-readable string.
+  string memoryMax = 5;
+  // Minimum GPU count.
+  int64 gpuMin = 6;
+  // Maximum GPU count.
+  int64 gpuMax = 7;
+  // Instance types to include.
+  repeated string allowedInstanceTypes = 8;
+  // Instance types to exclude.
+  repeated string excludedInstanceTypes = 9;
+}
+
+// CPU architechture of the instance types.
+message CpuArch {
+  enum Value {
+    // ARM64 architechture.
+    arm64 = 0;
+    // X86_64 architechture.
+    x86_64 = 1;
+    // i386 architechture.
+    i386 = 2;
+    // Apple silicon architechture.
+    arm64_mac = 3;
+  }
+}
+
+// Response structure for RecommendInstanceTypes
+message RecommendInstanceTypesResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Number of instance types found.
+  int64 count = 1;
+  // List of instance types.
+  repeated InstanceTypeInfo instanceTypes = 2;
+}
+
+// Information about instance types
+message InstanceTypeInfo {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Name of instance type.
+  string name = 1;
+  // Cpu architechture of instance type.
+  CpuArch.Value cpuArch = 2;
+  // Number of CPUs available in instance type.
+  int64 cpus = 3;
+  // Memory available in instance types in bytes.
+  int64 memory = 4;
+  // Number of GPUs available in instance types.
+  int64 gpus = 5;
+}

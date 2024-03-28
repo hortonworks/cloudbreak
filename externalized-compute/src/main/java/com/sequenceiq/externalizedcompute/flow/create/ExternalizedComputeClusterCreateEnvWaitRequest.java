@@ -11,8 +11,8 @@ public class ExternalizedComputeClusterCreateEnvWaitRequest extends Externalized
     @JsonCreator
     public ExternalizedComputeClusterCreateEnvWaitRequest(
             @JsonProperty("resourceId") Long externalizedComputeClusterId,
-            @JsonProperty("userId") String userId) {
-        super(externalizedComputeClusterId, userId);
+            @JsonProperty("actorCrn") String actorCrn) {
+        super(externalizedComputeClusterId, actorCrn);
     }
 
     public ExternalizedComputeClusterCreateEnvWaitRequest(ExternalizedComputeClusterContext context) {

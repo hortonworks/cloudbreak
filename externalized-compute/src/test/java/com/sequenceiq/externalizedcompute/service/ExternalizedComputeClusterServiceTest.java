@@ -18,15 +18,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
@@ -43,11 +45,11 @@ class ExternalizedComputeClusterServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:5678";
 
-    @Mock
-    private EnvironmentEndpoint environmentEndpoint;
+    @Spy
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     @Mock
-    private RegionAwareCrnGenerator regionAwareCrnGenerator;
+    private EnvironmentEndpoint environmentEndpoint;
 
     @Mock
     private CrnUserDetailsService crnUserDetailsService;
@@ -77,7 +79,9 @@ class ExternalizedComputeClusterServiceTest {
     private ExternalizedComputeClusterService clusterService;
 
     @Test
-    public void testPrepareComputeClusterCreation() throws TransactionService.TransactionExecutionException {
+    public void testPrepareComputeClusterCreation() throws TransactionExecutionException {
+        ReflectionTestUtils.setField(regionAwareCrnGenerator, "partition", "cdp");
+        ReflectionTestUtils.setField(regionAwareCrnGenerator, "region", "us-west-1");
         doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get()).when(transactionService).required(any(Supplier.class));
 
         ExternalizedComputeClusterRequest externalizedComputeClusterRequest = new ExternalizedComputeClusterRequest();
@@ -92,9 +96,6 @@ class ExternalizedComputeClusterServiceTest {
         when(environmentEndpoint.getByCrn(externalizedComputeClusterRequest.getEnvironmentCrn())).thenReturn(detailedEnvironmentResponse);
 
         Crn userCrn = Crn.fromString(USER_CRN);
-
-        when(regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.EXTERNALIZED_COMPUTE, userCrn.getAccountId()))
-                .thenReturn("crn:externalized");
 
         CrnUser crnUser = mock(CrnUser.class);
         when(crnUser.getUsername()).thenReturn("perdos@cloudera.com");
@@ -133,6 +134,21 @@ class ExternalizedComputeClusterServiceTest {
 
         verify(externalizedComputeClusterStatusService).setStatus(savedCluster, ExternalizedComputeClusterStatusEnum.CREATE_IN_PROGRESS,
                 "Cluster provision initiated");
+    }
+
+    @Test
+    public void testGetLiftieClusterCrn() {
+        ReflectionTestUtils.setField(regionAwareCrnGenerator, "partition", "cdp");
+        ReflectionTestUtils.setField(regionAwareCrnGenerator, "region", "us-west-1");
+
+        ExternalizedComputeCluster cluster = new ExternalizedComputeCluster();
+        cluster.setName("cluster");
+        cluster.setEnvironmentCrn("envCrn");
+        cluster.setLiftieName("liftie1");
+        cluster.setAccountId("account");
+
+        String liftieClusterCrn = clusterService.getLiftieClusterCrn(cluster);
+        assertEquals("crn:cdp:compute:us-west-1:account:cluster:liftie1", liftieClusterCrn);
     }
 
 }

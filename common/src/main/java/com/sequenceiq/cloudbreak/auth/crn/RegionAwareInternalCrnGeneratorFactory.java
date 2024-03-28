@@ -37,6 +37,10 @@ public class RegionAwareInternalCrnGeneratorFactory {
         return init(Crn.Service.REMOTECLUSTER);
     }
 
+    public RegionAwareInternalCrnGenerator externalizedCompute() {
+        return init(Crn.Service.EXTERNALIZED_COMPUTE);
+    }
+
     private RegionAwareInternalCrnGenerator init(Crn.Service serviceType) {
         return regionalAwareInternalCrnGenerator(serviceType, partition, region);
     }

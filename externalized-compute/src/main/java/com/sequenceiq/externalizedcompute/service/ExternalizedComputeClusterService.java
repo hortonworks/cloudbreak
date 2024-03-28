@@ -15,8 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.api.DefaultApi;
-import com.cloudera.model.CommonDeleteClusterResponse;
+import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DeleteClusterResponse;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -30,12 +29,12 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.externalizedcompute.ApiException;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterRequest;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatusEnum;
@@ -44,6 +43,7 @@ import com.sequenceiq.externalizedcompute.repository.ExternalizedComputeClusterR
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
+import com.sequenceiq.liftie.client.LiftieGrpcClient;
 
 @Service
 public class ExternalizedComputeClusterService implements ResourceIdProvider, PayloadContextProvider {
@@ -69,7 +69,7 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
-    private LiftieService liftieService;
+    private LiftieGrpcClient liftieGrpcClient;
 
     @Inject
     private EntitlementService entitlementService;
@@ -138,23 +138,24 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
             });
             LOGGER.info("Saved ExternalizedComputeCluster entity: {}", initiatedExternalizedComputeCluster);
             return externalizedComputeClusterFlowManager.triggerExternalizedComputeClusterCreation(initiatedExternalizedComputeCluster);
-        } catch (TransactionService.TransactionExecutionException e) {
+        } catch (TransactionExecutionException e) {
             LOGGER.error("Externalized compute cluster save failed", e);
             throw new RuntimeException("Externalized compute cluster initiation failed");
         }
     }
 
-    public void initiateDelete(Long id) {
+    public void initiateDelete(Long id, String actorCrn) {
         ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(id);
         LOGGER.info("Initiate delete for: {}", externalizedComputeCluster.getName());
-        DefaultApi defaultApi = liftieService.getDefaultApi();
         try {
             if (externalizedComputeCluster.getLiftieName() != null) {
-                CommonDeleteClusterResponse commonDeleteClusterResponse = defaultApi.deleteCluster(externalizedComputeCluster.getLiftieName());
-                LOGGER.info("Liftie delete response: {}", commonDeleteClusterResponse);
+                DeleteClusterResponse deleteClusterResponse =
+                        liftieGrpcClient.deleteCluster(getLiftieClusterCrn(externalizedComputeCluster), actorCrn);
+                LOGGER.info("Liftie delete response: {}", deleteClusterResponse);
             }
-        } catch (ApiException e) {
-            if (!e.getMessage().contains("already deleted")) {
+        } catch (Exception e) {
+            if (!e.getMessage().contains("already deleted") && !e.getMessage().contains("not found in database")
+                    && !e.getMessage().contains("existing operation 'Delete'")) {
                 LOGGER.error("Externalized compute cluster deletion failed", e);
                 throw new RuntimeException(e);
             }
@@ -181,7 +182,7 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
                     externalizedComputeClusterRepository.save(externalizedComputeCluster);
                 });
             });
-        } catch (TransactionService.TransactionExecutionException e) {
+        } catch (TransactionExecutionException e) {
             throw new RuntimeException("Could not delete cluster", e);
         }
     }
@@ -204,6 +205,11 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
 
     public List<ExternalizedComputeCluster> getAllByEnvironmentCrn(String environmentCrn, String accountId) {
         return externalizedComputeClusterRepository.findAllByEnvironmentCrnAndAccountIdAndDeletedIsNull(environmentCrn, accountId);
+    }
+
+    public String getLiftieClusterCrn(ExternalizedComputeCluster externalizedComputeCluster) {
+        return regionAwareCrnGenerator.generateCrnString(CrnResourceDescriptor.COMPUTE_CLUSTER,
+                externalizedComputeCluster.getLiftieName(), externalizedComputeCluster.getAccountId());
     }
 
     private void setTagsSafe(DetailedEnvironmentResponse environment, Map<String, String> userDefinedTags,

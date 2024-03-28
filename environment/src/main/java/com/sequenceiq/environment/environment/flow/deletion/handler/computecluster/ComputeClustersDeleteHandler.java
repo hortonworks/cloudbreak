@@ -15,10 +15,8 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvClusterDeleteFailedEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
-import com.sequenceiq.environment.environment.service.EnvironmentViewService;
 import com.sequenceiq.environment.environment.service.externalizedcompute.ExternalizedComputeService;
 import com.sequenceiq.environment.util.PollingConfig;
-import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -31,14 +29,10 @@ public class ComputeClustersDeleteHandler extends ExceptionCatcherEventHandler<E
 
     private static final int TIMEOUT = 90;
 
-    private final EnvironmentViewService environmentViewService;
-
     private final ExternalizedComputeService externalizedComputeService;
 
-    protected ComputeClustersDeleteHandler(EventSender eventSender, EnvironmentViewService environmentViewService,
-            ExternalizedComputeService externalizedComputeService) {
+    protected ComputeClustersDeleteHandler(ExternalizedComputeService externalizedComputeService) {
         this.externalizedComputeService = externalizedComputeService;
-        this.environmentViewService = environmentViewService;
     }
 
     @Override

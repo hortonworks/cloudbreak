@@ -11,8 +11,8 @@ public class ExternalizedComputeClusterDeleteRequest extends ExternalizedCompute
     @JsonCreator
     public ExternalizedComputeClusterDeleteRequest(
             @JsonProperty("resourceId") Long externalizedComputeClusterId,
-            @JsonProperty("userId") String userId) {
-        super(externalizedComputeClusterId, userId);
+            @JsonProperty("actorCrn") String actorCrn) {
+        super(externalizedComputeClusterId, actorCrn);
     }
 
     public ExternalizedComputeClusterDeleteRequest(ExternalizedComputeClusterContext context) {

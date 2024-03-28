@@ -46,21 +46,21 @@ public class ExternalizedComputeClusterFlowManager {
     public FlowIdentifier triggerExternalizedComputeClusterCreation(ExternalizedComputeCluster externalizedComputeCluster) {
         LOGGER.info("Trigger Externalized Compute Cluster creation for: {}", externalizedComputeCluster);
         String selector = EXTERNALIZED_COMPUTE_CLUSTER_CREATE_INITIATED_EVENT.event();
-        String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        return notify(selector, new ExternalizedComputeClusterEvent(selector, externalizedComputeCluster.getId(), userId),
+        String actorCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        return notify(selector, new ExternalizedComputeClusterEvent(selector, externalizedComputeCluster.getId(), actorCrn),
                 externalizedComputeCluster.getName());
     }
 
     public FlowIdentifier triggerExternalizedComputeClusterDeletion(ExternalizedComputeCluster externalizedComputeCluster) {
         LOGGER.info("Trigger Externalized Compute Cluster deletion for: {}", externalizedComputeCluster);
         String selector = EXTERNALIZED_COMPUTE_CLUSTER_DELETE_INITIATED_EVENT.event();
-        String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        return notify(selector, new ExternalizedComputeClusterEvent(selector, externalizedComputeCluster.getId(), userId),
+        String actorCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        return notify(selector, new ExternalizedComputeClusterEvent(selector, externalizedComputeCluster.getId(), actorCrn),
                 externalizedComputeCluster.getName());
     }
 
     private FlowIdentifier notify(String selector, ExternalizedComputeClusterEvent acceptable, String identifier) {
-        Map<String, Object> flowTriggerUserCrnHeader = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, acceptable.getUserId());
+        Map<String, Object> flowTriggerUserCrnHeader = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, acceptable.getActorCrn());
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(flowTriggerUserCrnHeader, acceptable);
         return notify(selector, identifier, event);
     }

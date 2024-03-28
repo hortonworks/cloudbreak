@@ -8,9 +8,9 @@ public abstract class ExternalizedComputeClusterFailedEvent extends Externalized
     private final Exception exception;
 
     @JsonCreator
-    public ExternalizedComputeClusterFailedEvent(@JsonProperty("resourceId") Long externalizedComputeClusterId, @JsonProperty("userId") String userId,
+    public ExternalizedComputeClusterFailedEvent(@JsonProperty("resourceId") Long externalizedComputeClusterId, @JsonProperty("actorCrn") String actorCrn,
             @JsonProperty("exception") Exception exception) {
-        super(externalizedComputeClusterId, userId);
+        super(externalizedComputeClusterId, actorCrn);
         this.exception = exception;
     }
 
