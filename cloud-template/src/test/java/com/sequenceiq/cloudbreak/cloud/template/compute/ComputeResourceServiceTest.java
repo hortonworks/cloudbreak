@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -55,6 +56,7 @@ import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
+import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -182,23 +184,37 @@ class ComputeResourceServiceTest {
     }
 
     @Test
-    void testResourceDeletionSuccess() throws ExecutionException, InterruptedException {
+    void testResourceDeletionSuccess() throws Exception {
         ResourceBuilderContext resourceBuilderContext = mock(ResourceBuilderContext.class);
         when(resourceBuilders.compute(AWS_VARIANT)).thenReturn(List.of(computeResourceBuilder1, computeResourceBuilder2));
         when(resourceBuilderContext.getParallelResourceRequest()).thenReturn(2);
 
+        when(computeResourceBuilder1.resourceType()).thenReturn(ResourceType.AWS_INSTANCE);
+        when(computeResourceBuilder2.resourceType()).thenReturn(ResourceType.AWS_VOLUMESET);
+
+        CloudResource instance1 = newResource("instance-1", ResourceType.AWS_INSTANCE, CommonStatus.CREATED);
+        CloudResource instance2 = newResource("instance-2", ResourceType.AWS_INSTANCE, CommonStatus.CREATED);
+        CloudResource volume1 = newResource("vol-1", ResourceType.AWS_VOLUMESET, CommonStatus.CREATED);
+        CloudResource volume2 = newResource("vol-2", ResourceType.AWS_VOLUMESET, CommonStatus.CREATED);
+
         givenDeletionResult(FutureResult.SUCCESS, new CloudResourceStatus(cloudResource, ResourceStatus.DELETED));
 
         List<CloudResourceStatus> cloudResourceStatuses =
-                underTest.deleteResources(resourceBuilderContext, authenticatedContext, List.of(cloudResource), false);
+                underTest.deleteResources(resourceBuilderContext, authenticatedContext, List.of(instance1, instance2, volume1, volume2), false, true);
 
-        assertThat(cloudResourceStatuses).hasSize(2);
-        verify(resourceActionFactory, times(2)).buildDeletionCallable(deletionCallableCaptor.capture());
+        assertThat(cloudResourceStatuses).hasSize(4);
+        verify(resourceActionFactory, times(4)).buildDeletionCallable(deletionCallableCaptor.capture());
 
         List<ResourceDeletionCallablePayload> deletionCallables = deletionCallableCaptor.getAllValues();
-        assertThat(deletionCallables).hasSize(2);
+        assertThat(deletionCallables).hasSize(4);
         assertEquals(deletionCallables.get(0).getBuilder(), computeResourceBuilder2);
-        assertEquals(deletionCallables.get(1).getBuilder(), computeResourceBuilder1);
+        assertEquals(deletionCallables.get(0).getResource(), volume1);
+        assertEquals(deletionCallables.get(1).getBuilder(), computeResourceBuilder2);
+        assertEquals(deletionCallables.get(1).getResource(), volume2);
+        assertEquals(deletionCallables.get(2).getBuilder(), computeResourceBuilder1);
+        assertEquals(deletionCallables.get(2).getResource(), instance1);
+        assertEquals(deletionCallables.get(3).getBuilder(), computeResourceBuilder1);
+        assertEquals(deletionCallables.get(3).getResource(), instance2);
     }
 
     @Test
@@ -210,7 +226,7 @@ class ComputeResourceServiceTest {
                 FutureResult.FAILED, new CloudResourceStatus(cloudResource, ResourceStatus.FAILED, "No permission to delete."));
 
         CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
-                () -> underTest.deleteResources(resourceBuilderContext, authenticatedContext, List.of(cloudResource), false));
+                () -> underTest.deleteResources(resourceBuilderContext, authenticatedContext, List.of(cloudResource), false, true));
 
         assertEquals("Resource deletion failed. Reason: No permission to delete.", cloudConnectorException.getMessage());
     }
@@ -245,15 +261,15 @@ class ComputeResourceServiceTest {
                 rollbackContextBuildValue.add(cloudFailureContext.getCtx().isBuild());
                 return null;
             }
-        }).when(cloudFailureHandler).rollbackIfNecessary(any(), anyList(), anyList(), any(), any(), any());
+        }).when(cloudFailureHandler).rollbackIfNecessary(any(), anyList(), anyList(), any(), any());
 
         List<CloudResourceStatus> cloudResourceStatuses = underTest.buildResourcesForLaunch(resourceBuilderContext, authenticatedContext, cloudStack, null);
         assertThat(cloudResourceStatuses).hasSize(2);
         assertThat(cloudResourceStatuses).extracting(cloudResourceStatus -> cloudResourceStatus.getStatus()).containsOnly(ResourceStatus.CREATED);
         verify(resourceActionFactory, times(2)).buildCreationCallable(
                 argThat(resourceCreationCallablePayload -> resourceCreationCallablePayload.getContext().isBuild()));
-        verify(cloudFailureHandler, times(1)).rollbackIfNecessary(any(), anyList(), anyList(), eq(group1), any(), any());
-        verify(cloudFailureHandler, times(1)).rollbackIfNecessary(any(), anyList(), anyList(), eq(group2), any(), any());
+        verify(cloudFailureHandler, times(1)).rollbackIfNecessary(any(), anyList(), anyList(), eq(group1), any());
+        verify(cloudFailureHandler, times(1)).rollbackIfNecessary(any(), anyList(), anyList(), eq(group2), any());
         assertThat(rollbackContextBuildValue).containsExactly(Boolean.FALSE, Boolean.FALSE);
     }
 
@@ -266,4 +282,10 @@ class ComputeResourceServiceTest {
         when(future.get()).thenReturn(new ResourceRequestResult<>(futureResult, List.of(cloudResourceStatus)));
         return future;
     }
+
+    private CloudResource newResource(String s, ResourceType resourceType, CommonStatus created) {
+        return CloudResource.builder().withName(s).withType(resourceType).withStatus(created)
+                .withParameters(new HashMap<>()).build();
+    }
+
 }

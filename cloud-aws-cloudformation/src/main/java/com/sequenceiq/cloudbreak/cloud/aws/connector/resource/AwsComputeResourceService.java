@@ -74,6 +74,6 @@ public class AwsComputeResourceService {
         CloudContext cloudContext = ac.getCloudContext();
         ResourceBuilderContext context = contextBuilder.contextInit(cloudContext, ac, stack.getNetwork(), true);
 
-        return computeResourceService.deleteResources(context, ac, cloudResources, false);
+        return computeResourceService.deleteResources(context, ac, cloudResources, false, true);
     }
 }

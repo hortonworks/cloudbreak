@@ -2,23 +2,19 @@ package com.sequenceiq.cloudbreak.cloud.template.compute;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.RolledbackResourcesException;
@@ -28,16 +24,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.Variant;
-import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
-import com.sequenceiq.cloudbreak.cloud.template.OrderedBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
-import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceStatusLists;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.AdjustmentType;
-import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class CloudFailureHandler {
@@ -48,26 +39,25 @@ public class CloudFailureHandler {
 
     private static final String CLOUD_PROVIDER_RESOURCE_CREATION_FAILED = "CLOUD_PROVIDER_RESOURCE_CREATION_FAILED";
 
-    @Inject
-    private AsyncTaskExecutor resourceBuilderExecutor;
+    private static final String CLOUD_PROVIDER_RESOURCE_ROLLBACK_FAILED = "CLOUD_PROVIDER_ROLLBACK_FAILED";
 
     @Inject
-    private ResourceActionFactory resourceActionFactory;
+    private ComputeResourceService computeResourceService;
 
     @Inject
     private Optional<CloudbreakEventService> cloudbreakEventService;
 
     public void rollbackIfNecessary(CloudFailureContext cloudFailureContext, List<CloudResourceStatus> failuresList, List<CloudResourceStatus> resourceStatuses,
-            Group group, ResourceBuilders resourceBuilders, Integer requestedNodeCount) {
+            Group group, Integer requestedNodeCount) {
         if (failuresList.isEmpty()) {
             return;
         }
         LOGGER.debug("Roll back the following resources: {}", failuresList);
-        doRollback(cloudFailureContext, failuresList, resourceStatuses, group, requestedNodeCount, resourceBuilders);
+        doRollback(cloudFailureContext, failuresList, resourceStatuses, group, requestedNodeCount);
     }
 
     private void doRollback(CloudFailureContext cloudFailureContext, List<CloudResourceStatus> failuresList, List<CloudResourceStatus> resourceStatuses,
-            Group group, Integer requestedNodeCount, ResourceBuilders resourceBuilders) {
+            Group group, Integer requestedNodeCount) {
         Set<Long> failures = failureCount(failuresList);
         ScaleContext stx = cloudFailureContext.getStx();
         AuthenticatedContext auth = cloudFailureContext.getAuth();
@@ -77,16 +67,15 @@ public class CloudFailureHandler {
             throwError(failuresList);
         }
 
-        fireCloudbreakEvent(auth, failuresList);
         LOGGER.info("Adjustment type is {}", stx.getAdjustmentType());
         switch (stx.getAdjustmentType()) {
             case EXACT:
                 if (stx.getThreshold() > requestedNodeCount - failures.size()) {
                     LOGGER.info("Number of failures is more than the threshold ({}) so error will be thrown", stx.getThreshold());
-                    rollbackEverythingAndThrowException(failuresList, resourceStatuses, group, resourceBuilders, stx, auth, ctx);
+                    rollbackEverythingAndThrowException(failuresList, resourceStatuses, group, stx, auth, ctx);
                 } else if (!failures.isEmpty()) {
                     LOGGER.info("Decrease node counts because threshold was higher");
-                    handleExceptions(auth, resourceStatuses, group, ctx, resourceBuilders, failures, stx.getUpscale());
+                    handleExceptions(auth, resourceStatuses, group, ctx, failures, stx.getUpscale());
                 }
                 break;
             case PERCENTAGE:
@@ -94,37 +83,50 @@ public class CloudFailureHandler {
                 Double threshold = Double.valueOf(stx.getThreshold());
                 if (threshold > calculatedPercentage) {
                     LOGGER.info("Calculated percentage ({}) is lower than threshold, do rollback ({})", calculatedPercentage, threshold);
-                    rollbackEverythingAndThrowException(failuresList, resourceStatuses, group, resourceBuilders, stx, auth, ctx);
+                    rollbackEverythingAndThrowException(failuresList, resourceStatuses, group, stx, auth, ctx);
                 } else if (!failures.isEmpty()) {
                     LOGGER.info("Decrease node counts because threshold was higher");
-                    handleExceptions(auth, resourceStatuses, group, ctx, resourceBuilders, failures, stx.getUpscale());
+                    handleExceptions(auth, resourceStatuses, group, ctx, failures, stx.getUpscale());
                 }
                 break;
             case BEST_EFFORT:
                 LOGGER.info("Decrease node counts because threshold was higher");
-                handleExceptions(auth, resourceStatuses, group, ctx, resourceBuilders, failures, stx.getUpscale());
+                handleExceptions(auth, resourceStatuses, group, ctx, failures, stx.getUpscale());
                 break;
             default:
                 LOGGER.info("Unsupported adjustment type so error will throw");
-                rollbackEverythingAndThrowException(failuresList, resourceStatuses, group, resourceBuilders, stx, auth, ctx);
+                rollbackEverythingAndThrowException(failuresList, resourceStatuses, group, stx, auth, ctx);
                 break;
         }
+
     }
 
-    private void fireCloudbreakEvent(AuthenticatedContext auth, List<CloudResourceStatus> failuresList) {
+    private void fireResourceDeletionFailedEvent(AuthenticatedContext auth, String failedResourcesWithReason) {
+        cloudbreakEventService.ifPresent(eventService -> eventService.fireCloudbreakEvent(auth.getCloudContext().getId(),
+                CLOUD_PROVIDER_RESOURCE_ROLLBACK_FAILED, ResourceEvent.CLOUD_PROVIDER_RESOURCE_ROLLBACK_FAILED, List.of(failedResourcesWithReason)));
+    }
+
+    private void fireResourceCreationFailedEvent(AuthenticatedContext auth, List<CloudResourceStatus> failuresList) {
         if (cloudbreakEventService.isPresent()) {
             String reason = failuresList.stream()
-                    .map(resourceStatus -> String.format("[privateId: %s, reason: %s]", resourceStatus.getPrivateId(), resourceStatus.getStatusReason()))
-                    .collect(Collectors.joining(","));
+                    .map(resourceStatus -> {
+                        CloudResource cloudResource = resourceStatus.getCloudResource();
+                        String detailedInfo = cloudResource.getDetailedInfo();
+                        if (resourceStatus.getStatusReason() != null) {
+                            detailedInfo += ": " + resourceStatus.getStatusReason();
+                        }
+                        return detailedInfo;
+                    })
+                    .collect(Collectors.joining(", "));
             cloudbreakEventService.get().fireCloudbreakEvent(auth.getCloudContext().getId(), CLOUD_PROVIDER_RESOURCE_CREATION_FAILED,
                     ResourceEvent.CLOUD_PROVIDER_RESOURCE_CREATION_FAILED, List.of(reason));
         }
     }
 
     private void rollbackEverythingAndThrowException(List<CloudResourceStatus> failuresList, List<CloudResourceStatus> resourceStatuses,
-            Group group, ResourceBuilders resourceBuilders, ScaleContext stx, AuthenticatedContext auth, ResourceBuilderContext ctx) {
+            Group group, ScaleContext stx, AuthenticatedContext auth, ResourceBuilderContext ctx) {
         Set<Long> rollbackIds = resourceStatuses.stream().map(CloudResourceStatus::getPrivateId).collect(Collectors.toSet());
-        doRollback(auth, resourceStatuses, rollbackIds, group, ctx, resourceBuilders, stx.getUpscale());
+        doRollback(auth, resourceStatuses, rollbackIds, group, ctx, stx.getUpscale());
         throwRolledbackException(failuresList);
     }
 
@@ -145,7 +147,7 @@ public class CloudFailureHandler {
     }
 
     private void handleExceptions(AuthenticatedContext auth, List<CloudResourceStatus> cloudResourceStatuses, Group group,
-            ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, Collection<Long> ids, Boolean upscale) {
+            ResourceBuilderContext ctx, Collection<Long> ids, Boolean upscale) {
         List<CloudResource> resources = new ArrayList<>(cloudResourceStatuses.size());
         for (CloudResourceStatus exception : cloudResourceStatuses) {
             if (ResourceStatus.FAILED.equals(exception.getStatus()) || ids.contains(exception.getPrivateId())) {
@@ -155,53 +157,38 @@ public class CloudFailureHandler {
         }
         if (!resources.isEmpty()) {
             LOGGER.info("Resource list not empty so rollback will start.Resource list size is: " + resources.size());
-            doRollback(auth, cloudResourceStatuses, ids, group, ctx, resourceBuilders, upscale);
+            doRollback(auth, cloudResourceStatuses, ids, group, ctx, upscale);
         }
     }
 
     private void doRollback(AuthenticatedContext auth, List<CloudResourceStatus> statuses, Collection<Long> rollbackIds, Group group,
-            ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, Boolean upscale) {
-        Variant variant = auth.getCloudContext().getVariant();
+            ResourceBuilderContext ctx, Boolean upscale) {
         LOGGER.info("Rollback resources for the following private ids: {}", rollbackIds);
 
         if (getRemovableInstanceTemplates(group, rollbackIds).size() <= 0 && !upscale) {
             LOGGER.info("InstanceGroup node count lower than 1 which is incorrect so error will be thrown");
             throwError(statuses);
         } else {
-            Multimap<ResourceType, ComputeResourceBuilder<ResourceBuilderContext>> resourceBuilderMap = getResourceBuilderMap(resourceBuilders, variant);
+            fireResourceCreationFailedEvent(auth, statuses.stream()
+                    .filter(cloudResourceStatus -> ResourceStatus.FAILED.equals(cloudResourceStatus.getStatus()))
+                    .collect(Collectors.toList()));
+            Set<CloudResource> cloudResources = new LinkedHashSet<>();
             for (CloudResourceStatus cloudResourceStatus : statuses) {
                 if (rollbackIds.contains(cloudResourceStatus.getPrivateId())) {
-                    List<ComputeResourceBuilder<ResourceBuilderContext>> reverseOrderedBuilders =
-                            resourceBuilderMap.get(cloudResourceStatus.getCloudResource().getType())
-                                    .stream().sorted(Comparator.comparingInt(OrderedBuilder::order).reversed())
-                                    .toList();
-                    for (ComputeResourceBuilder<ResourceBuilderContext> resourceBuilder : reverseOrderedBuilders) {
-                        try {
-                            deleteResource(auth, ctx, resourceBuilder, cloudResourceStatus);
-                        } catch (Exception e) {
-                            LOGGER.warn("Resource can not be deleted. Reason: " + e.getMessage(), e);
-                        }
-                    }
+                    cloudResources.add(cloudResourceStatus.getCloudResource());
                 }
             }
-        }
-    }
+            LOGGER.debug("Rollback cloud resources: {}", cloudResources);
+            List<CloudResourceStatus> deleteStatuses = computeResourceService.deleteResources(ctx, auth, cloudResources, false, false);
 
-    private Multimap<ResourceType, ComputeResourceBuilder<ResourceBuilderContext>> getResourceBuilderMap(ResourceBuilders resourceBuilders, Variant variant) {
-        List<ComputeResourceBuilder<ResourceBuilderContext>> computeResourceBuilders = resourceBuilders.compute(variant);
-        Multimap<ResourceType, ComputeResourceBuilder<ResourceBuilderContext>> resourceBuilderMap = ArrayListMultimap.create();
-        for (ComputeResourceBuilder<ResourceBuilderContext> resourceBuilder : computeResourceBuilders) {
-            resourceBuilderMap.put(resourceBuilder.resourceType(), resourceBuilder);
+            if (deleteStatuses.stream().anyMatch(CloudResourceStatus::isFailed)) {
+                String failedResourcesWithReason = deleteStatuses.stream().filter(CloudResourceStatus::isFailed)
+                        .map(cloudResourceStatus -> cloudResourceStatus.getCloudResource().getDetailedInfo() +
+                                ", Reason: " + cloudResourceStatus.getStatusReason()).collect(Collectors.joining("\n"));
+                LOGGER.warn("Resource deletion failed. Failed resources: {}", failedResourcesWithReason);
+                fireResourceDeletionFailedEvent(auth, failedResourcesWithReason);
+            }
         }
-        return resourceBuilderMap;
-    }
-
-    private void deleteResource(AuthenticatedContext auth, ResourceBuilderContext ctx, ComputeResourceBuilder<ResourceBuilderContext> resourceBuilder,
-            CloudResourceStatus cloudResourceStatus) throws ExecutionException, InterruptedException {
-        ResourceDeletionCallablePayload payload = new ResourceDeletionCallablePayload(ctx, auth, cloudResourceStatus.getCloudResource(),
-                resourceBuilder, false);
-        ResourceDeletionCallable deletionCallable = resourceActionFactory.buildDeletionCallable(payload);
-        resourceBuilderExecutor.submit(deletionCallable).get();
     }
 
     private Collection<InstanceTemplate> getRemovableInstanceTemplates(Group group, Collection<Long> ids) {

@@ -73,7 +73,7 @@ public class AzureComputeResourceService {
         ResourceBuilderContext context = initContext(ac, stack);
         context.addNetworkResources(networkResources);
 
-        return computeResourceService.deleteResources(context, ac, cloudResources, false);
+        return computeResourceService.deleteResources(context, ac, cloudResources, false, true);
     }
 
     private AzureContext initContext(AuthenticatedContext ac, CloudStack cloudStack) {
