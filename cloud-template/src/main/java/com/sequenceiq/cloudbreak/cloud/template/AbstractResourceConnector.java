@@ -157,7 +157,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         List<CloudResourceStatus> cloudResourceStatuses = loadBalancerResourceService.deleteResources(context, auth, cloudResources, false);
 
         //compute
-        List<CloudResourceStatus> computeStatuses = computeResourceService.deleteResources(context, auth, cloudResources, false);
+        List<CloudResourceStatus> computeStatuses = computeResourceService.deleteResources(context, auth, cloudResources, false, true);
         cloudResourceStatuses.addAll(computeStatuses);
 
         //group
@@ -279,7 +279,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), false);
 
         //compute
-        return computeResourceService.deleteResources(context, auth, resourcesToRemove, true);
+        return computeResourceService.deleteResources(context, auth, resourcesToRemove, true, true);
     }
 
     @Override

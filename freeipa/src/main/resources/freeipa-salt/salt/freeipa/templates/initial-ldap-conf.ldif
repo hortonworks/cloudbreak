@@ -9,6 +9,18 @@ changetype: modify
 replace: nsslapd-db-deadlock-policy
 nsslapd-db-deadlock-policy: 6
 
+{% if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int == 8 %}
+dn: cn=bdb,cn=config,cn=ldbm database,cn=plugins,cn=config
+changetype: modify
+replace: nsslapd-db-deadlock-policy
+nsslapd-db-deadlock-policy: 6
+
+
+dn: cn=bdb,cn=config,cn=ldbm database,cn=plugins,cn=config
+changetype: modify
+replace: nsslapd-db-locks
+nsslapd-db-locks: 200000
+{% endif %}
 
 dn: cn=config
 changetype: modify

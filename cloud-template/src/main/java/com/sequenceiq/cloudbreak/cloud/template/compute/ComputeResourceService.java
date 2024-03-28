@@ -92,7 +92,7 @@ public class ComputeResourceService {
     }
 
     public List<CloudResourceStatus> deleteResources(ResourceBuilderContext context, AuthenticatedContext auth,
-            Iterable<CloudResource> resources, boolean cancellable) {
+            Iterable<CloudResource> resources, boolean cancellable, boolean hardFail) {
         LOGGER.debug("Deleting the following resources: {}", resources);
         List<CloudResourceStatus> results = new ArrayList<>();
         Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
@@ -105,23 +105,28 @@ public class ComputeResourceService {
                         new ResourceDeletionCallablePayload(context, auth, cloudResource, builder, cancellable));
                 futures.add(resourceBuilderExecutor.submit(deletionCallable));
                 if (isRequestFull(futures.size(), context)) {
-                    results.addAll(getDeletedResourcesOrFail(futures));
+                    results.addAll(getDeletedResourcesOrFail(futures, hardFail));
                 }
             }
             // wait for builder type to finish before starting the next one
-            results.addAll(getDeletedResourcesOrFail(futures));
+            results.addAll(getDeletedResourcesOrFail(futures, hardFail));
         }
         return results;
     }
 
-    private List<CloudResourceStatus> getDeletedResourcesOrFail(Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures) {
+    private List<CloudResourceStatus> getDeletedResourcesOrFail(Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures,
+            boolean hardFail) {
         Map<FutureResult, List<List<CloudResourceStatus>>> futureResults = waitForRequests(futures);
         List<List<CloudResourceStatus>> failedResources = futureResults.get(FutureResult.FAILED);
-        if (!failedResources.isEmpty()) {
-            throw new CloudConnectorException("Resource deletion failed. Reason: "
-                    + flatList(failedResources).stream().map(CloudResourceStatus::getStatusReason).collect(Collectors.joining(" ")));
+        if (hardFail) {
+            if (!failedResources.isEmpty()) {
+                throw new CloudConnectorException("Resource deletion failed. Reason: "
+                        + flatList(failedResources).stream().map(CloudResourceStatus::getStatusReason).collect(Collectors.joining(" ")));
+            }
+            return flatList(futureResults.get(FutureResult.SUCCESS));
+        } else {
+            return flatList(futureResults.values().stream().flatMap(Collection::stream).toList());
         }
-        return flatList(futureResults.get(FutureResult.SUCCESS));
     }
 
     public List<CloudResourceStatus> update(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack stack,
@@ -330,9 +335,8 @@ public class ComputeResourceService {
                         ctx.setBuild(false);
                         CloudFailureContext cloudFailureContext = new CloudFailureContext(auth,
                                 new ScaleContext(upscale, adjustmentTypeAndThreshold.getAdjustmentType(), adjustmentTypeAndThreshold.getThreshold()), ctx);
-                        cloudFailureHandler.rollbackIfNecessary(cloudFailureContext, failedResources, resourceStatuses, group, resourceBuilders,
-                                getNewNodeCount(groups));
-                        results.addAll(filterResourceStatuses(resourceStatuses, ResourceStatus.CREATED));
+                        cloudFailureHandler.rollbackIfNecessary(cloudFailureContext, failedResources, resourceStatuses, group, getNewNodeCount(groups));
+                        results.addAll(resourceStatuses);
                     } finally {
                         ctx.setBuild(true);
                     }

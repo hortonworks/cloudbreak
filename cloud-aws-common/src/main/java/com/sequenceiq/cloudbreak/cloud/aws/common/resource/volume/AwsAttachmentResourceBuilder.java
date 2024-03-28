@@ -64,7 +64,8 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         LOGGER.debug("Prepare instance resource to attach to");
-        return context.getComputeResources(privateId);
+        return context.getComputeResources(privateId).stream()
+                .filter(cloudResource -> ResourceType.AWS_VOLUMESET.equals(cloudResource.getType())).collect(Collectors.toList());
     }
 
     @Override

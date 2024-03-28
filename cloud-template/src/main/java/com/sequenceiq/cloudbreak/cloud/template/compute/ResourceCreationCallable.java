@@ -143,12 +143,11 @@ public class ResourceCreationCallable implements Callable<ResourceRequestResult<
                     computeResults.addAll(pollerResult);
                 }
             } catch (Exception e) {
-                String errorMessage = format("Failed to create resources for instance with id: '%s', message: '%s'",
-                        instance.getTemplate().getPrivateId(), e.getMessage());
-                LOGGER.error(errorMessage, e);
+                String resources = cloudResources.stream().map(CloudResource::getDetailedInfo).collect(Collectors.joining(", "));
+                LOGGER.error("Resource creation failed: {}", resources, e);
                 computeResults.removeIf(crs -> crs.getPrivateId().equals(privateId));
                 for (CloudResource cloudResource : cloudResources) {
-                    computeResults.add(new CloudResourceStatus(cloudResource, ResourceStatus.FAILED, errorMessage, privateId));
+                    computeResults.add(new CloudResourceStatus(cloudResource, ResourceStatus.FAILED, e.getMessage(), privateId));
                 }
             }
         }
