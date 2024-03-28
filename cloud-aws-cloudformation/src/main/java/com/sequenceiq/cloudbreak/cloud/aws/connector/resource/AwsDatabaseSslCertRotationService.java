@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.CancellableWaiterConfiguration.cancellableWaiterConfiguration;
+import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
 
 import jakarta.inject.Inject;
 
@@ -11,11 +12,13 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 
+import software.amazon.awssdk.core.waiters.Waiter;
 import software.amazon.awssdk.services.rds.model.DBInstance;
 import software.amazon.awssdk.services.rds.model.DescribeDbEngineVersionsRequest;
 import software.amazon.awssdk.services.rds.model.DescribeDbEngineVersionsResponse;
@@ -35,6 +38,9 @@ public class AwsDatabaseSslCertRotationService {
 
     @Inject
     private AwsCloudFormationClient awsClient;
+
+    @Inject
+    private CustomAmazonWaiterProvider customAmazonWaiterProvider;
 
     public void applyCertificateChange(AuthenticatedContext ac, DatabaseStack dbStack, String desiredCertificate) {
             AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
@@ -81,6 +87,14 @@ public class AwsDatabaseSslCertRotationService {
         }
     }
 
+    private void waitUntilModifyFinishes(String dbInstanceIdentifier, AmazonRdsClient rdsClient, String exceptionMessage) {
+        Waiter<DescribeDbInstancesResponse> rdsWaiter = customAmazonWaiterProvider.getDbInstanceModifyWaiter();
+        DescribeDbInstancesRequest describeDBInstancesRequest = DescribeDbInstancesRequest.builder()
+                .dbInstanceIdentifier(dbInstanceIdentifier)
+                .build();
+        run(() -> rdsClient.describeDBInstances(describeDBInstancesRequest), rdsWaiter, exceptionMessage);
+    }
+
     private String getErrorMessage(String exceptionMessage) {
         String message = String.format("Exception occurred when querying valid upgrade targets: %s", exceptionMessage);
         LOGGER.warn(message);
@@ -114,6 +128,14 @@ public class AwsDatabaseSslCertRotationService {
         return true;
     }
 
+    private void waitUntilCertRotationStarts(String dbInstanceIdentifier, AmazonRdsClient rdsClient, String exceptionMessage) {
+        Waiter<DescribeDbInstancesResponse> rdsWaiter = customAmazonWaiterProvider.getCertRotationStartWaiter();
+        DescribeDbInstancesRequest describeDBInstancesRequest = DescribeDbInstancesRequest.builder()
+                .dbInstanceIdentifier(dbInstanceIdentifier)
+                .build();
+        run(() -> rdsClient.describeDBInstances(describeDBInstancesRequest), rdsWaiter, exceptionMessage);
+    }
+
     private void modifyRdsCertificate(String desiredCertificate, AmazonRdsClient rdsClient, String dbInstanceIdentifier) {
         ModifyDbInstanceRequest modifyDbInstanceRequest = ModifyDbInstanceRequest.builder()
                 .dbInstanceIdentifier(dbInstanceIdentifier)
@@ -121,6 +143,8 @@ public class AwsDatabaseSslCertRotationService {
                 .applyImmediately(true)
                 .build();
         rdsClient.modifyDBInstance(modifyDbInstanceRequest);
+        waitUntilCertRotationStarts(dbInstanceIdentifier, rdsClient, "Failed to start rotate certificate");
+        waitUntilModifyFinishes(dbInstanceIdentifier, rdsClient, "Failed to rotate certificate");
     }
 
     private boolean doWeNeedToModifyTheCertificate(String desiredCertificate, DescribeDbInstancesResponse describeDbInstancesResponse) {

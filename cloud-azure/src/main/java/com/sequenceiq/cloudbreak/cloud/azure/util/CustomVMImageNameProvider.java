@@ -26,7 +26,7 @@ public class CustomVMImageNameProvider {
                     .replaceAll("\\s", "");
         }
 
-        LOGGER.debug("The following azure Azure image name obtained from the region [{}] and VHD URI [{}]: {}", region, vhdUri, name);
+        LOGGER.debug("The following Azure image name obtained from the region [{}] and VHD URI [{}]: {}", region, vhdUri, name);
         return name;
     }
 
