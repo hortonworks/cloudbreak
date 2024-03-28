@@ -1,0 +1,31 @@
+global:
+  scrape_interval: 5s
+  external_labels:
+    monitor: 'codelab-monitor'
+
+scrape_configs:
+  - job_name: 'datalake'
+    scrape_interval: 5s
+    metrics_path: '/dl/metrics'
+    static_configs:
+      - targets: ['datalake:8080']
+  - job_name: 'freeipa'
+    scrape_interval: 5s
+    metrics_path: '/freeipa/metrics'
+    static_configs:
+      - targets: ['freeipa:8080']
+  - job_name: 'environment'
+    scrape_interval: 5s
+    metrics_path: '/environmentservice/metrics'
+    static_configs:
+      - targets: ['environment:8088']
+  - job_name: 'cb'
+    scrape_interval: 5s
+    metrics_path: '/cb/metrics'
+    static_configs:
+      - targets: ['cloudbreak:8080']
+  - job_name: 'redbeams'
+    scrape_interval: 5s
+    metrics_path: '/redbeams/metrics'
+    static_configs:
+      - targets: ['redbeams:8087']

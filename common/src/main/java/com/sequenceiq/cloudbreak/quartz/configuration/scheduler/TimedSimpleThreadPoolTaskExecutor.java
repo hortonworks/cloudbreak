@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.quartz.configuration.scheduler;
 
+import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
+import java.util.function.ToDoubleFunction;
 
 import org.quartz.SchedulerConfigException;
 import org.quartz.simpl.SimpleThreadPool;
@@ -29,17 +32,21 @@ public class TimedSimpleThreadPoolTaskExecutor implements ThreadPool, Executor {
 
     private final MeterRegistry registry;
 
-    private final SimpleThreadPoolTaskExecutor delegate;
+    private final ThreadPool delegate;
 
     private final Timer executionTimer;
 
     private final Timer idleTimer;
 
-    public TimedSimpleThreadPoolTaskExecutor(MeterRegistry registry, SimpleThreadPoolTaskExecutor delegate, String executorName, String metricPrefix,
+    public TimedSimpleThreadPoolTaskExecutor(MeterRegistry registry, ThreadPool delegate, String executorName, String metricPrefix,
             Iterable<Tag> tags) {
+        Set<Class<?>> allowedClassed = Set.of(SimpleThreadPoolTaskExecutor.class, VirtualThreadPoolTaskExecutor.class);
+        if (!allowedClassed.contains(delegate.getClass())) {
+            throw new IllegalArgumentException(String.format("ThredPool delegate class be one of %s. Got type %s", allowedClassed, delegate.getClass()));
+        }
         this.registry = registry;
         this.delegate = delegate;
-        Tags finalTags = Tags.concat(tags, new String[]{"name", executorName});
+        Tags finalTags = Tags.concat(tags, "name", executorName);
         this.executionTimer = registry.timer(metricPrefix + "executor", finalTags);
         this.idleTimer = registry.timer(metricPrefix + "executor.idle", finalTags);
         initThreadpoolMetrics(metricPrefix, finalTags);
@@ -89,30 +96,41 @@ public class TimedSimpleThreadPoolTaskExecutor implements ThreadPool, Executor {
     }
 
     private void initThreadpoolMetrics(String metricPrefix, Tags tags) {
-        FunctionCounter.builder(metricPrefix + "executor.completed", delegate, SimpleThreadPool::getStartedTasks)
+        setThreadPoolMetric(metricProvider -> FunctionCounter.builder(metricPrefix + "executor.completed", delegate, metricProvider)
                 .tags(tags)
                 .description("The approximate total number of tasks that have completed execution")
                 .baseUnit("tasks")
-                .register(registry);
-        Gauge.builder(metricPrefix + "executor.active", delegate, SimpleThreadPool::getBusyThreads)
+                .register(registry), SimpleThreadPool::getStartedTasks, VirtualThreadPoolTaskExecutor::getStartedTasks);
+        setThreadPoolMetric(metricProvider -> Gauge.builder(metricPrefix + "executor.active", delegate, metricProvider)
                 .tags(tags)
                 .description("The approximate number of threads that are actively executing tasks")
                 .baseUnit("threads")
-                .register(registry);
-        Gauge.builder(metricPrefix + "executor.pool.size", delegate, SimpleThreadPool::getPoolSize)
+                .register(registry), SimpleThreadPool::getBusyThreads, VirtualThreadPoolTaskExecutor::getBusyThreads);
+
+        setThreadPoolMetric(metricProvider -> Gauge.builder(metricPrefix + "executor.pool.size", delegate, metricProvider)
                 .tags(tags)
                 .description("The current number of threads in the pool")
                 .baseUnit("threads")
-                .register(registry);
-        Gauge.builder(metricPrefix + "executor.pool.core", delegate, SimpleThreadPool::getPoolSize)
+                .register(registry), SimpleThreadPool::getPoolSize, VirtualThreadPoolTaskExecutor::getPoolSize);
+        setThreadPoolMetric(metricProvider -> Gauge.builder(metricPrefix + "executor.pool.core", delegate, metricProvider)
                 .tags(tags)
                 .description("The core number of threads for the pool")
                 .baseUnit("threads")
-                .register(registry);
-        Gauge.builder(metricPrefix + "executor.pool.max", delegate, SimpleThreadPool::getPoolSize)
+                .register(registry), SimpleThreadPool::getPoolSize, VirtualThreadPoolTaskExecutor::getPoolSize);
+        setThreadPoolMetric(metricProvider -> Gauge.builder(metricPrefix + "executor.pool.max", delegate, metricProvider)
                 .tags(tags)
                 .description("The maximum allowed number of threads in the pool")
                 .baseUnit("threads")
-                .register(registry);
+                .register(registry), SimpleThreadPool::getPoolSize, VirtualThreadPoolTaskExecutor::getPoolSize);
+    }
+
+    private void setThreadPoolMetric(Consumer<ToDoubleFunction<ThreadPool>> metricFn,
+            ToDoubleFunction<SimpleThreadPoolTaskExecutor> simpleThreadPoolMetric,
+            ToDoubleFunction<VirtualThreadPoolTaskExecutor> virtualThreadPoolMetric) {
+        if (delegate.getClass().equals(SimpleThreadPoolTaskExecutor.class)) {
+            metricFn.accept(threadPool -> simpleThreadPoolMetric.applyAsDouble((SimpleThreadPoolTaskExecutor) threadPool));
+        } else if (delegate.getClass().equals(VirtualThreadPoolTaskExecutor.class)) {
+            metricFn.accept(threadPool -> virtualThreadPoolMetric.applyAsDouble((VirtualThreadPoolTaskExecutor) threadPool));
+        }
     }
 }

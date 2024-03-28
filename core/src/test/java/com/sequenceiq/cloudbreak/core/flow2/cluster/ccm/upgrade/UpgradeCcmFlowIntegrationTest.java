@@ -1,8 +1,12 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_EVENT;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -10,6 +14,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
@@ -45,6 +51,7 @@ import com.sequenceiq.cloudbreak.ccm.termination.CcmV2AgentTerminationListener;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionMetricsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.core.flow2.CloudbreakFlowInformation;
 import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
@@ -57,7 +64,6 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
-import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFailedEvent;
@@ -95,6 +101,8 @@ import com.sequenceiq.flow.repository.FlowChainLogRepository;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.notification.NotificationService;
+
+import io.micrometer.core.instrument.MeterRegistry;
 
 @ActiveProfiles("integration-test")
 @ExtendWith(SpringExtension.class)
@@ -146,6 +154,9 @@ class UpgradeCcmFlowIntegrationTest {
 
     @SpyBean
     private UpgradeCcmService upgradeCcmService;
+
+    @MockBean
+    private MeterRegistry meterRegistry;
 
     private Stack stack;
 
@@ -419,7 +430,7 @@ class UpgradeCcmFlowIntegrationTest {
         private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
 
         @Bean
-        public EventBus reactor(MDCCleanerThreadPoolExecutor threadPoolExecutor) {
+        public EventBus reactor(ExecutorService threadPoolExecutor) {
             return EventBus.builder()
                     .executor(threadPoolExecutor)
                     .exceptionHandler((exception, context) -> {
@@ -427,6 +438,14 @@ class UpgradeCcmFlowIntegrationTest {
                     .unhandledEventHandler(event -> {
                     })
                     .build();
+        }
+
+        @Bean
+        public CommonExecutorServiceFactory commonExecutorServiceFactory() {
+            CommonExecutorServiceFactory commonExecutorServiceFactory = mock(CommonExecutorServiceFactory.class);
+            when(commonExecutorServiceFactory.newThreadPoolExecutorService(any(), any(), anyInt(), anyInt(), anyLong(), any(), any(), any(), any())).thenReturn(
+                    Executors.newCachedThreadPool());
+            return commonExecutorServiceFactory;
         }
     }
 

@@ -1,11 +1,16 @@
 package com.sequenceiq.environment.environment.validation.validators;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import jakarta.inject.Inject;
 
@@ -28,7 +33,10 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+
+import io.micrometer.core.instrument.MeterRegistry;
 
 @ExtendWith(SpringExtension.class)
 class TagValidatorTest {
@@ -78,6 +86,9 @@ class TagValidatorTest {
         @Inject
         AzureTagValidator azureTagValidator;
 
+        @MockBean
+        private MeterRegistry meterRegistry;
+
         @Bean
         CloudConnector cloud() {
             PlatformParameters parameter = parameters();
@@ -93,6 +104,14 @@ class TagValidatorTest {
             PlatformParameters mock = Mockito.mock(PlatformParameters.class);
             when(mock.tagValidator()).thenReturn(azureTagValidator);
             return mock;
+        }
+
+        @Bean
+        public CommonExecutorServiceFactory commonExecutorServiceFactory() {
+            CommonExecutorServiceFactory commonExecutorServiceFactory = mock(CommonExecutorServiceFactory.class);
+            when(commonExecutorServiceFactory.newThreadPoolExecutorService(any(), any(), anyInt(), anyInt(), anyLong(), any(), any(), any(), any())).thenReturn(
+                    Executors.newCachedThreadPool());
+            return commonExecutorServiceFactory;
         }
     }
 }

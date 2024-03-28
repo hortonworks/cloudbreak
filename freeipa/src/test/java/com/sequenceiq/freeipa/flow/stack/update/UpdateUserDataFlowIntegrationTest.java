@@ -61,6 +61,8 @@ import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 @ActiveProfiles("integration-test")
 @ExtendWith(SpringExtension.class)
 class UpdateUserDataFlowIntegrationTest {
@@ -118,6 +120,9 @@ class UpdateUserDataFlowIntegrationTest {
 
     @MockBean
     private NodeConfig nodeConfig;
+
+    @MockBean
+    private MeterRegistry meterRegistry;
 
     @Mock
     private ResourceConnector resourcesApi;

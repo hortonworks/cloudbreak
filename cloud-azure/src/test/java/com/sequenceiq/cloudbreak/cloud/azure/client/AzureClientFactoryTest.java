@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.ExecutorService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.logger.concurrent.MDCCopyingThreadPoolExecutor;
 
 @ExtendWith(MockitoExtension.class)
 public class AzureClientFactoryTest {
@@ -57,7 +57,7 @@ public class AzureClientFactoryTest {
     private CloudContext cloudContext;
 
     @Mock
-    private MDCCopyingThreadPoolExecutor mdcCopyingThreadPoolExecutor;
+    private ExecutorService mdcCopyingThreadPoolExecutor;
 
     @Mock
     private AzureHttpClientConfigurer azureHttpClientConfigurer;

@@ -19,8 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.mock.verification.RequestResponseStorageService;
-
 @Component
 public class SaltApiRunComponent {
 
@@ -31,9 +29,6 @@ public class SaltApiRunComponent {
 
     @Inject
     private SaltStoreService saltStoreService;
-
-    @Inject
-    private RequestResponseStorageService requestResponseStorageService;
 
     private final Map<String, SaltResponse> saltResponsesMap = new ConcurrentHashMap<>();
 
@@ -83,14 +78,10 @@ public class SaltApiRunComponent {
     }
 
     private void storeIfEnabled(String mockUuid, Map<String, List<String>> params, Object response) {
-        if (requestResponseStorageService.isEnabledToStore(mockUuid)) {
-            RunResponseDto runResponseDto = new RunResponseDto(mockUuid);
-            runResponseDto.setParams(params);
-            runResponseDto.setResponse(response);
-            saltStoreService.addRunResponse(mockUuid, runResponseDto);
-        } else {
-            LOGGER.debug("Freeipa response store is disabled for {}, {}, response: {}", mockUuid, params, response);
-        }
+        RunResponseDto runResponseDto = new RunResponseDto(mockUuid);
+        runResponseDto.setParams(params);
+        runResponseDto.setResponse(response);
+        saltStoreService.addRunResponse(mockUuid, runResponseDto);
     }
 
     public Map<String, List<String>> getParams(String body) {

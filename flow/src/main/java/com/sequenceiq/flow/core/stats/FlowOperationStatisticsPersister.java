@@ -4,6 +4,8 @@ import java.text.DecimalFormat;
 import java.util.Date;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -36,22 +38,29 @@ public class FlowOperationStatisticsPersister {
     @Inject
     private TransactionService transactionService;
 
-    public synchronized void save(FlowStat flowStat) {
-        if (!OperationType.UNKNOWN.equals(flowStat.getOperationType()) && flowStat.getPayloadContext() != null) {
-            if (flowStat.isRestored()) {
-                LOGGER.debug("Flow was restored, so statistics won't be saved about that. (operation: {})", flowStat.getOperationType());
-            } else {
-                try {
-                    FlowOperationStats flowOperationStats = fetchOrCreateFlowOperationStats(flowStat);
-                    String durationHistory = calculateDurationHistory(flowStat, flowOperationStats);
-                    flowOperationStats.setDurationHistory(durationHistory);
-                    transactionService.required(() -> flowOperationStatsRepository.save(flowOperationStats));
-                } catch (TransactionService.TransactionExecutionException e) {
-                    LOGGER.warn("Cannot store flow operation statistics.", e);
-                } catch (Exception e) {
-                    LOGGER.warn("Unexpected error happened during storing flow operation statistics", e);
+    private final Lock lock = new ReentrantLock();
+
+    public void save(FlowStat flowStat) {
+        try {
+            lock.lock();
+            if (!OperationType.UNKNOWN.equals(flowStat.getOperationType()) && flowStat.getPayloadContext() != null) {
+                if (flowStat.isRestored()) {
+                    LOGGER.debug("Flow was restored, so statistics won't be saved about that. (operation: {})", flowStat.getOperationType());
+                } else {
+                    try {
+                        FlowOperationStats flowOperationStats = fetchOrCreateFlowOperationStats(flowStat);
+                        String durationHistory = calculateDurationHistory(flowStat, flowOperationStats);
+                        flowOperationStats.setDurationHistory(durationHistory);
+                        transactionService.required(() -> flowOperationStatsRepository.save(flowOperationStats));
+                    } catch (TransactionService.TransactionExecutionException e) {
+                        LOGGER.warn("Cannot store flow operation statistics.", e);
+                    } catch (Exception e) {
+                        LOGGER.warn("Unexpected error happened during storing flow operation statistics", e);
+                    }
                 }
             }
+        } finally {
+            lock.unlock();
         }
     }
 

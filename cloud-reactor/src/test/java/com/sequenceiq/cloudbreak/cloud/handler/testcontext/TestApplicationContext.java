@@ -1,13 +1,16 @@
 package com.sequenceiq.cloudbreak.cloud.handler.testcontext;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.Executors;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
@@ -22,8 +25,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
-import com.google.common.util.concurrent.ListeningScheduledExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
@@ -53,6 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.Persister;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
+import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
@@ -61,6 +63,8 @@ import com.sequenceiq.flow.reactor.config.EventBusConfig;
 import com.sequenceiq.flow.reactor.config.EventBusStatisticReporter;
 import com.sequenceiq.flow.service.FlowNameFormatService;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
+
+import io.micrometer.core.instrument.MeterRegistry;
 
 @MockBeans({@MockBean(ApplicationFlowInformation.class), @MockBean(FlowLogDBService.class), @MockBean(FlowRegister.class)})
 @Configuration
@@ -123,6 +127,9 @@ public class TestApplicationContext {
     @MockBean
     private EventBusStatisticReporter eventBusStatisticReporter;
 
+    @MockBean
+    private MeterRegistry meterRegistry;
+
     @Inject
     private ParameterGenerator g;
 
@@ -152,14 +159,17 @@ public class TestApplicationContext {
     }
 
     @Bean
-    public ListeningScheduledExecutorService listeningScheduledExecutorService() {
-        return MoreExecutors.listeningDecorator(new ScheduledThreadPoolExecutor(1));
-    }
-
-    @Bean
     public CloudPlatformConnectors cloudPlatformConnectors() {
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         return cloudPlatformConnectors;
+    }
+
+    @Bean
+    public CommonExecutorServiceFactory commonExecutorServiceFactory() {
+        CommonExecutorServiceFactory commonExecutorServiceFactory = mock(CommonExecutorServiceFactory.class);
+        when(commonExecutorServiceFactory.newThreadPoolExecutorService(any(), any(), anyInt(), anyInt(), anyLong(), any(), any(), any(), any())).thenReturn(
+                Executors.newCachedThreadPool());
+        return commonExecutorServiceFactory;
     }
 
     @Bean

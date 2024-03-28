@@ -4,6 +4,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.concurrent.ExecutorService;
+
 import jakarta.ws.rs.client.Client;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +23,6 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionMetricsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
-import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
@@ -99,7 +100,7 @@ public class FlowIntegrationTestConfig {
     }
 
     @Bean
-    public EventBus reactor(MDCCleanerThreadPoolExecutor threadPoolExecutor) {
+    public EventBus reactor(ExecutorService threadPoolExecutor) {
         return EventBus.builder()
                 .executor(threadPoolExecutor)
                 .exceptionHandler((exception, context) -> {

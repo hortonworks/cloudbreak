@@ -1,15 +1,20 @@
 package com.sequenceiq.flow.reactor.config;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Timer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,11 +23,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
+import com.sequenceiq.cloudbreak.concurrent.MDCCleanerDecorator;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
@@ -40,6 +45,12 @@ public class EventBusConfig {
     @Value("${cb.eventbus.threadpool.backlog.size:1000}")
     private int eventBusThreadPoolBacklogSize;
 
+    @Value("${spring.threads.virtual.enabled:false}")
+    private boolean virtualThreadsAvailable;
+
+    @Inject
+    private CommonExecutorServiceFactory commonExecutorServiceFactory;
+
     @Inject
     @Lazy
     private FlowLogDBService flowLogDBService;
@@ -49,13 +60,33 @@ public class EventBusConfig {
                 .collect(Collectors.toCollection(LinkedHashSet::new)));
     }
 
+    @PostConstruct
+    public void init() {
+        if (virtualThreadsAvailable) {
+            try {
+                Thread virtualThread = Thread.ofVirtual().unstarted(() -> {
+                });
+                Field schedulerField = virtualThread.getClass().getDeclaredField("scheduler");
+                schedulerField.setAccessible(true);
+                Object scheduler = schedulerField.get(virtualThread);
+                if (scheduler.getClass().equals(ForkJoinPool.class)) {
+                    LOGGER.info("Setup metrics for virtualThreadScheduler thread pool.");
+                    commonExecutorServiceFactory.monitorForkJoinPool((ForkJoinPool) scheduler, "virtualThreadScheduler");
+                }
+            } catch (Exception e) {
+                LOGGER.error("Couldn't setup monitoring for common virtual thread pool.", e);
+            }
+        }
+        commonExecutorServiceFactory.monitorForkJoinPool(ForkJoinPool.commonPool(), "commonForkJoinPool");
+    }
+
     @Bean
     public Timer timer() {
         return new Timer();
     }
 
     @Bean
-    public EventBus reactor(MDCCleanerThreadPoolExecutor threadPoolExecutor) {
+    public EventBus reactor(@Named("eventBusThreadPoolExecutor") ExecutorService threadPoolExecutor) {
         return EventBus.builder()
                 .executor(threadPoolExecutor)
                 .exceptionHandler((event, exception) -> handleException(event, exception, threadPoolExecutor))
@@ -78,21 +109,22 @@ public class EventBusConfig {
     }
 
     @Bean("eventBusThreadPoolExecutor")
-    public MDCCleanerThreadPoolExecutor getPoolExecutor() {
-        return new MDCCleanerThreadPoolExecutor(eventBusThreadPoolCoreSize,
-                eventBusThreadPoolMaxSize,
-                0L,
-                TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(eventBusThreadPoolBacklogSize),
-                new ThreadFactoryBuilder().setNameFormat("reactorDispatcher-%d").setDaemon(true).build(),
-                (r, executor) -> LOGGER.error("Task has been rejected from 'reactorDispatcher' threadpool. Executor state: " + executor));
-
+    public ExecutorService getPoolExecutor() {
+        if (virtualThreadsAvailable) {
+            return commonExecutorServiceFactory.newVirtualThreadExecutorService("reactorDispatcher", "eventBusThreadPoolExecutor",
+                    List.of(new MDCCleanerDecorator()));
+        } else {
+            return commonExecutorServiceFactory.newThreadPoolExecutorService("reactorDispatcher", "eventBusThreadPoolExecutor", eventBusThreadPoolCoreSize,
+                    eventBusThreadPoolMaxSize, 0, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(eventBusThreadPoolBacklogSize),
+                    (r, executor) -> LOGGER.error("Task has been rejected from 'reactorDispatcher' threadpool. Executor state: " + executor),
+                    List.of(new MDCCleanerDecorator()));
+        }
     }
 
-    private void handleException(Event<?> event, Throwable exception, ThreadPoolExecutor threadPoolExecutor) {
+    private void handleException(Event<?> event, Throwable exception, ExecutorService executorService) {
         try {
             LOGGER.error("Exception during event: {}", event, exception);
-            if (!threadPoolExecutor.isTerminating()) {
+            if (!executorService.isShutdown() && !executorService.isTerminated()) {
                 String flowId = Optional.ofNullable(tryGetFlowIdFromEvent(event))
                         .or(() -> Optional.ofNullable(getFlowIdFromMDC()))
                         .orElse(null);
@@ -111,10 +143,10 @@ public class EventBusConfig {
         }
     }
 
-    private void handleUnhandledEvent(Event<?> event, ThreadPoolExecutor threadPoolExecutor) {
+    private void handleUnhandledEvent(Event<?> event, ExecutorService executorService) {
         try {
             LOGGER.error("Unhandled event: {}", event);
-            if (!threadPoolExecutor.isTerminating()) {
+            if (!executorService.isShutdown() && !executorService.isTerminated()) {
                 String flowId = tryGetFlowIdFromEvent(event);
                 if (flowId != null) {
                     flowLogDBService.closeFlow(flowId, String.format("Unhanded event: %s", event.getClass().getName()));

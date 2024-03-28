@@ -94,6 +94,8 @@ import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 import com.sequenceiq.freeipa.service.stack.instance.MetadataSetupService;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 @ActiveProfiles("integration-test")
 @ExtendWith(SpringExtension.class)
 class StackProvisionFlowIntegrationTest {
@@ -164,6 +166,9 @@ class StackProvisionFlowIntegrationTest {
 
     @MockBean
     private NodeConfig nodeConfig;
+
+    @MockBean
+    private MeterRegistry meterRegistry;
 
     private ResourceConnector resourceConnector = mock(ResourceConnector.class);
 

@@ -130,6 +130,8 @@ import com.sequenceiq.freeipa.service.stack.instance.InstanceValidationService;
 import com.sequenceiq.freeipa.service.stack.instance.MetadataSetupService;
 import com.sequenceiq.freeipa.sync.FreeipaJobService;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 @ActiveProfiles("integration-test")
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(properties = {
@@ -219,6 +221,9 @@ class FreeIpaUpscaleFlowIntegrationTest {
 
     @MockBean
     private NodeConfig nodeConfig;
+
+    @MockBean
+    private MeterRegistry meterRegistry;
 
     private ResourceConnector resourceConnector = mock(ResourceConnector.class);
 

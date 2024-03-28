@@ -7,20 +7,19 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import jakarta.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDatabaseTemplateModelBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
-import com.sequenceiq.cloudbreak.logger.concurrent.MDCCopyingThreadPoolExecutor;
+import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
+import com.sequenceiq.cloudbreak.concurrent.MDCCopyDecorator;
 import com.sequenceiq.common.model.AzureDatabaseType;
-
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
 
 @Configuration
 public class AzureConfig {
@@ -53,18 +52,28 @@ public class AzureConfig {
     @Value("${cb.azure.client.thread.keepAliveTimeInSeconds:20}")
     private Integer azureClientThreadKeepAliveTimeInSeconds;
 
+    @Inject
+    private CommonExecutorServiceFactory commonExecutorServiceFactory;
+
+    @Value("${spring.threads.virtual.enabled:false}")
+    private boolean virtualThreadsAvailable;
+
     @Bean(name = "AzureTagSpecification")
     public TagSpecification getTagSpecification() {
         return new TagSpecification(maxAmount, minKeyLength, maxKeyLength, keyValidator, minValueLength, maxValueLength, valueValidator);
     }
 
     @Bean(name = "azureClientThreadPool")
-    public ExecutorService azureClientThreadPool(MeterRegistry meterRegistry) {
-        ExecutorService threadPoolExecutor = new MDCCopyingThreadPoolExecutor(
-                0, Integer.MAX_VALUE, azureClientThreadKeepAliveTimeInSeconds, TimeUnit.SECONDS, new SynchronousQueue<>(),
-                new ThreadFactoryBuilder().setDaemon(true).setNameFormat(AZURE_CLIENT_THREAD_POOL + "-%s").build(),
-                (r, executor) -> LOGGER.error("Task has been rejected from 'azure-worker' threadpool. Executor state: " + executor));
-        return ExecutorServiceMetrics.monitor(meterRegistry, threadPoolExecutor, AZURE_CLIENT_THREAD_POOL, "threadpool");
+    public ExecutorService azureClientThreadPool() {
+        if (virtualThreadsAvailable) {
+            return commonExecutorServiceFactory.newVirtualThreadExecutorService(AZURE_CLIENT_THREAD_POOL, AZURE_CLIENT_THREAD_POOL,
+                    List.of(new MDCCopyDecorator()));
+        } else {
+            return commonExecutorServiceFactory.newThreadPoolExecutorService(AZURE_CLIENT_THREAD_POOL, AZURE_CLIENT_THREAD_POOL, 0, Integer.MAX_VALUE,
+                    azureClientThreadKeepAliveTimeInSeconds, TimeUnit.SECONDS, new SynchronousQueue<>(),
+                    (r, executor) -> LOGGER.error("Task has been rejected from 'azure-worker' threadpool. Executor state: " + executor),
+                    List.of(new MDCCopyDecorator()));
+        }
     }
 
     @Bean(name = "azureDatabaseTemplateModelBuilderMap")

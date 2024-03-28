@@ -17,6 +17,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -45,7 +46,12 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.config.user.TestUserSelectors;
 import com.sequenceiq.it.cloudbreak.config.user.TestUsers;
+import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Capture;
@@ -1039,11 +1045,24 @@ public abstract class TestContext implements ApplicationContextAware {
             try {
                 LOGGER.info("Starting to clean up {} {}", testDto.getClass().getSimpleName(), testDto.getName());
                 testDto.cleanUp();
+                if (shouldRemoveMockInfrastructureTestCalls(testDto)) {
+                    ((AbstractTestDto) testDto).resetCalls();
+                }
             } catch (Exception e) {
                 LOGGER.info("Cleaning up of tests context with {} resource is failing, because of: {}", testDto.getName(), e.getMessage());
             }
         }
         shutdown();
+    }
+
+    private static boolean shouldRemoveMockInfrastructureTestCalls(CloudbreakTestDto testDto) {
+        Set<String> testCallRemovableResources = Set.of(
+                EnvironmentTestDto.ENVIRONMENT_RESOURCE_NAME,
+                FreeIpaTestDto.FREEIPA_RESOURCE_NAME,
+                SdxInternalTestDto.SDX_RESOURCE_NAME,
+                DistroXTestDtoBase.DISTROX_RESOURCE_NAME);
+        return CloudPlatform.MOCK.equals(testDto.getCloudPlatform()) && testDto.getResourceNameType() != null &&
+                testCallRemovableResources.contains(testDto.getResourceNameType()) && testDto instanceof AbstractTestDto;
     }
 
     public boolean shouldCleanUp() {
@@ -1098,7 +1117,7 @@ public abstract class TestContext implements ApplicationContextAware {
      * The SafeLogic CryptoComply for Java should be installed on Cloudbreak images.
      * This is validated on VM instances by default, it has been invoked in the E2E tearDown
      * (after the execution of each E2E test method).
-     *
+     * <p>
      * If the JAVA has been forced (re)installed or SDX, DistroX have been deleted during test execution,
      * the SafeLogic validation should be disabled for the test tearDown.
      */
@@ -1107,7 +1126,6 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     /**
-     *
      * @return SafeLogic Validation value (true or false)
      */
     public boolean getSafeLogicValidation() {

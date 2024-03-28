@@ -22,13 +22,12 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.concurrent.MdcCopyingTaskDecorator;
+import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
 import com.sequenceiq.environment.environment.dto.credential.CloudPlatformAwareCredentialDetailsConverter;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
@@ -75,6 +74,9 @@ public class AppConfig {
     @Value("${cb.intermediate.threadpool.capacity.size:}")
     private int intermediateQueueCapacity;
 
+    @Value("${cb.intermediate.threadpool.termination.seconds:60}")
+    private int intermediateAwaitTerminationSeconds;
+
     @Value("${environment.delayed.threadpool.core.size:10}")
     private int delayedCorePoolSize;
 
@@ -87,6 +89,12 @@ public class AppConfig {
 
     @Value("${environment.freeipa.supportedPlatforms:}")
     private String supportedFreeIpaPlatforms;
+
+    @Value("${spring.threads.virtual.enabled:false}")
+    private boolean virtualThreadsAvailable;
+
+    @Inject
+    private CommonExecutorServiceFactory commonExecutorServiceFactory;
 
     @Inject
     private MeterRegistry meterRegistry;
@@ -129,13 +137,8 @@ public class AppConfig {
     @Bean
     @Primary
     public AsyncTaskExecutor intermediateBuilderExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(intermediateCorePoolSize);
-        executor.setQueueCapacity(intermediateQueueCapacity);
-        executor.setThreadNamePrefix("intermediateBuilderExecutor-");
-        executor.setTaskDecorator(new MdcCopyingTaskDecorator());
-        executor.initialize();
-        return executor;
+        return commonExecutorServiceFactory.newAsyncTaskExecutor("intermediateBuilderExecutor", virtualThreadsAvailable, intermediateCorePoolSize,
+                intermediateQueueCapacity, intermediateAwaitTerminationSeconds);
     }
 
     @Bean

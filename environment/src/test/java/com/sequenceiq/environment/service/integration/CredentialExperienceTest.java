@@ -1,12 +1,16 @@
 package com.sequenceiq.environment.service.integration;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Client;
@@ -19,6 +23,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -45,6 +50,7 @@ import com.sequenceiq.cloudbreak.cloud.response.GcpCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionMetricsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
 import com.sequenceiq.cloudbreak.config.ConversionConfig;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -86,6 +92,8 @@ import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.notification.HttpNotificationSenderService;
 import com.sequenceiq.notification.NotificationService;
+
+import io.micrometer.core.instrument.MeterRegistry;
 
 @ExtendWith(SpringExtension.class)
 public class CredentialExperienceTest {
@@ -140,6 +148,9 @@ public class CredentialExperienceTest {
 
     @MockBean
     private NodeConfig nodeConfig;
+
+    @MockBean
+    private MeterRegistry meterRegistry;
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
@@ -345,6 +356,13 @@ public class CredentialExperienceTest {
         @MockBean
         private EditCredentialRequestToCredentialConverter editCredentialRequestToCredentialConverter;
 
+        @Bean
+        public CommonExecutorServiceFactory commonExecutorServiceFactory() {
+            CommonExecutorServiceFactory commonExecutorServiceFactory = mock(CommonExecutorServiceFactory.class);
+            when(commonExecutorServiceFactory.newThreadPoolExecutorService(any(), any(), anyInt(), anyInt(), anyLong(), any(), any(), any(), any())).thenReturn(
+                    Executors.newCachedThreadPool());
+            return commonExecutorServiceFactory;
+        }
     }
 
 }

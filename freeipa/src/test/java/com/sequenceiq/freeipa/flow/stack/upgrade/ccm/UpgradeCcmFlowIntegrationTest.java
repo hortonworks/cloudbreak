@@ -65,6 +65,8 @@ import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.upgrade.ccm.CcmParametersConfigService;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 @ActiveProfiles("integration-test")
 @ExtendWith(SpringExtension.class)
 class UpgradeCcmFlowIntegrationTest {
@@ -118,6 +120,9 @@ class UpgradeCcmFlowIntegrationTest {
 
     @MockBean
     private NodeConfig nodeConfig;
+
+    @MockBean
+    private MeterRegistry meterRegistry;
 
     @BeforeEach
     public void setup() {

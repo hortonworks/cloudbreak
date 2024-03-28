@@ -103,6 +103,22 @@ class RoutingDataSourceTest {
         assertThat(result).isEqualTo(quartzMeteringConnection);
     }
 
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("getQuartzThreadNames")
+    void shouldReturnQuartzDataSourceOnQuartzVirtualThread(String threadName) {
+        Connection result = getConnectionInVirtualThread(threadName);
+
+        assertThat(result).isEqualTo(quartzConnection);
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("getQuartzMeteringThreadNames")
+    void shouldReturnQuartzMeteringDataSourceOnQuartzVirtualThread(String threadName) {
+        Connection result = getConnectionInVirtualThread(threadName);
+
+        assertThat(result).isEqualTo(quartzMeteringConnection);
+    }
+
     private Connection getConnectionInThread(String threadName) {
         try {
             AtomicReference<Connection> connection = new AtomicReference<>();
@@ -118,6 +134,24 @@ class RoutingDataSourceTest {
             thread.start();
             thread.join();
 
+            return connection.get();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Connection getConnectionInVirtualThread(String threadName) {
+        try {
+            AtomicReference<Connection> connection = new AtomicReference<>();
+
+            Thread thread = Thread.ofVirtual().name(threadName).start(() -> {
+                try {
+                    connection.set(underTest.getConnection());
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            thread.join();
             return connection.get();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);

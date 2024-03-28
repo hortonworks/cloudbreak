@@ -12,6 +12,7 @@ import javax.sql.DataSource;
 
 import jakarta.inject.Inject;
 
+import org.quartz.spi.ThreadPool;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +28,7 @@ import org.springframework.scheduling.quartz.SimpleThreadPoolTaskExecutor;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.quartz.configuration.SchedulerFactoryBeanUtil;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TimedSimpleThreadPoolTaskExecutor;
+import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.VirtualThreadPoolTaskExecutor;
 import com.sequenceiq.cloudbreak.quartz.metric.JobMetricsListener;
 import com.sequenceiq.cloudbreak.quartz.metric.SchedulerMetricsListener;
 import com.sequenceiq.cloudbreak.quartz.metric.TriggerMetricsListener;
@@ -50,6 +52,9 @@ public class DynamicEntitlementRefreshSchedulerFactoryConfig {
     @Value("${quartz.dynamic-entitlement.threadpool.size:15}")
     private int threadpoolSize;
 
+    @Value("${quartz.dynamic-entitlement.virtual-threadpool.size:200}")
+    private int virtualThreadpoolSize;
+
     @Value("${quartz.dynamic-entitlement.threadpool.priority:5}")
     private int threadpoolPriority;
 
@@ -65,6 +70,9 @@ public class DynamicEntitlementRefreshSchedulerFactoryConfig {
 
     @Inject
     private ResourceCheckerJobListener resourceCheckerJobListener;
+
+    @Value("${spring.threads.virtual.enabled:false}")
+    private boolean virtualThreadsAvailable;
 
     @Bean(name = QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_SCHEDULER)
     public SchedulerFactoryBean quartzDynamicEntitlementRefreshScheduler(QuartzProperties quartzProperties,
@@ -88,10 +96,16 @@ public class DynamicEntitlementRefreshSchedulerFactoryConfig {
 
     @Bean(name = QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_TASK_EXECUTOR)
     public Executor quartzDynamicEntitlementRefreshTaskExecutor() {
-        SimpleThreadPoolTaskExecutor executor = new SimpleThreadPoolTaskExecutor();
-        executor.setThreadPriority(threadpoolPriority);
-        executor.setThreadCount(threadpoolSize);
-        executor.setThreadNamePrefix(QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_EXECUTOR_THREAD_NAME_PREFIX);
+        ThreadPool executor;
+        if (virtualThreadsAvailable) {
+            executor = new VirtualThreadPoolTaskExecutor(QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_EXECUTOR_THREAD_NAME_PREFIX, virtualThreadpoolSize, true);
+        } else {
+            SimpleThreadPoolTaskExecutor simpleThreadPoolTaskExecutor = new SimpleThreadPoolTaskExecutor();
+            simpleThreadPoolTaskExecutor.setThreadPriority(threadpoolPriority);
+            simpleThreadPoolTaskExecutor.setThreadCount(threadpoolSize);
+            simpleThreadPoolTaskExecutor.setThreadNamePrefix(QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_EXECUTOR_THREAD_NAME_PREFIX);
+            executor = simpleThreadPoolTaskExecutor;
+        }
         return new TimedSimpleThreadPoolTaskExecutor(meterRegistry, executor, QUARTZ_DYNAMIC_ENTITLEMENT_REFRESH_TASK_EXECUTOR, METRIC_PREFIX, Set.of());
     }
 }

@@ -160,6 +160,7 @@ if [[ "$CIRCLECI" && "$CIRCLECI" == "true" ]]; then
         export INTEGRATIONTEST_CLOUDPROVIDER="AWS"
     else
         export INTEGRATIONTEST_PARALLEL=methods
+        export INTEGRATIONTEST_THREADCOUNT=16
         export INTEGRATIONTEST_CLOUDPROVIDER="MOCK"
     fi
 
@@ -176,6 +177,12 @@ if [[ "$CIRCLECI" && "$CIRCLECI" == "true" ]]; then
 
     date
     env | grep -i INTEGRATIONTEST > integrationtest.properties
+
+    if [[ "$INTEGRATIONTEST_CLOUDPROVIDER" == "MOCK" ]]; then
+      date
+      echo -e "\n\033[1;96m--- Starting prometheus:\033[0m\n"
+      docker compose --compatibility up -d prometheus
+    fi
 
     date
     echo -e "\n\033[1;96m--- Tests to run:\033[0m\n"

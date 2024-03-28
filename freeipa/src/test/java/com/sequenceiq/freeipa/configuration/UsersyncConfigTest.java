@@ -1,9 +1,15 @@
 package com.sequenceiq.freeipa.configuration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -19,6 +25,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.configuration.UsersyncConfigTest.UsersyncConfigTestConfig;
 
@@ -26,7 +33,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = { UsersyncConfig.class, UsersyncConfigTestConfig.class })
+@ContextConfiguration(classes = {UsersyncConfig.class, UsersyncConfigTestConfig.class})
 @TestPropertySource(properties = {
         "freeipa.usersync.threadpool.core.size=1",
         "freeipa.usersync.threadpool.capacity.size=10"
@@ -66,6 +73,14 @@ class UsersyncConfigTest {
         @Bean
         public MeterRegistry meterRegistry() {
             return new SimpleMeterRegistry();
+        }
+
+        @Bean
+        public CommonExecutorServiceFactory commonExecutorServiceFactory() {
+            CommonExecutorServiceFactory commonExecutorServiceFactory = mock(CommonExecutorServiceFactory.class);
+            when(commonExecutorServiceFactory.newThreadPoolExecutorService(any(), any(), anyInt(), anyInt(), anyLong(), any(), any(), any(), any())).thenReturn(
+                    Executors.newCachedThreadPool());
+            return commonExecutorServiceFactory;
         }
     }
 }

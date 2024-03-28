@@ -84,6 +84,7 @@ public class ExternalizedComputeClusterTest extends AbstractMockTest {
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.delete())
                 .awaitForFlow()
+                .await(EnvironmentStatus.ARCHIVED)
                 .given(ExternalizedComputeClusterTestDto.class)
                 .when(externalizedComputeClusterTestClient.describeDeleted())
                 .await(ExternalizedComputeClusterApiStatus.DELETED)

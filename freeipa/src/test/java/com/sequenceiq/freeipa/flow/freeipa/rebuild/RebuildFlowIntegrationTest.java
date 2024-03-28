@@ -108,6 +108,8 @@ import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceValidationService;
 import com.sequenceiq.freeipa.service.stack.instance.MetadataSetupService;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 @ActiveProfiles("integration-test")
 @ExtendWith(SpringExtension.class)
 class RebuildFlowIntegrationTest {
@@ -199,6 +201,9 @@ class RebuildFlowIntegrationTest {
 
     @MockBean
     private StackProvisionService stackProvisionService;
+
+    @MockBean
+    private MeterRegistry meterRegistry;
 
     @BeforeEach
     public void setup() {

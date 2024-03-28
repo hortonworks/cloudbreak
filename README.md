@@ -558,6 +558,21 @@ In the `Profile` file make sure to also add:
 export MOCK_INFRASTRUCTURE_HOST=localhost
 ```
 
+### Virtual thread support
+
+Cloudbreak, Freeipa, DataLake, Environment, Redbeams services can be started with virtual threads. For this the services need to be started with `-Dspring.threads.virtual.enabled=true` jvm argument.
+
+Setting the `spring.threads.virtual.enabled` to `true` configures:
+
+* tomcat thread pool,
+* flow executor thread pool,
+* quartz thread pool,
+* azure client thread pool,
+* user sync thread pools, 
+* resource builder and intermediate thread pools
+
+to use virtual threads.
+
 ## Command Line
 
 ### Running Cloudbreak from the Command Line

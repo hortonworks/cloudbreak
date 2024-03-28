@@ -33,7 +33,7 @@ import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 
 public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCloudbreakTestDto<DistroXV1Request, StackV4Response, T> {
 
-    private static final String DISTROX_RESOURCE_NAME = "distroxName";
+    public static final String DISTROX_RESOURCE_NAME = "distroxName";
 
     protected DistroXTestDtoBase(DistroXV1Request request, TestContext testContext) {
         super(request, testContext);

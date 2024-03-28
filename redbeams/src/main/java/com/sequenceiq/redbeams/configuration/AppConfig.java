@@ -15,10 +15,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-import com.sequenceiq.cloudbreak.concurrent.MdcCopyingTaskDecorator;
+import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.ExecutorServiceMetrics;
@@ -46,11 +45,17 @@ public class AppConfig implements ResourceLoaderAware {
     @Value("${redbeams.threadpool.capacity.size:}")
     private int queueCapacity;
 
+    @Value("${redbeams.threadpool.termination.seconds:60}")
+    private int awaitTerminationSeconds;
+
     @Value("${redbeams.intermediate.threadpool.core.size:}")
     private int intermediateCorePoolSize;
 
     @Value("${redbeams.intermediate.threadpool.capacity.size:}")
     private int intermediateQueueCapacity;
+
+    @Value("${redbeams.intermediate.threadpool.termination.seconds:60}")
+    private int intermediateAwaitTerminationSeconds;
 
     @Value("${redbeams.delayed.threadpool.core.size:10}")
     private int delayedCorePoolSize;
@@ -67,31 +72,27 @@ public class AppConfig implements ResourceLoaderAware {
     @Value("${cert.ignorePreValidation}")
     private boolean ignorePreValidation;
 
+    @Value("${spring.threads.virtual.enabled:false}")
+    private boolean virtualThreadsAvailable;
+
     @Inject
     private MeterRegistry meterRegistry;
+
+    @Inject
+    private CommonExecutorServiceFactory commonExecutorServiceFactory;
 
     private ResourceLoader resourceLoader;
 
     @Bean
     public AsyncTaskExecutor intermediateBuilderExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(intermediateCorePoolSize);
-        executor.setQueueCapacity(intermediateQueueCapacity);
-        executor.setThreadNamePrefix("intermediateBuilderExecutor-");
-        executor.setTaskDecorator(new MdcCopyingTaskDecorator());
-        executor.initialize();
-        return executor;
+        return commonExecutorServiceFactory.newAsyncTaskExecutor("intermediateBuilderExecutor", virtualThreadsAvailable, intermediateCorePoolSize,
+                intermediateQueueCapacity, intermediateAwaitTerminationSeconds);
     }
 
     @Bean
     public AsyncTaskExecutor resourceBuilderExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(corePoolSize);
-        executor.setQueueCapacity(queueCapacity);
-        executor.setThreadNamePrefix("resourceBuilderExecutor-");
-        executor.setTaskDecorator(new MdcCopyingTaskDecorator());
-        executor.initialize();
-        return executor;
+        return commonExecutorServiceFactory.newAsyncTaskExecutor("resourceBuilderExecutor", virtualThreadsAvailable, corePoolSize, queueCapacity,
+                awaitTerminationSeconds);
     }
 
     @Bean(name = DELAYED_TASK_EXECUTOR)

@@ -1,6 +1,7 @@
 package com.sequenceiq.flow.reactor;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -9,9 +10,11 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Profile;
 
 import com.sequenceiq.cloudbreak.common.metrics.AbstractMetricService;
-import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
+import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.reactor.config.EventBusConfig;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 class ContextClosedEventHandlerTest {
 
@@ -22,10 +25,10 @@ class ContextClosedEventHandlerTest {
         AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
         applicationContext.getEnvironment().setActiveProfiles(TEST_PROFILE);
         applicationContext.register(EventBusConfig.class, ContextClosedEventHandler.class,
-                FlowRegister.class, TestMetricService.class);
+                FlowRegister.class, TestMetricService.class, CommonExecutorServiceFactory.class, TestMeterRegistry.class);
         applicationContext.refresh();
 
-        MDCCleanerThreadPoolExecutor eventBusThreadPoolExecutor = applicationContext.getBean("eventBusThreadPoolExecutor", MDCCleanerThreadPoolExecutor.class);
+        ExecutorService eventBusThreadPoolExecutor = applicationContext.getBean("eventBusThreadPoolExecutor", ExecutorService.class);
         Assertions.assertFalse(eventBusThreadPoolExecutor.isShutdown());
 
         applicationContext.close();
@@ -41,6 +44,11 @@ class ContextClosedEventHandlerTest {
         protected Optional<String> getMetricPrefix() {
             return Optional.of("test");
         }
+    }
+
+    @TestComponent
+    @Profile(TEST_PROFILE)
+    static class TestMeterRegistry extends SimpleMeterRegistry {
     }
 
 }

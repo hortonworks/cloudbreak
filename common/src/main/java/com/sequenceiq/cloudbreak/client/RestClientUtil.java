@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.client;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.net.ssl.SSLContext;
 
@@ -31,17 +33,24 @@ public class RestClientUtil {
 
     private static final Map<ConfigKey, Client> CLIENTS = new ConcurrentHashMap<>();
 
+    private static final Lock LOCK = new ReentrantLock();
+
     private RestClientUtil() {
     }
 
-    public static synchronized Client get() {
+    public static Client get() {
         return get(new ConfigKey(false, false, false));
     }
 
-    public static synchronized Client get(ConfigKey configKey) {
-        Client client = CLIENTS.computeIfAbsent(configKey, RestClientUtil::createClient);
-        LOGGER.debug("RestClient cache size: {}, key: {}, fetched client: {}", CLIENTS.size(), configKey, client);
-        return client;
+    public static Client get(ConfigKey configKey) {
+        try {
+            LOCK.lock();
+            Client client = CLIENTS.computeIfAbsent(configKey, RestClientUtil::createClient);
+            LOGGER.debug("RestClient cache size: {}, key: {}, fetched client: {}", CLIENTS.size(), configKey, client);
+            return client;
+        } finally {
+            LOCK.unlock();
+        }
     }
 
     public static Client createClient(String serverCert, String clientCert, String clientKey, boolean debug) throws Exception {

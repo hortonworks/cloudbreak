@@ -1,5 +1,6 @@
 package com.sequenceiq.flow.reactor;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import jakarta.inject.Inject;
@@ -12,7 +13,6 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
 import com.sequenceiq.flow.core.FlowRegister;
 
 @Component
@@ -28,7 +28,7 @@ public class ContextClosedEventHandler {
 
     @Inject
     @Named("eventBusThreadPoolExecutor")
-    private MDCCleanerThreadPoolExecutor executor;
+    private ExecutorService executor;
 
     @EventListener
     public void handleContextClosedEvent(ContextClosedEvent event) {

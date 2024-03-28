@@ -19,9 +19,6 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
-import com.google.common.util.concurrent.ListeningScheduledExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
@@ -30,7 +27,6 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.template.GroupResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.NetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
-import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerScheduledExecutor;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
@@ -96,20 +92,6 @@ public class TestConfig {
         factoryBean.setTemplateLoaderPath("classpath:/");
         factoryBean.afterPropertiesSet();
         return factoryBean.getObject();
-    }
-
-    @Bean("reactorListeningScheduledExecutorService")
-    public ListeningScheduledExecutorService reactorListeningScheduledExecutorService() {
-        return MoreExecutors
-                .listeningDecorator(new MDCCleanerScheduledExecutor(40,
-                        new ThreadFactoryBuilder().setNameFormat("cloud-api-%d").build()));
-    }
-
-    @Bean("cloudApiListeningScheduledExecutorService")
-    public ListeningScheduledExecutorService cloudApiListeningScheduledExecutorService() {
-        return MoreExecutors
-                .listeningDecorator(new MDCCleanerScheduledExecutor(40,
-                        new ThreadFactoryBuilder().setNameFormat("cloud-api-%d").build()));
     }
 
     @Bean

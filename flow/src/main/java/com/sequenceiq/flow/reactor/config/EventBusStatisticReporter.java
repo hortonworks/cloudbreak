@@ -1,13 +1,14 @@
 package com.sequenceiq.flow.reactor.config;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
 
 @Component
 public class EventBusStatisticReporter {
@@ -16,17 +17,21 @@ public class EventBusStatisticReporter {
 
     @Inject
     @Named("eventBusThreadPoolExecutor")
-    private MDCCleanerThreadPoolExecutor executor;
+    private ExecutorService executor;
 
     public void logInfoReport() {
-        LOGGER.info("Reactor event bus statistics: {}", create());
+        if (executor instanceof ThreadPoolExecutor) {
+            LOGGER.info("Reactor event bus statistics: {}", create((ThreadPoolExecutor) executor));
+        }
     }
 
     public void logErrorReport() {
-        LOGGER.error("Reactor state is critical, statistics: {}", create());
+        if (executor instanceof ThreadPoolExecutor) {
+            LOGGER.error("Reactor state is critical, statistics: {}", create((ThreadPoolExecutor) executor));
+        }
     }
 
-    private EventBusStatistics create() {
+    private EventBusStatistics create(ThreadPoolExecutor executor) {
         EventBusStatistics stats = new EventBusStatistics();
 
         stats.setPoolSize(executor.getPoolSize());

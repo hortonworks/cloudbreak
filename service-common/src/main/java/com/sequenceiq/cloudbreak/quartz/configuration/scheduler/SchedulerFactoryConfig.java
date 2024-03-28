@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 
 import jakarta.inject.Inject;
 
+import org.quartz.spi.ThreadPool;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,6 +54,9 @@ public class SchedulerFactoryConfig {
     @Value("${quartz.default.threadpool.size:15}")
     private int threadpoolSize;
 
+    @Value("${quartz.default.virtual-threadpool.size:200}")
+    private int virtualThreadpoolSize;
+
     @Value("${quartz.default.threadpool.priority:5}")
     private int threadpoolPriority;
 
@@ -71,6 +75,9 @@ public class SchedulerFactoryConfig {
 
     @Inject
     private MeterRegistry meterRegistry;
+
+    @Value("${spring.threads.virtual.enabled:false}")
+    private boolean virtualThreadsAvailable;
 
     @Primary
     @Bean(name = QUARTZ_SCHEDULER)
@@ -95,10 +102,16 @@ public class SchedulerFactoryConfig {
 
     @Bean(name = QUARTZ_TASK_EXECUTOR)
     public Executor quartzTaskExecutor() {
-        SimpleThreadPoolTaskExecutor executor = new SimpleThreadPoolTaskExecutor();
-        executor.setThreadPriority(threadpoolPriority);
-        executor.setThreadCount(threadpoolSize);
-        executor.setThreadNamePrefix(QUARTZ_EXECUTOR_THREAD_NAME_PREFIX);
+        ThreadPool executor;
+        if (virtualThreadsAvailable) {
+            executor = new VirtualThreadPoolTaskExecutor(QUARTZ_EXECUTOR_THREAD_NAME_PREFIX, virtualThreadpoolSize, true);
+        } else {
+            SimpleThreadPoolTaskExecutor simpleThreadPoolTaskExecutor = new SimpleThreadPoolTaskExecutor();
+            simpleThreadPoolTaskExecutor.setThreadPriority(threadpoolPriority);
+            simpleThreadPoolTaskExecutor.setThreadCount(threadpoolSize);
+            simpleThreadPoolTaskExecutor.setThreadNamePrefix(QUARTZ_EXECUTOR_THREAD_NAME_PREFIX);
+            executor = simpleThreadPoolTaskExecutor;
+        }
         return new TimedSimpleThreadPoolTaskExecutor(meterRegistry, executor, QUARTZ_TASK_EXECUTOR, METRIC_PREFIX, Set.of());
     }
 }

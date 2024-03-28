@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -24,7 +25,7 @@ public class ThreadBasedUserCrnProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ThreadBasedUserCrnProvider.class);
 
-    private static final ThreadLocal<String> USER_CRN = new ThreadLocal<>();
+    private static final InheritableThreadLocal<String> USER_CRN = new InheritableThreadLocal<>();
 
     private ThreadBasedUserCrnProvider() {
     }
@@ -93,6 +94,20 @@ public class ThreadBasedUserCrnProvider {
         setUserCrn(userCrn);
         try {
             return callable.get();
+        } finally {
+            removeUserCrn();
+            if (previousUserCrn != null) {
+                setUserCrn(previousUserCrn);
+            }
+        }
+    }
+
+    public static <T> T doAsCallable(String userCrn, Callable<T> callable) throws Exception {
+        String previousUserCrn = getUserCrn();
+        removeUserCrn();
+        setUserCrn(userCrn);
+        try {
+            return callable.call();
         } finally {
             removeUserCrn();
             if (previousUserCrn != null) {

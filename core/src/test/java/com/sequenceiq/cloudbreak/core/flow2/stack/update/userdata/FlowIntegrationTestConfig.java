@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.update.userdata;
 
+import java.util.concurrent.ExecutorService;
+
 import jakarta.ws.rs.client.Client;
 
 import org.springframework.boot.test.context.TestConfiguration;
@@ -18,7 +20,6 @@ import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.cloudbreak.core.flow2.service.CbEventParameterFactory;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
-import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
@@ -80,7 +81,7 @@ public class FlowIntegrationTestConfig {
     private StackStatusFinalizer stackStatusFinalizer;
 
     @Bean
-    public EventBus reactor(MDCCleanerThreadPoolExecutor threadPoolExecutor) {
+    public EventBus reactor(ExecutorService threadPoolExecutor) {
         return EventBus.builder()
                 .executor(threadPoolExecutor)
                 .exceptionHandler((exception, context) -> {

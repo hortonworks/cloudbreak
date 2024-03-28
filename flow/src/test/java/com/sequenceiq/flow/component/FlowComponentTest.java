@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.ReflectionUtils;
@@ -78,6 +79,8 @@ import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.flow.service.FlowService;
+
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -133,6 +136,9 @@ public class FlowComponentTest {
 
     @MockBean
     private TransactionalScheduler scheduler;
+
+    @SpyBean
+    private SimpleMeterRegistry meterRegistry;
 
     @AfterAll
     public static void afterAll() throws IOException, InterruptedException {

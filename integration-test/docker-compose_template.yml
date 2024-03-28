@@ -114,3 +114,16 @@ services:
       - ./apidefinitions:/json
     command: /json/validate.sh
     image: docker-private.infra.cloudera.com/cloudera_thirdparty/goswagger/swagger:0.12.0
+  prometheus:
+    networks:
+      cbreak_default: {}
+    ports:
+      - 19090:9090
+    user: "root"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus-data:/var/lib/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/var/lib/prometheus
+    image: prom/prometheus

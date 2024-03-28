@@ -12,6 +12,7 @@ import javax.sql.DataSource;
 
 import jakarta.inject.Inject;
 
+import org.quartz.spi.ThreadPool;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +28,7 @@ import org.springframework.scheduling.quartz.SimpleThreadPoolTaskExecutor;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.quartz.configuration.SchedulerFactoryBeanUtil;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TimedSimpleThreadPoolTaskExecutor;
+import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.VirtualThreadPoolTaskExecutor;
 import com.sequenceiq.cloudbreak.quartz.metric.JobMetricsListener;
 import com.sequenceiq.cloudbreak.quartz.metric.SchedulerMetricsListener;
 import com.sequenceiq.cloudbreak.quartz.metric.TriggerMetricsListener;
@@ -49,6 +51,9 @@ public class MeteringSchedulerFactoryConfig {
     @Value("${quartz.metering.common.threadpool.size:15}")
     private int threadpoolSize;
 
+    @Value("${quartz.metering.common.virtual-threadpool.size:200}")
+    private int virtualThreadpoolSize;
+
     @Value("${quartz.metering.common.threadpool.priority:5}")
     private int threadpoolPriority;
 
@@ -64,6 +69,9 @@ public class MeteringSchedulerFactoryConfig {
 
     @Inject
     private ResourceCheckerJobListener resourceCheckerJobListener;
+
+    @Value("${spring.threads.virtual.enabled:false}")
+    private boolean virtualThreadsAvailable;
 
     @Bean(name = QUARTZ_METERING_SCHEDULER)
     public SchedulerFactoryBean quartzMeteringScheduler(QuartzProperties quartzProperties, ObjectProvider<SchedulerFactoryBeanCustomizer> customizers,
@@ -87,10 +95,16 @@ public class MeteringSchedulerFactoryConfig {
 
     @Bean(name = QUARTZ_METERING_TASK_EXECUTOR)
     public Executor quartzMeteringTaskExecutor() {
-        SimpleThreadPoolTaskExecutor executor = new SimpleThreadPoolTaskExecutor();
-        executor.setThreadPriority(threadpoolPriority);
-        executor.setThreadCount(threadpoolSize);
-        executor.setThreadNamePrefix(QUARTZ_METERING_EXECUTOR_THREAD_NAME_PREFIX);
+        ThreadPool executor;
+        if (virtualThreadsAvailable) {
+            executor = new VirtualThreadPoolTaskExecutor(QUARTZ_METERING_EXECUTOR_THREAD_NAME_PREFIX, virtualThreadpoolSize, true);
+        } else {
+            SimpleThreadPoolTaskExecutor simpleThreadPoolTaskExecutor = new SimpleThreadPoolTaskExecutor();
+            simpleThreadPoolTaskExecutor.setThreadPriority(threadpoolPriority);
+            simpleThreadPoolTaskExecutor.setThreadCount(threadpoolSize);
+            simpleThreadPoolTaskExecutor.setThreadNamePrefix(QUARTZ_METERING_EXECUTOR_THREAD_NAME_PREFIX);
+            executor = simpleThreadPoolTaskExecutor;
+        }
         return new TimedSimpleThreadPoolTaskExecutor(meterRegistry, executor, QUARTZ_METERING_TASK_EXECUTOR, METRIC_PREFIX, Set.of());
     }
 }

@@ -1,9 +1,9 @@
 package com.sequenceiq.mock.salt;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
@@ -16,15 +16,15 @@ public class SaltDto {
 
     private SaltAction saltAction;
 
-    private List<FileDistributonDto> fileDistributonDtos = new ArrayList<>();
+    private List<FileDistributonDto> fileDistributonDtos = new CopyOnWriteArrayList<>();
 
-    private Map<String, Multimap<String, String>> grains = new HashMap<>();
+    private Map<String, Multimap<String, String>> grains = new ConcurrentHashMap<>();
 
-    private List<RunResponseDto> runResponsDtos = new ArrayList<>();
+    private List<RunResponseDto> runResponsDtos = new CopyOnWriteArrayList<>();
 
-    private List<Pillar> pillars = new ArrayList<>();
+    private List<Pillar> pillars = new CopyOnWriteArrayList<>();
 
-    private List<Minion> minions = new ArrayList<>();
+    private List<Minion> minions = new CopyOnWriteArrayList<>();
 
     public SaltDto(String mockUuid) {
         this.mockUuid = mockUuid;

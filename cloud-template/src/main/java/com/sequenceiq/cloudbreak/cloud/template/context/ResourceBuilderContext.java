@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
@@ -29,6 +30,8 @@ public class ResourceBuilderContext extends DynamicModel {
     private final Map<Long, List<CloudResource>> computeResources = new HashMap<>();
 
     private final Map<LoadBalancerType, List<CloudResource>> loadBalancerResources = new HashMap<>();
+
+    private final Lock lock = new ReentrantLock();
 
     private boolean build;
 
@@ -75,27 +78,42 @@ public class ResourceBuilderContext extends DynamicModel {
         return groupResources.get(groupName);
     }
 
-    public synchronized void addGroupResources(String groupName, Collection<CloudResource> resources) {
-        List<CloudResource> list = groupResources.computeIfAbsent(groupName, k -> new ArrayList<>());
-        list.addAll(resources.stream().filter(cloudResource -> groupName.equals(cloudResource.getGroup())).collect(Collectors.toList()));
+    public void addGroupResources(String groupName, Collection<CloudResource> resources) {
+        withLock(() -> {
+            List<CloudResource> list = groupResources.computeIfAbsent(groupName, k -> new ArrayList<>());
+            list.addAll(resources.stream().filter(cloudResource -> groupName.equals(cloudResource.getGroup())).toList());
+        });
     }
 
-    public synchronized void addComputeResources(Long privateId, Collection<CloudResource> resources) {
-        List<CloudResource> list = computeResources.computeIfAbsent(privateId, k -> new ArrayList<>());
-        list.addAll(resources);
+    public void addComputeResources(Long privateId, Collection<CloudResource> resources) {
+        withLock(() -> {
+            List<CloudResource> list = computeResources.computeIfAbsent(privateId, k -> new ArrayList<>());
+            list.addAll(resources);
+        });
     }
 
     public List<CloudResource> getComputeResources(Long privateId) {
         return computeResources.get(privateId);
     }
 
-    public synchronized void addLoadBalancerResources(LoadBalancerType type, Collection<CloudResource> resources) {
-        List<CloudResource> list = loadBalancerResources.computeIfAbsent(type, k -> new ArrayList<>());
-        list.addAll(resources);
+    public void addLoadBalancerResources(LoadBalancerType type, Collection<CloudResource> resources) {
+        withLock(() -> {
+            List<CloudResource> list = loadBalancerResources.computeIfAbsent(type, k -> new ArrayList<>());
+            list.addAll(resources);
+        });
     }
 
     public List<CloudResource> getLoadBalancerResources(LoadBalancerType type) {
         return loadBalancerResources.get(type);
+    }
+
+    private void withLock(Runnable runnable) {
+        try {
+            lock.lock();
+            runnable.run();
+        } finally {
+            lock.unlock();
+        }
     }
 
 }

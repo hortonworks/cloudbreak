@@ -3,12 +3,12 @@ package com.sequenceiq.mock.verification;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -23,21 +23,17 @@ public class RequestResponseStorageService {
 
     private final Map<String, List<Call>> calls = new ConcurrentHashMap<>();
 
-    private final Set<String> enabledCallStorage = new HashSet<>();
+    private final Set<String> enabledCallStorage = new ConcurrentSkipListSet<>();
 
     public void put(String mockUuid, Call call) {
-        if (isEnabledToStore(mockUuid)) {
-            List<Call> calls = getCalls(mockUuid).orElse(new CopyOnWriteArrayList<>());
-            calls.add(call);
-            this.calls.put(mockUuid, calls);
-        } else {
-            LOGGER.debug("Call store is disabled for {}, {}", mockUuid, call.getUri());
-        }
+        List<Call> calls = getCalls(mockUuid).orElse(new CopyOnWriteArrayList<>());
+        calls.add(call);
+        this.calls.put(mockUuid, calls);
     }
 
     public ResponseEntity<?> get(String mockUuid, String path) {
         Optional<List<Call>> calls = getCalls(mockUuid);
-        if (!isEnabledToStore(mockUuid) && (calls.isEmpty() || CollectionUtils.isEmpty(calls.get()))) {
+        if ((calls.isEmpty() || CollectionUtils.isEmpty(calls.get()))) {
             String message = "Cannot fetch the calls, because this function is disabled for the resource: " + mockUuid;
             LOGGER.error(message);
             return ResponseEntity.badRequest().body(message);
@@ -52,8 +48,9 @@ public class RequestResponseStorageService {
     }
 
     private Optional<List<Call>> getCalls(String mockUuid) {
-        return calls.entrySet().stream()
-                .filter(e -> isEnabledToStore(mockUuid))
+        return calls.entrySet()
+                .stream()
+                .filter(e -> mockUuid.contains(e.getKey()))
                 .map(Map.Entry::getValue)
                 .findFirst();
     }
@@ -70,12 +67,8 @@ public class RequestResponseStorageService {
 
     public void resetCallStorage(String mockUuid) {
         LOGGER.info("Reset the call storage of verification for {}", mockUuid);
-        calls.get(mockUuid).clear();
+        calls.remove(mockUuid);
         LOGGER.info("Calls for mock: {}", calls.get(mockUuid));
-    }
-
-    public boolean isEnabledToStore(String mockUuid) {
-        return enabledCallStorage.stream().anyMatch(mockUuid::contains);
     }
 
 }

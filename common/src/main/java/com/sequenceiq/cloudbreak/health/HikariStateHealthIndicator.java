@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.health;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.sql.DataSource;
 
@@ -35,6 +37,8 @@ public class HikariStateHealthIndicator implements HealthIndicator {
 
     @Inject
     private HikariDataSourcePoolMetadataExtractor hikariDataSourcePoolMetadataExtractor;
+
+    private final Lock lock = new ReentrantLock();
 
     @Override
     public Health health() {
@@ -84,14 +88,19 @@ public class HikariStateHealthIndicator implements HealthIndicator {
         }
     }
 
-    private synchronized boolean isDumpNeeded() {
-        boolean createDump = false;
-        long currentTimeMillis = System.currentTimeMillis();
-        long timeDifference = currentTimeMillis - lastDumpTime;
-        if (timeDifference > DUMP_FREQUENCY_MS) {
-            lastDumpTime = currentTimeMillis;
-            createDump = true;
+    private boolean isDumpNeeded() {
+        try {
+            lock.lock();
+            boolean createDump = false;
+            long currentTimeMillis = System.currentTimeMillis();
+            long timeDifference = currentTimeMillis - lastDumpTime;
+            if (timeDifference > DUMP_FREQUENCY_MS) {
+                lastDumpTime = currentTimeMillis;
+                createDump = true;
+            }
+            return createDump;
+        } finally {
+            lock.unlock();
         }
-        return createDump;
     }
 }

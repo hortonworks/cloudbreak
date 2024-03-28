@@ -1,8 +1,7 @@
 package com.sequenceiq.cloudbreak.usage.strategy;
 
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Date;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,12 +25,12 @@ public class HttpUsageProcessingStrategy implements UsageProcessingStrategy {
 
     private final EdhHttpConfiguration edhHttpConfiguration;
 
-    private final SimpleDateFormat simpleDateFormat;
+    private final DateTimeFormatter dateTimeFormatter;
 
     public HttpUsageProcessingStrategy(UsageHttpRecordProcessor usageHttpRecordProcessor, EdhHttpConfiguration edhHttpConfiguration) {
         this.usageHttpRecordProcessor = usageHttpRecordProcessor;
         this.edhHttpConfiguration = edhHttpConfiguration;
-        this.simpleDateFormat = new SimpleDateFormat(DATE_PATTERN);
+        this.dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_PATTERN);
     }
 
     @Override
@@ -40,7 +39,7 @@ public class HttpUsageProcessingStrategy implements UsageProcessingStrategy {
         long timestamp = event.getTimestamp();
         String binaryUsageEvent = BaseEncoding.base64().encode(event.toByteArray());
         fields.put("@message", String.format("CDP_BINARY_USAGE_EVENT - %s", binaryUsageEvent));
-        fields.put("@timestamp", format(Date.from(Instant.now())));
+        fields.put("@timestamp", format(OffsetDateTime.now()));
         edhHttpConfiguration.getAdditionalFields().stream()
                 .filter(f -> StringUtils.isNotBlank(f.getKey()))
                 .forEach(
@@ -51,7 +50,7 @@ public class HttpUsageProcessingStrategy implements UsageProcessingStrategy {
         usageHttpRecordProcessor.processRecord(request);
     }
 
-    private synchronized String format(Date date) {
-        return simpleDateFormat.format(date);
+    private String format(OffsetDateTime date) {
+        return dateTimeFormatter.format(date);
     }
 }

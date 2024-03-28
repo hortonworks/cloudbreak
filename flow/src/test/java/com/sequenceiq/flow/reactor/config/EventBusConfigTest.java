@@ -1,10 +1,15 @@
 package com.sequenceiq.flow.reactor.config;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 import jakarta.inject.Inject;
@@ -13,17 +18,22 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {EventBusConfig.class})
+@SpringBootTest(classes = {EventBusConfig.class, EventBusConfigTest.TestConfig.class})
 class EventBusConfigTest {
 
     @Inject
@@ -31,6 +41,9 @@ class EventBusConfigTest {
 
     @MockBean
     private FlowLogDBService flowLogDBService;
+
+    @MockBean
+    private MeterRegistry meterRegistry;
 
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
@@ -59,5 +72,17 @@ class EventBusConfigTest {
         eventBus.notify("exampleselector", new Event<>(headers, null));
         verify(flowLogDBService, timeout(2000).times(1))
                 .closeFlow("123", "Unhandled exception happened in flow, type: java.lang.RuntimeException, message: uncaught exception");
+    }
+
+    @Configuration
+    static class TestConfig {
+
+        @Bean
+        public CommonExecutorServiceFactory commonExecutorServiceFactory() {
+            CommonExecutorServiceFactory commonExecutorServiceFactory = mock(CommonExecutorServiceFactory.class);
+            when(commonExecutorServiceFactory.newThreadPoolExecutorService(any(), any(), anyInt(), anyInt(), anyLong(), any(), any(), any(), any()))
+                    .thenReturn(Executors.newCachedThreadPool());
+            return commonExecutorServiceFactory;
+        }
     }
 }
