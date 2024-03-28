@@ -16,8 +16,8 @@ jar {
 }
 
 dependencies {
-  implementation group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonDatabindVersion
-  api group: 'jakarta.validation',                         name: 'jakarta.validation-api',                 version: jakartaValidationVersion
+  implementation group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
+  api group: 'jakarta.validation',                       name: 'jakarta.validation-api',       version: jakartaValidationVersion
   api group: 'org.apache.commons',                       name: 'commons-lang3',                  version: apacheCommonsLangVersion
 
   implementation group: 'io.swagger.core.v3',            name: 'swagger-jaxrs2-jakarta',         version: swaggerCoreVersion

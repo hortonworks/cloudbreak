@@ -101,7 +101,7 @@ dependencies {
     implementation     group: 'org.springframework.security', name: 'spring-security-web',                   version: springSecurityVersion
     implementation     group: 'com.dyngr',                 name: 'polling',                                  version: dyngrPollingVersion
     implementation     group: 'net.sourceforge.jregex',    name: 'jregex',                                   version: '1.2_01'
-    implementation     group: 'com.fasterxml.jackson.core',name: 'jackson-databind',                         version: jacksonDatabindVersion
+    implementation     group: 'com.fasterxml.jackson.core',name: 'jackson-databind',                         version: jacksonVersion
     implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                                   version: okhttpVersion
     implementation     group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart',                  version: jerseyCoreVersion
     implementation     group: 'org.openapitools',          name: 'jackson-databind-nullable',                version: "$jacksonDatabindNullable"

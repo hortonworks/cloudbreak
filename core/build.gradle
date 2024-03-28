@@ -133,7 +133,7 @@ dependencyManagement {
       entry 'json-path'
     }
 
-    dependency group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',            version: jacksonDatabindVersion
+    dependency group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',            version: jacksonVersion
     dependency group: 'activation',                         name: 'activation',                  version: '1.0.2'
     dependency group: 'net.jcip',                           name: 'jcip-annotations',            version: '1.0'
     dependency group: 'com.google.http-client',             name: 'google-http-client-jackson2', version: '1.43.3'
@@ -196,7 +196,7 @@ dependencies {
   }
 
   implementation group: 'com.dyngr',                          name: 'polling',                          version: dyngrPollingVersion
-  implementation group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',                 version: jacksonDatabindVersion
+  implementation group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',                 version: jacksonVersion
   implementation group: 'com.google.http-client',             name: 'google-http-client-jackson2',      version: '1.43.3'
   implementation group: 'com.google.auth',                    name: 'google-auth-library-oauth2-http',  version: '1.23.0'
   implementation group: 'org.apache.commons',                 name: 'commons-lang3',                    version: '3.14.0'
@@ -299,7 +299,7 @@ dependencies {
   testImplementation group: 'org.assertj',                name: 'assertj-core',        version: assertjVersion
   testImplementation group: 'org.yaml',                   name: 'snakeyaml',           version: snakeYamlVersion
   testImplementation group: 'org.hamcrest',               name: 'hamcrest',            version: hamcrestVersion
-  testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind',    version: jacksonDatabindVersion
+  testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind',    version: jacksonVersion
   testImplementation group: "com.openpojo",               name: "openpojo",            version: openPojoVersion
 }
 

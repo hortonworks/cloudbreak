@@ -26,7 +26,7 @@ dependencies {
   api (group: 'org.springframework.vault', name: 'spring-vault-core', version: springVaultCoreVersion) {
     exclude group: 'org.springframework'
   }
-  implementation group: 'com.fasterxml.jackson.core',   name: 'jackson-databind', version: { strictly jacksonDatabindVersion }
+  implementation group: 'com.fasterxml.jackson.core',   name: 'jackson-databind', version: { strictly jacksonVersion }
 
   testImplementation project(path: ':common', configuration: 'tests')
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion

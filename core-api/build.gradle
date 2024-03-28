@@ -38,7 +38,7 @@ dependencies {
   implementation group: 'org.bouncycastle',              name: 'bcpkix-jdk18on',                 version: bouncycastleVersion
 
   implementation group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
-  implementation group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: {strictly jacksonDatabindVersion}
+  implementation group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: {strictly jacksonVersion}
   implementation group: 'org.hibernate.validator',       name: 'hibernate-validator',            version: hibernateValidatorVersion
   implementation group: 'org.apache.httpcomponents.client5', name: 'httpclient5',                version: httpClientVersion
   implementation group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion

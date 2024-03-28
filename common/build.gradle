@@ -32,10 +32,11 @@ dependencies {
   api group: 'com.google.guava',                            name: 'guava',                          version: guavaVersion
   api group: 'com.google.code.gson',                        name: 'gson',                           version: gsonVersion
   implementation group: 'org.mybatis',                      name: 'mybatis-migrations',             version: mybatisMigrationVersion
-  implementation group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',               version: jacksonDatabindVersion
+  implementation group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',               version: jacksonVersion
   implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-jdk8',          version: jacksonVersion
   implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-jsr310',        version: jacksonVersion
   implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-hibernate6',    version: jacksonVersion
+  implementation group: 'org.openapitools',                 name: 'jackson-databind-nullable',                version: "$jacksonDatabindNullable"
   implementation group: 'net.sf.json-lib',                  name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
   api group: 'net.jcip',                                    name: 'jcip-annotations',               version: '1.0'
   api group: 'com.github.spotbugs',                         name: 'spotbugs-annotations',           version: '4.8.4'
@@ -71,7 +72,7 @@ dependencies {
   implementation group: 'net.sf.json-lib',                  name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
   api group: 'org.springframework.boot',                    name: 'spring-boot-starter-actuator',   version: springBootVersion
   api group: 'com.zaxxer',                                  name: 'HikariCP',                       version: hikariCPVersion
-  implementation group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',               version: { strictly jacksonDatabindVersion }
+  implementation group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',               version: { strictly jacksonVersion }
   api group: 'org.springframework.security',                name: 'spring-security-core',           version: springSecurityVersion
   api group: 'org.springframework.security',                name: 'spring-security-config',         version: springSecurityVersion
   api group: 'com.cloudera.crypto',                         name: 'openssl-provider',               version: clouderaCryptoOpenSslProviderVersion

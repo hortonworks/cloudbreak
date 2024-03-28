@@ -27,6 +27,6 @@ dependencies {
   testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
 
   runtimeOnly        group: 'org.glassfish.jersey.core',  name: 'jersey-common',         version: jerseyCoreVersion
-  implementation     group: 'com.fasterxml.jackson.core', name: 'jackson-databind',      version: { strictly jacksonDatabindVersion }
+  implementation     group: 'com.fasterxml.jackson.core', name: 'jackson-databind',      version: { strictly jacksonVersion }
 
 }

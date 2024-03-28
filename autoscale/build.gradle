@@ -126,7 +126,7 @@ dependencyManagement {
 
         dependency group: 'xerces',              name: 'xercesImpl',            version: xerces
 
-        dependency group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonDatabindVersion
+        dependency group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
         dependency group: 'org.springframework',           name: 'spring-context-support',         version: springFrameworkVersion
         dependency group: 'com.zaxxer',                    name: 'HikariCP',                       version: hikariCPVersion
 
