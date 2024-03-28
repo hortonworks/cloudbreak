@@ -10,6 +10,7 @@ import static java.lang.String.format;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -676,10 +677,10 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     private Set<InstanceMetaDataV4Response> getInstanceMetaData(String hostGroupName) {
-        return getResponse()
-                .getStackV4Response()
-                .getInstanceGroups()
+        return Optional.ofNullable(getResponse().getStackV4Response())
+                .map(StackV4Response::getInstanceGroups)
                 .stream()
+                .flatMap(Collection::stream)
                 .filter(ig -> ig.getName().equals(hostGroupName))
                 .findFirst()
                 .orElseThrow(() -> new TestFailException(format("The expected '%s' host group is NOT present at SDX!", hostGroupName)))

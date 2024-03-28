@@ -132,7 +132,7 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
         createEnvironmentWithFreeIpa(testContext);
 
         testContext
-                .given(YARN_IMAGE_CATALOG, ImageCatalogTestDto.class)
+                .given(YARN_IMAGE_CATALOG, ImageCatalogTestDto.class, CHILD_CLOUD_PLATFORM)
                 .when(imageCatalogTestClient.createIfNotExistV4(), key(YARN_IMAGE_CATALOG))
                 .given("childtelemetry", TelemetryTestDto.class)
                     .withLogging(CHILD_CLOUD_PLATFORM)
