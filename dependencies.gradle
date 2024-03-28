@@ -86,7 +86,7 @@ ext {
 
   // Protobuf
   protobufVersion = '3.21.7'
-  grpcVersion = '1.62.2'
+  grpcVersion = '1.53.0'
 
   // Database
   hibernateCoreVersion = '6.2.9.Final'
