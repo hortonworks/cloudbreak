@@ -241,6 +241,7 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.util.SanitizerUtil;
 import com.sequenceiq.thunderhead.grpc.GrpcActorContext;
+import com.sequenceiq.thunderhead.grpc.service.auth.roles.MockEnvironmentUserResourceRole;
 import com.sequenceiq.thunderhead.model.AltusToken;
 import com.sequenceiq.thunderhead.service.MockUmsService;
 import com.sequenceiq.thunderhead.util.CrnHelper;
@@ -546,6 +547,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.aws.imdsv2.enforced}")
     private boolean awsImdsV2Enforced;
 
+    @Inject
+    private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
+
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
@@ -632,6 +636,8 @@ public class MockUserManagementService extends UserManagementImplBase {
                     User user = createUser(request.getAccountId(), "fakeMockUser" + i);
                     userBuilder.addUser(user);
                 }
+
+                mockEnvironmentUserResourceRole.getUserNames().forEach(user -> userBuilder.addUser(createUser(request.getAccountId(), user)));
             }
             responseObserver.onNext(userBuilder.build());
         } else {
@@ -732,7 +738,13 @@ public class MockUserManagementService extends UserManagementImplBase {
         String memberCrn = request.getMemberCrn();
         String accountId = Crn.fromString(memberCrn).getAccountId();
         LOGGER.info("List workload administration groups for member: {}, accountId: {}", memberCrn, accountId);
-        Set<String> groups = mockGroupManagementService.getOrCreateWorkloadGroups(accountId).stream().map(Group::getGroupName).collect(Collectors.toSet());
+        Set<String> groups;
+        if (mockEnvironmentUserResourceRole.hasMatchingUser(memberCrn)) {
+            groups = mockEnvironmentUserResourceRole.getWorkloadAdministrationGroupNames();
+        } else {
+            groups = mockGroupManagementService.getOrCreateWorkloadGroups(accountId).stream().map(Group::getGroupName).collect(Collectors.toSet());
+        }
+        LOGGER.info("List workload administration groups for member: {}, accountId: {}, workloadAdministratorGroups: {}", memberCrn, accountId, groups);
         ListWorkloadAdministrationGroupsForMemberResponse.Builder responseBuilder = ListWorkloadAdministrationGroupsForMemberResponse.newBuilder();
         responseBuilder.addAllWorkloadAdministrationGroupName(groups);
         responseObserver.onNext(responseBuilder.build());
