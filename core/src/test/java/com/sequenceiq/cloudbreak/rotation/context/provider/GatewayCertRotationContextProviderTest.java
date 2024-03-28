@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.rotation.context.provider;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep.CM_SERVICE_ROLE_RESTART;
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
+import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.CMServiceRoleRestartRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.ClusterProxyRotationService;
@@ -84,7 +86,7 @@ class GatewayCertRotationContextProviderTest {
     void setup() {
         when(stackService.getByCrn(any())).thenReturn(stackDto);
         when(stackDto.getCluster()).thenReturn(clusterView);
-        when(stackDto.getResourceCrn()).thenReturn(RESOURCE_CRN);
+        lenient().when(stackDto.getResourceCrn()).thenReturn(RESOURCE_CRN);
         Gateway oldGateway = getGateway("Old");
         Gateway newGateway = getGateway("New");
         when(gatewayService.getByClusterId(any())).thenReturn(Optional.of(oldGateway));
@@ -121,6 +123,20 @@ class GatewayCertRotationContextProviderTest {
 
         VaultRotationContext vaultRotationContext = (VaultRotationContext) contexts.get(VAULT);
         assertEquals(6, vaultRotationContext.getVaultPathSecretMap().size());
+    }
+
+    @Test
+    void testGetContextsWithTokenCertRotationKnoxSecretRefEmpty() {
+        Gateway oldGateway = getGateway("Old");
+        when(oldGateway.getTokenKeySecret()).thenReturn(Secret.EMPTY);
+        when(gatewayService.getByClusterId(any())).thenReturn(Optional.of(oldGateway));
+        when(readConfigResponse.getKnoxSecretRef()).thenReturn(null);
+
+        SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
+                () -> underTest.getContexts(RESOURCE_CRN));
+
+        assertEquals("Cannot continue gateway cert rotation because knox token key cannot be found in cluster-proxy.",
+                secretRotationException.getMessage());
     }
 
     private Gateway getGateway(String suffix) {

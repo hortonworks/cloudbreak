@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
+import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.ClusterProxyUpdateConfigRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext.CustomJobRotationContextBuilder;
@@ -65,6 +66,7 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
                 .map(gw -> gatewayService.putLegacyTokenCertIntoVaultIfNecessary(gw, readConfigResponse))
                 .orElseThrow(() -> new CloudbreakRuntimeException(format("Cannot find Gateway in database, cluster id %s", stack.getCluster().getId())));
         GatewayView newGatewaySecrets = gatewayService.generateSignKeys(new Gateway());
+        validateKnoxSecretRef(readConfigResponse.getKnoxSecretRef(), gateway.getTokenKeySecret().getSecret());
 
         result.put(VAULT, getVaultRotationContext(stack.getResourceCrn(),
                 getGatewaySignSecretMap(stack.getStack(), readConfigResponse, gateway, newGatewaySecrets)));
@@ -72,6 +74,12 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
         result.put(CM_SERVICE_ROLE_RESTART, getCMServiceRoleRestartRotationContext(stack.getResourceCrn()));
         result.put(CLUSTER_PROXY_UPDATE, getClusterProxyUpdateConfigContext(stack.getResourceCrn(), gateway.getTokenKeySecret().getSecret()));
         return result;
+    }
+
+    private void validateKnoxSecretRef(String knoxSecretRef, String gatewayTokenKeySecretInVault) {
+        if (StringUtils.isBlank(knoxSecretRef) && StringUtils.isBlank(gatewayTokenKeySecretInVault)) {
+            throw new SecretRotationException("Cannot continue gateway cert rotation because knox token key cannot be found in cluster-proxy.");
+        }
     }
 
     private boolean shouldGenerateNewTokenCert(ReadConfigResponse readConfigResponse) {
