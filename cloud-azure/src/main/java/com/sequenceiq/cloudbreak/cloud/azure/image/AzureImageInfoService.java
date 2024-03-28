@@ -22,11 +22,11 @@ public class AzureImageInfoService {
     @Inject
     private CustomVMImageNameProvider customVMImageNameProvider;
 
-    public AzureImageInfo getImageInfo(String resourceGroup, String fromVhdUri, AuthenticatedContext ac, AzureClient client) {
-        LOGGER.debug("About to fetch Azure image info based on the resource group [{}] and name from VHD URI [{}].", resourceGroup, fromVhdUri);
+    public AzureImageInfo getImageInfo(String resourceGroup, String vhdUri, AuthenticatedContext ac, AzureClient client) {
+        LOGGER.debug("About to fetch Azure image info based on the resource group [{}] and name from VHD URI [{}].", resourceGroup, vhdUri);
         String region = getRegion(ac);
-        String imageNameWithRegion = customVMImageNameProvider.getImageNameWithRegion(region, fromVhdUri);
-        String imageName = customVMImageNameProvider.getImageNameFromConnectionString(fromVhdUri);
+        String imageNameWithRegion = customVMImageNameProvider.getImageNameWithRegion(region, vhdUri);
+        String imageName = customVMImageNameProvider.getImageNameFromConnectionString(vhdUri);
         String imageId = getImageId(resourceGroup, client, imageNameWithRegion);
 
         AzureImageInfo imageInfo = new AzureImageInfo(imageNameWithRegion, imageName, imageId, region, resourceGroup);
