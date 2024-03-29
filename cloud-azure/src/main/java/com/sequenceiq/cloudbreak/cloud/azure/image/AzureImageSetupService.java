@@ -127,8 +127,13 @@ public class AzureImageSetupService {
                 image, prepareType, imageFallbackTarget, client, stack, ac);
         boolean fallbackRequired = validationResult.isFallbackRequired();
         boolean skipVhdCopy = validationResult.isSkipVhdCopy();
+        boolean hasFallbackImage = StringUtils.isNotBlank(imageFallbackTarget);
         if (fallbackRequired) {
-            image.setImageName(imageFallbackTarget);
+            if (hasFallbackImage) {
+                image.setImageName(imageFallbackTarget);
+            } else {
+                LOGGER.warn("Fallback would be required but there is no fallback image available for image {}", image.getImageName());
+            }
         }
         if (!skipVhdCopy) {
             String imageStorageName = armStorage.getImageStorageName(new AzureCredentialView(ac.getCloudCredential()), cloudContext, stack);
@@ -136,7 +141,10 @@ public class AzureImageSetupService {
 
             AzureImageInfo azureImageInfo = azureImageInfoService.getImageInfo(imageResourceGroupName, image.getImageName(), ac, client);
             Optional<AzureImage> foundImage = azureImageService.findImage(azureImageInfo, client, ac);
-            if (foundImage.isEmpty()) {
+            if (foundImage.isPresent()) {
+                LOGGER.info("Custom image with id {} already exists in the target resource group {}, bypassing VHD check!",
+                        foundImage.get().getId(), imageResourceGroupName);
+            } else {
                 LOGGER.info("Custom image with name {} does not exist in the target resource group {}, checking VHD!",
                         azureImageInfo.getImageName(), imageResourceGroupName);
 
@@ -165,11 +173,12 @@ public class AzureImageSetupService {
                     LOGGER.info("The image already exists in the storage account.");
                 }
                 if (fallbackRequired) {
-                    throw new CloudImageFallbackException("Fallback required");
+                    if (hasFallbackImage) {
+                        throw new CloudImageFallbackException("Fallback required");
+                    } else {
+                        LOGGER.warn("Fallback would be required but there is no fallback image available for image {}", image.getImageName());
+                    }
                 }
-            } else {
-                LOGGER.info("Custom image with id {} already exists in the target resource group {}, bypassing VHD check!",
-                        foundImage.get().getId(), imageResourceGroupName);
             }
         }
     }

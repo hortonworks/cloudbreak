@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.core.waiters.Waiter;
 import software.amazon.awssdk.core.waiters.WaiterResponse;
 import software.amazon.awssdk.services.rds.model.DBInstance;
 import software.amazon.awssdk.services.rds.model.DescribeDbEngineVersionsResponse;
@@ -54,6 +56,9 @@ class AwsDatabaseSslCertRotationServiceTest {
     @Mock
     private DescribeDbEngineVersionsResponse describeDbEngineVersionsResponse;
 
+    @Mock
+    private CustomAmazonWaiterProvider customAmazonWaiterProvider;
+
     @InjectMocks
     private AwsDatabaseSslCertRotationService rotationService;
 
@@ -71,6 +76,7 @@ class AwsDatabaseSslCertRotationServiceTest {
                         .engine("psql")
                         .build())
                 .build();
+        Waiter<DescribeDbInstancesResponse> waiter = mock(Waiter.class);
 
         when(ac.getCloudCredential()).thenReturn(mock(CloudCredential.class));
         when(ac.getCloudContext()).thenReturn(mock(CloudContext.class));
@@ -80,6 +86,9 @@ class AwsDatabaseSslCertRotationServiceTest {
         when(dbStack.getDatabaseServer()).thenReturn(mock(DatabaseServer.class));
         when(dbStack.getDatabaseServer().getServerId()).thenReturn(dbInstanceIdentifier);
         when(awsClient.createRdsClient(any(), any())).thenReturn(rdsClient);
+        when(rdsClient.describeDBInstances(any())).thenReturn(describeDbInstancesResponse);
+        when(customAmazonWaiterProvider.getCertRotationStartWaiter()).thenReturn(waiter);
+        when(customAmazonWaiterProvider.getDbInstanceModifyWaiter()).thenReturn(waiter);
         when(rdsClient.describeDBInstances(any(DescribeDbInstancesRequest.class))).thenReturn(describeDbInstancesResponse);
         when(rdsWaiter.waitUntilDBInstanceAvailable(any(DescribeDbInstancesRequest.class), any())).thenReturn(waiterResponse);
         when(rdsClient.waiters()).thenReturn(rdsWaiter);

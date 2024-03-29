@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor.AutoscalingActivityAcceptor;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor.AutoscalingInstancesInServiceAcceptor;
+import com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor.DbInstanceForModifyingStartedAcceptor;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor.DbInstanceStopFailureAcceptor;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor.DbInstanceStopSuccessAcceptor;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor.DescribeDbInstanceForMasterPasswordChangeSuccessAcceptor;
@@ -86,9 +87,21 @@ public class CustomAmazonWaiterProvider {
                 .build();
     }
 
+    public Waiter<DescribeDbInstancesResponse> getCertRotationStartWaiter() {
+        List<WaiterAcceptor<? super DescribeDbInstancesResponse>> acceptors = new ArrayList<>();
+        acceptors.add(new DescribeDbInstanceForModifyFailureAcceptor());
+        acceptors.add(new DbInstanceForModifyingStartedAcceptor());
+        acceptors.addAll(WaitersRuntime.DEFAULT_ACCEPTORS);
+        return Waiter.builder(DescribeDbInstancesResponse.class)
+                .acceptors(acceptors)
+                .overrideConfiguration(createWaiterOverrideConfiguration(MAX_ATTEMPTS))
+                .build();
+    }
+
     private WaiterOverrideConfiguration createWaiterOverrideConfiguration(int maxAttempts) {
         return WaiterOverrideConfiguration.builder()
-                .backoffStrategy(FixedDelayBackoffStrategy.create(Duration.ofSeconds(DEFAULT_DELAY_IN_SECONDS)))
+                .backoffStrategy(FixedDelayBackoffStrategy
+                        .create(Duration.ofSeconds(DEFAULT_DELAY_IN_SECONDS)))
                 .maxAttempts(maxAttempts)
                 .build();
     }

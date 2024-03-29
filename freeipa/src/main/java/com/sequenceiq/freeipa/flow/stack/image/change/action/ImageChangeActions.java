@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.image.ImageConverter;
-import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -42,6 +41,7 @@ import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.PrepareImageResultToStackEventConverter;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackSuccess;
 import com.sequenceiq.freeipa.service.image.ImageFallbackService;
+import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 
@@ -86,8 +86,13 @@ public class ImageChangeActions {
                 String platform = cloudContext.getPlatform().getValue();
                 String fallbackImageName = null;
                 if (imageFallbackService.imageFallbackPermitted(imageEntity, stack)) {
-                    ImageWrapper imageWrapper = imageFallbackService.getImageWrapper(imageEntity, stack);
-                    fallbackImageName = imageService.determineImageNameByRegion(platform, regionName, imageWrapper.getImage());
+                    try {
+                        com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image imageForStack = imageService.getImageForStack(stack);
+                        fallbackImageName = imageService.determineImageNameByRegion(platform, regionName, imageForStack);
+                    } catch (ImageNotFoundException e) {
+                        LOGGER.warn("Fallback image could not be determined due to exception {}," +
+                                " we should continue execution", e.getMessage());
+                    }
                 }
                 CloudStack cloudStack = getCloudStackConverter().convert(stack);
                 PrepareImageRequest<Object> request = new PrepareImageRequest<>(cloudContext, context.getCloudCredential(), cloudStack, image,
