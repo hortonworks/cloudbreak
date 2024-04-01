@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyHybridClient;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
@@ -32,12 +33,17 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
     @Inject
     private ClusterProxyHybridClient clusterProxyHybridClient;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public Set<SimpleRemoteEnvironmentResponse> listRemoteEnvironment(String accountId) {
         Set<SimpleRemoteEnvironmentResponse> responses = new HashSet<>();
-        privateControlPlaneService.listByAccountId(accountId)
-                .stream()
+        if (entitlementService.hybridCloudEnabled(accountId)) {
+            Set<PrivateControlPlane> privateControlPlanes = privateControlPlaneService.listByAccountId(accountId);
+            privateControlPlanes.stream()
                 .parallel()
                 .forEach(item -> responses.addAll(getEnvironmentsFromPrivateControlPlane(item)));
+        }
         return responses;
     }
 

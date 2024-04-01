@@ -58,6 +58,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_DEL
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_USERSYNC_THREAD_TIMEOUT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP_RAZ;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_HYBRID_CLOUD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EMBEDDED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
@@ -1035,6 +1036,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(CDP_CB_AZURE_ADD_DISK))
                                 .addEntitlements(createEntitlement(DATALAKE_HORIZONTAL_SCALE))
                                 .addEntitlements(createEntitlement(CDP_EXPRESS_ONBOARDING))
+                                .addEntitlements(createEntitlement(CDP_HYBRID_CLOUD))
                                 .setGlobalPasswordPolicy(workloadPasswordPolicy)
                                 .setAccountId(accountId)
                                 .setExternalAccountId("external-" + accountId)

@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyHybridClient;
 import com.sequenceiq.cloudbreak.clusterproxy.remoteenvironment.RemoteEnvironmentResponse;
 import com.sequenceiq.cloudbreak.clusterproxy.remoteenvironment.RemoteEnvironmentResponses;
@@ -36,11 +37,14 @@ class RemoteEnvironmentServiceTest {
     @Mock
     private ClusterProxyHybridClient clusterProxyHybridClientMock;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private RemoteEnvironmentService remoteEnvironmentService;
 
     @Test
-    public void testListRemoteEnvironment() {
+    public void testListRemoteEnvironmentWhenEntitlementGrantedShouldReturnEnvs() {
         PrivateControlPlane privateControlPlane1 = new PrivateControlPlane();
         privateControlPlane1.setResourceCrn("CRN1");
         privateControlPlane1.setName("NAME1");
@@ -76,6 +80,8 @@ class RemoteEnvironmentServiceTest {
         when(clusterProxyHybridClientMock.readConfig(eq("CRN1"))).thenReturn(environmentResponses1);
         when(clusterProxyHybridClientMock.readConfig(eq("CRN2"))).thenReturn(environmentResponses2);
 
+        when(entitlementService.hybridCloudEnabled(anyString())).thenReturn(true);
+
         SimpleRemoteEnvironmentResponse response1 = new SimpleRemoteEnvironmentResponse();
         response1.setName("NAME1");
         response1.setUrl("URL1");
@@ -100,5 +106,14 @@ class RemoteEnvironmentServiceTest {
         assertEquals(2, result.size());
         assertTrue(result.contains(response1));
         assertTrue(result.contains(response2));
+    }
+
+    @Test
+    public void testListRemoteEnvironmentWhenEntitlementNotGrantedShouldThrowBadRequest() {
+        when(entitlementService.hybridCloudEnabled(anyString())).thenReturn(false);
+
+        Set<SimpleRemoteEnvironmentResponse> responses = remoteEnvironmentService.listRemoteEnvironment("sampleAccountId");
+
+        assertEquals(responses.size(), 0);
     }
 }
