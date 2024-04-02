@@ -10,7 +10,6 @@ import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_DB_PASS
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_INTERMEDIATE_CA_CERT;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_CM_SERVICE_DB_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_DATABASE_ROOT_PASSWORD;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_GATEWAY_CERT;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_IDBROKER_CERT;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_LDAP_BIND_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.DATALAKE_MGMT_CM_ADMIN_PASSWORD;
@@ -178,6 +177,8 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
         String clusterName = testContext.given(sdxInternal, SdxInternalTestDto.class).getResponse().getName();
         Set<DatalakeSecretType> secretTypes = Sets.newHashSet();
         secretTypes.addAll(Set.of(
+                // CB-24849 and CB-25311
+                //DATALAKE_GATEWAY_CERT,
                 DATALAKE_USER_KEYPAIR,
                 DATALAKE_IDBROKER_CERT,
                 DATALAKE_SALT_BOOT_SECRETS,
@@ -187,10 +188,6 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 DATALAKE_CM_DB_PASSWORD,
                 DATALAKE_CM_SERVICE_DB_PASSWORD,
                 DATALAKE_CM_INTERMEDIATE_CA_CERT));
-        if (testContext.given(sdxInternal, SdxInternalTestDto.class).govCloud()) {
-            // CB-24849
-            secretTypes.add(DATALAKE_GATEWAY_CERT);
-        }
         testContext
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .when(sdxTestClient.describeInternal(), key(sdxInternal))

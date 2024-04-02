@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_LD
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CLUSTER_MGMT_CM_ADMIN_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_CM_INTERMEDIATE_CA_CERT;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD;
-import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.GATEWAY_CERT;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_BOOT_SECRETS;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.USER_KEYPAIR;
 import static com.sequenceiq.freeipa.rotation.FreeIpaRotationAdditionalParameters.CLUSTER_NAME;
@@ -92,12 +91,10 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 CLUSTER_CM_DB_PASSWORD,
                 // we should enable this again when CDPD-43281 is resolved
                 //CLUSTER_CM_SERVICES_DB_PASSWORD,
+                // CB-24849 and CB-25311
+                //GATEWAY_CERT
                 DATAHUB_EXTERNAL_DATABASE_ROOT_PASSWORD,
                 DATAHUB_CM_INTERMEDIATE_CA_CERT));
-        if (testContext.given(DistroXTestDto.class).govCloud()) {
-            // CB-24849
-            secretTypes.add(GATEWAY_CERT);
-        }
         testContext
                 .given(DistroXTestDto.class)
                 .when(distroXTestClient.rotateSecret(secretTypes))
