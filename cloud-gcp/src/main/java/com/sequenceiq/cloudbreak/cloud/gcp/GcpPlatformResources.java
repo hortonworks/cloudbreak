@@ -467,7 +467,7 @@ public class GcpPlatformResources implements PlatformResources {
                             .withMaximumPersistentDisksSizeGb(machineType.getMaximumPersistentDisksSizeGb())
                             .withVolumeEncryptionSupport(true);
                     if (isLocalSsdSupportedForInstanceType(machineType)) {
-                        LOGGER.debug("Adding the local disk configurations to the instance %s.", machineType);
+                        LOGGER.trace("Adding the local disk configurations to the instance {}.", machineType);
                         vmTypeMetaBuilder.withLocalSsdConfig(
                                 Set.of(GCP_LOCAL_SSD_ALLOWED_VALUES),
                                 GCP_LOCAL_SSD_POSSIBLE_NUMBER_VALUES
