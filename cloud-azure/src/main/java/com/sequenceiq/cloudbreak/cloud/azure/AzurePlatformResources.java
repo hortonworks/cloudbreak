@@ -266,7 +266,7 @@ public class AzurePlatformResources implements PlatformResources {
         LOGGER.debug("Requested Filters are {}", filters);
         for (VirtualMachineSize virtualMachineSize : vmTypes) {
             List<String> availabilityZonesForVm = availabilityZones.getOrDefault(virtualMachineSize.name(), new ArrayList<>());
-            LOGGER.debug("Availability Zones for VM type {} are {}", virtualMachineSize.name(), availabilityZonesForVm);
+            LOGGER.trace("Availability Zones for VM type {} are {}", virtualMachineSize.name(), availabilityZonesForVm);
             if (matchAvailabilityZones(filters, availabilityZonesForVm)) {
                 float memoryInGB = virtualMachineSize.memoryInMB() / NO_MB_PER_GB;
                 VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder()

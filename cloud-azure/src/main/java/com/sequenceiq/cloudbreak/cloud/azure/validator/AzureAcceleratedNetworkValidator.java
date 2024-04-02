@@ -40,7 +40,7 @@ public class AzureAcceleratedNetworkValidator {
     }
 
     public boolean isSupportedForVm(String vmType) {
-        LOGGER.debug("Validating vm type: " + vmType);
+        LOGGER.trace("Validating vm type: " + vmType);
         String[] parts = vmType.split("_");
         String transformedFlavor = "";
         boolean validCpu = false;
