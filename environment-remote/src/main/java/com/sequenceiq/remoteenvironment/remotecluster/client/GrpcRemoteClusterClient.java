@@ -1,5 +1,7 @@
 package com.sequenceiq.remoteenvironment.remotecluster.client;
 
+import java.util.List;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -7,8 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneResponse;
-import com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListPvcControlPlanesResponse;
+import com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.PvcControlPlaneConfiguration;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
@@ -29,24 +30,21 @@ public class GrpcRemoteClusterClient {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public ListPvcControlPlanesResponse listPrivateControlPlanes() {
+    @Inject
+    private StubProvider stubProvider;
+
+    public List<PvcControlPlaneConfiguration> listAllPrivateControlPlanes() {
         RemoteClusterServiceClient client = makeClient(
                 channelWrapper.getChannel(),
-                remoteClusterConfig.internalCrnForServiceAsString());
-        return client.listRemoteClusters();
+                remoteClusterConfig.internalCrnForIamServiceAsString());
+        return client.listAllPrivateControlPlanes();
     }
 
-    public DescribePvcControlPlaneResponse describePrivateControlPlanes(String pvc) {
-        RemoteClusterServiceClient client = makeClient(
-                channelWrapper.getChannel(),
-                remoteClusterConfig.internalCrnForServiceAsString());
-        return client.describeRemoteClusters(pvc);
-    }
-
-    private RemoteClusterServiceClient makeClient(ManagedChannel channel, String accountId) {
+    private RemoteClusterServiceClient makeClient(ManagedChannel channel, String actorCrn) {
         return new RemoteClusterServiceClient(
                 channel,
-                accountId,
-                remoteClusterConfig);
+                actorCrn,
+                remoteClusterConfig,
+                stubProvider);
     }
 }

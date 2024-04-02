@@ -66,7 +66,7 @@ public class PrivateControlPlaneService extends AbstractAccountAwareResourceServ
                 .stream()
                 .map(e -> e.getCrn())
                 .collect(Collectors.toSet());
-        privateControlPlaneRepository.deleteByResourceCrns(crns);
+        deleteByResourceCrns(crns);
         return privateControlPlaneDeRegistrationRequestsConverter.convert(request);
     }
 
@@ -135,5 +135,13 @@ public class PrivateControlPlaneService extends AbstractAccountAwareResourceServ
 
     public Set<PrivateControlPlane> listByAccountId(String accountId) {
         return repository().findAllByAccountId(accountId);
+    }
+
+    public List<PrivateControlPlane> findAll() {
+        return (List<PrivateControlPlane>) repository().findAll();
+    }
+
+    public void deleteByResourceCrns(Set<String> crns) {
+        privateControlPlaneRepository.deleteByResourceCrns(crns);
     }
 }

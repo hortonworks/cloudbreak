@@ -64,4 +64,8 @@ public class RemoteClusterServiceConfig {
     public String internalCrnForServiceAsString() {
         return regionAwareInternalCrnGeneratorFactory.remoteCluster().getInternalCrnForServiceAsString();
     }
+
+    public String internalCrnForIamServiceAsString() {
+        return regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString();
+    }
 }

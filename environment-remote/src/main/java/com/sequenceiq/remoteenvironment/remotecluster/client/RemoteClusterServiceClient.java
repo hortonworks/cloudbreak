@@ -1,21 +1,24 @@
 package com.sequenceiq.remoteenvironment.remotecluster.client;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.cloudera.thunderhead.service.remotecluster.RemoteClusterGrpc;
-import com.cloudera.thunderhead.service.remotecluster.RemoteClusterGrpc.RemoteClusterBlockingStub;
-import com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneRequest;
-import com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneResponse;
-import com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListPvcControlPlanesRequest;
-import com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListPvcControlPlanesResponse;
-import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
-import com.sequenceiq.cloudbreak.grpc.altus.CallingServiceNameInterceptor;
-import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.ListAllPvcControlPlanesRequest;
+import com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.ListAllPvcControlPlanesResponse;
+import com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.PvcControlPlaneConfiguration;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 import io.grpc.ManagedChannel;
 
 public class RemoteClusterServiceClient {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RemoteClusterServiceClient.class);
+
+    private static final int PAGE_SIZE = 1000;
 
     private final ManagedChannel channel;
 
@@ -23,36 +26,48 @@ public class RemoteClusterServiceClient {
 
     private final RemoteClusterServiceConfig remoteClusterConfig;
 
-    public RemoteClusterServiceClient(ManagedChannel channel, String actorCrn, RemoteClusterServiceConfig remoteClusterConfig) {
+    private final StubProvider stubProvider;
+
+    public RemoteClusterServiceClient(ManagedChannel channel, String actorCrn,
+        RemoteClusterServiceConfig remoteClusterConfig, StubProvider stubProvider) {
         this.channel = channel;
         this.actorCrn = actorCrn;
         this.remoteClusterConfig = remoteClusterConfig;
+        this.stubProvider = stubProvider;
     }
 
-    public ListPvcControlPlanesResponse listRemoteClusters() {
+    public List<PvcControlPlaneConfiguration> listAllPrivateControlPlanes() {
         String requestId = MDCBuilder.getOrGenerateRequestId();
+        String nextToken = null;
 
-        return newStub(requestId)
-                .listPvcControlPlanes(ListPvcControlPlanesRequest.newBuilder().build());
+        List<PvcControlPlaneConfiguration> items = new ArrayList<>();
+        do {
+            ListAllPvcControlPlanesRequest.Builder listAllPvcControlPlanesRequestBuilder = ListAllPvcControlPlanesRequest.newBuilder()
+                    .setPageSize(PAGE_SIZE);
+            if (nextToken != null) {
+                listAllPvcControlPlanesRequestBuilder.setPageToken(nextToken);
+            }
+            ListAllPvcControlPlanesRequest listAllPvcControlPlanesRequest = listAllPvcControlPlanesRequestBuilder.build();
+
+            ListAllPvcControlPlanesResponse listAllPvcControlPlanesResponse =
+                    stubProvider.newInternalStub(channel,
+                                    requestId,
+                                    remoteClusterConfig.getGrpcTimeoutSec(),
+                                    remoteClusterConfig.internalCrnForIamServiceAsString(),
+                                    remoteClusterConfig.getCallingServiceName())
+                    .listAllPvcControlPlanes(listAllPvcControlPlanesRequest);
+            if (listAllPvcControlPlanesResponse != null) {
+                items.addAll(listAllPvcControlPlanesResponse.getControlPlaneConfigurationsList());
+                if (!Strings.isNullOrEmpty(listAllPvcControlPlanesResponse.getNextPageToken())) {
+                    nextToken = listAllPvcControlPlanesResponse.getNextPageToken();
+                    LOGGER.info("There is multiple page of private control planes. Next token will be {}.", nextToken);
+                } else {
+                    nextToken = null;
+                }
+            }
+        } while (!Strings.isNullOrEmpty(nextToken));
+
+        return items;
     }
 
-    public DescribePvcControlPlaneResponse describeRemoteClusters(String pvc) {
-        String requestId = MDCBuilder.getOrGenerateRequestId();
-        checkNotNull(pvc, "pvc should not be null.");
-
-        DescribePvcControlPlaneRequest.Builder builder = DescribePvcControlPlaneRequest.newBuilder();
-        builder.setPvc(pvc);
-        return newStub(requestId)
-                .describePvcControlPlane(builder.build());
-    }
-
-    private RemoteClusterBlockingStub newStub(String requestId) {
-        checkNotNull(requestId, "requestId should not be null.");
-
-        return RemoteClusterGrpc.newBlockingStub(channel)
-                .withInterceptors(
-                        GrpcUtil.getTimeoutInterceptor(remoteClusterConfig.getGrpcTimeoutSec()),
-                        new AltusMetadataInterceptor(requestId, remoteClusterConfig.internalCrnForServiceAsString()),
-                        new CallingServiceNameInterceptor(remoteClusterConfig.getCallingServiceName()));
-    }
 }

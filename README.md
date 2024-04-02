@@ -500,7 +500,7 @@ kubectl port-forward deployment/thunderhead-remotecluster 9983:8982 --namespace 
 
 Also if you want to test the e2e flow then you need cluster proxy with:
 ```
-kubectl port-forward deployment/thunderhead-remotecluster 9983:8982 --namespace thunderhead-remotecluster
+kubectl -n cluster-proxy port-forward svc/cluster-proxy-cluster-proxy 10082:10080
 ```
 
 You can register a control with:

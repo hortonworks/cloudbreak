@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package remotecluster;
+
+option java_package = "com.cloudera.thunderhead.service.remotecluster";
+option java_outer_classname = "RemoteClusterInternalProto";
+
+import "remotecluster.proto";
+
+// RemoteCluster endpoints for internal use only.
+service RemoteClusterInternal {
+
+  // List all registered Private Cloud control plane configurations across all accounts.
+  rpc ListAllPvcControlPlanes (ListAllPvcControlPlanesRequest)
+      returns (ListAllPvcControlPlanesResponse) {
+  }
+
+  // Generate an auth token for the requests sent to Private Cloud control plane.
+  rpc GeneratePvcControlPlaneAuthToken (GeneratePvcControlPlaneAuthTokenRequest)
+      returns (GeneratePvcControlPlaneAuthTokenResponse) {
+  }
+}
+
+message ListAllPvcControlPlanesRequest {
+  // The page size.
+  int32 pageSize = 1;
+  // A token to specify where to start paginating. This is the nextToken from a previously truncated response.
+  string pageToken = 2;
+}
+
+message ListAllPvcControlPlanesResponse {
+  // The Private Cloud control plane configurations.
+  repeated PvcControlPlaneConfiguration controlPlaneConfigurations = 1;
+  // The token to use when requesting the next set of results. If not present, there are no additional results.
+  string nextPageToken = 2;
+}
+
+message GeneratePvcControlPlaneAuthTokenRequest {
+  // The account ID of the Private Cloud control plane.
+  string pvcId = 1;
+}
+
+message GeneratePvcControlPlaneAuthTokenResponse {
+  // The authentication token.
+  string token = 1;
+}
