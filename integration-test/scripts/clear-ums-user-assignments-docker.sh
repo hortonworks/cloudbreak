@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
-: ${IMAGE_NAME:=python:3}
+: ${IMAGE_NAME:=python:3.8}
 : ${DEPLOYMENT:=dev}
 : ${ACCOUNT:=default}
 

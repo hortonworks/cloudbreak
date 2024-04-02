@@ -11,15 +11,12 @@ install_requirements() {
   chmod +x ~/jq
   cp ~/jq /usr/bin
 
-  echo "install virtualenv"
-  pip install virtualenv
-
   echo "install cdp-cli"
   mkdir ~/cdpclienv
-  virtualenv ~/cdpclienv
+  python3 -m venv ~/cdpclienv
   source ~/cdpclienv/bin/activate
-  ~/cdpclienv/bin/pip install cdpcli
-  ~/cdpclienv/bin/pip install --upgrade cdpcli
+  ~/cdpclienv/bin/pip3 install cdpcli
+
 }
 
 get_admin_access() {
