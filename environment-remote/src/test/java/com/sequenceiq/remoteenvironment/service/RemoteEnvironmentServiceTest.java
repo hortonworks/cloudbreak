@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,13 +43,29 @@ class RemoteEnvironmentServiceTest {
     public void testListRemoteEnvironment() {
         PrivateControlPlane privateControlPlane1 = new PrivateControlPlane();
         privateControlPlane1.setResourceCrn("CRN1");
+        privateControlPlane1.setName("NAME1");
+        privateControlPlane1.setUrl("URL1");
+        privateControlPlane1.setAccountId("ACCOUNT1");
+        privateControlPlane1.setId(1L);
         PrivateControlPlane privateControlPlane2 = new PrivateControlPlane();
         privateControlPlane2.setResourceCrn("CRN2");
+        privateControlPlane2.setName("NAME2");
+        privateControlPlane2.setUrl("URL2");
+        privateControlPlane2.setAccountId("ACCOUNT2");
+        privateControlPlane2.setId(2L);
         when(privateControlPlaneServiceMock.listByAccountId(anyString()))
                 .thenReturn(new HashSet<>(Arrays.asList(privateControlPlane1, privateControlPlane2)));
 
         RemoteEnvironmentResponse environment1 = new RemoteEnvironmentResponse();
+        environment1.setEnvironmentName("NAME1");
+        environment1.setCrn("CRN1");
+        environment1.setStatus("AVAILABLE");
+        environment1.setCloudPlatform("HYBRID");
         RemoteEnvironmentResponse environment2 = new RemoteEnvironmentResponse();
+        environment2.setEnvironmentName("NAME2");
+        environment2.setCrn("CRN2");
+        environment2.setStatus("AVAILABLE");
+        environment2.setCloudPlatform("HYBRID");
 
         RemoteEnvironmentResponses environmentResponses1 = new RemoteEnvironmentResponses();
         environmentResponses1.setEnvironments(Set.of(environment1));
@@ -61,8 +78,20 @@ class RemoteEnvironmentServiceTest {
 
         SimpleRemoteEnvironmentResponse response1 = new SimpleRemoteEnvironmentResponse();
         response1.setName("NAME1");
+        response1.setUrl("URL1");
+        response1.setRegion("REGION1");
+        response1.setStatus("STATUS1");
+        response1.setPrivateControlPlaneName("PVC1");
+        response1.setCreated(new Date().getTime());
+        response1.setCloudPlatform("HYBRID");
         SimpleRemoteEnvironmentResponse response2 = new SimpleRemoteEnvironmentResponse();
         response2.setName("NAME2");
+        response2.setUrl("URL2");
+        response2.setRegion("REGION2");
+        response2.setStatus("STATUS2");
+        response2.setPrivateControlPlaneName("PVC2");
+        response2.setCreated(new Date().getTime());
+        response2.setCloudPlatform("HYBRID");
         when(converterMock.convert(eq(environment1), eq(privateControlPlane1))).thenReturn(response1);
         when(converterMock.convert(eq(environment2), eq(privateControlPlane2))).thenReturn(response2);
 
