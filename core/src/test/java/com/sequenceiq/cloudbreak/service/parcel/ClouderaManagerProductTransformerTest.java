@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.parcel;
 
+import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
@@ -18,19 +19,22 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.service.image.PreWarmParcelParser;
+import com.sequenceiq.common.model.OsType;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ClouderaManagerProductTransformerTest {
 
     private static final String PARCEL_URL = "http://parcel";
@@ -38,8 +42,6 @@ public class ClouderaManagerProductTransformerTest {
     private static final String PARCEL_VERSION = "7.1.0";
 
     private static final String PARCEL_NAME = "CDH-7.1.0";
-
-    private static final String OS_TYPE = "redhat7";
 
     @InjectMocks
     private ClouderaManagerProductTransformer underTest;
@@ -51,7 +53,7 @@ public class ClouderaManagerProductTransformerTest {
     public void testTransformShouldCreateASetOfClouderaManagerProductFromAnImage() {
         List<String> preWarmParcels = Collections.emptyList();
         List<String> preWarmCsdList = Collections.emptyList();
-        Image image = createImage(preWarmParcels, preWarmCsdList);
+        Image image = createImage(preWarmParcels, preWarmCsdList, CENTOS7);
         when(preWarmParcelParser.parseProductFromParcel(preWarmParcels, preWarmCsdList)).thenReturn(Optional.of(new ClouderaManagerProduct()));
 
         Set<ClouderaManagerProduct> foundProducts = underTest.transform(image, true, true);
@@ -61,19 +63,35 @@ public class ClouderaManagerProductTransformerTest {
         verify(preWarmParcelParser).parseProductFromParcel(preWarmParcels, preWarmCsdList);
     }
 
+    @ParameterizedTest()
+    @EnumSource(OsType.class)
+    public void testTransformShouldCreateASetOfClouderaManagerProductFromAnImageWithProperOsType(OsType osType) {
+        List<String> preWarmParcels = Collections.emptyList();
+        List<String> preWarmCsdList = Collections.emptyList();
+        Image image = createImage(preWarmParcels, preWarmCsdList, osType);
+
+        when(preWarmParcelParser.parseProductFromParcel(preWarmParcels, preWarmCsdList)).thenReturn(Optional.of(new ClouderaManagerProduct()));
+
+        Set<ClouderaManagerProduct> foundProducts = underTest.transform(image, true, true);
+
+        assertThat(foundProducts, hasSize(2));
+        assertTrue(assertCdhProductWithOsType(foundProducts, osType));
+        verify(preWarmParcelParser).parseProductFromParcel(preWarmParcels, preWarmCsdList);
+    }
+
     @Test
-    public void testTransformShouldReturnEmptySetWhenTheImageIsNotPreWarmed() {
-        Set<ClouderaManagerProduct> foundProducts = underTest.transform(createBaseImage(), true, true);
+    public void testTransformShouldReturnEmptySetWhenTheImageIsNotPrewarmed() {
+        Set<ClouderaManagerProduct> foundProducts = underTest.transform(createBaseImage(CENTOS7), true, true);
 
         assertTrue(foundProducts.isEmpty());
         verifyNoInteractions(preWarmParcelParser);
     }
 
     @Test
-    public void testTransformShouldCreateASetOfClouderaManagerProductFromAnImageWhenPreWarmParcelsAreNotAvailable() {
+    public void testTransformShouldCreateASetOfClouderaManagerProductFromAnImageWhenPrewarmedParcelsAreNotAvailable() {
         List<String> preWarmParcels = Collections.emptyList();
         List<String> preWarmCsdList = Collections.emptyList();
-        Image image = createImage(preWarmParcels, preWarmCsdList);
+        Image image = createImage(preWarmParcels, preWarmCsdList, CENTOS7);
         when(preWarmParcelParser.parseProductFromParcel(preWarmParcels, preWarmCsdList)).thenReturn(Optional.empty());
 
         Set<ClouderaManagerProduct> foundProducts = underTest.transform(image, true, true);
@@ -84,10 +102,10 @@ public class ClouderaManagerProductTransformerTest {
     }
 
     @Test
-    public void testTransformShouldParseCDHFromAnImageWhenGetPrewarmParcelsIsFalse() {
+    public void testTransformShouldParseCDHFromAnImageWhenGetPrewarmedParcelsIsFalse() {
         List<String> preWarmParcels = Collections.emptyList();
         List<String> preWarmCsdList = Collections.emptyList();
-        Image image = createImage(preWarmParcels, preWarmCsdList);
+        Image image = createImage(preWarmParcels, preWarmCsdList, CENTOS7);
 
         Set<ClouderaManagerProduct> foundProducts = underTest.transform(image, true, false);
 
@@ -100,7 +118,7 @@ public class ClouderaManagerProductTransformerTest {
     public void testTransformShouldParsePreWarmParcelsFromAnImageWhenGetCDHParcelsIsFalse() {
         List<String> preWarmParcels = Collections.emptyList();
         List<String> preWarmCsdList = Collections.emptyList();
-        Image image = createImage(preWarmParcels, preWarmCsdList);
+        Image image = createImage(preWarmParcels, preWarmCsdList, CENTOS7);
         when(preWarmParcelParser.parseProductFromParcel(preWarmParcels, preWarmCsdList)).thenReturn(Optional.of(new ClouderaManagerProduct()));
 
         Set<ClouderaManagerProduct> foundProducts = underTest.transform(image, false, true);
@@ -114,7 +132,7 @@ public class ClouderaManagerProductTransformerTest {
     public void testTransformShouldNotParseFromAnImageWhenCDHAndPreWarmBothFalse() {
         List<String> preWarmParcels = Collections.emptyList();
         List<String> preWarmCsdList = Collections.emptyList();
-        Image image = createImage(preWarmParcels, preWarmCsdList);
+        Image image = createImage(preWarmParcels, preWarmCsdList, CENTOS7);
 
         Set<ClouderaManagerProduct> foundProducts = underTest.transform(image, false, false);
 
@@ -129,18 +147,28 @@ public class ClouderaManagerProductTransformerTest {
                         && PARCEL_VERSION.equals(product.getVersion()));
     }
 
-    private Image createImage(List<String> preWarmParcels, List<String> preWarmCsdList) {
-        return new Image(null, null, null, null, null, null, null, null, null, new ImageStackDetails(null, createStackRepoDetails(), null), OS_TYPE,
+    private boolean assertCdhProductWithOsType(Set<ClouderaManagerProduct> actual, OsType osType) {
+        return actual.stream()
+                .anyMatch(product -> "CDH".equals(product.getName())
+                        && PARCEL_URL.equals(product.getParcel())
+                        && PARCEL_VERSION.equals(product.getVersion())
+                        && product.getParcelFileUrl().endsWith(osType.getParcelPostfix() + ".parcel"));
+    }
+
+    private Image createImage(List<String> preWarmParcels, List<String> preWarmCsdList, OsType osType) {
+        return new Image(null, null, null, null, null, null, null, null, null,
+                new ImageStackDetails(null, createStackRepoDetails(osType), null),
+                osType.getOsType(),
                 null, List.of(preWarmParcels), preWarmCsdList, null, false, null, null);
     }
 
-    private Image createBaseImage() {
-        return new Image(null, null, null, null, null, null, null, null, null, null, OS_TYPE, null, null, null, null, false, null, null);
+    private Image createBaseImage(OsType osType) {
+        return new Image(null, null, null, null, null, null, null, null, null, null, osType.getOsType(), null, null, null, null, false, null, null);
     }
 
-    private StackRepoDetails createStackRepoDetails() {
+    private StackRepoDetails createStackRepoDetails(OsType osType) {
         Map<String, String> stackMap = new HashMap<>();
-        stackMap.put(OS_TYPE, PARCEL_URL);
+        stackMap.put(osType.getOsType(), PARCEL_URL);
         stackMap.put("repository-version", PARCEL_VERSION);
         stackMap.put("repoid", PARCEL_NAME);
         return new StackRepoDetails(stackMap, null);
