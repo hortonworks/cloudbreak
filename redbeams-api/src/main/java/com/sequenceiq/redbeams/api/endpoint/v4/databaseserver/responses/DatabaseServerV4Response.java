@@ -1,7 +1,5 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
 
-import java.util.StringJoiner;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.common.database.MajorVersion;
@@ -59,6 +57,12 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
 
     @Schema(description = DatabaseServer.DATABASE_PROPERTIES, required = true)
     private DatabasePropertiesV4Response databasePropertiesV4Response;
+
+    @Schema(description = DatabaseServer.INSTANCE_TYPE)
+    private String instanceType;
+
+    @Schema(description = DatabaseServer.STORAGE_SIZE)
+    private Long storageSize;
 
     public Long getId() {
         return id;
@@ -172,23 +176,41 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base {
         this.databasePropertiesV4Response = databasePropertiesV4Response;
     }
 
+    public String getInstanceType() {
+        return instanceType;
+    }
+
+    public void setInstanceType(String instanceType) {
+        this.instanceType = instanceType;
+    }
+
+    public Long getStorageSize() {
+        return storageSize;
+    }
+
+    public void setStorageSize(Long storageSize) {
+        this.storageSize = storageSize;
+    }
+
     @Override
     public String toString() {
-        return new StringJoiner(", ", DatabaseServerV4Response.class.getSimpleName() + "[", "]")
-                .add("id=" + id)
-                .add("crn='" + crn + "'")
-                .add("databaseVendorDisplayName='" + databaseVendorDisplayName + "'")
-                .add("connectionDriver='" + connectionDriver + "'")
-                .add("connectionUserName=" + connectionUserName)
-                .add("connectionPassword=" + connectionPassword)
-                .add("creationDate=" + creationDate)
-                .add("resourceStatus=" + resourceStatus)
-                .add("status=" + status)
-                .add("statusReason='" + statusReason + "'")
-                .add("sslConfig=" + sslConfig)
-                .add("clusterCrn='" + clusterCrn + "'")
-                .add("majorVersion=" + majorVersion)
-                .add("databasePropertiesV4Response=" + databasePropertiesV4Response)
-                .toString();
+        return "DatabaseServerV4Response{" +
+                "id=" + id +
+                ", crn='" + crn + '\'' +
+                ", databaseVendorDisplayName='" + databaseVendorDisplayName + '\'' +
+                ", connectionDriver='" + connectionDriver + '\'' +
+                ", connectionUserName=" + connectionUserName +
+                ", connectionPassword=" + connectionPassword +
+                ", creationDate=" + creationDate +
+                ", resourceStatus=" + resourceStatus +
+                ", status=" + status +
+                ", statusReason='" + statusReason + '\'' +
+                ", sslConfig=" + sslConfig +
+                ", clusterCrn='" + clusterCrn + '\'' +
+                ", majorVersion=" + majorVersion +
+                ", databasePropertiesV4Response=" + databasePropertiesV4Response +
+                ", instanceType='" + instanceType + '\'' +
+                ", storageSize=" + storageSize +
+                '}';
     }
 }

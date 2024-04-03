@@ -91,6 +91,10 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
     private static final String DATABASE_SERVER_ATTRIBUTES_FLEXIBLE =
             "{ \"engine\": \"10\", \"this\": \"that\", \"AZURE_DATABASE_TYPE\": \"FLEXIBLE_SERVER\" }";
 
+    private static final Long DB_STORAGE_SIZE = 300L;
+
+    private static final String DB_INSTANCE_TYPE = "m5.4xlarge";
+
     @Mock
     private X509Certificate x509Certificate;
 
@@ -141,6 +145,8 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         assertThat(response.getPort()).isEqualTo(server.getPort());
         assertThat(response.getDatabaseVendor()).isEqualTo(server.getDatabaseVendor().databaseType());
         assertThat(response.getDatabaseVendorDisplayName()).isEqualTo(server.getDatabaseVendor().displayName());
+        assertThat(response.getStorageSize()).isEqualTo(server.getDbStack().get().getDatabaseServer().getStorageSize());
+        assertThat(response.getInstanceType()).isEqualTo(server.getDbStack().get().getDatabaseServer().getInstanceType());
         assertThat(response.getConnectionUserName()).isNotNull();
         assertThat(response.getConnectionPassword()).isNotNull();
         assertThat(response.getCreationDate()).isEqualTo(server.getCreationDate());
@@ -160,6 +166,8 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         } else {
             databaseServer.setAttributes(new Json(DATABASE_SERVER_ATTRIBUTES_SINGLE));
         }
+        databaseServer.setStorageSize(DB_STORAGE_SIZE);
+        databaseServer.setInstanceType(DB_INSTANCE_TYPE);
         dbStack.setDatabaseServer(databaseServer);
     }
 

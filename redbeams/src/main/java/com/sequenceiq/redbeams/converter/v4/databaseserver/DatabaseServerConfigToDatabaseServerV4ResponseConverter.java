@@ -75,6 +75,10 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
             response.setStatus(dbStack.getStatus());
             response.setStatusReason(dbStack.getStatusReason());
             response.setMajorVersion(dbStack.getMajorVersion());
+            if (dbStack.getDatabaseServer() != null) {
+                response.setInstanceType(dbStack.getDatabaseServer().getInstanceType());
+                response.setStorageSize(dbStack.getDatabaseServer().getStorageSize());
+            }
             if (dbStack.getSslConfig() != null) {
                 SslConfig sslConfig = sslConfigService.fetchById(dbStack.getSslConfig()).get();
                 SslConfigV4Response sslConfigV4Response = new SslConfigV4Response();

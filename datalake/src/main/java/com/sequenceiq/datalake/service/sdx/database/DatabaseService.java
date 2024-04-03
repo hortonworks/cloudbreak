@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import jakarta.inject.Inject;
@@ -54,6 +55,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 import com.sequenceiq.redbeams.api.endpoint.v4.operation.OperationV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.model.common.Status;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Service
 public class DatabaseService {
@@ -65,6 +67,10 @@ public class DatabaseService {
     private static final String INSTANCE_TYPE = "instancetype";
 
     private static final String STORAGE = "storage";
+
+    private static final String PREVIOUS_DATABASE_CRN = "previousDatabaseCrn";
+
+    private static final String PREVIOUS_CLUSTER_SHAPE = "previousClusterShape";
 
     private final Comparator<Versioned> versionComparator = new VersionComparator();
 
@@ -238,18 +244,47 @@ public class DatabaseService {
         }
         SdxDatabase sdxDatabase = sdxCluster.getSdxDatabase();
         Map<String, Object> attributes = sdxDatabase.getAttributes() != null ? sdxDatabase.getAttributes().getMap() : new HashMap<>();
-        // custom DB instance type and storage size from customer input
-        String instanceType = attributes.containsKey(INSTANCE_TYPE) ? attributes.get(INSTANCE_TYPE).toString() : databaseConfig.getInstanceType();
-        Long storageSize = attributes.containsKey(STORAGE) ? Long.parseLong(attributes.get(STORAGE).toString()) : databaseConfig.getVolumeSize();
-        LOGGER.info("Database instance type: {} and volume size {}", instanceType, storageSize);
+        String instanceType;
+        Long storageSize;
+        // Cascade instanceType and storageSize of the prevoius database if they are different of the default ones.
+        Optional<DatabaseServerV4Response> previousDatabaseOp = getPreviousDatabaseIfPropertiesWereModified(attributes, cloudPlatform, sdxCluster);
+        if (previousDatabaseOp.isPresent()) {
+            DatabaseServerV4Response previousDatabase = previousDatabaseOp.get();
+            instanceType = previousDatabase.getInstanceType();
+            storageSize =  previousDatabase.getStorageSize();
+        } else {
+            instanceType = databaseConfig.getInstanceType();
+            storageSize =  databaseConfig.getVolumeSize();
+        }
 
         DatabaseServerV4StackRequest req = new DatabaseServerV4StackRequest();
-        req.setInstanceType(instanceType);
+        req.setInstanceType(attributes.containsKey(INSTANCE_TYPE) ? attributes.get(INSTANCE_TYPE).toString() : instanceType);
         req.setDatabaseVendor(databaseConfig.getVendor());
-        req.setStorageSize(storageSize);
+        req.setStorageSize(attributes.containsKey(STORAGE) ? Long.parseLong(attributes.get(STORAGE).toString()) : storageSize);
         databaseServerParameterSetter.setParameters(req, sdxCluster, env, initiatorUserCrn);
         databaseServerParameterSetter.validate(req, sdxCluster, env, initiatorUserCrn);
+
+        LOGGER.info("Database requested parameters {}", req);
+
         return req;
+    }
+
+    private Optional<DatabaseServerV4Response> getPreviousDatabaseIfPropertiesWereModified(Map<String, Object> attributes, CloudPlatform cloudPlatform,
+            SdxCluster sdxCluster) {
+        DatabaseServerParameterSetter databaseServerParameterSetter = databaseServerParameterSetterMap.get(cloudPlatform);
+        if (attributes.containsKey(PREVIOUS_DATABASE_CRN) && attributes.containsKey(PREVIOUS_CLUSTER_SHAPE)) {
+            DatabaseServerV4Response previousDatabase = getDatabaseServerV4Response(attributes.get(PREVIOUS_DATABASE_CRN).toString());
+            DatabaseConfig previousDatabaseConfig = dbConfigs.get(new DatabaseConfigKey(cloudPlatform,
+                    SdxClusterShape.valueOf(attributes.get(PREVIOUS_CLUSTER_SHAPE).toString()),
+                    databaseServerParameterSetter.getDatabaseType(sdxCluster.getSdxDatabase()).orElse(null)));
+
+            if (previousDatabase != null && previousDatabaseConfig != null
+                    && (!previousDatabaseConfig.getInstanceType().equals(previousDatabase.getInstanceType())
+                    || previousDatabaseConfig.getVolumeSize() != previousDatabase.getStorageSize())) {
+                return Optional.of(previousDatabase);
+            }
+        }
+        return Optional.empty();
     }
 
     public DatabaseServerStatusV4Response waitAndGetDatabase(SdxCluster sdxCluster, String databaseCrn,
@@ -329,4 +364,9 @@ public class DatabaseService {
         return databaseServerConverter.convert(databaseServerV4Response);
     }
 
+    public DatabaseServerV4Response getDatabaseServerV4Response(String databaseServerCrn) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> databaseServerV4Endpoint.getByCrn(databaseServerCrn));
+    }
 }

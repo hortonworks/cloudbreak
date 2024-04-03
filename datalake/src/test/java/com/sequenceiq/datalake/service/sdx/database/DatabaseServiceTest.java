@@ -294,6 +294,41 @@ public class DatabaseServiceTest {
         assertThat(databaseServerV4StackRequest.getStorageSize()).isEqualTo(128L);
     }
 
+    @Test
+    public void testGetDatabaseServerRequestWithPreviousDatabaseModified() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setClusterName("NAME");
+        cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
+        cluster.setCrn(CLUSTER_CRN);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("previousDatabaseCrn", DATABASE_CRN);
+        attributes.put("previousClusterShape", SdxClusterShape.LIGHT_DUTY.toString());
+        sdxDatabase.setAttributes(new Json(attributes));
+        cluster.setSdxDatabase(sdxDatabase);
+        DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
+        env.setName("ENV");
+        env.setCloudPlatform("aws");
+        env.setCrn(ENV_CRN);
+        DatabaseConfig databaseConfig = getDatabaseConfig();
+        DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
+        databaseServerV4Response.setStorageSize(1024L);
+        databaseServerV4Response.setInstanceType("m5.8xlarge");
+
+        DatabaseConfigKey dbConfigKeyLight = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
+        when(dbConfigs.get(dbConfigKeyLight)).thenReturn(databaseConfig);
+        when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
+        when(databaseServerV4Endpoint.getByCrn(DATABASE_CRN)).thenReturn(databaseServerV4Response);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+
+        DatabaseServerV4StackRequest databaseServerV4StackRequest = underTest.getDatabaseServerRequest(CloudPlatform.AWS, cluster, env,
+                "initiatorUserCrn");
+
+        assertThat(databaseServerV4StackRequest).isNotNull();
+        assertThat(databaseServerV4StackRequest.getInstanceType()).isEqualTo("m5.8xlarge");
+        assertThat(databaseServerV4StackRequest.getStorageSize()).isEqualTo(1024L);
+    }
+
     private DatabaseConfig getDatabaseConfig() {
         return new DatabaseConfig("instanceType", "vendor", 100);
     }
