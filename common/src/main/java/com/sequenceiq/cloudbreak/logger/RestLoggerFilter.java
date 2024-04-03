@@ -84,7 +84,9 @@ public class RestLoggerFilter extends OncePerRequestFilter {
     }
 
     private Level calculateLogLevel(HttpServletRequest request, HttpServletResponse response) {
-        if (isGet(request) && response.getStatus() != SUCCESS) {
+        if (isRemoteEnvironmentGet(request)) {
+            return Level.INFO;
+        } else if (isGet(request) && response.getStatus() != SUCCESS) {
             return Level.DEBUG;
         } else if (isPost(request) || isPut(request) || isDelete(request)) {
             return Level.DEBUG;
@@ -102,6 +104,10 @@ public class RestLoggerFilter extends OncePerRequestFilter {
 
     private boolean isGet(HttpServletRequest request) {
         return isRequestMethodEqualWith(request, "GET");
+    }
+
+    private boolean isRemoteEnvironmentGet(HttpServletRequest request) {
+        return isRequestMethodEqualWith(request, "GET") && request.getRequestURI().contains("/remoteenvironmentservice");
     }
 
     private boolean isPost(HttpServletRequest request) {

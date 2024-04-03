@@ -1,4 +1,4 @@
-package com.sequenceiq.remoteenvironment.scheduled.archiver;
+package com.sequenceiq.remoteenvironment.scheduled;
 
 import jakarta.inject.Inject;
 

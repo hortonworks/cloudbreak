@@ -1,11 +1,9 @@
-package com.sequenceiq.remoteenvironment.remotecluster.client;
+package com.sequenceiq.remotecluster.client;
 
 import java.util.List;
 
 import jakarta.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -17,8 +15,6 @@ import io.grpc.ManagedChannel;
 
 @Component
 public class GrpcRemoteClusterClient {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(GrpcRemoteClusterClient.class);
 
     @Qualifier("remoteClusterManagedChannelWrapper")
     @Inject

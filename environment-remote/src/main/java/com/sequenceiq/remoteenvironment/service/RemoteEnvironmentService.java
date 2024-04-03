@@ -1,5 +1,7 @@
 package com.sequenceiq.remoteenvironment.service;
 
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -50,12 +52,12 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
     private List<SimpleRemoteEnvironmentResponse> getEnvironmentsFromPrivateControlPlane(PrivateControlPlane item) {
         List<SimpleRemoteEnvironmentResponse> responses = new ArrayList<>();
         try {
-            responses = clusterProxyHybridClient.readConfig(item.getResourceCrn())
+            responses = measure(() -> clusterProxyHybridClient.readConfig(item.getResourceCrn())
                     .getEnvironments()
                     .stream()
                     .parallel()
                     .map(environment -> privateControlPlaneEnvironmentToRemoteEnvironmentConverter.convert(environment, item))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toList()), LOGGER, "Cluster proxy call took us {} ms for pvc {}", item.getResourceCrn());
         } catch (Exception e) {
             LOGGER.warn("Failed to query environments from url {}", item.getUrl());
         }

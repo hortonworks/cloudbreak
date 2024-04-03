@@ -1,4 +1,4 @@
-package com.sequenceiq.remoteenvironment.scheduled.archiver;
+package com.sequenceiq.remoteenvironment.scheduled;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -20,10 +20,10 @@ import com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.PvcCont
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.MdcQuartzJob;
+import com.sequenceiq.remotecluster.client.GrpcRemoteClusterClient;
 import com.sequenceiq.remoteenvironment.api.v1.controlplane.model.registration.PrivateControlPlaneRegistrationRequest;
 import com.sequenceiq.remoteenvironment.api.v1.controlplane.model.registration.PrivateControlPlaneRegistrationRequests;
 import com.sequenceiq.remoteenvironment.domain.PrivateControlPlane;
-import com.sequenceiq.remoteenvironment.remotecluster.client.GrpcRemoteClusterClient;
 import com.sequenceiq.remoteenvironment.service.PrivateControlPlaneService;
 
 @Component
@@ -122,8 +122,9 @@ public class PrivateControlPlaneQueryJob extends MdcQuartzJob {
                 if (!pvcControlPlaneConfiguration.getName().equals(item.getName()) || !pvcControlPlaneConfiguration.getBaseUrl().equals(item.getUrl())) {
                     item.setName(pvcControlPlaneConfiguration.getName());
                     item.setUrl(pvcControlPlaneConfiguration.getBaseUrl());
-                    LOGGER.debug("updating control plane configurations in our database with {} crn because the data on our side is out of sync {}.",
-                            item.getResourceCrn(), item);
+                    LOGGER.debug("updating control plane configurations in our database with {} crn because " +
+                                    "the data on our side is out of sync name: {} url: {}.",
+                            item.getResourceCrn(), item.getName(), item.getUrl());
                     privateControlPlaneService.pureSave(item);
                 }
             }

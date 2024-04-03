@@ -107,6 +107,7 @@ dependencies {
     implementation(project(':audit-connector')) {
         transitive = false;
     }
+    implementation project(':remote-cluster-connector')
     implementation project(':datalake-dr-connector')
     implementation project(':cluster-dns-connector')
     implementation project(':sdx-connector')

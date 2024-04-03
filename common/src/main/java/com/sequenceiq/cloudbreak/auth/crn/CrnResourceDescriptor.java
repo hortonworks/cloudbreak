@@ -22,6 +22,7 @@ public enum CrnResourceDescriptor {
     PROXY(Crn.ResourceType.PROXY_CONFIG, Crn.Service.ENVIRONMENTS),
     // cloudbreak (datahub) service
     CLUSTER_DEF(Crn.ResourceType.CLUSTER_DEFINITION, Crn.Service.DATAHUB),
+    REMOTE_CLUSTER(Crn.ResourceType.PVC_CONTROL_PLANE, Crn.Service.REMOTECLUSTER),
     CLUSTER_TEMPLATE(Crn.ResourceType.CLUSTER_TEMPLATE, Crn.Service.DATAHUB),
     CUSTOM_CONFIGURATIONS(Crn.ResourceType.CUSTOM_CONFIGURATIONS, Crn.Service.DATAHUB),
     DATAHUB(Crn.ResourceType.CLUSTER, Crn.Service.DATAHUB),

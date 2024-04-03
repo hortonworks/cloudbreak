@@ -1,4 +1,4 @@
-package com.sequenceiq.remoteenvironment.remotecluster.client;
+package com.sequenceiq.remotecluster.client;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

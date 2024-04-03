@@ -1,4 +1,4 @@
-package com.sequenceiq.remoteenvironment.scheduled.archiver;
+package com.sequenceiq.remoteenvironment.scheduled;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -31,7 +31,7 @@ public class PrivateControlPlaneQueryJobService implements JobSchedulerService {
 
     private static final String TRIGGER_GROUP = "query-triggers";
 
-    private static final int ONE_HOUR_IN_MINUTES = 60;
+    private static final int FIVE_MINUTES = 5;
 
     @Inject
     private TransactionalScheduler scheduler;
@@ -91,7 +91,7 @@ public class PrivateControlPlaneQueryJobService implements JobSchedulerService {
         return Date.from(
                 ZonedDateTime.now()
                         .toInstant()
-                .plus(Duration.ofMinutes(ONE_HOUR_IN_MINUTES)));
+                .plus(Duration.ofMinutes(FIVE_MINUTES)));
     }
 
     @Override

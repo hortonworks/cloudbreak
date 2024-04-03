@@ -73,6 +73,7 @@ dependencies {
     implementation project(':environment-remote-api')
     implementation project(':cluster-proxy')
     implementation project(':service-common')
+    implementation project(':remote-cluster-connector')
 
     implementation group: 'org.springframework.boot',   name: 'spring-boot-starter',            version: springBootVersion
     implementation group: 'org.springframework.boot',   name: 'spring-boot-starter-web',        version: springBootVersion
@@ -142,28 +143,4 @@ publishing {
             }
         }
     }
-}
-
-protobuf {
-    protoc {
-        // The version of protoc must match protobuf-java. If you don't depend on
-        // protobuf-java directly, you will be transitively depending on the
-        // protobuf-java version that grpc depends on.
-        artifact = "com.google.protobuf:protoc:$protobufVersion"
-    }
-    plugins {
-        grpc {
-            artifact = "io.grpc:protoc-gen-grpc-java:$grpcVersion"
-        }
-    }
-    generateProtoTasks {
-        all()*.plugins {
-            grpc {}
-        }
-    }
-    generatedFilesBaseDir = "$projectDir/src/generated"
-}
-
-checkstyle {
-    checkstyleMain.exclude '**/generated/**'
 }

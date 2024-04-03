@@ -1,4 +1,4 @@
-package com.sequenceiq.remoteenvironment.remotecluster.client;
+package com.sequenceiq.remotecluster.client;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -18,6 +18,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalGrpc.RemoteClusterInternalBlockingStub;
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.ListAllPvcControlPlanesResponse;
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.PvcControlPlaneConfiguration;
+import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
+import com.sequenceiq.remotecluster.client.RemoteClusterServiceConfig;
+import com.sequenceiq.remotecluster.client.StubProvider;
 
 @ExtendWith(MockitoExtension.class)
 class RemoteClusterServiceClientTest {

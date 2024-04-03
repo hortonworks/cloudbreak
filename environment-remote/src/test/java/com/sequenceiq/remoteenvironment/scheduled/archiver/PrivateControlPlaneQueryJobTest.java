@@ -17,8 +17,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobExecutionException;
 
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.PvcControlPlaneConfiguration;
+import com.sequenceiq.remotecluster.client.GrpcRemoteClusterClient;
 import com.sequenceiq.remoteenvironment.domain.PrivateControlPlane;
-import com.sequenceiq.remoteenvironment.remotecluster.client.GrpcRemoteClusterClient;
+import com.sequenceiq.remoteenvironment.scheduled.PrivateControlPlaneQueryJob;
 import com.sequenceiq.remoteenvironment.service.PrivateControlPlaneService;
 
 @ExtendWith(MockitoExtension.class)

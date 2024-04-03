@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentEndpoint;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponses;
 import com.sequenceiq.remoteenvironment.service.RemoteEnvironmentService;
@@ -19,6 +20,7 @@ public class RemoteEnvironmentController implements RemoteEnvironmentEndpoint {
     @Override
     @DisableCheckPermissions
     public SimpleRemoteEnvironmentResponses list() {
+        MDCBuilder.buildMdcContext();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return new SimpleRemoteEnvironmentResponses(remoteEnvironmentService.listRemoteEnvironment(accountId));
     }

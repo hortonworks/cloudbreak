@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.InternalOnly;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.remoteenvironment.api.v1.controlplane.endpoint.PrivateControlPlaneEndpoint;
 import com.sequenceiq.remoteenvironment.api.v1.controlplane.model.deregistration.PrivateControlPlaneDeRegistrationRequests;
 import com.sequenceiq.remoteenvironment.api.v1.controlplane.model.deregistration.PrivateControlPlaneDeRegistrationResponses;
@@ -23,6 +24,7 @@ public class PrivateControlPlaneController implements PrivateControlPlaneEndpoin
     @InternalOnly
     @AccountIdNotNeeded
     public PrivateControlPlaneRegistrationResponses register(PrivateControlPlaneRegistrationRequests request) {
+        MDCBuilder.buildMdcContext(request);
         return remoteControlPlaneService.register(request);
     }
 
@@ -30,6 +32,7 @@ public class PrivateControlPlaneController implements PrivateControlPlaneEndpoin
     @InternalOnly
     @AccountIdNotNeeded
     public PrivateControlPlaneDeRegistrationResponses deregister(PrivateControlPlaneDeRegistrationRequests request) {
+        MDCBuilder.buildMdcContext(request);
         return remoteControlPlaneService.deregister(request);
     }
 }
