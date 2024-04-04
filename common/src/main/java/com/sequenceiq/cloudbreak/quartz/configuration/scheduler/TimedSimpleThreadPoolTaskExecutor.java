@@ -40,7 +40,7 @@ public class TimedSimpleThreadPoolTaskExecutor implements ThreadPool, Executor {
         this.registry = registry;
         this.delegate = delegate;
         Tags finalTags = Tags.concat(tags, new String[]{"name", executorName});
-        this.executionTimer = registry.timer(metricPrefix + "executor.execution", finalTags);
+        this.executionTimer = registry.timer(metricPrefix + "executor", finalTags);
         this.idleTimer = registry.timer(metricPrefix + "executor.idle", finalTags);
         initThreadpoolMetrics(metricPrefix, finalTags);
     }
