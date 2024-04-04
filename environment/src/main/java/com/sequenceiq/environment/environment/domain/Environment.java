@@ -181,6 +181,9 @@ public class Environment implements AuthResource, AccountAwareResource {
     @Column(name = "creator_client")
     private String creatorClient;
 
+    @Column(nullable = false, name = "create_compute_cluster")
+    private boolean createComputeCluster;
+
     public Environment() {
         regions = new Json(new HashSet<Region>());
         tags = new Json(new EnvironmentTags(new HashMap<>(), new HashMap<>()));
@@ -231,10 +234,6 @@ public class Environment implements AuthResource, AccountAwareResource {
         this.originalName = originalName;
     }
 
-    public void setArchived(boolean archived) {
-        this.archived = archived;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -279,16 +278,16 @@ public class Environment implements AuthResource, AccountAwareResource {
         return location;
     }
 
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
     public String getLocationDisplayName() {
         return locationDisplayName;
     }
 
     public void setLocationDisplayName(String locationDisplayName) {
         this.locationDisplayName = locationDisplayName;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
     }
 
     public Double getLongitude() {
@@ -309,6 +308,10 @@ public class Environment implements AuthResource, AccountAwareResource {
 
     public boolean isArchived() {
         return archived;
+    }
+
+    public void setArchived(boolean archived) {
+        this.archived = archived;
     }
 
     public Long getDeletionTimestamp() {
@@ -340,6 +343,10 @@ public class Environment implements AuthResource, AccountAwareResource {
         }
     }
 
+    public void setTelemetry(Json telemetry) {
+        this.telemetry = telemetry;
+    }
+
     public EnvironmentDataServices getDataServices() {
         if (dataServices != null && dataServices.getValue() != null) {
             return JsonUtil.readValueOpt(dataServices.getValue(), EnvironmentDataServices.class).orElse(null);
@@ -364,6 +371,10 @@ public class Environment implements AuthResource, AccountAwareResource {
         if (backup != null) {
             this.backup = new Json(backup);
         }
+    }
+
+    public void setBackup(Json backup) {
+        this.backup = backup;
     }
 
     @Override
@@ -514,14 +525,6 @@ public class Environment implements AuthResource, AccountAwareResource {
         }
     }
 
-    public void setTelemetry(Json telemetry) {
-        this.telemetry = telemetry;
-    }
-
-    public void setBackup(Json backup) {
-        this.backup = backup;
-    }
-
     public String getAdminGroupName() {
         return adminGroupName;
     }
@@ -614,6 +617,14 @@ public class Environment implements AuthResource, AccountAwareResource {
         this.creatorClient = creatorClient;
     }
 
+    public boolean isCreateComputeCluster() {
+        return createComputeCluster;
+    }
+
+    public void setCreateComputeCluster(boolean createExternalizedCompute) {
+        this.createComputeCluster = createExternalizedCompute;
+    }
+
     @Override
     public String toString() {
         return "Environment{" +
@@ -627,6 +638,7 @@ public class Environment implements AuthResource, AccountAwareResource {
                 ", statusReason='" + statusReason + '\'' +
                 ", domain='" + domain + '\'' +
                 ", enableSecretEncryption=" + enableSecretEncryption +
+                ", createComputeCluster=" + createComputeCluster +
                 '}';
     }
 

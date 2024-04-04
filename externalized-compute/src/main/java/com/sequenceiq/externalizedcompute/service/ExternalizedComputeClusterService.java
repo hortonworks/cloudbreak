@@ -161,9 +161,10 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
         }
     }
 
-    public ExternalizedComputeCluster getExternalizedComputeCluster(String name, String accountId) {
-        return externalizedComputeClusterRepository.findByNameAndAccountIdAndDeletedIsNull(name, accountId)
-                .orElseThrow(() -> new NotFoundException("Can't find externalized compute cluster by name: " + name));
+    public ExternalizedComputeCluster getExternalizedComputeCluster(String environmentCrn, String name) {
+        return externalizedComputeClusterRepository.findByEnvironmentCrnAndNameAndDeletedIsNull(environmentCrn, name)
+                .orElseThrow(() -> new NotFoundException(String.format("Can't find externalized compute cluster by environmentCrn: %s and name: %s",
+                        environmentCrn, name)));
     }
 
     public ExternalizedComputeCluster getExternalizedComputeCluster(Long id) {
@@ -220,17 +221,17 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
                 tags.putAll(environment.getTags().getDefaults());
             }
             CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder
-                .builder()
-                .withCreatorCrn(userCrnString)
-                .withEnvironmentCrn(environment.getCrn())
-                .withPlatform(environment.getCloudPlatform())
-                .withAccountId(accountId)
-                .withResourceCrn(externalizedComputeCluster.getResourceCrn())
-                .withIsInternalTenant(internalTenant)
-                .withUserName(crnUser.getUsername())
-                .withAccountTags(accountTagService.list())
-                .withUserDefinedTags(userDefinedTags)
-                .build();
+                    .builder()
+                    .withCreatorCrn(userCrnString)
+                    .withEnvironmentCrn(environment.getCrn())
+                    .withPlatform(environment.getCloudPlatform())
+                    .withAccountId(accountId)
+                    .withResourceCrn(externalizedComputeCluster.getResourceCrn())
+                    .withIsInternalTenant(internalTenant)
+                    .withUserName(crnUser.getUsername())
+                    .withAccountTags(accountTagService.list())
+                    .withUserDefinedTags(userDefinedTags)
+                    .build();
 
             Map<String, String> prepareDefaultTags = costTagging.prepareDefaultTags(request);
             tags.putAll(prepareDefaultTags);

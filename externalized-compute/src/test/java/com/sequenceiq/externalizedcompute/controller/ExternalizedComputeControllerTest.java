@@ -28,6 +28,8 @@ class ExternalizedComputeControllerTest {
 
     private static final String CLUSTER_NAME = "cluster1";
 
+    private static final String ENVIRONMENT_CRN = "environmentCrn";
+
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
     @Mock
@@ -64,7 +66,7 @@ class ExternalizedComputeControllerTest {
     @Test
     public void testClusterDescribe() {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            underTest.describe(CLUSTER_NAME);
+            underTest.describe(CLUSTER_NAME, ENVIRONMENT_CRN);
         });
 
         verify(commonPermissionCheckingUtils, timeout(1)).checkPermissionForUserOnResource(AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, USER_CRN, "envCrn");
@@ -73,7 +75,7 @@ class ExternalizedComputeControllerTest {
     @Test
     public void testClusterDelete() {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            underTest.delete(CLUSTER_NAME);
+            underTest.delete(CLUSTER_NAME, ENVIRONMENT_CRN);
         });
 
         verify(commonPermissionCheckingUtils, timeout(1)).checkPermissionForUserOnResource(AuthorizationResourceAction.DELETE_ENVIRONMENT, USER_CRN, "envCrn");

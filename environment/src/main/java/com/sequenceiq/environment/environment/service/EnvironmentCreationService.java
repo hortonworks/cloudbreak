@@ -30,7 +30,6 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
-import com.sequenceiq.environment.environment.service.externalizedcompute.ExternalizedComputeClusterCreationService;
 import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -70,8 +69,6 @@ public class EnvironmentCreationService {
 
     private final OwnerAssignmentService ownerAssignmentService;
 
-    private final ExternalizedComputeClusterCreationService externalizedComputeClusterCreationService;
-
     private final EntitlementService entitlementService;
 
     @Value("${info.app.version}")
@@ -88,7 +85,6 @@ public class EnvironmentCreationService {
             LoadBalancerEntitlementService loadBalancerEntitlementService,
             EnvironmentRecipeService recipeService,
             OwnerAssignmentService ownerAssignmentService,
-            ExternalizedComputeClusterCreationService externalizedComputeClusterCreationService,
             EntitlementService entitlementService) {
         this.environmentService = environmentService;
         validatorService = environmentValidatorService;
@@ -100,7 +96,6 @@ public class EnvironmentCreationService {
         this.loadBalancerEntitlementService = loadBalancerEntitlementService;
         this.recipeService = recipeService;
         this.ownerAssignmentService = ownerAssignmentService;
-        this.externalizedComputeClusterCreationService = externalizedComputeClusterCreationService;
         this.entitlementService = entitlementService;
     }
 
@@ -138,8 +133,6 @@ public class EnvironmentCreationService {
                     getIfNotNull(creationDto.getNetwork(), NetworkDto::getEndpointGatewaySubnetMetas));
             createAndSetParameters(environment, creationDto.getParameters());
             environmentService.save(environment);
-            externalizedComputeClusterCreationService.createExternalizedComputeCluster(environment.getResourceCrn(),
-                    creationDto.getExternalizedClusterCreation());
             reactorFlowManager.triggerCreationFlow(environment.getId(), environment.getName(), creationDto.getCreator(), environment.getResourceCrn());
         } catch (Exception e) {
             environment.setStatus(EnvironmentStatus.CREATE_FAILED);

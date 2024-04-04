@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.environment.flow.creation;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_COMPUTE_CLUSTER_CREATION_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_COMPUTE_CLUSTER_CREATION_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_COMPUTE_CLUSTER_WAITING_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_COMPUTE_CLUSTER_WAITING_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CREATION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CREATION_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_FREEIPA_CREATION_FAILED;
@@ -14,15 +18,18 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_RESOURCE
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_VALIDATION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_VALIDATION_STARTED;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_COMPUTE_CLUSTER_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_NETWORK_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_PUBLICKEY_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.INITIALIZE_ENVIRONMENT_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.INITIALIZE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT;
-import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.SCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.VALIDATE_ENVIRONMENT_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.WAIT_COMPUTE_CLUSTER_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINALIZE_ENV_CREATION_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINISH_ENV_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.HANDLED_FAILED_ENV_CREATION_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_NETWORK_CREATION_EVENT;
 
 import java.util.Map;
 
@@ -129,18 +136,28 @@ public class EnvCreationActions {
         };
     }
 
-    @Bean(name = "STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_STARTED_STATE")
-    public Action<?, ?> storageConsumptionCollectionSchedulingAction() {
+    @Bean(name = "COMPUTE_CLUSTER_CREATION_STARTED_STATE")
+    public Action<?, ?> computeClusterCreationStartedAction() {
         return new AbstractEnvironmentCreationAction<>(EnvCreationEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
-                    EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
-                    sendEvent(context, SCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT.selector(), environmentDto);
+                    if (environment.isCreateComputeCluster()) {
+                        LOGGER.info("Creation of compute cluster has started. Current state is - COMPUTE_CLUSTER_CREATION_STARTED_STATE");
+                        EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
+                        eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(),
+                                ENVIRONMENT_COMPUTE_CLUSTER_CREATION_STARTED);
+                        sendEvent(context, CREATE_COMPUTE_CLUSTER_EVENT.selector(), environmentDto);
+                    } else {
+                        LOGGER.info("Creation of compute cluster is not required, proceed to the next state.");
+                        sendEvent(context, START_NETWORK_CREATION_EVENT.selector(), payload);
+                    }
                 }, () -> {
                     EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(payload.getResourceId(), payload.getResourceName(), null,
                             payload.getResourceCrn());
-                    LOGGER.warn("No environment found with id '{}'.", payload.getResourceId());
+                    eventService.sendEventAndNotificationForMissingEnv(payload, ENVIRONMENT_COMPUTE_CLUSTER_CREATION_FAILED,
+                            context.getFlowTriggerUserCrn());
+                    LOGGER.warn("Failed to create compute cluster for environment! No environment found with id '{}'.", payload.getResourceId());
                     sendEvent(context, failureEvent);
                 });
             }
@@ -210,13 +227,13 @@ public class EnvCreationActions {
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
                     LOGGER.info("Initialization of resource encryption has started." +
-                        " Current state is - ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED_STATE");
+                            " Current state is - ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED_STATE");
                     environment.setStatus(EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS);
                     environment.setStatusReason(null);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
                     eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(),
-                        ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED);
+                            ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED);
                     sendEvent(context, INITIALIZE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT.selector(), environmentDto);
                 }, () -> {
                     EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
@@ -226,7 +243,7 @@ public class EnvCreationActions {
                             payload.getResourceCrn());
                     LOGGER.debug("Environment encryption init action went failed with  EnvCreationFailureEvent was: {}", failureEvent);
                     eventService.sendEventAndNotificationForMissingEnv(payload, ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_FAILED,
-                        context.getFlowTriggerUserCrn());
+                            context.getFlowTriggerUserCrn());
                     LOGGER.warn("Failed to create encryption resources for environment! No environment found with id '{}'.", payload.getResourceId());
                     sendEvent(context, failureEvent);
                 });
@@ -256,6 +273,37 @@ public class EnvCreationActions {
                     LOGGER.debug("Environment freeipa creation action went failed with EnvCreationFailureEvent was: {}", failureEvent);
                     eventService.sendEventAndNotificationForMissingEnv(payload, ENVIRONMENT_FREEIPA_CREATION_FAILED, context.getFlowTriggerUserCrn());
                     LOGGER.warn("Failed to create freeipa for environment! No environment found with id '{}'.", payload.getResourceId());
+                    sendEvent(context, failureEvent);
+                });
+            }
+        };
+    }
+
+    @Bean(name = "COMPUTE_CLUSTER_CREATION_WAITING_STATE")
+    public Action<?, ?> computeClusterCreationWaitingAction() {
+        return new AbstractEnvironmentCreationAction<>(EnvCreationEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
+                environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
+                    if (environment.isCreateComputeCluster()) {
+                        LOGGER.info("Waiting for compute cluster creation. Current state is - COMPUTE_CLUSTER_CREATION_WAITING_STATE");
+                        environment.setStatus(EnvironmentStatus.COMPUTE_CLUSTER_CREATION_IN_PROGRESS);
+                        environment.setStatusReason(null);
+                        environment = environmentService.save(environment);
+                        EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
+                        eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(),
+                                ENVIRONMENT_COMPUTE_CLUSTER_WAITING_STARTED);
+                        sendEvent(context, WAIT_COMPUTE_CLUSTER_CREATION_EVENT.selector(), environmentDto);
+                    } else {
+                        LOGGER.info("Waiting for compute cluster creation is not required, proceed to the next state.");
+                        sendEvent(context, FINISH_ENV_CREATION_EVENT.selector(), payload);
+                    }
+                }, () -> {
+                    EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(payload.getResourceId(), payload.getResourceName(), null,
+                            payload.getResourceCrn());
+                    eventService.sendEventAndNotificationForMissingEnv(payload, ENVIRONMENT_COMPUTE_CLUSTER_WAITING_FAILED,
+                            context.getFlowTriggerUserCrn());
+                    LOGGER.warn("Failed to wait for compute cluster for environment! No environment found with id '{}'.", payload.getResourceId());
                     sendEvent(context, failureEvent);
                 });
             }

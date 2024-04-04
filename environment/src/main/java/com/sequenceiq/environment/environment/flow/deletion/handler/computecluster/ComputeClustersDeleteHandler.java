@@ -16,13 +16,14 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvClusterDeleteFailedEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentViewService;
+import com.sequenceiq.environment.environment.service.externalizedcompute.ExternalizedComputeService;
 import com.sequenceiq.environment.util.PollingConfig;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
-import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventSenderAwareHandler;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
-public class ComputeClustersDeleteHandler extends ExceptionCatcherEventSenderAwareHandler<EnvironmentDeletionDto> {
+public class ComputeClustersDeleteHandler extends ExceptionCatcherEventHandler<EnvironmentDeletionDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComputeClustersDeleteHandler.class);
 
@@ -32,12 +33,11 @@ public class ComputeClustersDeleteHandler extends ExceptionCatcherEventSenderAwa
 
     private final EnvironmentViewService environmentViewService;
 
-    private final ComputeClusterDeleteService computeClusterDeleteService;
+    private final ExternalizedComputeService externalizedComputeService;
 
     protected ComputeClustersDeleteHandler(EventSender eventSender, EnvironmentViewService environmentViewService,
-            ComputeClusterDeleteService computeClusterDeleteService) {
-        super(eventSender);
-        this.computeClusterDeleteService = computeClusterDeleteService;
+            ExternalizedComputeService externalizedComputeService) {
+        this.externalizedComputeService = externalizedComputeService;
         this.environmentViewService = environmentViewService;
     }
 
@@ -60,7 +60,7 @@ public class ComputeClustersDeleteHandler extends ExceptionCatcherEventSenderAwa
         EnvironmentDto environmentDto = environmentDeletionDto.getEnvironmentDto();
 
         PollingConfig pollingConfig = getPollingConfig();
-        computeClusterDeleteService.deleteComputeCluster(environmentDto.getResourceCrn(), pollingConfig);
+        externalizedComputeService.deleteComputeCluster(environmentDto.getResourceCrn(), pollingConfig);
         return getEnvDeleteEvent(environmentDeletionDto);
     }
 

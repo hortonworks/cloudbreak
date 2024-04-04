@@ -44,6 +44,8 @@ public interface ExternalizedComputeClusterRepository
 
     Optional<ExternalizedComputeCluster> findByNameAndAccountIdAndDeletedIsNull(String name, String accountId);
 
+    Optional<ExternalizedComputeCluster> findByEnvironmentCrnAndNameAndDeletedIsNull(String environmentCrn, String name);
+
     Optional<ExternalizedComputeCluster> findByIdAndDeletedIsNull(Long id);
 
 }

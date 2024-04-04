@@ -47,8 +47,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     /**
      * This field is not used anymore
+     *
      * @deprecated As of Environment service 2.27, because this is duplication
-     *             {@link #location} instead.
+     * {@link #location} instead.
      */
     @Schema(description = EnvironmentModelDescription.REGIONS)
     @Deprecated(forRemoval = true)

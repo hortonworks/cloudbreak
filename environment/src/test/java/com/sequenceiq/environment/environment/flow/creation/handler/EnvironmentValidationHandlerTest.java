@@ -106,7 +106,7 @@ class EnvironmentValidationHandlerTest {
         assertThat(envCreationEvent).isNotNull();
         assertThat(envCreationEvent.getResourceCrn()).isEqualTo(ENVIRONMENT_CRN);
         assertThat(envCreationEvent.getResourceId()).isEqualTo(ENVIRONMENT_ID);
-        assertThat(envCreationEvent.selector()).isEqualTo("START_NETWORK_CREATION_EVENT");
+        assertThat(envCreationEvent.selector()).isEqualTo("START_COMPUTE_CLUSTER_CREATION_EVENT");
     }
 
     @Test

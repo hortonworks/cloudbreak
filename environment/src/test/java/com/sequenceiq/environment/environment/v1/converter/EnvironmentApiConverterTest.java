@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
@@ -182,7 +183,7 @@ class EnvironmentApiConverterTest {
         assertEquals(networkDto, actual.getNetwork());
         assertSecurityAccess(request.getSecurityAccess(), actual.getSecurityAccess());
         assertEquals(dataServices, actual.getDataServices());
-        assertEquals(String.format("default-%s-compute-cluster", request.getName()), actual.getExternalizedClusterCreation().getName());
+        assertTrue(actual.getComputeClusterCreation().isCreateComputeCluster());
 
         verify(credentialService).getCloudPlatformByCredential(anyString(), anyString(), any());
         verify(freeIpaConverter).convert(request.getFreeIpa(), "test-aws", cloudPlatform.name());
@@ -294,7 +295,7 @@ class EnvironmentApiConverterTest {
     void testAzureSingleRgEnabledAndAzureRequestWithoutUsageAndWithName() {
         EnvironmentRequest request = createEnvironmentRequest(AZURE);
         request.setAzure(AzureEnvironmentParameters.builder()
-            .withAzureResourceGroup(
+                .withAzureResourceGroup(
                         AzureResourceGroup.builder()
                                 .withName("myResourceGroup")
                                 .build())

@@ -19,7 +19,7 @@ public class ExternalizedComputeClusterNotFoundAction implements
         Log.when("Describe externalized compute cluster: " + testDto.getResponse().getName());
         try {
             ExternalizedComputeClusterResponse computeCluster =
-                    client.getDefaultClient().externalizedComputeClusterEndpoint().describe(testDto.getResponse().getName());
+                    client.getDefaultClient().externalizedComputeClusterEndpoint().describe(testDto.getEnvironmentCrn(), testDto.getResponse().getName());
             Log.whenJson("Compute cluster should be deleted", computeCluster);
             throw new TestFailException("Compute cluster should be deleted: " + testDto.getResponse().getName());
         } catch (NotFoundException notFoundException) {

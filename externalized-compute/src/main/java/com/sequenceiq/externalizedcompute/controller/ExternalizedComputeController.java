@@ -16,7 +16,6 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
@@ -65,18 +64,23 @@ public class ExternalizedComputeController implements ExternalizedComputeCluster
     }
 
     @Override
-    @CustomPermissionCheck
-    public FlowIdentifier delete(@NotEmpty String name) {
+    @CheckPermissionByAccount(action = DELETE_ENVIRONMENT)
+    public FlowIdentifier delete(
+            @TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn,
+            @NotEmpty String name) {
         LOGGER.info("Externalized Compute Cluster delete: {}", name);
-        ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(name);
+        ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(environmentCrn, name);
         checkPermissionOnEnvironment(DELETE_ENVIRONMENT, externalizedComputeCluster);
         MDCBuilder.buildMdcContext(externalizedComputeCluster);
         return externalizedComputeClusterFlowManager.triggerExternalizedComputeClusterDeletion(externalizedComputeCluster);
     }
 
     @Override
-    public ExternalizedComputeClusterResponse describe(String name) {
-        ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(name);
+    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
+    public ExternalizedComputeClusterResponse describe(
+            @TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn,
+            @NotEmpty String name) {
+        ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(environmentCrn, name);
         checkPermissionOnEnvironment(DESCRIBE_ENVIRONMENT, externalizedComputeCluster);
         MDCBuilder.buildMdcContext(externalizedComputeCluster);
         return externalizedComputeClusterConverterService.convertToResponse(externalizedComputeCluster);
@@ -84,15 +88,27 @@ public class ExternalizedComputeController implements ExternalizedComputeCluster
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
-    public List<ExternalizedComputeClusterResponse> list(@TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String envCrn) {
-        return externalizedComputeClusterService.getAllByEnvironmentCrn(envCrn, ThreadBasedUserCrnProvider.getAccountId())
+    public List<ExternalizedComputeClusterResponse> list(
+            @TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn) {
+        return externalizedComputeClusterService.getAllByEnvironmentCrn(environmentCrn, ThreadBasedUserCrnProvider.getAccountId())
                 .stream()
                 .map(externalizedComputeClusterConverterService::convertToResponse)
                 .toList();
     }
 
-    private ExternalizedComputeCluster getExternalizedComputeCluster(String name) {
-        return externalizedComputeClusterService.getExternalizedComputeCluster(name, ThreadBasedUserCrnProvider.getAccountId());
+    @Deprecated(forRemoval = true)
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
+    public List<ExternalizedComputeClusterResponse> listDeprecated(
+            @TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn) {
+        return externalizedComputeClusterService.getAllByEnvironmentCrn(environmentCrn, ThreadBasedUserCrnProvider.getAccountId())
+                .stream()
+                .map(externalizedComputeClusterConverterService::convertToResponse)
+                .toList();
+    }
+
+    private ExternalizedComputeCluster getExternalizedComputeCluster(String environmentCrn, String name) {
+        return externalizedComputeClusterService.getExternalizedComputeCluster(environmentCrn, name);
     }
 
     private void checkPermissionOnEnvironment(AuthorizationResourceAction action, ExternalizedComputeCluster cluster) {

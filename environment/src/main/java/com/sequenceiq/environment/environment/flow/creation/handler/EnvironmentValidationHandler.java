@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.flow.creation.handler;
 
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.VALIDATE_ENVIRONMENT_EVENT;
-import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_NETWORK_CREATION_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_COMPUTE_CLUSTER_CREATION_EVENT;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.Set;
@@ -182,7 +182,7 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
     private void goToNextState(Event<EnvironmentValidationDto> environmentDtoEvent, EnvironmentDto environmentDto) {
         EnvCreationEvent envCreationEvent = EnvCreationEvent.builder()
                 .withResourceId(environmentDto.getResourceId())
-                .withSelector(START_NETWORK_CREATION_EVENT.selector())
+                .withSelector(START_COMPUTE_CLUSTER_CREATION_EVENT.selector())
                 .withResourceCrn(environmentDto.getResourceCrn())
                 .withResourceName(environmentDto.getName())
                 .build();

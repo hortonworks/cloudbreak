@@ -15,15 +15,18 @@ public class ExternalizedComputeClusterWaitObject implements WaitObject {
 
     private ExternalizedComputeClusterClient externalizedComputeClusterClient;
 
+    private String environmentCrn;
+
     private String name;
 
     private ExternalizedComputeClusterApiStatus desiredStatus;
 
     private ExternalizedComputeClusterResponse computeCluster;
 
-    public ExternalizedComputeClusterWaitObject(ExternalizedComputeClusterClient externalizedComputeClusterClient, String name,
+    public ExternalizedComputeClusterWaitObject(ExternalizedComputeClusterClient externalizedComputeClusterClient, String environmentCrn, String name,
             ExternalizedComputeClusterApiStatus desiredStatus) {
         this.externalizedComputeClusterClient = externalizedComputeClusterClient;
+        this.environmentCrn = environmentCrn;
         this.name = name;
         this.desiredStatus = desiredStatus;
     }
@@ -34,7 +37,7 @@ public class ExternalizedComputeClusterWaitObject implements WaitObject {
 
     @Override
     public void fetchData() {
-        computeCluster = getEndpoint().describe(name);
+        computeCluster = getEndpoint().describe(environmentCrn, name);
     }
 
     @Override

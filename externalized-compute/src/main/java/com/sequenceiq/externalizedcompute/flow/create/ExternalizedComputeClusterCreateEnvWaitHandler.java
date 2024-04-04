@@ -26,7 +26,7 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 @Component
 public class ExternalizedComputeClusterCreateEnvWaitHandler extends ExceptionCatcherEventHandler<ExternalizedComputeClusterCreateEnvWaitRequest> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExternalizedComputeClusterCreateWaitHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExternalizedComputeClusterCreateEnvWaitHandler.class);
 
     @Value("${externalizedcompute.create.env.wait.sleep.time.sec:10}")
     private int sleepTime;
@@ -63,12 +63,12 @@ public class ExternalizedComputeClusterCreateEnvWaitHandler extends ExceptionCat
                             LOGGER.error("Environment status is null");
                             return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, event.getData().getUserId(),
                                     new RuntimeException("Environment status is null")));
-                        } else if (environmentStatus.isAvailable()) {
-                            LOGGER.info("{} environment is in available state", environmentCrn);
+                        } else if (environmentStatus.isComputeClusterCreationInProgress()) {
+                            LOGGER.info("Environment is in COMPUTE_CLUSTER_CREATION_IN_PROGRESS state, proceed to compute cluster creation.");
                             return AttemptResults.finishWith(
                                     new ExternalizedComputeClusterCreateEnvWaitSuccessResponse(resourceId, event.getData().getUserId()));
                         } else if (environmentStatus.isFailed()) {
-                            LOGGER.error("{} environment status is a failed status: {}", environmentCrn, environmentStatus);
+                            LOGGER.error("Environment is in failed status: {}", environmentStatus);
                             return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, event.getData().getUserId(),
                                     new RuntimeException(String.format("Environment creation failed. Status: %s. Message: %s", environmentStatus,
                                             environmentStatus.getDescription()))));
@@ -77,7 +77,7 @@ public class ExternalizedComputeClusterCreateEnvWaitHandler extends ExceptionCat
                                     new RuntimeException(String.format("Environment is deleted. Status: %s. Message: %s", environmentStatus,
                                             environmentStatus.getDescription()))));
                         } else {
-                            LOGGER.debug("{} environment is in {}", environmentCrn, environmentStatus);
+                            LOGGER.debug("Environment is in {}, waiting for COMPUTE_CLUSTER_CREATION_IN_PROGRESS state", environmentStatus);
                             return AttemptResults.justContinue();
                         }
                     } catch (NotFoundException notFoundException) {

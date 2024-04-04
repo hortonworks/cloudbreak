@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
-import com.sequenceiq.environment.environment.flow.deletion.handler.computecluster.ComputeClusterDeleteService;
+import com.sequenceiq.environment.environment.service.externalizedcompute.ExternalizedComputeService;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.environment.experience.ExperienceConnectorService;
 
@@ -41,20 +41,19 @@ public class EnvironmentResourceDeletionService {
 
     private final ExperienceConnectorService experienceConnectorService;
 
-    private final ComputeClusterDeleteService computeClusterDeleteService;
+    private final ExternalizedComputeService externalizedComputeService;
 
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public EnvironmentResourceDeletionService(PlatformAwareSdxConnector platformAwareSdxConnector, DatalakeV4Endpoint datalakeV4Endpoint,
             DistroXV1Endpoint distroXV1Endpoint, ClusterTemplateV4Endpoint clusterTemplateV4Endpoint, ExperienceConnectorService experienceConnectorService,
-            ComputeClusterDeleteService computeClusterDeleteService,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+            ExternalizedComputeService externalizedComputeService, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.platformAwareSdxConnector = platformAwareSdxConnector;
         this.datalakeV4Endpoint = datalakeV4Endpoint;
         this.distroXV1Endpoint = distroXV1Endpoint;
         this.clusterTemplateV4Endpoint = clusterTemplateV4Endpoint;
         this.experienceConnectorService = experienceConnectorService;
-        this.computeClusterDeleteService = computeClusterDeleteService;
+        this.externalizedComputeService = externalizedComputeService;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
@@ -84,7 +83,7 @@ public class EnvironmentResourceDeletionService {
     public Set<String> getComputeClusterNames(EnvironmentView environment) {
         Set<String> clusterNames = Set.of();
         try {
-            clusterNames = computeClusterDeleteService.getComputeClusterNames(environment);
+            clusterNames = externalizedComputeService.getComputeClusterNames(environment);
         } catch (WebApplicationException | ProcessingException e) {
             propagateException("Failed to get Compute clusters due to:", e);
         }

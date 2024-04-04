@@ -39,10 +39,10 @@ public enum EnvironmentStatus {
 
     // If the user chooses to encrypt resources with CMK then we create required encryption resources which will be used to encrypt other resources
     ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus
-        .ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS),
+            .ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS),
     // If the user chooses to encrypt resources with CMK then we delete encryption resources which are used to encrypt other resources
     ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus
-        .ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS),
+            .ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS),
     // If the user chooses to encrypt resources with CMK then we create required encryption resources in cloud which will be used to
     // encrypt other resources
     ENVIRONMENT_ENCRYPTION_RESOURCES_INITIALIZED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus
@@ -55,6 +55,10 @@ public enum EnvironmentStatus {
     FREEIPA_CREATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS),
     // Deleting the FreeIPA resource for the environment
     FREEIPA_DELETE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_DELETE_IN_PROGRESS),
+
+    // Creating the compute cluster for the environment
+    COMPUTE_CLUSTER_CREATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.
+            COMPUTE_CLUSTER_CREATION_IN_PROGRESS),
 
     // Deleting all the attached DWX/ML ..etc cluster (currently only DWX and Monitoring)
     EXPERIENCE_DELETE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.EXPERIENCE_DELETE_IN_PROGRESS),

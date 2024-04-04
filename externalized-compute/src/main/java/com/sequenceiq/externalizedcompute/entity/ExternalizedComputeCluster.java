@@ -32,6 +32,7 @@ public class ExternalizedComputeCluster implements AccountAwareResource {
     @NotNull
     private String resourceCrn;
 
+    @NotNull
     private String environmentCrn;
 
     @NotNull
@@ -53,17 +54,25 @@ public class ExternalizedComputeCluster implements AccountAwareResource {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     @Override
     public String getResourceCrn() {
         return resourceCrn;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
     }
 
     public String getAccountId() {
         return accountId;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
     }
 
     @Override
@@ -71,12 +80,8 @@ public class ExternalizedComputeCluster implements AccountAwareResource {
         return name;
     }
 
-    public void setAccountId(String accountId) {
-        this.accountId = accountId;
-    }
-
-    public void setResourceCrn(String resourceCrn) {
-        this.resourceCrn = resourceCrn;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getEnvironmentCrn() {
@@ -85,10 +90,6 @@ public class ExternalizedComputeCluster implements AccountAwareResource {
 
     public void setEnvironmentCrn(String envCrn) {
         this.environmentCrn = envCrn;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getLiftieName() {
@@ -129,7 +130,7 @@ public class ExternalizedComputeCluster implements AccountAwareResource {
                 "id=" + id +
                 ", accountId='" + accountId + '\'' +
                 ", resourceCrn='" + resourceCrn + '\'' +
-                ", envCrn='" + environmentCrn + '\'' +
+                ", environmentCrn='" + environmentCrn + '\'' +
                 ", name='" + name + '\'' +
                 ", liftieName='" + liftieName + '\'' +
                 ", created=" + created +

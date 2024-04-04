@@ -60,7 +60,6 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
-import com.sequenceiq.environment.environment.service.externalizedcompute.ExternalizedComputeClusterCreationService;
 import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.network.CloudNetworkService;
@@ -123,9 +122,6 @@ class EnvironmentCreationServiceTest {
     private OwnerAssignmentService ownerAssignmentService;
 
     @MockBean
-    private ExternalizedComputeClusterCreationService externalizedComputeClusterCreationService;
-
-    @MockBean
     private EntitlementService entitlementService;
 
     @Inject
@@ -133,6 +129,28 @@ class EnvironmentCreationServiceTest {
 
     @Captor
     private ArgumentCaptor<Environment> environmentCaptor;
+
+    // @formatter:off
+    // CHECKSTYLE:OFF
+    static Object[][] tunnelingScenarios() {
+        return new Object[][] {
+                // tunnel                 override  valid  expectedTunnel  expectedThrowable  errorMessage
+                { Tunnel.DIRECT,          false,    true,  Tunnel.DIRECT,          null,              null },
+                { Tunnel.DIRECT,          true,     true,  Tunnel.DIRECT,          null,              null },
+
+                { Tunnel.CLUSTER_PROXY,   false,    true,  Tunnel.CLUSTER_PROXY,   null,              null },
+                { Tunnel.CLUSTER_PROXY,   true,     true,  Tunnel.CLUSTER_PROXY,   null,              null },
+
+                { Tunnel.CCM,             false,    true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
+                { Tunnel.CCM,             true,     true,  Tunnel.CCM,             null,              null },
+
+                { Tunnel.CCMV2,           false,    true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
+                { Tunnel.CCMV2,           true,     true,  Tunnel.CCMV2,           null,              null },
+
+                { Tunnel.CCMV2_JUMPGATE,  false,    true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
+                { Tunnel.CCMV2_JUMPGATE,  true,     true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
+        };
+    }
 
     @BeforeEach
     void setUp() {
@@ -155,28 +173,6 @@ class EnvironmentCreationServiceTest {
         verify(environmentService, never()).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
-    }
-
-    // @formatter:off
-    // CHECKSTYLE:OFF
-    static Object[][] tunnelingScenarios() {
-        return new Object[][] {
-                // tunnel                 override  valid  expectedTunnel  expectedThrowable  errorMessage
-                { Tunnel.DIRECT,          false,    true,  Tunnel.DIRECT,          null,              null },
-                { Tunnel.DIRECT,          true,     true,  Tunnel.DIRECT,          null,              null },
-
-                { Tunnel.CLUSTER_PROXY,   false,    true,  Tunnel.CLUSTER_PROXY,   null,              null },
-                { Tunnel.CLUSTER_PROXY,   true,     true,  Tunnel.CLUSTER_PROXY,   null,              null },
-
-                { Tunnel.CCM,             false,    true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
-                { Tunnel.CCM,             true,     true,  Tunnel.CCM,             null,              null },
-
-                { Tunnel.CCMV2,           false,    true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
-                { Tunnel.CCMV2,           true,     true,  Tunnel.CCMV2,           null,              null },
-
-                { Tunnel.CCMV2_JUMPGATE,  false,    true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
-                { Tunnel.CCMV2_JUMPGATE,  true,     true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
-        };
     }
     // CHECKSTYLE:ON
     // @formatter:on

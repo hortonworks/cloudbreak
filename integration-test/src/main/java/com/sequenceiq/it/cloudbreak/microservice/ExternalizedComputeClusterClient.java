@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.externalizedcompute.api.client.ExternalizedComputeClusterApiKeyClient;
 import com.sequenceiq.externalizedcompute.api.client.ExternalizedComputeClusterCrnEndpoint;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus;
+import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -41,8 +42,9 @@ public class ExternalizedComputeClusterClient extends MicroserviceClient<com.seq
     public ExternalizedComputeClusterWaitObject waitObject(CloudbreakTestDto entity, String name,
             Map<String, ExternalizedComputeClusterApiStatus> desiredStatuses, TestContext testContext,
             Set<ExternalizedComputeClusterApiStatus> ignoredFailedStatuses) {
-        return new ExternalizedComputeClusterWaitObject(this, ((ExternalizedComputeClusterTestDto) entity).getResponse().getName(),
-                desiredStatuses.get("status"));
+        ExternalizedComputeClusterResponse externalizedComputeCluster = ((ExternalizedComputeClusterTestDto) entity).getResponse();
+        return new ExternalizedComputeClusterWaitObject(this, externalizedComputeCluster.getEnvironmentCrn(),
+                externalizedComputeCluster.getName(), desiredStatuses.get("status"));
     }
 
     @Override

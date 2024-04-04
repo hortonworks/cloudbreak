@@ -185,6 +185,7 @@ public class EnvironmentDtoConverter {
         environment.setExperimentalFeaturesJson(creationDto.getExperimentalFeatures());
         environment.setDataServices(creationDto.getDataServices());
         environment.setCreatorClient(creationDto.getCreatorClient());
+        environment.setCreateComputeCluster(creationDto.getComputeClusterCreation().isCreateComputeCluster());
         setRegions(creationDto, environment);
         return environment;
     }

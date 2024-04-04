@@ -694,6 +694,7 @@ class EnvironmentDtoConverterTest {
                 .withRegions(regions)
                 .withTags(userDefinedTags)
                 .withCrn(RESOURCE_CRN)
+                .withComputeClusterCreation(ComputeClusterCreationDto.builder().withCreateComputeCluster(true).build())
                 .build();
 
         when(environmentTagsDtoConverter.getTags(any(EnvironmentCreationDto.class)))
@@ -723,6 +724,7 @@ class EnvironmentDtoConverterTest {
         assertThat(result.getFreeIpaImageId()).isEqualTo(FREE_IPA_IMAGE_ID);
         assertThat(result.getAdminGroupName()).isEqualTo(ADMIN_GROUP_NAME);
         assertThat(result.getCreated()).isPositive();
+        assertThat(result.isCreateComputeCluster()).isTrue();
 
         EnvironmentTelemetry resultTelemetry = result.getTelemetry();
         assertThat(resultTelemetry).isNotNull();
@@ -771,6 +773,7 @@ class EnvironmentDtoConverterTest {
                 .withFreeIpaCreation(freeIpaCreation)
                 .withTags(null)
                 .withCrn(RESOURCE_CRN)
+                .withComputeClusterCreation(ComputeClusterCreationDto.builder().withCreateComputeCluster(true).build())
                 .build();
 
         when(environmentTagsDtoConverter.getTags(any(EnvironmentCreationDto.class)))

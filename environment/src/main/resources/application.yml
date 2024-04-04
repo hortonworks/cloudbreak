@@ -98,8 +98,9 @@ environment:
     url: http://localhost:8086
     contextPath: /dl
   externalizedCompute:
-      url: http://localhost:8091
-      contextPath: /externalizedcompute
+    enabled: false
+    url: http://localhost:8091
+    contextPath: /externalizedcompute
   db:
     host: localhost
     port: 5432
@@ -141,8 +142,6 @@ environment:
   experience:
     scan:
       enabled: false
-  externalizedcompute:
-    enabled: false
   thunderhead:
     computeapi:
       host: localhost

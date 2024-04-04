@@ -7,7 +7,8 @@ public enum ExternalizedComputeClusterStatusEnum {
     DELETED,
     AVAILABLE,
     CREATE_FAILED,
-    DELETE_FAILED;
+    DELETE_FAILED,
+    UNKNOWN;
 
     public boolean isDeleteInProgressOrCompleted() {
         return DELETE_IN_PROGRESS.equals(this) || DELETED.equals(this);
