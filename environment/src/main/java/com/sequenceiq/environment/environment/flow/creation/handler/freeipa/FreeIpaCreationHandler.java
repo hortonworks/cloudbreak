@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -110,7 +109,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final MultiAzValidator multiAzValidator;
 
-    private Set<String> enabledChildPlatforms;
+    private final Set<String> enabledChildPlatforms;
 
     public FreeIpaCreationHandler(
             EventSender eventSender,
@@ -213,10 +212,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     private List<String> getSubnetCidrs(EnvironmentDto environmentDto) {
         if (environmentDto.getNetwork() != null) {
             if (environmentDto.getNetwork().getNetworkCidrs() != null) {
-                return environmentDto.getNetwork()
-                        .getNetworkCidrs()
-                        .stream()
-                        .collect(Collectors.toList());
+                return new ArrayList<>(environmentDto.getNetwork().getNetworkCidrs());
             } else if (!Strings.isNullOrEmpty(environmentDto.getNetwork().getNetworkCidr())) {
                 return List.of(environmentDto.getNetwork().getNetworkCidr());
             }
@@ -435,9 +431,8 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
                 ImageSettingsRequest imageSettings = new ImageSettingsRequest();
                 imageSettings.setCatalog(imageCatalog);
                 imageSettings.setId(imageId);
-                imageSettings.setOs(imageOs);
                 createFreeIpaRequest.setImage(imageSettings);
-            } else if (!Strings.isNullOrEmpty(imageOs)) {
+            } else if (!StringUtils.isAllBlank(imageOs, imageCatalog)) {
                 LOGGER.info("FreeIPA creation with a pre-defined image catalog and OS type: '{}', '{}'", imageCatalog, imageOs);
                 ImageSettingsRequest imageSettings = new ImageSettingsRequest();
                 imageSettings.setCatalog(imageCatalog);

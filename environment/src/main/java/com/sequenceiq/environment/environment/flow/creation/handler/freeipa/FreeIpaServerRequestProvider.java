@@ -9,13 +9,13 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 
 @Component
-class FreeIpaServerRequestProvider {
+public class FreeIpaServerRequestProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaCreationHandler.class);
 
     private static final String FREEIPA_HOSTNAME = "ipaserver";
 
-    FreeIpaServerRequest create(EnvironmentDto environment) {
+    public FreeIpaServerRequest create(EnvironmentDto environment) {
         String domain = environment.getDomain();
         LOGGER.info("Creating FreeIPA request for environment: '{}' with domain: '{}'", environment.getName(), domain);
 
