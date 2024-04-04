@@ -73,12 +73,12 @@ public class ExternalizedComputeService {
         return String.format(DEFAULT_COMPUTE_CLUSTER_NAME_FORMAT, environmentName);
     }
 
-    public void deleteComputeCluster(String envCrn, PollingConfig pollingConfig) {
+    public void deleteComputeCluster(String envCrn, PollingConfig pollingConfig, boolean force) {
         if (externalizedComputeEnabled) {
             List<ExternalizedComputeClusterResponse> clusters = externalizedComputeClientService.list(envCrn);
             LOGGER.debug("Compute clusters for the environment: {}", clusters);
             for (ExternalizedComputeClusterResponse cluster : clusters) {
-                externalizedComputeClientService.deleteComputeCluster(envCrn, cluster.getName());
+                externalizedComputeClientService.deleteComputeCluster(envCrn, cluster.getName(), force);
             }
             try {
                 pollingDeletion(pollingConfig, () -> {

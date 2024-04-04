@@ -3,7 +3,7 @@ package com.sequenceiq.externalizedcompute.flow.create;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
-public enum ExternalizedComputeClusterCreateEvent implements FlowEvent {
+public enum ExternalizedComputeClusterCreateFlowEvent implements FlowEvent {
 
     EXTERNALIZED_COMPUTE_CLUSTER_CREATE_INITIATED_EVENT,
     EXTERNALIZED_COMPUTE_CLUSTER_CREATE_WAIT_FINISHED_EVENT(EventSelectorUtil.selector(ExternalizedComputeClusterCreateEnvWaitSuccessResponse.class)),
@@ -14,11 +14,11 @@ public enum ExternalizedComputeClusterCreateEvent implements FlowEvent {
 
     private final String event;
 
-    ExternalizedComputeClusterCreateEvent() {
+    ExternalizedComputeClusterCreateFlowEvent() {
         event = name();
     }
 
-    ExternalizedComputeClusterCreateEvent(String event) {
+    ExternalizedComputeClusterCreateFlowEvent(String event) {
         this.event = event;
     }
 

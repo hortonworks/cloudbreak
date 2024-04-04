@@ -58,11 +58,11 @@ public class ExternalizedComputeController implements ExternalizedComputeCluster
     @CheckPermissionByAccount(action = DELETE_ENVIRONMENT)
     public FlowIdentifier delete(
             @TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn,
-            @NotEmpty String name) {
-        LOGGER.info("Externalized Compute Cluster delete: {}", name);
+            @NotEmpty String name, boolean force) {
+        LOGGER.info("Externalized Compute Cluster delete: {}. Force: {}", name, force);
         ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(environmentCrn, name);
         MDCBuilder.buildMdcContext(externalizedComputeCluster);
-        return externalizedComputeClusterFlowManager.triggerExternalizedComputeClusterDeletion(externalizedComputeCluster);
+        return externalizedComputeClusterFlowManager.triggerExternalizedComputeClusterDeletion(externalizedComputeCluster, force);
     }
 
     @Override

@@ -41,10 +41,10 @@ public class ExternalizedComputeClientService {
                 initiatorUserCrn -> handleException(() -> endpoint.create(request, initiatorUserCrn), "Failed to create compute cluster"));
     }
 
-    public FlowIdentifier deleteComputeCluster(String environmentCrn, String name) {
+    public FlowIdentifier deleteComputeCluster(String environmentCrn, String name, boolean force) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                initiatorUserCrn -> handleException(() -> endpoint.delete(environmentCrn, name), "Failed to delete compute cluster"));
+                initiatorUserCrn -> handleException(() -> endpoint.delete(environmentCrn, name, force), "Failed to delete compute cluster"));
     }
 
     public Optional<ExternalizedComputeClusterResponse> getComputeCluster(String environmentCrn, String name) {

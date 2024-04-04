@@ -54,7 +54,7 @@ public class ComputeClustersDeleteHandler extends ExceptionCatcherEventHandler<E
         EnvironmentDto environmentDto = environmentDeletionDto.getEnvironmentDto();
 
         PollingConfig pollingConfig = getPollingConfig();
-        externalizedComputeService.deleteComputeCluster(environmentDto.getResourceCrn(), pollingConfig);
+        externalizedComputeService.deleteComputeCluster(environmentDto.getResourceCrn(), pollingConfig, environmentDeletionDto.isForceDelete());
         return getEnvDeleteEvent(environmentDeletionDto);
     }
 

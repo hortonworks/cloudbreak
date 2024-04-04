@@ -1,10 +1,10 @@
 package com.sequenceiq.externalizedcompute.flow.create;
 
-import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FAIL_HANDLED_EVENT;
-import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FINALIZED_EVENT;
-import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FINISHED_EVENT;
-import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_INITIATED_EVENT;
-import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_WAIT_FINISHED_EVENT;
+import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FAIL_HANDLED_EVENT;
+import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FINALIZED_EVENT;
+import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FINISHED_EVENT;
+import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_INITIATED_EVENT;
+import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_WAIT_FINISHED_EVENT;
 import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateState.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FAILED_STATE;
 import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateState.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FINISHED_STATE;
 import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateState.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_IN_PROGRESS_STATE;
@@ -22,12 +22,12 @@ import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class ExternalizedComputeClusterCreateFlowConfig
-        extends AbstractFlowConfiguration<ExternalizedComputeClusterCreateState, ExternalizedComputeClusterCreateEvent>
-        implements RetryableFlowConfiguration<ExternalizedComputeClusterCreateEvent> {
+        extends AbstractFlowConfiguration<ExternalizedComputeClusterCreateState, ExternalizedComputeClusterCreateFlowEvent>
+        implements RetryableFlowConfiguration<ExternalizedComputeClusterCreateFlowEvent> {
 
-    private static final List<Transition<ExternalizedComputeClusterCreateState, ExternalizedComputeClusterCreateEvent>> TRANSITIONS =
-            new Transition.Builder<ExternalizedComputeClusterCreateState, ExternalizedComputeClusterCreateEvent>()
-                    .defaultFailureEvent(ExternalizedComputeClusterCreateEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FAILED_EVENT)
+    private static final List<Transition<ExternalizedComputeClusterCreateState, ExternalizedComputeClusterCreateFlowEvent>> TRANSITIONS =
+            new Transition.Builder<ExternalizedComputeClusterCreateState, ExternalizedComputeClusterCreateFlowEvent>()
+                    .defaultFailureEvent(ExternalizedComputeClusterCreateFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FAILED_EVENT)
                     .from(INIT_STATE)
                     .to(EXTERNALIZED_COMPUTE_CLUSTER_CREATE_WAIT_ENV_STATE)
                     .event(EXTERNALIZED_COMPUTE_CLUSTER_CREATE_INITIATED_EVENT).defaultFailureEvent()
@@ -46,21 +46,21 @@ public class ExternalizedComputeClusterCreateFlowConfig
 
                     .build();
 
-    private static final FlowEdgeConfig<ExternalizedComputeClusterCreateState, ExternalizedComputeClusterCreateEvent> EDGE_CONFIG =
+    private static final FlowEdgeConfig<ExternalizedComputeClusterCreateState, ExternalizedComputeClusterCreateFlowEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
                     EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FAILED_STATE, EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FAIL_HANDLED_EVENT);
 
     public ExternalizedComputeClusterCreateFlowConfig() {
-        super(ExternalizedComputeClusterCreateState.class, ExternalizedComputeClusterCreateEvent.class);
+        super(ExternalizedComputeClusterCreateState.class, ExternalizedComputeClusterCreateFlowEvent.class);
     }
 
-    public ExternalizedComputeClusterCreateEvent[] getEvents() {
-        return ExternalizedComputeClusterCreateEvent.values();
+    public ExternalizedComputeClusterCreateFlowEvent[] getEvents() {
+        return ExternalizedComputeClusterCreateFlowEvent.values();
     }
 
     @Override
-    public ExternalizedComputeClusterCreateEvent[] getInitEvents() {
-        return new ExternalizedComputeClusterCreateEvent[]{
+    public ExternalizedComputeClusterCreateFlowEvent[] getInitEvents() {
+        return new ExternalizedComputeClusterCreateFlowEvent[]{
                 EXTERNALIZED_COMPUTE_CLUSTER_CREATE_INITIATED_EVENT
         };
     }
@@ -71,17 +71,17 @@ public class ExternalizedComputeClusterCreateFlowConfig
     }
 
     @Override
-    protected List<Transition<ExternalizedComputeClusterCreateState, ExternalizedComputeClusterCreateEvent>> getTransitions() {
+    protected List<Transition<ExternalizedComputeClusterCreateState, ExternalizedComputeClusterCreateFlowEvent>> getTransitions() {
         return TRANSITIONS;
     }
 
     @Override
-    public FlowEdgeConfig<ExternalizedComputeClusterCreateState, ExternalizedComputeClusterCreateEvent> getEdgeConfig() {
+    public FlowEdgeConfig<ExternalizedComputeClusterCreateState, ExternalizedComputeClusterCreateFlowEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 
     @Override
-    public ExternalizedComputeClusterCreateEvent getRetryableEvent() {
+    public ExternalizedComputeClusterCreateFlowEvent getRetryableEvent() {
         return EXTERNALIZED_COMPUTE_CLUSTER_CREATE_FAIL_HANDLED_EVENT;
     }
 

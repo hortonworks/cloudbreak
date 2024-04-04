@@ -1,30 +1,42 @@
 package com.sequenceiq.externalizedcompute.flow.delete;
 
-import com.sequenceiq.flow.core.FlowEvent;
-import com.sequenceiq.flow.event.EventSelectorUtil;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.externalizedcompute.flow.ExternalizedComputeClusterEvent;
 
-public enum ExternalizedComputeClusterDeleteEvent implements FlowEvent {
+public class ExternalizedComputeClusterDeleteEvent extends ExternalizedComputeClusterEvent {
 
-    EXTERNALIZED_COMPUTE_CLUSTER_DELETE_INITIATED_EVENT,
-    EXTERNALIZED_COMPUTE_CLUSTER_DELETE_STARTED_EVENT,
-    EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FAILED_EVENT(EventSelectorUtil.selector(ExternalizedComputeClusterDeleteFailedEvent.class)),
-    EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FAIL_HANDLED_EVENT,
-    EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FINISHED_EVENT(EventSelectorUtil.selector(ExternalizedComputeClusterDeleteWaitSuccessResponse.class)),
-    EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FINALIZED_EVENT;
+    private final boolean force;
 
-    private final String event;
-
-    ExternalizedComputeClusterDeleteEvent() {
-        event = name();
+    public ExternalizedComputeClusterDeleteEvent(String selector, Long externalizedComputeId, String userId, boolean force) {
+        super(selector, externalizedComputeId, userId);
+        this.force = force;
     }
 
-    ExternalizedComputeClusterDeleteEvent(String event) {
-        this.event = event;
+    public ExternalizedComputeClusterDeleteEvent(Long externalizedComputeId, String actorCrn, boolean force) {
+        super(externalizedComputeId, actorCrn);
+        this.force = force;
+    }
+
+    @JsonCreator
+    public ExternalizedComputeClusterDeleteEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long externalizedComputeId,
+            @JsonProperty("externalizedComputeName") String externalizedComputeName,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("force") boolean force) {
+        super(selector, externalizedComputeId, externalizedComputeName, userId);
+        this.force = force;
+    }
+
+    public boolean isForce() {
+        return force;
     }
 
     @Override
-    public String event() {
-        return event;
+    public String toString() {
+        return "ExternalizedComputeClusterDeleteEvent{" +
+                "force=" + force +
+                "} " + super.toString();
     }
-
 }

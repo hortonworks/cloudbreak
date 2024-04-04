@@ -37,7 +37,7 @@ public class ExternalizedComputeClusterDeleteWaitHandler extends ExceptionCatche
     @Value("${externalizedcompute.delete.wait.sleep.time.sec:10}")
     private int sleepTime;
 
-    @Value("${externalizedcompute.delete.wait.sleep.time.limit.hour:2}")
+    @Value("${externalizedcompute.delete.wait.sleep.time.limit.seconds:7200}")
     private int timeLimit;
 
     @Inject
@@ -57,12 +57,13 @@ public class ExternalizedComputeClusterDeleteWaitHandler extends ExceptionCatche
         ExternalizedComputeCluster externalizedComputeCluster =
                 externalizedComputeClusterService.getExternalizedComputeCluster(resourceId);
         String actorCrn = event.getData().getActorCrn();
+        boolean force = event.getData().isForce();
         if (externalizedComputeCluster.getLiftieName() == null) {
             LOGGER.info("Liftie cluster does not exists, so we can skip waiting");
-            return new ExternalizedComputeClusterDeleteWaitSuccessResponse(resourceId, actorCrn);
+            return new ExternalizedComputeClusterDeleteWaitSuccessResponse(resourceId, actorCrn, force);
         }
         try {
-            return Polling.stopAfterDelay(timeLimit, TimeUnit.HOURS)
+            return Polling.stopAfterDelay(timeLimit, TimeUnit.SECONDS)
                     .stopIfException(false)
                     .waitPeriodly(sleepTime, TimeUnit.SECONDS)
                     .run(() -> {
@@ -73,13 +74,18 @@ public class ExternalizedComputeClusterDeleteWaitHandler extends ExceptionCatche
                             switch (cluster.getStatus()) {
                                 case DELETED_STATUS -> {
                                     LOGGER.debug("Cluster deleted successfully");
-                                    return AttemptResults.finishWith(new ExternalizedComputeClusterDeleteWaitSuccessResponse(resourceId, actorCrn));
+                                    return AttemptResults.finishWith(new ExternalizedComputeClusterDeleteWaitSuccessResponse(resourceId, actorCrn, force));
                                 }
                                 case DELETE_FAILED_STATUS -> {
                                     LOGGER.error("Cluster status is a failed status: {}", cluster.getStatus());
                                     String errorMessage = cluster.getMessage();
-                                    return AttemptResults.finishWith(new ExternalizedComputeClusterDeleteFailedEvent(resourceId, actorCrn,
-                                            new RuntimeException("Cluster deletion failed. Status: " + cluster.getStatus() + ". Message: " + errorMessage)));
+                                    if (!force) {
+                                        return AttemptResults.finishWith(new ExternalizedComputeClusterDeleteFailedEvent(resourceId, actorCrn,
+                                                new RuntimeException("Cluster deletion failed. Status: " + cluster.getStatus() + ". Message: " + errorMessage)));
+                                    } else {
+                                        LOGGER.warn("Although the cluster delete failed, we proceeded with the deletion since the force flag was enabled");
+                                        return AttemptResults.finishWith(new ExternalizedComputeClusterDeleteWaitSuccessResponse(resourceId, actorCrn, force));
+                                    }
                                 }
                                 default -> {
                                     LOGGER.info("Neither \"DELETED\" status nor \"DELETE_FAILED\" status: {}", cluster.getStatus());
@@ -89,18 +95,23 @@ public class ExternalizedComputeClusterDeleteWaitHandler extends ExceptionCatche
                         } catch (StatusRuntimeException statusRuntimeException) {
                             LOGGER.warn("'{}' liftie cluster describe failed", externalizedComputeCluster.getLiftieName(), statusRuntimeException);
                             if (statusRuntimeException.getMessage().contains("not found in database")) {
-                                return AttemptResults.finishWith(new ExternalizedComputeClusterDeleteWaitSuccessResponse(resourceId, actorCrn));
+                                return AttemptResults.finishWith(new ExternalizedComputeClusterDeleteWaitSuccessResponse(resourceId, actorCrn, force));
                             } else {
                                 return AttemptResults.justContinue();
                             }
                         }
                     });
         } catch (PollerStoppedException e) {
-            DescribeClusterResponse cluster =
-                    liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), actorCrn);
-            LOGGER.warn("Liftie cluster deletion timed out: {}. Cluster response: {}", externalizedComputeCluster.getLiftieName(), cluster,  e);
-            return new ExternalizedComputeClusterCreateFailedEvent(resourceId, actorCrn, new RuntimeException("Compute cluster deletion timed out. " +
-                    "The last known status is:" + cluster.getStatus() + ". Message: " + cluster.getMessage()));
+            if (force) {
+                LOGGER.warn("Although the cluster delete timed out, we proceeded with the deletion since the force flag was enabled");
+                return new ExternalizedComputeClusterDeleteWaitSuccessResponse(resourceId, actorCrn, force);
+            } else {
+                DescribeClusterResponse cluster =
+                        liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), actorCrn);
+                LOGGER.warn("Liftie cluster deletion timed out: {}. Cluster response: {}", externalizedComputeCluster.getLiftieName(), cluster, e);
+                return new ExternalizedComputeClusterCreateFailedEvent(resourceId, actorCrn, new RuntimeException("Compute cluster deletion timed out. " +
+                        "The last known status is:" + cluster.getStatus() + ". Message: " + cluster.getMessage()));
+            }
         }
     }
 

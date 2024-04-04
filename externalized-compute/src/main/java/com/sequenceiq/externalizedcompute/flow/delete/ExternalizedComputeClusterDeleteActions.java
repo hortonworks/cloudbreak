@@ -1,8 +1,8 @@
 package com.sequenceiq.externalizedcompute.flow.delete;
 
-import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FAIL_HANDLED_EVENT;
-import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FINALIZED_EVENT;
-import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_STARTED_EVENT;
+import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FAIL_HANDLED_EVENT;
+import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FINALIZED_EVENT;
+import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_STARTED_EVENT;
 
 import java.util.Map;
 import java.util.Optional;
@@ -19,7 +19,6 @@ import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatu
 import com.sequenceiq.externalizedcompute.flow.AbstractExternalizedComputeClusterAction;
 import com.sequenceiq.externalizedcompute.flow.AbstractExternalizedComputeClusterFailureAction;
 import com.sequenceiq.externalizedcompute.flow.ExternalizedComputeClusterContext;
-import com.sequenceiq.externalizedcompute.flow.ExternalizedComputeClusterEvent;
 import com.sequenceiq.externalizedcompute.service.ExternalizedComputeClusterService;
 import com.sequenceiq.externalizedcompute.service.ExternalizedComputeClusterStatusService;
 
@@ -36,10 +35,10 @@ public class ExternalizedComputeClusterDeleteActions {
 
     @Bean(name = "EXTERNALIZED_COMPUTE_CLUSTER_DELETE_STATE")
     public Action<?, ?> externalizedComputeClusterDelete() {
-        return new AbstractExternalizedComputeClusterAction<>(ExternalizedComputeClusterEvent.class) {
+        return new AbstractExternalizedComputeClusterAction<>(ExternalizedComputeClusterDeleteEvent.class) {
 
             @Override
-            protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterDeleteEvent payload, Map<Object, Object> variables) {
                 externalizedComputeClusterStatusService.setStatus(context.getExternalizedComputeId(), ExternalizedComputeClusterStatusEnum.DELETE_IN_PROGRESS,
                         "Cluster delete initiated");
                 externalizedComputeClusterService.initiateDelete(context.getExternalizedComputeId(), context.getActorCrn());
@@ -47,7 +46,8 @@ public class ExternalizedComputeClusterDeleteActions {
             }
 
             @Override
-            protected Object getFailurePayload(ExternalizedComputeClusterEvent payload, Optional<ExternalizedComputeClusterContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(ExternalizedComputeClusterDeleteEvent payload, Optional<ExternalizedComputeClusterContext> flowContext,
+                    Exception ex) {
                 return ExternalizedComputeClusterDeleteFailedEvent.from(payload, ex);
             }
         };
@@ -55,17 +55,18 @@ public class ExternalizedComputeClusterDeleteActions {
 
     @Bean(name = "EXTERNALIZED_COMPUTE_CLUSTER_DELETE_IN_PROGRESS_STATE")
     public Action<?, ?> externalizedComputeClusterDeleteWait() {
-        return new AbstractExternalizedComputeClusterAction<>(ExternalizedComputeClusterEvent.class) {
+        return new AbstractExternalizedComputeClusterAction<>(ExternalizedComputeClusterDeleteEvent.class) {
 
             @Override
-            protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterDeleteEvent payload, Map<Object, Object> variables) {
                 ExternalizedComputeClusterDeleteWaitRequest externalizedComputeClusterDeleteWaitRequest =
-                        new ExternalizedComputeClusterDeleteWaitRequest(context.getExternalizedComputeId(), context.getActorCrn());
+                        new ExternalizedComputeClusterDeleteWaitRequest(context.getExternalizedComputeId(), context.getActorCrn(), payload.isForce());
                 sendEvent(context, externalizedComputeClusterDeleteWaitRequest.selector(), externalizedComputeClusterDeleteWaitRequest);
             }
 
             @Override
-            protected Object getFailurePayload(ExternalizedComputeClusterEvent payload, Optional<ExternalizedComputeClusterContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(ExternalizedComputeClusterDeleteEvent payload, Optional<ExternalizedComputeClusterContext> flowContext,
+                    Exception ex) {
                 return ExternalizedComputeClusterDeleteFailedEvent.from(payload, ex);
             }
         };
@@ -73,16 +74,17 @@ public class ExternalizedComputeClusterDeleteActions {
 
     @Bean(name = "EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FINISHED_STATE")
     public Action<?, ?> externalizedComputeClusterDeleteFinished() {
-        return new AbstractExternalizedComputeClusterAction<>(ExternalizedComputeClusterEvent.class) {
+        return new AbstractExternalizedComputeClusterAction<>(ExternalizedComputeClusterDeleteEvent.class) {
 
             @Override
-            protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterDeleteEvent payload, Map<Object, Object> variables) {
                 externalizedComputeClusterService.deleteExternalizedComputeCluster(payload.getResourceId());
                 sendEvent(context, EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FINALIZED_EVENT.event(), payload);
             }
 
             @Override
-            protected Object getFailurePayload(ExternalizedComputeClusterEvent payload, Optional<ExternalizedComputeClusterContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(ExternalizedComputeClusterDeleteEvent payload, Optional<ExternalizedComputeClusterContext> flowContext,
+                    Exception ex) {
                 return ExternalizedComputeClusterDeleteFailedEvent.from(payload, ex);
             }
         };

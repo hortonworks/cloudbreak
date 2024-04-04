@@ -1,7 +1,7 @@
 package com.sequenceiq.externalizedcompute.flow;
 
-import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_INITIATED_EVENT;
-import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_INITIATED_EVENT;
+import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_INITIATED_EVENT;
+import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_INITIATED_EVENT;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
+import com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteEvent;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.FlowConstants;
@@ -51,11 +52,11 @@ public class ExternalizedComputeClusterFlowManager {
                 externalizedComputeCluster.getName());
     }
 
-    public FlowIdentifier triggerExternalizedComputeClusterDeletion(ExternalizedComputeCluster externalizedComputeCluster) {
+    public FlowIdentifier triggerExternalizedComputeClusterDeletion(ExternalizedComputeCluster externalizedComputeCluster, boolean force) {
         LOGGER.info("Trigger Externalized Compute Cluster deletion for: {}", externalizedComputeCluster);
         String selector = EXTERNALIZED_COMPUTE_CLUSTER_DELETE_INITIATED_EVENT.event();
         String actorCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return notify(selector, new ExternalizedComputeClusterEvent(selector, externalizedComputeCluster.getId(), actorCrn),
+        return notify(selector, new ExternalizedComputeClusterDeleteEvent(selector, externalizedComputeCluster.getId(), actorCrn, force),
                 externalizedComputeCluster.getName());
     }
 

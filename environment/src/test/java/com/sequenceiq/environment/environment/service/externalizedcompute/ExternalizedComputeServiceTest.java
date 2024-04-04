@@ -116,10 +116,10 @@ class ExternalizedComputeServiceTest {
                 .thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "externalizedComputeEnabled", true);
         PollingConfig pollingConfig = PollingConfig.builder().withSleepTime(0).withTimeout(10).withTimeoutTimeUnit(TimeUnit.SECONDS).build();
-        underTest.deleteComputeCluster(envCrn, pollingConfig);
+        underTest.deleteComputeCluster(envCrn, pollingConfig, true);
         verify(externalizedComputeClientService, times(3)).list(envCrn);
-        verify(externalizedComputeClientService, times(1)).deleteComputeCluster(envCrn, defaultCluster);
-        verify(externalizedComputeClientService, times(1)).deleteComputeCluster(envCrn, anotherCluster);
+        verify(externalizedComputeClientService, times(1)).deleteComputeCluster(envCrn, defaultCluster, true);
+        verify(externalizedComputeClientService, times(1)).deleteComputeCluster(envCrn, anotherCluster, true);
     }
 
     @Test
@@ -145,12 +145,12 @@ class ExternalizedComputeServiceTest {
         ReflectionTestUtils.setField(underTest, "externalizedComputeEnabled", true);
         PollingConfig pollingConfig = PollingConfig.builder().withSleepTime(0).withTimeout(10).withTimeoutTimeUnit(TimeUnit.SECONDS).build();
         EnvironmentServiceException environmentServiceException = assertThrows(EnvironmentServiceException.class,
-                () -> underTest.deleteComputeCluster(envCrn, pollingConfig));
+                () -> underTest.deleteComputeCluster(envCrn, pollingConfig, false));
 
         assertEquals("Compute clusters deletion failed. Reason: Found a compute cluster with delete failed status: " +
                 failedComputeClusterResponse1.getName(), environmentServiceException.getMessage());
         verify(externalizedComputeClientService, times(2)).list(envCrn);
-        verify(externalizedComputeClientService, times(1)).deleteComputeCluster(envCrn, defaultCluster);
-        verify(externalizedComputeClientService, times(1)).deleteComputeCluster(envCrn, anotherCluster);
+        verify(externalizedComputeClientService, times(1)).deleteComputeCluster(envCrn, defaultCluster, false);
+        verify(externalizedComputeClientService, times(1)).deleteComputeCluster(envCrn, anotherCluster, false);
     }
 }

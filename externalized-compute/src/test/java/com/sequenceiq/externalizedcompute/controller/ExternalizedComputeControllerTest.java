@@ -58,10 +58,10 @@ class ExternalizedComputeControllerTest {
     public void testClusterDelete() {
         when(externalizedComputeClusterService.getExternalizedComputeCluster(anyString(), anyString())).thenReturn(externalizedComputeCluster);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            underTest.delete(ENVIRONMENT_CRN, CLUSTER_NAME);
+            underTest.delete(ENVIRONMENT_CRN, CLUSTER_NAME, false);
         });
 
         verify(externalizedComputeClusterService, times(1)).getExternalizedComputeCluster(eq(ENVIRONMENT_CRN), eq(CLUSTER_NAME));
-        verify(externalizedComputeClusterFlowManager, times(1)).triggerExternalizedComputeClusterDeletion(any());
+        verify(externalizedComputeClusterFlowManager, times(1)).triggerExternalizedComputeClusterDeletion(any(), eq(false));
     }
 }

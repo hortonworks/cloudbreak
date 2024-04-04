@@ -8,11 +8,15 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 
 public class ExternalizedComputeClusterDeleteWaitRequest extends ExternalizedComputeClusterEvent {
 
+    private boolean force;
+
     @JsonCreator
     public ExternalizedComputeClusterDeleteWaitRequest(
             @JsonProperty("resourceId") Long externalizedComputeClusterId,
-            @JsonProperty("actorCrn") String actorCrn) {
+            @JsonProperty("actorCrn") String actorCrn,
+            @JsonProperty("force") boolean force) {
         super(externalizedComputeClusterId, actorCrn);
+        this.force = force;
     }
 
     public ExternalizedComputeClusterDeleteWaitRequest(ExternalizedComputeClusterContext context) {
@@ -24,4 +28,7 @@ public class ExternalizedComputeClusterDeleteWaitRequest extends ExternalizedCom
         return EventSelectorUtil.selector(ExternalizedComputeClusterDeleteWaitRequest.class);
     }
 
+    public boolean isForce() {
+        return force;
+    }
 }

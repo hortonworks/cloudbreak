@@ -51,11 +51,12 @@ public class ExternalizedComputeInternalController implements ExternalizedComput
     @Override
     public FlowIdentifier delete(
             @TenantAwareParam @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn,
-            @NotEmpty String name) {
+            @NotEmpty String name,
+            boolean force) {
         LOGGER.info("Externalized Compute Cluster internal delete: {}", name);
         ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(environmentCrn, name);
         MDCBuilder.buildMdcContext(externalizedComputeCluster);
-        return externalizedComputeClusterFlowManager.triggerExternalizedComputeClusterDeletion(externalizedComputeCluster);
+        return externalizedComputeClusterFlowManager.triggerExternalizedComputeClusterDeletion(externalizedComputeCluster, force);
     }
 
     @Override
