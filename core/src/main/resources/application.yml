@@ -733,7 +733,9 @@ cb:
         YARN: 7.2.0,
         ZEPPELIN: 7.2.0,
         ZOOKEEPER: 7.2.0,
-        QUERY_PROCESSOR: 7.2.15
+        QUERY_PROCESSOR: 7.2.15,
+        RANGER: 7.2.0,
+        ATLAS: 7.2.0
 
   stopRestriction:
     restrictedCloudPlatform: AWS

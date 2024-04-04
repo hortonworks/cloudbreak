@@ -5,12 +5,10 @@ import java.util.Optional;
 import jakarta.inject.Inject;
 
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.MdcQuartzJob;
 import com.sequenceiq.cloudbreak.structuredevent.service.db.CDPStructuredEventDBService;
@@ -40,27 +38,23 @@ public class EnvironmentArchiverJob extends MdcQuartzJob {
     }
 
     @Override
-    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
-        try {
-            purgeFinalisedEnvironments(environmentArchiverConfig.getRetentionPeriodInDays());
-        } catch (TransactionService.TransactionExecutionException e) {
-            LOGGER.error("Transaction failed for environment cleanup.", e);
-            throw new JobExecutionException(e);
-        }
+    protected void executeTracedJob(JobExecutionContext context) {
+        purgeFinalisedEnvironments(environmentArchiverConfig.getRetentionPeriodInDays());
     }
 
-    public void purgeFinalisedEnvironments(int retentionPeriodDays) throws TransactionService.TransactionExecutionException {
+    public void purgeFinalisedEnvironments(int retentionPeriodDays) {
         LOGGER.debug("Cleaning finalised environments");
         long timestampsBefore = timeUtil.getTimestampThatDaysBeforeNow(retentionPeriodDays);
         environmentService.getAllForArchive(timestampsBefore, environmentArchiverConfig.getLimitForEnvironment())
                 .stream()
                 .forEach(
-                    crn -> {
-                        Optional<Exception> exception = structuredEventService.deleteStructuredEventByResourceCrn(crn);
+                    environmentCrn -> {
+                        LOGGER.info("Starting to archive environment with CRN: {}", environmentCrn);
+                        Optional<Exception> exception = structuredEventService.deleteStructuredEventByResourceCrn(environmentCrn);
                         if (exception.isEmpty()) {
-                            environmentService.deleteByResourceCrn(crn);
+                            environmentService.deleteByResourceCrn(environmentCrn);
                         } else {
-                            LOGGER.error("Could not completely delete environment events for {} with error {}", crn, exception.get());
+                            LOGGER.error("Could not completely delete environment events for {} with error {}", environmentCrn, exception.get());
                         }
                     }
         );
