@@ -14,13 +14,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.ImageInfoResponse;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.image.FreeIpaImageFilterSettings;
+import com.sequenceiq.freeipa.service.image.FreeipaPlatformStringTransformer;
 import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
 import com.sequenceiq.freeipa.service.image.ImageService;
 
@@ -31,8 +34,14 @@ public class UpgradeImageService {
 
     private static final String DATE_FORMAT = "yyyy-MM-dd";
 
+    @Value("${freeipa.image.catalog.default.os}")
+    private String defaultOs;
+
     @Inject
     private ImageService imageService;
+
+    @Inject
+    private FreeipaPlatformStringTransformer platformStringTransformer;
 
     public ImageInfoResponse selectImage(FreeIpaImageFilterSettings imageFilterParams) {
         Pair<ImageWrapper, String> imageWrapperAndName = imageService.fetchImageWrapperAndName(imageFilterParams);
@@ -68,12 +77,36 @@ public class UpgradeImageService {
         Optional<String> currentImageDate = getCurrentImageDate(stack, currentImage);
         List<Pair<ImageWrapper, String>> imagesWrapperAndName = imageService.fetchImagesWrapperAndName(stack, catalog, currentImage.getOs(),
                 allowMajorOsUpgrade);
-        return imagesWrapperAndName.stream()
+        List<ImageInfoResponse> targetImages = imagesWrapperAndName.stream()
                 .filter(imageWrapperAndName -> currentImageDate.isPresent()
                         && isCandidateImageNewerThanCurrent(imageWrapperAndName.getLeft(), currentImageDate.get()))
                 .filter(imageWrapperAndName -> !currentImage.getId().equals(imageWrapperAndName.getLeft().getImage().getUuid()))
                 .map(this::convertImageWrapperAndNameToImageInfoResponse)
                 .collect(Collectors.toList());
+        fetchDefaultOsImageIfNotPresentInTargets(stack, catalog, currentImage, targetImages).ifPresent(targetImages::add);
+        return targetImages;
+    }
+
+    private Optional<ImageInfoResponse> fetchDefaultOsImageIfNotPresentInTargets(Stack stack, String catalog, ImageInfoResponse currentImage,
+            List<ImageInfoResponse> targetImages) {
+        try {
+            OsType defaultOsType = OsType.getByOs(defaultOs);
+            OsType currentOsType = OsType.getByOs(currentImage.getOs());
+            if (defaultOsType != currentOsType
+                    && defaultOsType.ordinal() > currentOsType.ordinal()
+                    && targetImages.stream().noneMatch(img -> defaultOs.equalsIgnoreCase(img.getOs()))) {
+                String platformString = platformStringTransformer.getPlatformString(stack);
+                FreeIpaImageFilterSettings imageFilterSettings = new FreeIpaImageFilterSettings(null, catalog, defaultOs, defaultOs,
+                        stack.getRegion(), platformString, false);
+                Pair<ImageWrapper, String> rhel8ImageWrapper = imageService.fetchImageWrapperAndName(imageFilterSettings);
+                return Optional.of(convertImageWrapperAndNameToImageInfoResponse(rhel8ImageWrapper));
+            } else {
+                return Optional.empty();
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Couldn't fetch extra default image as upgrade candidate.", e);
+            return Optional.empty();
+        }
     }
 
     private boolean isCandidateImageNewerThanCurrent(ImageWrapper candidate, String currentImageDate) {

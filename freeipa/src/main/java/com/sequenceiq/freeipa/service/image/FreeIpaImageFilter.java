@@ -37,7 +37,7 @@ public class FreeIpaImageFilter {
     @Inject
     private PreferredOsService preferredOsService;
 
-    List<Image> filterImages(List<Image> candidateImages, FreeIpaImageFilterSettings imageFilterSettings) {
+    public List<Image> filterImages(List<Image> candidateImages, FreeIpaImageFilterSettings imageFilterSettings) {
         LOGGER.debug("Filtering images with the following parameters: {}", imageFilterSettings);
         if (StringUtils.isNotBlank(imageFilterSettings.currentImageId())) {
             return candidateImages.stream()
@@ -66,7 +66,7 @@ public class FreeIpaImageFilter {
         }
     }
 
-    boolean filterPlatformAndRegion(FreeIpaImageFilterSettings imageFilterSettings, Image image) {
+    private boolean filterPlatformAndRegion(FreeIpaImageFilterSettings imageFilterSettings, Image image) {
         Map<String, Map<String, String>> imageSetsByProvider = image.getImageSetsByProvider();
         return imageSetsByProvider.containsKey(imageFilterSettings.platform())
                 && CollectionUtils.containsAny(imageSetsByProvider.get(imageFilterSettings.platform()).keySet(), imageFilterSettings.region(), DEFAULT_REGION);
@@ -94,13 +94,13 @@ public class FreeIpaImageFilter {
         return img.getUuid().equalsIgnoreCase(imageId);
     }
 
-    Optional<Image> findMostRecentImage(List<Image> compatibleImages) {
+    public Optional<Image> findMostRecentImage(List<Image> compatibleImages) {
         LOGGER.debug("Not found any image compatible with the application version. Falling back to the most recent image.");
         return compatibleImages.stream()
                 .max(newestImageWithPreferredOs());
     }
 
-    Comparator<Image> newestImageWithPreferredOs() {
+    public Comparator<Image> newestImageWithPreferredOs() {
         String preferredOs = preferredOsService.getDefaultOs();
         return Comparator.<Image, Integer>comparing(img -> preferredOs.equalsIgnoreCase(img.getOs()) ? 1 : 0)
                 .thenComparing(Image::getDate);
