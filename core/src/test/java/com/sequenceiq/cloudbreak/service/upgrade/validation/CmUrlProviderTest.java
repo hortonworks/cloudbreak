@@ -17,6 +17,8 @@ import jakarta.ws.rs.client.WebTarget;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.auth.PaywallCredentialPopulator;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.common.model.OsType;
 
 @ExtendWith(MockitoExtension.class)
 class CmUrlProviderTest {
@@ -38,11 +41,13 @@ class CmUrlProviderTest {
     @InjectMocks
     private CmUrlProvider underTest;
 
-    @Test
-    public void testUrlFromManifest() throws IOException {
+    @ParameterizedTest
+    @EnumSource(OsType.class)
+    public void testUrlFromManifest(OsType osType) throws IOException {
         Image image = mock(Image.class);
-        when(image.getOsType()).thenReturn("redhat7");
-        when(image.getRepo()).thenReturn(Map.of("redhat7", "https://archive.cloudera.com/p/cm-public/7.6.0-23760327/redhat7/yum/"));
+        String osTypeString = osType.getOsType();
+        when(image.getOsType()).thenReturn(osTypeString);
+        when(image.getRepo()).thenReturn(Map.of(osTypeString, "https://archive.cloudera.com/p/cm-public/7.6.0-23760327/" + osTypeString + "/yum/"));
         when(image.getPackageVersions()).thenReturn(Map.of(CM.getKey(), "7.6.0", CM_BUILD_NUMBER.getKey(), "23760327"));
         Client client = mock(Client.class);
         when(restClientFactory.getOrCreateDefault()).thenReturn(client);
@@ -57,7 +62,11 @@ class CmUrlProviderTest {
         String result = underTest.getCmRpmUrl(image);
 
         verify(paywallCredentialPopulator).populateWebTarget("https://archive.cloudera.com/p/cm-public/7.6.0-23760327/release_manifest.json", webTarget);
-        assertEquals("https://archive.cloudera.com/p/cm-public/7.6.0-23760327/redhat7/yum/RPMS/x86_64/cloudera-manager-server-7.6.0-23760327p.el7.x86_64.rpm",
+        assertEquals("https://archive.cloudera.com/p/cm-public/7.6.0-23760327/"
+                        + osTypeString
+                        + "/yum/RPMS/x86_64/cloudera-manager-server-7.6.0-23760327p."
+                        + osType.getParcelPostfix()
+                        + ".x86_64.rpm",
                 result);
     }
 
