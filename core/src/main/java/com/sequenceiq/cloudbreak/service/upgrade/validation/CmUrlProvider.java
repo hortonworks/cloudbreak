@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.auth.PaywallCredentialPopulator;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.service.image.CustomImageProvider;
+import com.sequenceiq.common.model.OsType;
 
 @Component
 public class CmUrlProvider {
@@ -50,7 +51,9 @@ public class CmUrlProvider {
                 .concat(image.getPackageVersions().get(CM.getKey()))
                 .concat("-")
                 .concat(image.getPackageVersions().get(CM_BUILD_NUMBER.getKey()))
-                .concat(".el7.x86_64.rpm");
+                .concat(".")
+                .concat(OsType.getByOsTypeString(image.getOsType()).getParcelPostfix())
+                .concat(".x86_64.rpm");
     }
 
     private Optional<String> fetchUrlFromManifest(Image image) {
