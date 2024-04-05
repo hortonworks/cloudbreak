@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -386,10 +387,10 @@ class AzureClientTest {
         azureZoneInfo.put("instanceType1", List.of("1"));
         azureZoneInfo.put("instanceType2", List.of("1", "2"));
         azureZoneInfo.put("instanceType3", List.of("1", "2", "3"));
-        return new Object[] {Collections.emptyMap(),
+        return new Object[] {
+                Collections.emptyMap(),
                 Map.of("instanceType1", List.of("1")),
-                azureZoneInfo
-                };
+                azureZoneInfo};
     }
 
     @ParameterizedTest
@@ -415,6 +416,18 @@ class AzureClientTest {
             Assertions.assertTrue(zoneInfo.containsKey(entry.getKey()));
             assertEquals(entry.getValue(), zoneInfo.get(entry.getKey()));
         });
+    }
+
+    @Test
+    void testGetAvailabilityZonesWhenVmWhenVirtualMachineAZisNull() {
+        VirtualMachines virtualMachines = mock(VirtualMachines.class);
+        VirtualMachine virtualMachine = mock(VirtualMachine.class);
+        when(virtualMachines.getByResourceGroup(any(), any())).thenReturn(virtualMachine);
+        when(virtualMachine.availabilityZones()).thenReturn(null);
+        when(azureResourceManager.virtualMachines()).thenReturn(virtualMachines);
+
+        Set<AvailabilityZoneId> availabilityZone = underTest.getAvailabilityZone("group", "name");
+        assertEquals(availabilityZone.size(), 0);
     }
 
     static Object[] azureZones() {
