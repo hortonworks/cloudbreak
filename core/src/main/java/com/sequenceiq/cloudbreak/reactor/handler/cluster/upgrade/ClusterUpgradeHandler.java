@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_NOT_
 import static java.lang.String.format;
 
 import java.util.Optional;
-import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -16,12 +15,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
-import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
@@ -85,20 +82,19 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
         ClusterUpgradeRequest request = event.getData();
         Long stackId = request.getResourceId();
         try {
-            StackDto stackDto = stackDtoService.getById(stackId);
-            Set<ClusterComponentView> components = parcelService.getParcelComponentsByBlueprint(stackDto);
-            ClusterApi connector = clusterApiConnectors.getConnector(stackDto);
-            Set<ClouderaManagerProduct> upgradeCandidateProducts = upgradeCandidateProvider.getRequiredProductsForUpgrade(connector, stackDto, components);
-            if (upgradeCandidateProducts.isEmpty()) {
+            if (request.getUpgradeCandidateProducts().isEmpty()) {
                 LOGGER.debug("Skip cluster runtime upgrade because all required product is present on the cluster.");
                 flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_UPGRADE_NOT_NEEDED);
                 return new ClusterUpgradeSuccess(stackId);
             } else {
+                StackDto stackDto = stackDtoService.getById(stackId);
+                ClusterApi connector = clusterApiConnectors.getConnector(stackDto);
                 clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.CLUSTER_UPGRADE_IN_PROGRESS);
                 flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_UPGRADE);
                 Optional<String> remoteDataContext = getRemoteDataContext(stackDto.getStack());
-                connector.upgradeClusterRuntime(upgradeCandidateProducts, request.isPatchUpgrade(), remoteDataContext, request.isRollingUpgradeEnabled());
-                return removeUnusedParcelsAfterRuntimeUpgrade(stackDto, components);
+                connector.upgradeClusterRuntime(request.getUpgradeCandidateProducts(), request.isPatchUpgrade(), remoteDataContext,
+                        request.isRollingUpgradeEnabled());
+                return removeUnusedParcelsAfterRuntimeUpgrade(stackDto);
             }
         } catch (Exception e) {
             LOGGER.error("Cluster upgrade event failed", e);
@@ -109,7 +105,7 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
     private Optional<String> getRemoteDataContext(StackView stack) {
         Optional<String> remoteDataContext = Optional.empty();
         if (!stack.isDatalake()) {
-            String datalakeCrn = null;
+            String datalakeCrn;
             if (StringUtils.isNotEmpty(stack.getDatalakeCrn())) {
                 datalakeCrn = stack.getDatalakeCrn();
             } else {
@@ -123,8 +119,8 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
         return remoteDataContext;
     }
 
-    private Selectable removeUnusedParcelsAfterRuntimeUpgrade(StackDto stackDto, Set<ClusterComponentView> components) throws CloudbreakException {
-        ParcelOperationStatus parcelOperationStatus = parcelService.removeUnusedParcelComponents(stackDto, components);
+    private Selectable removeUnusedParcelsAfterRuntimeUpgrade(StackDto stackDto) throws CloudbreakException {
+        ParcelOperationStatus parcelOperationStatus = parcelService.removeUnusedParcelComponents(stackDto);
         if (parcelOperationStatus.getFailed().isEmpty()) {
             return new ClusterUpgradeSuccess(stackDto.getId());
         } else {

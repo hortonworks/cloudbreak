@@ -15,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterUpgradePrerequisitesServiceTest {
@@ -26,9 +25,6 @@ class ClusterUpgradePrerequisitesServiceTest {
 
     @InjectMocks
     private ClusterUpgradePrerequisitesService underTest;
-
-    @Mock
-    private ClusterApiConnectors clusterApiConnectors;
 
     @Mock
     private StackDto stackDto;
@@ -43,12 +39,10 @@ class ClusterUpgradePrerequisitesServiceTest {
 
     @Test
     void testRemoveDasServiceIfNecessary() throws Exception {
-        when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.isServicePresent(STACK_NAME, DAS_SERVICE_TYPE)).thenReturn(true);
 
-        underTest.removeDasServiceIfNecessary(stackDto, "7.2.18");
+        underTest.removeDasServiceIfNecessary(stackDto, clusterApi, "7.2.18");
 
-        verify(clusterApiConnectors).getConnector(stackDto);
         verify(clusterApi).isServicePresent(STACK_NAME, DAS_SERVICE_TYPE);
         verify(clusterApi).stopClouderaManagerService(DAS_SERVICE_TYPE, true);
         verify(clusterApi).deleteClouderaManagerService(DAS_SERVICE_TYPE);
@@ -56,24 +50,22 @@ class ClusterUpgradePrerequisitesServiceTest {
 
     @Test
     void testRemoveDasServiceIfNecessaryShouldNotRemoveTheServiceIfTheRuntimeVersionIsLowerThanTheLimited() throws Exception {
-        underTest.removeDasServiceIfNecessary(stackDto, "7.2.17");
-        verifyNoInteractions(clusterApiConnectors, clusterApi);
+        underTest.removeDasServiceIfNecessary(stackDto, clusterApi, "7.2.17");
+        verifyNoInteractions(clusterApi);
     }
 
     @Test
     void testRemoveDasServiceIfNecessaryShouldNotRemoveTheServiceIfTheRuntimeVersionIsNull() throws Exception {
-        underTest.removeDasServiceIfNecessary(stackDto, null);
-        verifyNoInteractions(clusterApiConnectors, clusterApi);
+        underTest.removeDasServiceIfNecessary(stackDto, clusterApi,  null);
+        verifyNoInteractions(clusterApi);
     }
 
     @Test
     void testRemoveDasServiceIfNecessaryShouldNotRemoveTheServiceIfTheServiceIsNotPresentOnTheCluster() throws Exception {
-        when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.isServicePresent(STACK_NAME, DAS_SERVICE_TYPE)).thenReturn(false);
 
-        underTest.removeDasServiceIfNecessary(stackDto, "7.2.18");
+        underTest.removeDasServiceIfNecessary(stackDto, clusterApi, "7.2.18");
 
-        verify(clusterApiConnectors).getConnector(stackDto);
         verify(clusterApi).isServicePresent(STACK_NAME, DAS_SERVICE_TYPE);
         verify(clusterApi, times(0)).stopClouderaManagerService(DAS_SERVICE_TYPE, true);
         verify(clusterApi, times(0)).deleteClouderaManagerService(DAS_SERVICE_TYPE);

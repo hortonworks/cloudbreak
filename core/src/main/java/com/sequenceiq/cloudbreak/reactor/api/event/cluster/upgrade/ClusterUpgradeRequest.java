@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade;
 
+import java.util.Set;
 import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 
-public class ClusterUpgradeRequest extends StackEvent {
+public class ClusterUpgradeRequest extends AbstractClusterUpgradeEvent {
 
     private final boolean patchUpgrade;
 
@@ -15,9 +16,10 @@ public class ClusterUpgradeRequest extends StackEvent {
     @JsonCreator
     public ClusterUpgradeRequest(
             @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("upgradeCandidateProducts") Set<ClouderaManagerProduct> upgradeCandidateProducts,
             @JsonProperty("patchUpgrade") boolean patchUpgrade,
             @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled) {
-        super(stackId);
+        super(stackId, upgradeCandidateProducts);
         this.patchUpgrade = patchUpgrade;
         this.rollingUpgradeEnabled = rollingUpgradeEnabled;
     }

@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -16,7 +18,9 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeInitRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeInitSuccess;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
+import com.sequenceiq.cloudbreak.service.parcel.UpgradeCandidateProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePrerequisitesService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -36,6 +40,12 @@ public class ClusterUpgradeInitHandler extends ExceptionCatcherEventHandler<Clus
     @Inject
     private ClusterUpgradePrerequisitesService clusterUpgradePrerequisitesService;
 
+    @Inject
+    private ClusterApiConnectors clusterApiConnectors;
+
+    @Inject
+    private UpgradeCandidateProvider upgradeCandidateProvider;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(ClusterUpgradeInitRequest.class);
@@ -53,10 +63,12 @@ public class ClusterUpgradeInitHandler extends ExceptionCatcherEventHandler<Clus
         ClusterUpgradeInitRequest request = event.getData();
         Selectable result;
         try {
-            Set<ClusterComponentView> componentsByBlueprint = parcelService.getParcelComponentsByBlueprint(stackDto);
-            parcelService.removeUnusedParcelComponents(stackDto, componentsByBlueprint);
-            clusterUpgradePrerequisitesService.removeDasServiceIfNecessary(stackDto, request.getTargetRuntimeVersion());
-            result = new ClusterUpgradeInitSuccess(request.getResourceId());
+            Set<ClusterComponentView> components = parcelService.getParcelComponentsByBlueprint(stackDto);
+            parcelService.removeUnusedParcelComponents(stackDto, components);
+            ClusterApi connector = clusterApiConnectors.getConnector(stackDto);
+            clusterUpgradePrerequisitesService.removeDasServiceIfNecessary(stackDto, connector, request.getTargetRuntimeVersion());
+            Set<ClouderaManagerProduct> upgradeCandidateProducts = upgradeCandidateProvider.getRequiredProductsForUpgrade(connector, stackDto, components);
+            result = new ClusterUpgradeInitSuccess(request.getResourceId(), upgradeCandidateProducts);
         } catch (Exception e) {
             LOGGER.error("Upgrade initialization failed", e);
             result = new ClusterUpgradeFailedEvent(request.getResourceId(), e, DetailedStackStatus.CLUSTER_UPGRADE_INIT_FAILED);

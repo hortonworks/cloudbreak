@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
-import com.sequenceiq.cloudbreak.service.parcel.UpgradeCandidateProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -64,9 +63,6 @@ class ClusterUpgradeHandlerTest {
     private ClusterBuilderService clusterBuilderService;
 
     @Mock
-    private UpgradeCandidateProvider upgradeCandidateProvider;
-
-    @Mock
     private ClusterService clusterService;
 
     @Mock
@@ -87,79 +83,61 @@ class ClusterUpgradeHandlerTest {
 
     @Test
     void testDoAcceptShouldReturnSuccessResponseWhenThereAreUpgradeCandidatesAndTheStackIsDataLake() throws CloudbreakException {
-        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, true, true);
+        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, upgradeCandidateProducts, true, true);
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
-        when(parcelService.getParcelComponentsByBlueprint(stackDto)).thenReturn(components);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(connector);
-        when(upgradeCandidateProvider.getRequiredProductsForUpgrade(connector, stackDto, components)).thenReturn(upgradeCandidateProducts);
         when(stackDto.getStack()).thenReturn(createStack(StackType.DATALAKE));
-        when(parcelService.removeUnusedParcelComponents(stackDto, components)).thenReturn(createParcelOperationStatus(true));
+        when(parcelService.removeUnusedParcelComponents(stackDto)).thenReturn(createParcelOperationStatus(true));
 
         Selectable result = underTest.doAccept(new HandlerEvent<>(Event.wrap(request)));
 
         assertEquals(CLUSTER_UPGRADE_FINISHED_EVENT.event(), result.selector());
         verify(stackDtoService).getById(STACK_ID);
-        verify(parcelService).getParcelComponentsByBlueprint(stackDto);
-        verify(upgradeCandidateProvider).getRequiredProductsForUpgrade(connector, stackDto, components);
         verify(clusterService).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.CLUSTER_UPGRADE_IN_PROGRESS);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_UPGRADE);
         verify(connector).upgradeClusterRuntime(upgradeCandidateProducts, true, Optional.empty(), true);
-        verify(parcelService).removeUnusedParcelComponents(stackDto, components);
+        verify(parcelService).removeUnusedParcelComponents(stackDto);
     }
 
     @Test
     void testDoAcceptShouldReturnSuccessResponseWhenThereAreUpgradeCandidatesAndTheStackIsDataHub() throws CloudbreakException {
-        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, true, true);
+        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, upgradeCandidateProducts, true, true);
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
-        when(parcelService.getParcelComponentsByBlueprint(stackDto)).thenReturn(components);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(connector);
-        when(upgradeCandidateProvider.getRequiredProductsForUpgrade(connector, stackDto, components)).thenReturn(upgradeCandidateProducts);
         when(stackDto.getStack()).thenReturn(createStack(StackType.WORKLOAD));
         when(clusterBuilderService.getSdxContextOptional(stackDto.getStack().getDatalakeCrn())).thenReturn(Optional.of(REMOTE_DATA_CONTEXT));
-        when(parcelService.removeUnusedParcelComponents(stackDto, components)).thenReturn(createParcelOperationStatus(true));
+        when(parcelService.removeUnusedParcelComponents(stackDto)).thenReturn(createParcelOperationStatus(true));
 
         Selectable result = underTest.doAccept(new HandlerEvent<>(Event.wrap(request)));
 
         assertEquals(CLUSTER_UPGRADE_FINISHED_EVENT.event(), result.selector());
         verify(stackDtoService).getById(STACK_ID);
-        verify(parcelService).getParcelComponentsByBlueprint(stackDto);
-        verify(upgradeCandidateProvider).getRequiredProductsForUpgrade(connector, stackDto, components);
         verify(clusterService).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.CLUSTER_UPGRADE_IN_PROGRESS);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_UPGRADE);
         verify(clusterBuilderService).getSdxContextOptional(stackDto.getStack().getDatalakeCrn());
         verify(connector).upgradeClusterRuntime(upgradeCandidateProducts, true, Optional.of(REMOTE_DATA_CONTEXT), true);
-        verify(parcelService).removeUnusedParcelComponents(stackDto, components);
+        verify(parcelService).removeUnusedParcelComponents(stackDto);
     }
 
     @Test
     void testDoAcceptShouldReturnSuccessResponseWhenThereAreNoUpgradeCandidates() {
-        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, true, true);
-
-        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
-        when(parcelService.getParcelComponentsByBlueprint(stackDto)).thenReturn(components);
-        when(clusterApiConnectors.getConnector(stackDto)).thenReturn(connector);
-        when(upgradeCandidateProvider.getRequiredProductsForUpgrade(connector, stackDto, components)).thenReturn(Collections.emptySet());
+        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, Collections.emptySet(), true, true);
 
         Selectable result = underTest.doAccept(new HandlerEvent<>(Event.wrap(request)));
 
         assertEquals(CLUSTER_UPGRADE_FINISHED_EVENT.event(), result.selector());
-        verify(stackDtoService).getById(STACK_ID);
-        verify(parcelService).getParcelComponentsByBlueprint(stackDto);
-        verify(upgradeCandidateProvider).getRequiredProductsForUpgrade(connector, stackDto, components);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_UPGRADE_NOT_NEEDED);
-        verifyNoInteractions(clusterService, connector);
+        verifyNoInteractions(stackDtoService, clusterService, connector, clusterApiConnectors);
     }
 
     @Test
     void testDoAcceptShouldReturnFailedResponseWhenThereAreUpgradeCandidatesAndTheUpgradeClusterRuntimeThrowsException() throws CloudbreakException {
-        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, true, true);
+        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, upgradeCandidateProducts, true, true);
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
-        when(parcelService.getParcelComponentsByBlueprint(stackDto)).thenReturn(components);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(connector);
-        when(upgradeCandidateProvider.getRequiredProductsForUpgrade(connector, stackDto, components)).thenReturn(upgradeCandidateProducts);
         when(stackDto.getStack()).thenReturn(createStack(StackType.DATALAKE));
         doThrow(new CloudbreakException("error")).when(connector).upgradeClusterRuntime(upgradeCandidateProducts, true, Optional.empty(), true);
 
@@ -167,8 +145,6 @@ class ClusterUpgradeHandlerTest {
 
         assertEquals(CLUSTER_UPGRADE_FAILED_EVENT.event(), result.selector());
         verify(stackDtoService).getById(STACK_ID);
-        verify(parcelService).getParcelComponentsByBlueprint(stackDto);
-        verify(upgradeCandidateProvider).getRequiredProductsForUpgrade(connector, stackDto, components);
         verify(clusterService).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.CLUSTER_UPGRADE_IN_PROGRESS);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_UPGRADE);
         verify(connector).upgradeClusterRuntime(upgradeCandidateProducts, true, Optional.empty(), true);
@@ -176,25 +152,21 @@ class ClusterUpgradeHandlerTest {
 
     @Test
     void testDoAcceptShouldReturnFailedResponseWhenParcelRemovalFailedAfterTheUpgrade() throws CloudbreakException {
-        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, true, true);
+        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, upgradeCandidateProducts, true, true);
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
-        when(parcelService.getParcelComponentsByBlueprint(stackDto)).thenReturn(components);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(connector);
-        when(upgradeCandidateProvider.getRequiredProductsForUpgrade(connector, stackDto, components)).thenReturn(upgradeCandidateProducts);
         when(stackDto.getStack()).thenReturn(createStack(StackType.DATALAKE));
-        when(parcelService.removeUnusedParcelComponents(stackDto, components)).thenReturn(createParcelOperationStatus(false));
+        when(parcelService.removeUnusedParcelComponents(stackDto)).thenReturn(createParcelOperationStatus(false));
 
         Selectable result = underTest.doAccept(new HandlerEvent<>(Event.wrap(request)));
 
         assertEquals(CLUSTER_UPGRADE_FAILED_EVENT.event(), result.selector());
         verify(stackDtoService).getById(STACK_ID);
-        verify(parcelService).getParcelComponentsByBlueprint(stackDto);
-        verify(upgradeCandidateProvider).getRequiredProductsForUpgrade(connector, stackDto, components);
         verify(clusterService).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.CLUSTER_UPGRADE_IN_PROGRESS);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_UPGRADE);
         verify(connector).upgradeClusterRuntime(upgradeCandidateProducts, true, Optional.empty(), true);
-        verify(parcelService).removeUnusedParcelComponents(stackDto, components);
+        verify(parcelService).removeUnusedParcelComponents(stackDto);
     }
 
     private StackView createStack(StackType stackType) {

@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterComponentUpdater;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.component.ImageReaderService;
-import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
@@ -81,16 +80,9 @@ public class ParcelService {
     private PaywallCredentialPopulator paywallCredentialPopulator;
 
     public Set<ClusterComponentView> getParcelComponentsByBlueprint(StackDtoDelegate stack) {
-        return getParcelComponentsByBlueprint(stack.getStack(), stack.getCluster(), stack.getBlueprint());
-    }
-
-    public Set<ClusterComponentView> getParcelComponentsByBlueprint(StackView stack, ClusterView cluster, Blueprint blueprint) {
-        if (cluster == null) {
-            return Collections.emptySet();
-        }
-        Set<ClusterComponentView> components = getComponents(cluster.getId());
+        Set<ClusterComponentView> components = getComponents(stack.getCluster().getId());
         LOGGER.debug("The following components are available in the cluster {}", components);
-        if (stack.isDatalake()) {
+        if (stack.getStack().isDatalake()) {
             return getDataLakeClusterComponents(components);
         } else {
             Map<String, ClusterComponentView> cmProductMap = new HashMap<>();
@@ -100,7 +92,7 @@ public class ParcelService {
                 cmProductMap.put(product.getName(), clusterComponent);
                 cmProducts.add(product);
             }
-            cmProducts = filterParcelsByBlueprint(stack.getWorkspaceId(), stack.getId(), cmProducts, blueprint);
+            cmProducts = filterParcelsByBlueprint(stack.getWorkspaceId(), stack.getId(), cmProducts, stack.getBlueprint());
             Set<ClusterComponentView> componentsByRequiredProducts = getComponentsByRequiredProducts(cmProductMap, cmProducts);
             LOGGER.debug("The following components are required for cluster {}", componentsByRequiredProducts);
             return componentsByRequiredProducts;
@@ -108,15 +100,12 @@ public class ParcelService {
     }
 
     public Set<String> getComponentNamesByImage(StackDtoDelegate stack, Image image) {
-        return getComponentsByImage(stack, image).stream().map(ClusterComponentView::getName).collect(Collectors.toSet());
+        return getComponentsByImage(stack.getStack(), stack.getCluster().getId(), stack.getBlueprint(), image)
+                .stream().map(ClusterComponentView::getName)
+                .collect(Collectors.toSet());
     }
 
-    public Set<ClusterComponentView> getComponentsByImage(StackDtoDelegate stack, Image image) {
-        ClusterView cluster = stack.getCluster();
-        return getComponentsByImage(stack.getStack(), cluster.getId(), stack.getBlueprint(), image);
-    }
-
-    public Set<ClusterComponentView> getComponentsByImage(StackView stack, Long clusterId, Blueprint blueprint, Image image) {
+    private Set<ClusterComponentView> getComponentsByImage(StackView stack, Long clusterId, Blueprint blueprint, Image image) {
         Set<ClusterComponentView> components = getComponents(clusterId);
         if (stack.isDatalake()) {
             return getDataLakeClusterComponents(components);

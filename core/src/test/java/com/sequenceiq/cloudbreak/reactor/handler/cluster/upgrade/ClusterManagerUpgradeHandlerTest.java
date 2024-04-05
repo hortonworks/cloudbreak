@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
+import java.util.Collections;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,7 +35,7 @@ class ClusterManagerUpgradeHandlerTest {
 
     @Test
     void testDoAcceptShouldReturnSuccessEvent() throws CloudbreakOrchestratorException, CloudbreakException {
-        ClusterManagerUpgradeRequest request = new ClusterManagerUpgradeRequest(STACK_ID, true);
+        ClusterManagerUpgradeRequest request = new ClusterManagerUpgradeRequest(STACK_ID, Collections.emptySet(), true);
 
         Selectable result = underTest.doAccept(new HandlerEvent<>(Event.wrap(request)));
 
@@ -43,7 +45,7 @@ class ClusterManagerUpgradeHandlerTest {
 
     @Test
     void testDoAcceptShouldReturnFailureEvent() throws CloudbreakOrchestratorException, CloudbreakException {
-        ClusterManagerUpgradeRequest request = new ClusterManagerUpgradeRequest(STACK_ID, true);
+        ClusterManagerUpgradeRequest request = new ClusterManagerUpgradeRequest(STACK_ID, Collections.emptySet(), true);
         doThrow(new CloudbreakException("error")).when(clusterManagerUpgradeManagementService).upgradeClusterManager(STACK_ID, true);
 
         Selectable result = underTest.doAccept(new HandlerEvent<>(Event.wrap(request)));

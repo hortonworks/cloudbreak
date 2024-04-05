@@ -110,7 +110,7 @@ public class ClusterUpgradeActions {
                 StatedImage targetStatedImage = getTargetImage(variables);
                 imageComponentUpdaterService.updateComponentsForUpgrade(targetStatedImage, payload.getResourceId());
                 boolean rollingUpgradeEnabled = rollingUpgradeEnabled(variables);
-                Selectable event = new ClusterManagerUpgradeRequest(context.getStackId(), rollingUpgradeEnabled);
+                Selectable event = new ClusterManagerUpgradeRequest(context.getStackId(), payload.getUpgradeCandidateProducts(), rollingUpgradeEnabled);
                 sendEvent(context, event.selector(), event);
             }
 
@@ -139,7 +139,7 @@ public class ClusterUpgradeActions {
                 imageComponentUpdaterService.updateComponentsForUpgrade(targetStatedImage, payload.getResourceId());
                 boolean rollingUpgradeEnabled = rollingUpgradeEnabled(variables);
                 boolean patchUpgrade = clusterUpgradeService.isPatchUpgrade(currentImage.getPackageVersions(), targetImage.getPackageVersions());
-                Selectable event = new ClusterUpgradeRequest(context.getStackId(), patchUpgrade, rollingUpgradeEnabled);
+                Selectable event = new ClusterUpgradeRequest(context.getStackId(), payload.getUpgradeCandidateProducts(), patchUpgrade, rollingUpgradeEnabled);
                 sendEvent(context, event.selector(), event);
             }
 
