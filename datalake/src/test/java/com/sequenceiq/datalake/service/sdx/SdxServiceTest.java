@@ -1138,6 +1138,199 @@ class SdxServiceTest {
         verify(ownerAssignmentService, times(1)).assignResourceOwnerRoleIfEntitled(anyString(), any());
     }
 
+    @Test
+    void testShapeValidationOfSDXCreation() throws IOException {
+        when(entitlementService.enterpriseSdxDisabled(any())).thenReturn(false);
+        when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(Set.of(11, 17, 21));
+        DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse();
+        when(environmentClientService.getByName(eq("env-name"))).thenReturn(detailedEnvironmentResponse);
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyBoolean())).thenReturn(imageCatalogPlatform);
+        BaseStackDetailsV4Response baseStackDetailsV4Response = new BaseStackDetailsV4Response();
+        ImageV4Response imageV4Response = new ImageV4Response();
+        imageV4Response.setStackDetails(baseStackDetailsV4Response);
+        when(imageCatalogService.getImageResponseFromImageRequest(any(), any())).thenReturn(imageV4Response);
+        String enterpriseJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
+        StackV4Request stackV4Request = JsonUtil.readValue(enterpriseJson, StackV4Request.class);
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(stackV4Request);
+
+        // By runtime in the request and not in the image
+        SdxClusterRequest sdxClusterRequest = getSdxClusterRequest();
+        sdxClusterRequest.setJavaVersion(21);
+        sdxClusterRequest.setEnvironment("env-name");
+        sdxClusterRequest.setEnableRangerRms(false);
+
+        // MEDIUM_DUTY and 7.2.17 => non throws
+        sdxClusterRequest.setClusterShape(MEDIUM_DUTY_HA);
+        sdxClusterRequest.setRuntime("7.2.17");
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+
+        // MEDIUM_DUTY and 7.2.18 => throws
+        sdxClusterRequest.setRuntime("7.2.19");
+        assertThrows(BadRequestException.class,
+            () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+
+        // MEDIUM_DUTY and 7.3.0 => throws
+        sdxClusterRequest.setRuntime("7.3.0");
+        assertThrows(BadRequestException.class,
+            () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+
+        // MEDIUM_DUTY and 7.2.16 => non throws
+        sdxClusterRequest.setRuntime("7.2.16");
+        sdxClusterRequest.setClusterShape(MEDIUM_DUTY_HA);
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+
+        // LIGHT_DUTY and 7.2.18 => non throws
+        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+
+        // LIGHT_DUTY and 7.2.17 => non throws
+        sdxClusterRequest.setRuntime("7.2.17");
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+
+        // ENTERPRISE and 7.2.18 => non throws
+        sdxClusterRequest.setRuntime("7.2.18");
+        sdxClusterRequest.setClusterShape(ENTERPRISE);
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+
+        // ENTERPRISE and 7.2.17 => non throws
+        sdxClusterRequest.setRuntime("7.2.17");
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+
+        // ENTERPRISE and 7.2.16 => throws
+        sdxClusterRequest.setRuntime("7.2.16");
+        assertThrows(BadRequestException.class,
+            () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+
+        // By runtime in the image and not in the request
+        sdxClusterRequest.setRuntime(null);
+
+        // MEDIUM_DUTY and 7.2.17 => non throws
+        baseStackDetailsV4Response.setVersion("7.2.17");
+        imageV4Response.setStackDetails(baseStackDetailsV4Response);
+        sdxClusterRequest.setClusterShape(MEDIUM_DUTY_HA);
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+
+        // MEDIUM_DUTY and 7.2.18 => throws
+        baseStackDetailsV4Response.setVersion("7.2.18");
+        imageV4Response.setStackDetails(baseStackDetailsV4Response);
+        assertThrows(BadRequestException.class,
+            () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+
+        // MEDIUM_DUTY and 7.2.16 => non throws
+        baseStackDetailsV4Response.setVersion("7.2.16");
+        imageV4Response.setStackDetails(baseStackDetailsV4Response);
+        sdxClusterRequest.setClusterShape(MEDIUM_DUTY_HA);
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
+            () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+
+        // LIGHT_DUTY and 7.2.18 => non throws
+        baseStackDetailsV4Response.setVersion("7.2.18");
+        imageV4Response.setStackDetails(baseStackDetailsV4Response);
+        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
+            () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+
+        // LIGHT_DUTY and 7.2.17 => non throws
+        baseStackDetailsV4Response.setVersion("7.2.17");
+        imageV4Response.setStackDetails(baseStackDetailsV4Response);
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+
+        // ENTERPRISE and 7.2.18 => non throws
+        baseStackDetailsV4Response.setVersion("7.2.18");
+        imageV4Response.setStackDetails(baseStackDetailsV4Response);
+        sdxClusterRequest.setClusterShape(ENTERPRISE);
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+
+        // ENTERPRISE and 7.2.17 => non throws
+        baseStackDetailsV4Response.setVersion("7.2.17");
+        imageV4Response.setStackDetails(baseStackDetailsV4Response);
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+
+        // ENTERPRISE and 7.2.16 => throws
+        baseStackDetailsV4Response.setVersion("7.2.16");
+        imageV4Response.setStackDetails(baseStackDetailsV4Response);
+        assertThrows(BadRequestException.class,
+            () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+    }
+
+    @Test
+    void testShapeValidationOfSDXResize() throws IOException {
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setClusterName("dl-name");
+        sdxCluster.setEnvName("env-name");
+        sdxCluster.setCloudStorageBaseLocation("s3a://bucket/path");
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(eq("hortonworks"), eq("dl-name")))
+            .thenReturn(Optional.of(sdxCluster));
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(eq("hortonworks"))).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(eq("hortonworks"), eq(ENVIRONMENT_CRN)))
+            .thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(eq("dl-name"), eq(USER_CRN))).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(eq("dl-name"), eq(USER_CRN))).thenReturn(false);
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.STOPPED);
+        StackImageV4Response image = new StackImageV4Response();
+        image.setOs(OS_NAME);
+        image.setCatalogName(CATALOG_NAME);
+        stackV4Response.setImage(image);
+        when(stackV4Endpoint.get(eq(0L), eq("dl-name"), any(), eq("hortonworks"))).thenReturn(stackV4Response);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse();
+        when(environmentClientService.getByName(eq("env-name"))).thenReturn(detailedEnvironmentResponse);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(USER_CRN);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        String enterpriseJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
+        StackV4Request stackV4Request = JsonUtil.readValue(enterpriseJson, StackV4Request.class);
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(stackV4Request);
+
+        // By runtime in the request and not in the image
+        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
+        sdxClusterResizeRequest.setEnvironment("env-name");
+        sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
+
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.setRuntime("7.2.16");
+        // LIGHT_DUTY to MEDIUM_DUTY and 7.2.16 => non throws
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "dl-name", sdxClusterResizeRequest)));
+
+        // LIGHT_DUTY to MEDIUM_DUTY and 7.2.17 => non throws
+        sdxCluster.setRuntime("7.2.16");
+        assertDoesNotThrow(
+            () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "dl-name", sdxClusterResizeRequest)));
+
+        // LIGHT_DUTY to MEDIUM_DUTY and 7.2.18 => throws
+        sdxCluster.setRuntime("7.2.18");
+        assertThrows(BadRequestException.class,
+            () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "dl-name", sdxClusterResizeRequest)));
+
+        // LIGHT_DUTY to MEDIUM_DUTY and 7.2.19 => throws
+        sdxCluster.setRuntime("7.2.19");
+        assertThrows(BadRequestException.class,
+            () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "dl-name", sdxClusterResizeRequest)));
+
+        // LIGHT_DUTY to MEDIUM_DUTY and 7.3.0 => throws
+        sdxCluster.setRuntime("7.3.0");
+        assertThrows(BadRequestException.class,
+            () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "dl-name", sdxClusterResizeRequest)));
+
+        // MEDIUM_DUTY to ENTERPRISE and 7.2.17 => non throws
+        sdxCluster.setRuntime("7.2.17");
+        sdxCluster.setClusterShape(MEDIUM_DUTY_HA);
+        sdxClusterResizeRequest.setClusterShape(ENTERPRISE);
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "dl-name", sdxClusterResizeRequest)));
+
+        // MEDIUM_DUTY to ENTERPRISE and 7.3.0 => non throws
+        sdxCluster.setRuntime("7.3.0");
+        sdxCluster.setClusterShape(MEDIUM_DUTY_HA);
+        sdxClusterResizeRequest.setClusterShape(ENTERPRISE);
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "dl-name", sdxClusterResizeRequest)));
+
+        // MEDIUM_DUTY to ENTERPRISE and 7.2.16 => throws
+        sdxCluster.setRuntime("7.2.16");
+        sdxCluster.setClusterShape(MEDIUM_DUTY_HA);
+        sdxClusterResizeRequest.setClusterShape(ENTERPRISE);
+        assertThrows(BadRequestException.class,
+            () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "dl-name", sdxClusterResizeRequest)));
+    }
+
     private DetailedEnvironmentResponse getDetailedEnvironmentResponse() {
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCreator(USER_CRN);
