@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -58,6 +59,8 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -186,6 +189,18 @@ public class ClusterUpgradeValidationActions {
                 LOGGER.info("Starting cluster upgrade image validation.");
                 UpgradeImageInfo upgradeImageInfo = (UpgradeImageInfo) variables.get(UPGRADE_IMAGE_INFO);
                 Image targetImage = (Image) variables.get(TARGET_IMAGE);
+                Stack stack = stackService.getById(payload.getResourceId());
+                Database database = stack.getDatabase();
+                if (targetImage != null
+                        && database != null
+                        && "redhat8".equals(targetImage.getOsType())
+                        && database.getExternalDatabaseAvailabilityType() != null
+                        && database.getExternalDatabaseAvailabilityType().isEmbedded()
+                        && "10".equals(database.getExternalDatabaseEngineVersion())) {
+                    // temporary hotfix to prevent failing upgrades to rhel8 when the cluster has postgres 10 embedded database
+                    LOGGER.warn("Embedded database is on Postgres 10 version, upgrade is not possible.");
+                    throw new BadRequestException("Embedded database is on Postgres 10 version, upgrade is not possible.");
+                }
                 CloudStack cloudStack = context.getCloudStack().replaceImage(targetImage);
                 ClusterUpgradeImageValidationEvent event = new ClusterUpgradeImageValidationEvent(payload.getResourceId(), payload.getImageId(), cloudStack,
                         context.getCloudCredential(), context.getCloudContext(), upgradeImageInfo.targetStatedImage().getImage());
