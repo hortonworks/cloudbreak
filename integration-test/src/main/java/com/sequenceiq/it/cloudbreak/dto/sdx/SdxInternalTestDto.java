@@ -653,14 +653,15 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     @Override
     public void setMasterPrivateIp(TestContext testContext) {
         refreshResponse(testContext, testContext.getSdxClient());
-        Set<InstanceMetaDataV4Response> metadata = getInstanceMetaData(MASTER.getName());
-        Optional<InstanceMetaDataV4Response> instanceMetaData = metadata.stream()
-                .findFirst();
-        sdxMasterPrivateIp = instanceMetaData.isPresent() ? instanceMetaData.get().getPrivateIp() : null;
+        String hostGroupName = MASTER.getName();
+        InstanceMetaDataV4Response instanceMetaData = getInstanceMetaData(hostGroupName).stream()
+                .findFirst()
+                .orElseThrow(() -> new TestFailException("Cannot find valid instance group with this name: " + hostGroupName));
+        sdxMasterPrivateIp = instanceMetaData.getPrivateIp();
         if (StringUtils.isNotBlank(sdxMasterPrivateIp)) {
-            LOGGER.info("Found {} private IP for {} host group!", sdxMasterPrivateIp, MASTER.getName());
+            LOGGER.info("Found {} private IP for {} host group!", sdxMasterPrivateIp, hostGroupName);
         } else {
-            throw new TestFailException("Cannot find valid instance group with this name: " + MASTER.getName());
+            LOGGER.info("No private IP for {} host group, current instance status is: {}", hostGroupName, instanceMetaData.getInstanceStatus());
         }
     }
 

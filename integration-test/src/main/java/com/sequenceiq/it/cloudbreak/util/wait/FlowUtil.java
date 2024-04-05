@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.util.wait;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +20,8 @@ import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.MicroserviceClient;
@@ -78,13 +81,13 @@ public class FlowUtil {
                             testDto, name, e.getMessage()));
                 }
                 testContext.getExceptionMap().put(String.format("Cloudbreak await for flow %s", testDto), e);
-                if (CloudPlatform.YARN.equalsIgnoreCase(testDto.getCloudPlatform().name())) {
-                    String testDtoName = testDto.getClass().getSimpleName();
-                    if (StringUtils.equalsIgnoreCase(testDtoName, "SdxInternalTestDto") || StringUtils.equalsIgnoreCase(testDtoName, "DistroXTestDto")) {
+                if (CloudPlatform.YARN.equals(testDto.getCloudPlatform())) {
+                    Class<? extends CloudbreakTestDto> testDtoClass = testDto.getClass();
+                    if (Set.of(SdxInternalTestDto.class, DistroXTestDto.class).contains(testDtoClass)) {
                         testDto.setMasterPrivateIp(testContext);
                     } else {
                         LOGGER.warn("YCloud cluster logs have not been generated to '{}' testDTO (appropriate resources: Data Lake and Data Hub)!",
-                                testDtoName);
+                                testDtoClass);
                     }
                 }
             }
