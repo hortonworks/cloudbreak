@@ -1,9 +1,11 @@
 package com.sequenceiq.common.model;
 
+import java.util.Arrays;
+
 public enum OsType {
 
-    CENTOS7("centos7", "redhat7", "CentOS 7", "CentOS 7"),
-    RHEL8("redhat8", "redhat8", "Red Hat Enterprise Linux 8", "RHEL 8");
+    CENTOS7("centos7", "redhat7", "CentOS 7", "CentOS 7", "el7"),
+    RHEL8("redhat8", "redhat8", "Red Hat Enterprise Linux 8", "RHEL 8", "el8");
 
     private final String os;
 
@@ -13,11 +15,14 @@ public enum OsType {
 
     private final String shortName;
 
-    OsType(String os, String osType, String name, String shortName) {
+    private final String parcelPostfix;
+
+    OsType(String os, String osType, String name, String shortName, String parcelPostfix) {
         this.os = os;
         this.osType = osType;
         this.name = name;
         this.shortName = shortName;
+        this.parcelPostfix = parcelPostfix;
     }
 
     public String getOs() {
@@ -34,5 +39,16 @@ public enum OsType {
 
     public String getShortName() {
         return shortName;
+    }
+
+    public String getParcelPostfix() {
+        return parcelPostfix;
+    }
+
+    public static OsType getByOsTypeString(String osType) {
+        return Arrays.stream(values())
+                .filter(e -> e.osType.equals(osType))
+                .findFirst()
+                .orElse(null);
     }
 }
