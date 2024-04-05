@@ -9,6 +9,7 @@ import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.ext.ExceptionMapper;
 
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.ServerProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -40,6 +41,11 @@ public class EndpointConfig extends ResourceConfig {
     private void init() {
         registerEndpoints();
         registerExceptionMappers();
+        setProperties();
+    }
+
+    private void setProperties() {
+        property(ServerProperties.WADL_FEATURE_DISABLE, true);
     }
 
     private void registerExceptionMappers() {
