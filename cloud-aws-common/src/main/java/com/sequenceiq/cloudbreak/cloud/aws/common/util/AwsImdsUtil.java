@@ -39,11 +39,15 @@ public class AwsImdsUtil {
 
     public void validateInstanceMetadataUpdate(UpdateType updateType, CloudStack stack, AuthenticatedContext authenticatedContext) {
         if (INSTANCE_METADATA_UPDATE_TOKEN_REQUIRED.equals(updateType)) {
+            String accountId = authenticatedContext.getCloudContext().getAccountId();
+            if (!entitlementService.isAwsImdsV2Enforced(accountId)) {
+                throw new CloudbreakServiceException(String.format("Instance metadata update is not supported for this tenant (%s)!", accountId));
+            }
+            String imageId = stack.getImage().getImageId();
             Map<String, String> packageVersions = stack.getImage().getPackageVersions();
-            if (!entitlementService.isAwsImdsV2Enforced(authenticatedContext.getCloudContext().getAccountId()) ||
-                    !packageVersions.containsKey(ImagePackageVersion.IMDS_VERSION.getKey()) ||
+            if (!packageVersions.containsKey(ImagePackageVersion.IMDS_VERSION.getKey()) ||
                     !StringUtils.equals(packageVersions.get(ImagePackageVersion.IMDS_VERSION.getKey()), AWS_IMDS_VERSION_V2)) {
-                throw new CloudbreakServiceException("Instance metadata update is not supported for this tenant!");
+                throw new CloudbreakServiceException(String.format("Instance metadata update is not supported for this image: %s!", imageId));
             }
         }
     }
