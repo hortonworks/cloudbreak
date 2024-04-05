@@ -547,7 +547,11 @@ public class AzureClient {
     public Set<AvailabilityZoneId> getAvailabilityZone(String resourceGroup, String vmName) {
         return handleException(() -> {
             VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, vmName);
-            return Objects.nonNull(vm) ? vm.availabilityZones() : Collections.emptySet();
+            if (Objects.isNull(vm) || Objects.isNull(vm.availabilityZones())) {
+                return Collections.emptySet();
+            } else {
+                return vm.availabilityZones();
+            }
         });
     }
 
