@@ -49,17 +49,22 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
         return responses;
     }
 
-    private List<SimpleRemoteEnvironmentResponse> getEnvironmentsFromPrivateControlPlane(PrivateControlPlane item) {
+    private List<SimpleRemoteEnvironmentResponse> getEnvironmentsFromPrivateControlPlane(PrivateControlPlane controlPlane) {
+        LOGGER.debug("The processing of private control plane('{}') is executed by thread: {}", controlPlane.getName(), Thread.currentThread().getName());
         List<SimpleRemoteEnvironmentResponse> responses = new ArrayList<>();
         try {
-            responses = measure(() -> clusterProxyHybridClient.readConfig(item.getResourceCrn())
+            responses = measure(() -> clusterProxyHybridClient.readConfig(controlPlane.getResourceCrn())
                     .getEnvironments()
                     .stream()
                     .parallel()
-                    .map(environment -> privateControlPlaneEnvironmentToRemoteEnvironmentConverter.convert(environment, item))
-                    .collect(Collectors.toList()), LOGGER, "Cluster proxy call took us {} ms for pvc {}", item.getResourceCrn());
+                    .map(environment -> {
+                        LOGGER.debug("Remote environment list on private control plane: {} will be executed by thread: {}", controlPlane.getName(),
+                                Thread.currentThread().getName());
+                        return privateControlPlaneEnvironmentToRemoteEnvironmentConverter.convert(environment, controlPlane);
+                    })
+                    .collect(Collectors.toList()), LOGGER, "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
         } catch (Exception e) {
-            LOGGER.warn("Failed to query environments from url {}", item.getUrl());
+            LOGGER.warn("Failed to query environments from url {}", controlPlane.getUrl());
         }
         return responses;
     }

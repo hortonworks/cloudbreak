@@ -13,9 +13,9 @@ import com.sequenceiq.thunderhead.controller.remotecluster.domain.MockRemoteEnvi
 import com.sequenceiq.thunderhead.controller.remotecluster.domain.MockRemoteEnvironmentResponses;
 
 @RestController
-public class MockThunderheadRemoteClusterApiController {
+public class MockClusterProxyPvcControlPlaneApiController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MockThunderheadRemoteClusterApiController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MockClusterProxyPvcControlPlaneApiController.class);
 
     @PostMapping("/cluster-proxy/proxy/{crn}/PvcControlPlane/api/v1/environments2/listEnvironments")
     public ResponseEntity<MockRemoteEnvironmentResponses> describeCustomConfig(@PathVariable("crn") String crn) {

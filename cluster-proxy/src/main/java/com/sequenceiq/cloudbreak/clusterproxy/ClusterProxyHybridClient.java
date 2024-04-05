@@ -53,6 +53,10 @@ public class ClusterProxyHybridClient {
             multiplier = CLUSTER_PROXY_REMOTE_CLUSTER_READ_RETRY_MULTIPLIER,
             maxDelay = CLUSTER_PROXY_REMOTE_CLUSTER_READ_RETRY_MAX_DELAY),
             maxAttempts = CLUSTER_PROXY_REMOTE_CLUSTER_READ_RETRY_MAX_ATTEMTPS)
+    public RemoteEnvironmentResponses readConfigWithRetry(String clusterIdentifier) {
+        return readConfig(clusterIdentifier);
+    }
+
     public RemoteEnvironmentResponses readConfig(String clusterIdentifier) {
         String readConfigUrl = String.format(clusterProxyConfiguration.getClusterProxyUrl() + REMOTE_CLUSTER_READ_CONFIG_PATH, clusterIdentifier);
         try {
