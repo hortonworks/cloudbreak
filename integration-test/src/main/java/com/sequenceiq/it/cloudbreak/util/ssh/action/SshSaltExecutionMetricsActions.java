@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -27,6 +28,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -52,11 +55,12 @@ import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.salt.SaltFunctionReport;
 import com.sequenceiq.it.cloudbreak.salt.SaltHighstateReport;
 import com.sequenceiq.it.cloudbreak.salt.SaltStateReport;
+import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
 
 import net.schmizz.sshj.SSHClient;
 
 @Component
-public class SshSaltExecutionMetricsActions extends SshJClientActions {
+public class SshSaltExecutionMetricsActions {
 
     private static final String DEFAULT_TEST_METHOD_NAME = "unknown";
 
@@ -64,6 +68,12 @@ public class SshSaltExecutionMetricsActions extends SshJClientActions {
 
     @Value("${integrationtest.outputdir:.}")
     private String saltMetricsWorkingDirectory;
+
+    @Inject
+    private SshJClientActions sshJClientActions;
+
+    @Inject
+    private SshJClient sshJClient;
 
     public List<SaltHighstateReport> getSaltExecutionMetrics(String environmentCrn, String resourceName, MicroserviceClient client, String serviceName) {
         return getSaltExecutionMetrics(environmentCrn, resourceName, client, saltMetricsWorkingDirectory, serviceName);
@@ -76,7 +86,7 @@ public class SshSaltExecutionMetricsActions extends SshJClientActions {
         try {
             if (!saltMasterIp.isBlank()) {
                 String extractSaltMetricsCommand = getExtractSaltMetricsCommand(serviceName);
-                Pair<Integer, String> cmdOut = executeSshCommand(saltMasterIp, extractSaltMetricsCommand);
+                Pair<Integer, String> cmdOut = sshJClientActions.executeSshCommand(saltMasterIp, extractSaltMetricsCommand);
                 LOGGER.info("SSH test result on IP: [{}]: Return code: [{}], Result: {}", saltMasterIp, cmdOut.getLeft(), cmdOut.getRight());
 
                 downloadSaltExecutionMetrics(saltMasterIp, workingDirectoryLocation, serviceName);
@@ -98,7 +108,7 @@ public class SshSaltExecutionMetricsActions extends SshJClientActions {
         String fileName = String.format("salt_states_totalduration_report_%s_%s.log", serviceName,
                 testContext.getTestMethodName().orElse(DEFAULT_TEST_METHOD_NAME));
         File outputDirectory = new File(saltMetricsWorkingDirectory);
-        String filePath = outputDirectory.getPath() + System.getProperty("file.separator") + fileName;
+        String filePath = outputDirectory.getPath() + FileSystems.getDefault().getSeparator() + fileName;
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write(saltStatesTotalDurations.toString());
             LOGGER.info("Log file for Salt States Totalduration report has been created successfully at: {}", filePath);
@@ -107,18 +117,8 @@ public class SshSaltExecutionMetricsActions extends SshJClientActions {
         }
     }
 
-    public void writeSaltHighstateReportsToFiles(TestContext testContext, String workingDirectoryLocation, String serviceName,
-            List<SaltHighstateReport> saltHighstateReportList) {
-        try {
-            new ObjectMapper().writeValue(new File(format("%s/salt_metrics_report_%s_%s.json", workingDirectoryLocation, serviceName,
-                    testContext.getTestMethodName().orElse(DEFAULT_TEST_METHOD_NAME))), saltHighstateReportList);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private void downloadSaltExecutionMetrics(String instanceIp, String workingDirectoryLocation, String serviceName) throws IOException {
-        SSHClient sshClient = createSshClient(instanceIp, null, null, null);
+        SSHClient sshClient = sshJClient.createSshClient(instanceIp, null, null, null);
         sshClient.newSCPFileTransfer().download(format("/home/cloudbreak/salt_execution_metrics_%s.zip", serviceName), workingDirectoryLocation);
 
         if (Files.exists(Path.of(format("%s/salt_execution_metrics_%s.zip", workingDirectoryLocation, serviceName)))) {

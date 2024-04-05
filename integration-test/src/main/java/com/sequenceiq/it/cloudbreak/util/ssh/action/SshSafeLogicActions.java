@@ -3,6 +3,8 @@ package com.sequenceiq.it.cloudbreak.util.ssh.action;
 import java.util.Map;
 import java.util.Set;
 
+import jakarta.inject.Inject;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +14,7 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
 
 @Component
-public class SshSafeLogicActions extends SshJClient {
+public class SshSafeLogicActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SshSafeLogicActions.class);
 
@@ -30,9 +32,12 @@ public class SshSafeLogicActions extends SshJClient {
 
     private static final String EXPECTED_MAX_AES_KEY_LENGTH = "2147483647";
 
+    @Inject
+    private SshJClient sshJClient;
+
     public boolean hasSafeLogicBinaries(Set<String> ipAddresses) {
         LOGGER.info("Getting SafeLogic binaries on instances {}", ipAddresses);
-        Map<String, Pair<Integer, String>> results = executeCommands(ipAddresses, LIST_JRE_EXTENSIONS_COMMAND);
+        Map<String, Pair<Integer, String>> results = sshJClient.executeCommands(ipAddresses, LIST_JRE_EXTENSIONS_COMMAND);
         LOGGER.info("List JRE extensions output on instances: {}", results);
         Boolean result = null;
 
@@ -54,7 +59,7 @@ public class SshSafeLogicActions extends SshJClient {
 
     public boolean hasCryptoComplyForJavaSecurityProvider(Set<String> ipAddresses) {
         LOGGER.info("Getting Java security providers on instances {}", ipAddresses);
-        Map<String, Pair<Integer, String>> results = executeCommands(ipAddresses, LIST_JAVA_SECURITY_PROVIDERS_COMMAND);
+        Map<String, Pair<Integer, String>> results = sshJClient.executeCommands(ipAddresses, LIST_JAVA_SECURITY_PROVIDERS_COMMAND);
         LOGGER.info("List Java security providers output on instances: {}", results);
         Boolean result = null;
 
@@ -76,7 +81,7 @@ public class SshSafeLogicActions extends SshJClient {
 
     public void validateMaxAESKeyLength(Set<String> ipAddresses) {
         LOGGER.info("Getting max AES key length on instances {}", ipAddresses);
-        Map<String, Pair<Integer, String>> results = executeCommands(ipAddresses, GET_MAX_AES_KEY_LENGTH_COMMAND);
+        Map<String, Pair<Integer, String>> results = sshJClient.executeCommands(ipAddresses, GET_MAX_AES_KEY_LENGTH_COMMAND);
         LOGGER.info("Get max AES key length output on instances: {}", results);
         String result = null;
 

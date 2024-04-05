@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import jakarta.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -17,13 +19,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
 
 import net.schmizz.sshj.SSHClient;
 
 @Component
-public class ScpDownloadClusterLogsActions extends SshJClientActions {
-
-    private static final String DEFAULT_TEST_METHOD_NAME = "unknown";
+public class ScpDownloadClusterLogsActions {
 
     private static final String LOG_FOLDER_NAME = "yarn_cluster_logs";
 
@@ -31,6 +32,12 @@ public class ScpDownloadClusterLogsActions extends SshJClientActions {
 
     @Value("${integrationtest.outputdir:.}")
     private String workingDirectory;
+
+    @Inject
+    private SshJClientActions sshJClientActions;
+
+    @Inject
+    private SshJClient sshJClient;
 
     public void downloadClusterLogs(String environmentCrn, String resourceName, String masterIp, String serviceName) {
         downloadClusterLogs(environmentCrn, resourceName, masterIp, workingDirectory, serviceName);
@@ -58,10 +65,11 @@ public class ScpDownloadClusterLogsActions extends SshJClientActions {
 
     private void copyLogsToCloudbreak(String instanceIp, String sourceFilePath, String destinationDirectory) {
         String mkdirLogsDirectoryCommand = format("mkdir -p %s", destinationDirectory);
-        executeSshCommand(instanceIp, mkdirLogsDirectoryCommand);
-        executeSshCommand(instanceIp, format("sudo cp -ru %s %s/ && sudo chown -R cloudbreak:cloudbreak %s", sourceFilePath, destinationDirectory,
+        sshJClientActions.executeSshCommand(instanceIp, mkdirLogsDirectoryCommand);
+        sshJClientActions.executeSshCommand(instanceIp, format("sudo cp -ru %s %s/ && sudo chown -R cloudbreak:cloudbreak %s", sourceFilePath,
+                destinationDirectory, destinationDirectory));
+        sshJClientActions.executeSshCommand(instanceIp, format("tar -czf %s.tar.gz %s && rm -rf %s", destinationDirectory, destinationDirectory,
                 destinationDirectory));
-        executeSshCommand(instanceIp, format("tar -czf %s.tar.gz %s && rm -rf %s", destinationDirectory, destinationDirectory, destinationDirectory));
     }
 
     private void download(String instanceIp, String sourceFilePath, String destinationPath) {
@@ -69,8 +77,8 @@ public class ScpDownloadClusterLogsActions extends SshJClientActions {
     }
 
     private void download(String instanceIp, String user, String password, String privateKeyFilePath, String sourceFilePath, String destinationPath) {
-        try (SSHClient sshClient = createSshClient(instanceIp, user, password, privateKeyFilePath)) {
-            download(sshClient, sourceFilePath, destinationPath);
+        try (SSHClient sshClient = sshJClient.createSshClient(instanceIp, user, password, privateKeyFilePath)) {
+            sshJClient.download(sshClient, sourceFilePath, destinationPath);
             Log.log(LOGGER, format("File download [%s] from host [%s] has been done.", sourceFilePath, instanceIp));
         } catch (Exception e) {
             Log.error(LOGGER, format("File download [%s] from host [%s] is failing! %s", sourceFilePath, instanceIp, e.getMessage()));

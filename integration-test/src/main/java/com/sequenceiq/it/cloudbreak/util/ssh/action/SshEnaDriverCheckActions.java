@@ -23,17 +23,20 @@ import com.sequenceiq.it.cloudbreak.util.aws.AwsCloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
 
 @Component
-public class SshEnaDriverCheckActions extends SshJClient {
+public class SshEnaDriverCheckActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SshEnaDriverCheckActions.class);
 
     @Inject
     private AwsCloudFunctionality awsCloudFunctionality;
 
+    @Inject
+    private SshJClient sshJClient;
+
     private void checkEnaDriver(String instanceIp) {
         String modinfoEnaCmd = "/usr/sbin/modinfo ena";
         String wrongResult = "modinfo: ERROR: Module ena not found.";
-        Pair<Integer, String> result = executeCommand(instanceIp, modinfoEnaCmd);
+        Pair<Integer, String> result = sshJClient.executeCommand(instanceIp, modinfoEnaCmd);
         if (result.getValue().startsWith(wrongResult)) {
             LOGGER.error(format("ENA driver is not available at '%s' instance!", instanceIp));
             throw new TestFailException(format("ENA driver is not available at '%s' instance!", instanceIp));

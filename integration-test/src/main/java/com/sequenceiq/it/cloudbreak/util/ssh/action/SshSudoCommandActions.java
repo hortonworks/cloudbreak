@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import jakarta.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -16,9 +18,12 @@ import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
 import net.schmizz.sshj.SSHClient;
 
 @Component
-public class SshSudoCommandActions extends SshJClient {
+public class SshSudoCommandActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SshSudoCommandActions.class);
+
+    @Inject
+    private SshJClient sshJClient;
 
     public void executeCommand(Set<String> ipAddresses, String user, String password, String... sudoCommands) {
         ipAddresses.stream().forEach(ipAddress -> {
@@ -42,8 +47,8 @@ public class SshSudoCommandActions extends SshJClient {
     }
 
     private Pair<Integer, String> executeCommand(String instanceIP, String user, String password, String command) {
-        try (SSHClient sshClient = createSshClient(instanceIP, user, password, null)) {
-            return execute(sshClient, command);
+        try (SSHClient sshClient = sshJClient.createSshClient(instanceIP, user, password, null)) {
+            return sshJClient.execute(sshClient, command);
         } catch (Exception e) {
             throw new TestFailException(" SSH fail on [" + instanceIP + "] while executing command [" + command + "].", e);
         }

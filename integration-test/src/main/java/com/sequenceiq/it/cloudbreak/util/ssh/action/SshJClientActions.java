@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import jakarta.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -48,8 +50,11 @@ import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
 import net.schmizz.sshj.SSHClient;
 
 @Component
-public class SshJClientActions extends SshJClient {
+public class SshJClientActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(SshJClientActions.class);
+
+    @Inject
+    private SshJClient sshJClient;
 
     private List<String> getInstanceMetadataIps(Set<InstanceMetaDataResponse> instanceMetaDatas, boolean publicIp) {
         return instanceMetaDatas.stream().map(instanceMetaDataResponse -> {
@@ -315,8 +320,8 @@ public class SshJClientActions extends SshJClient {
     }
 
     private Pair<Integer, String> executeSshCommand(String instanceIp, String user, String password, String privateKeyFilePath, String command) {
-        try (SSHClient sshClient = createSshClient(instanceIp, user, password, privateKeyFilePath)) {
-            Pair<Integer, String> cmdOut = execute(sshClient, command);
+        try (SSHClient sshClient = sshJClient.createSshClient(instanceIp, user, password, privateKeyFilePath)) {
+            Pair<Integer, String> cmdOut = sshJClient.execute(sshClient, command);
             Log.log(LOGGER, " Command exit status '%s' and result '%s'. ", cmdOut.getKey(), cmdOut.getValue());
             return cmdOut;
         } catch (Exception e) {

@@ -22,9 +22,6 @@ public class SshJUtil {
     @Inject
     private SshJClientActions sshJClientActions;
 
-    private SshJUtil() {
-    }
-
     public <T extends AbstractSdxTestDto> T checkFilesOnHostByNameAndPath(T testDto, List<InstanceGroupV4Response> instanceGroups,
             List<String> hostGroupNames, String filePath, String fileName, long requiredNumberOfFiles, String user, String password) {
         return sshJClientActions.checkFilesByNameAndPath(testDto, instanceGroups, hostGroupNames, filePath, fileName, requiredNumberOfFiles, user,

@@ -18,6 +18,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -38,9 +39,6 @@ public class SshJClient {
     @Value("${integrationtest.defaultPrivateKeyFile}")
     private String defaultPrivateKeyFilePath;
 
-    public SshJClient() {
-    }
-
     @PostConstruct
     private void logSetup() {
         if (StringUtils.isEmpty(defaultPrivateKeyFilePath)) {
@@ -54,7 +52,8 @@ public class SshJClient {
         }
     }
 
-    protected SSHClient createSshClient(String host, String user, String password, String privateKeyFilePath) throws IOException {
+    @Retryable(retryFor = net.schmizz.sshj.userauth.UserAuthException.class)
+    public SSHClient createSshClient(String host, String user, String password, String privateKeyFilePath) throws IOException {
         SSHClient client = new SSHClient();
 
         client.addHostKeyVerifier(new PromiscuousVerifier());
@@ -84,19 +83,19 @@ public class SshJClient {
         return client;
     }
 
-    protected void upload(SSHClient ssh, String sourceFilePath, String destinationPath) throws IOException {
+    public void upload(SSHClient ssh, String sourceFilePath, String destinationPath) throws IOException {
         LOGGER.info("Waiting for [{}] file to be uploaded to [{}]...", sourceFilePath, destinationPath);
         ssh.setTimeout(120000);
         ssh.newSCPFileTransfer().upload(sourceFilePath, destinationPath);
     }
 
-    protected void download(SSHClient ssh, String sourceFilePath, String destinationPath) throws IOException {
+    public void download(SSHClient ssh, String sourceFilePath, String destinationPath) throws IOException {
         LOGGER.info("Waiting for [{}] file to be downloaded to [{}]...", sourceFilePath, destinationPath);
         ssh.setTimeout(120000);
         ssh.newSCPFileTransfer().download(sourceFilePath, destinationPath);
     }
 
-    protected void uploadToHost(String instanceIP, String sourceFile, String destinationPath) {
+    public void uploadToHost(String instanceIP, String sourceFile, String destinationPath) {
         try (SSHClient sshClient = createSshClient(instanceIP, null, null, null)) {
             upload(sshClient, sourceFile, destinationPath);
             Log.log(LOGGER, format("File upload [%s] to host [%s] has been done.", sourceFile, instanceIP));
@@ -106,7 +105,7 @@ public class SshJClient {
         }
     }
 
-    protected Pair<Integer, String> execute(SSHClient ssh, String command) throws IOException {
+    public Pair<Integer, String> execute(SSHClient ssh, String command) throws IOException {
         LOGGER.info("Waiting to SSH command to be executed...");
         try (Session session = startSshSession(ssh);
             Command cmd = session.exec(command);
@@ -118,13 +117,13 @@ public class SshJClient {
         }
     }
 
-    protected Map<String, Pair<Integer, String>> executeCommands(Set<String> ipAddresses, String command) {
+    public Map<String, Pair<Integer, String>> executeCommands(Set<String> ipAddresses, String command) {
         Map<String, Pair<Integer, String>> results = new HashMap<>();
         ipAddresses.forEach(ipAddress -> results.put(ipAddress, executeCommand(ipAddress, command)));
         return results;
     }
 
-    protected Pair<Integer, String> executeCommand(String instanceIP, String command) {
+    public Pair<Integer, String> executeCommand(String instanceIP, String command) {
         try (SSHClient sshClient = createSshClient(instanceIP, null, null, null)) {
             Pair<Integer, String> cmdOut = execute(sshClient, command);
             Log.log(LOGGER, format("Command exit status [%s] and result [%s].", cmdOut.getKey(), cmdOut.getValue()));
