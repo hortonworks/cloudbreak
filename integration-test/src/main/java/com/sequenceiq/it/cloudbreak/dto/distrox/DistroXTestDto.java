@@ -461,14 +461,15 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     @Override
     public void setMasterPrivateIp(TestContext testContext) {
         refreshResponse(testContext, testContext.getCloudbreakClient());
-        Set<InstanceMetaDataV4Response> metadata = getInstanceMetaData(MASTER.getName());
-        Optional<InstanceMetaDataV4Response> instanceMetaData = metadata.stream()
-                .findFirst();
-        distroxMasterPrivateIp = instanceMetaData.isPresent() ? instanceMetaData.get().getPrivateIp() : null;
+        String hostGroupName = MASTER.getName();
+        InstanceMetaDataV4Response instanceMetaData = getInstanceMetaData(hostGroupName).stream()
+                .findFirst()
+                .orElseThrow(() -> new TestFailException("Cannot find valid instance group with this name: " + hostGroupName));
+        distroxMasterPrivateIp = instanceMetaData.getPrivateIp();
         if (StringUtils.isNotBlank(distroxMasterPrivateIp)) {
-            LOGGER.info("Found {} private IP for {} host group!", distroxMasterPrivateIp, MASTER.getName());
+            LOGGER.info("Found {} private IP for {} host group!", distroxMasterPrivateIp, hostGroupName);
         } else {
-            throw new TestFailException("Cannot find valid instance group with this name: " + MASTER.getName());
+            LOGGER.info("No private IP for {} host group, current instance status is: {}", hostGroupName, instanceMetaData.getInstanceStatus());
         }
     }
 
