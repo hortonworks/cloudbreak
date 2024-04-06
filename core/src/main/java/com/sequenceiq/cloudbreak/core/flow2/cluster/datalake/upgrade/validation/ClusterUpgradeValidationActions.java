@@ -193,13 +193,15 @@ public class ClusterUpgradeValidationActions {
                 Database database = stack.getDatabase();
                 if (targetImage != null
                         && database != null
-                        && "redhat8".equals(targetImage.getOsType())
                         && database.getExternalDatabaseAvailabilityType() != null
                         && database.getExternalDatabaseAvailabilityType().isEmbedded()
                         && "10".equals(database.getExternalDatabaseEngineVersion())) {
                     // temporary hotfix to prevent failing upgrades to rhel8 when the cluster has postgres 10 embedded database
-                    LOGGER.warn("Embedded database is on Postgres 10 version, upgrade is not possible.");
-                    throw new BadRequestException("Embedded database is on Postgres 10 version, upgrade is not possible.");
+                    String errorMessage = "Your DataHub is using PostgreSQL 10, which has been at its end-of-life since November 2022" +
+                            " and no longer receives updates. Therefore, upgrading your DataHub directly is not supported." +
+                            " Recommended Action: Recreate your DataHub, which will automatically use PostgreSQL 14.";
+                    LOGGER.warn(errorMessage);
+                    throw new BadRequestException(errorMessage);
                 }
                 CloudStack cloudStack = context.getCloudStack().replaceImage(targetImage);
                 ClusterUpgradeImageValidationEvent event = new ClusterUpgradeImageValidationEvent(payload.getResourceId(), payload.getImageId(), cloudStack,
