@@ -193,7 +193,6 @@ public class ClusterUpgradeValidationActions {
                 Database database = stack.getDatabase();
                 if (targetImage != null
                         && database != null
-                        && "redhat8".equals(targetImage.getOsType())
                         && database.getExternalDatabaseAvailabilityType() != null
                         && database.getExternalDatabaseAvailabilityType().isEmbedded()
                         && "10".equals(database.getExternalDatabaseEngineVersion())) {
