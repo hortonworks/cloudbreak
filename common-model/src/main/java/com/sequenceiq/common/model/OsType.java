@@ -51,4 +51,8 @@ public enum OsType {
                 .findFirst()
                 .orElse(null);
     }
+
+    public static OsType getByOs(String os) {
+        return Arrays.stream(values()).filter(osType -> osType.os.equalsIgnoreCase(os)).findFirst().orElseThrow();
+    }
 }

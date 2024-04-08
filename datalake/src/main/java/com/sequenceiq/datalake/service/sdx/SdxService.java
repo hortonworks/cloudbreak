@@ -156,6 +156,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     public static final String MEDIUM_DUTY_REQUIRED_VERSION = "7.2.7";
 
+    public static final String MEDIUM_DUTY_MAXIMUM_VERSION = "7.2.17";
+
     public static final String ENTERPRISE_DATALAKE_REQUIRED_VERSION = "7.2.17";
 
     public static final String CCMV2_JUMPGATE_REQUIRED_VERSION = "7.2.6";
@@ -1159,28 +1161,11 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private void validateShape(SdxClusterShape shape, String runtime, DetailedEnvironmentResponse environment) {
         ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
         if (SdxClusterShape.MICRO_DUTY.equals(shape)) {
-            if (!entitlementService.microDutySdxEnabled(Crn.safeFromString(environment.getCreator()).getAccountId())) {
-                validationBuilder.error(String.format("Provisioning a micro duty data lake cluster is not enabled for %s. " +
-                        "Contact Cloudera support to enable CDP_MICRO_DUTY_SDX entitlement for the account.", environment.getCloudPlatform()));
-            }
-            if (!isShapeVersionSupportedByRuntime(runtime, MICRO_DUTY_REQUIRED_VERSION)) {
-                validationBuilder.error("Provisioning a Micro Duty SDX shape is only valid for CM version greater than or equal to "
-                        + MICRO_DUTY_REQUIRED_VERSION + " and not " + runtime);
-            }
+            validateMicroDutyShape(runtime, environment, validationBuilder);
         } else if (SdxClusterShape.MEDIUM_DUTY_HA.equals(shape)) {
-            if (!isShapeVersionSupportedByRuntime(runtime, MEDIUM_DUTY_REQUIRED_VERSION)) {
-                validationBuilder.error("Provisioning a Medium Duty SDX shape is only valid for CM version greater than or equal to "
-                        + MEDIUM_DUTY_REQUIRED_VERSION + " and not " + runtime);
-            }
+            validateMediumDutyShape(runtime, validationBuilder);
         } else if (SdxClusterShape.ENTERPRISE.equals(shape)) {
-            if (entitlementService.enterpriseSdxDisabled(ThreadBasedUserCrnProvider.getAccountId())) {
-                validationBuilder.error("Provisioning an enterprise data lake cluster is disabled. " +
-                        "Contact Cloudera support to enable this scale for the account.");
-            }
-            if (!isShapeVersionSupportedByRuntime(runtime, ENTERPRISE_DATALAKE_REQUIRED_VERSION)) {
-                validationBuilder.error("Provisioning an Enterprise SDX shape is only valid for CM version greater than or equal to "
-                        + ENTERPRISE_DATALAKE_REQUIRED_VERSION + " and not " + runtime);
-            }
+            validateEnterpriseShape(runtime, validationBuilder);
         }
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
@@ -1188,13 +1173,55 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     }
 
-    private boolean isShapeVersionSupportedByRuntime(String runtime, String shapeVersion) {
+    private void validateEnterpriseShape(String runtime, ValidationResultBuilder validationBuilder) {
+        if (entitlementService.enterpriseSdxDisabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            validationBuilder.error("Provisioning an enterprise data lake cluster is disabled. " +
+                    "Contact Cloudera support to enable this scale for the account.");
+        }
+        if (!isShapeVersionSupportedByMinimumRuntimeVersion(runtime, ENTERPRISE_DATALAKE_REQUIRED_VERSION)) {
+            validationBuilder.error("Provisioning an Enterprise SDX shape is only valid for CM version greater than or equal to "
+                    + ENTERPRISE_DATALAKE_REQUIRED_VERSION + " and not " + runtime);
+        }
+    }
+
+    private void validateMicroDutyShape(String runtime, DetailedEnvironmentResponse environment, ValidationResultBuilder validationBuilder) {
+        if (!entitlementService.microDutySdxEnabled(Crn.safeFromString(environment.getCreator()).getAccountId())) {
+            validationBuilder.error(String.format("Provisioning a micro duty data lake cluster is not enabled for %s. " +
+                    "Contact Cloudera support to enable CDP_MICRO_DUTY_SDX entitlement for the account.", environment.getCloudPlatform()));
+        }
+        if (!isShapeVersionSupportedByMinimumRuntimeVersion(runtime, MICRO_DUTY_REQUIRED_VERSION)) {
+            validationBuilder.error("Provisioning a Micro Duty SDX shape is only valid for CM version greater than or equal to "
+                    + MICRO_DUTY_REQUIRED_VERSION + " and not " + runtime);
+        }
+    }
+
+    private void validateMediumDutyShape(String runtime, ValidationResultBuilder validationBuilder) {
+        if (!isShapeVersionSupportedByMinimumRuntimeVersion(runtime, MEDIUM_DUTY_REQUIRED_VERSION)) {
+            validationBuilder.error("Provisioning a Medium Duty SDX shape is only valid for CM version greater than or equal to "
+                    + MEDIUM_DUTY_REQUIRED_VERSION + " and not " + runtime);
+        }
+        if (!isShapeVersionSupportedByMaximumRuntimeVersion(runtime, MEDIUM_DUTY_MAXIMUM_VERSION)) {
+            validationBuilder.error("Provisioning a Medium Duty SDX shape is only valid for 7.2.17 and below. If you want to provision a " +
+                runtime + " SDX, Please use the ENTERPRISE shape!");
+        }
+    }
+
+    private boolean isShapeVersionSupportedByMinimumRuntimeVersion(String runtime, String shapeVersion) {
         // If runtime is empty, then SDX internal call was used, so we assume it's supported.
         if (StringUtils.isEmpty(runtime)) {
             return true;
         }
         Comparator<Versioned> versionComparator = new VersionComparator();
         return versionComparator.compare(() -> runtime, () -> shapeVersion) > -1;
+    }
+
+    private boolean isShapeVersionSupportedByMaximumRuntimeVersion(String runtime, String shapeVersion) {
+        // internal usage
+        if (StringUtils.isEmpty(runtime)) {
+            return true;
+        }
+        Comparator<Versioned> versionedComparator = new VersionComparator();
+        return versionedComparator.compare(() -> runtime, () -> shapeVersion) < 1;
     }
 
     /**
