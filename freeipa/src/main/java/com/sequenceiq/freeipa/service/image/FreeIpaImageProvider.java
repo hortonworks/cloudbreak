@@ -41,12 +41,6 @@ public class FreeIpaImageProvider implements ImageProvider {
     @Inject
     private FreeIpaImageFilter freeIpaImageFilter;
 
-    @Inject
-    private PreferredOsService preferredOsService;
-
-    @Inject
-    private SupportedOsService supportedOsService;
-
     @Override
     public Optional<ImageWrapper> getImage(FreeIpaImageFilterSettings imageFilterParams) {
         FreeIpaImageFilterSettings imageFilterSettings = populateImageFilterSettings(imageFilterParams);
