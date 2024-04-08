@@ -38,7 +38,7 @@ dependencies {
   implementation group: 'com.fasterxml.jackson.datatype',   name: 'jackson-datatype-hibernate6',    version: jacksonVersion
   implementation group: 'net.sf.json-lib',                  name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
   api group: 'net.jcip',                                    name: 'jcip-annotations',               version: '1.0'
-  api group: 'com.github.spotbugs',                         name: 'spotbugs-annotations',           version: '4.7.3'
+  api group: 'com.github.spotbugs',                         name: 'spotbugs-annotations',           version: '4.8.4'
   api group: 'org.reflections',                             name: 'reflections',                    version: '0.10.2'
 
   implementation group: 'com.github.ben-manes.caffeine',    name: 'caffeine',                       version: caffeineVersion
