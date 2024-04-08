@@ -92,6 +92,7 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
         }
     }
 
+    @Retryable(maxAttemptsExpression = MAX_ATTEMPTS_EXPRESSION, backoff = @Backoff(delayExpression = DELAY_EXPRESSION))
     public SdxInternalTestDto checkCmKnoxIDBrokerRoleConfigGroups(SdxInternalTestDto testDto, TestContext testContext) {
         String serverFqdn = testDto.getResponse().getStackV4Response().getCluster().getServerFqdn();
         ApiClient apiClient = getCmApiClient(serverFqdn, testDto.getName(), V_43, testContext.getWorkloadUserName(), testContext.getWorkloadPassword());
@@ -137,6 +138,7 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
         return testDto;
     }
 
+    @Retryable(maxAttemptsExpression = MAX_ATTEMPTS_EXPRESSION, backoff = @Backoff(delayExpression = DELAY_EXPRESSION))
     public DistroXTestDto checkCmYarnNodemanagerRoleConfigGroups(DistroXTestDto testDto, TestContext testContext) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
         String user = testContext.getWorkloadUserName();
@@ -145,6 +147,7 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
         return checkCmYarnNodemanagerRoleConfigGroups(apiClient, testDto, user, password);
     }
 
+    @Retryable(maxAttemptsExpression = MAX_ATTEMPTS_EXPRESSION, backoff = @Backoff(delayExpression = DELAY_EXPRESSION))
     public DistroXTestDto checkCmHdfsNamenodeRoleConfigGroups(DistroXTestDto testDto, TestContext testContext, Set<String> mountPoints) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
         ApiClient apiClient = getCmApiClientWithTimeoutDisabled(serverIp, testDto.getName(), V_43, testContext.getWorkloadUserName(),
@@ -186,6 +189,7 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
         return testDto;
     }
 
+    @Retryable(maxAttemptsExpression = MAX_ATTEMPTS_EXPRESSION, backoff = @Backoff(delayExpression = DELAY_EXPRESSION))
     public DistroXTestDto checkCmHdfsDatanodeRoleConfigGroups(DistroXTestDto testDto, TestContext testContext, Set<String> mountPoints) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
         ApiClient apiClient = getCmApiClientWithTimeoutDisabled(serverIp, testDto.getName(), V_43, testContext.getWorkloadUserName(),
@@ -227,6 +231,7 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
         return testDto;
     }
 
+    @Retryable(maxAttemptsExpression = MAX_ATTEMPTS_EXPRESSION, backoff = @Backoff(delayExpression = DELAY_EXPRESSION))
     public DistroXTestDto checkCmYarnNodemanagerRoleConfigGroupsDirect(DistroXTestDto testDto, TestContext testContext) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
         String user = testContext.getWorkloadUserName();
@@ -271,6 +276,7 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
         return testDto;
     }
 
+    @Retryable(maxAttemptsExpression = MAX_ATTEMPTS_EXPRESSION, backoff = @Backoff(delayExpression = DELAY_EXPRESSION))
     public DistroXTestDto checkCmServicesStartedSuccessfully(DistroXTestDto testDto, TestContext testContext) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
         ApiClient apiClient = getCmApiClientWithTimeoutDisabledDirect(serverIp, testDto.getName(), V_43, testContext.getWorkloadUserName(),
