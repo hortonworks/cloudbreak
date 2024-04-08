@@ -8,6 +8,7 @@ export DOCKER_TAG_REDBEAMS=dev
 export DOCKER_TAG_PERISCOPE=dev
 export DOCKER_TAG_EXTERNALIZED_COMPUTE=dev
 export DOCKER_TAG_MOCK_INFRASTRUCTURE=dev
+export DOCKER_TAG_MOCK_THUNDERHEAD=dev
 export THUNDERHEAD_MOCK_VOLUME_HOST=../../mock-thunderhead/build/libs/mock-thunderhead.jar
 export REMOVE_CONTAINER=
 export DPS_VERSION=2.0.0.0-142

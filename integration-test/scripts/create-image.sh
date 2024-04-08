@@ -82,6 +82,18 @@ echo -e "\n\033[1;96m--- Change Dockerfile \033[0m\n"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-mock-infrastructure:/integcb/docker-containers/docker-mock-infrastructure \
  busybox:1.31.1 /bin/sh -c "sed -i '/mock-infrastructure-\$VERSION/c\ADD mock-infrastructure.jar /' /integcb/docker-containers/docker-mock-infrastructure/Dockerfile"
 
+date
+echo -e "\n\033[1;96m--- Copy ../mock-thunderhead/build/libs/mock-thunderhead.jar to docker-mock-thunderhead directory\033[0m\n"
+mkdir ./integcb/docker-containers/docker-mock-thunderhead/
+cp ../mock-thunderhead/build/libs/mock-thunderhead.jar ./integcb/docker-containers/docker-mock-thunderhead
+cp ../mock-thunderhead/deploy.sh ./integcb/docker-containers/docker-mock-thunderhead
+cp ../mock-thunderhead/Dockerfile ./integcb/docker-containers/docker-mock-thunderhead
+cp ../mock-thunderhead/Makefile ./integcb/docker-containers/docker-mock-thunderhead
+date
+echo -e "\n\033[1;96m--- Change Dockerfile \033[0m\n"
+docker run -v "$(pwd)"/integcb/docker-containers/docker-mock-thunderhead:/integcb/docker-containers/docker-mock-thunderhead \
+ busybox:1.31.1 /bin/sh -c "sed -i '/mock-thunderhead-\$VERSION/c\ADD mock-thunderhead.jar /' /integcb/docker-containers/docker-mock-thunderhead/Dockerfile"
+
 echo -e "\n\033[1;96m--- Build docker images\033[0m\n"
 docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak:dev ./integcb/docker-containers/docker-cloudbreak & \
   docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-datalake:dev ./integcb/docker-containers/docker-datalake & \
@@ -91,4 +103,5 @@ docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak:dev ./inte
   docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-redbeams:dev ./integcb/docker-containers/docker-redbeams & \
   docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-externalizedcompute:dev ./integcb/docker-containers/docker-externalized-compute & \
   docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-mock-infrastructure:dev ./integcb/docker-containers/docker-mock-infrastructure & \
+  docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-mock-thunderhead:dev ./integcb/docker-containers/docker-mock-thunderhead & \
   wait

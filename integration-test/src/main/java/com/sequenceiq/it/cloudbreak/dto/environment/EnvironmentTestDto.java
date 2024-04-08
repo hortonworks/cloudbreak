@@ -23,9 +23,11 @@ import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
+import com.sequenceiq.environment.api.v1.environment.model.CustomDockerRegistryV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.DataServicesRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
@@ -171,6 +173,18 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withEnableMultiAzFreeIpa() {
         getRequest().getFreeIpa().setEnableMultiAz(true);
+        return this;
+    }
+
+    public EnvironmentTestDto withDockerRegistryConfig(String crn) {
+        DataServicesRequest dataServices = getRequest().getDataServices();
+        if (dataServices == null) {
+            dataServices = new DataServicesRequest();
+        }
+        CustomDockerRegistryV1Parameters customDockerRegistryV1Parameters = new CustomDockerRegistryV1Parameters();
+        customDockerRegistryV1Parameters.setCrn(crn);
+        dataServices.setCustomDockerRegistry(customDockerRegistryV1Parameters);
+        getRequest().setDataServices(dataServices);
         return this;
     }
 

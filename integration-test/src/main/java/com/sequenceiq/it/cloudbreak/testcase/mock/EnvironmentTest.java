@@ -19,6 +19,8 @@ import jakarta.ws.rs.NotFoundException;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.TestCrnGenerator;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
@@ -58,6 +60,9 @@ public class EnvironmentTest extends AbstractMockTest {
     private RecipeUtil recipeUtil;
 
     @Inject
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
+    @Inject
     private ImageCatalogMockServerSetup imageCatalogMockServerSetup;
 
     @Override
@@ -79,6 +84,48 @@ public class EnvironmentTest extends AbstractMockTest {
                 .when(environmentTestClient.create())
                 .when(environmentTestClient.list())
                 .then(this::checkEnvIsListed)
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "valid create environment request is sent with wrong docker registry config",
+            then = "environment should be failed state")
+    public void testCreateEnvironmentWithWrongDockerRegistryConfig(MockedTestContext testContext) {
+        testContext
+                .given(CredentialTestDto.class)
+                .when(credentialTestClient.create())
+                .given(EnvironmentTestDto.class)
+                .withDockerRegistryConfig(regionAwareCrnGenerator.generateCrn(
+                        CrnResourceDescriptor.COMPUTE_DOCKER_CONFIG,
+                        "wrong-crn",
+                        "cloudera").toString())
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.CREATE_FAILED)
+                .when(environmentTestClient.list())
+                .then(this::checkEnvAboutDockerRegistryValidationFailure)
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "valid create environment request is sent with docker registry config",
+            then = "environment should be valid state")
+    public void testCreateEnvironmentWithValidDockerRegistryConfig(MockedTestContext testContext) {
+        testContext
+                .given(CredentialTestDto.class)
+                .when(credentialTestClient.create())
+                .given(EnvironmentTestDto.class)
+                .withDockerRegistryConfig(regionAwareCrnGenerator.generateCrn(
+                        CrnResourceDescriptor.COMPUTE_DOCKER_CONFIG,
+                        "9d74eee4-1cad-45d7-b645-7csdfsdfsdfds",
+                        "cloudera").toString())
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.CREATE_FAILED)
+                .when(environmentTestClient.list())
+                .then(this::checkEnvAboutDockerRegistryValidationFailure)
                 .validate();
     }
 
@@ -238,6 +285,24 @@ public class EnvironmentTest extends AbstractMockTest {
                 .collect(Collectors.toList());
         if (result.isEmpty()) {
             throw new TestFailException("Environment is not listed");
+        }
+        return environment;
+    }
+
+    private EnvironmentTestDto checkEnvAboutDockerRegistryValidationFailure(TestContext testContext, EnvironmentTestDto environment,
+        EnvironmentClient environmentClient) {
+        Collection<SimpleEnvironmentResponse> simpleEnvironmentV4Respons = environment.getResponseSimpleEnvSet();
+        List<SimpleEnvironmentResponse> result = simpleEnvironmentV4Respons.stream()
+                .filter(env -> environment.getName().equals(env.getName()))
+                .collect(Collectors.toList());
+        if (result.isEmpty()) {
+            throw new TestFailException("Environment is not listed");
+        } else {
+            String reason = result.get(0).getStatusReason();
+            if (!reason.startsWith("The validation of the specified custom docker registry config with CRN")) {
+                throw new TestFailException("Environment failed but not with Liftie validation as we expected. " +
+                        "The error reason was " + reason);
+            }
         }
         return environment;
     }
