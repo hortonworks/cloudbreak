@@ -48,6 +48,11 @@ public class VaultKvV1Engine extends AbstractVaultEngine<VaultKvV1Engine> {
     }
 
     @Override
+    public String enginePath() {
+        return enginePath;
+    }
+
+    @Override
     @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, allEntries = true)
     public String put(String path, String value) {
         return put(path, Collections.singletonMap(VaultConstants.FIELD_SECRET, value));

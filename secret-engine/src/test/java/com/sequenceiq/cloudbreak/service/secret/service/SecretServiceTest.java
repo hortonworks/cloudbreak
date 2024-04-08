@@ -17,6 +17,7 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,13 +26,14 @@ import org.springframework.util.ReflectionUtils;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
 import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
+import com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine;
 
 @ExtendWith(MockitoExtension.class)
 public class SecretServiceTest {
 
     private final MetricService metricService = Mockito.mock(MetricService.class);
 
-    private final SecretEngine persistentEngine = Mockito.mock(SecretEngine.class);
+    private final SecretEngine persistentEngine = Mockito.mock(VaultKvV2Engine.class);
 
     private final VaultRetryService vaultRetryService = Mockito.mock(VaultRetryService.class);
 
@@ -112,4 +114,30 @@ public class SecretServiceTest {
         verify(persistentEngine, times(1)).delete(anyString());
         verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_DELETE), any(Duration.class), any(String[].class));
     }
+
+    @Test
+    void testGetKvV2SecretByPathAndFieldPathNull() {
+        String result = underTest.getKvV2SecretByPathAndField(null, "field");
+        assertNull(result);
+    }
+
+    @Test
+    void testGetKvV2SecretByPathAndFieldFieldNull() {
+        String result = underTest.getKvV2SecretByPathAndField("path", null);
+        assertNull(result);
+    }
+
+    @Test
+    void testGetKvV2SecretByPathAndField() {
+        when(persistentEngine.enginePath()).thenReturn("enginePath");
+        String result = underTest.getKvV2SecretByPathAndField("path", "field");
+
+        ArgumentCaptor<String> secretJsonCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> fieldCaptor = ArgumentCaptor.forClass(String.class);
+        verify(persistentEngine).get(secretJsonCaptor.capture(), fieldCaptor.capture());
+        assertEquals("{\"enginePath\":\"enginePath\",\"engineClass\":\"com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine\"," +
+                "\"path\":\"path\"}", secretJsonCaptor.getValue());
+        assertEquals("field", fieldCaptor.getValue());
+    }
+
 }

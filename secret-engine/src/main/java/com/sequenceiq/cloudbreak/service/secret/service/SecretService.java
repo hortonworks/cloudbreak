@@ -182,17 +182,25 @@ public class SecretService {
      * Fetches the secret from Secret's store. If the secret is not found then null is returned.
      * If the secret is null then null is returned.
      *
-     * @param secretResponse SecretResponse that refers to a Secret in the Secret engine
-     * @param field  The key of the key-value secret in Secret
+     * @param secretPath path of the Secret that refers to a Secret in the Secret engine
+     * @param field      The key of the key-value secret in Secret
      * @return Secret content or null if the secret secret is not found.
      */
-    public String getByResponse(SecretResponse secretResponse, String field) {
-        if (secretResponse == null) {
+    public String getKvV2SecretByPathAndField(String secretPath, String field) {
+        if (secretPath == null || field == null) {
             return null;
         }
-        VaultSecret vaultSecret = new VaultSecret(secretResponse.getEnginePath(), VaultKvV2Engine.class.getCanonicalName(), secretResponse.getSecretPath());
+        VaultSecret vaultSecret = new VaultSecret(getVaultKvV2EnginePath(), VaultKvV2Engine.class.getCanonicalName(), secretPath);
         String secretAsJson = new Gson().toJson(vaultSecret);
         return get(secretAsJson, field);
+    }
+
+    private String getVaultKvV2EnginePath() {
+        return engines.stream()
+                .filter(e -> e instanceof VaultKvV2Engine)
+                .findFirst()
+                .map(SecretEngine::enginePath)
+                .orElse("");
     }
 
     private Optional<SecretEngine> getFirstEngineStream(String secret) {

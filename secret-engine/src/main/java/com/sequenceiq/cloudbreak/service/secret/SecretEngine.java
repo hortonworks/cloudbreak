@@ -10,6 +10,8 @@ public interface SecretEngine {
 
     String appPath();
 
+    String enginePath();
+
     String put(String key, String value);
 
     String put(String key, Map<String, String> value);

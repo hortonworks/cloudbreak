@@ -20,7 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.clusterproxy.ReadConfigResponse;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
-import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 @ExtendWith(MockitoExtension.class)
@@ -59,15 +58,15 @@ class ClusterProxyRotationServiceTest {
     @Test
     void readClusterProxyTokenKeysShouldConvertJwkToPem() {
         when(readConfigResponse.getKnoxSecretRef()).thenReturn(SECRET_PATH + ":" + SECRET_FIELD);
-        ArgumentCaptor<SecretResponse> secretResponseArgumentCaptor = ArgumentCaptor.forClass(SecretResponse.class);
+        ArgumentCaptor<String> secretPathArgumentCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> secretFieldArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        when(secretService.getByResponse(secretResponseArgumentCaptor.capture(), secretFieldArgumentCaptor.capture())).thenReturn(JWK);
+        when(secretService.getKvV2SecretByPathAndField(secretPathArgumentCaptor.capture(), secretFieldArgumentCaptor.capture())).thenReturn(JWK);
 
         KeyPair keyPair = underTest.readClusterProxyTokenKeys(readConfigResponse);
         String secretField = secretFieldArgumentCaptor.getValue();
         assertEquals(SECRET_FIELD, secretField);
-        SecretResponse secretResponse = secretResponseArgumentCaptor.getValue();
-        assertEquals(SECRET_PATH, secretResponse.getSecretPath());
+        String secretPath = secretPathArgumentCaptor.getValue();
+        assertEquals(SECRET_PATH, secretPath);
 
         assertEquals(ALGORITHM, keyPair.getPublic().getAlgorithm());
     }
@@ -95,7 +94,7 @@ class ClusterProxyRotationServiceTest {
     @Test
     void readClusterProxyTokenKeysShouldThrowExceptionBadJwk() {
         when(readConfigResponse.getKnoxSecretRef()).thenReturn(SECRET_PATH + ":" + SECRET_FIELD);
-        when(secretService.getByResponse(any(), any())).thenReturn("badjwk");
+        when(secretService.getKvV2SecretByPathAndField(any(), any())).thenReturn("badjwk");
         CloudbreakServiceException e = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.readClusterProxyTokenKeys(readConfigResponse));
         assertEquals("Cannot read JWK format token keys from cluster-proxy.", e.getMessage());
