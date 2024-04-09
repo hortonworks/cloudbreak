@@ -1,6 +1,5 @@
 package com.sequenceiq.datalake.service.upgrade;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -17,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
@@ -32,12 +30,10 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.datalake.controller.sdx.SdxUpgradeClusterConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
@@ -54,8 +50,6 @@ public class SdxRuntimeUpgradeService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxRuntimeUpgradeService.class);
 
     private static final long WORKSPACE_ID = 0L;
-
-    private static final Versioned INVALID_TARGET_VERSION_MDL =  () -> "7.2.18";
 
     @Value("${sdx.paywall.url}")
     private String paywallUrl;
@@ -114,7 +108,6 @@ public class SdxRuntimeUpgradeService {
         MDCBuilder.buildMdcContext(cluster);
         SdxUpgradeResponse sdxUpgradeResponse = checkForUpgradeByName(clusterName, upgradeRequest, accountId, upgradePreparation);
         validateUpgradeCandidates(clusterName, sdxUpgradeResponse);
-        validateRuntimeVersionForShape(upgradeRequest, sdxUpgradeResponse, cluster);
         return upgradePreparation ? initSdxUpgradePreparation(userCrn, sdxUpgradeResponse, upgradeRequest, cluster, skipBackup)
                 : initSdxUpgrade(userCrn, sdxUpgradeResponse, upgradeRequest, cluster);
     }
@@ -126,7 +119,6 @@ public class SdxRuntimeUpgradeService {
         MDCBuilder.buildMdcContext(cluster);
         SdxUpgradeResponse sdxUpgradeResponse = checkForUpgradeByCrn(userCrn, clusterCrn, upgradeRequest, accountId, upgradePreparation);
         validateUpgradeCandidates(cluster.getClusterName(), sdxUpgradeResponse);
-        validateRuntimeVersionForShape(upgradeRequest, sdxUpgradeResponse, cluster);
         return upgradePreparation ? initSdxUpgradePreparation(userCrn, sdxUpgradeResponse, upgradeRequest, cluster, skipBackup)
                 : initSdxUpgrade(userCrn, sdxUpgradeResponse, upgradeRequest, cluster);
     }
@@ -145,21 +137,10 @@ public class SdxRuntimeUpgradeService {
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> stackV4Endpoint.checkForClusterUpgradeByName(WORKSPACE_ID, clusterName,
                     request, accountId));
-        UpgradeV4Response filteredUpgradeV4Response = upgradeFilter.filterSdxUpgradeResponse(upgradeSdxClusterRequest, upgradeV4Response);
         SdxCluster datalake = sdxService.getByNameOrCrn(ThreadBasedUserCrnProvider.getUserCrn(), NameOrCrn.ofName(clusterName));
-        if (isShapeValidForRuntime(upgradeSdxClusterRequest, filteredUpgradeV4Response.getUpgradeCandidates(), datalake)) {
-            LOGGER.warn("Medium duty upgrade request occurred on {}", datalake.getRuntime());
-            getAvailableCandidates(filteredUpgradeV4Response);
-        }
+        UpgradeV4Response filteredUpgradeV4Response = upgradeFilter.filterSdxUpgradeResponse(upgradeSdxClusterRequest, upgradeV4Response,
+            datalake.getClusterShape());
         return sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(filteredUpgradeV4Response);
-    }
-
-    private void getAvailableCandidates(UpgradeV4Response response) {
-        List<ImageInfoV4Response> availableCandidates = response.getUpgradeCandidates()
-                .stream()
-                .filter(candidate -> !isVersionNewerOrEqualThanLimitedMDLRuntime(candidate.getComponentVersions().getCdp()))
-                .collect(Collectors.toList());
-        response.setUpgradeCandidates(availableCandidates);
     }
 
     private UpgradeV4Request createUpgradeV4Request(SdxUpgradeRequest upgradeSdxClusterRequest, boolean upgradePreparation) {
@@ -311,37 +292,5 @@ public class SdxRuntimeUpgradeService {
                 .orElse(SdxUpgradeReplaceVms.ENABLED);
         LOGGER.debug("VM-s replacement after the upgrade process is {}", replaceVms.name());
         return replaceVms;
-    }
-
-    private void validateRuntimeVersionForShape(SdxUpgradeRequest upgradeRequest, SdxUpgradeResponse sdxUpgradeResponse, SdxCluster cluster) {
-        if (!isShapeValidForRuntime(upgradeRequest, sdxUpgradeResponse.getUpgradeCandidates(), cluster)) {
-            String targetRuntime = getTargetRuntimeFromRequestOrImage(upgradeRequest, sdxUpgradeResponse.getUpgradeCandidates());
-            throw new BadRequestException(String.format("You cannot upgrade Medium-Duty to %s. Please use the Datalake resize operation " +
-                "to change your cluster shape to Enterprise to enable upgrade to %s", targetRuntime, targetRuntime));
-        }
-    }
-
-    @VisibleForTesting
-    public boolean isShapeValidForRuntime(SdxUpgradeRequest upgradeRequest, List<ImageInfoV4Response> upgradeCandidates, SdxCluster cluster) {
-        if (cluster.getClusterShape() == SdxClusterShape.MEDIUM_DUTY_HA) {
-            String targetRuntime = getTargetRuntimeFromRequestOrImage(upgradeRequest, upgradeCandidates);
-            return null != targetRuntime && !isVersionNewerOrEqualThanLimitedMDLRuntime(targetRuntime);
-        }
-        return true;
-    }
-
-    private static boolean isVersionNewerOrEqualThanLimitedMDLRuntime(String runtime) {
-        Comparator<Versioned> versionComparator = new VersionComparator();
-        return versionComparator.compare(() -> runtime, INVALID_TARGET_VERSION_MDL) > -1;
-    }
-
-    private static String getTargetRuntimeFromRequestOrImage(SdxUpgradeRequest upgradeRequest, List<ImageInfoV4Response> upgradeCandidates) {
-        if (StringUtils.isNotEmpty(upgradeRequest.getRuntime())) {
-            return upgradeRequest.getRuntime();
-        }
-        if (StringUtils.isNotEmpty(upgradeRequest.getImageId())) {
-            return getTargetCdhVersion(upgradeCandidates, upgradeRequest.getImageId());
-        }
-        return null;
     }
 }
