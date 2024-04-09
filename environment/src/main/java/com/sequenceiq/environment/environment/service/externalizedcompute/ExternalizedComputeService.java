@@ -6,14 +6,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
-import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.dyngr.Polling;
@@ -22,13 +18,11 @@ import com.dyngr.core.AttemptResults;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.environment.exception.ExternalizedComputeOperationFailedException;
 import com.sequenceiq.environment.util.PollingConfig;
-import com.sequenceiq.externalizedcompute.api.endpoint.ExternalizedComputeClusterEndpoint;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterBase;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterRequest;
@@ -45,10 +39,7 @@ public class ExternalizedComputeService {
     private boolean externalizedComputeEnabled;
 
     @Inject
-    private ExternalizedComputeClusterEndpoint endpoint;
-
-    @Inject
-    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+    private ExternalizedComputeClientService externalizedComputeClientService;
 
     public void createComputeCluster(Environment environment) {
         try {
@@ -56,53 +47,41 @@ public class ExternalizedComputeService {
                 if (!externalizedComputeEnabled) {
                     throw new BadRequestException("Externalized compute not enabled");
                 }
-                String computeClusterName = getComputeClusterDefaultName(environment.getName());
+                String computeClusterName = getDefaultComputeClusterName(environment.getName());
                 LOGGER.info("Creating compute cluster with name {}", computeClusterName);
                 ExternalizedComputeClusterRequest request = new ExternalizedComputeClusterRequest();
                 request.setEnvironmentCrn(environment.getResourceCrn());
                 request.setName(computeClusterName);
-                endpoint.create(request);
+                externalizedComputeClientService.createComputeCluster(request);
             } else {
                 LOGGER.info("Creating compute cluster is skipped because it was not configured");
             }
+        } catch (ExternalizedComputeOperationFailedException e) {
+            throw e;
         } catch (Exception e) {
             LOGGER.error("Could not create compute cluster due to:", e);
             throw new ExternalizedComputeOperationFailedException("Could not create compute cluster: " + e.getMessage(), e);
         }
     }
 
-    public ExternalizedComputeClusterResponse getComputeCluster(String environmentCrn, String name) {
-        return endpoint.describe(environmentCrn, name);
+    public Optional<ExternalizedComputeClusterResponse> getComputeCluster(String environmentCrn, String name) {
+        return externalizedComputeClientService.getComputeCluster(environmentCrn, name);
     }
 
-    public Optional<ExternalizedComputeClusterResponse> getComputeClusterOptional(String environmentCrn, String name) {
-        try {
-            return Optional.of(getComputeCluster(environmentCrn, name));
-        } catch (NotFoundException e) {
-            LOGGER.warn("Could not find compute cluster: {}", name);
-            return Optional.empty();
-        } catch (WebApplicationException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.warn("Failed to describe compute cluster: {} due to: {}", name, errorMessage, e);
-            throw new ExternalizedComputeOperationFailedException(errorMessage, e);
-        }
-    }
-
-    public String getComputeClusterDefaultName(String environmentName) {
+    public String getDefaultComputeClusterName(String environmentName) {
         return String.format(DEFAULT_COMPUTE_CLUSTER_NAME_FORMAT, environmentName);
     }
 
-    @Retryable(noRetryFor = EnvironmentServiceException.class, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public void deleteComputeCluster(String envCrn, PollingConfig pollingConfig) {
         if (externalizedComputeEnabled) {
-            List<ExternalizedComputeClusterResponse> clusters = endpoint.list(envCrn);
+            List<ExternalizedComputeClusterResponse> clusters = externalizedComputeClientService.list(envCrn);
             LOGGER.debug("Compute clusters for the environment: {}", clusters);
             for (ExternalizedComputeClusterResponse cluster : clusters) {
-                endpoint.delete(envCrn, cluster.getName());
+                externalizedComputeClientService.deleteComputeCluster(envCrn, cluster.getName());
             }
             try {
                 pollingDeletion(pollingConfig, () -> {
-                    List<ExternalizedComputeClusterResponse> clustersUnderDeletion = endpoint.list(envCrn);
+                    List<ExternalizedComputeClusterResponse> clustersUnderDeletion = externalizedComputeClientService.list(envCrn);
                     LOGGER.debug("Compute clusters under deletion: {}", clustersUnderDeletion);
                     if (!clustersUnderDeletion.isEmpty()) {
                         for (ExternalizedComputeClusterResponse clusterResponse : clustersUnderDeletion) {
@@ -127,7 +106,7 @@ public class ExternalizedComputeService {
     public Set<String> getComputeClusterNames(EnvironmentView environment) {
         LOGGER.debug("Get compute cluster names of the environment: '{}'", environment.getName());
         if (externalizedComputeEnabled) {
-            return endpoint.list(environment.getResourceCrn()).stream()
+            return externalizedComputeClientService.list(environment.getResourceCrn()).stream()
                     .map(ExternalizedComputeClusterBase::getName)
                     .collect(Collectors.toSet());
         } else {

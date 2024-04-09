@@ -58,7 +58,7 @@ public class ComputeClusterCreationWaitingHandler extends ExceptionCatcherEventH
         EnvironmentDto environmentDto = event.getData();
         Environment environment = environmentService.findEnvironmentByIdOrThrow(environmentDto.getId());
         LOGGER.debug("Compute cluster creation waiting flow step started.");
-        String computeClusterName = externalizedComputeService.getComputeClusterDefaultName(environment.getName());
+        String computeClusterName = externalizedComputeService.getDefaultComputeClusterName(environment.getName());
         awaitComputeClusterCreation(environment, computeClusterName);
         LOGGER.debug("Compute cluster creation waiting successfully finished.");
         return EnvCreationEvent.builder()

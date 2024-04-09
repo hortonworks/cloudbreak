@@ -104,7 +104,7 @@ class ComputeClusterCreationWaitingHandlerTest {
         assertThat(envCreationEvent.getResourceCrn()).isEqualTo(ENVIRONMENT_CRN);
         assertThat(envCreationEvent.getResourceId()).isEqualTo(ENVIRONMENT_ID);
         assertThat(envCreationEvent.selector()).isEqualTo("FINISH_ENV_CREATION_EVENT");
-        verify(externalizedComputeService, times(1)).getComputeClusterDefaultName(anyString());
+        verify(externalizedComputeService, times(1)).getDefaultComputeClusterName(anyString());
         verify(computeClusterPollingService, times(1)).pollWithTimeout(
                 any(ComputeClusterCreationRetrievalTask.class),
                 any(ComputeClusterPollerObject.class),
@@ -121,7 +121,7 @@ class ComputeClusterCreationWaitingHandlerTest {
 
         underTest.accept(Event.wrap(environmentDto));
 
-        verify(externalizedComputeService, never()).getComputeClusterDefaultName(anyString());
+        verify(externalizedComputeService, never()).getDefaultComputeClusterName(anyString());
         assertEquals(EnvCreationFailureEvent.class, failureEventCaptor.getValue().getData().getClass());
         EnvCreationFailureEvent envCreationFailureEvent = failureEventCaptor.getValue().getData();
         assertEquals("environment '1' not found.", envCreationFailureEvent.getException().getMessage());
@@ -145,7 +145,7 @@ class ComputeClusterCreationWaitingHandlerTest {
 
         underTest.accept(Event.wrap(environmentDto));
 
-        verify(externalizedComputeService, times(1)).getComputeClusterDefaultName(anyString());
+        verify(externalizedComputeService, times(1)).getDefaultComputeClusterName(anyString());
         assertEquals(EnvCreationFailureEvent.class, failureEventCaptor.getValue().getData().getClass());
         EnvCreationFailureEvent envCreationFailureEvent = failureEventCaptor.getValue().getData();
         assertEquals("error", envCreationFailureEvent.getException().getMessage());

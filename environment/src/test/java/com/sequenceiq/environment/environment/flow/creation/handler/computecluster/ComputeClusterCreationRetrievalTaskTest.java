@@ -62,7 +62,7 @@ class ComputeClusterCreationRetrievalTaskTest {
     @Test
     void testCheckStatusWithMissingComputeCluster() {
         ComputeClusterPollerObject computeClusterPollerObject = new ComputeClusterPollerObject(ENV_ID, ENV_CRN, COMPUTE_CLUSTER_NAME);
-        when(externalizedComputeService.getComputeClusterOptional(eq(ENV_CRN), eq(COMPUTE_CLUSTER_NAME))).thenReturn(Optional.empty());
+        when(externalizedComputeService.getComputeCluster(eq(ENV_CRN), eq(COMPUTE_CLUSTER_NAME))).thenReturn(Optional.empty());
 
         assertThrows(ExternalizedComputeOperationFailedException.class, () -> underTest.checkStatus(computeClusterPollerObject));
     }
@@ -73,7 +73,7 @@ class ComputeClusterCreationRetrievalTaskTest {
         ExternalizedComputeClusterResponse response = new ExternalizedComputeClusterResponse();
         response.setStatus(ExternalizedComputeClusterApiStatus.DELETE_IN_PROGRESS);
         response.setName(COMPUTE_CLUSTER_NAME);
-        when(externalizedComputeService.getComputeClusterOptional(eq(ENV_CRN), eq(COMPUTE_CLUSTER_NAME))).thenReturn(Optional.of(response));
+        when(externalizedComputeService.getComputeCluster(eq(ENV_CRN), eq(COMPUTE_CLUSTER_NAME))).thenReturn(Optional.of(response));
 
         assertThrows(ExternalizedComputeOperationFailedException.class, () -> underTest.checkStatus(computeClusterPollerObject));
     }
@@ -84,7 +84,7 @@ class ComputeClusterCreationRetrievalTaskTest {
         ExternalizedComputeClusterResponse response = new ExternalizedComputeClusterResponse();
         response.setStatus(ExternalizedComputeClusterApiStatus.DELETE_IN_PROGRESS);
         response.setName(COMPUTE_CLUSTER_NAME);
-        when(externalizedComputeService.getComputeClusterOptional(eq(ENV_CRN), eq(COMPUTE_CLUSTER_NAME))).thenReturn(Optional.of(response));
+        when(externalizedComputeService.getComputeCluster(eq(ENV_CRN), eq(COMPUTE_CLUSTER_NAME))).thenReturn(Optional.of(response));
 
         assertThrows(ExternalizedComputeOperationFailedException.class, () -> underTest.checkStatus(computeClusterPollerObject));
     }
@@ -95,7 +95,7 @@ class ComputeClusterCreationRetrievalTaskTest {
         ExternalizedComputeClusterResponse response = new ExternalizedComputeClusterResponse();
         response.setStatus(ExternalizedComputeClusterApiStatus.UNKNOWN);
         response.setName(COMPUTE_CLUSTER_NAME);
-        when(externalizedComputeService.getComputeClusterOptional(eq(ENV_CRN), eq(COMPUTE_CLUSTER_NAME))).thenReturn(Optional.of(response));
+        when(externalizedComputeService.getComputeCluster(eq(ENV_CRN), eq(COMPUTE_CLUSTER_NAME))).thenReturn(Optional.of(response));
 
         assertThrows(ExternalizedComputeOperationFailedException.class, () -> underTest.checkStatus(computeClusterPollerObject));
     }
@@ -106,11 +106,11 @@ class ComputeClusterCreationRetrievalTaskTest {
         ExternalizedComputeClusterResponse response = new ExternalizedComputeClusterResponse();
         response.setStatus(ExternalizedComputeClusterApiStatus.AVAILABLE);
         response.setName(COMPUTE_CLUSTER_NAME);
-        when(externalizedComputeService.getComputeClusterOptional(eq(ENV_CRN), eq(COMPUTE_CLUSTER_NAME))).thenReturn(Optional.of(response));
+        when(externalizedComputeService.getComputeCluster(eq(ENV_CRN), eq(COMPUTE_CLUSTER_NAME))).thenReturn(Optional.of(response));
 
         boolean result = underTest.checkStatus(computeClusterPollerObject);
         assertTrue(result);
-        verify(externalizedComputeService, times(1)).getComputeClusterOptional(eq(ENV_CRN), eq(COMPUTE_CLUSTER_NAME));
+        verify(externalizedComputeService, times(1)).getComputeCluster(eq(ENV_CRN), eq(COMPUTE_CLUSTER_NAME));
     }
 
 }

@@ -35,7 +35,7 @@ public class ComputeClusterCreationRetrievalTask extends SimpleStatusCheckerTask
         String name = pollerObject.getName();
         try {
             LOGGER.debug("Checking the state of compute cluster creation progress: '{}'", name);
-            Optional<ExternalizedComputeClusterResponse> response = externalizedComputeService.getComputeClusterOptional(environmentCrn, name);
+            Optional<ExternalizedComputeClusterResponse> response = externalizedComputeService.getComputeCluster(environmentCrn, name);
             if (response.isEmpty()) {
                 throw new ExternalizedComputeOperationFailedException(String.format("Compute cluster not found: %s", name));
             }
@@ -67,8 +67,8 @@ public class ComputeClusterCreationRetrievalTask extends SimpleStatusCheckerTask
     @Override
     public void handleTimeout(ComputeClusterPollerObject pollerObject) {
         try {
-            Optional<ExternalizedComputeClusterResponse> response = externalizedComputeService.getComputeClusterOptional(
-                    pollerObject.getEnvironmentCrn(), pollerObject.getName());
+            Optional<ExternalizedComputeClusterResponse> response = externalizedComputeService.getComputeCluster(pollerObject.getEnvironmentCrn(),
+                    pollerObject.getName());
             if (response.isEmpty()) {
                 throw new ExternalizedComputeOperationFailedException(
                         String.format("Polling operation timed out, compute cluster %s was not found", pollerObject.getName()));
