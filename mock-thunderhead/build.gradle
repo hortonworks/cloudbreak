@@ -74,7 +74,7 @@ dependencies {
     implementation group: 'javax.annotation', name: 'javax.annotation-api', version: javaxAnnotationApiVersion
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
     implementation group: 'com.google.protobuf', name: 'protobuf-java-util', version: protobufVersion
-    implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
+    implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.12.5'
 
     testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
