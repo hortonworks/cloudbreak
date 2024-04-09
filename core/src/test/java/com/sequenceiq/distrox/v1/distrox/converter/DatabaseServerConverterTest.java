@@ -51,6 +51,9 @@ class DatabaseServerConverterTest {
         sourceSslConfig.setSslCertificatesStatus(SslCertStatus.UP_TO_DATE);
         sourceSslConfig.setSslCertificateExpirationDate(1L);
         sourceSslConfig.setSslCertificateExpirationDateAsDateString("expirationDate");
+        sourceSslConfig.setSslCertificateActiveVersion(1);
+        sourceSslConfig.setSslCertificateHighestAvailableVersion(1);
+        sourceSslConfig.setSslCertificateActiveCloudProviderIdentifier("ecdsa-high");
         source.setSslConfig(sourceSslConfig);
         source.setMajorVersion(MajorVersion.VERSION_10);
 
@@ -76,6 +79,9 @@ class DatabaseServerConverterTest {
         assertThat(resultSslConfig.getSslCertificateExpirationDate()).isEqualTo(sourceSslConfig.getSslCertificateExpirationDate());
         assertThat(resultSslConfig.getSslCertificateExpirationDateAsDateString()).isEqualTo(sourceSslConfig.getSslCertificateExpirationDateAsDateString());
         assertThat(resultSslConfig.getSslCertificates()).isEqualTo(sourceSslConfig.getSslCertificates());
+        assertThat(resultSslConfig.getSslCertificateActiveVersion()).isEqualTo(sourceSslConfig.getSslCertificateActiveVersion());
+        assertThat(resultSslConfig.getSslCertificateHighestAvailableVersion()).isEqualTo(sourceSslConfig.getSslCertificateHighestAvailableVersion());
+        assertThat(resultSslConfig.getSslCertificateActiveCloudProviderIdentifier()).isEqualTo(sourceSslConfig.getSslCertificateActiveCloudProviderIdentifier());
     }
 
     @ParameterizedTest

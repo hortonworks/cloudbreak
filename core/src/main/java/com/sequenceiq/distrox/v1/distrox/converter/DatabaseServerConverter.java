@@ -51,6 +51,9 @@ public class DatabaseServerConverter {
             if (sslConfig.getSslCertificatesStatus() != null) {
                 databaseServerSslConfig.setSslCertificatesStatus(sslConfig.getSslCertificatesStatus().name());
             }
+            databaseServerSslConfig.setSslCertificateActiveVersion(sslConfig.getSslCertificateActiveVersion());
+            databaseServerSslConfig.setSslCertificateHighestAvailableVersion(sslConfig.getSslCertificateHighestAvailableVersion());
+            databaseServerSslConfig.setSslCertificateActiveCloudProviderIdentifier(sslConfig.getSslCertificateActiveCloudProviderIdentifier());
             databaseServerSslConfig.setSslCertificateExpirationDate(sslConfig.getSslCertificateExpirationDate());
             databaseServerSslConfig.setSslCertificateExpirationDateAsDateString(sslConfig.getSslCertificateExpirationDateAsDateString());
             stackDatabaseServerResponse.setSslConfig(databaseServerSslConfig);

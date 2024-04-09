@@ -30,6 +30,15 @@ public class DatabaseServerSslConfig {
     @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATE_EXPIRATION_DATE_AS_STRING)
     private String sslCertificateExpirationDateAsDateString;
 
+    @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATE_ACTIVE_VERSION)
+    private int sslCertificateActiveVersion;
+
+    @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATE_HIGHEST_AVAILABLE_VERSION)
+    private int sslCertificateHighestAvailableVersion;
+
+    @Schema(description = DatabaseServerModelDescription.SSL_CERTIFICATE_ACTIVE_CLOUD_PROVIDER_IDENTIFIER)
+    private String sslCertificateActiveCloudProviderIdentifier;
+
     public DatabaseServerSslConfig() {
     }
 
@@ -81,11 +90,42 @@ public class DatabaseServerSslConfig {
         this.sslCertificateExpirationDateAsDateString = sslCertificateExpirationDateAsDateString;
     }
 
+    public int getSslCertificateActiveVersion() {
+        return sslCertificateActiveVersion;
+    }
+
+    public void setSslCertificateActiveVersion(int sslCertificateActiveVersion) {
+        this.sslCertificateActiveVersion = sslCertificateActiveVersion;
+    }
+
+    public int getSslCertificateHighestAvailableVersion() {
+        return sslCertificateHighestAvailableVersion;
+    }
+
+    public void setSslCertificateHighestAvailableVersion(int sslCertificateHighestAvailableVersion) {
+        this.sslCertificateHighestAvailableVersion = sslCertificateHighestAvailableVersion;
+    }
+
+    public String getSslCertificateActiveCloudProviderIdentifier() {
+        return sslCertificateActiveCloudProviderIdentifier;
+    }
+
+    public void setSslCertificateActiveCloudProviderIdentifier(String sslCertificateActiveCloudProviderIdentifier) {
+        this.sslCertificateActiveCloudProviderIdentifier = sslCertificateActiveCloudProviderIdentifier;
+    }
+
     @Override
     public String toString() {
         return "DatabaseServerSslConfig{" +
                 ", sslCertificateType=" + sslCertificateType +
                 ", sslMode=" + sslMode +
+                ", sslCertificatesStatus='" + sslCertificatesStatus + '\'' +
+                ", sslCertificateExpirationDate=" + sslCertificateExpirationDate +
+                ", sslCertificateExpirationDateAsDateString='" + sslCertificateExpirationDateAsDateString + '\'' +
+                ", sslCertificateActiveVersion=" + sslCertificateActiveVersion +
+                ", sslCertificateHighestAvailableVersion=" + sslCertificateHighestAvailableVersion +
+                ", sslCertificateActiveCloudProviderIdentifier='" + sslCertificateActiveCloudProviderIdentifier + '\'' +
                 '}';
     }
+
 }
