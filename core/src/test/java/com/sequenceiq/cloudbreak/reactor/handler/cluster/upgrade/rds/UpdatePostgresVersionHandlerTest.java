@@ -51,7 +51,7 @@ class UpdatePostgresVersionHandlerTest {
         Selectable result = underTest.doAccept(event);
 
         verify(stackUpdater).updateExternalDatabaseEngineVersion(STACK_ID, TARGET_MAJOR_VERSION.getMajorVersion());
-        verify(rdsUpgradeOrchestratorService).updateDatabaseEngineVersion(STACK_ID, TARGET_MAJOR_VERSION.getMajorVersion());
+        verify(rdsUpgradeOrchestratorService).updateDatabaseEngineVersion(STACK_ID);
         assertThat(result.selector()).isEqualTo("UPGRADERDSUPDATEVERSIONRESULT");
     }
 
@@ -60,12 +60,12 @@ class UpdatePostgresVersionHandlerTest {
         UpgradeRdsUpdateVersionRequest request = new UpgradeRdsUpdateVersionRequest(STACK_ID, TARGET_MAJOR_VERSION);
         when(event.getData()).thenReturn(request);
         doThrow(new CloudbreakServiceException("error"))
-                .when(rdsUpgradeOrchestratorService).updateDatabaseEngineVersion(STACK_ID, TARGET_MAJOR_VERSION.getMajorVersion());
+                .when(rdsUpgradeOrchestratorService).updateDatabaseEngineVersion(STACK_ID);
 
 
         Selectable result = underTest.doAccept(event);
         verify(stackUpdater).updateExternalDatabaseEngineVersion(STACK_ID, TARGET_MAJOR_VERSION.getMajorVersion());
-        verify(rdsUpgradeOrchestratorService).updateDatabaseEngineVersion(STACK_ID, TARGET_MAJOR_VERSION.getMajorVersion());
+        verify(rdsUpgradeOrchestratorService).updateDatabaseEngineVersion(STACK_ID);
         assertThat(result.selector()).isEqualTo("UPGRADERDSFAILEDEVENT");
     }
 

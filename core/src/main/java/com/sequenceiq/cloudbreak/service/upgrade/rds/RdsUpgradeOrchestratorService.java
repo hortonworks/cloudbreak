@@ -173,9 +173,13 @@ public class RdsUpgradeOrchestratorService {
         updateRdsUpgradePillar(stackDto, volumeWithLargestFreeSpace);
     }
 
-    public void updateDatabaseEngineVersion(Long stackId, String databaseEngineVersion) {
-        LOGGER.debug("Updating the database engine version to {}", databaseEngineVersion);
+    public void updateDatabaseEngineVersion(Long stackId) {
         StackDto stackDto = stackDtoService.getById(stackId);
+        updateDatabaseEngineVersion(stackDto);
+    }
+
+    public void updateDatabaseEngineVersion(StackDto stackDto) {
+        LOGGER.debug("Updating the database engine version to {}", stackDto.getDatabase().getExternalDatabaseEngineVersion());
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stackDto);
         try {
