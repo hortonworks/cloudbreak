@@ -36,7 +36,7 @@ public class ExternalizedComputeClusterCreateService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExternalizedComputeClusterCreateService.class);
 
-    @Value("${externalizedcompute.create.kubernetes.version:1.28}")
+    @Value("${externalizedcompute.create.kubernetes.version:1.27}")
     private String kubernetesVersion;
 
     @Inject
