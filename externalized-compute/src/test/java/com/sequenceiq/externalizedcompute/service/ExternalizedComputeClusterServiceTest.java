@@ -111,7 +111,7 @@ class ExternalizedComputeClusterServiceTest {
 
         when(entitlementService.internalTenant("1234")).thenReturn(true);
 
-        clusterService.prepareComputeClusterCreation(externalizedComputeClusterRequest, userCrn);
+        clusterService.prepareComputeClusterCreation(externalizedComputeClusterRequest, true, userCrn);
 
         ArgumentCaptor<ExternalizedComputeCluster> clusterArgumentCaptor = ArgumentCaptor.forClass(
                 ExternalizedComputeCluster.class);
@@ -121,6 +121,7 @@ class ExternalizedComputeClusterServiceTest {
         assertEquals(externalizedComputeClusterRequest.getName(), cluster.getName());
         assertEquals(externalizedComputeClusterRequest.getEnvironmentCrn(), cluster.getEnvironmentCrn());
         assertEquals("1234", cluster.getAccountId());
+        assertTrue(cluster.isDefaultCluster());
         assertNull(cluster.getDeleted());
 
         CDPTagGenerationRequest tags = cdpTagGenerationRequestArgumentCaptor.getValue();

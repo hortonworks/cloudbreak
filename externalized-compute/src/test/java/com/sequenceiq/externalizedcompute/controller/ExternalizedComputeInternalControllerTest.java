@@ -20,7 +20,7 @@ import com.sequenceiq.externalizedcompute.service.ExternalizedComputeClusterConv
 import com.sequenceiq.externalizedcompute.service.ExternalizedComputeClusterService;
 
 @ExtendWith(MockitoExtension.class)
-class ExternalizedComputeControllerTest {
+class ExternalizedComputeInternalControllerTest {
 
     private static final String CLUSTER_NAME = "cluster1";
 
@@ -38,7 +38,7 @@ class ExternalizedComputeControllerTest {
     private ExternalizedComputeClusterConverterService externalizedComputeClusterConverterService;
 
     @InjectMocks
-    private ExternalizedComputeController underTest;
+    private ExternalizedComputeInternalController underTest;
 
     @Mock
     private ExternalizedComputeCluster externalizedComputeCluster;
@@ -64,4 +64,5 @@ class ExternalizedComputeControllerTest {
         verify(externalizedComputeClusterService, times(1)).getExternalizedComputeCluster(eq(ENVIRONMENT_CRN), eq(CLUSTER_NAME));
         verify(externalizedComputeClusterFlowManager, times(1)).triggerExternalizedComputeClusterDeletion(any());
     }
+
 }

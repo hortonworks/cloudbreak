@@ -25,7 +25,7 @@ import com.sequenceiq.environment.exception.ExternalizedComputeOperationFailedEx
 import com.sequenceiq.environment.util.PollingConfig;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterBase;
-import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterRequest;
+import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterInternalRequest;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
 
 @Component
@@ -49,9 +49,10 @@ public class ExternalizedComputeService {
                 }
                 String computeClusterName = getDefaultComputeClusterName(environment.getName());
                 LOGGER.info("Creating compute cluster with name {}", computeClusterName);
-                ExternalizedComputeClusterRequest request = new ExternalizedComputeClusterRequest();
+                ExternalizedComputeClusterInternalRequest request = new ExternalizedComputeClusterInternalRequest();
                 request.setEnvironmentCrn(environment.getResourceCrn());
                 request.setName(computeClusterName);
+                request.setDefaultCluster(true);
                 externalizedComputeClientService.createComputeCluster(request);
             } else {
                 LOGGER.info("Creating compute cluster is skipped because it was not configured");

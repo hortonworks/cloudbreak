@@ -50,6 +50,8 @@ public class ExternalizedComputeCluster implements AccountAwareResource {
     @Column(columnDefinition = "TEXT")
     private Json tags;
 
+    private boolean defaultCluster;
+
     public Long getId() {
         return id;
     }
@@ -124,6 +126,14 @@ public class ExternalizedComputeCluster implements AccountAwareResource {
         this.tags = tags;
     }
 
+    public boolean isDefaultCluster() {
+        return defaultCluster;
+    }
+
+    public void setDefaultCluster(boolean defaultCluster) {
+        this.defaultCluster = defaultCluster;
+    }
+
     @Override
     public String toString() {
         return "ExternalizedComputeCluster{" +
@@ -136,6 +146,7 @@ public class ExternalizedComputeCluster implements AccountAwareResource {
                 ", created=" + created +
                 ", deleted=" + deleted +
                 ", tags=" + tags +
+                ", defaultCluster=" + defaultCluster +
                 '}';
     }
 }

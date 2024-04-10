@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,6 +20,7 @@ public class ExternalizedComputeClusterBase {
 
     @NotEmpty
     @Schema
+    @TenantAwareParam
     @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     private String environmentCrn;
 

@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
 import com.sequenceiq.externalizedcompute.api.ExternalizedComputeClusterApi;
 import com.sequenceiq.externalizedcompute.controller.ExternalizedComputeController;
+import com.sequenceiq.externalizedcompute.controller.ExternalizedComputeInternalController;
 import com.sequenceiq.externalizedcompute.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.flow.controller.FlowPublicController;
 
@@ -25,6 +26,7 @@ public class EndpointConfig extends ResourceConfig {
 
     private static final List<Class<?>> CONTROLLERS = Arrays.asList(
             ExternalizedComputeController.class,
+            ExternalizedComputeInternalController.class,
             FlowPublicController.class
     );
 

@@ -117,7 +117,8 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
                 .stream().map(statusEntity -> statusEntity.getExternalizedComputeCluster().getId()).collect(Collectors.toSet());
     }
 
-    public FlowIdentifier prepareComputeClusterCreation(ExternalizedComputeClusterRequest externalizedComputeClusterRequest, Crn userCrn) {
+    public FlowIdentifier prepareComputeClusterCreation(ExternalizedComputeClusterRequest externalizedComputeClusterRequest,
+            boolean defaultCluster, Crn userCrn) {
         ExternalizedComputeCluster externalizedComputeCluster = new ExternalizedComputeCluster();
         externalizedComputeCluster.setName(externalizedComputeClusterRequest.getName());
         DetailedEnvironmentResponse environment = environmentEndpoint.getByCrn(externalizedComputeClusterRequest.getEnvironmentCrn());
@@ -126,6 +127,7 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
         externalizedComputeCluster.setAccountId(userCrn.getAccountId());
         String crn = regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.EXTERNALIZED_COMPUTE, userCrn.getAccountId());
         externalizedComputeCluster.setResourceCrn(crn);
+        externalizedComputeCluster.setDefaultCluster(defaultCluster);
         setTagsSafe(environment, externalizedComputeClusterRequest.getTags(), externalizedComputeCluster, userCrn);
         // TODO: add check if exists
         try {

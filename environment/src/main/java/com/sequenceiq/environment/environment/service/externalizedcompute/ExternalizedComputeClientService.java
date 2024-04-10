@@ -12,10 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.exception.ExternalizedComputeOperationFailedException;
-import com.sequenceiq.externalizedcompute.api.endpoint.ExternalizedComputeClusterEndpoint;
-import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterRequest;
+import com.sequenceiq.externalizedcompute.api.endpoint.ExternalizedComputeClusterInternalEndpoint;
+import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterInternalRequest;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -25,32 +27,43 @@ public class ExternalizedComputeClientService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExternalizedComputeClientService.class);
 
     @Inject
-    private ExternalizedComputeClusterEndpoint endpoint;
+    private ExternalizedComputeClusterInternalEndpoint endpoint;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    public FlowIdentifier createComputeCluster(ExternalizedComputeClusterRequest request) {
-        return handleException(() -> endpoint.create(request), "Failed to create compute cluster");
+    public FlowIdentifier createComputeCluster(ExternalizedComputeClusterInternalRequest request) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                initiatorUserCrn -> handleException(() -> endpoint.create(request, initiatorUserCrn), "Failed to create compute cluster"));
     }
 
     public FlowIdentifier deleteComputeCluster(String environmentCrn, String name) {
-        return handleException(() -> endpoint.delete(environmentCrn, name), "Failed to delete compute cluster");
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                initiatorUserCrn -> handleException(() -> endpoint.delete(environmentCrn, name), "Failed to delete compute cluster"));
     }
 
     public Optional<ExternalizedComputeClusterResponse> getComputeCluster(String environmentCrn, String name) {
-        return handleException(() -> {
-            try {
-                return Optional.of(endpoint.describe(environmentCrn, name));
-            } catch (NotFoundException e) {
-                LOGGER.info("Could not find compute cluster: {}", name);
-                return Optional.empty();
-            }
-        }, "Failed to describe compute cluster");
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                initiatorUserCrn -> handleException(() -> {
+                    try {
+                        return Optional.of(endpoint.describe(environmentCrn, name));
+                    } catch (NotFoundException e) {
+                        LOGGER.info("Could not find compute cluster: {}", name);
+                        return Optional.empty();
+                    }
+                }, "Failed to describe compute cluster"));
     }
 
     public List<ExternalizedComputeClusterResponse> list(String environmentCrn) {
-        return handleException(() -> endpoint.list(environmentCrn), "Failed to list compute clusters");
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                initiatorUserCrn -> handleException(() -> endpoint.list(environmentCrn), "Failed to list compute clusters"));
     }
 
     private <T> T handleException(Supplier<T> function, String messageTemplate) {

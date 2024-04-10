@@ -4,6 +4,7 @@ import jakarta.ws.rs.client.WebTarget;
 
 import com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint;
 import com.sequenceiq.externalizedcompute.api.endpoint.ExternalizedComputeClusterEndpoint;
+import com.sequenceiq.externalizedcompute.api.endpoint.ExternalizedComputeClusterInternalEndpoint;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 
 public class ExternalizedComputeClusterCrnEndpoint extends AbstractUserCrnServiceEndpoint implements ExternalizedComputeClusterClient {
@@ -15,6 +16,11 @@ public class ExternalizedComputeClusterCrnEndpoint extends AbstractUserCrnServic
     @Override
     public ExternalizedComputeClusterEndpoint externalizedComputeClusterEndpoint() {
         return getEndpoint(ExternalizedComputeClusterEndpoint.class);
+    }
+
+    @Override
+    public ExternalizedComputeClusterInternalEndpoint externalizedComputeClusterInternalEndpoint() {
+        return getEndpoint(ExternalizedComputeClusterInternalEndpoint.class);
     }
 
     @Override
