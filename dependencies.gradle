@@ -76,7 +76,7 @@ ext {
   jacksonVersionForBuild = '2.15.3'
   jsonSmartVersion = '2.4.9'
   snakeYamlVersion = '2.2'
-  xerces = '2.12.0'
+  xerces = '2.12.2'
   jacksonDatabindNullable = "0.2.6"
 
   // Templating
