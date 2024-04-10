@@ -86,28 +86,28 @@
         "package-versions": {
           "cm-build-number": "5949264",
           "cdh-build-number": "1922354",
-          "cm": "CM_VERSION",
+          "cm": "CM_VERSION_NEXT",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
-          "stack": "CDH_RUNTIME",
+          "stack": "CDH_RUNTIME_NEXT",
           "python38": "3.8.13-1.el7"
         },
         "stack-details": {
           "repo": {
             "stack": {
               "redhat7": "https://MOCK_SERVER_ADDRESS/mock-parcel",
-              "repoid": "CDH-CDH_RUNTIME",
-              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1922354"
+              "repoid": "CDH-CDH_RUNTIME_NEXT",
+              "repository-version": "CDH_RUNTIME_NEXT-1.cdhCDH_RUNTIME_NEXT.p0.1922354"
             },
             "util": null
           },
-          "version": "CDH_RUNTIME",
+          "version": "CDH_RUNTIME_NEXT",
           "build-number": "1922354"
         },
         "repo": {
           "redhat7": "https://MOCK_SERVER_ADDRESS/mock-parcel"
         },
-        "version": "CDH_RUNTIME",
+        "version": "CDH_RUNTIME_NEXT",
         "build-number": "5949264",
         "pre_warm_parcels": [
           [
@@ -156,29 +156,29 @@
         "package-versions": {
           "cm-build-number": "5949264",
           "cdh-build-number": "1922354",
-          "cm": "CM_VERSION",
+          "cm": "CM_VERSION_NEXT",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
-          "stack": "CDH_RUNTIME",
+          "stack": "CDH_RUNTIME_NEXT",
           "python38": "3.8.13-1.el7"
         },
         "stack-details": {
           "repo": {
             "stack": {
               "redhat7": "https://MOCK_SERVER_ADDRESS/mock-parcel/",
-              "repoid": "CDH-CDH_RUNTIME",
-              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1922354"
+              "repoid": "CDH-CDH_RUNTIME_NEXT",
+              "repository-version": "CDH_RUNTIME_NEXT-1.cdhCDH_RUNTIME_NEXT.p0.1922354"
             },
             "util": null
           },
-          "version": "CDH_RUNTIME",
+          "version": "CDH_RUNTIME_NEXT",
           "build-number": "1922354"
         },
         "repo": {
           "redhat7": "https://MOCK_SERVER_ADDRESS/mock-parcel/"
         },
         "build-number": "5949264",
-        "version": "CDH_RUNTIME",
+        "version": "CDH_RUNTIME_NEXT",
         "pre_warm_parcels": [
           [
             "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",
@@ -226,29 +226,29 @@
         "package-versions": {
           "cm-build-number": "5949264",
           "cdh-build-number": "1922354",
-          "cm": "CM_VERSION",
+          "cm": "CM_VERSION_NEXT",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
-          "stack": "CDH_RUNTIME",
+          "stack": "CDH_RUNTIME_NEXT",
           "python38": "3.8.16-1.module+el8.8.0+18967+20d359ae.1"
         },
         "stack-details": {
           "repo": {
             "stack": {
               "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/",
-              "repoid": "CDH-CDH_RUNTIME",
-              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1922354"
+              "repoid": "CDH-CDH_RUNTIME_NEXT",
+              "repository-version": "CDH_RUNTIME_NEXT-1.cdhCDH_RUNTIME_NEXT.p0.1922354"
             },
             "util": null
           },
-          "version": "CDH_RUNTIME",
+          "version": "CDH_RUNTIME_NEXT",
           "build-number": "1922354"
         },
         "repo": {
           "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/"
         },
         "build-number": "5949264",
-        "version": "CDH_RUNTIME",
+        "version": "CDH_RUNTIME_NEXT",
         "pre_warm_parcels": [
           [
             "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",
@@ -296,29 +296,29 @@
         "package-versions": {
           "cm-build-number": "5949264",
           "cdh-build-number": "1922354",
-          "cm": "CM_VERSION",
+          "cm": "CM_VERSION_NEXT",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
-          "stack": "CDH_RUNTIME",
+          "stack": "CDH_RUNTIME_NEXT",
           "python38": "3.8.16-1.module+el8.8.0+18967+20d359ae.1"
         },
         "stack-details": {
           "repo": {
             "stack": {
               "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/",
-              "repoid": "CDH-CDH_RUNTIME",
-              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1922354"
+              "repoid": "CDH-CDH_RUNTIME_NEXT",
+              "repository-version": "CDH_RUNTIME_NEXT-1.cdhCDH_RUNTIME_NEXT.p0.1922354"
             },
             "util": null
           },
-          "version": "CDH_RUNTIME",
+          "version": "CDH_RUNTIME_NEXT",
           "build-number": "1922354"
         },
         "repo": {
           "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/"
         },
         "build-number": "5949264",
-        "version": "CDH_RUNTIME",
+        "version": "CDH_RUNTIME_NEXT",
         "pre_warm_parcels": [
           [
             "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",
@@ -366,29 +366,29 @@
         "package-versions": {
           "cm-build-number": "5949264",
           "cdh-build-number": "1922354",
-          "cm": "CM_VERSION",
+          "cm": "CM_VERSION_NEXT",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
-          "stack": "CDH_RUNTIME",
+          "stack": "CDH_RUNTIME_NEXT",
           "python38": "3.8.16-1.module+el8.8.0+18967+20d359ae.1"
         },
         "stack-details": {
           "repo": {
             "stack": {
               "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/",
-              "repoid": "CDH-CDH_RUNTIME",
-              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1922354"
+              "repoid": "CDH-CDH_RUNTIME_NEXT",
+              "repository-version": "CDH_RUNTIME_NEXT-1.cdhCDH_RUNTIME_NEXT.p0.1922354"
             },
             "util": null
           },
-          "version": "CDH_RUNTIME",
+          "version": "CDH_RUNTIME_NEXT",
           "build-number": "1922354"
         },
         "repo": {
           "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/"
         },
         "build-number": "5949264",
-        "version": "CDH_RUNTIME",
+        "version": "CDH_RUNTIME_NEXT",
         "pre_warm_parcels": [
           [
             "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",
@@ -438,26 +438,26 @@
           "cdh-build-number": "1922354",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
-          "stack": "CDH_RUNTIME",
+          "stack": "CDH_RUNTIME_NEXT",
           "python38": "3.8.16-1.module+el8.8.0+18967+20d359ae.1"
         },
         "stack-details": {
           "repo": {
             "stack": {
               "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/",
-              "repoid": "CDH-CDH_RUNTIME",
-              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1922354"
+              "repoid": "CDH-CDH_RUNTIME_NEXT",
+              "repository-version": "CDH_RUNTIME_NEXT-1.cdhCDH_RUNTIME_NEXT.p0.1922354"
             },
             "util": null
           },
-          "version": "CDH_RUNTIME",
+          "version": "CDH_RUNTIME_NEXT",
           "build-number": "1922354"
         },
         "repo": {
           "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/"
         },
         "build-number": "5949264",
-        "version": "CDH_RUNTIME",
+        "version": "CDH_RUNTIME_NEXT",
         "pre_warm_parcels": [
           [
             "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",
@@ -508,26 +508,26 @@
           "cm": "7.x.0",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
-          "stack": "CDH_RUNTIME",
+          "stack": "CDH_RUNTIME_NEXT",
           "python38": "3.8.16-1.module+el8.8.0+18967+20d359ae.1"
         },
         "stack-details": {
           "repo": {
             "stack": {
               "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/",
-              "repoid": "CDH-CDH_RUNTIME",
-              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1922354"
+              "repoid": "CDH-CDH_RUNTIME_NEXT",
+              "repository-version": "CDH_RUNTIME_NEXT-1.cdhCDH_RUNTIME_NEXT.p0.1922354"
             },
             "util": null
           },
-          "version": "CDH_RUNTIME",
+          "version": "CDH_RUNTIME_NEXT",
           "build-number": "1922354"
         },
         "repo": {
           "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/"
         },
         "build-number": "5949264",
-        "version": "CDH_RUNTIME",
+        "version": "CDH_RUNTIME_NEXT",
         "pre_warm_parcels": [
           [
             "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",
@@ -575,29 +575,29 @@
         "package-versions": {
           "cm-build-number": "2000",
           "cdh-build-number": "1922354",
-          "cm": "CM_VERSION",
+          "cm": "CM_VERSION_NEXT",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
-          "stack": "CDH_RUNTIME",
+          "stack": "CDH_RUNTIME_NEXT",
           "python38": "3.8.16-1.module+el8.8.0+18967+20d359ae.1"
         },
         "stack-details": {
           "repo": {
             "stack": {
               "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/",
-              "repoid": "CDH-CDH_RUNTIME",
-              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1922354"
+              "repoid": "CDH-CDH_RUNTIME_NEXT",
+              "repository-version": "CDH_RUNTIME_NEXT-1.cdhCDH_RUNTIME_NEXT.p0.1922354"
             },
             "util": null
           },
-          "version": "CDH_RUNTIME",
+          "version": "CDH_RUNTIME_NEXT",
           "build-number": "1922354"
         },
         "repo": {
           "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/"
         },
         "build-number": "2000",
-        "version": "CDH_RUNTIME",
+        "version": "CDH_RUNTIME_NEXT",
         "pre_warm_parcels": [
           [
             "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",
@@ -645,29 +645,29 @@
         "package-versions": {
           "cm-build-number": "2000",
           "cdh-build-number": "1922354",
-          "cm": "CM_VERSION",
+          "cm": "CM_VERSION_NEXT",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
-          "stack": "CDH_RUNTIME",
+          "stack": "CDH_RUNTIME_NEXT",
           "python38": "3.8.13-1.el7"
         },
         "stack-details": {
           "repo": {
             "stack": {
               "redhat7": "https://MOCK_SERVER_ADDRESS/mock-parcel/",
-              "repoid": "CDH-CDH_RUNTIME",
-              "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1922354"
+              "repoid": "CDH-CDH_RUNTIME_NEXT",
+              "repository-version": "CDH_RUNTIME_NEXT-1.cdhCDH_RUNTIME_NEXT.p0.1922354"
             },
             "util": null
           },
-          "version": "CDH_RUNTIME",
+          "version": "CDH_RUNTIME_NEXT",
           "build-number": "1922354"
         },
         "repo": {
           "redhat7": "https://MOCK_SERVER_ADDRESS/mock-parcel/"
         },
         "build-number": "2000",
-        "version": "CDH_RUNTIME",
+        "version": "CDH_RUNTIME_NEXT",
         "pre_warm_parcels": [
           [
             "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",

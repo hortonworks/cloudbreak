@@ -17,9 +17,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeReplaceVms;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
@@ -55,12 +58,18 @@ public class DistroXUpgradeTests extends AbstractMockTest {
     @Description(given = "there is a running Cloudbreak, and an environment with SDX and DistroX cluster in available state",
             when = "upgrade called on the DistroX cluster",
             then = "DistroX upgrade should be successful, the cluster should be up and running")
-    public void testDistroXUpgrade(TestContext testContext) {
-
+    public void testDistroXUpgrade(MockedTestContext testContext) {
+        String imageSettings = "imageSettingsUpgrade";
+        String upgradeImageCatalogName = resourcePropertyProvider().getName();
+        createImageCatalogForOsUpgrade(testContext, upgradeImageCatalogName);
         String distroXName = resourcePropertyProvider().getName();
         String targetRuntimeVersion = getNextRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion());
         testContext
+                .given(imageSettings, DistroXImageTestDto.class)
+                .withImageId("73f5db23-293d-4934-b124-1d5361375480")
+                .withImageCatalog(upgradeImageCatalogName)
                 .given(distroXName, DistroXTestDto.class)
+                .withImageSettings(imageSettings)
                 .when(distroXTestClient.create(), key(distroXName))
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
@@ -68,7 +77,13 @@ public class DistroXUpgradeTests extends AbstractMockTest {
                 .withRuntime(targetRuntimeVersion)
                 .given(distroXName, DistroXTestDto.class)
                 .then((tc, entity, client) ->  {
-                    entity.mockCm().setCmVersion(targetRuntimeVersion);
+                    DistroXUpgradeV1Request request = new DistroXUpgradeV1Request();
+                    request.setRuntime(targetRuntimeVersion);
+                    request.setDryRun(true);
+                    DistroXUpgradeV1Response distroXUpgradeV1Response = client.getDefaultClient().distroXUpgradeV1Endpoint()
+                            .upgradeClusterByName(entity.getName(), request);
+                    ImageComponentVersions componentVersions = distroXUpgradeV1Response.upgradeCandidates().getFirst().getComponentVersions();
+                    entity.mockCm().setCmVersion(componentVersions.getCm() + "-" + componentVersions.getCmGBN());
                     return entity;
                 })
                 .when(distroXTestClient.upgrade(), key(distroXName))
