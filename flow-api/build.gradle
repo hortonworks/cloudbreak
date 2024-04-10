@@ -22,7 +22,7 @@ dependencies {
   implementation group: 'commons-codec',                 name: 'commons-codec',                  version: commonsCodecVersion
   implementation group: 'commons-net',                   name: 'commons-net',                    version: '3.10.0'
 
-  implementation group: 'net.jodah',                     name: 'expiringmap',                    version: '0.5.10'
+  implementation group: 'net.jodah',                     name: 'expiringmap',                    version: '0.5.11'
   implementation group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
   implementation group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
   implementation group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: jerseyCoreVersion
