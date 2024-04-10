@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -873,7 +874,13 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             if (getAllImages) {
                 return new ImageFilterResult(v3ImageCatalog.getImages().getCdhImages());
             } else {
-                return imageCatalogServiceProxy.getImageFilterResult(v3ImageCatalog);
+                Set<String> defaultImages = v3ImageCatalog.getVersions().getCloudbreakVersions().stream()
+                        .map(CloudbreakVersion::getDefaults)
+                        .flatMap(List::stream)
+                        .collect(Collectors.toSet());
+                ImageFilterResult imageFilterResult = imageCatalogServiceProxy.getImageFilterResult(v3ImageCatalog);
+                List<Image> images = imageFilterResult.getImages().stream().filter(image -> defaultImages.contains(image.getUuid())).toList();
+                return new ImageFilterResult(images, imageFilterResult.getReason());
             }
         }
     }
