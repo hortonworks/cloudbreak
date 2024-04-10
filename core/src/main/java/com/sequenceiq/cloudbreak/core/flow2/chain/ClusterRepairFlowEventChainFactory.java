@@ -198,15 +198,12 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             LOGGER.debug("Cluster repair flowchain is extended with upgrade embedded db preparation flow as embedded db upgrade is needed");
             flowTriggers.add(new UpgradeEmbeddedDBPreparationTriggerRequest(UpgradeEmbeddedDBPreparationEvent.UPGRADE_EMBEDDEDDB_PREPARATION_EVENT.event(),
                     event.getResourceId(), targetMajorVersion));
+            flowTriggers.add(new UpgradeRdsTriggerRequest(UpgradeRdsEvent.UPGRADE_RDS_EVENT.event(), event.getResourceId(), targetMajorVersion, null, null));
         }
         if (rootDiskRepairMigrationEnabled) {
             addRootDiskUpdateIfNecessary(event, stackDto, repairableGroupsWithHostNames, flowTriggers);
         }
         addDownscaleAndUpscaleEvents(event, flowTriggers, repairableGroupsWithHostNames, singlePrimaryGW, stackView);
-        if (embeddedDBUpgrade) {
-            LOGGER.debug("Cluster repair flowchain is extended with upgrade rds flow as embedded db upgrade is needed");
-            flowTriggers.add(new UpgradeRdsTriggerRequest(UpgradeRdsEvent.UPGRADE_RDS_EVENT.event(), event.getResourceId(), targetMajorVersion, null, null));
-        }
         flowTriggers.add(rescheduleStatusCheckEvent(event));
         flowTriggers.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
         return flowTriggers;

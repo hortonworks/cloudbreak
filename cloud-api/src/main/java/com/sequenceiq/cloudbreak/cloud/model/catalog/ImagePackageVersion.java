@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model.catalog;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 
 public enum ImagePackageVersion {
 
@@ -21,7 +22,12 @@ public enum ImagePackageVersion {
     SOURCE_IMAGE("source-image"),
     SPARK3("spark3", "Spark 3"),
     STACK("stack"),
-    IMDS_VERSION("imds");
+    IMDS_VERSION("imds"),
+    PSQL10("psql10", "PostgreSQL 10"),
+    PSQL11("psql11", "PostgreSQL 11"),
+    PSQL14("psql14", "PostgreSQL 14");
+
+    public static final Set<ImagePackageVersion> PSQL_VERSIONS = Set.of(PSQL10, PSQL11, PSQL14);
 
     private final String key;
 

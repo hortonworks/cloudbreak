@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -38,9 +37,6 @@ public class EmbeddedDatabaseService {
 
     @Inject
     private CloudParameterCache cloudParameterCache;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
