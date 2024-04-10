@@ -1,6 +1,8 @@
 package com.sequenceiq.remoteenvironment.domain;
 
 
+import java.util.Objects;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -88,5 +90,26 @@ public class PrivateControlPlane implements AuthResource, AccountAwareResource {
                 ", url='" + url + '\'' +
                 ", accountId='" + accountId + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        PrivateControlPlane that = (PrivateControlPlane) o;
+        return Objects.equals(id, that.id)
+                && Objects.equals(name, that.name)
+                && Objects.equals(resourceCrn, that.resourceCrn)
+                && Objects.equals(accountId, that.accountId)
+                && Objects.equals(url, that.url);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, resourceCrn, accountId, url);
     }
 }
