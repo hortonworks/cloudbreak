@@ -75,7 +75,7 @@ dependencies {
   api group: 'org.springframework.security',                name: 'spring-security-core',           version: springSecurityVersion
   api group: 'org.springframework.security',                name: 'spring-security-config',         version: springSecurityVersion
   api group: 'com.cloudera.crypto',                         name: 'openssl-provider',               version: clouderaCryptoOpenSslProviderVersion
-  implementation     group: 'org.aspectj',                  name: 'aspectjtools',                   version: '1.9.20'
+  implementation     group: 'org.aspectj',                  name: 'aspectjtools',                   version: '1.9.22'
   implementation     group: 'dnsjava',                      name: 'dnsjava',                        version: dnsjavaVersion
 
   testImplementation group: 'org.springframework.boot',     name: 'spring-boot-starter-test',       version: springBootVersion
