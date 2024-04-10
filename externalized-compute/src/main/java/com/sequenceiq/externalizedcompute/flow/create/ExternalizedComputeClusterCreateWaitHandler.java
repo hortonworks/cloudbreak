@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DescribeClusterResponse;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
+import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
@@ -25,6 +26,8 @@ import com.sequenceiq.liftie.client.LiftieGrpcClient;
 public class ExternalizedComputeClusterCreateWaitHandler extends ExceptionCatcherEventHandler<ExternalizedComputeClusterCreateWaitRequest> {
 
     public static final String CREATE_FAILED_STATUS = "CREATE_FAILED";
+
+    public static final String DEPLOYMENT_FAILED_STATUS = "DEPLOYMENT_FAILED";
 
     public static final String RUNNING_STATUS = "RUNNING";
 
@@ -53,31 +56,37 @@ public class ExternalizedComputeClusterCreateWaitHandler extends ExceptionCatche
         ExternalizedComputeCluster externalizedComputeCluster =
                 externalizedComputeClusterService.getExternalizedComputeCluster(resourceId);
         String actorCrn = event.getData().getActorCrn();
-        return Polling.stopAfterDelay(timeLimit, TimeUnit.HOURS)
-                .stopIfException(false)
-                .waitPeriodly(sleepTime, TimeUnit.SECONDS)
-                .run(() -> {
-                    DescribeClusterResponse cluster =
-                            liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), actorCrn);
-                    LOGGER.debug("Cluster response: {}", cluster);
-                    switch (cluster.getStatus()) {
-                        case RUNNING_STATUS -> {
-                            LOGGER.debug("Cluster created successfully");
-                            return AttemptResults.finishWith(
-                                    new ExternalizedComputeClusterCreateWaitSuccessResponse(resourceId, actorCrn));
+        try {
+            return Polling.stopAfterDelay(timeLimit, TimeUnit.HOURS)
+                    .stopIfException(false)
+                    .waitPeriodly(sleepTime, TimeUnit.SECONDS)
+                    .run(() -> {
+                        DescribeClusterResponse cluster =
+                                liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), actorCrn);
+                        LOGGER.debug("Cluster response: {}", cluster);
+                        switch (cluster.getStatus()) {
+                            case RUNNING_STATUS:
+                                LOGGER.debug("Cluster created successfully");
+                                return AttemptResults.finishWith(
+                                        new ExternalizedComputeClusterCreateWaitSuccessResponse(resourceId, actorCrn));
+                            case DEPLOYMENT_FAILED_STATUS:
+                            case CREATE_FAILED_STATUS:
+                                LOGGER.error("Cluster status is a failed status: {}", cluster.getStatus());
+                                String errorMessage = cluster.getMessage();
+                                return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, actorCrn,
+                                        new RuntimeException("Cluster creation failed. Status: " + cluster.getStatus() + ". Message: " + errorMessage)));
+                            default:
+                                LOGGER.info("Neither \"RUNNING\" status nor \"CREATE_FAILED\" status: {}", cluster.getStatus());
+                                return AttemptResults.justContinue();
                         }
-                        case CREATE_FAILED_STATUS -> {
-                            LOGGER.error("Cluster status is a failed status: {}", cluster.getStatus());
-                            String errorMessage = cluster.getMessage();
-                            return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, actorCrn,
-                                    new RuntimeException("Cluster creation failed. Status: " + cluster.getStatus() + ". Message: " + errorMessage)));
-                        }
-                        default -> {
-                            LOGGER.info("Neither \"RUNNING\" status nor \"CREATE_FAILED\" status: {}", cluster.getStatus());
-                            return AttemptResults.justContinue();
-                        }
-                    }
-                });
+                    });
+        } catch (PollerStoppedException e) {
+            DescribeClusterResponse cluster =
+                    liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), actorCrn);
+            LOGGER.warn("Liftie cluster creation timed out: {}. Cluster response: {}", externalizedComputeCluster.getLiftieName(), cluster,  e);
+            return new ExternalizedComputeClusterCreateFailedEvent(resourceId, actorCrn, new RuntimeException("Compute cluster creation timed out. " +
+                    "The last known status is:" + cluster.getStatus() + ". Message: " + cluster.getMessage()));
+        }
     }
 
     @Override

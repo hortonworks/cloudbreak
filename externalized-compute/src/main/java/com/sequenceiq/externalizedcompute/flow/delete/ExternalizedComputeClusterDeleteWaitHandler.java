@@ -12,9 +12,11 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.DescribeClusterResponse;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
+import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
+import com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateFailedEvent;
 import com.sequenceiq.externalizedcompute.service.ExternalizedComputeClusterService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -59,39 +61,47 @@ public class ExternalizedComputeClusterDeleteWaitHandler extends ExceptionCatche
             LOGGER.info("Liftie cluster does not exists, so we can skip waiting");
             return new ExternalizedComputeClusterDeleteWaitSuccessResponse(resourceId, actorCrn);
         }
-        return Polling.stopAfterDelay(timeLimit, TimeUnit.HOURS)
-                .stopIfException(false)
-                .waitPeriodly(sleepTime, TimeUnit.SECONDS)
-                .run(() -> {
-                    try {
-                        DescribeClusterResponse cluster = liftieGrpcClient.describeCluster(
-                                externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), actorCrn);
-                        LOGGER.debug("Cluster status: {}", cluster.getStatus());
-                        switch (cluster.getStatus()) {
-                            case DELETED_STATUS -> {
-                                LOGGER.debug("Cluster deleted successfully");
+        try {
+            return Polling.stopAfterDelay(timeLimit, TimeUnit.HOURS)
+                    .stopIfException(false)
+                    .waitPeriodly(sleepTime, TimeUnit.SECONDS)
+                    .run(() -> {
+                        try {
+                            DescribeClusterResponse cluster = liftieGrpcClient.describeCluster(
+                                    externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), actorCrn);
+                            LOGGER.debug("Cluster status: {}", cluster.getStatus());
+                            switch (cluster.getStatus()) {
+                                case DELETED_STATUS -> {
+                                    LOGGER.debug("Cluster deleted successfully");
+                                    return AttemptResults.finishWith(new ExternalizedComputeClusterDeleteWaitSuccessResponse(resourceId, actorCrn));
+                                }
+                                case DELETE_FAILED_STATUS -> {
+                                    LOGGER.error("Cluster status is a failed status: {}", cluster.getStatus());
+                                    String errorMessage = cluster.getMessage();
+                                    return AttemptResults.finishWith(new ExternalizedComputeClusterDeleteFailedEvent(resourceId, actorCrn,
+                                            new RuntimeException("Cluster deletion failed. Status: " + cluster.getStatus() + ". Message: " + errorMessage)));
+                                }
+                                default -> {
+                                    LOGGER.info("Neither \"DELETED\" status nor \"DELETE_FAILED\" status: {}", cluster.getStatus());
+                                    return AttemptResults.justContinue();
+                                }
+                            }
+                        } catch (StatusRuntimeException statusRuntimeException) {
+                            LOGGER.warn("'{}' liftie cluster describe failed", externalizedComputeCluster.getLiftieName(), statusRuntimeException);
+                            if (statusRuntimeException.getMessage().contains("not found in database")) {
                                 return AttemptResults.finishWith(new ExternalizedComputeClusterDeleteWaitSuccessResponse(resourceId, actorCrn));
-                            }
-                            case DELETE_FAILED_STATUS -> {
-                                LOGGER.error("Cluster status is a failed status: {}", cluster.getStatus());
-                                String errorMessage = cluster.getMessage();
-                                return AttemptResults.finishWith(new ExternalizedComputeClusterDeleteFailedEvent(resourceId, actorCrn,
-                                        new RuntimeException("Cluster deletion failed. Status: " + cluster.getStatus() + ". Message: " + errorMessage)));
-                            }
-                            default -> {
-                                LOGGER.info("Neither \"DELETED\" status nor \"DELETE_FAILED\" status: {}", cluster.getStatus());
+                            } else {
                                 return AttemptResults.justContinue();
                             }
                         }
-                    } catch (StatusRuntimeException statusRuntimeException) {
-                        LOGGER.warn("'{}' liftie cluster describe failed", externalizedComputeCluster.getLiftieName(), statusRuntimeException);
-                        if (statusRuntimeException.getMessage().contains("not found in database")) {
-                            return AttemptResults.finishWith(new ExternalizedComputeClusterDeleteWaitSuccessResponse(resourceId, actorCrn));
-                        } else {
-                            return AttemptResults.justContinue();
-                        }
-                    }
-                });
+                    });
+        } catch (PollerStoppedException e) {
+            DescribeClusterResponse cluster =
+                    liftieGrpcClient.describeCluster(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster), actorCrn);
+            LOGGER.warn("Liftie cluster deletion timed out: {}. Cluster response: {}", externalizedComputeCluster.getLiftieName(), cluster,  e);
+            return new ExternalizedComputeClusterCreateFailedEvent(resourceId, actorCrn, new RuntimeException("Compute cluster deletion timed out. " +
+                    "The last known status is:" + cluster.getStatus() + ". Message: " + cluster.getMessage()));
+        }
     }
 
     @Override

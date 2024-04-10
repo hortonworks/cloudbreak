@@ -1,14 +1,9 @@
 {
   "metadata": {
-    "clusterType": "Dedicated",
     "description": "Common compute cluster"
   },
   "spec": {
     "deployments": {
-      "istio": {
-        "deploymentProfile": "cml",
-        "enabled": true
-      },
       "logging": {
         "enabled": true
       },

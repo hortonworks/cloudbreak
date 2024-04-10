@@ -18,7 +18,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CommonClusterSpec;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CreateClusterRequest;
@@ -56,7 +55,6 @@ class ExternalizedComputeClusterCreateServiceTest {
 
     @Test
     void initiateCreationTest() {
-        ReflectionTestUtils.setField(externalizedComputeClusterCreateService, "kubernetesVersion", "1.28");
         ExternalizedComputeCluster externalizedComputeCluster = new ExternalizedComputeCluster();
         externalizedComputeCluster.setName("cluser-name");
         externalizedComputeCluster.setEnvironmentCrn("envcrn");
@@ -79,9 +77,7 @@ class ExternalizedComputeClusterCreateServiceTest {
 
         CreateClusterRequest clusterRequest = commonCreateClusterRequestArgumentCaptor.getValue();
         CommonClusterSpec spec = clusterRequest.getSpec();
-        assertEquals("1.28", spec.getKubernetes().getVersion());
         assertThat(spec.getNetwork().getTopology().getSubnetsList().stream().toList()).containsExactlyInAnyOrder("subnet1", "subnet2");
-        assertEquals("1.28", spec.getKubernetes().getVersion());
         Assertions.assertTrue(spec.getDeployments().getLogging().getEnabled());
         assertEquals(USER_CRN, clusterRequest.getMetadata().getClusterOwner().getCrn());
         assertEquals("cloudera", clusterRequest.getMetadata().getClusterOwner().getAccountId());
@@ -95,7 +91,6 @@ class ExternalizedComputeClusterCreateServiceTest {
 
     @Test
     void initiateCreationShouldNotHappenWhenLiftieNameExists() {
-        ReflectionTestUtils.setField(externalizedComputeClusterCreateService, "kubernetesVersion", "1.28");
         ExternalizedComputeCluster externalizedComputeCluster = new ExternalizedComputeCluster();
         externalizedComputeCluster.setLiftieName("liftie-cluster-name");
         externalizedComputeCluster.setName("cluser-name");

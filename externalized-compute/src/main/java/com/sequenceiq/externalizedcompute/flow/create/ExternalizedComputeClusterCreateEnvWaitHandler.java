@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
+import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
@@ -50,42 +51,50 @@ public class ExternalizedComputeClusterCreateEnvWaitHandler extends ExceptionCat
         Long resourceId = event.getData().getResourceId();
         ExternalizedComputeCluster externalizedComputeCluster =
                 externalizedComputeClusterService.getExternalizedComputeCluster(resourceId);
-        return Polling.stopAfterDelay(timeLimit, TimeUnit.HOURS)
-                .stopIfException(false)
-                .waitPeriodly(sleepTime, TimeUnit.SECONDS)
-                .run(() -> {
-                    String environmentCrn = externalizedComputeCluster.getEnvironmentCrn();
-                    try {
-                        DetailedEnvironmentResponse environment = environmentEndpoint.getByCrn(environmentCrn);
-                        EnvironmentStatus environmentStatus = environment.getEnvironmentStatus();
-                        LOGGER.debug("Environment status: {}", environmentStatus);
-                        if (environmentStatus == null) {
-                            LOGGER.error("Environment status is null");
-                            return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, event.getData().getActorCrn(),
-                                    new RuntimeException("Environment status is null")));
-                        } else if (environmentStatus.isComputeClusterCreationInProgress()) {
-                            LOGGER.info("Environment is in COMPUTE_CLUSTER_CREATION_IN_PROGRESS state, proceed to compute cluster creation.");
-                            return AttemptResults.finishWith(
-                                    new ExternalizedComputeClusterCreateEnvWaitSuccessResponse(resourceId, event.getData().getActorCrn()));
-                        } else if (environmentStatus.isFailed()) {
-                            LOGGER.error("Environment is in failed status: {}", environmentStatus);
-                            return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, event.getData().getActorCrn(),
-                                    new RuntimeException(String.format("Environment creation failed. Status: %s. Message: %s", environmentStatus,
-                                            environmentStatus.getDescription()))));
-                        } else if (environmentStatus.isDeleteInProgress()) {
-                            return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, event.getData().getActorCrn(),
-                                    new RuntimeException(String.format("Environment is deleted. Status: %s. Message: %s", environmentStatus,
-                                            environmentStatus.getDescription()))));
-                        } else {
-                            LOGGER.debug("Environment is in {}, waiting for COMPUTE_CLUSTER_CREATION_IN_PROGRESS state", environmentStatus);
-                            return AttemptResults.justContinue();
+        String actorCrn = event.getData().getActorCrn();
+        String environmentCrn = externalizedComputeCluster.getEnvironmentCrn();
+        try {
+            return Polling.stopAfterDelay(timeLimit, TimeUnit.HOURS)
+                    .stopIfException(false)
+                    .waitPeriodly(sleepTime, TimeUnit.SECONDS)
+                    .run(() -> {
+                        try {
+                            DetailedEnvironmentResponse environment = environmentEndpoint.getByCrn(environmentCrn);
+                            EnvironmentStatus environmentStatus = environment.getEnvironmentStatus();
+                            LOGGER.debug("Environment status: {}", environmentStatus);
+                            if (environmentStatus == null) {
+                                LOGGER.error("Environment status is null");
+                                return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, actorCrn,
+                                        new RuntimeException("Environment status is null")));
+                            } else if (environmentStatus.isComputeClusterCreationInProgress() || environmentStatus.isAvailable()) {
+                                LOGGER.info("Environment is in COMPUTE_CLUSTER_CREATION_IN_PROGRESS or AVAILABLE state, proceed to compute cluster creation.");
+                                return AttemptResults.finishWith(
+                                        new ExternalizedComputeClusterCreateEnvWaitSuccessResponse(resourceId, actorCrn));
+                            } else if (environmentStatus.isFailed()) {
+                                LOGGER.error("Environment is in failed status: {}", environmentStatus);
+                                return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, actorCrn,
+                                        new RuntimeException(String.format("Environment creation failed. Status: %s. Message: %s", environmentStatus,
+                                                environmentStatus.getDescription()))));
+                            } else if (environmentStatus.isDeleteInProgress()) {
+                                return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, actorCrn,
+                                        new RuntimeException(String.format("Environment is deleted. Status: %s. Message: %s", environmentStatus,
+                                                environmentStatus.getDescription()))));
+                            } else {
+                                LOGGER.debug("Environment is in {}, waiting for COMPUTE_CLUSTER_CREATION_IN_PROGRESS state", environmentStatus);
+                                return AttemptResults.justContinue();
+                            }
+                        } catch (NotFoundException notFoundException) {
+                            LOGGER.warn("Environment not found: {}", environmentCrn);
+                            return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, actorCrn,
+                                    new RuntimeException("Environment not found")));
                         }
-                    } catch (NotFoundException notFoundException) {
-                        LOGGER.warn("Environment not found: {}", environmentCrn);
-                        return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, event.getData().getActorCrn(),
-                                new RuntimeException("Environment not found")));
-                    }
-                });
+                    });
+        } catch (PollerStoppedException e) {
+            DetailedEnvironmentResponse environment = environmentEndpoint.getByCrn(environmentCrn);
+            LOGGER.warn("Environment wait operation timed out. Env response: {}", environment,  e);
+            return new ExternalizedComputeClusterCreateFailedEvent(resourceId, actorCrn, new RuntimeException("Environment wait operation timed out" +
+                    "The last known status is:" + environment.getEnvironmentStatus()));
+        }
     }
 
     @Override

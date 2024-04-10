@@ -7,12 +7,10 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CommonClusterMetadata;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CommonClusterOwner;
-import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CommonKubernetes;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CommonNetwork;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CommonNetworkTopology;
 import com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CreateClusterRequest;
@@ -35,9 +33,6 @@ public class ExternalizedComputeClusterCreateService {
     public static final String COMPUTE_CLUSTER_JSON = "compute-cluster.json";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExternalizedComputeClusterCreateService.class);
-
-    @Value("${externalizedcompute.create.kubernetes.version:1.27}")
-    private String kubernetesVersion;
 
     @Inject
     private LiftieGrpcClient liftieGrpcClient;
@@ -84,7 +79,6 @@ public class ExternalizedComputeClusterCreateService {
     private CreateClusterRequest setupLiftieCluster(CreateClusterRequest.Builder createClusterBuilder, String userCrn,
             ExternalizedComputeCluster externalizedComputeCluster) {
         fillMetadata(createClusterBuilder, externalizedComputeCluster, userCrn);
-        setKubernetes(createClusterBuilder);
         fillNetworkSettings(createClusterBuilder, externalizedComputeCluster);
         return createClusterBuilder.build();
     }
@@ -93,11 +87,6 @@ public class ExternalizedComputeClusterCreateService {
         DetailedEnvironmentResponse environment = environmentEndpoint.getByCrn(externalizedComputeCluster.getEnvironmentCrn());
         CommonNetwork network = getNetworkFromEnvResponse(environment);
         commonClusterBuilder.getSpecBuilder().setNetwork(network);
-    }
-
-    private void setKubernetes(CreateClusterRequest.Builder commonClusterBuilder) {
-        CommonKubernetes.Builder kubernetesBuilder = commonClusterBuilder.getSpecBuilder().getKubernetesBuilder();
-        kubernetesBuilder.setVersion(kubernetesVersion);
     }
 
     private void fillMetadata(CreateClusterRequest.Builder commonClusterBuilder, ExternalizedComputeCluster externalizedComputeCluster,
