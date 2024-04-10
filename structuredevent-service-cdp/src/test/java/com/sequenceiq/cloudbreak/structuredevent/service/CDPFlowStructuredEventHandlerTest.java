@@ -40,7 +40,7 @@ public class CDPFlowStructuredEventHandlerTest {
         CDPStructuredFlowEvent event = new CDPStructuredFlowEvent();
         when(cdpStructuredFlowEventFactory.createStructuredFlowEvent(any(), any())).thenReturn(event);
 
-        underTest.transition(transition);
+        underTest.transitionEnded(transition);
 
         ArgumentCaptor<FlowDetails> flowDetailsCaptor = ArgumentCaptor.forClass(FlowDetails.class);
         verify(cdpStructuredFlowEventFactory).createStructuredFlowEvent(any(), flowDetailsCaptor.capture());
@@ -73,7 +73,7 @@ public class CDPFlowStructuredEventHandlerTest {
         when(source.getId()).thenReturn("source");
         Object field = FieldUtils.readField(underTest, "exception", true);
         Assertions.assertNotNull(field);
-        underTest.transition(transition);
+        underTest.transitionEnded(transition);
 
         ArgumentCaptor<FlowDetails> flowDetailsCaptor = ArgumentCaptor.forClass(FlowDetails.class);
         verify(cdpStructuredFlowEventFactory).createStructuredFlowEvent(any(), flowDetailsCaptor.capture(), eq(exception));

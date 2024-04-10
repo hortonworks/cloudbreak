@@ -80,10 +80,21 @@ public class CDPFlowStructuredEventHandler<S, E> extends StateMachineListenerAda
 
     /**
      * Send a new structured event.
+     *
      * @param transition provides information to build the new Structured Event.
      */
     @Override
     public void transition(Transition<S, E> transition) {
+
+    }
+
+    @Override
+    public void transitionStarted(Transition<S, E> transition) {
+
+    }
+
+    @Override
+    public void transitionEnded(Transition<S, E> transition) {
         try {
             String fromId = getFromId(transition);
             String toId = getToId(transition);
@@ -132,16 +143,6 @@ public class CDPFlowStructuredEventHandler<S, E> extends StateMachineListenerAda
     private String getFromId(Transition<S, E> transition) {
         State<S, E> from = transition.getSource();
         return from != null ? from.getId().toString() : "unknown";
-    }
-
-    @Override
-    public void transitionStarted(Transition<S, E> transition) {
-
-    }
-
-    @Override
-    public void transitionEnded(Transition<S, E> transition) {
-
     }
 
     @Override
