@@ -19,12 +19,14 @@ import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.converter.TargetMajorVersionToUpgradeTargetVersionConverter;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseService;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerRequest;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -66,6 +68,9 @@ class UpgradeRdsHandlerTest {
 
     @Mock
     private EnvironmentClientService environmentClientService;
+
+    @Mock
+    private StackUpdater stackUpdater;
 
     @Mock
     private HandlerEvent<UpgradeRdsUpgradeDatabaseServerRequest> event;
@@ -115,10 +120,12 @@ class UpgradeRdsHandlerTest {
         UpgradeRdsUpgradeDatabaseServerRequest request = new UpgradeRdsUpgradeDatabaseServerRequest(STACK_ID, TARGET_MAJOR_VERSION);
         StackDto stackDto = spy(StackDto.class);
         ClusterView cluster = mock(ClusterView.class);
+        Database database = new Database();
 
         when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stackDto)).thenReturn(true);
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(stackDto.getCluster()).thenReturn(cluster);
+        when(stackDto.getDatabase()).thenReturn(database);
         when(cluster.getDatabaseServerCrn()).thenReturn(null);
         when(event.getData()).thenReturn(request);
 
@@ -130,6 +137,8 @@ class UpgradeRdsHandlerTest {
                 any(DetailedEnvironmentResponse.class));
         verify(environmentClientService, never()).getByCrn(any());
         verify(rdsUpgradeOrchestratorService).upgradeEmbeddedDatabase(stackDto);
+        verify(stackUpdater).updateExternalDatabaseEngineVersion(STACK_ID, TARGET_MAJOR_VERSION.getMajorVersion());
+        verify(rdsUpgradeOrchestratorService).updateDatabaseEngineVersion(stackDto);
         assertThat(result.selector()).isEqualTo("UPGRADERDSUPGRADEDATABASESERVERRESULT");
     }
 

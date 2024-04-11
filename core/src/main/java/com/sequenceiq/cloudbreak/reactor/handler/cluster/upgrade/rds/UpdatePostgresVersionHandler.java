@@ -48,7 +48,7 @@ public class UpdatePostgresVersionHandler extends ExceptionCatcherEventHandler<U
         LOGGER.info("Updating database engine version to {}", targetMajorVersion);
         try {
             stackUpdater.updateExternalDatabaseEngineVersion(stackId, targetMajorVersion);
-            rdsUpgradeOrchestratorService.updateDatabaseEngineVersion(stackId, targetMajorVersion);
+            rdsUpgradeOrchestratorService.updateDatabaseEngineVersion(stackId);
         } catch (Exception e) {
             LOGGER.error("Database server engine version update failed. {}", e.getMessage());
             return new UpgradeRdsFailedEvent(stackId, e, DetailedStackStatus.DATABASE_UPGRADE_FAILED);

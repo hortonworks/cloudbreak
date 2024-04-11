@@ -26,12 +26,14 @@ import org.springframework.statemachine.action.Action;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
+import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -60,7 +62,6 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -184,29 +185,33 @@ public class ClusterUpgradeValidationActions {
     public Action<?, ?> clusterUpgradeImageValidation() {
         return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeS3guardValidationFinishedEvent.class) {
 
+            @Inject
+            private EntitlementService entitlementService;
+
             @Override
             protected void doExecute(StackContext context, ClusterUpgradeS3guardValidationFinishedEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Starting cluster upgrade image validation.");
                 UpgradeImageInfo upgradeImageInfo = (UpgradeImageInfo) variables.get(UPGRADE_IMAGE_INFO);
                 Image targetImage = (Image) variables.get(TARGET_IMAGE);
-                Stack stack = stackService.getById(payload.getResourceId());
-                Database database = stack.getDatabase();
+                Database database = context.getStack().getDatabase();
                 if (targetImage != null
                         && database != null
                         && database.getExternalDatabaseAvailabilityType() != null
                         && database.getExternalDatabaseAvailabilityType().isEmbedded()
-                        && "10".equals(database.getExternalDatabaseEngineVersion())) {
+                        && MajorVersion.VERSION_10.getMajorVersion().equals(database.getExternalDatabaseEngineVersion())
+                        && !entitlementService.isEmbeddedPostgresUpgradeEnabled(context.getCloudContext().getAccountId())) {
                     // temporary hotfix to prevent failing upgrades to rhel8 when the cluster has postgres 10 embedded database
                     String errorMessage = "Your DataHub is using PostgreSQL 10, which has been at its end-of-life since November 2022" +
-                            " and no longer receives updates. Therefore, upgrading your DataHub directly is not supported." +
-                            " Recommended Action: Recreate your DataHub, which will automatically use PostgreSQL 14.";
+                            " and no longer receives updates. Recommended Action: Request 'CDP_POSTGRES_UPGRADE_EMBEDDED' entitlement," +
+                            " then cluster will automatically upgraded to use PostgreSQL 14.";
                     LOGGER.warn(errorMessage);
-                    throw new BadRequestException(errorMessage);
+                    sendEvent(context, new ClusterUpgradeValidationFailureEvent(payload.getResourceId(), new UpgradeValidationFailedException(errorMessage)));
+                } else {
+                    CloudStack cloudStack = context.getCloudStack().replaceImage(targetImage);
+                    ClusterUpgradeImageValidationEvent event = new ClusterUpgradeImageValidationEvent(payload.getResourceId(), payload.getImageId(), cloudStack,
+                            context.getCloudCredential(), context.getCloudContext(), upgradeImageInfo.targetStatedImage().getImage());
+                    sendEvent(context, event.selector(), event);
                 }
-                CloudStack cloudStack = context.getCloudStack().replaceImage(targetImage);
-                ClusterUpgradeImageValidationEvent event = new ClusterUpgradeImageValidationEvent(payload.getResourceId(), payload.getImageId(), cloudStack,
-                        context.getCloudCredential(), context.getCloudContext(), upgradeImageInfo.targetStatedImage().getImage());
-                sendEvent(context, event.selector(), event);
             }
 
             @Override

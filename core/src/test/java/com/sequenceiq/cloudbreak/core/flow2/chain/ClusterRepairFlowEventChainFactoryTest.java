@@ -184,9 +184,9 @@ public class ClusterRepairFlowEventChainFactoryTest {
         assertEvents(eventQueues, List.of(
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
                 "UPGRADE_EMBEDDEDDB_PREPARATION_TRIGGER_EVENT",
+                "UPGRADE_RDS_TRIGGER_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
-                "UPGRADE_RDS_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));
     }

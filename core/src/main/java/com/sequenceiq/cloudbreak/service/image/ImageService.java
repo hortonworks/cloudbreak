@@ -58,7 +58,6 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.StackTypeResolver;
-import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
@@ -99,9 +98,6 @@ public class ImageService {
 
     @Inject
     private EntitlementService entitlementService;
-
-    @Inject
-    private UserDataService userDataService;
 
     @Inject
     private StackTypeResolver stackTypeResolver;
