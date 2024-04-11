@@ -105,6 +105,7 @@ public class SshJClient {
         }
     }
 
+    @Retryable(retryFor = IOException.class)
     public Pair<Integer, String> execute(SSHClient ssh, String command) throws IOException {
         LOGGER.info("Waiting to SSH command to be executed...");
         try (Session session = startSshSession(ssh);
