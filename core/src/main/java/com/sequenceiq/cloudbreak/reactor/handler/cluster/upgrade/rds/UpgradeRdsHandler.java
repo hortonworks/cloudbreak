@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsUpgradeDatabaseServerResult;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -44,6 +45,9 @@ public class UpgradeRdsHandler extends ExceptionCatcherEventHandler<UpgradeRdsUp
 
     @Inject
     private StackDtoService stackDtoService;
+
+    @Inject
+    private StackUpdater stackUpdater;
 
     @Inject
     private RdsUpgradeOrchestratorService rdsUpgradeOrchestratorService;
@@ -111,8 +115,14 @@ public class UpgradeRdsHandler extends ExceptionCatcherEventHandler<UpgradeRdsUp
 
     private UpgradeRdsUpgradeDatabaseServerResult upgradeEmbeddedDatabase(UpgradeRdsUpgradeDatabaseServerRequest request, Long stackId, StackDto stackDto)
             throws CloudbreakOrchestratorException {
-        LOGGER.debug("Starting embedded database upgrade...");
+        String targetMajorVersion = request.getVersion().getMajorVersion();
+        LOGGER.debug("Starting embedded database upgrade to {} version...", targetMajorVersion);
         rdsUpgradeOrchestratorService.upgradeEmbeddedDatabase(stackDto);
+        LOGGER.debug("Upgrading embedded database version in db to {} version...", targetMajorVersion);
+        stackUpdater.updateExternalDatabaseEngineVersion(stackId, targetMajorVersion);
+        stackDto.getDatabase().setExternalDatabaseEngineVersion(targetMajorVersion);
+        LOGGER.debug("Upgrading embedded database version in salt pillars to {} version...", targetMajorVersion);
+        rdsUpgradeOrchestratorService.updateDatabaseEngineVersion(stackDto);
         return new UpgradeRdsUpgradeDatabaseServerResult(stackId, request.getVersion());
     }
 

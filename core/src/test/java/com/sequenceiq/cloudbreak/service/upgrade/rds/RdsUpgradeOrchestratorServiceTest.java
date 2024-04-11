@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
+import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -121,8 +122,10 @@ class RdsUpgradeOrchestratorServiceTest {
                 "fqdn1", "hostgroup");
         Node node2 = new Node("privateIP2", "publicIP2", "instance2", "instanceType2",
                 "fqdn2", "hostgroup");
+        Database database = new Database();
         lenient().when(stack.getId()).thenReturn(STACK_ID);
         lenient().when(stack.getCluster()).thenReturn(cluster);
+        lenient().when(stack.getDatabase()).thenReturn(database);
         lenient().when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
         lenient().when(gatewayConfig.getHostname()).thenReturn("fqdn1");
         lenient().when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
@@ -346,7 +349,7 @@ class RdsUpgradeOrchestratorServiceTest {
 
     @Test
     void testUpdateDatabaseEngineVersion() throws CloudbreakOrchestratorFailedException {
-        underTest.updateDatabaseEngineVersion(STACK_ID, DATABASE_ENGINE_VERSION);
+        underTest.updateDatabaseEngineVersion(STACK_ID);
 
         verify(stackDtoService).getById(STACK_ID);
         verify(postgresConfigService).decorateServicePillarWithPostgresIfNeeded(anyMap(), eq(stack));
@@ -357,7 +360,7 @@ class RdsUpgradeOrchestratorServiceTest {
     void testUpdateDatabaseEngineVersionShouldThrowExceptionWhenTheHostOrchestratorThrowsException() throws CloudbreakOrchestratorFailedException {
         doThrow(new CloudbreakOrchestratorFailedException("Error")).when(hostOrchestrator).saveCustomPillars(any(), any(), any());
 
-        assertThrows(CloudbreakServiceException.class, () -> underTest.updateDatabaseEngineVersion(STACK_ID, DATABASE_ENGINE_VERSION));
+        assertThrows(CloudbreakServiceException.class, () -> underTest.updateDatabaseEngineVersion(STACK_ID));
 
         verify(stackDtoService).getById(STACK_ID);
         verify(postgresConfigService).decorateServicePillarWithPostgresIfNeeded(anyMap(), eq(stack));
