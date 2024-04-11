@@ -90,7 +90,7 @@ integrationtest:
     defaultPassword: cb1STPneh2b6KyJn
     defaultPort: 7180
   cloudProvider: MOCK
-  runtimeVersion: 7.2.17
+  runtimeVersion: 7.2.18
   upgrade:
     currentHARuntimeVersion: 7.2.16
     currentRuntimeVersion: 7.2.16
