@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_ADJUSTMENT_TYPE_FALLBACK;
+import static java.lang.Boolean.FALSE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -9,6 +11,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -24,6 +27,9 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -51,7 +57,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackScaleV4RequestToUpdateStackV4RequestConverter;
@@ -72,26 +78,25 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 
 @ExtendWith(MockitoExtension.class)
 class StackCommonServiceTest {
 
-    private static final String AWS = CloudPlatform.AWS.name();
-
     private static final long WORKSPACE_ID = 1L;
 
-    private static final String ACCOUNT_ID = "accountId";
+    private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
     private static final long STACK_ID = 2L;
 
     private static final NameOrCrn STACK_NAME = NameOrCrn.ofName("stackName");
 
     private static final NameOrCrn STACK_CRN =
-            NameOrCrn.ofCrn("crn:cdp:datahub:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:cluster:6b5a9aa7-223a-4d6a-93ca-27627be773b5");
+            NameOrCrn.ofCrn("crn:cdp:datahub:us-west-1:" + ACCOUNT_ID + ":cluster:6b5a9aa7-223a-4d6a-93ca-27627be773b5");
 
-    private static final String ACTOR_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
+    private static final String ACTOR_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID();
 
     private static final String SUBNET_ID = "aSubnetId";
 
@@ -156,6 +161,68 @@ class StackCommonServiceTest {
 
     @InjectMocks
     private StackCommonService underTest;
+
+    static Object[][] scalingAdjustmentProvider() {
+        return new Object[][]{
+
+                // platformVariant, inputAdjustmentType, finalAdjustmentType
+
+                {"AWS", CloudConstants.AWS, AdjustmentType.BEST_EFFORT, AdjustmentType.EXACT},
+                {"AWS", CloudConstants.AWS_NATIVE, AdjustmentType.BEST_EFFORT, AdjustmentType.BEST_EFFORT},
+                {"AWS", CloudConstants.AWS_NATIVE_GOV, AdjustmentType.BEST_EFFORT, AdjustmentType.BEST_EFFORT},
+                {"AZURE", CloudConstants.AZURE, AdjustmentType.BEST_EFFORT, AdjustmentType.EXACT},
+                {"GCP", CloudConstants.GCP, AdjustmentType.BEST_EFFORT, AdjustmentType.BEST_EFFORT},
+
+                {"AWS", CloudConstants.AWS, AdjustmentType.PERCENTAGE, AdjustmentType.EXACT},
+                {"AWS", CloudConstants.AWS_NATIVE, AdjustmentType.PERCENTAGE, AdjustmentType.PERCENTAGE},
+                {"AWS", CloudConstants.AWS_NATIVE_GOV, AdjustmentType.PERCENTAGE, AdjustmentType.PERCENTAGE},
+                {"AZURE", CloudConstants.AZURE, AdjustmentType.PERCENTAGE, AdjustmentType.EXACT},
+                {"GCP", CloudConstants.GCP, AdjustmentType.PERCENTAGE, AdjustmentType.PERCENTAGE},
+
+                {"AWS", CloudConstants.AWS, AdjustmentType.EXACT, AdjustmentType.EXACT},
+                {"AWS", CloudConstants.AWS_NATIVE, AdjustmentType.EXACT, AdjustmentType.EXACT},
+                {"AWS", CloudConstants.AWS_NATIVE_GOV, AdjustmentType.EXACT, AdjustmentType.EXACT},
+                {"AZURE", CloudConstants.AZURE, AdjustmentType.EXACT, AdjustmentType.EXACT},
+                {"GCP", CloudConstants.GCP, AdjustmentType.EXACT, AdjustmentType.EXACT},
+        };
+    }
+
+    @ParameterizedTest
+    @MethodSource("scalingAdjustmentProvider")
+    public void testUpScalingForAdjustmentType(String cloudPlatform, String platformVariant,
+            AdjustmentType inputAdjustmentType, AdjustmentType finalAdjustmentType) {
+        String group = "master";
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stackView.getCloudPlatform()).thenReturn(cloudPlatform);
+        when(stack.getPlatformVariant()).thenReturn(platformVariant);
+        when(stackView.getResourceCrn()).thenReturn(STACK_CRN.getCrn());
+        when(stackDtoService.getByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stack);
+        StackScaleV4Request updateRequest = new StackScaleV4Request();
+        updateRequest.setGroup(group);
+        updateRequest.setAdjustmentType(inputAdjustmentType);
+        UpdateStackV4Request updateStackV4Request = new UpdateStackV4Request();
+        InstanceGroupAdjustmentV4Request instanceGroupAdjustment = new InstanceGroupAdjustmentV4Request();
+        instanceGroupAdjustment.setScalingAdjustment(1);
+        instanceGroupAdjustment.setInstanceGroup(group);
+        updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustment);
+        ArgumentCaptor<StackScaleV4Request> scaleRequestCaptor = ArgumentCaptor.forClass(StackScaleV4Request.class);
+        when(stackScaleV4RequestToUpdateStackV4RequestConverter.convert(scaleRequestCaptor.capture())).thenReturn(updateStackV4Request);
+        when(cloudParameterCache.isUpScalingSupported(anyString())).thenReturn(Boolean.TRUE);
+        CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
+        when(cloudbreakUser.getUserCrn()).thenReturn("crn:cdp:" + Crn.Service.AUTOSCALE.getName() + ":us-west-1:altus:user:__internal__actor__");
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+        when(regionAwareInternalCrnGeneratorFactory.autoscale()).thenReturn(regionAwareInternalCrnGenerator);
+        lenient().doNothing().when(eventService).fireCloudbreakEvent(any(), any(), eq(STACK_UPSCALE_ADJUSTMENT_TYPE_FALLBACK));
+
+        underTest.putScalingInWorkspace(STACK_NAME, ACCOUNT_ID, updateRequest);
+
+        assertEquals(finalAdjustmentType, scaleRequestCaptor.getValue().getAdjustmentType());
+        if (!inputAdjustmentType.equals(finalAdjustmentType)) {
+            verify(eventService).fireCloudbreakEvent(any(), any(), eq(STACK_UPSCALE_ADJUSTMENT_TYPE_FALLBACK));
+        }
+    }
 
     @Test
     public void testCreateImageChangeDtoWithCatalog() {
@@ -342,7 +409,7 @@ class StackCommonServiceTest {
         StackDto stack = mock(StackDto.class);
         String variant = AwsConstants.AwsVariant.AWS_VARIANT.name();
         when(stack.getPlatformVariant()).thenReturn(variant);
-        when(multiAzValidator.supportedVariant(variant)).thenReturn(Boolean.FALSE);
+        when(multiAzValidator.supportedVariant(variant)).thenReturn(FALSE);
         NetworkScaleV4Request networkScaleV4Request = new NetworkScaleV4Request();
         networkScaleV4Request.setPreferredSubnetIds(List.of(SUBNET_ID));
 
@@ -388,11 +455,10 @@ class StackCommonServiceTest {
         instanceGroupAdjustment.setScalingAdjustment(1);
         updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustment);
         when(stackScaleV4RequestToUpdateStackV4RequestConverter.convert(any())).thenReturn(updateStackV4Request);
-        when(cloudParameterCache.isUpScalingSupported(anyString())).thenReturn(Boolean.FALSE);
+        when(cloudParameterCache.isUpScalingSupported(anyString())).thenReturn(FALSE);
 
         BadRequestException actual = assertThrows(BadRequestException.class, () -> underTest.putScalingInWorkspace(STACK_NAME, ACCOUNT_ID, updateRequest));
         assertEquals(actual.getMessage(), "Upscaling is not supported on AWS cloudplatform");
-
     }
 
     @Test

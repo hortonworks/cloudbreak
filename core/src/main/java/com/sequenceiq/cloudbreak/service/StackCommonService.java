@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_RETRY_FLOW_START;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_ADJUSTMENT_TYPE_FALLBACK;
 
 import java.util.HashSet;
 import java.util.List;
@@ -42,6 +43,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterCache;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.controller.StackCreatorService;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackScaleV4RequestToUpdateClusterV4RequestConverter;
@@ -69,6 +71,7 @@ import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.domain.RetryResponse;
 import com.sequenceiq.flow.domain.RetryableFlow;
@@ -293,6 +296,13 @@ public class StackCommonService {
         validateNetworkScaleRequest(stack, stackScaleV4Request.getStackNetworkScaleV4Request());
         MDCBuilder.buildMdcContext(stack);
         stackScaleV4Request.setStackId(stack.getId());
+        if (Set.of(CloudConstants.AWS, CloudConstants.AZURE).contains(stack.getPlatformVariant())) {
+            LOGGER.warn("Due to stability reason, for Cloudformation based AWS clusters and ARM template based Azure clusters " +
+                    "are only supporting EXACT scaling for upscale!");
+            stackScaleV4Request.setAdjustmentType(AdjustmentType.EXACT);
+            stackScaleV4Request.setThreshold(null);
+            eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_ADJUSTMENT_TYPE_FALLBACK);
+        }
         UpdateStackV4Request updateStackJson = stackScaleV4RequestToUpdateStackV4RequestConverter.convert(stackScaleV4Request);
         Integer scalingAdjustment = updateStackJson.getInstanceGroupAdjustment().getScalingAdjustment();
         validateScalingRequest(stack.getStack(), scalingAdjustment);
