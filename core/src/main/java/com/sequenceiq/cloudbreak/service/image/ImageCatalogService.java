@@ -350,7 +350,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     public StatedImages getImages(Long workspaceId, String imageCatalogName, String runtimeVersion, ImageCatalogPlatform provider)
             throws CloudbreakImageCatalogException {
-        return getImages(getLoggedInUser(), workspaceId, imageCatalogName, runtimeVersion, ImmutableSet.of(provider));
+        return getImages(getLoggedInUser(), workspaceId, imageCatalogName, runtimeVersion, ImmutableSet.of(provider), true);
     }
 
     public List<Image> getAllCdhImages(String accountId, Long workspaceId, String imageCatalogName, Set<ImageCatalogPlatform> provider)
@@ -359,8 +359,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     StatedImages getImages(User user, Long workspaceId, String imageCatalogName, String runtimeVersion,
-        Set<ImageCatalogPlatform> providers) throws CloudbreakImageCatalogException {
-        return getImages(user, workspaceId, imageCatalogName, providers, runtimeVersion, true);
+        Set<ImageCatalogPlatform> providers, boolean applyVersionBasedFiltering) throws CloudbreakImageCatalogException {
+        return getImages(user, workspaceId, imageCatalogName, providers, runtimeVersion, applyVersionBasedFiltering);
     }
 
     private StatedImages getImages(User user, Long workspaceId, String imageCatalogName,
@@ -617,6 +617,10 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     public Images propagateImagesIfRequested(Long workspaceId, String name, Boolean withImages) {
+        return propagateImagesIfRequested(workspaceId, name, withImages, true);
+    }
+
+    public Images propagateImagesIfRequested(Long workspaceId, String name, Boolean withImages, Boolean applyVersionBasedFiltering) {
         if (BooleanUtils.isTrue(withImages)) {
             Set<ImageCatalogPlatform> platforms = new HashSet<>();
             platforms.addAll(preferencesService.enabledPlatforms()
@@ -628,7 +632,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                     .map(e -> imageCatalogPlatform(e.concat("_GOV").toUpperCase(Locale.ROOT)))
                     .collect(Collectors.toSet()));
             try {
-                return getImages(getLoggedInUser(), workspaceId, name, null, platforms).getImages();
+                return getImages(getLoggedInUser(), workspaceId, name, null, platforms, applyVersionBasedFiltering).getImages();
             } catch (CloudbreakImageCatalogException e) {
                 LOGGER.info("No images was found: ", e);
             }

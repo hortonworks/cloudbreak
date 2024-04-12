@@ -82,7 +82,7 @@ public class ImageCatalogServiceTest {
     public void resourceCrnByResourceNameShouldBeResolvedByCore() {
         when(cloudbreakInternalCrnClient.withInternalCrn()).thenReturn(cloudbreakServiceCrnEndpoints);
         when(cloudbreakServiceCrnEndpoints.imageCatalogV4Endpoint()).thenReturn(imageCatalogV4Endpoint);
-        when(imageCatalogV4Endpoint.getByNameInternal(eq(SdxService.WORKSPACE_ID_DEFAULT), eq(IMAGE_CATALOG_NAME), eq(false), any()))
+        when(imageCatalogV4Endpoint.getByNameInternal(eq(SdxService.WORKSPACE_ID_DEFAULT), eq(IMAGE_CATALOG_NAME), eq(false), any(), any()))
                 .thenReturn(imageCatalogV4Response);
         when(imageCatalogV4Response.getCrn()).thenReturn(IMAGE_CATALOG_CRN);
 

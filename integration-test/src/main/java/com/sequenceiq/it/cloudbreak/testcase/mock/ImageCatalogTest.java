@@ -62,7 +62,7 @@ public class ImageCatalogTest extends AbstractMockTest {
                 .withName(imgCatalogName)
                 .withUrl(getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
-                .when(imageCatalogTestClient.getV4(Boolean.FALSE), key(imgCatalogName))
+                .when(imageCatalogTestClient.getV4(), key(imgCatalogName))
                 .validate();
     }
 

@@ -74,7 +74,7 @@ public class SdxMultiAzUpgradeTest extends PreconditionSdxE2ETest {
         List<ImageV4Response> cdhImages = new ArrayList<>();
         testContext
                 .given(ImageCatalogTestDto.class)
-                .when(imageCatalogTestClient.getV4(true))
+                .when(imageCatalogTestClient.getV4WithAdvertisedImages())
                 .then((testContext1, entity, cloudbreakClient) -> {
                     List<ImageV4Response> sortedImages = entity.getResponse().getImages().getCdhImages().stream()
                             .filter(im -> im.getVersion().equals("7.2.17") && im.getImageSetsByProvider().containsKey("azure"))

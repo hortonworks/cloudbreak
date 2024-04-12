@@ -128,7 +128,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
     protected String getUuid(TestContext testContext, String prodCatalogName, String currentRuntimeVersion3rdParty) {
         testContext
                 .given(ImageCatalogTestDto.class).withName(prodCatalogName)
-                .when(imageCatalogTest.getV4(true));
+                .when(imageCatalogTest.getV4WithAdvertisedImages());
         ImageCatalogTestDto dto = testContext.get(ImageCatalogTestDto.class);
         return dto.getResponse().getImages().getCdhImages().stream()
                 .filter(img -> img.getVersion().equals(currentRuntimeVersion3rdParty) && img.getImageSetsByProvider().keySet().stream().iterator().next()

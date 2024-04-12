@@ -31,6 +31,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxGetAuditsAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxGetDatalakeEventsZipAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxInstanceMetadataUpdateAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxInternalOsUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxInternalResizeRecoveryAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxInternalUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxListAction;
@@ -145,12 +146,16 @@ public class SdxTestClient {
         return new SdxUpgradeAction();
     }
 
+    public Action<SdxInternalTestDto, SdxClient> upgradeInternal() {
+        return new SdxInternalUpgradeAction();
+    }
+
     public Action<SdxTestDto, SdxClient> osUpgrade(String imageId) {
         return new SdxOsUpgradeAction(imageId);
     }
 
-    public Action<SdxInternalTestDto, SdxClient> upgradeInternal() {
-        return new SdxInternalUpgradeAction();
+    public Action<SdxInternalTestDto, SdxClient> osUpgradeInternal(String imageId) {
+        return new SdxInternalOsUpgradeAction(imageId);
     }
 
     public Action<SdxTestDto, SdxClient> upgradeDatabaseServer() {
