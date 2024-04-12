@@ -37,6 +37,8 @@ public class CommonCloudProperties {
 
     private Telemetry telemetry = new Telemetry();
 
+    private BaseImageTest baseImageTest = new BaseImageTest();
+
     public String getCloudProvider() {
         return cloudProvider;
     }
@@ -151,6 +153,37 @@ public class CommonCloudProperties {
 
     public void setTelemetry(Telemetry telemetry) {
         this.telemetry = telemetry;
+    }
+
+    public BaseImageTest getBaseImageTest() {
+        return baseImageTest;
+    }
+
+    public void setBaseImageTest(BaseImageTest baseImageTest) {
+        this.baseImageTest = baseImageTest;
+    }
+
+    public static class BaseImageTest {
+
+        private String sourceCatalogName;
+
+        private String sourceCatalogUrl;
+
+        public String getSourceCatalogName() {
+            return sourceCatalogName;
+        }
+
+        public void setSourceCatalogName(String sourceCatalogName) {
+            this.sourceCatalogName = sourceCatalogName;
+        }
+
+        public String getSourceCatalogUrl() {
+            return sourceCatalogUrl;
+        }
+
+        public void setSourceCatalogUrl(String sourceCatalogUrl) {
+            this.sourceCatalogUrl = sourceCatalogUrl;
+        }
     }
 
     public static class ImageValidation {

@@ -82,6 +82,16 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     @Override
+    public String getBaseImageTestCatalogName() {
+        return commonCloudProperties().getBaseImageTest().getSourceCatalogName();
+    }
+
+    @Override
+    public String getBaseImageTestCatalogUrl() {
+        return commonCloudProperties().getBaseImageTest().getSourceCatalogUrl();
+    }
+
+    @Override
     public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
         return imageCatalog.withName(commonCloudProperties.getImageCatalogName());
     }

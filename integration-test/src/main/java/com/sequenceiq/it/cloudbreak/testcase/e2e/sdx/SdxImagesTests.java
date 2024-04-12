@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -38,6 +39,9 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
 
     @Inject
     private SdxTestClient sdxTestClient;
+
+    @Inject
+    private ImageCatalogTestClient imageCatalogTestClient;
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
@@ -87,12 +91,15 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
 
         testContext
                 .given(imageCatalog, ImageCatalogTestDto.class)
+                .withName(cloudProvider.getBaseImageTestCatalogName())
+                .withUrl(cloudProvider.getBaseImageTestCatalogUrl())
+                .when(imageCatalogTestClient.createIfNotExistV4())
                 .when((tc, dto, client) -> {
                     selectedImageID.set(cloudProvider.getLatestBaseImageID(tc, dto, client));
                     return dto;
                 })
                 .given(imageSettings, ImageSettingsTestDto.class)
-                    .withImageCatalog(cloudProvider.getImageCatalogName())
+                    .withImageCatalog(cloudProvider.getBaseImageTestCatalogName())
                     .withImageId(selectedImageID.get())
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)

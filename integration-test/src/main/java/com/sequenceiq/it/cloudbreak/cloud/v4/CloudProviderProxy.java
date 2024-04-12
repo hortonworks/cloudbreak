@@ -84,6 +84,16 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public String getBaseImageTestCatalogName() {
+        return delegate.getBaseImageTestCatalogName();
+    }
+
+    @Override
+    public String getBaseImageTestCatalogUrl() {
+        return delegate.getBaseImageTestCatalogUrl();
+    }
+
+    @Override
     public String verticalScaleVolumeType() {
         return delegate.verticalScaleVolumeType();
     }
