@@ -81,6 +81,16 @@ public class LegacyFlowStructuredEventHandler<S, E> extends StateMachineListener
 
     @Override
     public void transition(Transition<S, E> transition) {
+
+    }
+
+    @Override
+    public void transitionStarted(Transition<S, E> transition) {
+
+    }
+
+    @Override
+    public void transitionEnded(Transition<S, E> transition) {
         try {
             State<S, E> from = transition.getSource();
             State<S, E> to = transition.getTarget();
@@ -103,16 +113,6 @@ public class LegacyFlowStructuredEventHandler<S, E> extends StateMachineListener
         } catch (RuntimeException ex) {
             LOGGER.error("Error happened during structured flow event generation! The event won't be stored!", ex);
         }
-    }
-
-    @Override
-    public void transitionStarted(Transition<S, E> transition) {
-
-    }
-
-    @Override
-    public void transitionEnded(Transition<S, E> transition) {
-
     }
 
     @Override
