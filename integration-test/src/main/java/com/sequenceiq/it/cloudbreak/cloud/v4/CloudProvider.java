@@ -73,6 +73,10 @@ public interface CloudProvider {
 
     String getLatestBaseImageID();
 
+    String getBaseImageTestCatalogName();
+
+    String getBaseImageTestCatalogUrl();
+
     InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template);
 
     DistroXInstanceTemplateTestDto template(DistroXInstanceTemplateTestDto template);

@@ -79,6 +79,9 @@ integrationtest:
   imageValidation:
     sourceCatalogName: v3-dev
     sourceCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-dev-cb-image-catalog.json
+  baseImageTest:
+    sourceCatalogName: v3-test
+    sourceCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-cb-image-catalog.json
   tags:
     auto: tesztelek
   clusterShape: LIGHT_DUTY
