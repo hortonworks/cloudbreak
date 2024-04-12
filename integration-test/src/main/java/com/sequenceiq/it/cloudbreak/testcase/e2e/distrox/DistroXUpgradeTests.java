@@ -105,7 +105,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                     "disks are encrypted too")
     public void testDistroXUpgradesWithEncryptedDisks(TestContext testContext) {
 
-        String currentRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion();
+        String currentUpgradeRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion();
         String targetRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeTargetVersion();
         String currentRuntimeVersion3rdParty = commonClusterManagerProperties.getUpgrade().getDistroXUpgrade3rdPartyCurrentVersion();
         String targetRuntimeVersion3rdParty = commonClusterManagerProperties.getUpgrade().getDistroXUpgrade3rdPartyTargetVersion();
@@ -117,9 +117,9 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
         encryptedTestUtil.createFreeipa(testContext, commonCloudProperties());
         encryptedTestUtil.doFreeipUserSync(testContext);
         encryptedTestUtil.assertEnvironmentAndFreeipa(testContext, null);
-        createDatalake(testContext, currentRuntimeVersion);
+        createDatalake(testContext, currentUpgradeRuntimeVersion);
         encryptedTestUtil.assertDatalake(testContext, null);
-        createDatahubs(testContext, currentRuntimeVersion, currentRuntimeVersion3rdParty, firstDhName, secondDhName);
+        createDatahubs(testContext, currentUpgradeRuntimeVersion, currentRuntimeVersion3rdParty, firstDhName, secondDhName);
         encryptedTestUtil.assertDatahubWithName(testContext, null, firstDhName);
         encryptedTestUtil.assertDatahubWithName(testContext, null, secondDhName);
         upgradeAndAssertUpgrade(testContext, targetRuntimeVersion, targetRuntimeVersion3rdParty, firstDhName, secondDhName);
@@ -155,7 +155,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .validate();
     }
 
-    private void createDatahubs(TestContext testContext, String currentRuntimeVersion, String currentRuntimeVersion3rdParty,
+    private void createDatahubs(TestContext testContext, String currentUpgradeRuntimeVersion, String currentRuntimeVersion3rdParty,
             String firstDhName, String secondDhName) {
         AtomicReference<String> uuid = new AtomicReference<>();
         String thirdPartyCatalogName = resourcePropertyProvider().getName();
@@ -163,7 +163,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
 
         testContext
                 .given(firstDhName, DistroXTestDto.class)
-                .withTemplate(commonClusterManagerProperties.getInternalDistroXBlueprintName(currentRuntimeVersion))
+                .withTemplate(commonClusterManagerProperties.getInternalDistroXBlueprintName(currentUpgradeRuntimeVersion))
                 .withPreferredSubnetsForInstanceNetworkIfMultiAzEnabledOrJustFirst()
                 .when(distroXTestClient.create(), key(firstDhName))
                 .await(STACK_AVAILABLE, key(firstDhName))

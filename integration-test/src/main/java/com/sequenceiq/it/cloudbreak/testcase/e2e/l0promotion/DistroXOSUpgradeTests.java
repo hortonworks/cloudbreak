@@ -57,13 +57,13 @@ public class DistroXOSUpgradeTests extends AbstractE2ETest {
     public void testBaseDistroXOSUpgrade(TestContext testContext) {
         String sdxName = resourcePropertyProvider().getName();
         String distroXName = resourcePropertyProvider().getName();
-        String currentRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion();
+        String currentUpgradeRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion();
         String targetRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeTargetVersion();
 
         testContext
                 .given(sdxName, SdxTestDto.class)
                     .withCloudStorage()
-                    .withRuntimeVersion(currentRuntimeVersion)
+                    .withRuntimeVersion(currentUpgradeRuntimeVersion)
                 .when(sdxTestClient.create(), key(sdxName))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxName))
                 .awaitForHealthyInstances()
@@ -71,7 +71,7 @@ public class DistroXOSUpgradeTests extends AbstractE2ETest {
 
         testContext
                 .given(distroXName, DistroXTestDto.class)
-                    .withTemplate(commonClusterManagerProperties.getInternalDistroXBlueprintName(currentRuntimeVersion))
+                    .withTemplate(commonClusterManagerProperties.getInternalDistroXBlueprintName(currentUpgradeRuntimeVersion))
                 .when(distroXTestClient.create(), key(distroXName))
                 .await(STACK_AVAILABLE, key(distroXName))
                 .awaitForHealthyInstances()

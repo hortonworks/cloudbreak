@@ -72,16 +72,16 @@ public class CommonClusterManagerProperties {
         return clouderamanager;
     }
 
-    public String getInternalDistroXBlueprintName() {
+    public String getInternalDistroXBlueprintNameForCurrentRuntime() {
         return getInternalDistroXBlueprintName(runtimeVersion);
     }
 
-    public String getInternalDistroXBlueprintName(String runtimeVersion) {
-        return String.format(internalDistroXBlueprintName, runtimeVersion, getSparkVersion());
+    public String getInternalDistroXBlueprintName(String distroXUpgradeCurrentVersion) {
+        return String.format(internalDistroXBlueprintName, distroXUpgradeCurrentVersion, getSparkVersion(distroXUpgradeCurrentVersion));
     }
 
-    private String getSparkVersion() {
-        return versionComparator.compare(() -> runtimeVersion, () -> FIRST_RUNTIME_VERSION_WITH_SPARK_VERSION) >= 0 ? SPARK_VERSION : "";
+    private String getSparkVersion(String distroXUpgradeCurrentVersion) {
+        return versionComparator.compare(() -> distroXUpgradeCurrentVersion, () -> FIRST_RUNTIME_VERSION_WITH_SPARK_VERSION) >= 0 ? SPARK_VERSION : "";
     }
 
     public void setInternalDistroXBlueprintName(String internalDistroXBlueprintName) {
