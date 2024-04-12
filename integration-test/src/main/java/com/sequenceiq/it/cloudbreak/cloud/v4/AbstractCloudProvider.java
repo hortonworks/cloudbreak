@@ -295,7 +295,6 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     public String getLatestDefaultPreWarmedImageByRuntimeVersion(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform,
             boolean govCloud, String runtimeVersion) {
-        String osType = govCloud ? RHEL8.getOsType() : CENTOS7.getOsType();
         try {
             ImageV4Response latestPrewarmedImage = cloudbreakClient
                     .getDefaultClient()
@@ -305,11 +304,9 @@ public abstract class AbstractCloudProvider implements CloudProvider {
                     .getCdhImages().stream()
                     .filter(ImageV4Response::isDefaultImage)
                     .filter(image -> StringUtils.equalsIgnoreCase(image.getStackDetails().getVersion(), runtimeVersion))
-                    .filter(imageV4Response -> StringUtils.equalsIgnoreCase(imageV4Response.getOsType(), osType))
                     .max(Comparator.comparing(ImageV4Response::getPublished))
                     .orElseThrow(() -> new TestFailException(
-                            format("Cannot find pre-warmed images at '%s' provider with os type '%s' for '%s' runtime version!",
-                                    platform, osType, runtimeVersion)));
+                            format("Cannot find pre-warmed images at '%s' provider for '%s' runtime version!", platform, runtimeVersion)));
 
             Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
             Log.log(LOGGER, format(" Image Catalog URL: %s ", imageCatalogTestDto.getRequest().getUrl()));
