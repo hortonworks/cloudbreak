@@ -19,7 +19,7 @@
     "resources": [
         {
             "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "2023-01-01",
+            "apiVersion": "2023-04-01",
             "name": "[parameters('storageAccountName')]",
             "location": "[parameters('location')]",
             "tags": {
@@ -42,6 +42,7 @@
                 },
                 "allowBlobPublicAccess": false,
                 "supportsHttpsTrafficOnly": true,
+                "minimumTlsVersion": "TLS1_2",
                 "encryption": {
                     "services": {
                         "file": {
