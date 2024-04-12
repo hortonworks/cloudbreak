@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.USERDATA_SECRET_ID;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,6 +59,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
+import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -80,6 +82,21 @@ import software.amazon.awssdk.services.ec2.model.RunInstancesResponse;
 class AwsNativeInstanceResourceBuilderTest {
 
     private static final String INSTANCE_ID = "instanceId";
+
+    private static final String TEST_USERDATA = """
+            export NOT_SECRET1="not_a_secret1"
+            ###SECRETS-START
+            export SECRET1="secret1"
+            export SECRET2="secret2"
+            ###SECRETS-END
+            export NOT_SECRET2="not_a_secret2"
+            """;
+
+    private static final String USERDATA_WITH_SECRETS_REPLACED = """
+            export NOT_SECRET1="not_a_secret1"
+            export USERDATA_SECRET_ID="testsecretid"
+            export NOT_SECRET2="not_a_secret2"
+            """;
 
     @InjectMocks
     private AwsNativeInstanceResourceBuilder underTest;
@@ -130,9 +147,10 @@ class AwsNativeInstanceResourceBuilderTest {
     private AwsStackNameCommonUtil awsStackNameCommonUtil;
 
     static Object[][] testBuildWhenInstanceNoExistSource() {
-        return new Object[][] {
-                {"v2", HttpTokensState.REQUIRED},
-                {null, null}
+        return new Object[][]{
+                {"v2", HttpTokensState.REQUIRED, false},
+                {null, null, false},
+                {null, null, true}
         };
     }
 
@@ -153,7 +171,8 @@ class AwsNativeInstanceResourceBuilderTest {
 
     @ParameterizedTest
     @MethodSource("testBuildWhenInstanceNoExistSource")
-    void testBuildWhenInstanceNoExist(String supportedImdsVersionOfStack, HttpTokensState expectedTokenState) throws Exception {
+    void testBuildWhenInstanceNoExist(String supportedImdsVersionOfStack, HttpTokensState expectedTokenState,
+            boolean secretEncryptionEnabled) throws Exception {
         Instance instance = Instance.builder().instanceId(INSTANCE_ID).build();
         RunInstancesResponse runInstancesResponse = RunInstancesResponse.builder().instances(instance).build();
         InstanceAuthentication authentication = mock(InstanceAuthentication.class);
@@ -179,6 +198,11 @@ class AwsNativeInstanceResourceBuilderTest {
         when(securityGroupBuilderUtil.getSecurityGroupIds(awsContext, group)).thenReturn(List.of("sg-id"));
         when(awsStackNameCommonUtil.getInstanceName(ac, "groupName", privateId)).thenReturn("stackname");
         when(cloudStack.getSupportedImdsVersion()).thenReturn(supportedImdsVersionOfStack);
+        when(cloudStack.getUserDataByType(any())).thenReturn(TEST_USERDATA);
+        when(cloudInstance.hasParameter(USERDATA_SECRET_ID)).thenReturn(secretEncryptionEnabled);
+        if (secretEncryptionEnabled) {
+            when(cloudInstance.getStringParameter(USERDATA_SECRET_ID)).thenReturn("testsecretid");
+        }
 
         ArgumentCaptor<RunInstancesRequest> runInstancesRequestArgumentCaptor = ArgumentCaptor.forClass(RunInstancesRequest.class);
         List<CloudResource> actual = underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.singletonList(cloudResource), cloudStack);
@@ -189,6 +213,11 @@ class AwsNativeInstanceResourceBuilderTest {
             assertEquals(runInstancesRequest.metadataOptions().httpTokens(), expectedTokenState);
         } else {
             assertNull(runInstancesRequest.metadataOptions());
+        }
+        if (secretEncryptionEnabled) {
+            assertEquals(Base64Util.encode(USERDATA_WITH_SECRETS_REPLACED), runInstancesRequest.userData());
+        } else {
+            assertEquals(Base64Util.encode(TEST_USERDATA), runInstancesRequest.userData());
         }
         assertEquals("sg-id", runInstancesRequest.securityGroupIds().get(0));
         assertThat(runInstancesRequest.tagSpecifications().get(0)).matches(ts -> ts.tags().stream()

@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceVolumeConnector;
+import com.sequenceiq.cloudbreak.cloud.SecretConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
 import com.sequenceiq.cloudbreak.cloud.ValidatorType;
@@ -157,6 +158,11 @@ public class MockConnector implements CloudConnector {
 
     @Override
     public EncryptionResources encryptionResources() {
+        return null;
+    }
+
+    @Override
+    public SecretConnector secretConnector() {
         return null;
     }
 }

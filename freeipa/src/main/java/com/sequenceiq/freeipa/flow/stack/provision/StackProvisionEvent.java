@@ -19,6 +19,8 @@ import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFall
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackSuccess;
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserDataFailed;
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserDataSuccess;
+import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.UpdateUserdataSecretsFailed;
+import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.UpdateUserdataSecretsSuccess;
 
 public enum StackProvisionEvent implements FlowEvent {
     START_CREATION_EVENT("STACK_PROVISION_TRIGGER_EVENT"),
@@ -45,6 +47,8 @@ public enum StackProvisionEvent implements FlowEvent {
     IMAGE_FALLBACK_FAILED_EVENT(EventSelectorUtil.selector(ImageFallbackFailed.class)),
     COLLECT_METADATA_FINISHED_EVENT(CloudPlatformResult.selector(CollectMetadataResult.class)),
     COLLECT_METADATA_FAILED_EVENT(CloudPlatformResult.failureSelector(CollectMetadataResult.class)),
+    UPDATE_USERDATA_SECRETS_FINISHED_EVENT(EventSelectorUtil.selector(UpdateUserdataSecretsSuccess.class)),
+    UPDATE_USERDATA_SECRETS_FAILED_EVENT(EventSelectorUtil.selector(UpdateUserdataSecretsFailed.class)),
     SSHFINGERPRINTS_EVENT(CloudPlatformResult.selector(GetSSHFingerprintsResult.class)),
     SSHFINGERPRINTS_FAILED_EVENT(CloudPlatformResult.failureSelector(GetSSHFingerprintsResult.class)),
     GET_TLS_INFO_FINISHED_EVENT(CloudPlatformResult.selector(GetTlsInfoResult.class)),

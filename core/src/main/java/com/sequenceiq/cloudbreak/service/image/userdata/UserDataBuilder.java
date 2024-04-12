@@ -27,11 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
-import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeySource;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
-import com.sequenceiq.cloudbreak.encryption.EncryptionUtil;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -51,9 +47,6 @@ public class UserDataBuilder {
 
     @Inject
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
-
-    @Inject
-    private EncryptionUtil encryptionUtil;
 
     public Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, Variant variant, byte[] cbSshKeyDer, String sshUser,
             PlatformParameters parameters, String saltBootPassword, String cbCert, CcmConnectivityParameters ccmParameters, ProxyConfig proxyConfig,
@@ -124,42 +117,12 @@ public class UserDataBuilder {
     private void extendModelAndEncryptSecretsIfSecretEncryptionEnabled(Platform platform, Variant variant, DetailedEnvironmentResponse environment,
             Map<String, Object> model) {
         if (environment.isEnableSecretEncryption()) {
-            Map<String, String> secretKeysAndNames = validateAndReturnSecretKeysAndNames();
-            CloudPlatform cloudPlatform = CloudPlatform.valueOf(platform.getValue());
-            EncryptionKeySource secretEncryptionKeySource = encryptionUtil.getEncryptionKeySource(cloudPlatform, environment);
+            //TODO get the KMS key
+            String secretEncryptionKeySource = "";
 
             model.put("secretEncryptionEnabled", Boolean.TRUE);
-            model.put("secretEncryptionKeySource", secretEncryptionKeySource.keyValue());
-
-            for (Map.Entry<String, Object> entry : model.entrySet()) {
-                String key = entry.getKey();
-                if (secretKeysAndNames.containsKey(key)) {
-                    String secretName = secretKeysAndNames.get(key);
-                    String secretValue = (String) entry.getValue();
-                    LOGGER.debug("Encrypting secret {}...", key);
-
-                    if (!secretValue.isEmpty()) {
-                        entry.setValue(encryptionUtil.encrypt(platform, variant, secretValue, environment, secretName));
-                        LOGGER.debug("Succesfully encrypted secret {}.", key);
-                    } else {
-                        LOGGER.debug("Secret {} is an empty String, therefore skipping encryption for it.", key);
-                    }
-                }
-            }
+            model.put("secretEncryptionKeySource", secretEncryptionKeySource);
         }
-    }
-
-    public Map<String, String> validateAndReturnSecretKeysAndNames() {
-        Map<String, String> secretKeysAndNames = userDataBuilderParams.getUserDataSecrets();
-        if (secretKeysAndNames == null) {
-            throw new CloudbreakServiceException("Secret encryption is enabled, but secret keys and names couldn't be loaded for user data secret encryption!");
-        }
-        if (secretKeysAndNames.isEmpty()) {
-            throw new CloudbreakServiceException("Secret encryption is enabled, but secret keys and names map is empty, " +
-                    "which means no secrets will be encrypted in the user data!");
-        }
-        LOGGER.debug("Using the following secret keys and names for user data secret encryption: {}.", secretKeysAndNames);
-        return secretKeysAndNames;
     }
 
     private String build(Map<String, Object> model) {

@@ -4,6 +4,7 @@ import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.freeipa.flow.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
+import com.sequenceiq.freeipa.flow.stack.termination.action.DeleteUserdataSecretsAction;
 import com.sequenceiq.freeipa.flow.stack.termination.action.DeregisterCcmKeyAction;
 import com.sequenceiq.freeipa.flow.stack.termination.action.DeregisterClusterProxyAction;
 import com.sequenceiq.freeipa.flow.stack.termination.action.ExecutePreTerminationRecipesAction;
@@ -16,6 +17,7 @@ import com.sequenceiq.freeipa.flow.stack.termination.action.StopTelemetryAgentAc
 public enum StackTerminationState implements FlowState {
     INIT_STATE,
     EXECUTE_PRE_TERMINATION_RECIPES(ExecutePreTerminationRecipesAction.class),
+    DELETE_USERDATA_SECRETS_STATE(DeleteUserdataSecretsAction.class),
     DEREGISTER_CLUSTERPROXY_STATE(DeregisterClusterProxyAction.class),
     DEREGISTER_CCMKEY_STATE(DeregisterCcmKeyAction.class),
     STOP_TELEMETRY_AGENT_STATE(StopTelemetryAgentAction.class),

@@ -6,14 +6,14 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
-public class CreateUserDataRequest extends StackEvent {
+public class UpdateUserdataSecretsRequest extends StackEvent {
 
     private final CloudContext cloudContext;
 
     private final CloudCredential cloudCredential;
 
     @JsonCreator
-    public CreateUserDataRequest(
+    public UpdateUserdataSecretsRequest(
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("cloudContext") CloudContext cloudContext,
             @JsonProperty("cloudCredential") CloudCredential cloudCredential) {

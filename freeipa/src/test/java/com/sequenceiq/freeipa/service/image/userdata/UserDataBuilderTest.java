@@ -1,20 +1,12 @@
 package com.sequenceiq.freeipa.service.image.userdata;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -47,16 +39,13 @@ import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
-import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeySource;
-import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyType;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.freeipa.encryption.EncryptionUtil;
+import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackEncryption;
 import com.sequenceiq.freeipa.service.StackEncryptionService;
 
@@ -70,14 +59,13 @@ class UserDataBuilderTest {
 
     private static final Long STACK_ID = 1L;
 
+    private static final String ENCRYPTION_KEY_SOURCE = "encryptionKey";
+
     @Spy
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
     @Mock
     private CcmV2TlsTypeDecider ccmV2TlsTypeDecider;
-
-    @Mock
-    private EncryptionUtil encryptionUtil;
 
     @Mock
     private StackEncryptionService stackEncryptionService;
@@ -86,6 +74,8 @@ class UserDataBuilderTest {
     private UserDataBuilder underTest;
 
     private DetailedEnvironmentResponse environment;
+
+    private Stack stack;
 
     @BeforeEach
     void setup() throws IOException, TemplateException {
@@ -98,12 +88,13 @@ class UserDataBuilderTest {
 
         UserDataBuilderParams params = new UserDataBuilderParams();
         params.setCustomUserData("date >> /tmp/time.txt");
-        params.setUserDataSecrets(Map.of("saltBootPassword", "SALT_BOOT_PASSWORD"));
 
         ReflectionTestUtils.setField(underTest, "userDataBuilderParams", params);
         environment = DetailedEnvironmentResponse.builder()
                 .withCrn("environmentCrn")
                 .build();
+        stack = new Stack();
+        stack.setAccountId(ACCOUNT_ID);
     }
 
     @Test
@@ -132,8 +123,8 @@ class UserDataBuilderTest {
         when(scriptParams.getStartLabel()).thenReturn(98);
         when(platformParameters.scriptParams()).thenReturn(scriptParams);
 
-        String userData = underTest.buildUserData(ACCOUNT_ID, environment, Platform.platform("AZURE"), "priv-key".getBytes(),
-                "cloudbreak", platformParameters, "pass", "cert", ccmConnectivityParameters, proxyConfig, STACK_ID);
+        String userData = underTest.buildUserData(stack, environment, Platform.platform("AZURE"), "priv-key".getBytes(),
+                "cloudbreak", platformParameters, "pass", "cert", ccmConnectivityParameters, proxyConfig);
 
         String expectedUserData = FileReaderUtils.readFileFromClasspath("azure-ccm-init.sh");
         assertEquals(expectedUserData, userData);
@@ -152,8 +143,8 @@ class UserDataBuilderTest {
         when(scriptParams.getStartLabel()).thenReturn(98);
         when(platformParameters.scriptParams()).thenReturn(scriptParams);
 
-        String userData = underTest.buildUserData(ACCOUNT_ID, environment, Platform.platform("AZURE"), "priv-key".getBytes(),
-                "cloudbreak", platformParameters, "pass", "cert", ccmConnectivityParameters, null, STACK_ID);
+        String userData = underTest.buildUserData(stack, environment, Platform.platform("AZURE"), "priv-key".getBytes(),
+                "cloudbreak", platformParameters, "pass", "cert", ccmConnectivityParameters, null);
 
         String expectedUserData = FileReaderUtils.readFileFromClasspath("azure-ccm-v2-init.sh");
         assertEquals(expectedUserData, userData);
@@ -183,8 +174,8 @@ class UserDataBuilderTest {
         lenient().when(ccmV2TlsTypeDecider.decide(environment)).thenReturn(ccmV2TlsType);
         environment.setCcmV2TlsType(ccmV2TlsType);
         environment.setAccountId(ACCOUNT_ID);
-        String userData = underTest.buildUserData(ACCOUNT_ID, environment, Platform.platform("AZURE"), "priv-key".getBytes(),
-                "cloudbreak", platformParameters, "pass", "cert", ccmConnectivityParameters, null, STACK_ID);
+        String userData = underTest.buildUserData(stack, environment, Platform.platform("AZURE"), "priv-key".getBytes(),
+                "cloudbreak", platformParameters, "pass", "cert", ccmConnectivityParameters, null);
 
         String expectedUserData = FileReaderUtils.readFileFromClasspath(expectedContentFileName);
         assertEquals(expectedUserData, userData);
@@ -200,64 +191,32 @@ class UserDataBuilderTest {
         when(scriptParams.getStartLabel()).thenReturn(98);
         when(platformParameters.scriptParams()).thenReturn(scriptParams);
 
-        String userData = underTest.buildUserData(ACCOUNT_ID, environment, Platform.platform("AZURE"), "priv-key".getBytes(),
-                "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null,
-                STACK_ID);
+        String userData = underTest.buildUserData(stack, environment, Platform.platform("AZURE"), "priv-key".getBytes(),
+                "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null);
 
         String expectedUserData = FileReaderUtils.readFileFromClasspath("azure-init.sh");
         assertEquals(expectedUserData, userData);
     }
 
     @Test
-    @DisplayName("test if secret encryption is enabled, then it is reflected in the user data (boolean and key arn are passed, secrets are encrypted)")
-    void testBuildUserDataWithSecretEncryptionEnabled() {
+    @DisplayName("test if section containing secrets is marked and flag and encryption key are included, if secret encryption is enabled")
+    void testBuildUserDataWithSecretEncryptionEnabled() throws IOException {
         environment.setEnableSecretEncryption(true);
-        environment.setCloudPlatform(CloudPlatform.AWS.name());
+        stack.setId(STACK_ID);
+        StackEncryption stackEncryption = new StackEncryption();
+        stackEncryption.setEncryptionKeyLuks(ENCRYPTION_KEY_SOURCE);
+        ReflectionTestUtils.setField(underTest, "cdpApiEndpointUrl", "endpointUrl");
         PlatformParameters platformParameters = mock(PlatformParameters.class);
         ScriptParams scriptParams = mock(ScriptParams.class);
-        when(platformParameters.scriptParams()).thenReturn(scriptParams);
         when(scriptParams.getDiskPrefix()).thenReturn("sd");
         when(scriptParams.getStartLabel()).thenReturn(98);
-        StackEncryption stackEncryption = mock(StackEncryption.class);
-        when(stackEncryption.getEncryptionKeyLuks()).thenReturn("keyArn");
+        when(platformParameters.scriptParams()).thenReturn(scriptParams);
         when(stackEncryptionService.getStackEncryption(STACK_ID)).thenReturn(stackEncryption);
-        EncryptionKeySource encryptionKeySource = EncryptionKeySource.builder()
-                .withKeyType(EncryptionKeyType.AWS_KMS_KEY_ARN)
-                .withKeyValue("keyArn")
-                .build();
-        when(encryptionUtil.getEncryptionKeySource(CloudPlatform.AWS, "keyArn")).thenReturn(encryptionKeySource);
-        when(encryptionUtil.encrypt(CloudPlatform.AWS, "pass", environment, "SALT_BOOT_PASSWORD", encryptionKeySource))
-                .thenReturn("encrypted-pass");
 
-        String userData = underTest.buildUserData(ACCOUNT_ID, environment, Platform.platform("AZURE"), "priv-key".getBytes(),
-                "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null, STACK_ID);
+        String userdata = underTest.buildUserData(stack, environment, Platform.platform("AWS"), "priv-key".getBytes(), "cloudbreak",
+                platformParameters, "pass", "cert", new CcmConnectivityParameters(), null);
 
-        verify(encryptionUtil, times(1))
-                .encrypt(eq(CloudPlatform.AWS), eq("pass"), eq(environment), eq("SALT_BOOT_PASSWORD"), eq(encryptionKeySource));
-        assertTrue(userData.contains("ENVIRONMENT_CRN=\"environmentCrn\""));
-        assertTrue(userData.contains("SALT_BOOT_PASSWORD=encrypted-pass"));
-        assertTrue(userData.contains("SECRET_ENCRYPTION_ENABLED=true"));
-        assertTrue(userData.contains("SECRET_ENCRYPTION_KEY_SOURCE=\"keyArn\""));
+        String expectedUserData = FileReaderUtils.readFileFromClasspath("aws-secret-encryption-init.sh");
+        assertEquals(expectedUserData, userdata);
     }
-
-    @Test
-    @DisplayName("test if secret encryption is disabled, then user data does not contain secret encryption related variables, and secrets are not encrypted")
-    void testBuildUserDataWithSecretEncryptionDisabled() {
-        environment.setEnableSecretEncryption(false);
-        PlatformParameters platformParameters = mock(PlatformParameters.class);
-        ScriptParams scriptParams = mock(ScriptParams.class);
-        when(platformParameters.scriptParams()).thenReturn(scriptParams);
-        when(scriptParams.getDiskPrefix()).thenReturn("sd");
-        when(scriptParams.getStartLabel()).thenReturn(98);
-
-        String userData = underTest.buildUserData(ACCOUNT_ID, environment, Platform.platform("AZURE"), "priv-key".getBytes(),
-                "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null,
-                STACK_ID);
-
-        verify(encryptionUtil, never()).encrypt(any(), any(), any(), any(), any());
-        assertTrue(userData.contains("SALT_BOOT_PASSWORD=pass"));
-        assertFalse(userData.contains("SECRET_ENCRYPTION_ENABLED"));
-        assertFalse(userData.contains("SECRET_ENCRYPTION_KEY_SOURCE"));
-    }
-
 }

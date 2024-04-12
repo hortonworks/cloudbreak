@@ -74,6 +74,9 @@ public class InstanceMetaData implements OrchestrationNode {
     @Column(columnDefinition = "TEXT")
     private Json image;
 
+    @Column(name = "userdatasecretresource_id")
+    private Long userdataSecretResourceId;
+
     public String getPrivateIp() {
         return privateIp;
     }
@@ -267,6 +270,14 @@ public class InstanceMetaData implements OrchestrationNode {
         this.image = image;
     }
 
+    public Long getUserdataSecretResourceId() {
+        return userdataSecretResourceId;
+    }
+
+    public void setUserdataSecretResourceId(Long userdataSecretResourceId) {
+        this.userdataSecretResourceId = userdataSecretResourceId;
+    }
+
     @Override
     public String toString() {
         return "InstanceMetaData{" +
@@ -288,6 +299,7 @@ public class InstanceMetaData implements OrchestrationNode {
                 ", instanceGroup=" + instanceGroup +
                 ", lifeCycle=" + lifeCycle +
                 ", variant='" + variant + '\'' +
+                ", userdataSecretResource=" + userdataSecretResourceId +
                 '}';
     }
 

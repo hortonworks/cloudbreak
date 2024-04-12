@@ -14,6 +14,9 @@ export LAZY_FORMAT_DISK_LIMIT=12
 export IS_GATEWAY=${gateway?c}
 export TMP_SSH_KEY="dummy"
 export SSH_USER=${sshUser}
+<#if secretEncryptionEnabled!false>
+###SECRETS-START
+</#if>
 export SALT_BOOT_PASSWORD=${saltBootPassword}
 export SALT_BOOT_SIGN_KEY=${signaturePublicKey}
 export CB_CERT=${cbCert}
@@ -76,6 +79,7 @@ export CCM_V2_AGENT_HMAC_FOR_PRIVATE_KEY="${ccmV2AgentHmacForPrivateKey}"
 export IS_CCM_V2_JUMPGATE_ENABLED=false
 </#if>
 <#if secretEncryptionEnabled!false>
+###SECRETS-END
 export SECRET_ENCRYPTION_ENABLED=true
 export SECRET_ENCRYPTION_KEY_SOURCE="${secretEncryptionKeySource}"
 </#if>

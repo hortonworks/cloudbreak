@@ -2,9 +2,6 @@ package com.sequenceiq.cloudbreak.service.image.userdata;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -17,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -47,13 +43,9 @@ import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
-import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeySource;
-import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeyType;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
-import com.sequenceiq.cloudbreak.encryption.EncryptionUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -70,9 +62,6 @@ class UserDataBuilderTest {
 
     private DetailedEnvironmentResponse environment;
 
-    @Mock
-    private EncryptionUtil encryptionUtil;
-
     @InjectMocks
     private UserDataBuilder underTest;
 
@@ -87,7 +76,6 @@ class UserDataBuilderTest {
 
         UserDataBuilderParams params = new UserDataBuilderParams();
         params.setCustomUserData("date >> /tmp/time.txt");
-        params.setUserDataSecrets(Map.of("saltBootPassword", "SALT_BOOT_PASSWORD"));
         ReflectionTestUtils.setField(underTest, "userDataBuilderParams", params);
 
         environment = DetailedEnvironmentResponse.builder()
@@ -188,39 +176,6 @@ class UserDataBuilderTest {
                 .build();
         Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), Variant.variant("AZURE"), "priv-key".getBytes(),
                 "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), proxyConfig, environment);
-        assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
-        assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
-    }
-
-    @Test
-    void testBuildUserDataWithSecretEncryptionEnabled() throws IOException {
-        String expectedGwScript = FileReaderUtils.readFileFromClasspath("aws-gateway-init-secret-encryption.sh");
-        String expectedCoreScript = FileReaderUtils.readFileFromClasspath("aws-core-init-secret-encryption.sh");
-        environment.setEnableSecretEncryption(true);
-        environment.setCloudPlatform(CloudPlatform.AWS.name());
-        EncryptionKeySource encryptionKeySource = EncryptionKeySource.builder()
-                .withKeyType(EncryptionKeyType.AWS_KMS_KEY_ARN)
-                .withKeyValue("keyArn")
-                .build();
-        when(encryptionUtil.getEncryptionKeySource(CloudPlatform.AWS, environment)).thenReturn(encryptionKeySource);
-        when(encryptionUtil.encrypt(any(), any(), eq("pass"), eq(environment), eq("SALT_BOOT_PASSWORD"))).thenReturn("encrypted-pass");
-
-        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AWS"), Variant.variant("AWS"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null, environment);
-
-        assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
-        assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
-    }
-
-    @Test
-    void testBuildUserDataWithSecretEncryptionDisabled() throws IOException {
-        String expectedGwScript = FileReaderUtils.readFileFromClasspath("aws-gateway-init.sh");
-        String expectedCoreScript = FileReaderUtils.readFileFromClasspath("aws-core-init.sh");
-        environment.setEnableSecretEncryption(false);
-
-        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AWS"), Variant.variant("AWS"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), null, environment);
-
         assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
         assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
     }
