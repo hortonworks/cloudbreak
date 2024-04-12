@@ -234,7 +234,7 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
                 .given(clouderaManager, DistroXClouderaManagerTestDto.class, CHILD_CLOUD_PLATFORM)
                     .withClouderaManagerProduct(cmProduct)
                 .given(cluster, DistroXClusterTestDto.class, CHILD_CLOUD_PLATFORM)
-                    .withBlueprintName(commonClusterManagerProperties().getInternalDistroXBlueprintName())
+                    .withBlueprintName(commonClusterManagerProperties().getInternalDistroXBlueprintNameForCurrentRuntime())
                     .withValidateBlueprint(Boolean.FALSE)
                     .withClouderaManager(clouderaManager)
                 .given(imageSettings, DistroXImageTestDto.class, CHILD_CLOUD_PLATFORM)

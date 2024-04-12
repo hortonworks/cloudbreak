@@ -401,7 +401,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBlueprintName() {
-        return commonClusterManagerProperties().getInternalDistroXBlueprintName();
+        return commonClusterManagerProperties().getInternalDistroXBlueprintNameForCurrentRuntime();
     }
 
     @Override
