@@ -322,7 +322,14 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     public String getLatestDefaultBaseImage(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform, boolean govCloud) {
-        String osType = govCloud ? RHEL8.getOsType() : CENTOS7.getOsType();
+        Runtime.Version defaultRuntimeVersion = Runtime.Version.parse(commonClusterManagerProperties.getRuntimeVersion());
+        Runtime.Version baseRuntimeVersion = Runtime.Version.parse("7.2.18");
+        String osType = govCloud
+                ? RHEL8.getOsType()
+                : defaultRuntimeVersion.compareTo(baseRuntimeVersion) >= 0
+                    ? RHEL8.getOsType()
+                    : CENTOS7.getOsType();
+
         try {
             List<BaseImageV4Response> images = cloudbreakClient
                     .getDefaultClient()
