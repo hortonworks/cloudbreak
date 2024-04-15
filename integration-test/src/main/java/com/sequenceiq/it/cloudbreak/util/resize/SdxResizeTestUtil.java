@@ -22,6 +22,9 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 @Component
 public class SdxResizeTestUtil {
+
+    private static final String MDL_RESIZE_FIXED_RUNTIME_VERSION = "7.2.17";
+
     @Inject
     private SdxTestClient sdxTestClient;
 
@@ -59,11 +62,11 @@ public class SdxResizeTestUtil {
                 .given("telemetry", TelemetryTestDto.class)
                 .withLogging()
                 .withReportClusterLogs()
-
                 // Create original SDX cluster.
                 .given(sdxKey, SdxInternalTestDto.class)
                 .withDatabase(sdxDatabaseRequest)
                 .withCloudStorage(cloudStorageRequest)
+                .withRuntimeVersion(MDL_RESIZE_FIXED_RUNTIME_VERSION)
                 .withClusterShape(SdxClusterShape.CUSTOM)
                 .withTelemetry("telemetry")
                 .when(sdxTestClient.createInternal(), key(sdxKey))
