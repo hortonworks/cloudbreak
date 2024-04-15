@@ -115,7 +115,7 @@ bootRun {
 }
 
 bootRun {
-    mainClass = 'com.sequenceiq.environmentprivate.PrivateEnvironmentApplication'
+    mainClass = 'com.sequenceiq.remoteenvironment.RemoteEnvironmentApplication'
 }
 
 bootJar {

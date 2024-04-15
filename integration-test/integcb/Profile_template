@@ -18,6 +18,7 @@ export CB_DEFAULT_SUBSCRIPTION_ADDRESS=""
 export CB_CLIENT_SECRET=cloudbreak
 export INGRESS_URLS=dev-gateway,localhost
 export CLUSTERPROXY_ENABLED=true
+export THUNDERHEAD_URL=http://thunderhead-mock:8080
 export ENVIRONMENT_AUTOSYNC_ENABLED=false
 export ENVIRONMENT_FREEIPA_SYNCHRONIZEONSTART=false
 export ENVIRONMENT_EXPERIENCE_SCAN_ENABLED=true
@@ -47,3 +48,4 @@ export FREEIPA_JAVA_OPTS="-Dfreeipa.hibernate.circuitbreaker=BREAK -Dhibernate.s
 export REDBEAMS_JAVA_OPTS="-Dredbeams.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=10 -Dhibernate.session.circuitbreak.max.count=25"
 export DATALAKE_JAVA_OPTS="-Ddatalake.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=10 -Dhibernate.session.circuitbreak.max.count=25"
 export ENVIRONMENT_JAVA_OPTS="-Denvironment.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=10 -Dhibernate.session.circuitbreak.max.count=55 -Denvironment.tunnel.default=CLUSTER_PROXY"
+export REMOTE_ENVIRONMENT_JAVA_OPTS="-Denvironment-remote.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=10 -Dhibernate.session.circuitbreak.max.count=55 -Denvironment.tunnel.default=CLUSTER_PROXY"

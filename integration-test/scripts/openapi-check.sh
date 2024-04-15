@@ -12,6 +12,7 @@ echo -e "OpenAPI check\n"
 mkdir -p ./apidefinitions
 cp ../core/build/openapi/cb.json ./apidefinitions/cloudbreak.json
 cp ../environment/build/openapi/environment.json ./apidefinitions/environment.json
+cp ../environment-remote/build/openapi/remoteenvironment.json ./apidefinitions/remoteenvironment.json
 cp ../freeipa/build/openapi/freeipa.json ./apidefinitions/freeipa.json
 cp ../redbeams/build/openapi/redbeams.json ./apidefinitions/redbeams.json
 cp ../datalake/build/openapi/datalake.json ./apidefinitions/datalake.json

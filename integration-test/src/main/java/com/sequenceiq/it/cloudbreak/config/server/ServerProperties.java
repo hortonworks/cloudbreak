@@ -130,6 +130,15 @@ public class ServerProperties {
     @Value("${integrationtest.externalizedcompute.port:0}")
     private int externalizedComputePort;
 
+    @Value("${integrationtest.remoteenvironment.server}")
+    private String remoteEnvironmentServer;
+
+    @Value("${integrationtest.remoteenvironment.port:8092}")
+    private int remoteEnvironmentPort;
+
+    @Value("${integrationtest.remoteenvironment.contextPath:/remoteenvironmentservice}")
+    private String remoteEnvironmentContextPath;
+
     private String cbVersion;
 
     @Inject
@@ -195,6 +204,14 @@ public class ServerProperties {
             return sdxServer + ":" + sdxPort + sdxRootContextPath;
         } else {
             return sdxServer + sdxRootContextPath;
+        }
+    }
+
+    public String getRemoteEnvironmentAddress() {
+        if (remoteEnvironmentPort != 0) {
+            return remoteEnvironmentServer + ":" + remoteEnvironmentPort + remoteEnvironmentContextPath;
+        } else {
+            return remoteEnvironmentServer + remoteEnvironmentContextPath;
         }
     }
 

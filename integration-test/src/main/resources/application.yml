@@ -42,6 +42,8 @@ integrationtest:
     server: http://localhost
   externalizedcompute:
     server: http://localhost
+  remoteenvironment:
+    server: http://localhost
   ums:
     host: ums.thunderhead-dev.cloudera.com
     port: 8982

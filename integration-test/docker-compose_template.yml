@@ -25,6 +25,8 @@ services:
       - INTEGRATIONTEST_SDX_SERVER=http://dev-gateway
       - INTEGRATIONTEST_REDBEAMS_SERVER=http://dev-gateway
       - INTEGRATIONTEST_EXTERNALIZEDCOMPUTE_SERVER=http://dev-gateway
+      - INTEGRATIONTEST_REMOTEENVIRONMENT_SERVER=http://remote-environment
+      - INTEGRATIONTEST_REMOTEENVIRONMENT_PORT=8080
       - ALTUS_AUDIT_ENDPOINT=thunderhead-mock
       - MOCK_INFRASTRUCTURE_HOST=mock-infrastructure
       - CLOUDBREAK_URL=cloudbreak:8080

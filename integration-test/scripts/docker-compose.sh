@@ -61,7 +61,7 @@ cbd_services_sanity_check() {
 }
 
 TRACE=1 ./cbd regenerate
-./cbd start-wait traefik dev-gateway core-gateway commondb vault cloudbreak environment periscope freeipa redbeams datalake externalized-compute haveged mock-infrastructure idbmms cluster-proxy cadence cluster-proxy-health-check-worker thunderhead-mock
+./cbd start-wait traefik dev-gateway core-gateway commondb vault cloudbreak environment remote-environment periscope freeipa redbeams datalake externalized-compute haveged mock-infrastructure idbmms cluster-proxy cadence cluster-proxy-health-check-worker thunderhead-mock
 RESULT=$?
 cbd_services_sanity_check
 
@@ -113,6 +113,7 @@ fi
 mkdir -p ./apidefinitions
 curl -k http://${PUBLIC_IP}:8080/cb/api/openapi.json -o ./apidefinitions/cloudbreak.json
 curl -k http://${PUBLIC_IP}:8088/environmentservice/api/openapi.json -o ./apidefinitions/environment.json
+curl -k http://${PUBLIC_IP}:8092/remoteenvironmentservice/api/openapi.json -o ./apidefinitions/remote-environment.json
 curl -k http://${PUBLIC_IP}:8090/freeipa/api/openapi.json -o ./apidefinitions/freeipa.json
 curl -k http://${PUBLIC_IP}:8087/redbeams/api/openapi.json -o ./apidefinitions/redbeams.json
 curl -k http://${PUBLIC_IP}:8086/dl/api/openapi.json -o ./apidefinitions/datalake.json

@@ -32,6 +32,8 @@ update-cb-profile() {
     echo 'export DATALAKE_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5"' >> integcb/Profile
     echo 'export FREEIPA_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5"' >> integcb/Profile
     echo 'export ENVIRONMENT_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5"' >> integcb/Profile
+    echo 'export REMOTE_ENVIRONMENT_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5"' >> integcb/Profile
+
 
     echo "Replacement done with UMS_HOST and JAVA OPTS for altus.ums.rights.cache.seconds"
 }
