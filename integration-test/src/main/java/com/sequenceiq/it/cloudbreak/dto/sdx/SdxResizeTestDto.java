@@ -27,7 +27,7 @@ public class SdxResizeTestDto extends AbstractSdxTestDto<SdxClusterResizeRequest
                     .withClusterShape(getCloudProvider().getClusterShape());
         } else {
             return withEnvironmentName(getTestContext().get(EnvironmentTestDto.class).getResponse().getName())
-                    .withClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+                    .withClusterShape(SdxClusterShape.ENTERPRISE);
         }
     }
 

@@ -172,6 +172,8 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     public SdxInternalTestDto withRuntimeVersion(String runtimeVersion) {
         getRequest().setRuntime(runtimeVersion);
+        getRequest().getStackV4Request().getCluster()
+                .setBlueprintName(commonClusterManagerProperties.getInternalSdxBlueprintNameWithRuntimeVersion(runtimeVersion));
         return this;
     }
 
