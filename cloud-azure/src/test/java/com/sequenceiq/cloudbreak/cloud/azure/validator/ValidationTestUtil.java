@@ -19,4 +19,11 @@ public class ValidationTestUtil {
         errorMessages.forEach(message -> assertTrue(actual.stream().anyMatch(item -> item.equals(message)), validationResult::getFormattedErrors));
     }
 
+    public static void checkWarningsPresent(ValidationResult.ValidationResultBuilder resultBuilder, List<String> warningMessages) {
+        ValidationResult validationResult = resultBuilder.build();
+        assertEquals(warningMessages.size(), validationResult.getWarnings().size(), validationResult.getFormattedWarnings());
+        List<String> actual = validationResult.getWarnings();
+        warningMessages.forEach(message -> assertTrue(actual.stream().anyMatch(item -> item.equals(message)), validationResult::getFormattedWarnings));
+    }
+
 }

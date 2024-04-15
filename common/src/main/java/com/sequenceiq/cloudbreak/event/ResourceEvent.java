@@ -90,6 +90,7 @@ public enum ResourceEvent {
     ENVIRONMENT_INITIALIZATION_FAILED("environment.initialization.failed"),
     ENVIRONMENT_VALIDATION_STARTED("environment.validation.started"),
     ENVIRONMENT_VALIDATION_FAILED("environment.validation.failed"),
+    ENVIRONMENT_VALIDATION_WARNINGS("environment.validation.warnings"),
     ENVIRONMENT_VALIDATION_FAILED_AND_SKIPPED("environment.validation.skipped"),
     ENVIRONMENT_NETWORK_CREATION_STARTED("environment.network.creation.started"),
     ENVIRONMENT_NETWORK_CREATION_FAILED("environment.network.creation.failed"),

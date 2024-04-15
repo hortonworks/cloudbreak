@@ -150,11 +150,13 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
         resultBuilder = underTest.privateDnsZoneConnectedToNetwork(azureClient, NETWORK_RESOURCE_GROUP_NAME, NETWORK_NAME,
                 getPrivateDnsZoneResourceId(A_RESOURCE_GROUP_NAME), resultBuilder);
 
-        assertTrue(resultBuilder.build().hasError());
-        ValidationTestUtil.checkErrorsPresent(resultBuilder, List.of(
-                "The private DNS zone /subscriptions/subscriptionId/resourceGroups/a-resource-group-name/providers/Microsoft.Network/privateDnsZones" +
-                        "/privatelink.postgres.database.azure.com does not have a network link to network networkName. Please make sure the private DNS zone " +
-                        "is connected to the network provided to the environment."));
+        assertTrue(resultBuilder.build().hasWarning());
+        assertFalse(resultBuilder.build().hasError());
+        ValidationTestUtil.checkWarningsPresent(resultBuilder, List.of(
+                "The private DNS zone /subscriptions/subscriptionId/resourceGroups/a-resource-group-name/providers/Microsoft.Network/privateDnsZones/" +
+                        "privatelink.postgres.database.azure.com does not have a network link to network networkName. " +
+                        "Would you have a Hub and Spoke architecture with DNS Forwarders configured, network link is not required. " +
+                        "Otherwise, please ensure that the private DNS zone is connected to the network provided to the environment."));
     }
 
     @Test

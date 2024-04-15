@@ -5,11 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -135,6 +138,26 @@ class EnvironmentValidationHandlerTest {
         verify(eventBus, times(1)).notify(eq(EnvCreationStateSelectors.FAILED_ENV_CREATION_EVENT.name()), failureEventCaptor.capture());
         EnvCreationFailureEvent envCreationFailureEvent = failureEventCaptor.getValue().getData();
         assertEquals("Validation failed.", envCreationFailureEvent.getException().getMessage());
+    }
+
+    @Test
+    void sendWarningNotificationWhenValidationHasWarnings() {
+        EnvironmentValidationDto environmentValidationDto = createEnvironmentValidationDto();
+        Environment environment = new Environment();
+        when(environmentService.findEnvironmentById(anyLong())).thenReturn(Optional.of(environment));
+        when(validatorService.validateRegionsAndLocation(any(), any(), eq(environment), any())).thenReturn(new ValidationResultBuilder().warning("warning1"));
+        when(validatorService.validateNetworkWithProvider(eq(environmentValidationDto))).thenReturn(new ValidationResultBuilder().warning("warning2").build());
+        when(cloudStorageValidator.validateCloudStorage(any(), any()))
+                .thenReturn(ObjectStorageValidateResponse.builder().withStatus(ResponseStatus.OK).build());
+
+        underTest.accept(Event.wrap(environmentValidationDto));
+
+        verify(eventSenderService).sendEventAndNotification(eq(environmentValidationDto.getEnvironmentDto()),
+                any(),
+                eq(ResourceEvent.ENVIRONMENT_VALIDATION_WARNINGS),
+                eq(Set.of("1. warning1\n" +
+                        "2. warning2")));
+        verify(eventBus, never()).notify(eq(EnvCreationStateSelectors.FAILED_ENV_CREATION_EVENT.name()), failureEventCaptor.capture());
     }
 
     private EnvironmentValidationDto createEnvironmentValidationDto() {
