@@ -1,6 +1,6 @@
 package com.sequenceiq.thunderhead.grpc;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,7 +22,11 @@ public class GrpcRequestContext {
 
     @JsonCreator
     public GrpcRequestContext(@JsonProperty("requestId") String requestId) {
-        this.requestId = checkNotNull(requestId, "requestId should not be null.");
+        if (requestId == null) {
+            this.requestId = UUID.randomUUID().toString();
+        } else {
+            this.requestId = requestId;
+        }
     }
 
     @JsonProperty("requestId")

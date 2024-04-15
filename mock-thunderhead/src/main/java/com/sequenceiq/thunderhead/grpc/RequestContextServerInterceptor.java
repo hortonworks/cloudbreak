@@ -2,6 +2,8 @@ package com.sequenceiq.thunderhead.grpc;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.util.UUID;
+
 import org.slf4j.MDC;
 
 import com.sequenceiq.cloudbreak.logger.MdcContext;
@@ -27,11 +29,19 @@ public class RequestContextServerInterceptor implements ServerInterceptor {
             Metadata metadata,
             ServerCallHandler<R, S> serverCallHandler) {
 
-        if (!"usermanagement.UserManagement/VerifyInteractiveUserSessionToken".equals(serverCall.getMethodDescriptor().getFullMethodName())
-                && !"usermanagement.UserManagement/Authenticate".equals(serverCall.getMethodDescriptor().getFullMethodName())) {
+        String fullMethodName = serverCall.getMethodDescriptor().getFullMethodName();
+        if (!"usermanagement.UserManagement/VerifyInteractiveUserSessionToken".equals(fullMethodName)
+                && !"usermanagement.UserManagement/Authenticate".equals(fullMethodName)) {
             String requestId = metadata.get(REQUEST_ID_METADATA_KEY);
+            // Temporary solution. Liftie does not send request ID for this UMS call, tracking jira: COMPX-16621
+            if ("usermanagement.UserManagement/GetWorkloadAuthConfiguration".equals(fullMethodName)) {
+                requestId = UUID.randomUUID().toString();
+            }
             checkNotNull(requestId, "requestId should not be null.");
             String actorCrn = metadata.get(ACTOR_CRN_METADATA_KEY);
+            if ("usermanagement.UserManagement/GetWorkloadAuthConfiguration".equals(fullMethodName)) {
+                actorCrn = "unknown actor";
+            }
             checkNotNull(actorCrn, "actorCrn should not be null.");
 
             GrpcRequestContext requestContext = new GrpcRequestContext(requestId);

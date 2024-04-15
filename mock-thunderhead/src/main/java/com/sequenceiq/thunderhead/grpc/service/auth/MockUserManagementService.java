@@ -1463,6 +1463,20 @@ public class MockUserManagementService extends UserManagementImplBase {
     }
 
     @Override
+    public void getWorkloadAuthConfiguration(UserManagementProto.GetWorkloadAuthConfigurationRequest request,
+            StreamObserver<UserManagementProto.GetWorkloadAuthConfigurationResponse> responseObserver) {
+        LOGGER.info("Get workload auth configuration for account: {}", request.getAccountId());
+        UserManagementProto.GetWorkloadAuthConfigurationResponse response = UserManagementProto.GetWorkloadAuthConfigurationResponse.newBuilder()
+                .addResponseTypesSupported("id_token")
+                .addSubjectTypesSupported("public")
+                .addIdTokenSigningAlgValuesSupported("RS256")
+                .addAllClaimsSupported(Arrays.asList("sub", "aud", "iss", "nbf", "exp", "given_name", "family_name", "email", "groups", "type"))
+                .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
     public void getAccessKeyVerificationData(UserManagementProto.GetAccessKeyVerificationDataRequest request,
             StreamObserver<UserManagementProto.GetAccessKeyVerificationDataResponse> responseObserver) {
         String accountId = Crn.fromString(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn()).getAccountId();

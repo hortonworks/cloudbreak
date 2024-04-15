@@ -76,7 +76,7 @@ public class ExternalizedComputeClusterCreateWaitHandler extends ExceptionCatche
                                 return AttemptResults.finishWith(new ExternalizedComputeClusterCreateFailedEvent(resourceId, actorCrn,
                                         new RuntimeException("Cluster creation failed. Status: " + cluster.getStatus() + ". Message: " + errorMessage)));
                             default:
-                                LOGGER.info("Neither \"RUNNING\" status nor \"CREATE_FAILED\" status: {}", cluster.getStatus());
+                                LOGGER.info("Status is not \"RUNNING\", \"CREATE_FAILED\", or \"DEPLOYMENT_FAILED\": {}", cluster.getStatus());
                                 return AttemptResults.justContinue();
                         }
                     });
