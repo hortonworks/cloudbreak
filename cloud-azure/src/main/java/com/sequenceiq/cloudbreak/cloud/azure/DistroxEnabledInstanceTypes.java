@@ -53,6 +53,7 @@ public class DistroxEnabledInstanceTypes {
         "Standard_L8s," +
         "Standard_L16s," +
         "Standard_L32s," +
+        "Standard_L8as_v3," +
         "Standard_NC6," +
         "Standard_NC24r," +
         "Standard_NC6s_v3," +
