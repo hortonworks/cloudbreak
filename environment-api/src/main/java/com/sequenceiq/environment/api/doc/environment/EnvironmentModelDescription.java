@@ -153,8 +153,12 @@ public class EnvironmentModelDescription {
     public static final String FREEIPA_IMAGE_CATALOG = "Image catalog for FreeIpa instance creation.";
     public static final String FREEIPA_IMAGE_ID = "Image ID for FreeIpa instance creation.";
     public static final String FREEIPA_IMAGE_OS_TYPE = "OS type to be chosen from the image catalog";
+
     public static final String CREATE_EXTERNALIZED_COMPUTE_CLUSTER = "Create externalized compute cluster for environment";
-    public static final String EXTERNALIZED_COMPUTE_CLUSTER_NAME = "Name of the created k8s cluster";
+    public static final String EXTERNALIZED_COMPUTE_PRIVATE_CLUSTER = "Externalized compute cluster private flag";
+    public static final String EXTERNALIZED_COMPUTE_KUBE_API_AUTHORIZED_IP_RANGES = "Externalized compute cluster Kubernetes API authorized IP ranges";
+    public static final String EXTERNALIZED_COMPUTE_OUTBOUND_TYPE = "Externalized compute cluster outbound type";
+    public static final String EXTERNALIZED_COMPUTE_LOAD_BALANCER_AUTHORIZED_IP_RANGES = "Externalized compute cluster load balancer authorized IP ranges";
 
     public static final String PROXYCONFIG_NAME = "Name of the proxyconfig of the environment.";
     public static final String PROXYCONFIG_RESPONSE = "ProxyConfig attached to the environment.";

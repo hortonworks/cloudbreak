@@ -43,7 +43,7 @@ public class ExternalizedComputeService {
 
     public void createComputeCluster(Environment environment) {
         try {
-            if (environment.isCreateComputeCluster()) {
+            if (environment.getDefaultComputeCluster().isCreate()) {
                 if (!externalizedComputeEnabled) {
                     throw new BadRequestException("Externalized compute not enabled");
                 }

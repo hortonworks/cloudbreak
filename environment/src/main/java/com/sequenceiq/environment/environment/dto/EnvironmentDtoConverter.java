@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
+import com.sequenceiq.environment.environment.domain.DefaultComputeCluster;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.domain.Region;
@@ -150,6 +151,8 @@ public class EnvironmentDtoConverter {
                 .withParentEnvironmentCrn(parentEnvironment.getResourceCrn())
                 .withParentEnvironmentName(parentEnvironment.getName())
                 .withParentEnvironmentCloudPlatform(parentEnvironment.getCloudPlatform()));
+        doIfNotNull(environment.getDefaultComputeCluster(),
+                defaultComputeCluster -> builder.withExternalizedComputeCluster(defaultComputeClusterToExternalizedComputeClusterDto(defaultComputeCluster)));
         return builder.build();
     }
 
@@ -185,9 +188,36 @@ public class EnvironmentDtoConverter {
         environment.setExperimentalFeaturesJson(creationDto.getExperimentalFeatures());
         environment.setDataServices(creationDto.getDataServices());
         environment.setCreatorClient(creationDto.getCreatorClient());
-        environment.setCreateComputeCluster(creationDto.getComputeClusterCreation().isCreateComputeCluster());
+        setDefaultComputeCluster(creationDto, environment);
         setRegions(creationDto, environment);
         return environment;
+    }
+
+    public ExternalizedComputeClusterDto defaultComputeClusterToExternalizedComputeClusterDto(DefaultComputeCluster defaultComputeCluster) {
+        if (defaultComputeCluster != null && defaultComputeCluster.isCreate()) {
+            return ExternalizedComputeClusterDto.builder()
+                    .withCreate(defaultComputeCluster.isCreate())
+                    .withPrivateCluster(defaultComputeCluster.isPrivateCluster())
+                    .withKubeApiAuthorizedIpRanges(defaultComputeCluster.getKubeApiAuthorizedIpRanges())
+                    .withLoadBalancerAuthorizationIpRanges(defaultComputeCluster.getLoadBalancerAuthorizedIpRanges())
+                    .withOutboundType(defaultComputeCluster.getOutboundType())
+                    .build();
+        } else {
+            return null;
+        }
+    }
+
+    private void setDefaultComputeCluster(EnvironmentCreationDto creationDto, Environment environment) {
+        ExternalizedComputeClusterDto computeClusterCreation = creationDto.getExternalizedComputeCluster();
+        DefaultComputeCluster defaultComputeCluster = new DefaultComputeCluster();
+        if (computeClusterCreation.isCreate()) {
+            defaultComputeCluster.setCreate(computeClusterCreation.isCreate());
+            defaultComputeCluster.setPrivateCluster(computeClusterCreation.isPrivateCluster());
+            defaultComputeCluster.setKubeApiAuthorizedIpRanges(computeClusterCreation.getKubeApiAuthorizedIpRanges());
+            defaultComputeCluster.setOutboundType(computeClusterCreation.getOutboundType());
+            defaultComputeCluster.setLoadBalancerAuthorizedIpRanges(computeClusterCreation.getKubeApiAuthorizedIpRanges());
+        }
+        environment.setDefaultComputeCluster(defaultComputeCluster);
     }
 
     public NetworkDto networkToNetworkDto(Environment environment) {

@@ -142,7 +142,7 @@ public class EnvCreationActions {
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
-                    if (environment.isCreateComputeCluster()) {
+                    if (environment.getDefaultComputeCluster().isCreate()) {
                         LOGGER.info("Creation of compute cluster has started. Current state is - COMPUTE_CLUSTER_CREATION_STARTED_STATE");
                         EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
                         eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(),
@@ -285,7 +285,7 @@ public class EnvCreationActions {
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
-                    if (environment.isCreateComputeCluster()) {
+                    if (environment.getDefaultComputeCluster().isCreate()) {
                         LOGGER.info("Waiting for compute cluster creation. Current state is - COMPUTE_CLUSTER_CREATION_WAITING_STATE");
                         environment.setStatus(EnvironmentStatus.COMPUTE_CLUSTER_CREATION_IN_PROGRESS);
                         environment.setStatusReason(null);

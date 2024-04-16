@@ -32,6 +32,7 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.domain.CredentialView;
 import com.sequenceiq.environment.environment.EnvironmentDeletionType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
+import com.sequenceiq.environment.environment.domain.DefaultComputeCluster;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
@@ -130,6 +131,10 @@ class EnvironmentDtoConverterTest {
     private static final String PARENT_CLOUD_PLATFORM = "GCP";
 
     private static final String STORAGE_LOCATION = "storageLocation";
+
+    private static final String AUTHORIZED_IP_RANGES = "0.0.0.0/0";
+
+    private static final String OUTBOUND_TYPE = "userDefinedRouting";
 
     @Mock
     private AuthenticationDtoConverter authenticationDtoConverter;
@@ -694,7 +699,13 @@ class EnvironmentDtoConverterTest {
                 .withRegions(regions)
                 .withTags(userDefinedTags)
                 .withCrn(RESOURCE_CRN)
-                .withComputeClusterCreation(ComputeClusterCreationDto.builder().withCreateComputeCluster(true).build())
+                .withExternalizedComputeCluster(ExternalizedComputeClusterDto.builder()
+                        .withCreate(true)
+                        .withPrivateCluster(true)
+                        .withOutboundType(OUTBOUND_TYPE)
+                        .withKubeApiAuthorizedIpRanges(AUTHORIZED_IP_RANGES)
+                        .withLoadBalancerAuthorizationIpRanges(AUTHORIZED_IP_RANGES)
+                        .build())
                 .build();
 
         when(environmentTagsDtoConverter.getTags(any(EnvironmentCreationDto.class)))
@@ -724,7 +735,13 @@ class EnvironmentDtoConverterTest {
         assertThat(result.getFreeIpaImageId()).isEqualTo(FREE_IPA_IMAGE_ID);
         assertThat(result.getAdminGroupName()).isEqualTo(ADMIN_GROUP_NAME);
         assertThat(result.getCreated()).isPositive();
-        assertThat(result.isCreateComputeCluster()).isTrue();
+        DefaultComputeCluster defaultComputeCluster = result.getDefaultComputeCluster();
+        assertNotNull(defaultComputeCluster);
+        assertThat(defaultComputeCluster.isCreate()).isTrue();
+        assertThat(defaultComputeCluster.isPrivateCluster()).isTrue();
+        assertThat(defaultComputeCluster.getOutboundType()).isEqualTo(OUTBOUND_TYPE);
+        assertThat(defaultComputeCluster.getKubeApiAuthorizedIpRanges()).isEqualTo(AUTHORIZED_IP_RANGES);
+        assertThat(defaultComputeCluster.getLoadBalancerAuthorizedIpRanges()).isEqualTo(AUTHORIZED_IP_RANGES);
 
         EnvironmentTelemetry resultTelemetry = result.getTelemetry();
         assertThat(resultTelemetry).isNotNull();
@@ -773,7 +790,9 @@ class EnvironmentDtoConverterTest {
                 .withFreeIpaCreation(freeIpaCreation)
                 .withTags(null)
                 .withCrn(RESOURCE_CRN)
-                .withComputeClusterCreation(ComputeClusterCreationDto.builder().withCreateComputeCluster(true).build())
+                .withExternalizedComputeCluster(ExternalizedComputeClusterDto.builder()
+                        .withCreate(false)
+                        .build())
                 .build();
 
         when(environmentTagsDtoConverter.getTags(any(EnvironmentCreationDto.class)))
@@ -792,6 +811,12 @@ class EnvironmentDtoConverterTest {
         assertThat(environmentTags.getUserDefinedTags()).isNotNull();
         assertThat(environmentTags.getUserDefinedTags()).isEmpty();
         assertThat(environmentTags.getDefaultTags()).isEqualTo(defaultTags);
+        DefaultComputeCluster defaultComputeCluster = result.getDefaultComputeCluster();
+        assertThat(defaultComputeCluster.isCreate()).isFalse();
+        assertThat(defaultComputeCluster.isPrivateCluster()).isFalse();
+        assertThat(defaultComputeCluster.getOutboundType()).isNull();
+        assertThat(defaultComputeCluster.getKubeApiAuthorizedIpRanges()).isNull();
+        assertThat(defaultComputeCluster.getLoadBalancerAuthorizedIpRanges()).isNull();
     }
 
     @Test

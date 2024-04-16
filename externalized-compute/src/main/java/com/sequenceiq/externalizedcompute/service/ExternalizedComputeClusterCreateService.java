@@ -1,10 +1,13 @@
 package com.sequenceiq.externalizedcompute.service;
 
+import static com.cloudera.thunderhead.service.liftiepublic.LiftiePublicProto.CommonSecurity;
+
 import java.io.IOException;
 import java.util.Map;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -70,6 +73,10 @@ public class ExternalizedComputeClusterCreateService {
                 if (clusterResponse.hasValidationResponse()) {
                     liftieValidationResponseUtil.throwException(clusterResponse.getValidationResponse());
                 }
+                if (StringUtils.isEmpty(clusterResponse.getClusterId())) {
+                    LOGGER.warn("Liftie name cannot be empty!");
+                    throw new CloudbreakServiceException("Externalized compute cluster creation failed, cluster id cannot be empty!");
+                }
                 externalizedComputeCluster.setLiftieName(clusterResponse.getClusterId());
                 externalizedComputeClusterRepository.save(externalizedComputeCluster);
                 LOGGER.info("Liftie create response: {}", clusterResponse);
@@ -85,13 +92,23 @@ public class ExternalizedComputeClusterCreateService {
 
     private CreateClusterRequest setupLiftieCluster(CreateClusterRequest.Builder createClusterBuilder, String userCrn,
             ExternalizedComputeCluster externalizedComputeCluster) {
+        DetailedEnvironmentResponse environment = environmentEndpoint.getByCrn(externalizedComputeCluster.getEnvironmentCrn());
         fillMetadata(createClusterBuilder, externalizedComputeCluster, userCrn);
-        fillNetworkSettings(createClusterBuilder, externalizedComputeCluster);
+        fillNetworkSettings(createClusterBuilder, environment);
+        fillSecurity(createClusterBuilder, environment);
         return createClusterBuilder.build();
     }
 
-    private void fillNetworkSettings(CreateClusterRequest.Builder commonClusterBuilder, ExternalizedComputeCluster externalizedComputeCluster) {
-        DetailedEnvironmentResponse environment = environmentEndpoint.getByCrn(externalizedComputeCluster.getEnvironmentCrn());
+    private void fillSecurity(CreateClusterRequest.Builder createClusterBuilder, DetailedEnvironmentResponse environment) {
+        if (environment.getExternalizedComputeCluster() != null) {
+            createClusterBuilder.getSpecBuilder()
+                    .setSecurity(CommonSecurity.newBuilder()
+                            .setPrivate(environment.getExternalizedComputeCluster().isPrivateCluster())
+                            .build());
+        }
+    }
+
+    private void fillNetworkSettings(CreateClusterRequest.Builder commonClusterBuilder, DetailedEnvironmentResponse environment) {
         CommonNetwork network = getNetworkFromEnvResponse(environment);
         commonClusterBuilder.getSpecBuilder().setNetwork(network);
     }

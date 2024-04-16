@@ -20,6 +20,12 @@ public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDet
 
     private CredentialDetails credentialDetails;
 
+    private ExternalizedComputeClusterDto externalizedComputeCluster;
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public Credential getCredential() {
         return credential;
     }
@@ -51,6 +57,18 @@ public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDet
         return credentialDetails;
     }
 
+    public void setCredentialDetails(CredentialDetails credentialDetails) {
+        this.credentialDetails = credentialDetails;
+    }
+
+    public ExternalizedComputeClusterDto getExternalizedComputeCluster() {
+        return externalizedComputeCluster;
+    }
+
+    public void setExternalizedComputeCluster(ExternalizedComputeClusterDto externalizedComputeCluster) {
+        this.externalizedComputeCluster = externalizedComputeCluster;
+    }
+
     @Override
     public String creatorClient() {
         return super.getCreatorClient();
@@ -59,14 +77,6 @@ public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDet
     @Override
     public void setCreatorClient(String creatorClient) {
         super.setCreatorClient(creatorClient);
-    }
-
-    public void setCredentialDetails(CredentialDetails credentialDetails) {
-        this.credentialDetails = credentialDetails;
-    }
-
-    public static Builder builder() {
-        return new Builder();
     }
 
     @Override
@@ -82,6 +92,8 @@ public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDet
         private ProxyConfig proxyConfig;
 
         private CredentialDetails credentialDetails;
+
+        private ExternalizedComputeClusterDto externalizedComputeCluster;
 
         private Builder() {
         }
@@ -101,11 +113,17 @@ public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDet
             return this;
         }
 
+        public Builder withExternalizedComputeCluster(ExternalizedComputeClusterDto externalizedComputeCluster) {
+            this.externalizedComputeCluster = externalizedComputeCluster;
+            return this;
+        }
+
         public EnvironmentDto build() {
             EnvironmentDto environmentDto = new EnvironmentDto();
             environmentDto.setCredential(credential);
             environmentDto.setProxyConfig(proxyConfig);
             environmentDto.setCredentialDetails(credentialDetails);
+            environmentDto.setExternalizedComputeCluster(externalizedComputeCluster);
             build(environmentDto);
             return environmentDto;
         }

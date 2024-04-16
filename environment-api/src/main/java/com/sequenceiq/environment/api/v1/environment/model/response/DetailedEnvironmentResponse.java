@@ -30,6 +30,13 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
     @Schema(description = EnvironmentModelDescription.PROXYCONFIG_RESPONSE)
     private ProxyResponse proxyConfig;
 
+    @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_CLUSTER)
+    private ExternalizedComputeClusterResponse externalizedComputeCluster;
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public CredentialResponse getCredential() {
         return credential;
     }
@@ -46,8 +53,12 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         this.proxyConfig = proxyConfig;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public ExternalizedComputeClusterResponse getExternalizedComputeCluster() {
+        return externalizedComputeCluster;
+    }
+
+    public void setExternalizedComputeCluster(ExternalizedComputeClusterResponse externalizedComputeCluster) {
+        this.externalizedComputeCluster = externalizedComputeCluster;
     }
 
     @Override
@@ -55,6 +66,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         return super.toString() + ", " + "DetailedEnvironmentResponse{" +
                 "credential=" + credential +
                 ", proxyConfig=" + proxyConfig +
+                ", externalizedComputeCluster=" + externalizedComputeCluster +
                 '}';
     }
 
@@ -141,6 +153,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         private DataServicesResponse dataServices;
 
         private boolean enableSecretEncryption;
+
+        private ExternalizedComputeClusterResponse externalizedComputeCluster;
 
         private Builder() {
         }
@@ -345,6 +359,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withExternalizedComputeCluster(ExternalizedComputeClusterResponse externalizedComputeCluster) {
+            this.externalizedComputeCluster = externalizedComputeCluster;
+            return this;
+        }
+
         public DetailedEnvironmentResponse build() {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
             detailedEnvironmentResponse.setCrn(crn);
@@ -386,6 +405,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setAccountId(accountId);
             detailedEnvironmentResponse.setDataServices(dataServices);
             detailedEnvironmentResponse.setEnableSecretEncryption(enableSecretEncryption);
+            detailedEnvironmentResponse.setExternalizedComputeCluster(externalizedComputeCluster);
             return detailedEnvironmentResponse;
         }
     }

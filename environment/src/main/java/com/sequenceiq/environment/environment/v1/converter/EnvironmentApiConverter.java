@@ -54,11 +54,11 @@ import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
-import com.sequenceiq.environment.environment.dto.ComputeClusterCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
+import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
@@ -81,6 +81,10 @@ import com.sequenceiq.environment.telemetry.service.AccountTelemetryService;
 public class EnvironmentApiConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentApiConverter.class);
+
+    private static final String DEFAULT_CIDR = "0.0.0.0/0";
+
+    private static final String DEFAULT_OUTBOUND_TYPE = "userDefinedRouting";
 
     private final CredentialService credentialService;
 
@@ -137,7 +141,8 @@ public class EnvironmentApiConverter {
                 .withCredential(request)
                 .withCreated(System.currentTimeMillis())
                 .withFreeIpaCreation(freeIpaConverter.convert(request.getFreeIpa(), accountId, cloudPlatform))
-                .withComputeClusterCreation(getComputeClusterCreationDto(request.getExternalizedComputeCreateRequest()))
+                .withExternalizedComputeCluster(requestToExternalizedComputeClusterDto(request.getExternalizedComputeCreateRequest(),
+                        request.getSecurityAccess()))
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),
                         accountTelemetryService.getOrDefault(accountId).getFeatures(), accountId))
@@ -171,7 +176,7 @@ public class EnvironmentApiConverter {
         // TODO temporary until CCM not really integrated
         if (request.getSecurityAccess() == null && !CloudPlatform.GCP.name().equals(cloudPlatform)) {
             SecurityAccessDto securityAccess = SecurityAccessDto.builder()
-                    .withCidr("0.0.0.0/0")
+                    .withCidr(DEFAULT_CIDR)
                     .build();
             builder.withSecurityAccess(securityAccess);
         }
@@ -179,10 +184,27 @@ public class EnvironmentApiConverter {
         return builder.build();
     }
 
-    private ComputeClusterCreationDto getComputeClusterCreationDto(ExternalizedComputeCreateRequest externalizedCompute) {
-        ComputeClusterCreationDto.Builder builder = ComputeClusterCreationDto.builder();
-        if (externalizedCompute != null) {
-            builder.withCreateComputeCluster(externalizedCompute.isCreate());
+    private ExternalizedComputeClusterDto requestToExternalizedComputeClusterDto(ExternalizedComputeCreateRequest externalizedCompute,
+            SecurityAccessRequest securityAccess) {
+        ExternalizedComputeClusterDto.Builder builder = ExternalizedComputeClusterDto.builder();
+        if (externalizedCompute != null && externalizedCompute.isCreate()) {
+            builder.withCreate(externalizedCompute.isCreate())
+                    .withPrivateCluster(externalizedCompute.isPrivateCluster());
+            if (StringUtils.hasText(externalizedCompute.getOutboundType())) {
+                builder.withOutboundType(externalizedCompute.getOutboundType());
+            } else {
+                builder.withOutboundType(DEFAULT_OUTBOUND_TYPE);
+            }
+            if (StringUtils.hasText(externalizedCompute.getKubeApiAuthorizedIpRanges())) {
+                builder.withKubeApiAuthorizedIpRanges(externalizedCompute.getKubeApiAuthorizedIpRanges());
+            } else {
+                builder.withKubeApiAuthorizedIpRanges(DEFAULT_CIDR);
+            }
+            if (securityAccess != null && StringUtils.hasText(securityAccess.getCidr())) {
+                builder.withLoadBalancerAuthorizationIpRanges(securityAccess.getCidr());
+            } else {
+                builder.withLoadBalancerAuthorizationIpRanges(DEFAULT_CIDR);
+            }
         }
         return builder.build();
     }

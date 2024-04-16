@@ -70,6 +70,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
+import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
@@ -98,6 +99,12 @@ class EnvironmentApiConverterTest {
     private static final String KEY_URL_RESOURCE_GROUP = "dummy-key-url";
 
     private static final String ENCRYPTION_KEY_ARN = "dummy-key-arn";
+
+    private static final String AUTHORIZED_IP_RANGES = "0.0.0.0/0";
+
+    private static final String OUTBOUND_TYPE = "userDefinedRouting";
+
+    private static final String SECURITY_ACCESS_CIDR = "1.1.1.1/16";
 
     @InjectMocks
     private EnvironmentApiConverter underTest;
@@ -183,7 +190,12 @@ class EnvironmentApiConverterTest {
         assertEquals(networkDto, actual.getNetwork());
         assertSecurityAccess(request.getSecurityAccess(), actual.getSecurityAccess());
         assertEquals(dataServices, actual.getDataServices());
-        assertTrue(actual.getComputeClusterCreation().isCreateComputeCluster());
+        ExternalizedComputeClusterDto externalizedComputeCluster = actual.getExternalizedComputeCluster();
+        assertTrue(externalizedComputeCluster.isCreate());
+        assertTrue(externalizedComputeCluster.isPrivateCluster());
+        assertEquals(OUTBOUND_TYPE, externalizedComputeCluster.getOutboundType());
+        assertEquals(AUTHORIZED_IP_RANGES, externalizedComputeCluster.getKubeApiAuthorizedIpRanges());
+        assertEquals(SECURITY_ACCESS_CIDR, externalizedComputeCluster.getLoadBalancerAuthorizationIpRanges());
 
         verify(credentialService).getCloudPlatformByCredential(anyString(), anyString(), any());
         verify(freeIpaConverter).convert(request.getFreeIpa(), "test-aws", cloudPlatform.name());
@@ -523,6 +535,9 @@ class EnvironmentApiConverterTest {
         request.setCcmV2TlsType(CcmV2TlsType.ONE_WAY_TLS);
         ExternalizedComputeCreateRequest extClusterCreateReq = new ExternalizedComputeCreateRequest();
         extClusterCreateReq.setCreate(true);
+        extClusterCreateReq.setPrivateCluster(true);
+        extClusterCreateReq.setOutboundType(OUTBOUND_TYPE);
+        extClusterCreateReq.setKubeApiAuthorizedIpRanges(AUTHORIZED_IP_RANGES);
         request.setExternalizedComputeCreateRequest(extClusterCreateReq);
         setParameters(request, cloudPlatform);
         return request;
@@ -609,7 +624,7 @@ class EnvironmentApiConverterTest {
 
     private SecurityAccessRequest createSecurityAccessRequest() {
         SecurityAccessRequest securityAccessRequest = new SecurityAccessRequest();
-        securityAccessRequest.setCidr("1.1.1.1/16");
+        securityAccessRequest.setCidr(SECURITY_ACCESS_CIDR);
         securityAccessRequest.setDefaultSecurityGroupId("default-security-group");
         securityAccessRequest.setSecurityGroupIdForKnox("knox-security-group");
         return securityAccessRequest;

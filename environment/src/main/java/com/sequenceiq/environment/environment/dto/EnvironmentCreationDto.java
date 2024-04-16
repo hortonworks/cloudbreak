@@ -42,7 +42,7 @@ public class EnvironmentCreationDto {
 
     private final Set<String> regions;
 
-    private final ComputeClusterCreationDto computeClusterCreation;
+    private final ExternalizedComputeClusterDto externalizedComputeCluster;
 
     private final FreeIpaCreationDto freeIpaCreation;
 
@@ -84,7 +84,7 @@ public class EnvironmentCreationDto {
         network = builder.network;
         credential = builder.credential;
         freeIpaCreation = builder.freeIpaCreation;
-        computeClusterCreation = builder.computeClusterCreation;
+        externalizedComputeCluster = builder.externalizedComputeCluster;
         created = builder.created;
         if (CollectionUtils.isEmpty(builder.regions)) {
             regions = new HashSet<>();
@@ -163,8 +163,8 @@ public class EnvironmentCreationDto {
         return freeIpaCreation;
     }
 
-    public ComputeClusterCreationDto getComputeClusterCreation() {
-        return computeClusterCreation;
+    public ExternalizedComputeClusterDto getExternalizedComputeCluster() {
+        return externalizedComputeCluster;
     }
 
     public AuthenticationDto getAuthentication() {
@@ -257,7 +257,7 @@ public class EnvironmentCreationDto {
 
         private FreeIpaCreationDto freeIpaCreation;
 
-        private ComputeClusterCreationDto computeClusterCreation;
+        private ExternalizedComputeClusterDto externalizedComputeCluster;
 
         private AuthenticationDto authentication;
 
@@ -341,8 +341,8 @@ public class EnvironmentCreationDto {
             return this;
         }
 
-        public Builder withComputeClusterCreation(ComputeClusterCreationDto computeClusterCreation) {
-            this.computeClusterCreation = computeClusterCreation;
+        public Builder withExternalizedComputeCluster(ExternalizedComputeClusterDto externalizedComputeCluster) {
+            this.externalizedComputeCluster = externalizedComputeCluster;
             return this;
         }
 

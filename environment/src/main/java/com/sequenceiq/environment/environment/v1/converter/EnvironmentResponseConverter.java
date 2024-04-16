@@ -25,6 +25,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentDeletionType;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.ExternalizedComputeClusterResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
@@ -35,6 +36,7 @@ import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentViewDto;
+import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -133,7 +135,22 @@ public class EnvironmentResponseConverter {
         NullUtil.doIfNotNull(environmentDto.getNetwork(),
                 network -> builder.withNetwork(networkDtoToResponse(network, environmentDto.getExperimentalFeatures().getTunnel(), true)));
         NullUtil.doIfNotNull(environmentDto.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessDtoToResponse(securityAccess)));
+        NullUtil.doIfNotNull(environmentDto.getExternalizedComputeCluster(),
+                externalizedComputeCluster -> builder.withExternalizedComputeCluster(externalizedComputeClusterDtoToResponse(externalizedComputeCluster)));
         return builder.build();
+    }
+
+    private ExternalizedComputeClusterResponse externalizedComputeClusterDtoToResponse(ExternalizedComputeClusterDto externalizedComputeClusterDto) {
+        if (externalizedComputeClusterDto != null) {
+            return ExternalizedComputeClusterResponse.newBuilder()
+                    .withPrivateCluster(externalizedComputeClusterDto.isPrivateCluster())
+                    .withKubeApiAuthorizedIpRanges(externalizedComputeClusterDto.getKubeApiAuthorizedIpRanges())
+                    .withLoadBalancerAuthorizedIpRanges(externalizedComputeClusterDto.getLoadBalancerAuthorizationIpRanges())
+                    .withOutboundType(externalizedComputeClusterDto.getOutboundType())
+                    .build();
+        } else {
+            return null;
+        }
     }
 
     private EnvironmentNetworkResponse networkDtoToResponse(NetworkDto network, Tunnel tunnel, boolean detailedResponse) {
@@ -334,7 +351,7 @@ public class EnvironmentResponseConverter {
     private EnvironmentDeletionType deletionType(com.sequenceiq.environment.environment.EnvironmentDeletionType deletionType) {
         if (deletionType == null) {
             LOGGER.debug("Environment deletion type is not filled, falling back to NONE");
-            return  EnvironmentDeletionType.NONE;
+            return EnvironmentDeletionType.NONE;
         }
         return switch (deletionType) {
             case NONE -> EnvironmentDeletionType.NONE;

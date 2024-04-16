@@ -1,30 +1,30 @@
-package com.sequenceiq.environment.api.v1.environment.model.request;
+package com.sequenceiq.environment.environment.domain;
 
 import java.io.Serializable;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
+@Embeddable
+public class DefaultComputeCluster implements Serializable {
 
-import io.swagger.v3.oas.annotations.media.Schema;
-
-@Schema(name = "ExternalizedComputeRequest")
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class ExternalizedComputeCreateRequest implements Serializable {
-
-    @NotNull
-    @Schema(description = EnvironmentModelDescription.CREATE_EXTERNALIZED_COMPUTE_CLUSTER)
+    @Column(nullable = false, name = "compute_create")
     private boolean create;
 
-    @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_PRIVATE_CLUSTER)
+    @Column(nullable = false, name = "compute_private_cluster")
     private boolean privateCluster;
 
-    @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_KUBE_API_AUTHORIZED_IP_RANGES)
+    @Column(name = "compute_kube_api_authorized_ip_ranges")
     private String kubeApiAuthorizedIpRanges;
 
-    @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_OUTBOUND_TYPE)
+    @Column(name = "compute_outbound_type")
     private String outboundType;
+
+    @Column(name = "compute_load_balancer_authorized_ip_ranges")
+    private String loadBalancerAuthorizedIpRanges;
+
+    public DefaultComputeCluster() {
+    }
 
     public boolean isCreate() {
         return create;
@@ -58,13 +58,22 @@ public class ExternalizedComputeCreateRequest implements Serializable {
         this.outboundType = outboundType;
     }
 
+    public String getLoadBalancerAuthorizedIpRanges() {
+        return loadBalancerAuthorizedIpRanges;
+    }
+
+    public void setLoadBalancerAuthorizedIpRanges(String loadBalancedAuthorizedIpRanges) {
+        this.loadBalancerAuthorizedIpRanges = loadBalancedAuthorizedIpRanges;
+    }
+
     @Override
     public String toString() {
-        return "ExternalizedComputeCreateRequest{" +
+        return "DefaultComputeCluster{" +
                 "create=" + create +
                 ", privateCluster=" + privateCluster +
                 ", kubeApiAuthorizedIpRanges='" + kubeApiAuthorizedIpRanges + '\'' +
                 ", outboundType='" + outboundType + '\'' +
+                ", loadBalancedAuthorizedIpRanges='" + loadBalancerAuthorizedIpRanges + '\'' +
                 '}';
     }
 }

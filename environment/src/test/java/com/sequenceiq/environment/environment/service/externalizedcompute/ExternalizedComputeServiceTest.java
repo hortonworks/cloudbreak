@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.environment.environment.domain.DefaultComputeCluster;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.environment.exception.ExternalizedComputeOperationFailedException;
@@ -46,7 +47,9 @@ class ExternalizedComputeServiceTest {
     void createComputeClusterWhenEnvironmentRequestContainsRequestCallToExtShouldHappen() {
         ReflectionTestUtils.setField(underTest, "externalizedComputeEnabled", true);
         Environment environment = new Environment();
-        environment.setCreateComputeCluster(true);
+        DefaultComputeCluster defaultComputeCluster = new DefaultComputeCluster();
+        defaultComputeCluster.setCreate(true);
+        environment.setDefaultComputeCluster(defaultComputeCluster);
         underTest.createComputeCluster(environment);
         verify(externalizedComputeClientService, times(1)).createComputeCluster(any());
     }
@@ -56,7 +59,9 @@ class ExternalizedComputeServiceTest {
         ReflectionTestUtils.setField(underTest, "externalizedComputeEnabled", true);
         when(externalizedComputeClientService.createComputeCluster(any())).thenThrow(new NotFoundException("HTTP 404 Not Found localhost:1111/faultyurl"));
         Environment environment = new Environment();
-        environment.setCreateComputeCluster(true);
+        DefaultComputeCluster defaultComputeCluster = new DefaultComputeCluster();
+        defaultComputeCluster.setCreate(true);
+        environment.setDefaultComputeCluster(defaultComputeCluster);
         ExternalizedComputeOperationFailedException exception = assertThrows(ExternalizedComputeOperationFailedException.class,
                 () -> underTest.createComputeCluster(environment));
         verify(externalizedComputeClientService, times(1)).createComputeCluster(any());
@@ -66,7 +71,9 @@ class ExternalizedComputeServiceTest {
     @Test
     void createComputeClusterWhenEnvironmentRequestDoesNotContainsRequest() {
         Environment environment = new Environment();
-        environment.setCreateComputeCluster(false);
+        DefaultComputeCluster defaultComputeCluster = new DefaultComputeCluster();
+        defaultComputeCluster.setCreate(false);
+        environment.setDefaultComputeCluster(defaultComputeCluster);
         underTest.createComputeCluster(environment);
         verify(externalizedComputeClientService, times(0)).createComputeCluster(any());
     }
@@ -94,7 +101,9 @@ class ExternalizedComputeServiceTest {
     void createComputeClusterWhenExtComputeThrowErrorShouldThrowExceptionIfExtComputeClusterDisabled() {
         ReflectionTestUtils.setField(underTest, "externalizedComputeEnabled", false);
         Environment environment = new Environment();
-        environment.setCreateComputeCluster(true);
+        DefaultComputeCluster defaultComputeCluster = new DefaultComputeCluster();
+        defaultComputeCluster.setCreate(true);
+        environment.setDefaultComputeCluster(defaultComputeCluster);
         ExternalizedComputeOperationFailedException exception = assertThrows(ExternalizedComputeOperationFailedException.class,
                 () -> underTest.createComputeCluster(environment));
         verify(externalizedComputeClientService, times(0)).createComputeCluster(any());

@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -181,8 +182,8 @@ public class Environment implements AuthResource, AccountAwareResource {
     @Column(name = "creator_client")
     private String creatorClient;
 
-    @Column(nullable = false, name = "create_compute_cluster")
-    private boolean createComputeCluster;
+    @Embedded
+    private DefaultComputeCluster defaultComputeCluster;
 
     public Environment() {
         regions = new Json(new HashSet<Region>());
@@ -617,12 +618,12 @@ public class Environment implements AuthResource, AccountAwareResource {
         this.creatorClient = creatorClient;
     }
 
-    public boolean isCreateComputeCluster() {
-        return createComputeCluster;
+    public DefaultComputeCluster getDefaultComputeCluster() {
+        return defaultComputeCluster;
     }
 
-    public void setCreateComputeCluster(boolean createExternalizedCompute) {
-        this.createComputeCluster = createExternalizedCompute;
+    public void setDefaultComputeCluster(DefaultComputeCluster defaultComputeCluster) {
+        this.defaultComputeCluster = defaultComputeCluster;
     }
 
     @Override
@@ -638,7 +639,6 @@ public class Environment implements AuthResource, AccountAwareResource {
                 ", statusReason='" + statusReason + '\'' +
                 ", domain='" + domain + '\'' +
                 ", enableSecretEncryption=" + enableSecretEncryption +
-                ", createComputeCluster=" + createComputeCluster +
                 '}';
     }
 
