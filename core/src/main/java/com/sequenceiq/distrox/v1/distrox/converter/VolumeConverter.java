@@ -65,7 +65,7 @@ public class VolumeConverter {
 
     private void overrideSizeIfNecessary(RootVolumeRequest source, String cloudPlatform) {
         int defaultRootVolumeSize = rootVolumeSizeProvider.getForPlatform(cloudPlatform);
-        if (source.getSize() < defaultRootVolumeSize) {
+        if (source.getSize() == null || source.getSize() < defaultRootVolumeSize) {
             LOGGER.warn("Root volume size {} is smaller than the minimum {} for platform {}, so it is increased",
                     source.getSize(), defaultRootVolumeSize, cloudPlatform);
             source.setSize(defaultRootVolumeSize);

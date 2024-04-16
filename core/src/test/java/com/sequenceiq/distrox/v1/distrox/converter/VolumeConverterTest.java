@@ -51,6 +51,10 @@ public class VolumeConverterTest {
         RootVolumeV1Request convertedRootVolumeV1Request = underTest.convert(smallRootVolumeV4Request, "AWS");
         assertEquals(DEFAULT_ROOT_DISK_SIZE, convertedRootVolumeV1Request.getSize());
 
+        RootVolumeV4Request nullRootVolumeV4Request = new RootVolumeV4Request();
+        RootVolumeV1Request convertedNullRootVolumeV1Request = underTest.convert(nullRootVolumeV4Request, "AWS");
+        assertEquals(DEFAULT_ROOT_DISK_SIZE, convertedNullRootVolumeV1Request.getSize());
+
         when(rootVolumeSizeProvider.getForPlatform("AWS")).thenReturn(DEFAULT_ROOT_DISK_SIZE);
         RootVolumeV1Request goodRootVolumeV1Request = new RootVolumeV1Request();
         goodRootVolumeV1Request.setSize(300);
