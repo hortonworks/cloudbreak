@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.clusterproxy.remoteenvironment;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class RemoteEnvironmentResponse {
@@ -56,5 +58,25 @@ public class RemoteEnvironmentResponse {
                 ", status='" + status + '\'' +
                 ", cloudPlatform='" + cloudPlatform + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        RemoteEnvironmentResponse that = (RemoteEnvironmentResponse) o;
+        return Objects.equals(crn, that.crn)
+                && Objects.equals(environmentName, that.environmentName)
+                && Objects.equals(status, that.status)
+                && Objects.equals(cloudPlatform, that.cloudPlatform);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(crn, environmentName, status, cloudPlatform);
     }
 }
