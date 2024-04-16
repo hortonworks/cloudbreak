@@ -49,13 +49,15 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
 
     private static final int SINGLE_CERT = 1;
 
-    private static final int THREE_CERTS = 3;
+    private static final int FOUR_CERTS = 4;
 
     private static final int VERSION_0 = 0;
 
     private static final int VERSION_1 = 1;
 
     private static final int VERSION_2 = 2;
+
+    private static final int VERSION_3 = 3;
 
     private static final String CERT_ISSUER_AWS_0 = "CN=Amazon RDS Root 2019 CA,OU=Amazon RDS,O=Amazon Web Services\\, Inc.,ST=Washington,L=Seattle,C=US";
 
@@ -65,6 +67,8 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
 
     private static final String CERT_ISSUER_AZURE_2 = "CN=DigiCert Global Root CA,OU=www.digicert.com,O=DigiCert Inc,C=US";
 
+    private static final String CERT_ISSUER_AZURE_3 = "CN=Microsoft RSA Root Certificate Authority 2017,O=Microsoft Corporation,C=US";
+
     private static final String CLOUD_PROVIDER_IDENTIFIER_AWS_0 = "rds-ca-2019";
 
     private static final String CLOUD_PROVIDER_IDENTIFIER_AZURE_0 = "BaltimoreCyberTrustRoot";
@@ -72,6 +76,8 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
     private static final String CLOUD_PROVIDER_IDENTIFIER_AZURE_1 = "DigiCertGlobalRootG2";
 
     private static final String CLOUD_PROVIDER_IDENTIFIER_AZURE_2 = "DigiCertGlobalRootCA";
+
+    private static final String CLOUD_PROVIDER_IDENTIFIER_AZURE_3 = "MicrosoftRSARootCertificateAuthority2017";
 
     private static final String REGION_DUMMY = "dummy";
 
@@ -114,7 +120,7 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
             tests.add(awsTest);
         }
         DynamicTest azureTest = DynamicTest.dynamicTest(CloudPlatform.AZURE.name(),
-                () -> assertThat(underTest.getNumberOfCertsByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null)).isEqualTo(THREE_CERTS));
+                () -> assertThat(underTest.getNumberOfCertsByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null)).isEqualTo(FOUR_CERTS));
         tests.add(azureTest);
         return tests;
     }
@@ -133,7 +139,7 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
         }
         DynamicTest azureTest = DynamicTest.dynamicTest(CloudPlatform.AZURE.name(), () -> {
             assertThat(underTest.getMinVersionByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null)).isEqualTo(VERSION_0);
-            assertThat(underTest.getMaxVersionByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null)).isEqualTo(VERSION_2);
+            assertThat(underTest.getMaxVersionByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null)).isEqualTo(VERSION_3);
         });
         tests.add(azureTest);
         return tests;
@@ -209,7 +215,7 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
             Set<SslCertificateEntry> certsAzure = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null);
 
             assertThat(certsAzure).isNotNull();
-            assertThat(certsAzure).hasSize(THREE_CERTS);
+            assertThat(certsAzure).hasSize(FOUR_CERTS);
             assertThat(certsAzure).doesNotContainNull();
         });
         tests.add(azureTest);
@@ -234,14 +240,15 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
         verifyCertEntry(certsAwsDummy, VERSION_0, CERT_ISSUER_AWS_0, CLOUD_PROVIDER_IDENTIFIER_AWS_0);
 
         Set<SslCertificateEntry> certsAzure = underTest.getCertsByCloudPlatformAndRegionAndVersions(CloudPlatform.AZURE.name(), null, VERSION_0, VERSION_1,
-                VERSION_2);
+                VERSION_2, VERSION_3);
 
         assertThat(certsAzure).isNotNull();
-        assertThat(certsAzure).hasSize(THREE_CERTS);
+        assertThat(certsAzure).hasSize(FOUR_CERTS);
         assertThat(certsAzure).doesNotContainNull();
         verifyCertEntry(certsAzure, VERSION_0, CERT_ISSUER_AZURE_0, CLOUD_PROVIDER_IDENTIFIER_AZURE_0);
         verifyCertEntry(certsAzure, VERSION_1, CERT_ISSUER_AZURE_1, CLOUD_PROVIDER_IDENTIFIER_AZURE_1);
         verifyCertEntry(certsAzure, VERSION_2, CERT_ISSUER_AZURE_2, CLOUD_PROVIDER_IDENTIFIER_AZURE_2);
+        verifyCertEntry(certsAzure, VERSION_3, CERT_ISSUER_AZURE_3, CLOUD_PROVIDER_IDENTIFIER_AZURE_3);
     }
 
     @Test
@@ -258,6 +265,8 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
                 CLOUD_PROVIDER_IDENTIFIER_AZURE_1);
         verifyCertEntry(underTest.getCertByCloudPlatformAndRegionAndVersion(CloudPlatform.AZURE.name(), null, VERSION_2), VERSION_2, CERT_ISSUER_AZURE_2,
                 CLOUD_PROVIDER_IDENTIFIER_AZURE_2);
+        verifyCertEntry(underTest.getCertByCloudPlatformAndRegionAndVersion(CloudPlatform.AZURE.name(), null, VERSION_3), VERSION_3, CERT_ISSUER_AZURE_3,
+                CLOUD_PROVIDER_IDENTIFIER_AZURE_3);
     }
 
     private void verifyCertEntry(Set<SslCertificateEntry> certs, int version, String certIssuerExpected, String cloudProviderIdentifierExpected) {
@@ -300,6 +309,9 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
         verifyCertEntry(underTest.getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(CloudPlatform.AZURE.name(), null,
                         CLOUD_PROVIDER_IDENTIFIER_AZURE_2),
                 VERSION_2, CERT_ISSUER_AZURE_2, CLOUD_PROVIDER_IDENTIFIER_AZURE_2);
+        verifyCertEntry(underTest.getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(CloudPlatform.AZURE.name(), null,
+                        CLOUD_PROVIDER_IDENTIFIER_AZURE_3),
+                VERSION_3, CERT_ISSUER_AZURE_3, CLOUD_PROVIDER_IDENTIFIER_AZURE_3);
     }
 
     @Configuration
