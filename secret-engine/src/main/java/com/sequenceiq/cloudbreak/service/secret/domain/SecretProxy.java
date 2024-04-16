@@ -13,7 +13,7 @@ public class SecretProxy extends Secret {
 
     @Override
     public String getRaw() {
-        SecretService secretService = StaticApplicationContext.getApplicationContext().getBean(SecretService.class);
+        SecretService secretService = StaticApplicationContext.getBean(SecretService.class);
         return secretService.get(getSecret());
     }
 }

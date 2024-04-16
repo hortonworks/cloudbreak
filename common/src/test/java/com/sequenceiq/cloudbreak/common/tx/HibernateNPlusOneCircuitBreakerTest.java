@@ -14,6 +14,7 @@ public class HibernateNPlusOneCircuitBreakerTest {
     @BeforeEach
     public void setUp() {
         underTest = new HibernateNPlusOneCircuitBreaker();
+        HibernateCircuitBreakerConfigProvider.init(null);
     }
 
     @Test

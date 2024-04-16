@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.app;
 
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.env.Environment;
 
 /**
  * This grants you access to Spring ApplicationContext from non-Spring beans. Use it only from non-Spring beans,
@@ -18,18 +18,8 @@ public class StaticApplicationContext {
         context = applicationContext;
     }
 
-    public static ApplicationContext getApplicationContext() {
-        return context;
+    public static <T> T getBean(Class<T> requiredType) throws BeansException {
+        return context.getBean(requiredType);
     }
 
-    public static <T> T getEnvironmentProperty(String key, Class<T> targetType, T defaultValue) {
-        T ret = defaultValue;
-        if (getApplicationContext() != null) {
-            Environment environment = getApplicationContext().getEnvironment();
-            if (environment != null) {
-                ret = environment.getProperty(key, targetType, defaultValue);
-            }
-        }
-        return ret;
-    }
 }
