@@ -28,6 +28,8 @@ public class CommonClusterManagerProperties {
 
     private String internalDistroXBlueprintName;
 
+    private String internalDistroXVerticalScaleBlueprintName;
+
     private UpgradeProperties upgrade = new UpgradeProperties();
 
     private UpgradeDatabaseServerProperties upgradeDatabaseServer = new UpgradeDatabaseServerProperties();
@@ -86,6 +88,14 @@ public class CommonClusterManagerProperties {
 
     public void setInternalDistroXBlueprintName(String internalDistroXBlueprintName) {
         this.internalDistroXBlueprintName = internalDistroXBlueprintName;
+    }
+
+    public String getInternalDistroXVerticalScaleBlueprintName() {
+        return String.format(internalDistroXVerticalScaleBlueprintName, runtimeVersion);
+    }
+
+    public void setInternalDistroXVerticalScaleBlueprintName(String internalDistroXVerticalScaleBlueprintName) {
+        this.internalDistroXVerticalScaleBlueprintName = internalDistroXVerticalScaleBlueprintName;
     }
 
     public UpgradeProperties getUpgrade() {

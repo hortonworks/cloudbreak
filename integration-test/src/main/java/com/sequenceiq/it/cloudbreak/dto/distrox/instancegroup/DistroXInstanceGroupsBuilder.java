@@ -1,6 +1,8 @@
 package com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup;
 
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.COMPUTE;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.COORDINATOR;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.EXECUTOR;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.GATEWAY;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.WORKER;
@@ -13,8 +15,10 @@ import java.util.stream.Collectors;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.volume.VolumeV1Request;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 
 public class DistroXInstanceGroupsBuilder {
 
@@ -28,6 +32,17 @@ public class DistroXInstanceGroupsBuilder {
 
     public DistroXInstanceGroupsBuilder defaultHostGroup() {
         distroXInstanceGroupTestDtoList = withHostGroup(testContext, MASTER, COMPUTE, WORKER, GATEWAY);
+        return this;
+    }
+
+    public DistroXInstanceGroupsBuilder verticalScaleHostGroup() {
+        distroXInstanceGroupTestDtoList = withHostGroup(testContext, MASTER, COORDINATOR, EXECUTOR);
+        VolumeV4TestDto attachedVolumes = testContext.init(VolumeV4TestDto.class, testContext.getCloudPlatform());
+        VolumeV1Request volumes = new VolumeV1Request();
+        volumes.setCount(attachedVolumes.getRequest().getCount());
+        volumes.setSize(attachedVolumes.getRequest().getSize());
+        volumes.setType(attachedVolumes.getRequest().getType());
+        getInstanceTemplates().forEach(template -> template.setAttachedVolumes(Set.of(volumes)));
         return this;
     }
 

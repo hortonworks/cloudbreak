@@ -109,7 +109,8 @@ public class DeleteVolumesValidationHandlerTest {
         assertEquals("DELETEVOLUMESFAILEDEVENT_ERROR", result.getSelector());
         assertInstanceOf(DeleteVolumesFailedEvent.class, result);
         assertInstanceOf(BadRequestException.class, result.getException());
-        assertEquals("BadRequestException: Instance group being scaled isn't a compute instance", result.getException().getMessage());
+        assertEquals("BadRequestException: Instance group being scaled isn't a compute instance. Non-compliant services: GATEWAY",
+                result.getException().getMessage());
 
     }
 

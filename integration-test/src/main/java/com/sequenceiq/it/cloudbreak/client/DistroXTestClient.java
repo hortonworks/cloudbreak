@@ -177,8 +177,8 @@ public class DistroXTestClient {
         return new DistroXRotateSecretInternalAction(secretTypes, additionalProperties);
     }
 
-    public Action<DistroXTestDto, CloudbreakClient> deleteDisks() {
-        return new DistroXDeleteDisksAction();
+    public Action<DistroXTestDto, CloudbreakClient> deleteDisks(String instanceGroup) {
+        return new DistroXDeleteDisksAction(instanceGroup);
     }
 
     public Action<DistroXTestDto, CloudbreakClient> updateDisks(int size, String volumeType, String instanceGroup) {

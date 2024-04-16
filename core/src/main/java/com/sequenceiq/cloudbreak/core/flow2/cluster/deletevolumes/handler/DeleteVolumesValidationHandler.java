@@ -67,19 +67,23 @@ public class DeleteVolumesValidationHandler extends ExceptionCatcherEventHandler
         Set<String> hostTemplateComponents = processor.getComponentsInHostGroup(requestGroup);
         Set<ServiceComponent> hostTemplateServiceComponents = processor.getServiceComponentsByHostGroup().get(requestGroup);
         boolean computeInstance = true;
+        StringBuilder blackListedServices = new StringBuilder();
         for (String service : hostTemplateComponents) {
             com.google.common.base.Optional<BlackListedDeleteVolumesRole> enumValue =
                     Enums.getIfPresent(BlackListedDeleteVolumesRole.class, service);
             if (enumValue.isPresent()) {
+                if (!blackListedServices.toString().isEmpty()) {
+                    blackListedServices.append(", ");
+                }
+                blackListedServices.append(enumValue.get());
                 computeInstance = false;
             }
         }
         if (!computeInstance) {
             LOGGER.warn("Deleting volumes flow is being stopped, as instance being scaled is not a compute instance.");
-            return new DeleteVolumesFailedEvent(
-                    "BadRequestException: Instance group being scaled isn't a compute instance",
-                    new BadRequestException("BadRequestException: Instance group being scaled isn't a compute instance"),
-                    stack.getId());
+            String statusReason = "BadRequestException: Instance group being scaled isn't a compute instance. Non-compliant services: " +
+                    blackListedServices.toString();
+            return new DeleteVolumesFailedEvent(statusReason, new BadRequestException(statusReason), stack.getId());
         } else {
             List<CloudResource> cloudResourcesToBeDeleted = stack.getResources().stream().filter(resource -> null != resource.getInstanceGroup()
                             && resource.getInstanceGroup().equals(requestGroup)

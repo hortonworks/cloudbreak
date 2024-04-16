@@ -19,6 +19,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvail
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -43,7 +44,7 @@ public class DistroXVolumesVerticalScaleTest extends AbstractE2ETest {
 
     private static final Map<String, String> DX_TAGS = Map.of("distroxTagKey", "distroxTagValue");
 
-    private static final String TEST_INSTANCE_GROUP = "compute";
+    private static final String TEST_INSTANCE_GROUP = "coordinator";
 
     private static final int UPDATE_SIZE = 500;
 
@@ -63,6 +64,9 @@ public class DistroXVolumesVerticalScaleTest extends AbstractE2ETest {
 
     @Inject
     private DistroxUtil distroxUtil;
+
+    @Inject
+    private CommonClusterManagerProperties commonClusterManagerProperties;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -100,9 +104,9 @@ public class DistroXVolumesVerticalScaleTest extends AbstractE2ETest {
             .await(SdxClusterStatusResponse.RUNNING)
             .awaitForHealthyInstances()
             .given("dx", DistroXTestDto.class)
+            .withTemplate(commonClusterManagerProperties.getInternalDistroXVerticalScaleBlueprintName())
             .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
-                    .defaultHostGroup()
-                    .withStorageOptimizedInstancetype()
+                    .verticalScaleHostGroup()
                     .withInstanceType(instanceType)
                     .build())
             .addTags(DX_TAGS)
@@ -122,7 +126,7 @@ public class DistroXVolumesVerticalScaleTest extends AbstractE2ETest {
             })
             .awaitForHealthyInstances()
             .given("dx", DistroXTestDto.class)
-            .when(distroXTestClient.deleteDisks(), RunningParameter.key("dx"))
+            .when(distroXTestClient.deleteDisks(TEST_INSTANCE_GROUP), RunningParameter.key("dx"))
             .await(STACK_AVAILABLE, RunningParameter.key("dx"))
             .awaitForHealthyInstances()
             .given("dx", DistroXTestDto.class)

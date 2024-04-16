@@ -11,6 +11,8 @@ public enum HostGroupType {
     GATEWAY("gateway", InstanceGroupType.CORE, InstanceCountParameter.GATEWAY_INSTANCE_COUNT.getName(), 0),
     GATEWAY_ENT("gateway", InstanceGroupType.GATEWAY, InstanceCountParameter.GATEWAY_INSTANCE_COUNT.getName(), 2),
     COMPUTE("compute", InstanceGroupType.CORE, InstanceCountParameter.COMPUTE_INSTANCE_COUNT.getName()),
+    COORDINATOR("coordinator", InstanceGroupType.CORE, InstanceCountParameter.COMPUTE_INSTANCE_COUNT.getName()),
+    EXECUTOR("executor", InstanceGroupType.CORE, InstanceCountParameter.WORKER_INSTANCE_COUNT.getName()),
     SERVICES("Services", InstanceGroupType.GATEWAY, InstanceCountParameter.SERVICE_INSTANCE_COUNT.getName()),
     MESSAGING("Messaging", InstanceGroupType.CORE, InstanceCountParameter.NIFI_INSTANCE_COUNT.getName()),
     NIFI("NiFi", InstanceGroupType.CORE, InstanceCountParameter.NIFI_INSTANCE_COUNT.getName()),
