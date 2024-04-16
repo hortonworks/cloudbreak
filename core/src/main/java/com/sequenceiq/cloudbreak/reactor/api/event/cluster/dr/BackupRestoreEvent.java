@@ -22,48 +22,58 @@ public class BackupRestoreEvent extends StackEvent {
 
     private final int databaseMaxDurationInMin;
 
+    private final boolean dryRun;
+
     public BackupRestoreEvent(Long stackId, String backupLocation, String backupId) {
-        this (null, stackId, backupLocation, backupId);
+        this (null, stackId, backupLocation, backupId, false);
     }
 
-    public BackupRestoreEvent(Long stackId, String backupLocation, String backupId, int databaseMaxDurationInMin) {
-        this (null, stackId, backupLocation, backupId, databaseMaxDurationInMin);
+    public BackupRestoreEvent(Long stackId, String backupLocation, String backupId, boolean dryRun) {
+        this (null, stackId, backupLocation, backupId, dryRun);
     }
 
-    public BackupRestoreEvent(String selector, Long stackId, String backupLocation, String backupId) {
+    public BackupRestoreEvent(Long stackId, String backupLocation, String backupId, int databaseMaxDurationInMin, boolean dryRun) {
+        this (null, stackId, backupLocation, backupId, databaseMaxDurationInMin, dryRun);
+    }
+
+    public BackupRestoreEvent(String selector, Long stackId, String backupLocation, String backupId, boolean dryRun) {
         super(selector, stackId);
         this.backupLocation = backupLocation;
         this.backupId = backupId;
+        this.dryRun = dryRun;
         this.closeConnections = true;
         this.skipDatabaseNames = Collections.emptyList();
         this.databaseMaxDurationInMin = 0;
     }
 
-    public BackupRestoreEvent(String selector, Long stackId, String backupLocation, String backupId, int databaseMaxDurationInMin) {
+    public BackupRestoreEvent(String selector, Long stackId, String backupLocation, String backupId, int databaseMaxDurationInMin, boolean dryRun) {
         super(selector, stackId);
         this.backupLocation = backupLocation;
         this.backupId = backupId;
+        this.dryRun = dryRun;
         this.closeConnections = true;
         this.skipDatabaseNames = Collections.emptyList();
         this.databaseMaxDurationInMin = databaseMaxDurationInMin;
     }
 
     public BackupRestoreEvent(String selector, Long stackId, String backupLocation, String backupId, boolean closeConnections, List<String> skipDatabaseNames,
-            int databaseMaxDurationInMin) {
+            int databaseMaxDurationInMin, boolean dryRun) {
         super(selector, stackId);
         this.backupLocation = backupLocation;
         this.backupId = backupId;
         this.closeConnections = closeConnections;
         this.skipDatabaseNames = skipDatabaseNames;
         this.databaseMaxDurationInMin = databaseMaxDurationInMin;
+        this.dryRun = dryRun;
     }
 
     public BackupRestoreEvent(String selector, Long stackId, Promise<AcceptResult> accepted, String backupLocation, String backupId, boolean closeConnections,
-            int databaseMaxDurationInMin) {
+            int databaseMaxDurationInMin, boolean dryRun) {
         super(selector, stackId, accepted);
         this.backupLocation = backupLocation;
         this.backupId = backupId;
         this.closeConnections = closeConnections;
+        this.dryRun = dryRun;
         this.skipDatabaseNames = Collections.emptyList();
         this.databaseMaxDurationInMin = databaseMaxDurationInMin;
     }
@@ -77,13 +87,15 @@ public class BackupRestoreEvent extends StackEvent {
             @JsonProperty("backupId") String backupId,
             @JsonProperty("closeConnections") boolean closeConnections,
             @JsonProperty("skipDatabaseNames") List<String> skipDatabaseNames,
-            @JsonProperty("databaseMaxDurationInMin") int databaseMaxDurationInMin) {
+            @JsonProperty("databaseMaxDurationInMin") int databaseMaxDurationInMin,
+            @JsonProperty("dryRun") boolean dryRun) {
         super(selector, stackId, accepted);
         this.backupLocation = backupLocation;
         this.backupId = backupId;
         this.closeConnections = closeConnections;
         this.skipDatabaseNames = skipDatabaseNames;
         this.databaseMaxDurationInMin = databaseMaxDurationInMin;
+        this.dryRun = dryRun;
     }
 
     public String getBackupLocation() {
@@ -104,5 +116,9 @@ public class BackupRestoreEvent extends StackEvent {
 
     public int getDatabaseMaxDurationInMin() {
         return databaseMaxDurationInMin;
+    }
+
+    public boolean isDryRun() {
+        return dryRun;
     }
 }

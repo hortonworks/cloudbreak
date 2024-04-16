@@ -20,8 +20,10 @@ public class BackupRestoreContext extends CommonContext {
 
     private final int databaseMaxDurationInMin;
 
+    private final boolean dryRun;
+
     public BackupRestoreContext(FlowParameters flowParameters, StackEvent event, String backupLocation, String backupId,
-                                boolean closeConnections, List<String> skipDatabaseNames, int databaseMaxDurationInMin) {
+                                boolean closeConnections, List<String> skipDatabaseNames, int databaseMaxDurationInMin, boolean dryRun) {
         super(flowParameters);
         this.stackId = event.getResourceId();
         this.backupLocation = backupLocation;
@@ -29,11 +31,13 @@ public class BackupRestoreContext extends CommonContext {
         this.closeConnections = closeConnections;
         this.skipDatabaseNames = skipDatabaseNames;
         this.databaseMaxDurationInMin = databaseMaxDurationInMin;
+        this.dryRun = dryRun;
     }
 
+    @SuppressWarnings("ParameterNumber")
     public static BackupRestoreContext from(FlowParameters flowParameters, StackEvent event, String backupLocation, String backupId,
-                                            boolean closeConnections, List<String> skipDatabaseNames, int databaseMaxDurationInMin) {
-        return new BackupRestoreContext(flowParameters, event, backupLocation, backupId, closeConnections, skipDatabaseNames, databaseMaxDurationInMin);
+                                            boolean closeConnections, List<String> skipDatabaseNames, int databaseMaxDurationInMin, boolean dryRun) {
+        return new BackupRestoreContext(flowParameters, event, backupLocation, backupId, closeConnections, skipDatabaseNames, databaseMaxDurationInMin, dryRun);
     }
 
     public Long getStackId() {
@@ -58,5 +62,9 @@ public class BackupRestoreContext extends CommonContext {
 
     public int getDatabaseMaxDurationInMin() {
         return databaseMaxDurationInMin;
+    }
+
+    public boolean isDryRun() {
+        return dryRun;
     }
 }

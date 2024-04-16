@@ -605,12 +605,12 @@ public interface StackV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier updatePillarConfigurationByCrn(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn);
 
-    @SuppressWarnings("ParameterNumber")
     @POST
     @Path("{name}/database_backup")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = DATABASE_BACKUP, operationId = "databaseBackup",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    @SuppressWarnings("ParameterNumber")
     BackupV4Response backupDatabaseByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("backupLocation") String backupLocation, @QueryParam("backupId") String backupId,
             @QueryParam("skipDatabaseNames") List<String> skipDatabaseNames,

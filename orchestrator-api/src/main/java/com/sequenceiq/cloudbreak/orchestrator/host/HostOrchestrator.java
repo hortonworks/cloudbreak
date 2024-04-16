@@ -134,6 +134,12 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void backupDatabase(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel, int databaseMaxDurationInMin)
             throws CloudbreakOrchestratorFailedException;
 
+    void backupDryRunValidation(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel,
+            int databaseMaxDurationInMin) throws CloudbreakOrchestratorFailedException;
+
+    void restoreDryRunValidation(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel,
+            int databaseMaxDurationInMin) throws CloudbreakOrchestratorFailedException;
+
     void restoreDatabase(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel, int databaseMaxDurationInMin)
             throws CloudbreakOrchestratorFailedException;
 

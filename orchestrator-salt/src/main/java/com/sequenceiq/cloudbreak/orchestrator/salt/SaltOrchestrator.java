@@ -133,6 +133,10 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private static final String DATABASE_RESTORE = "postgresql.disaster_recovery.restore";
 
+    private static final String BACKUP_DRY_RUN_VALIDATION = "postgresql.disaster_recovery.backup_dry_run_validation";
+
+    private static final String RESTORE_DRY_RUN_VALIDATION = "postgresql.disaster_recovery.restore_dry_run_validation";
+
     private static final String CM_SERVER_RESTART = "cloudera.manager.restart";
 
     private static final String CM_AGENT_STOP = "cloudera.agent.agent-stop";
@@ -1411,6 +1415,48 @@ public class SaltOrchestrator implements HostOrchestrator {
             int databaseMaxDurationInMin)
             throws CloudbreakOrchestratorFailedException {
         callBackupRestore(primaryGateway, target, saltConfig, exitModel, DATABASE_RESTORE, databaseMaxDurationInMin);
+    }
+
+    @Override
+    public void backupDryRunValidation(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel,
+        int databaseMaxDurationInMin)
+        throws CloudbreakOrchestratorFailedException {
+        int maxDatabaseDrRetry = databaseMaxDurationInMin == 0 ? maxDatabaseDrRetryDefault :
+            databaseMaxDurationInMin * SECONDS_IN_MIN / DATABASE_DR_EACH_RETRY_IN_SEC;
+        LOGGER.info("Calling salt orchestrator on database backup/restore with retry number: {}", maxDatabaseDrRetry);
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
+                OrchestratorBootstrap pillarSave =
+                    PillarSave.createCustomPillar(sc, Sets.newHashSet(primaryGateway.getPrivateAddress()), propertiesEntry.getValue());
+                Callable<Boolean> saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel, maxDatabaseDrRetry, maxDatabaseDrRetryOnError);
+                saltPillarRunner.call();
+            }
+            executeSingleSaltState(target, exitModel, Optional.of(maxDatabaseDrRetry), Optional.of(maxDatabaseDrRetryOnError), sc, BACKUP_DRY_RUN_VALIDATION);
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during database backup", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void restoreDryRunValidation(GatewayConfig primaryGateway, Set<String> target, SaltConfig saltConfig, ExitCriteriaModel exitModel,
+        int databaseMaxDurationInMin)
+        throws CloudbreakOrchestratorFailedException {
+        int maxDatabaseDrRetry = databaseMaxDurationInMin == 0 ? maxDatabaseDrRetryDefault :
+            databaseMaxDurationInMin * SECONDS_IN_MIN / DATABASE_DR_EACH_RETRY_IN_SEC;
+        LOGGER.info("Calling salt orchestrator on database backup/restore with retry number: {}", maxDatabaseDrRetry);
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
+                OrchestratorBootstrap pillarSave =
+                    PillarSave.createCustomPillar(sc, Sets.newHashSet(primaryGateway.getPrivateAddress()), propertiesEntry.getValue());
+                Callable<Boolean> saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel, maxDatabaseDrRetry, maxDatabaseDrRetryOnError);
+                saltPillarRunner.call();
+            }
+            executeSingleSaltState(target, exitModel, Optional.of(maxDatabaseDrRetry), Optional.of(maxDatabaseDrRetryOnError), sc, RESTORE_DRY_RUN_VALIDATION);
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during database backup", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
     }
 
     @Override

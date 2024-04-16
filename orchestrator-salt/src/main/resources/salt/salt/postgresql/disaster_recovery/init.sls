@@ -39,3 +39,17 @@ set_pgpass_file:
     - value: /opt/salt/postgresql/.pgpass
     - require:
       - file: /opt/salt/postgresql/.pgpass
+
+/opt/salt/scripts/backup_dry_run_validation.sh:
+  file.managed:
+    - makedirs: True
+    - mode: 750
+    - source: salt://postgresql/disaster_recovery/scripts/backup_dry_run_validation.sh
+    - template: jinja
+
+/opt/salt/scripts/restore_dry_run_validation.sh:
+  file.managed:
+    - makedirs: True
+    - mode: 750
+    - source: salt://postgresql/disaster_recovery/scripts/restore_dry_run_validation.sh
+    - template: jinja

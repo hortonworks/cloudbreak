@@ -53,7 +53,7 @@ public class BackupDatalakeDatabaseFlowEventChainFactory implements FlowEventCha
         }
         flowEventChain.add(new DatabaseBackupTriggerEvent(DATABASE_BACKUP_EVENT.event(), event.getResourceId(), event.accepted(),
                 event.getBackupLocation(), event.getBackupId(), event.isCloseConnections(), event.getSkipDatabaseNames(),
-                event.getDatabaseMaxDurationInMin()));
+                event.getDatabaseMaxDurationInMin(), event.isDryRun()));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 

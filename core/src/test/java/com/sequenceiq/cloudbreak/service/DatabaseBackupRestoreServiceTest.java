@@ -92,9 +92,10 @@ public class DatabaseBackupRestoreServiceTest {
         when(stackService.findStackByNameAndWorkspaceId(any(), anyLong())).thenReturn(Optional.of(stack));
         when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(stack);
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(1L)).thenReturn(Collections.EMPTY_LIST);
-        when(flowManager.triggerDatalakeDatabaseBackup(anyLong(), any(), any(), anyBoolean(), any(), eq(0))).thenReturn(FlowIdentifier.notTriggered());
+        when(flowManager.triggerDatalakeDatabaseBackup(anyLong(), any(), any(), anyBoolean(), any(), eq(0), anyBoolean()))
+            .thenReturn(FlowIdentifier.notTriggered());
 
-        service.backupDatabase(WORKSPACE_ID, ofName, null, null, true, Collections.emptyList(), 0);
+        service.backupDatabase(WORKSPACE_ID, ofName, null, null, true, Collections.emptyList(), 0, false);
     }
 
     @Test
@@ -142,9 +143,10 @@ public class DatabaseBackupRestoreServiceTest {
         when(stackService.findStackByNameAndWorkspaceId(any(), anyLong())).thenReturn(Optional.of(stack));
         when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(stack);
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(1L)).thenReturn(Collections.EMPTY_LIST);
-        when(flowManager.triggerDatalakeDatabaseBackup(anyLong(), any(), any(), anyBoolean(), any(), eq(0))).thenReturn(FlowIdentifier.notTriggered());
+        when(flowManager.triggerDatalakeDatabaseBackup(anyLong(), any(), any(), anyBoolean(), any(), eq(0), anyBoolean()))
+            .thenReturn(FlowIdentifier.notTriggered());
 
-        service.backupDatabase(WORKSPACE_ID, ofName, null, null, true, Collections.emptyList(), databaseMaxDurationInMin);
+        service.backupDatabase(WORKSPACE_ID, ofName, null, null, true, Collections.emptyList(), databaseMaxDurationInMin, false);
 
     }
 
@@ -158,7 +160,7 @@ public class DatabaseBackupRestoreServiceTest {
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(1L)).thenReturn(Collections.EMPTY_LIST);
         when(flowManager.triggerDatalakeDatabaseRestore(anyLong(), any(), any(), eq(0))).thenReturn(FlowIdentifier.notTriggered());
 
-        service.backupDatabase(WORKSPACE_ID, ofName, null, null, true, Collections.emptyList(), databaseMaxDurationInMin);
+        service.backupDatabase(WORKSPACE_ID, ofName, null, null, true, Collections.emptyList(), databaseMaxDurationInMin, false);
 
     }
 

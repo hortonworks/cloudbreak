@@ -43,6 +43,8 @@ public class BackupRestoreSaltConfigGenerator {
 
     public static final String COMPRESSION_LEVEL = "compression_level";
 
+    public static final String RAZ_ENABLED = "raz_enabled";
+
     public static final List<DatabaseType> DEFAULT_BACKUP_DATABASE =
             List.of(DatabaseType.HIVE, DatabaseType.RANGER, DatabaseType.PROFILER_AGENT, DatabaseType.PROFILER_METRIC);
 
@@ -52,8 +54,9 @@ public class BackupRestoreSaltConfigGenerator {
 
     private static final String FAST_COMPRESSION_VALUE = "1";
 
+    @SuppressWarnings("ParameterNumber")
     public SaltConfig createSaltConfig(String location, String backupId, String rangerAdminGroup,
-            boolean closeConnections, List<String> skipDatabaseNames, boolean enableCompression, StackView stack)
+            boolean closeConnections, List<String> skipDatabaseNames, boolean enableCompression, StackView stack, boolean razEnabled)
             throws URISyntaxException {
         String fullLocation = buildFullLocation(location, backupId, stack.getCloudPlatform());
 
@@ -76,6 +79,7 @@ public class BackupRestoreSaltConfigGenerator {
             disasterRecoveryValues.put(DATABASE_NAMES_KEY, String.join(" ", names));
         }
         disasterRecoveryValues.put(COMPRESSION_LEVEL, enableCompression ? FAST_COMPRESSION_VALUE : SKIP_COMPRESSION_VALUE);
+        disasterRecoveryValues.put(RAZ_ENABLED, razEnabled ? Boolean.TRUE.toString() : Boolean.FALSE.toString());
         servicePillar.put("disaster-recovery", new SaltPillarProperties(POSTGRESQL_DISASTER_RECOVERY_PILLAR_PATH,
                 singletonMap(DISASTER_RECOVERY_KEY, disasterRecoveryValues)));
 

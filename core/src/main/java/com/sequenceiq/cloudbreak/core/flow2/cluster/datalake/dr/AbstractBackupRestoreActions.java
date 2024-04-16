@@ -22,7 +22,7 @@ public abstract class AbstractBackupRestoreActions<P extends BackupRestoreEvent>
     protected BackupRestoreContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
         P payload) {
         return BackupRestoreContext.from(flowParameters, payload, payload.getBackupLocation(), payload.getBackupId(),
-                payload.isCloseConnections(), payload.getSkipDatabaseNames(), payload.getDatabaseMaxDurationInMin());
+                payload.isCloseConnections(), payload.getSkipDatabaseNames(), payload.getDatabaseMaxDurationInMin(), payload.isDryRun());
     }
 
     @Override

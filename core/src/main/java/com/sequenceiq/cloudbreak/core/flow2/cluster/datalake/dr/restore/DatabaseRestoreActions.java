@@ -83,7 +83,7 @@ public class DatabaseRestoreActions {
                 Flow flow = getFlow(flowParameters.getFlowId());
                 flow.setFlowFailed(payload.getException());
                 return BackupRestoreContext.from(flowParameters, payload, null, null, true, payload.getSkipDatabaseNames(),
-                        payload.getDatabaseMaxDurationInMin());
+                        payload.getDatabaseMaxDurationInMin(), false);
             }
 
             @Override

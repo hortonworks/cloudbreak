@@ -486,7 +486,7 @@ public class StackV4Controller extends NotificationController implements StackV4
             @AccountId String accountId, int databaseMaxDurationInMin, boolean dryRun) {
         FlowIdentifier flowIdentifier = stackOperations.backupClusterDatabase(NameOrCrn.ofName(name),
                 restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId, true, skipDatabaseNames,
-                databaseMaxDurationInMin);
+                databaseMaxDurationInMin, dryRun);
         return new BackupV4Response(flowIdentifier);
     }
 
@@ -498,7 +498,7 @@ public class StackV4Controller extends NotificationController implements StackV4
             boolean dryRun) {
         FlowIdentifier flowIdentifier = stackOperations.backupClusterDatabase(NameOrCrn.ofName(name),
                 restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId, closeConnections, skipDatabaseNames,
-                databaseMaxDurationInMin);
+                databaseMaxDurationInMin, dryRun);
         return new BackupV4Response(flowIdentifier);
     }
 

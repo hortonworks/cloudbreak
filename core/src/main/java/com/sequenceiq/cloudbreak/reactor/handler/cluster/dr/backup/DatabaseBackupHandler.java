@@ -85,8 +85,12 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
             boolean enableDbCompression = entitlementService.isDatalakeDatabaseBackupCompressionEnabled(ThreadBasedUserCrnProvider.getAccountId());
             LOGGER.info("Compression entitlement: {}", enableDbCompression);
             SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(request.getBackupLocation(), request.getBackupId(), rangerAdminGroup,
-                    request.isCloseConnections(), request.getSkipDatabaseNames(), enableDbCompression, stack);
-            hostOrchestrator.backupDatabase(gatewayConfig, gatewayFQDN, saltConfig, exitModel, request.getDatabaseMaxDurationInMin());
+                    request.isCloseConnections(), request.getSkipDatabaseNames(), enableDbCompression, stack, cluster.isRangerRazEnabled());
+            if (event.getData().isDryRun()) {
+                hostOrchestrator.backupDryRunValidation(gatewayConfig, gatewayFQDN, saltConfig, exitModel, request.getDatabaseMaxDurationInMin());
+            } else {
+                hostOrchestrator.backupDatabase(gatewayConfig, gatewayFQDN, saltConfig, exitModel, request.getDatabaseMaxDurationInMin());
+            }
 
             result = new DatabaseBackupSuccess(stackId);
         } catch (Exception e) {

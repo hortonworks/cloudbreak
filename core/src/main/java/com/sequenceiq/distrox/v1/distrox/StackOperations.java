@@ -398,12 +398,13 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return stackCommonService.getRetryableFlows(name, workspaceId);
     }
 
+    @SuppressWarnings("ParameterNumber")
     public FlowIdentifier backupClusterDatabase(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String location, String backupId,
-                                                boolean closeConnections, List<String> skipDatabaseNames, int databaseMaxDurationInMin) {
+                                                boolean closeConnections, List<String> skipDatabaseNames, int databaseMaxDurationInMin, boolean dryRun) {
         databaseBackupRestoreService.validate(workspaceId, nameOrCrn, location, backupId);
         LOGGER.debug("Starting cluster database backup: " + nameOrCrn);
         return databaseBackupRestoreService.backupDatabase(workspaceId, nameOrCrn, location, backupId, closeConnections, skipDatabaseNames,
-                databaseMaxDurationInMin);
+                databaseMaxDurationInMin, dryRun);
     }
 
     public FlowIdentifier restoreClusterDatabase(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String location, String backupId,
