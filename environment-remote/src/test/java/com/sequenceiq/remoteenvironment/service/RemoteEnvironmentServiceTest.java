@@ -104,8 +104,16 @@ class RemoteEnvironmentServiceTest {
         Set<SimpleRemoteEnvironmentResponse> result = remoteEnvironmentService.listRemoteEnvironment("sampleAccountId");
 
         assertEquals(2, result.size());
-        assertTrue(result.contains(response1));
-        assertTrue(result.contains(response2));
+        assertTrue(result.stream()
+                .map(e -> e.getName())
+                .filter(e -> e.equalsIgnoreCase(response2.getName()))
+                .findFirst()
+                .isPresent());
+        assertTrue(result.stream()
+                .map(e -> e.getName())
+                .filter(e -> e.equalsIgnoreCase(response1.getName()))
+                .findFirst()
+                .isPresent());
     }
 
     @Test

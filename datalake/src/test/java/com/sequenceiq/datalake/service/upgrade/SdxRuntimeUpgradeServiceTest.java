@@ -298,6 +298,43 @@ public class SdxRuntimeUpgradeServiceTest {
     }
 
     @Test
+    public void testRollingUpgradeForMediumDutyDataLakeShouldBeEnabledWhenSkipRollingValidationEntitlementIsEnabled() {
+        when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
+        when(sdxService.getByNameOrCrn(any(), any())).thenReturn(sdxCluster);
+        ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
+        when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), upgradeV4RequestCaptor.capture(), eq(ACCOUNT_ID))).thenReturn(response);
+        when(sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(sdxUpgradeRequest)).thenCallRealMethod();
+        when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(any(UpgradeV4Response.class))).thenReturn(sdxUpgradeResponse);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(sdxService.getAccountIdFromCrn(USER_CRN)).thenReturn(ACCOUNT_ID);
+        ImageInfoV4Response imageInfo = new ImageInfoV4Response();
+        imageInfo.setImageId(IMAGE_ID);
+        imageInfo.setCreated(1L);
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
+        ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
+        lastImageInfo.setImageId(IMAGE_ID_LAST);
+        lastImageInfo.setCreated(2L);
+        lastImageInfo.setComponentVersions(createExpectedPackageVersions());
+        response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
+        sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
+
+        sdxUpgradeRequest.setLockComponents(false);
+        sdxUpgradeRequest.setImageId(null);
+        sdxUpgradeRequest.setReplaceVms(REPAIR_AFTER_UPGRADE);
+        sdxUpgradeRequest.setRollingUpgradeEnabled(ROLLING_UPGRADE_ENABLED);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID, false));
+
+        verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE, SKIP_BACKUP,
+                SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE, SKIP_BACKUP,
+                SKIP_OPTIONS, ROLLING_UPGRADE_ENABLED, TestConstants.DO_NOT_KEEP_VARIANT);
+        assertTrue(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isRollingUpgradeEnabled());
+    }
+
+    @Test
     public void testSkipOptionsShouldBePassedToDrService() {
         DatalakeDrSkipOptions skipOptions = new DatalakeDrSkipOptions(true, true, true, true);
         sdxUpgradeRequest.setSkipValidation(true);
@@ -330,7 +367,6 @@ public class SdxRuntimeUpgradeServiceTest {
 
     @Test
     public void testMediumDutyRollingUpgradeMustBeRejected() {
-        DatalakeDrSkipOptions skipOptions = new DatalakeDrSkipOptions(true, true, true, true);
         sdxUpgradeRequest.setSkipValidation(true);
         sdxUpgradeRequest.setSkipAtlasMetadata(true);
         sdxUpgradeRequest.setSkipRangerAudits(true);

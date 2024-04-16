@@ -109,7 +109,7 @@ public class SdxRuntimeUpgradeService {
         SdxUpgradeResponse sdxUpgradeResponse = checkForUpgradeByName(clusterName, upgradeRequest, accountId, upgradePreparation);
         validateUpgradeCandidates(clusterName, sdxUpgradeResponse);
         return upgradePreparation ? initSdxUpgradePreparation(userCrn, sdxUpgradeResponse, upgradeRequest, cluster, skipBackup)
-                : initSdxUpgrade(userCrn, sdxUpgradeResponse, upgradeRequest, cluster);
+                : initSdxUpgrade(userCrn, accountId, sdxUpgradeResponse, upgradeRequest, cluster);
     }
 
     public SdxUpgradeResponse triggerUpgradeByCrn(String userCrn, String clusterCrn, SdxUpgradeRequest upgradeRequest, String accountId,
@@ -120,7 +120,7 @@ public class SdxRuntimeUpgradeService {
         SdxUpgradeResponse sdxUpgradeResponse = checkForUpgradeByCrn(userCrn, clusterCrn, upgradeRequest, accountId, upgradePreparation);
         validateUpgradeCandidates(cluster.getClusterName(), sdxUpgradeResponse);
         return upgradePreparation ? initSdxUpgradePreparation(userCrn, sdxUpgradeResponse, upgradeRequest, cluster, skipBackup)
-                : initSdxUpgrade(userCrn, sdxUpgradeResponse, upgradeRequest, cluster);
+                : initSdxUpgrade(userCrn, accountId, sdxUpgradeResponse, upgradeRequest, cluster);
     }
 
     private boolean isInternalRepoAllowedForUpgrade(String userCrn) {
@@ -151,10 +151,11 @@ public class SdxRuntimeUpgradeService {
         return request;
     }
 
-    private SdxUpgradeResponse initSdxUpgrade(String userCrn, SdxUpgradeResponse sdxUpgradeResponse, SdxUpgradeRequest request, SdxCluster cluster) {
+    private SdxUpgradeResponse initSdxUpgrade(String userCrn, String accountId, SdxUpgradeResponse sdxUpgradeResponse, SdxUpgradeRequest request,
+            SdxCluster cluster) {
         List<ImageInfoV4Response> upgradeCandidates = sdxUpgradeResponse.getUpgradeCandidates();
         verifyPaywallAccess(userCrn, request);
-        validateRollingUpgrade(userCrn, request, cluster);
+        validateRollingUpgrade(accountId, request, cluster.getClusterShape());
         String targetImageId = determineImageId(request, upgradeCandidates, sdxUpgradeResponse.getCurrent().getComponentVersions().getOs());
         String targetCdhVersion = getTargetCdhVersion(upgradeCandidates, targetImageId);
         FlowIdentifier flowIdentifier = triggerDatalakeUpgradeFlow(request, cluster, targetImageId);
@@ -181,11 +182,10 @@ public class SdxRuntimeUpgradeService {
                 rollingUpgradeEnabled, keepVariant);
     }
 
-    private void validateRollingUpgrade(String userCrn, SdxUpgradeRequest request, SdxCluster cluster) {
+    private void validateRollingUpgrade(String accountId, SdxUpgradeRequest request, SdxClusterShape clusterShape) {
         boolean rollingUpgradeEnabled = Boolean.TRUE.equals(request.getRollingUpgradeEnabled());
-        if (rollingUpgradeEnabled && cluster.getClusterShape() != SdxClusterShape.ENTERPRISE) {
-            String message = String.format("Rolling upgrade is not supported for %s cluster shape.",
-                    cluster.getClusterShape().name());
+        if (rollingUpgradeEnabled && clusterShape != SdxClusterShape.ENTERPRISE && !entitlementService.isSkipRollingUpgradeValidationEnabled(accountId)) {
+            String message = String.format("Rolling upgrade is not supported for %s cluster shape.", clusterShape.name());
             LOGGER.warn(message);
             throw new BadRequestException(message);
         }
