@@ -32,7 +32,7 @@ public class SdxResizeTestUtil {
     private SdxUtil sdxUtil;
 
     public void runResizeTest(TestContext testContext, String sdxKey, SdxCloudStorageRequest cloudStorageRequest) {
-        SdxResizeTestValidator resizeTestValidator = new SdxResizeTestValidator(SdxClusterShape.MEDIUM_DUTY_HA);
+        SdxResizeTestValidator resizeTestValidator = new SdxResizeTestValidator(SdxClusterShape.ENTERPRISE);
 
         performInitialResizeSteps(testContext, sdxKey, cloudStorageRequest, resizeTestValidator, false)
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxKey))
