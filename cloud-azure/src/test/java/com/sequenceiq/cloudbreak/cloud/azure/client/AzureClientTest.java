@@ -5,6 +5,7 @@ import static com.azure.resourcemanager.compute.models.PublicNetworkAccess.DISAB
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -41,6 +42,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.retry.RetryException;
 
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.Region;
@@ -53,6 +55,7 @@ import com.azure.resourcemanager.compute.fluent.ResourceSkusClient;
 import com.azure.resourcemanager.compute.fluent.models.DiskInner;
 import com.azure.resourcemanager.compute.fluent.models.ResourceSkuInner;
 import com.azure.resourcemanager.compute.fluent.models.VirtualMachineInner;
+import com.azure.resourcemanager.compute.models.ApiErrorException;
 import com.azure.resourcemanager.compute.models.CachingTypes;
 import com.azure.resourcemanager.compute.models.Disk;
 import com.azure.resourcemanager.compute.models.Disk.DefinitionStages.Blank;
@@ -292,6 +295,62 @@ class AzureClientTest {
         underTest.attachDisksToVm(disks, virtualMachine);
         verify(virtualMachineUpdate, times(1)).withDataDiskDefaultCachingType(captor.capture());
         assertEquals(CachingTypes.READ_ONLY, captor.getValue());
+    }
+
+    @Test
+    public void testAttachDisksToVmIfAlreadyAttachedIssueHappened() {
+        VirtualMachine virtualMachine = mock(VirtualMachine.class);
+        VirtualMachine.Update virtualMachineUpdate = getVirtualMachineUpdateForAttachDiskErrorTest(virtualMachine);
+        when(azureExceptionHandler.isDiskAlreadyAttached(any())).thenReturn(true);
+        when(virtualMachineUpdate.apply()).thenThrow(new ApiErrorException("", null, null));
+
+        underTest.attachDisksToVm(getDisksForAttachDiskFailureTest(), virtualMachine);
+        verify(virtualMachineUpdate).apply();
+    }
+
+    @Test
+    public void testAttachDisksToVmIfConcurrentWriteIssueHappened() {
+        VirtualMachine virtualMachine = mock(VirtualMachine.class);
+        VirtualMachine.Update virtualMachineUpdate = getVirtualMachineUpdateForAttachDiskErrorTest(virtualMachine);
+        when(azureExceptionHandler.isDiskAlreadyAttached(any())).thenReturn(false);
+        when(azureExceptionHandler.isConcurrentWrite(any())).thenReturn(true);
+        when(virtualMachineUpdate.apply()).thenThrow(new ApiErrorException("", null, null));
+
+        assertThrows(RetryException.class, () -> underTest.attachDisksToVm(getDisksForAttachDiskFailureTest(), virtualMachine));
+        verify(virtualMachineUpdate).apply();
+    }
+
+    @Test
+    public void testAttachDisksToVmIfOtherHttpStatusCodeErrorHappened() {
+        VirtualMachine virtualMachine = mock(VirtualMachine.class);
+        VirtualMachine.Update virtualMachineUpdate = getVirtualMachineUpdateForAttachDiskErrorTest(virtualMachine);
+        when(azureExceptionHandler.isConcurrentWrite(any())).thenReturn(false);
+        when(azureExceptionHandler.isDiskAlreadyAttached(any())).thenReturn(false);
+        when(virtualMachineUpdate.apply()).thenThrow(new ApiErrorException("", null, null));
+
+        assertThrows(ApiErrorException.class, () -> underTest.attachDisksToVm(getDisksForAttachDiskFailureTest(), virtualMachine));
+        verify(virtualMachineUpdate).apply();
+    }
+
+    private VirtualMachine.Update getVirtualMachineUpdateForAttachDiskErrorTest(VirtualMachine virtualMachine) {
+        VirtualMachineInner virtualMachineInner = mock(VirtualMachineInner.class);
+        when(virtualMachine.innerModel()).thenReturn(virtualMachineInner);
+        when(virtualMachineInner.withPlan(null)).thenReturn(virtualMachineInner);
+        VirtualMachine.Update virtualMachineUpdate = mock(VirtualMachine.Update.class);
+        when(virtualMachine.update()).thenReturn(virtualMachineUpdate);
+        when(virtualMachineUpdate.withExistingDataDisk(any(Disk.class))).thenReturn(virtualMachineUpdate);
+        when(virtualMachineUpdate.withDataDiskDefaultCachingType(any(CachingTypes.class))).thenReturn(virtualMachineUpdate);
+        return virtualMachineUpdate;
+    }
+
+    private List<Disk> getDisksForAttachDiskFailureTest() {
+        int sizeInGb = 4095;
+        DiskSkuTypes diskSkuTypes = DiskSkuTypes.ULTRA_SSD_LRS;
+        Disk disk = mock(Disk.class);
+        List<Disk> disks = List.of(disk);
+        when(disk.sizeInGB()).thenReturn(sizeInGb);
+        when(disk.sku()).thenReturn(diskSkuTypes);
+        return disks;
     }
 
     @Test

@@ -28,6 +28,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.RetryException;
+import org.springframework.retry.annotation.Retryable;
 
 import com.azure.core.http.rest.PagedIterable;
 import com.azure.core.management.Region;
@@ -42,6 +44,7 @@ import com.azure.resourcemanager.compute.ComputeManager;
 import com.azure.resourcemanager.compute.fluent.models.DiskEncryptionSetInner;
 import com.azure.resourcemanager.compute.fluent.models.DiskInner;
 import com.azure.resourcemanager.compute.fluent.models.ResourceSkuInner;
+import com.azure.resourcemanager.compute.models.ApiErrorException;
 import com.azure.resourcemanager.compute.models.AvailabilitySet;
 import com.azure.resourcemanager.compute.models.CachingTypes;
 import com.azure.resourcemanager.compute.models.Disk;
@@ -318,6 +321,7 @@ public class AzureClient {
         }
     }
 
+    @Retryable(retryFor = RetryException.class)
     public void attachDisksToVm(List<Disk> disks, VirtualMachine vm) {
         // This is needed because of bug https://github.com/Azure/azure-libraries-for-java/issues/632
         // It affects the VM-s launched from Azure Marketplace images
@@ -330,7 +334,17 @@ public class AzureClient {
             LOGGER.debug("attach managed disk {} to VM {}", disk.id(), vm.id());
             update.withExistingDataDisk(disk);
         }
-        update.apply();
+        try {
+            update.apply();
+        } catch (ApiErrorException e) {
+            if (azureExceptionHandler.isDiskAlreadyAttached(e)) {
+                LOGGER.info("Disks are already attached to VM {}", vm.id());
+            } else if (azureExceptionHandler.isConcurrentWrite(e)) {
+                throw new RetryException("Concurrent write error, trying it again.", e);
+            } else {
+                throw e;
+            }
+        }
     }
 
     private CachingTypes getCachingType(List<Disk> disks) {

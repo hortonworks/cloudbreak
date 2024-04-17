@@ -19,6 +19,12 @@ public class AzureExceptionHandler {
 
     private static final String MGMT_ERROR_CODE_CONFLICT = "Conflict";
 
+    private static final String CONCURRENT_WRITE_ERROR_CODE = "ConflictingConcurrentWriteNotAllowed";
+
+    private static final String CONFLICTING_USER_INPUT_ERROR_CODE = "ConflictingUserInput";
+
+    private static final String ALREADY_ATTACHED_ERROR_MESSAGE = "cannot be attached as the disk is already owned by VM";
+
     private static final AzureExceptionHandlerParameters DEFAULT_EXCEPTION_HANDLER_PARAMETERS = AzureExceptionHandlerParameters.builder()
             .withHandleNotFound(true)
             .build();
@@ -28,6 +34,8 @@ public class AzureExceptionHandler {
     private static final int FORBIDDEN = 403;
 
     private static final int UNAUTHORIZED_CODE = 401;
+
+    private static final int CONFLICT = 409;
 
     public <T> T handleException(Supplier<T> function) {
         return handleException(function, DEFAULT_EXCEPTION_HANDLER_PARAMETERS);
@@ -116,6 +124,14 @@ public class AzureExceptionHandler {
         return UNAUTHORIZED_CODE == msalServiceException.statusCode();
     }
 
+    public boolean isConcurrentWrite(ManagementException ex) {
+        return httpAndAzureStatusCodeMatches(CONFLICT, CONCURRENT_WRITE_ERROR_CODE, Optional.empty(), ex);
+    }
+
+    public boolean isDiskAlreadyAttached(ManagementException ex) {
+        return httpAndAzureStatusCodeMatches(CONFLICT, CONFLICTING_USER_INPUT_ERROR_CODE, Optional.of(ALREADY_ATTACHED_ERROR_MESSAGE), ex);
+    }
+
     private boolean hasStatusCode(ManagementException exception, int statusCode) {
         return exception.getResponse() != null && statusCode == exception.getResponse().getStatusCode();
     }
@@ -128,6 +144,14 @@ public class AzureExceptionHandler {
     private boolean isDetailsContainAnyConflict(ManagementException e) {
         return e.getValue().getDetails() != null
                 && e.getValue().getDetails().stream().anyMatch(detail -> MGMT_ERROR_CODE_CONFLICT.equalsIgnoreCase(detail.getCode()));
+    }
+
+    private static boolean httpAndAzureStatusCodeMatches(Integer expectedHttpStatusCode, String expectedAzureErrorCode,
+            Optional<String> expectedAzureErrorMessage, ManagementException exception) {
+        ManagementError error = exception.getValue();
+        return exception.getResponse() != null && exception.getResponse().getStatusCode() == expectedHttpStatusCode && error != null &&
+                error.getCode().contains(expectedAzureErrorCode) &&
+                expectedAzureErrorMessage.stream().allMatch(errorMessage -> error.getMessage() != null && error.getMessage().contains(errorMessage));
     }
 
 }

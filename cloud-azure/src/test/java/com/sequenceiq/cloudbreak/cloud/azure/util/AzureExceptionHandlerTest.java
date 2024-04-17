@@ -4,23 +4,29 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import com.azure.core.http.HttpResponse;
 import com.azure.core.management.exception.ManagementError;
 import com.azure.core.management.exception.ManagementException;
+import com.azure.resourcemanager.compute.models.ApiError;
+import com.azure.resourcemanager.compute.models.ApiErrorException;
 import com.microsoft.aad.msal4j.MsalServiceException;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 
@@ -34,6 +40,46 @@ public class AzureExceptionHandlerTest {
             AzureExceptionHandlerParameters.builder().withHandleNotFound(true).build();
 
     AzureExceptionHandler underTest = new AzureExceptionHandler();
+
+    private static Stream<Arguments> concurrentWriteCheckTestSource() {
+        return Stream.of(
+                Arguments.of(401, "ConflictingConcurrentWriteNotAllowed", false),
+                Arguments.of(409, "anything", false),
+                Arguments.of(409, "ConflictingConcurrentWriteNotAllowed", true)
+        );
+    }
+
+    private static Stream<Arguments> diskAlreadyAttachedCheckTestSource() {
+        return Stream.of(
+                Arguments.of(401, "ConflictingUserInput", "", false),
+                Arguments.of(409, "anything", "", false),
+                Arguments.of(409, "ConflictingUserInput", "", false),
+                Arguments.of(409, "ConflictingUserInput", "cannot be attached as the disk is already owned by VM", false)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("concurrentWriteCheckTestSource")
+    void concurrentWriteCheckTest(int statusCode, String azureErrorCode, boolean result) {
+        ApiErrorException apiErrorException = getApiErrorException(statusCode, azureErrorCode, "");
+        assertEquals(result, underTest.isConcurrentWrite(apiErrorException));
+    }
+
+    @ParameterizedTest
+    @MethodSource("diskAlreadyAttachedCheckTestSource")
+    void concurrentWriteCheckTest(int statusCode, String azureErrorCode, String azureErrorMessage, boolean result) {
+        ApiErrorException apiErrorException = getApiErrorException(statusCode, azureErrorCode, azureErrorMessage);
+        assertEquals(result, underTest.isConcurrentWrite(apiErrorException));
+    }
+
+    private ApiErrorException getApiErrorException(int statusCode, String azureErrorCode, String azureErrorMessage) {
+        HttpResponse httpResponse = mock(HttpResponse.class);
+        when(httpResponse.getStatusCode()).thenReturn(statusCode);
+        ApiError apiError = mock(ApiError.class);
+        lenient().when(apiError.getCode()).thenReturn(azureErrorCode);
+        lenient().when(apiError.getMessage()).thenReturn(azureErrorMessage);
+        return new ApiErrorException("", httpResponse, apiError);
+    }
 
     @Test
     void handleException() {
