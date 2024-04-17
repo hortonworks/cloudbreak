@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.constant.AzureConstants.RESOURCE_GROUP_N
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,7 +40,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
     private final AvailabilityZoneConverter availabilityZoneConverter;
 
     public AzureEnvironmentNetworkConverter(EnvironmentViewConverter environmentViewConverter, EntitlementService entitlementService,
-        AzureRegistrationTypeResolver azureRegistrationTypeResolver, AvailabilityZoneConverter availabilityZoneConverter) {
+            AzureRegistrationTypeResolver azureRegistrationTypeResolver, AvailabilityZoneConverter availabilityZoneConverter) {
         super(environmentViewConverter, entitlementService);
         this.azureRegistrationTypeResolver = azureRegistrationTypeResolver;
         this.availabilityZoneConverter = availabilityZoneConverter;
@@ -71,18 +72,18 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
         azureNetwork.setResourceGroupName(String.valueOf(createdCloudNetwork.getProperties().get("resourceGroupName")));
         azureNetwork.setSubnetMetas(createdCloudNetwork.getSubnets().stream()
                 .collect(Collectors.toMap(CreatedSubnet::getSubnetId,
-                        subnet -> new CloudSubnet(
-                                subnet.getSubnetId(),
-                                subnet.getSubnetId(),
-                                subnet.getAvailabilityZone(),
-                                subnet.getCidr(),
-                                subnet.isPublicSubnet(),
-                                subnet.isMapPublicIpOnLaunch(),
-                                subnet.isIgwAvailable(),
-                                subnet.getType(),
-                                subnet.isPublicSubnet()
-                                        ? getDeploymentRestrictionWhenPublicSubnet(createdCloudNetwork)
-                                        : getDeploymentRestrictionForPrivateSubnet(subnet.getType()))
+                                subnet -> new CloudSubnet(
+                                        subnet.getSubnetId(),
+                                        subnet.getSubnetId(),
+                                        subnet.getAvailabilityZone(),
+                                        subnet.getCidr(),
+                                        subnet.isPublicSubnet(),
+                                        subnet.isMapPublicIpOnLaunch(),
+                                        subnet.isIgwAvailable(),
+                                        subnet.getType(),
+                                        subnet.isPublicSubnet()
+                                                ? getDeploymentRestrictionWhenPublicSubnet(createdCloudNetwork)
+                                                : getDeploymentRestrictionForPrivateSubnet(subnet.getType()))
                         )
                 )
         );
@@ -154,11 +155,13 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
             NetworkDto newNetworkDto) {
         AzureParams newAzureParams = newNetworkDto.getAzure();
         AzureParams.Builder azureParamsBuilder = AzureParams.builder(originalNetworkDto.getAzure());
-        if (StringUtils.isNotEmpty(newAzureParams.getDatabasePrivateDnsZoneId())) {
-            azureParamsBuilder.withDatabasePrivateDnsZoneId(newAzureParams.getDatabasePrivateDnsZoneId());
-        }
-        if (CollectionUtils.isNotEmpty(newAzureParams.getFlexibleServerSubnetIds())) {
-            azureParamsBuilder.withFlexibleServerSubnetIds(newAzureParams.getFlexibleServerSubnetIds());
+        if (Objects.nonNull(newAzureParams)) {
+            if (StringUtils.isNotEmpty(newAzureParams.getDatabasePrivateDnsZoneId())) {
+                azureParamsBuilder.withDatabasePrivateDnsZoneId(newAzureParams.getDatabasePrivateDnsZoneId());
+            }
+            if (CollectionUtils.isNotEmpty(newAzureParams.getFlexibleServerSubnetIds())) {
+                azureParamsBuilder.withFlexibleServerSubnetIds(newAzureParams.getFlexibleServerSubnetIds());
+            }
         }
         return networkDtoBuilder.withAzure(azureParamsBuilder.build());
     }
@@ -174,7 +177,9 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
     @Override
     public void updateProviderSpecificParameters(BaseNetwork baseNetwork, NetworkDto networkDto) {
         AzureNetwork azureNetwork = (AzureNetwork) baseNetwork;
-        azureNetwork.setFlexibleServerSubnetIds(networkDto.getAzure().getFlexibleServerSubnetIds());
-        azureNetwork.setDatabasePrivateDnsZoneId(networkDto.getAzure().getDatabasePrivateDnsZoneId());
+        if (Objects.nonNull(networkDto.getAzure())) {
+            azureNetwork.setFlexibleServerSubnetIds(networkDto.getAzure().getFlexibleServerSubnetIds());
+            azureNetwork.setDatabasePrivateDnsZoneId(networkDto.getAzure().getDatabasePrivateDnsZoneId());
+        }
     }
 }
