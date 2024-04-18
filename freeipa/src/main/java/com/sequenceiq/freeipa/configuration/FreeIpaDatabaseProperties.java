@@ -19,7 +19,7 @@ public class FreeIpaDatabaseProperties implements DatabaseProperties {
     @Value("${freeipa.db.env.db:}")
     private String dbName;
 
-    @Value("${freeipa.db.env.poolsize:30}")
+    @Value("${freeipa.db.env.poolsize:60}")
     private int poolSize;
 
     @Value("${freeipa.db.env.connectiontimeout:30}")
