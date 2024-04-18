@@ -14,7 +14,6 @@ services:
       - ./:/it
       - ./dumps:/it/dumps
       - ./testuser_home:/home/jboss
-      - /etc/localtime:/etc/localtime:ro
     command: java -XX:OnOutOfMemoryError="kill -9 %p" -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/it/dumps -jar /it/build/libs/cloudbreak-integration-test.jar com.sequenceiq.it.IntegrationTestApp --integrationtest.command=suiteurls --integrationtest.suiteFiles=${INTEGRATIONTEST_SUITEFILES} | tee cbtest.log
     environment:
       - INTEGRATIONTEST_USER_ACCESSKEY

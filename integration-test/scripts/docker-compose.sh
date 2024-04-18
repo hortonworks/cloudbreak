@@ -4,6 +4,15 @@ export DEBUG=1
 
 set -ex
 
+
+export INTEGRATIONTEST_SUITE_FILES=file:/it/src/main/resources/testsuites/v4/mock/all-in-mock-package.yaml
+export AWS=false
+export INTEGRATIONTEST_UMS_HOST=thunderhead-mock
+export INTEGRATIONTEST_UMS_PORT=8982
+export INTEGRATIONTEST_AUTHDISTRIBUTOR_HOST=thunderhead-mock
+export INTEGRATIONTEST_THREADCOUNT=4
+
+
 : ${INTEGRATIONTEST_SUITEFILES:=${INTEGRATIONTEST_SUITE_FILES}${ADDITIONAL_SUITEFILES+,$ADDITIONAL_SUITEFILES}}
 : ${INTEGRATIONTEST_TESTSUITE_POLLINGINTERVAL:=1000}
 : ${INTEGCB_LOCATION?"integcb location"}
@@ -103,14 +112,15 @@ fi
 
 cd ..
 
-if [[ "$DOCKER_HOST" ]]; then
-    PUBLIC_IP=`echo $DOCKER_HOST | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'`
-fi
-if [[ "$PUBLIC_IP" ]]; then
-    PUBLIC_IP=$PUBLIC_IP
-else
-    PUBLIC_IP=127.0.0.1
-fi
+#if [[ "$DOCKER_HOST" ]]; then
+#    PUBLIC_IP=`echo $DOCKER_HOST | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'`
+#fi
+#if [[ "$PUBLIC_IP" ]]; then
+#    PUBLIC_IP=$PUBLIC_IP
+#else
+#    PUBLIC_IP=127.0.0.1
+#fi
+PUBLIC_IP=127.0.0.1
 
 mkdir -p ./apidefinitions
 curl -k http://${PUBLIC_IP}:8080/cb/api/openapi.json -o ./apidefinitions/cloudbreak.json

@@ -24,12 +24,12 @@ jobs:
     runs-on: [cb-ubuntu22]
 
     steps:
-      - name: Checkout
+      - name: checkout
         id: checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Setup secrets
+      - name: setup_secrets
         id: build_secrets
         uses: Kitchen/RE-thirdparty-actions/actions/vault@main
         with:
@@ -40,14 +40,13 @@ jobs:
           role: cb
           secrets: |
             cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
-      - name: Update Jira ticket
+      - name: update_jira_ticket
         run: |-
-          #!/bin/bash -x
           export JIRA_TOKEN=$(echo "${{ steps.build_secrets.outputs.JIRA_TOKEN }}")
           export PULL_REQUEST_NUMBER=$PULL_REQUEST_NUMBER
           export BRANCH=$SOURCE_BRANCH
           export PROJECT=$PROJECT
-          ./scripts/jira.sh
+          make jira-update-steps_update_jira_ticket
 
   unit-test:
     permissions: write-all
@@ -55,12 +54,12 @@ jobs:
     runs-on: [cb-ubuntu22]
 
     steps:
-      - name: Checkout
+      - name: checkout
         id: checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Setup secrets
+      - name: setup_secrets
         id: build_secrets
         uses: Kitchen/RE-thirdparty-actions/actions/vault@main
         with:
@@ -76,7 +75,7 @@ jobs:
               cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
               cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
               cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
-      - name: Cache Java libs
+      - name: cache_java_libs
         id: cache-java
         uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
         env:
@@ -91,26 +90,17 @@ jobs:
             ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
             ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
       - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
-        name: List the state of java libs
+        name: list_the_state_of_java_libs
         continue-on-error: true
         run: ./gradlew dependencies
-      - name: Gradle build
+      - name: gradle_build
         run: |-
-          #!/bin/bash -x
           export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
           export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
           export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
-          ./gradlew -q javaToolchains
-          ./gradlew -Penv=jenkins -b build.gradle --quiet \
-            test \
-            jacocoTestReport \
-            -x checkstyleMain \
-            -x checkstyleTest \
-            -x spotbugsMain \
-            -x spotbugsTest \
-            --no-daemon --parallel -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
-      - name: Add Test Report
+          make unit-test-steps_gradle_build
+      - name: add_test_report
         if: success() || failure()
         id: test-report
         env:
@@ -124,7 +114,7 @@ jobs:
           list-tests: 'failed'
           fail-on-error: 'true'
           only-summary: 'true'
-      - name: Add coverage to PR
+      - name: add_coverage_to_pr
         id: jacoco
         uses: cloudbreak/cloudbreak-github-actions/actions/jacoco-report@master
         with:
@@ -151,19 +141,18 @@ jobs:
           min-coverage-changed-files: 55
           title: Cloudbreak code coverage report
           update-comment: true
-
   checkstyle-main:
     permissions: write-all
     name: Checkstyle Main
     runs-on: [cb-ubuntu22]
 
     steps:
-      - name: Checkout
+      - name: checkout
         id: checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Setup secrets
+      - name: setup_secrets
         id: build_secrets
         uses: Kitchen/RE-thirdparty-actions/actions/vault@main
         with:
@@ -177,7 +166,7 @@ jobs:
               cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
               cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
               cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
-      - name: Cache Java libs
+      - name: cache_java_libs
         id: cache-java
         uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
         env:
@@ -192,37 +181,35 @@ jobs:
             ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
             ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
       - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
-        name: List the state of java libs
+        name: list_the_state_of_java_libs
         continue-on-error: true
         run: ./gradlew dependencies
-      - name: Gradle build
+      - name: gradle_build
         run: |-
-          #!/bin/bash -x
           export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
           export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
           export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
-          ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleTest -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
+          make checkstyle-main-steps_gradle_build
       - uses: cloudbreak/cloudbreak-github-actions/actions/checkstyle-github-action@master
         if: success() || failure()
-        name: Checkstyle Main Report
+        name: checkstyle_main_report
         with:
           name: Checkstyle Main Report
           title: Checkstyle Main Report
           path: '**/checkstyle/main.xml'
-
   checkstyle-test:
     permissions: write-all
     name: Checkstyle Test
     runs-on: [cb-ubuntu22]
 
     steps:
-      - name: Checkout
+      - name: checkout
         id: checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Setup secrets
+      - name: setup_secrets
         id: build_secrets
         uses: Kitchen/RE-thirdparty-actions/actions/vault@main
         with:
@@ -236,7 +223,7 @@ jobs:
               cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
               cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
               cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
-      - name: Cache Java libs
+      - name: cache_java_libs
         id: cache-java
         uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
         env:
@@ -251,37 +238,35 @@ jobs:
             ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
             ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
       - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
-        name: List the state of java libs
+        name: list_the_state_of_java_libs
         continue-on-error: true
         run: ./gradlew dependencies
-      - name: Gradle build
+      - name: gradle_build
         run: |-
-          #!/bin/bash -x
           export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
           export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
           export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
-          ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleMain -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
+          make checkstyle-test-steps_gradle_build
       - uses: cloudbreak/cloudbreak-github-actions/actions/checkstyle-github-action@master
         if: success() || failure()
-        name: Checkstyle Test Report
+        name: checkstyle_test_report
         with:
           name: Checkstyle Test Report
           title: Checkstyle Test Report
           path: '**/checkstyle/test.xml'
-
   spotbugs-test:
     permissions: write-all
     name: Spotbugs Test
     runs-on: [cb-ubuntu22]
 
     steps:
-      - name: Checkout
+      - name: checkout
         id: checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Setup secrets
+      - name: setup_secrets
         id: build_secrets
         uses: Kitchen/RE-thirdparty-actions/actions/vault@main
         with:
@@ -295,7 +280,7 @@ jobs:
               cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
               cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
               cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
-      - name: Cache Java libs
+      - name: cache_java_libs
         id: cache-java
         uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
         env:
@@ -310,37 +295,35 @@ jobs:
             ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
             ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
       - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
-        name: List the state of java libs
+        name: list_the_state_of_java_libs
         continue-on-error: true
         run: ./gradlew dependencies
-      - name: Gradle build
+      - name: gradle_build
         run: |-
-          #!/bin/bash -x
           export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
           export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
           export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
-          ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x checkstyleTest -x checkstyleMain -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
+          make spotbugs-test-steps_gradle_build
       - uses: cloudbreak/cloudbreak-github-actions/actions/spotbugs-github-action@master
         if: success() || failure()
-        name: SpotBugs Test Report
+        name: spotbugs_test_report
         with:
           name: SpotBugs Test Report
           title: SpotBugs Test Report
           path: '**/spotbugsXml.xml'
-
   spotbugs-main:
     permissions: write-all
     name: Spotbugs Main
     runs-on: [cb-ubuntu22]
 
     steps:
-      - name: Checkout
+      - name: checkout
         id: checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Setup secrets
+      - name: setup_secrets
         id: build_secrets
         uses: Kitchen/RE-thirdparty-actions/actions/vault@main
         with:
@@ -354,7 +337,7 @@ jobs:
               cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
               cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
               cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
-      - name: Cache Java libs
+      - name: cache_java_libs
         id: cache-java
         uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
         env:
@@ -369,25 +352,23 @@ jobs:
             ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
             ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
       - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
-        name: List the state of java libs
+        name: list_the_state_of_java_libs
         continue-on-error: true
         run: ./gradlew dependencies
-      - name: Gradle build
+      - name: gradle_build
         run: |-
-          #!/bin/bash -x
           export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
           export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
           export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
           export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
-          ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsTest -x checkstyleTest -x checkstyleMain -x test --no-daemon -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=256m -XX:+HeapDumpOnOutOfMemoryError"
+          make spotbugs-main-steps_gradle_build
       - uses: cloudbreak/cloudbreak-github-actions/actions/spotbugs-github-action@master
         if: success() || failure()
-        name: SpotBugs Main Report
+        name: spotbugs_main_report
         with:
           name: SpotBugs Main Report
           title: SpotBugs Main Report
           path: '**/spotbugsXml.xml'
-
   auto-approve:
     permissions: write-all
     name: Auto Approve
@@ -398,3 +379,114 @@ jobs:
       - uses: cloudbreak/cloudbreak-github-actions/actions/auto-approve-action@master
         with:
           review-message: "Auto approved pull request."
+  swagger-compatiblity:
+    permissions: write-all
+    name: Swagger Compatibility
+    runs-on: [cb-ubuntu22]
+
+    steps:
+      - name: checkout
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: setup_secrets
+        id: build_secrets
+        uses: Kitchen/RE-thirdparty-actions/actions/vault@main
+        with:
+          tlsSkipVerify: true
+          url: https://re-vault.infra.cloudera.com/
+          method: kubernetes
+          path: rke_re_jenkins
+          role: cb
+          secrets: |
+            cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+            cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+            cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+            cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+      - name: cache_java_libs
+        id: cache-java
+        uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
+        env:
+          cache-name: cache-java-libs
+        with:
+          path: |
+            /home/jenkins/.gradle/caches
+            /home/jenkins/.gradle/wrapper
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
+      - name: install_tools
+        run: |-
+          #!/bin/bash -x
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make
+      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
+        name: list_the_state_of_java_libs
+        continue-on-error: true
+        run: ./gradlew dependencies
+      - name: openapi_compatibility_check
+        run: |-
+          export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
+          export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
+          export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
+          export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
+          make swagger-compatiblity-steps_openapi_compatibility_check
+  component-test:
+    permissions: write-all
+    name: Component Test
+    runs-on: [ cb-ubuntu22 ]
+
+    steps:
+      - name: checkout
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: setup_secrets
+        id: build_secrets
+        uses: Kitchen/RE-thirdparty-actions/actions/vault@main
+        with:
+          tlsSkipVerify: true
+          url: https://re-vault.infra.cloudera.com/
+          method: kubernetes
+          path: rke_re_jenkins
+          role: cb
+          secrets: |
+            cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+            cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+            cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+            cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+      - name: cache_java_libs
+        id: cache-java
+        uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
+        env:
+          cache-name: cache-java-libs
+        with:
+          path: |
+            /home/jenkins/.gradle/caches
+            /home/jenkins/.gradle/wrapper
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
+            ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
+      - name: install_tools
+        run: |-
+          #!/bin/bash -x
+          sudo apt-get update
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make docker-compose-v2 uuid-runtime
+          docker compose --version
+      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
+        name: list_the_state_of_java_libs
+        continue-on-error: true
+        run: ./gradlew dependencies
+      - name: component_test
+        run: |-
+          export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
+          export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
+          export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
+          export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
+          make component-test-steps_component_test

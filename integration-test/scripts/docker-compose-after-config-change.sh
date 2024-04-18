@@ -57,13 +57,12 @@ else
 fi
 
 date
-while read line; do
-    export $line
-done < integrationtest.properties
-
-date
 echo -e "\n\033[1;96m--- Env variables started with INTEGRATIONTEST :\033[0m\n"
 env | grep -i INTEGRATIONTEST
+date
+while read line; do
+  export $line
+done < integrationtest.properties
 
 date
 echo -e "\n\033[1;96m--- Tests to run:\033[0m\n"

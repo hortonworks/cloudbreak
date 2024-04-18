@@ -120,4 +120,4 @@ echo -e "\n\033[1;96m--- Build docker images\033[0m\n"
   docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-mock-infrastructure:dev ./integcb/docker-containers/docker-mock-infrastructure & \
   docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-mock-thunderhead:dev ./integcb/docker-containers/docker-mock-thunderhead & \
   docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-remote-environment:dev ./integcb/docker-containers/docker-environment-remote -f ./integcb/docker-containers/docker-environment-remote/$folder/Dockerfile $special_build_args & \
-  wait
+wait
