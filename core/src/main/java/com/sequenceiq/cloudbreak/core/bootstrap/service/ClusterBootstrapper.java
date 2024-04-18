@@ -231,7 +231,7 @@ public class ClusterBootstrapper {
 
     private void checkIfAnyInstanceIsNotInStartedState(StackDtoDelegate stack, CloudbreakOrchestratorFailedException e) throws CloudbreakException {
         List<InstanceGroupDto> instanceGroupDtos = stack.getInstanceGroupDtos();
-        List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(instanceGroupDtos, stack.getEnvironmentCrn(), stack.getStackAuthentication());
+        List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(instanceGroupDtos, stack.getStack());
         List<CloudVmInstanceStatus> instanceStatuses = stackInstanceStatusChecker.queryInstanceStatuses(stack, cloudInstances);
         List<CloudVmInstanceStatus> notStartedInstances = instanceStatuses.stream()
                 .filter(instance -> !InstanceStatus.STARTED.equals(instance.getStatus()))

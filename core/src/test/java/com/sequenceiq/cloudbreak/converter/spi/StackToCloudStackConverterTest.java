@@ -66,6 +66,7 @@ import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
@@ -81,6 +82,7 @@ import com.sequenceiq.cloudbreak.service.environment.marketplace.AzureMarketplac
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.TargetGroupPortProvider;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
@@ -91,6 +93,7 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.api.type.TargetGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
@@ -134,6 +137,8 @@ public class StackToCloudStackConverterTest {
     private static final String AVAILABILITY_ZONE = "availabilityZone";
 
     private static final String INSTANCE_NAME = "instanceName";
+
+    private static final String YARN_APPLICATION_NAME = "yarn-application";
 
     @InjectMocks
     private StackToCloudStackConverter underTest;
@@ -204,6 +209,9 @@ public class StackToCloudStackConverterTest {
     @Mock
     private UserDataService userDataService;
 
+    @Mock
+    private ResourceService resourceService;
+
     @BeforeEach
     public void setUp() {
         when(stack.getStackAuthentication()).thenReturn(stackAuthentication);
@@ -236,7 +244,6 @@ public class StackToCloudStackConverterTest {
     }
 
     @Test
-
     public void testConvertWhenThereIsAFileSystemInClusterThenExpectedSpiFileSystemShouldPlacedInCloudStack() {
         FileSystem fileSystem = new FileSystem();
         SpiFileSystem expected = mock(SpiFileSystem.class);
@@ -856,7 +863,7 @@ public class StackToCloudStackConverterTest {
         when(instanceMetaData.getInstanceName()).thenReturn(INSTANCE_NAME);
         when(instanceMetaData.getShortHostname()).thenReturn(DISCOVERY_NAME);
 
-        Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, instanceMetaData, CloudPlatform.AWS, null);
+        Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, stack, instanceMetaData, CloudPlatform.AWS, null);
 
         assertThat(result).hasSize(5);
         assertThat(result).doesNotContainKey(RESOURCE_GROUP_NAME_PARAMETER);
@@ -873,7 +880,7 @@ public class StackToCloudStackConverterTest {
         InstanceMetadataView instanceMetaData = mock(InstanceMetadataView.class);
         when(instanceMetaData.getId()).thenReturn(1L);
 
-        Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, instanceMetaData, CloudPlatform.AWS, null);
+        Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, stack, instanceMetaData, CloudPlatform.AWS, null);
 
         assertEquals(1, result.size());
         assertThat(result.get(CloudInstance.ID)).isEqualTo(1L);
@@ -881,7 +888,7 @@ public class StackToCloudStackConverterTest {
 
     @Test
     public void testBuildCloudInstanceParametersAWSWithNullInstanceMetaData() {
-        Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, null, CloudPlatform.AWS, null);
+        Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, stack, null, CloudPlatform.AWS, null);
 
         assertThat(result).isEmpty();
     }
@@ -904,7 +911,7 @@ public class StackToCloudStackConverterTest {
                 .build());
         Template template = new Template();
 
-        Map<String, Object> result = underTest.buildCloudInstanceParameters(environmentResponse, instanceMetaData, CloudPlatform.AZURE, template);
+        Map<String, Object> result = underTest.buildCloudInstanceParameters(environmentResponse, stack, instanceMetaData, CloudPlatform.AZURE, template);
 
         assertEquals(RESOURCE_GROUP, result.get(RESOURCE_GROUP_NAME_PARAMETER).toString());
         assertEquals(ResourceGroupUsage.SINGLE.name(), result.get(RESOURCE_GROUP_USAGE_PARAMETER).toString());
@@ -934,7 +941,7 @@ public class StackToCloudStackConverterTest {
         Template template = new Template();
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
 
-        Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, instanceMetaData, CloudPlatform.AZURE, template);
+        Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, stack, instanceMetaData, CloudPlatform.AZURE, template);
 
         assertFalse(result.containsKey(RESOURCE_GROUP_NAME_PARAMETER));
         assertFalse(result.containsKey(RESOURCE_GROUP_USAGE_PARAMETER));
@@ -945,6 +952,32 @@ public class StackToCloudStackConverterTest {
         assertThat(result.get(CloudInstance.DISCOVERY_NAME)).isEqualTo(DISCOVERY_NAME);
         assertThat(result.get(NetworkConstants.SUBNET_ID)).isEqualTo(SUBNET_ID);
         assertThat(result.get(CloudInstance.INSTANCE_NAME)).isEqualTo(INSTANCE_NAME);
+    }
+
+    @Test
+    void buildCloudInstanceParametersYarn() {
+        InstanceMetadataView instanceMetaData = spy(InstanceMetadataView.class);
+        when(instanceMetaData.getId()).thenReturn(1L);
+        when(instanceMetaData.getDiscoveryFQDN()).thenReturn(DISCOVERY_FQDN);
+        when(instanceMetaData.getSubnetId()).thenReturn(SUBNET_ID);
+        when(instanceMetaData.getInstanceName()).thenReturn(INSTANCE_NAME);
+
+        Resource yarnApplication = new Resource();
+        yarnApplication.setResourceName(YARN_APPLICATION_NAME);
+        when(resourceService.findByStackIdAndType(stack.getId(), ResourceType.YARN_APPLICATION)).thenReturn(List.of(yarnApplication));
+
+        Map<String, Object> result = underTest.buildCloudInstanceParameters(environment, stack, instanceMetaData, CloudPlatform.YARN, new Template());
+
+        assertFalse(result.containsKey(RESOURCE_GROUP_NAME_PARAMETER));
+        assertFalse(result.containsKey(RESOURCE_GROUP_USAGE_PARAMETER));
+
+        assertEquals(6, result.size());
+        assertThat(result.get(CloudInstance.ID)).isEqualTo(1L);
+        assertThat(result.get(CloudInstance.FQDN)).isEqualTo(DISCOVERY_FQDN);
+        assertThat(result.get(CloudInstance.DISCOVERY_NAME)).isEqualTo(DISCOVERY_NAME);
+        assertThat(result.get(NetworkConstants.SUBNET_ID)).isEqualTo(SUBNET_ID);
+        assertThat(result.get(CloudInstance.INSTANCE_NAME)).isEqualTo(INSTANCE_NAME);
+        assertThat(result.get(CloudInstance.APPLICATION_NAME)).isEqualTo(YARN_APPLICATION_NAME);
     }
 
     @ParameterizedTest
@@ -1249,7 +1282,7 @@ public class StackToCloudStackConverterTest {
         when(stack.getCloudPlatform()).thenReturn("AWS");
         when(instanceMetadataToImageIdConverter.convert(instanceMetaData)).thenReturn("image-12");
 
-        CloudInstance cloudInstance = underTest.buildInstance(instanceMetaData, instanceGroup, new StackAuthentication(), 12L, InstanceStatus.CREATED,
+        CloudInstance cloudInstance = underTest.buildInstance(instanceMetaData, instanceGroup, stack, 12L, InstanceStatus.CREATED,
                 new DetailedEnvironmentResponse());
 
         verifyCloudInstanceWhenInstanceMetaDataPresent(cloudInstance, subnetId, availabilityZone);

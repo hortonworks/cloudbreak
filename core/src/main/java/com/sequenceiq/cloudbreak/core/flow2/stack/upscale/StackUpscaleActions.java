@@ -63,7 +63,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolver
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.multiaz.DataLakeAwareInstanceMetadataAvailabilityZoneCalculator;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
@@ -78,7 +77,6 @@ import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
@@ -112,9 +110,6 @@ public class StackUpscaleActions {
 
     @Inject
     private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
-
-    @Inject
-    private EnvironmentClientService environmentClientService;
 
     @Inject
     private StackUpgradeService stackUpgradeService;
@@ -328,9 +323,7 @@ public class StackUpscaleActions {
                             .filter(ig -> ig.getGroupName().equals(gatewayMetaData.getInstanceGroupName()))
                             .findFirst()
                             .orElseThrow(NotFoundException.notFound("Cannot found InstanceGroup for Gateway instance metadata"));
-                    DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(stack.getEnvironmentCrn());
-                    CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData, instanceGroup, environment,
-                            stack.getStackAuthentication());
+                    CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData, instanceGroup, stack);
                     LOGGER.info("Send GetSSHFingerprintsRequest because we need to collect SSH fingerprints");
                     Selectable sshFingerPrintReq = new GetSSHFingerprintsRequest<GetSSHFingerprintsResult>(context.getCloudContext(),
                             context.getCloudCredential(), gatewayInstance);

@@ -48,11 +48,9 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.service.OperationException;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 @Component
@@ -82,9 +80,6 @@ public class ServiceProviderConnectorAdapter {
     private CredentialClientService credentialClientService;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
-
-    @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
@@ -111,10 +106,9 @@ public class ServiceProviderConnectorAdapter {
                 .collect(Collectors.toList());
         List<CloudInstance> instances = new ArrayList<>();
         InstanceGroupDto group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
-        DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(stack.getEnvironmentCrn());
         for (InstanceMetadataView metaData : group.getInstanceMetadataViews()) {
             if (instanceIds.contains(metaData.getInstanceId())) {
-                CloudInstance cloudInstance = metadataConverter.convert(metaData, group.getInstanceGroup(), environment, stack.getStackAuthentication());
+                CloudInstance cloudInstance = metadataConverter.convert(metaData, group.getInstanceGroup(), stack.getStack());
                 instances.add(cloudInstance);
             }
         }

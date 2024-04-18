@@ -75,8 +75,7 @@ public class StackStopActions {
             @Override
             protected Selectable createRequest(StackStartStopContext context) {
                 StackDtoDelegate stack = context.getStack();
-                List<CloudInstance> cloudInstances = instanceMetaDataToCloudInstanceConverter.convert(context.getInstanceGroupDtos(),
-                        stack.getEnvironmentCrn(), stack.getStackAuthentication());
+                List<CloudInstance> cloudInstances = instanceMetaDataToCloudInstanceConverter.convert(context.getInstanceGroupDtos(), stack.getStack());
                 List<CloudResource> cloudResources = resourceService.getAllByStackId(stack.getId()).stream()
                         .map(s -> resourceToCloudResourceConverter.convert(s))
                         .collect(Collectors.toList());

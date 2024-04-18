@@ -80,8 +80,7 @@ public class StackStartActions {
                 StackDto stackDto = context.getStack();
                 StackView stack = stackDto.getStack();
                 LOGGER.debug("Assembling start request for stack: {}", stack.getId());
-                List<CloudInstance> cloudInstances = instanceMetaDataToCloudInstanceConverter.convert(stackDto.getInstanceGroupDtos(),
-                        stack.getEnvironmentCrn(), stack.getStackAuthentication());
+                List<CloudInstance> cloudInstances = instanceMetaDataToCloudInstanceConverter.convert(stackDto.getInstanceGroupDtos(), stack);
                 List<CloudResource> resources = resourceService.getAllByStackId(stack.getId()).stream()
                         .map(s -> resourceToCloudResourceConverter.convert(s))
                         .collect(Collectors.toList());

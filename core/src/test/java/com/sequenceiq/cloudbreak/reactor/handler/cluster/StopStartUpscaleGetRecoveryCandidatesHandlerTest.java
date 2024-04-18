@@ -231,7 +231,7 @@ class StopStartUpscaleGetRecoveryCandidatesHandlerTest {
         lenient().doReturn(recoveryCandidates).when(recoveryCandidateCollectionService).getStartedInstancesWithServicesNotRunning(any(StackDto.class),
                 anyString(), anySet(), anyBoolean());
         lenient().doReturn(generateCloudInstances(unhealthyCount))
-                .when(instanceMetaDataToCloudInstanceConverter).convert(anyList(), any(StackView.class));
+                .when(instanceMetaDataToCloudInstanceConverter).convert(recoveryCandidates, stackView);
     }
 
     private void makeBasicAssertions(Event resultEvent, StopStartUpscaleGetRecoveryCandidatesResult result,

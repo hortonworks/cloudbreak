@@ -70,7 +70,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVol
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataSuccess;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.multiaz.DataLakeAwareInstanceMetadataAvailabilityZoneCalculator;
@@ -82,7 +81,6 @@ import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.LoadBalancerType;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.core.PayloadConverter;
 
 @Configuration
@@ -105,9 +103,6 @@ public class StackCreationActions {
 
     @Inject
     private LoadBalancerPersistenceService loadBalancerPersistenceService;
-
-    @Inject
-    private EnvironmentClientService environmentClientService;
 
     @Inject
     private ResourceService resourceService;
@@ -370,8 +365,7 @@ public class StackCreationActions {
                 StackDto stack = stackDtoService.getById(context.getStackId());
                 InstanceMetadataView gatewayMetaData = stack.getPrimaryGatewayInstance();
                 InstanceGroupView instanceGroup = stack.getInstanceGroupByInstanceGroupName(gatewayMetaData.getInstanceGroupName()).getInstanceGroup();
-                DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(stack.getEnvironmentCrn());
-                CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData, instanceGroup, environment, stack.getStackAuthentication());
+                CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData, instanceGroup, stack.getStack());
                 return new GetSSHFingerprintsRequest<GetSSHFingerprintsResult>(context.getCloudContext(), context.getCloudCredential(), gatewayInstance);
             }
         };

@@ -28,6 +28,8 @@ public class CloudInstance extends DynamicModel {
 
     public static final String DISCOVERY_NAME = "DiscoveryName";
 
+    public static final String APPLICATION_NAME = "ApplicationName";
+
     public static final String FQDN = "FQDN";
 
     public static final String ID = "ID";
