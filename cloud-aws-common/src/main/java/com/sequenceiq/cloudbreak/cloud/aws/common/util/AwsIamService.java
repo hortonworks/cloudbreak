@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -27,9 +28,12 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsAccessConfigType;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.model.CloudIdentityType;
 
+import software.amazon.awssdk.arns.Arn;
+import software.amazon.awssdk.arns.ArnResource;
 import software.amazon.awssdk.core.auth.policy.Action;
 import software.amazon.awssdk.core.auth.policy.Policy;
 import software.amazon.awssdk.core.auth.policy.Resource;
@@ -57,27 +61,58 @@ public class AwsIamService {
      *
      * @param iam                     AmazonIdentityManagement client
      * @param instanceProfileArn      instance profile ARN
+     * @param cloudIdentityType       type of the cloud identity that {@code instanceProfileArn} is associated with
      * @param validationResultBuilder builder for any errors encountered
      * @return InstanceProfile if instance profile ARN is valid otherwise null
      */
     public InstanceProfile getInstanceProfile(AmazonIdentityManagementClient iam, String instanceProfileArn,
             CloudIdentityType cloudIdentityType, ValidationResultBuilder validationResultBuilder) {
+        return getInstanceProfileInternal(iam, instanceProfileArn, cloudIdentityType, validationResultBuilder);
+    }
+
+    private InstanceProfile getInstanceProfileInternal(AmazonIdentityManagementClient iam, String instanceProfileArn,
+            CloudIdentityType cloudIdentityType, ValidationResultBuilder validationResultBuilder) {
         InstanceProfile instanceProfile = null;
-        if (instanceProfileArn != null && instanceProfileArn.contains("/")) {
-            String instanceProfileName = instanceProfileArn.split("/", 2)[1];
+        if (isResourceArnValid(instanceProfileArn)) {
+            String instanceProfileName = getResourceName(instanceProfileArn);
             GetInstanceProfileRequest instanceProfileRequest = GetInstanceProfileRequest.builder()
                     .instanceProfileName(instanceProfileName)
                     .build();
             try {
                 instanceProfile = iam.getInstanceProfile(instanceProfileRequest).instanceProfile();
             } catch (NoSuchEntityException | ServiceFailureException e) {
-                String msg = String.format("Instance profile (%s) doesn't exists on AWS side. %s",
-                        instanceProfileArn, getAdviceMessage(AwsAccessConfigType.INSTANCE_PROFILE, cloudIdentityType));
-                LOGGER.error(msg, e);
-                validationResultBuilder.error(msg);
+                if (validationResultBuilder != null) {
+                    String msg = String.format("Instance profile (%s) doesn't exists on AWS side. %s",
+                            instanceProfileArn, getAdviceMessage(AwsAccessConfigType.INSTANCE_PROFILE, cloudIdentityType));
+                    LOGGER.error(msg, e);
+                    validationResultBuilder.error(msg);
+                } else {
+                    LOGGER.error(String.format("Unable to look up EC2 Instance Profile of ARN='%s'", instanceProfileArn), e);
+                }
             }
         }
         return instanceProfile;
+    }
+
+    private boolean isResourceArnValid(String instanceProfileOrRoleArn) {
+        return instanceProfileOrRoleArn != null && instanceProfileOrRoleArn.contains("/");
+    }
+
+    private String getResourceName(String instanceProfileOrRoleArn) {
+        return instanceProfileOrRoleArn.split("/", 2)[1];
+    }
+
+    /**
+     * Validates instance profile ARN and returns an InstanceProfile object if valid. Contrary to
+     * {@link #getInstanceProfile(AmazonIdentityManagementClient, String, CloudIdentityType, ValidationResultBuilder)}, this method does not return any
+     * validation / error message in {@link ValidationResultBuilder}.
+     *
+     * @param iam                     AmazonIdentityManagement client
+     * @param instanceProfileArn      instance profile ARN
+     * @return InstanceProfile if instance profile ARN is valid otherwise null
+     */
+    public InstanceProfile getInstanceProfileNoValidationResult(AmazonIdentityManagementClient iam, String instanceProfileArn) {
+        return getInstanceProfileInternal(iam, instanceProfileArn, null, null);
     }
 
     /**
@@ -97,7 +132,7 @@ public class AwsIamService {
     }
 
     /**
-     * Validates role ARN and returns an Role object if valid
+     * Validates role ARN and returns a Role object if valid
      *
      * @param iam                     AmazonIdentityManagement client
      * @param roleArn                 role ARN
@@ -107,14 +142,16 @@ public class AwsIamService {
     public Role getRole(AmazonIdentityManagementClient iam, String roleArn,
             ValidationResultBuilder validationResultBuilder) {
         Role role = null;
-        if (roleArn != null && roleArn.contains("/")) {
-            String roleName = roleArn.split("/", 2)[1];
-            GetRoleRequest roleRequest = GetRoleRequest.builder().roleName(roleName).build();
+        if (isResourceArnValid(roleArn)) {
+            String roleName = getResourceName(roleArn);
+            GetRoleRequest roleRequest = GetRoleRequest.builder()
+                    .roleName(roleName)
+                    .build();
             try {
                 role = iam.getRole(roleRequest).role();
             } catch (NoSuchEntityException | ServiceFailureException e) {
                 String msg = String.format("Role (%s) doesn't exists on AWS side. %s", roleArn, getAdviceMessage(AwsAccessConfigType.ROLE, ID_BROKER));
-                LOGGER.debug(msg, e);
+                LOGGER.error(msg, e);
                 validationResultBuilder.error(msg);
             }
         }
@@ -176,7 +213,7 @@ public class AwsIamService {
                 policy = Policy.fromJson(policyJson);
             }
         } catch (IOException e) {
-            LOGGER.debug("Unable to load policy json", e);
+            LOGGER.warn("Unable to load policy json", e);
         }
 
         return policy;
@@ -313,4 +350,47 @@ public class AwsIamService {
         }
         return IOUtils.toString(is, StandardCharsets.UTF_8);
     }
+
+    public String getAccountRootArn(String iamResourceArn) {
+        return Arn.fromString(iamResourceArn).toBuilder()
+                .resource("root")
+                .build()
+                .toString();
+    }
+
+    public boolean isInstanceProfileArn(String iamResourceArn) {
+        ArnResource arnResource = Arn.fromString(iamResourceArn).resource();
+        return arnResource.resourceType()
+                .map("instance-profile"::equals)
+                .orElse(false);
+    }
+
+    public String getInstanceProfileRoleArn(InstanceProfile instanceProfile) {
+        if (!instanceProfile.hasRoles()) {
+            throw new CloudConnectorException(String.format("No IAM role is associated with EC2 Instance Profile of ARN='%s'", instanceProfile.arn()));
+        }
+        return instanceProfile.roles().getFirst().arn();
+    }
+
+    public String getEffectivePrincipal(AmazonIdentityManagementClient iam, String iamPrincipalArn) {
+        String effectivePrincipal;
+        if (isInstanceProfileArn(iamPrincipalArn)) {
+            InstanceProfile instanceProfile = getInstanceProfileNoValidationResult(iam, iamPrincipalArn);
+            effectivePrincipal = Optional.ofNullable(instanceProfile)
+                    .map(this::getInstanceProfileRoleArn)
+                    .orElseThrow(() -> new CloudConnectorException(String.format("Unable to look up EC2 Instance Profile of ARN='%s'", iamPrincipalArn)));
+            LOGGER.info("Mapping target EC2 Instance Profile of ARN='{}' to effective IAM role '{}'.", iamPrincipalArn, effectivePrincipal);
+        } else {
+            effectivePrincipal = iamPrincipalArn;
+            LOGGER.info("Target principal ARN '{}' is not an EC2 Instance Profile. Leaving it untouched.", iamPrincipalArn);
+        }
+        return effectivePrincipal;
+    }
+
+    public List<String> getEffectivePrincipals(AmazonIdentityManagementClient iam, List<String> iamPrincipalArns) {
+        return iamPrincipalArns.stream()
+                .map(p -> getEffectivePrincipal(iam, p))
+                .toList();
+    }
+
 }

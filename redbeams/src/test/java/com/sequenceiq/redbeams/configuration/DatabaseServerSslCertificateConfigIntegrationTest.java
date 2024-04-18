@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResourcesTestSupport;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsSubnetIgwExplorer;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.kms.AmazonKmsUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -344,6 +345,9 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
 
         @MockBean
         private EntitlementService entitlementService;
+
+        @MockBean
+        private AmazonKmsUtil amazonKmsUtil;
 
     }
 

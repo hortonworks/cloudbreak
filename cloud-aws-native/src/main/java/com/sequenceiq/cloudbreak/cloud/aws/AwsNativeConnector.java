@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.ValidatorType;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsAuthenticator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsCredentialConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsEncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsIdentityService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsNoSqlConnector;
@@ -106,6 +107,9 @@ public class AwsNativeConnector implements CloudConnector {
     @Inject
     private AwsSecretsManagerConnector awsSecretsManagerConnector;
 
+    @Inject
+    private AwsEncryptionResources awsEncryptionResources;
+
     @Override
     public Authenticator authentication() {
         return awsAuthenticator;
@@ -166,7 +170,7 @@ public class AwsNativeConnector implements CloudConnector {
 
     @Override
     public EncryptionResources encryptionResources() {
-        return null;
+        return awsEncryptionResources;
     }
 
     @Override

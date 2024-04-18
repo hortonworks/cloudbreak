@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
+import static java.util.Map.entry;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,7 +14,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -36,6 +39,7 @@ import software.amazon.awssdk.services.ec2.model.EbsInstanceBlockDevice;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.InstanceBlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.Reservation;
+import software.amazon.awssdk.services.kms.model.Tag;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsTaggingServiceTest {
@@ -208,4 +212,17 @@ public class AwsTaggingServiceTest {
         CloudCredential cloudCredential = new CloudCredential("crn", "credentialname", "account");
         return new AuthenticatedContext(context, cloudCredential);
     }
+
+    @Test
+    void prepareKmsTagsTest() {
+        Map<String, String> userDefinedTags = Map.ofEntries(entry("key1", "value1"), entry("key2", "value2"));
+
+        Collection<Tag> resultTags = awsTaggingService.prepareKmsTags(userDefinedTags);
+        Assertions.assertThat(resultTags).isNotNull();
+        Assertions.assertThat(resultTags).hasSize(2);
+        Map<String, String> resultTagsMap = resultTags.stream()
+                .collect(Collectors.toMap(Tag::tagKey, Tag::tagValue));
+        Assertions.assertThat(resultTagsMap).isEqualTo(userDefinedTags);
+    }
+
 }

@@ -44,6 +44,12 @@ public class AwsTaggingService {
                 .collect(Collectors.toList());
     }
 
+    public Collection<software.amazon.awssdk.services.kms.model.Tag> prepareKmsTags(Map<String, String> userDefinedTags) {
+        return userDefinedTags.entrySet().stream()
+                .map(entry -> prepareKmsTag(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+    }
+
     public Collection<software.amazon.awssdk.services.cloudwatch.model.Tag> prepareCloudWatchTags(Map<String, String> userDefinedTags) {
         return userDefinedTags.entrySet().stream()
                 .map(entry -> prepareCloudWatchTag(entry.getKey(), entry.getValue()))
@@ -116,6 +122,13 @@ public class AwsTaggingService {
 
     private software.amazon.awssdk.services.ec2.model.Tag prepareEc2Tag(String key, String value) {
         return software.amazon.awssdk.services.ec2.model.Tag.builder().key(key).value(value).build();
+    }
+
+    private software.amazon.awssdk.services.kms.model.Tag prepareKmsTag(String key, String value) {
+        return software.amazon.awssdk.services.kms.model.Tag.builder()
+                .tagKey(key)
+                .tagValue(value)
+                .build();
     }
 
     private software.amazon.awssdk.services.cloudwatch.model.Tag prepareCloudWatchTag(String key, String value) {

@@ -34,9 +34,15 @@ public class CloudResourceHelper {
     }
 
     public Optional<CloudResource> getResourceTypeFromList(ResourceType type, List<CloudResource> resources) {
+        return getResourceTypeInstancesFromList(type, resources)
+                .stream()
+                .findFirst();
+    }
+
+    public List<CloudResource> getResourceTypeInstancesFromList(ResourceType type, List<CloudResource> resources) {
         return resources.stream()
                 .filter(resource -> resource.getType() == type)
-                .findFirst();
+                .toList();
     }
 
     public void updateDeleteOnTerminationFlag(List<CloudResource> reattachableVolumeSets, boolean deleteOnTermination, CloudContext cloudContext) {

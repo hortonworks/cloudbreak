@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonKmsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.kms.AmazonKmsUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -149,14 +150,10 @@ import software.amazon.awssdk.services.iam.model.ListRolesRequest;
 import software.amazon.awssdk.services.iam.model.ListRolesResponse;
 import software.amazon.awssdk.services.iam.model.Role;
 import software.amazon.awssdk.services.kms.model.AliasListEntry;
-import software.amazon.awssdk.services.kms.model.DescribeKeyRequest;
-import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
 import software.amazon.awssdk.services.kms.model.KeyListEntry;
 import software.amazon.awssdk.services.kms.model.KeyMetadata;
 import software.amazon.awssdk.services.kms.model.ListAliasesRequest;
 import software.amazon.awssdk.services.kms.model.ListAliasesResponse;
-import software.amazon.awssdk.services.kms.model.ListKeysRequest;
-import software.amazon.awssdk.services.kms.model.ListKeysResponse;
 import software.amazon.awssdk.services.rds.model.Certificate;
 import software.amazon.awssdk.services.rds.model.DescribeCertificatesRequest;
 
@@ -216,6 +213,9 @@ public class AwsPlatformResources implements PlatformResources {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private AmazonKmsUtil amazonKmsUtil;
 
     @Value("${cb.aws.vm.parameter.definition.path:}")
     private String awsVmParameterDefinitionPath;
@@ -861,33 +861,23 @@ public class AwsPlatformResources implements PlatformResources {
         AmazonKmsClient client = awsClient.createAWSKMS(awsCredentialView, region.value());
 
         try {
-            List<KeyListEntry> listKeyResult = getListKeyResult(client);
+            List<KeyListEntry> listKeysResult = amazonKmsUtil.listKeysWithAllPages(client);
             List<AliasListEntry> listAliasesResult = getListAliasResult(client);
             for (AliasListEntry aliasListEntry : listAliasesResult) {
                 String targetKeyId = aliasListEntry.targetKeyId();
                 try {
-                    listKeyResult.stream()
+                    listKeysResult.stream()
                             .filter(item -> item.keyId().equals(targetKeyId)).findFirst()
                             .ifPresent(item -> {
-                                DescribeKeyRequest describeKeyRequest = DescribeKeyRequest.builder().keyId(item.keyId()).build();
-                                DescribeKeyResponse describeKeyResponse = client.describeKey(describeKeyRequest);
-                                KeyMetadata keyMetaData = describeKeyResponse.keyMetadata();
-                                Map<String, Object> meta = new HashMap<>();
-                                meta.put("awsAccountId", keyMetaData.awsAccountId());
-                                meta.put("creationDate", keyMetaData.creationDate());
-                                meta.put("enabled", keyMetaData.enabled());
-                                meta.put("expirationModel", keyMetaData.expirationModel());
-                                meta.put("keyManager", keyMetaData.keyManager());
-                                meta.put("keyState", keyMetaData.keyState());
-                                meta.put("keyUsage", keyMetaData.keyUsage());
-                                meta.put("origin", keyMetaData.origin());
-                                meta.put("validTo", keyMetaData.validTo());
+                                String keyId = item.keyId();
+                                KeyMetadata keyMetadata = amazonKmsUtil.getKeyMetadataByKeyId(client, keyId);
+                                Map<String, Object> meta = amazonKmsUtil.extractKeyMetadataMap(keyMetadata);
 
-                                if (keyMetaData.keyManager() == null || !CloudConstants.AWS.equalsIgnoreCase(keyMetaData.keyManager().name())) {
+                                if (keyMetadata.keyManager() == null || !CloudConstants.AWS.equalsIgnoreCase(keyMetadata.keyManager().name())) {
                                     CloudEncryptionKey key = new CloudEncryptionKey(
                                             item.keyArn(),
-                                            keyMetaData.keyId(),
-                                            keyMetaData.description(),
+                                            keyMetadata.keyId(),
+                                            keyMetadata.description(),
                                             aliasListEntry.aliasName().replace("alias/", ""),
                                             meta);
                                     cloudEncryptionKeys.getCloudEncryptionKeys().add(key);
@@ -919,18 +909,6 @@ public class AwsPlatformResources implements PlatformResources {
             throw new CloudConnectorException(queryFailedMessage + e.getMessage(), e);
         }
         return cloudEncryptionKeys;
-    }
-
-    private List<KeyListEntry> getListKeyResult(AmazonKmsClient client) {
-        String nextMarker = null;
-        List<KeyListEntry> kmsKeys = new ArrayList<>();
-        do {
-            ListKeysRequest listKeysRequest = ListKeysRequest.builder().marker(nextMarker).build();
-            ListKeysResponse listKeysResponse = client.listKeys(listKeysRequest);
-            kmsKeys.addAll(listKeysResponse.keys());
-            nextMarker = listKeysResponse.nextMarker();
-        } while (nextMarker != null);
-        return kmsKeys;
     }
 
     private List<AliasListEntry> getListAliasResult(AmazonKmsClient client) {

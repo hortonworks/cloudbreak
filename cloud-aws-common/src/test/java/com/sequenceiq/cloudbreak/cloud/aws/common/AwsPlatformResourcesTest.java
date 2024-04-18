@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonKmsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.kms.AmazonKmsUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -63,6 +64,8 @@ import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCert
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificates;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTable;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
+import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
+import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
@@ -93,14 +96,10 @@ import software.amazon.awssdk.services.iam.model.InstanceProfile;
 import software.amazon.awssdk.services.iam.model.ListInstanceProfilesRequest;
 import software.amazon.awssdk.services.iam.model.ListInstanceProfilesResponse;
 import software.amazon.awssdk.services.kms.model.AliasListEntry;
-import software.amazon.awssdk.services.kms.model.DescribeKeyRequest;
-import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
 import software.amazon.awssdk.services.kms.model.KeyListEntry;
 import software.amazon.awssdk.services.kms.model.KeyMetadata;
 import software.amazon.awssdk.services.kms.model.ListAliasesRequest;
 import software.amazon.awssdk.services.kms.model.ListAliasesResponse;
-import software.amazon.awssdk.services.kms.model.ListKeysRequest;
-import software.amazon.awssdk.services.kms.model.ListKeysResponse;
 import software.amazon.awssdk.services.rds.model.Certificate;
 import software.amazon.awssdk.services.rds.model.DescribeCertificatesRequest;
 
@@ -128,6 +127,9 @@ public class AwsPlatformResourcesTest {
     private CommonAwsClient awsClient;
 
     @Mock
+    private CloudbreakResourceReaderService cloudbreakResourceReaderService;
+
+    @Mock
     private AmazonIdentityManagementClient amazonCFClient;
 
     @Mock
@@ -137,7 +139,7 @@ public class AwsPlatformResourcesTest {
     private EntitlementService entitlementService;
 
     @Mock
-    private AmazonKmsClient awskmsClient;
+    private AmazonKmsClient amazonKmsClient;
 
     @Mock
     private AmazonEc2Client amazonEC2Client;
@@ -146,10 +148,16 @@ public class AwsPlatformResourcesTest {
     private AwsSubnetIgwExplorer awsSubnetIgwExplorer;
 
     @Mock
+    private MinimalHardwareFilter minimalHardwareFilter;
+
+    @Mock
     private AmazonDynamoDBClient amazonDynamoDB;
 
     @Mock
     private AwsPageCollector awsPageCollector;
+
+    @Mock
+    private AmazonKmsUtil amazonKmsUtil;
 
     private ExtendedCloudCredential cloudCredential;
 
@@ -282,21 +290,20 @@ public class AwsPlatformResourcesTest {
         listEntries.add(keyListEntry(2));
         listEntries.add(keyListEntry(3));
         listEntries.add(keyListEntry(4));
-        ListKeysResponse listKeysResult = ListKeysResponse.builder().keys(listEntries).build();
-
-        DescribeKeyResponse describeKeyResult = DescribeKeyResponse.builder().keyMetadata(KeyMetadata.builder().build()).build();
 
         Set<AliasListEntry> aliasListEntries = new HashSet<>();
         aliasListEntries.add(aliasListEntry(1));
         aliasListEntries.add(aliasListEntry(2));
         aliasListEntries.add(aliasListEntry(3));
         aliasListEntries.add(aliasListEntry(4));
-        ListAliasesResponse describeAliasResult = ListAliasesResponse.builder().aliases(aliasListEntries).build();
+        ListAliasesResponse listAliasesResponse = ListAliasesResponse.builder().aliases(aliasListEntries).build();
 
-        when(awsClient.createAWSKMS(any(AwsCredentialView.class), anyString())).thenReturn(awskmsClient);
-        when(awskmsClient.listKeys(any(ListKeysRequest.class))).thenReturn(listKeysResult);
-        when(awskmsClient.describeKey(any(DescribeKeyRequest.class))).thenReturn(describeKeyResult);
-        when(awskmsClient.listAliases(any(ListAliasesRequest.class))).thenReturn(describeAliasResult);
+        when(awsClient.createAWSKMS(any(AwsCredentialView.class), anyString())).thenReturn(amazonKmsClient);
+        when(amazonKmsUtil.listKeysWithAllPages(amazonKmsClient)).thenReturn(List.copyOf(listEntries));
+        when(amazonKmsClient.listAliases(any(ListAliasesRequest.class))).thenReturn(listAliasesResponse);
+        KeyMetadata keyMetadata = KeyMetadata.builder().build();
+        when(amazonKmsUtil.getKeyMetadataByKeyId(eq(amazonKmsClient), anyString())).thenReturn(keyMetadata);
+        when(amazonKmsUtil.extractKeyMetadataMap(keyMetadata)).thenReturn(Map.of());
 
         CloudEncryptionKeys cloudEncryptionKeys = underTest.encryptionKeys(cloudCredential, region("London"), new HashMap<>());
 
@@ -305,22 +312,10 @@ public class AwsPlatformResourcesTest {
 
     @Test
     public void collectEncryptionKeysWhenWeGetBackInfoThenItShouldReturnListWithPaginatedElements() {
-
-        List<KeyListEntry> listEntriesPage1 = new ArrayList<>();
-        List<KeyListEntry> listEntriesPage2 = new ArrayList<>();
-        for (int i = 0; i < KMS_KEYS_COUNT / 2; i++) {
-            listEntriesPage1.add(keyListEntry(i));
+        List<KeyListEntry> listEntries = new ArrayList<>();
+        for (int i = 0; i <  KMS_KEYS_COUNT; i++) {
+            listEntries.add(keyListEntry(i));
         }
-
-        for (int i = KMS_KEYS_COUNT / 2; i < KMS_KEYS_COUNT; i++) {
-            listEntriesPage2.add(keyListEntry(i));
-        }
-
-        ListKeysResponse listKeysResultWithMarker = ListKeysResponse.builder().keys(listEntriesPage1).nextMarker("testMarker").build();
-        ListKeysResponse listKeysResult = ListKeysResponse.builder().keys(listEntriesPage2).build();
-
-        DescribeKeyResponse describeKeyResult = DescribeKeyResponse.builder().keyMetadata(KeyMetadata.builder().build()).build();
-
 
         List<AliasListEntry> aliasListEntriesPage1 = new ArrayList<>();
         List<AliasListEntry> aliasListEntriesPage2 = new ArrayList<>();
@@ -335,10 +330,12 @@ public class AwsPlatformResourcesTest {
         ListAliasesResponse listAliasesResultWithMarker = ListAliasesResponse.builder().aliases(aliasListEntriesPage1).nextMarker("testMarker").build();
         ListAliasesResponse listAliasesResult = ListAliasesResponse.builder().aliases(aliasListEntriesPage2).build();
 
-        when(awsClient.createAWSKMS(any(AwsCredentialView.class), anyString())).thenReturn(awskmsClient);
-        when(awskmsClient.listKeys(any(ListKeysRequest.class))).thenReturn(listKeysResultWithMarker, listKeysResult);
-        when(awskmsClient.describeKey(any(DescribeKeyRequest.class))).thenReturn(describeKeyResult);
-        when(awskmsClient.listAliases(any(ListAliasesRequest.class))).thenReturn(listAliasesResultWithMarker, listAliasesResult);
+        when(awsClient.createAWSKMS(any(AwsCredentialView.class), anyString())).thenReturn(amazonKmsClient);
+        when(amazonKmsUtil.listKeysWithAllPages(amazonKmsClient)).thenReturn(List.copyOf(listEntries));
+        when(amazonKmsClient.listAliases(any(ListAliasesRequest.class))).thenReturn(listAliasesResultWithMarker, listAliasesResult);
+        KeyMetadata keyMetadata = KeyMetadata.builder().build();
+        when(amazonKmsUtil.getKeyMetadataByKeyId(eq(amazonKmsClient), anyString())).thenReturn(keyMetadata);
+        when(amazonKmsUtil.extractKeyMetadataMap(keyMetadata)).thenReturn(Map.of());
 
         CloudEncryptionKeys cloudEncryptionKeys = underTest.encryptionKeys(cloudCredential, region("London"), new HashMap<>());
 

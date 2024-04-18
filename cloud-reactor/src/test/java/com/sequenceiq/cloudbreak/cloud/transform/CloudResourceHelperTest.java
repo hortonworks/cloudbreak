@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -41,6 +42,9 @@ class CloudResourceHelperTest {
 
     @InjectMocks
     private CloudResourceHelper underTest;
+
+    @Captor
+    private ArgumentCaptor<List<CloudResource>> listArgumentCaptor;
 
     private static CloudResource createCloudResourceByType(ResourceType resourceType) {
         return CloudResource.builder()
@@ -75,6 +79,27 @@ class CloudResourceHelperTest {
         }
     }
 
+    static Object[][] getResourceTypeInstancesFromListDataProvider() {
+        return new Object[][]{
+                // testCaseName type resources resultExpected
+                {"AWS_INSTANCE, []", ResourceType.AWS_INSTANCE, List.of(), List.of()},
+                {"AWS_INSTANCE, [CLOUD_RESOURCE_AWS_INSTANCE]", ResourceType.AWS_INSTANCE, List.of(CLOUD_RESOURCE_AWS_INSTANCE),
+                        List.of(CLOUD_RESOURCE_AWS_INSTANCE)},
+                {"AWS_INSTANCE, [CLOUD_RESOURCE_AWS_INSTANCE, CLOUD_RESOURCE_AWS_VPC]", ResourceType.AWS_INSTANCE,
+                        List.of(CLOUD_RESOURCE_AWS_INSTANCE, CLOUD_RESOURCE_AWS_VPC), List.of(CLOUD_RESOURCE_AWS_INSTANCE)},
+                {"AWS_INSTANCE, [CLOUD_RESOURCE_AWS_VPC]", ResourceType.AWS_INSTANCE, List.of(CLOUD_RESOURCE_AWS_VPC), List.of()},
+                {"AWS_INSTANCE, [CLOUD_RESOURCE_AWS_INSTANCE, CLOUD_RESOURCE_AWS_VPC, CLOUD_RESOURCE_AWS_INSTANCE_2]", ResourceType.AWS_INSTANCE,
+                        List.of(CLOUD_RESOURCE_AWS_INSTANCE, CLOUD_RESOURCE_AWS_VPC, CLOUD_RESOURCE_AWS_INSTANCE_2),
+                        List.of(CLOUD_RESOURCE_AWS_INSTANCE, CLOUD_RESOURCE_AWS_INSTANCE_2)},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("getResourceTypeInstancesFromListDataProvider")
+    void getResourceTypeInstancesFromListTest(String testCaseName, ResourceType type, List<CloudResource> resources, List<CloudResource> resultExpected) {
+        assertThat(underTest.getResourceTypeInstancesFromList(type, resources)).isEqualTo(resultExpected);
+    }
+
     @Test
     void updateDeleteOnTerminationFlagButNoResourcesTest() {
         underTest.updateDeleteOnTerminationFlag(List.of(), false, mock(CloudContext.class));
@@ -96,7 +121,6 @@ class CloudResourceHelperTest {
         when(cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class)).thenReturn(mock(VolumeSetAttributes.class));
         List<CloudResource> reattachableVolumeSets = List.of(cloudResource);
         underTest.updateDeleteOnTerminationFlag(reattachableVolumeSets, false, mock(CloudContext.class));
-        ArgumentCaptor<List> listArgumentCaptor = ArgumentCaptor.forClass(List.class);
         verify(resourceNotifier, times(1)).notifyUpdates(listArgumentCaptor.capture(), any());
         assertThat(listArgumentCaptor.getValue()).containsExactly(cloudResource);
     }
