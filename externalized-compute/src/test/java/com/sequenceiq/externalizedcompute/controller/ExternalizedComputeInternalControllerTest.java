@@ -58,7 +58,7 @@ class ExternalizedComputeInternalControllerTest {
     public void testClusterDelete() {
         when(externalizedComputeClusterService.getExternalizedComputeCluster(anyString(), anyString())).thenReturn(externalizedComputeCluster);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            underTest.delete(ENVIRONMENT_CRN, CLUSTER_NAME, true);
+            underTest.delete(ENVIRONMENT_CRN, USER_CRN, CLUSTER_NAME, true);
         });
 
         verify(externalizedComputeClusterService, times(1)).getExternalizedComputeCluster(eq(ENVIRONMENT_CRN), eq(CLUSTER_NAME));

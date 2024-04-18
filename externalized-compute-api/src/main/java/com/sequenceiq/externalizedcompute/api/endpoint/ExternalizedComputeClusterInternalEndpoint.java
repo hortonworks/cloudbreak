@@ -51,7 +51,8 @@ public interface ExternalizedComputeClusterInternalEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier delete(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("environmentCrn") String environmentCrn,
-            @NotEmpty @PathParam("name") @NotEmpty String name, @QueryParam("force") boolean force);
+            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn, @NotEmpty @PathParam("name") @NotEmpty String name,
+            @QueryParam("force") boolean force);
 
     @GET
     @Path("{environmentCrn}/{name}")

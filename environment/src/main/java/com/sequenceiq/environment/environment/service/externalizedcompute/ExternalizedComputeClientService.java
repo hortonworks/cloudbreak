@@ -44,7 +44,7 @@ public class ExternalizedComputeClientService {
     public FlowIdentifier deleteComputeCluster(String environmentCrn, String name, boolean force) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                initiatorUserCrn -> handleException(() -> endpoint.delete(environmentCrn, name, force), "Failed to delete compute cluster"));
+                initiatorUserCrn -> handleException(() -> endpoint.delete(environmentCrn, initiatorUserCrn, name, force), "Failed to delete compute cluster"));
     }
 
     public Optional<ExternalizedComputeClusterResponse> getComputeCluster(String environmentCrn, String name) {

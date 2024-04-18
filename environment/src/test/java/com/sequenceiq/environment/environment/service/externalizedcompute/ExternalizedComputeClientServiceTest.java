@@ -113,7 +113,9 @@ class ExternalizedComputeClientServiceTest {
 
     @Test
     void deleteCluster() {
-        underTest.deleteComputeCluster(ENVIRONMENT_CRN, COMPUTE_NAME, true);
-        verify(endpoint, times(1)).delete(ENVIRONMENT_CRN, COMPUTE_NAME, true);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            underTest.deleteComputeCluster(ENVIRONMENT_CRN, COMPUTE_NAME, true);
+        });
+        verify(endpoint, times(1)).delete(ENVIRONMENT_CRN, USER_CRN, COMPUTE_NAME, true);
     }
 }
