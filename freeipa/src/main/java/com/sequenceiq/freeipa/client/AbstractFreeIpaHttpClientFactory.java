@@ -112,7 +112,7 @@ public abstract class AbstractFreeIpaHttpClientFactory<T> {
             Optional<String> password);
 
     private String toClusterProxyBasepath(Stack stack, String clusterProxyServiceName) {
-        return String.format("%s%s", clusterProxyService.getProxyPath(stack, clusterProxyServiceName), getDefaultBasePath());
+        return String.format("%s%s", clusterProxyService.getProxyPathPgwAsFallBack(stack, clusterProxyServiceName), getDefaultBasePath());
     }
 
     private URL getIpaUrl(HttpClientConfig clientConfig, int port, String basePath) throws MalformedURLException {

@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyRegistrationClient;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceConfig;
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceHealthCheck;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequest;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequestBuilder;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
@@ -37,13 +36,10 @@ import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultConfigException;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
 import com.sequenceiq.common.api.type.Tunnel;
-import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
-import com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.polling.clusterproxy.ServiceEndpointHealthListenerTask;
 import com.sequenceiq.freeipa.service.polling.clusterproxy.ServiceEndpointHealthPollerObject;
 import com.sequenceiq.freeipa.util.ClusterProxyServiceAvailabilityChecker;
@@ -66,26 +62,8 @@ public class ClusterProxyService {
     @Value("${clusterProxy.healthCheckV1.intervalInSec}")
     private int intervalInSecV1;
 
-    @Value("${clusterProxy.healthCheckV1.healthStatusEndpoint}")
-    private String healthStatusEndpointV1;
-
-    @Value("${clusterProxy.healthCheckV1.timeoutInSec}")
-    private int timeoutInSecV1;
-
-    @Value("${clusterProxy.healthCheckV1.healthyStatusCode}")
-    private int healthyStatusCodeV1;
-
     @Value("${clusterProxy.healthCheckV2.intervalInSec}")
     private int intervalInSecV2;
-
-    @Value("${clusterProxy.healthCheckV2.healthStatusEndpoint}")
-    private String healthStatusEndpointV2;
-
-    @Value("${clusterProxy.healthCheckV2.timeoutInSec}")
-    private int timeoutInSecV2;
-
-    @Value("${clusterProxy.healthCheckV2.healthyStatusCode}")
-    private int healthyStatusCodeV2;
 
     @Value("${clusterProxy.maxAttempts}")
     private int maxAttempts;
@@ -116,9 +94,6 @@ public class ClusterProxyService {
 
     @Inject
     private SecurityConfigService securityConfigService;
-
-    @Inject
-    private FreeIpaService freeIpaService;
 
     @Inject
     private PollingService<ServiceEndpointHealthPollerObject> serviceEndpointHealthPollingService;
@@ -170,7 +145,6 @@ public class ClusterProxyService {
 
         if (bootstrap) {
             tunnelGatewayConfigs = List.of(primaryGatewayConfig);
-            serviceConfigs.add(createServiceConfig(stack, generateFreeIpaFqdn(stack), primaryGatewayConfig, clientCertificate, preferPrivateIp));
         } else if (clusterProxyServiceAvailabilityChecker.isDnsBasedServiceNameAvailable(stack)) {
             List<GatewayConfig> targetGatewayConfigs = gatewayConfigs.stream()
                     .filter(gatewayConfig -> Objects.nonNull(gatewayConfig.getInstanceId()))
@@ -248,35 +222,9 @@ public class ClusterProxyService {
 
     private List<ClusterServiceConfig> createDnsMappedServiceConfigs(Stack stack, List<GatewayConfig> gatewayConfigs, ClientCertificate clientCertificate,
             boolean preferPrivateIp) {
-        List<ClusterServiceConfig> serviceConfigs = gatewayConfigs.stream()
+        return gatewayConfigs.stream()
                 .map(gatewayConfig -> createServiceConfig(stack, gatewayConfig.getHostname(), gatewayConfig, clientCertificate, preferPrivateIp))
                 .collect(Collectors.toList());
-        List<String> endpoints = gatewayConfigs.stream()
-                .map(gatewayConfig -> getNginxEndpointForRegistration(stack, gatewayConfig, preferPrivateIp))
-                .collect(Collectors.toList());
-        serviceConfigs.add(new ClusterServiceConfig(generateFreeIpaFqdn(stack),
-                endpoints,
-                null,
-                false,
-                List.of(),
-                clientCertificate, getHealthCheck(stack)));
-        return serviceConfigs;
-    }
-
-    private String generateFreeIpaFqdn(Stack stack) {
-        FreeIpa freeIpa = freeIpaService.findByStack(stack);
-        return FreeIpaDomainUtils.getFreeIpaFqdn(freeIpa.getDomain());
-    }
-
-    private ClusterServiceHealthCheck getHealthCheck(Stack stack) {
-        ClusterServiceHealthCheck clusterServiceHealthCheck;
-        int intervalInSec = getIntervalInSec(stack);
-        if (healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(stack)) {
-            clusterServiceHealthCheck = new ClusterServiceHealthCheck(intervalInSec, healthStatusEndpointV2, timeoutInSecV2, healthyStatusCodeV2);
-        } else {
-            clusterServiceHealthCheck = new ClusterServiceHealthCheck(intervalInSec, healthStatusEndpointV1, timeoutInSecV1, healthyStatusCodeV1);
-        }
-        return clusterServiceHealthCheck;
     }
 
     private int getIntervalInSec(Stack stack) {
@@ -311,11 +259,6 @@ public class ClusterProxyService {
 
     public String getProxyPath(String crn) {
         return String.format("%s/proxy/%s/%s", clusterProxyConfiguration.getClusterProxyBasePath(), crn, FREEIPA_SERVICE_NAME);
-    }
-
-    public String getProxyPath(Stack stack, String serviceName) {
-        String freeIpaFqdn = generateFreeIpaFqdn(stack);
-        return getProxyPath(stack, serviceName, freeIpaFqdn);
     }
 
     public String getProxyPathPgwAsFallBack(Stack stack, String serviceName) {

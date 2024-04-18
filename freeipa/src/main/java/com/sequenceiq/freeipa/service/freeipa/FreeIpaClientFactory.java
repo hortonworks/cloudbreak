@@ -91,7 +91,7 @@ public class FreeIpaClientFactory {
             LOGGER.debug("Using legacy cluster proxy base path");
             return toLegacyClusterProxyBasepath(stack);
         } else {
-            return String.format("%s%s", clusterProxyService.getProxyPath(stack, clusterProxyServiceName), FreeIpaClientBuilder.DEFAULT_BASE_PATH);
+            return String.format("%s%s", clusterProxyService.getProxyPathPgwAsFallBack(stack, clusterProxyServiceName), FreeIpaClientBuilder.DEFAULT_BASE_PATH);
         }
     }
 

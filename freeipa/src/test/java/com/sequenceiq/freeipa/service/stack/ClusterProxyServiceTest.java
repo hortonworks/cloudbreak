@@ -30,11 +30,8 @@ import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyRegistrationClient;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceConfig;
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterServiceHealthCheck;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequest;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
-import com.sequenceiq.cloudbreak.clusterproxy.ReadConfigResponse;
-import com.sequenceiq.cloudbreak.clusterproxy.ReadConfigService;
 import com.sequenceiq.cloudbreak.clusterproxy.TunnelEntry;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.polling.PollingService;
@@ -67,12 +64,6 @@ public class ClusterProxyServiceTest {
     private static final String PRIVATE_ADDRESS = "privateAddress";
 
     private static final int INTERVAL_IN_SEC_V_2 = 12;
-
-    private static final String HEALTH_STATUS_ENDPOINT_V_2 = "health.info";
-
-    private static final int TIMEOUT_IN_SEC_V_2 = 34;
-
-    private static final int HEALTHY_STATUS_CODE_V_2 = 200;
 
     private static final String STACK_RESOURCE_CRN = "resourceCrn";
 
@@ -120,8 +111,6 @@ public class ClusterProxyServiceTest {
         Stack aStack = getAStack();
         aStack.setTunnel(ccmv2Mode);
         aStack.setCcmV2AgentCrn("testAgentCrn");
-        FreeIpa freeIpa = new FreeIpa();
-        freeIpa.setDomain("ipadom");
 
         GatewayConfig gatewayConfig = new GatewayConfig("connectionAddress", "publicIpAddress", PRIVATE_IP_ADDRESS,
                 ServiceFamilies.GATEWAY.getDefaultPort(), "testInstanceId", true);
@@ -133,7 +122,6 @@ public class ClusterProxyServiceTest {
         when(securityConfigService.findOneByStack(aStack)).thenReturn(null);
         when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(configRegResponse);
         when(stackUpdater.updateClusterProxyRegisteredFlag(aStack, true)).thenReturn(aStack);
-        when(freeIpaService.findByStack(aStack)).thenReturn(freeIpa);
 
         underTest.registerFreeIpaForBootstrap(STACK_ID);
 
@@ -152,8 +140,6 @@ public class ClusterProxyServiceTest {
                 proxyRegistrationReq.getCcmV2Configs(), ccmv2Mode + " config should match");
 
         assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("freeipa", List.of("https://privateIpAddress:9443"), List.of(), null));
-        assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("freeipa.ipadom", List.of("https://privateIpAddress:9443"), List.of(),
-                null));
         assertThat(proxyRegistrationReq.getEnvironmentCrn()).isEqualTo(ENVIRONMENT_CRN);
     }
 
@@ -186,16 +172,12 @@ public class ClusterProxyServiceTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(aStack)).thenReturn(primaryGateway);
         when(gatewayConfigService.getNotDeletedGatewayConfigs(aStack)).thenReturn(List.of(gatewayConfig1, gatewayConfig2));
         when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(configRegResponse);
-        when(freeIpaService.findByStack(aStack)).thenReturn(freeIpa);
         when(clusterProxyServiceAvailabilityChecker.isDnsBasedServiceNameAvailable(aStack)).thenReturn(true);
         when(serviceEndpointHealthPollingService.pollWithTimeout(any(), any(), anyLong(), anyInt(), anyInt())).thenReturn(null);
         when(stackUpdater.updateClusterProxyRegisteredFlag(aStack, true)).thenReturn(aStack);
         when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(aStack)).thenReturn(true);
 
         ReflectionTestUtils.setField(underTest, "intervalInSecV2", INTERVAL_IN_SEC_V_2);
-        ReflectionTestUtils.setField(underTest, "healthStatusEndpointV2", HEALTH_STATUS_ENDPOINT_V_2);
-        ReflectionTestUtils.setField(underTest, "timeoutInSecV2", TIMEOUT_IN_SEC_V_2);
-        ReflectionTestUtils.setField(underTest, "healthyStatusCodeV2", HEALTHY_STATUS_CODE_V_2);
 
         underTest.updateFreeIpaRegistrationAndWait(STACK_ID, List.of("testInstanceId1", "testInstanceId2"));
 
@@ -223,9 +205,6 @@ public class ClusterProxyServiceTest {
                 null));
         assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("hostname2", List.of("https://privateIpAddress2:9443"), List.of(),
                 null));
-        assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("freeipa.test.freeipa.domain",
-                List.of("https://privateIpAddress1:9443", "https://privateIpAddress2:9443"), null, false, List.of(), null,
-                new ClusterServiceHealthCheck(INTERVAL_IN_SEC_V_2, HEALTH_STATUS_ENDPOINT_V_2, TIMEOUT_IN_SEC_V_2, HEALTHY_STATUS_CODE_V_2)));
         assertThat(proxyRegistrationReq.getEnvironmentCrn()).isEqualTo(ENVIRONMENT_CRN);
     }
 
@@ -240,16 +219,12 @@ public class ClusterProxyServiceTest {
 
         ConfigRegistrationResponse configRegResponse = mock(ConfigRegistrationResponse.class);
 
-        FreeIpa freeIpa = new FreeIpa();
-        freeIpa.setDomain("ipadom");
-
         when(stackService.getStackById(STACK_ID)).thenReturn(aStack);
         when(clusterProxyEnablementService.isClusterProxyApplicable(any())).thenReturn(true);
         when(gatewayConfigService.getPrimaryGatewayConfig(aStack)).thenReturn(gatewayConfig);
         when(securityConfigService.findOneByStack(aStack)).thenReturn(null);
         when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(configRegResponse);
         when(stackUpdater.updateClusterProxyRegisteredFlag(aStack, true)).thenReturn(aStack);
-        when(freeIpaService.findByStack(aStack)).thenReturn(freeIpa);
 
         underTest.registerFreeIpaForBootstrap(STACK_ID);
 
@@ -267,15 +242,11 @@ public class ClusterProxyServiceTest {
                 proxyRegistrationReq.getTunnels(), "CCMV1 tunnel should be configured.");
 
         assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("freeipa", List.of("https://privateAddress:9443"), List.of(), null));
-        assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("freeipa.ipadom", List.of("https://privateAddress:9443"), List.of(),
-                null));
     }
 
     @Test
     public void testClusterProxyRegistrationWhenCCMDisabled() {
         Stack aStack = getAStack();
-        FreeIpa freeIpa = new FreeIpa();
-        freeIpa.setDomain("ipadom");
 
         GatewayConfig gatewayConfig = new GatewayConfig("connectionAddress", "publicAddress", PRIVATE_ADDRESS,
                 9443, "instanceId", false);
@@ -287,7 +258,6 @@ public class ClusterProxyServiceTest {
         when(securityConfigService.findOneByStack(aStack)).thenReturn(null);
         when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(configRegResponse);
         when(stackUpdater.updateClusterProxyRegisteredFlag(aStack, true)).thenReturn(aStack);
-        when(freeIpaService.findByStack(aStack)).thenReturn(freeIpa);
 
         underTest.registerFreeIpaForBootstrap(STACK_ID);
 
@@ -305,8 +275,6 @@ public class ClusterProxyServiceTest {
         assertNull(proxyRegistrationReq.getTunnels(), "CCMV1 tunnel should not be initialized");
 
         assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("freeipa", List.of("https://publicAddress:9443"), List.of(), null));
-        assertThat(proxyRegistrationReq.getServices()).contains(new ClusterServiceConfig("freeipa.ipadom", List.of("https://publicAddress:9443"), List.of(),
-                null));
     }
 
     @Test
@@ -316,68 +284,6 @@ public class ClusterProxyServiceTest {
         String result = underTest.getProxyPath("testCrn");
 
         assertEquals("basePath/proxy/testCrn/freeipa", result);
-    }
-
-    @Test
-    public void testGetPathWithStackWithoutServiceName() {
-        when(clusterProxyConfiguration.getClusterProxyBasePath()).thenReturn("basePath");
-        Stack stack = getAStack();
-        FreeIpa freeIpa = new FreeIpa();
-        freeIpa.setDomain("ipadom");
-        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
-
-        String result = underTest.getProxyPath(stack, null);
-
-        assertEquals("basePath/proxy/resourceCrn/freeipa.ipadom", result);
-    }
-
-    @Test
-    public void testGetPathWithStackWithServiceNameNotRegistered() {
-        when(clusterProxyConfiguration.getClusterProxyBasePath()).thenReturn("basePath");
-        Stack stack = getAStack();
-        FreeIpa freeIpa = new FreeIpa();
-        freeIpa.setDomain("ipadom");
-        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
-        ReadConfigResponse readConfigResponse = new ReadConfigResponse();
-        readConfigResponse.setServices(List.of());
-        when(clusterProxyRegistrationClient.readConfig(STACK_RESOURCE_CRN)).thenReturn(readConfigResponse);
-
-        String result = underTest.getProxyPath(stack, "unregistered");
-
-        assertEquals("basePath/proxy/resourceCrn/freeipa.ipadom", result);
-    }
-
-    @Test
-    public void testGetPathWithStackWithServiceNameNotRegisteredWithEmptyServices() {
-        when(clusterProxyConfiguration.getClusterProxyBasePath()).thenReturn("basePath");
-        Stack stack = getAStack();
-        FreeIpa freeIpa = new FreeIpa();
-        freeIpa.setDomain("ipadom");
-        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
-        ReadConfigResponse readConfigResponse = new ReadConfigResponse();
-        when(clusterProxyRegistrationClient.readConfig(STACK_RESOURCE_CRN)).thenReturn(readConfigResponse);
-
-        String result = underTest.getProxyPath(stack, "unregistered");
-
-        assertEquals("basePath/proxy/resourceCrn/freeipa.ipadom", result);
-    }
-
-    @Test
-    public void testGetPathWithStackWithServiceNameRegistered() {
-        when(clusterProxyConfiguration.getClusterProxyBasePath()).thenReturn("basePath");
-        Stack stack = getAStack();
-        FreeIpa freeIpa = new FreeIpa();
-        freeIpa.setDomain("ipadom");
-        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
-        ReadConfigResponse readConfigResponse = new ReadConfigResponse();
-        ReadConfigService service = new ReadConfigService();
-        service.setName("registered");
-        readConfigResponse.setServices(List.of(service));
-        when(clusterProxyRegistrationClient.readConfig(STACK_RESOURCE_CRN)).thenReturn(readConfigResponse);
-
-        String result = underTest.getProxyPath(stack, "registered");
-
-        assertEquals("basePath/proxy/resourceCrn/registered", result);
     }
 
     private Stack getAStack() {
