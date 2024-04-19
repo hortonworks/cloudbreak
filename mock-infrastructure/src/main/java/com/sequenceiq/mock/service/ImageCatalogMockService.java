@@ -31,6 +31,9 @@ public class ImageCatalogMockService {
     }
 
     public String getNextRuntimeVersion(String runtime) {
+        if ("7.2.18".equals(runtime)) {
+            return "7.3.0";
+        }
         String[] splitted = runtime.split("\\.");
         int last = Integer.parseInt(splitted[splitted.length - 1]);
         List<String> elements = new ArrayList<>(Arrays.asList(splitted).subList(0, splitted.length - 1));
