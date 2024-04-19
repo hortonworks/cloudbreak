@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.api.v1.environment.model.request.azure.
 import static com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage.SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +27,10 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidate
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.api.telemetry.base.LoggingBase;
@@ -41,6 +45,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 public class CloudStorageValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudStorageValidator.class);
+
+    private static final String CLOUDERA_RUNTIME_7_2_17 = "7.2.17";
 
     private final CredentialResponseToCloudCredentialConverter credentialResponseToCloudCredentialConverter;
 
@@ -96,20 +102,24 @@ public class CloudStorageValidator {
     }
 
     /**
-     *  Validates if the required permissions are configured on the backup location on cloud provider.
-     * @param cloudStorageRequest Information on storage configuration used for datalake.
-     * @param environment Details of the environment on which validation is performed.
+     * Validates if the required permissions are configured on the backup location on cloud provider.
+     *
+     * @param cloudStorageRequest     Information on storage configuration used for datalake.
+     * @param backupOperationType     Type of the operation.
+     * @param environment             Details of the environment on which validation is performed.
+     * @param customBackupLocation    Used when a backup location is not the default one.
+     * @param clouderaRuntime         Cloudera runtime version.
      * @param validationResultBuilder Builder to gather the failures.
      */
     public void validateBackupLocation(CloudStorageRequest cloudStorageRequest, BackupOperationType backupOperationType,
-            DetailedEnvironmentResponse environment, String customBackupLocation,
-            ValidationResult.ValidationResultBuilder validationResultBuilder) {
+            DetailedEnvironmentResponse environment, String customBackupLocation, String clouderaRuntime,
+            ValidationResultBuilder validationResultBuilder) {
         String backupLocation = !Strings.isNullOrEmpty(customBackupLocation) ? customBackupLocation : getBackupLocationBase(environment);
         LOGGER.info("Validating backup Location: {}", backupLocation);
         CloudCredential cloudCredential = credentialResponseToCloudCredentialConverter.convert(environment.getCredential());
         List<StorageLocationBase> locations = cloudStorageRequest.getLocations();
         ObjectStorageValidateRequest request = createBackupLocationValidateRequest(cloudCredential, backupOperationType, cloudStorageRequest,
-                environment, backupLocation);
+                environment, backupLocation, clouderaRuntime);
         ObjectStorageValidateResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> cloudProviderServicesV4Endpoint.validateObjectStorage(request));
@@ -145,6 +155,7 @@ public class CloudStorageValidator {
                 .withBackupLocationBase(getBackupLocationBase(environment))
                 .withBackupOperationType(BackupOperationType.NONE)
                 .withAzureParameters(getSingleResourceGroupName(environment));
+
         if (environment.getIdBrokerMappingSource() == MOCK) {
             result.withMockSettings(environment.getLocation().getName(), environment.getAdminGroupName());
         }
@@ -154,7 +165,8 @@ public class CloudStorageValidator {
     private ObjectStorageValidateRequest createBackupLocationValidateRequest(
             CloudCredential credential, BackupOperationType backupOperationType,
             CloudStorageRequest cloudStorageRequest,
-            DetailedEnvironmentResponse environment, String backupLocation) {
+            DetailedEnvironmentResponse environment, String backupLocation,
+            String clouderaRuntime) {
         cloudStorageRequest.setLocations(Collections.emptyList());
         ObjectStorageValidateRequest.Builder result = ObjectStorageValidateRequest.builder()
                 .withCloudPlatform(environment.getCloudPlatform())
@@ -162,7 +174,9 @@ public class CloudStorageValidator {
                 .withCloudStorageRequest(cloudStorageRequest)
                 .withBackupLocationBase(backupLocation)
                 .withBackupOperationType(backupOperationType)
-                .withAzureParameters(getSingleResourceGroupName(environment));
+                .withAzureParameters(getSingleResourceGroupName(environment))
+                .withSkipLogRoleValidationforBackup(!isLogRoleValidationRequiredForBackup(clouderaRuntime));
+
         if (environment.getIdBrokerMappingSource() == MOCK) {
             result.withMockSettings(environment.getLocation().getName(), environment.getAdminGroupName());
         }
@@ -181,4 +195,8 @@ public class CloudStorageValidator {
                 .orElse(getLogsLocationBase(environment));
     }
 
+    private boolean isLogRoleValidationRequiredForBackup(String clouderaRuntime) {
+        Comparator<Versioned> versionComparator = new VersionComparator();
+        return versionComparator.compare(() -> clouderaRuntime, () -> CLOUDERA_RUNTIME_7_2_17) < 0;
+    }
 }

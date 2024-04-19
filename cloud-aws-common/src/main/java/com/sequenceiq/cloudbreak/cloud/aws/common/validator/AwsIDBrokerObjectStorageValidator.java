@@ -100,8 +100,9 @@ public class AwsIDBrokerObjectStorageValidator {
         awsInstanceProfileEC2TrustValidator.isTrusted(instanceProfile, cloudFileSystem.getCloudIdentityType(), resultBuilder);
         awsLogRolePermissionValidator.validateLog(iam, instanceProfile, cloudFileSystem, validationRequest.getLogsLocationBase(), skipOrgPolicyDecisions,
                 resultBuilder);
+
         if (entitlementService.isDatalakeBackupRestorePrechecksEnabled(accountId) &&
-                BackupOperationType.isRestore(validationRequest.getBackupOperationType())) {
+                BackupOperationType.isRestore(validationRequest.getBackupOperationType()) && !validationRequest.getSkipLogRoleValidationforBackup()) {
             LOGGER.info("Permission validation on backup location: {}", validationRequest.getBackupLocationBase());
             awsLogRolePermissionValidator.validateBackup(iam, instanceProfile, cloudFileSystem, backupLocationBase(validationRequest),
                     skipOrgPolicyDecisions, resultBuilder);

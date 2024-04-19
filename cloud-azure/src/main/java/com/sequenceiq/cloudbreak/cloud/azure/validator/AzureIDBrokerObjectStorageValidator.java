@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.service.AzureClientCachedOperations
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -76,14 +77,15 @@ public class AzureIDBrokerObjectStorageValidator {
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
     public ValidationResult validateObjectStorage(AzureClient client, String accountId,
             SpiFileSystem spiFileSystem,
-            String logsLocationBase,
-            String backupLocationBase,
+            ObjectStorageValidateRequest objectStorageValidateRequest,
             String singleResourceGroupName,
             ValidationResultBuilder resultBuilder) {
         LOGGER.info("Validating Azure identities...");
         List<CloudFileSystemView> cloudFileSystems = spiFileSystem.getCloudFileSystems();
+        String logsLocationBase = objectStorageValidateRequest.getLogsLocationBase();
+        String backupLocationBase = objectStorageValidateRequest.getBackupLocationBase();
         validateHierarchicalNamespace(client, spiFileSystem, logsLocationBase, backupLocationBase, accountId, resultBuilder);
-        if (Objects.nonNull(cloudFileSystems) && cloudFileSystems.size() > 0) {
+        if (Objects.nonNull(cloudFileSystems) && !cloudFileSystems.isEmpty()) {
             for (CloudFileSystemView cloudFileSystemView : cloudFileSystems) {
                 CloudAdlsGen2View cloudFileSystem = (CloudAdlsGen2View) cloudFileSystemView;
                 String managedIdentityId = cloudFileSystem.getManagedIdentity();
@@ -111,7 +113,8 @@ public class AzureIDBrokerObjectStorageValidator {
                         }
                     } else if (LOG.equals(cloudIdentityType)) {
                         validateLocation(client, identity, logsLocationBase, accountId, resultBuilder);
-                        if (entitlementService.isDatalakeBackupRestorePrechecksEnabled(accountId)) {
+                        if (entitlementService.isDatalakeBackupRestorePrechecksEnabled(accountId) &&
+                                !objectStorageValidateRequest.getSkipLogRoleValidationforBackup()) {
                             validateLocation(client, identity, backupLocationBase, accountId, resultBuilder);
                         }
                     }

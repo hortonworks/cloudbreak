@@ -33,6 +33,8 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
 
     private MockAccountMappingSettings mockAccountMappingSettings;
 
+    private boolean skipLogRoleValidationforBackup;
+
     public ObjectStorageValidateRequest() {
     }
 
@@ -46,6 +48,7 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
         this.backupOperationType = builder.backupOperationType;
         this.mockAccountMappingSettings = builder.mockAccountMappingSettings;
         this.azure = builder.azure;
+        this.skipLogRoleValidationforBackup = builder.skipLogRoleValidationforBackup;
     }
 
     public static Builder builder() {
@@ -124,6 +127,14 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
         this.azure = azure;
     }
 
+    public boolean getSkipLogRoleValidationforBackup() {
+        return skipLogRoleValidationforBackup;
+    }
+
+    public void setSkipLogRoleValidationforBackup(boolean skipLogRoleValidationforBackup) {
+        this.skipLogRoleValidationforBackup = skipLogRoleValidationforBackup;
+    }
+
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
     @Override
     public boolean equals(Object o) {
@@ -141,12 +152,14 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
                 Objects.equals(logsLocationBase, request.logsLocationBase) &&
                 Objects.equals(backupLocationBase, request.backupLocationBase) &&
                 Objects.equals(backupOperationType, request.backupOperationType) &&
-                Objects.equals(azure, request.azure);
+                Objects.equals(azure, request.azure) &&
+                Objects.equals(skipLogRoleValidationforBackup, request.skipLogRoleValidationforBackup);
+
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(credential, cloudPlatform, cloudStorageRequest, spiFileSystem, logsLocationBase, azure);
+        return Objects.hash(credential, cloudPlatform, cloudStorageRequest, spiFileSystem, logsLocationBase, azure, skipLogRoleValidationforBackup);
     }
 
     @Override
@@ -158,6 +171,7 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
                 ", logsLocationBase='" + logsLocationBase + '\'' +
                 ", backupLocationBase='" + backupLocationBase + '\'' +
                 ", backupOperationType='" + backupOperationType + '\'' +
+                ", skipLogRoleValidationforBackup='" + skipLogRoleValidationforBackup + '\'' +
                 '}';
     }
 
@@ -190,6 +204,8 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
         private MockAccountMappingSettings mockAccountMappingSettings;
 
         private AzureParameters azure;
+
+        private boolean skipLogRoleValidationforBackup;
 
         public Builder withCredential(CloudCredential credential) {
             this.credential = credential;
@@ -239,6 +255,11 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
             if (singleResourceGroupName != null) {
                 this.azure = new AzureParameters(singleResourceGroupName);
             }
+            return this;
+        }
+
+        public Builder withSkipLogRoleValidationforBackup(boolean skipLogRoleValidationforBackup) {
+            this.skipLogRoleValidationforBackup = skipLogRoleValidationforBackup;
             return this;
         }
 

@@ -253,7 +253,7 @@ class StorageValidationServiceTest {
         when(environmentService.getDetailedEnvironmentResponseByName(anyString())).thenReturn(detailedEnvironmentResponse);
         ValidationResult validationResult = underTest.validateBackupStorage(sdxCluster, BackupOperationType.ANY, null);
         verify(cloudStorageValidator, times(1)).validateBackupLocation(cloudStorageRequestArgumentCaptor.capture(),
-                eq(BackupOperationType.ANY), detailedEnvironmentResponseArgumentCaptor.capture(), eq(null), any());
+                eq(BackupOperationType.ANY), detailedEnvironmentResponseArgumentCaptor.capture(), eq(null), any(), any());
         Assertions.assertEquals(2, cloudStorageRequestArgumentCaptor.getValue().getLocations().size());
         Assertions.assertEquals(2, cloudStorageRequestArgumentCaptor.getValue().getIdentities().size());
         Assertions.assertNull(cloudStorageRequestArgumentCaptor.getValue().getAws());
@@ -279,7 +279,7 @@ class StorageValidationServiceTest {
         when(environmentService.getDetailedEnvironmentResponseByName(anyString())).thenReturn(detailedEnvironmentResponse);
         ValidationResult validationResult = underTest.validateBackupStorage(sdxCluster, BackupOperationType.ANY, BACKUP_LOCATION);
         verify(cloudStorageValidator, times(1)).validateBackupLocation(cloudStorageRequestArgumentCaptor.capture(),
-                eq(BackupOperationType.ANY), detailedEnvironmentResponseArgumentCaptor.capture(), eq(BACKUP_LOCATION), any());
+                eq(BackupOperationType.ANY), detailedEnvironmentResponseArgumentCaptor.capture(), eq(BACKUP_LOCATION), any(), any());
         Assertions.assertEquals(2, cloudStorageRequestArgumentCaptor.getValue().getLocations().size());
         Assertions.assertEquals(2, cloudStorageRequestArgumentCaptor.getValue().getIdentities().size());
         Assertions.assertNull(cloudStorageRequestArgumentCaptor.getValue().getAws());

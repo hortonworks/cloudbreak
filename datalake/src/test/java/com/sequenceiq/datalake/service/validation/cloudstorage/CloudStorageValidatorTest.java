@@ -4,14 +4,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -117,7 +122,7 @@ public class CloudStorageValidatorTest {
         when(cloudProviderServicesV4Endpoint.validateObjectStorage(any())).thenReturn(new ObjectStorageValidateResponse());
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), BackupOperationType.ANY,
-                environment, null, validationResultBuilder));
+                environment, null, "7.2.16", validationResultBuilder));
         assertFalse(validationResultBuilder.build().hasError());
     }
 
@@ -133,7 +138,7 @@ public class CloudStorageValidatorTest {
         when(cloudProviderServicesV4Endpoint.validateObjectStorage(any())).thenReturn(new ObjectStorageValidateResponse());
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), BackupOperationType.ANY, environment,
-                CUSTOM_BACKUP_LOCATION, validationResultBuilder));
+                CUSTOM_BACKUP_LOCATION, "7.2.16", validationResultBuilder));
         verify(cloudProviderServicesV4Endpoint, times(1)).validateObjectStorage(captor.capture());
         assertEquals(CUSTOM_BACKUP_LOCATION, captor.getValue().getBackupLocationBase());
         assertFalse(validationResultBuilder.build().hasError());
@@ -156,7 +161,7 @@ public class CloudStorageValidatorTest {
         when(cloudProviderServicesV4Endpoint.validateObjectStorage(any())).thenReturn(objectStorageValidateResponse);
         ValidationResultBuilder validationResultBuilderforFailure = new ValidationResultBuilder();
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), BackupOperationType.ANY, environment, null,
-                validationResultBuilderforFailure));
+                "7.2.16", validationResultBuilderforFailure));
         verify(cloudProviderServicesV4Endpoint, times(1)).validateObjectStorage(captor.capture());
         assertTrue(captor.getValue().getCloudStorageRequest().getLocations().isEmpty());
         assertEquals("id", captor.getValue().getCredential().getId());
@@ -183,7 +188,7 @@ public class CloudStorageValidatorTest {
         when(cloudProviderServicesV4Endpoint.validateObjectStorage(any())).thenReturn(objectStorageValidateResponse);
         ValidationResultBuilder validationResultBuilderforFailure = new ValidationResultBuilder();
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), BackupOperationType.ANY,
-                environment, CUSTOM_BACKUP_LOCATION, validationResultBuilderforFailure));
+                environment, CUSTOM_BACKUP_LOCATION, "7.2.16", validationResultBuilderforFailure));
         verify(cloudProviderServicesV4Endpoint, times(1)).validateObjectStorage(captor.capture());
         assertTrue(captor.getValue().getBackupOperationType().name().equals(BackupOperationType.ANY.name()));
         assertTrue(captor.getValue().getCloudStorageRequest().getLocations().isEmpty());
@@ -193,5 +198,38 @@ public class CloudStorageValidatorTest {
         assertEquals("AWS", captor.getValue().getCloudPlatform());
         assertTrue(validationResultBuilderforFailure.build().hasError());
         assertEquals("dummy failure", validationResultBuilderforFailure.build().getFormattedErrors());
+    }
+
+    static Stream<Arguments> parameterScenarios() {
+        return Stream.of(
+                Arguments.of("7.2.15", false),
+                Arguments.of("7.2.16", false),
+                Arguments.of("7.2.17", true),
+                Arguments.of("7.2.18", true)
+        );
+    }
+
+    @ParameterizedTest(name = "runtime = {0}, skipLogRoleValidationforBackup = {1}")
+    @MethodSource("parameterScenarios")
+    public void validateSkipLogRoleValidationforBackup(String runtime, boolean skipLogRoleValidationforBackup) {
+        ObjectStorageValidateResponse objectStorageValidateResponse = mock(ObjectStorageValidateResponse.class);
+        when(objectStorageValidateResponse.getStatus()).thenReturn(ResponseStatus.OK);
+        when(environment.getCredential()).thenReturn(new CredentialResponse());
+        when(environment.getBackupLocation()).thenReturn(BACKUP_LOCATION);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(credentialResponseToCloudCredentialConverter.convert(any())).thenReturn(
+                new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc"));
+
+        when(cloudProviderServicesV4Endpoint.validateObjectStorage(any())).thenReturn(objectStorageValidateResponse);
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateBackupLocation(new CloudStorageRequest(), BackupOperationType.ANY,
+                environment, null, runtime, validationResultBuilder));
+
+        ArgumentCaptor<ObjectStorageValidateRequest> requestArgumentCaptor = ArgumentCaptor.forClass(ObjectStorageValidateRequest.class);
+        verify(cloudProviderServicesV4Endpoint).validateObjectStorage(requestArgumentCaptor.capture());
+        ObjectStorageValidateRequest request = requestArgumentCaptor.getValue();
+        assertFalse(validationResultBuilder.build().hasError());
+        assertEquals(skipLogRoleValidationforBackup, request.getSkipLogRoleValidationforBackup());
     }
 }

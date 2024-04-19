@@ -95,8 +95,7 @@ public class AzureObjectStorageConnector implements ObjectStorageConnector {
         resultBuilder.prefix("Cloud Storage validation failed");
         try {
             ValidationResult validationResult = azureIDBrokerObjectStorageValidator.validateObjectStorage(
-                    client, accountId, spiFileSystem, request.getLogsLocationBase(), request.getBackupLocationBase(),
-                    getSingleResourceGroupName(request), resultBuilder);
+                    client, accountId, spiFileSystem, request, getSingleResourceGroupName(request), resultBuilder);
             ObjectStorageValidateResponse response;
             if (validationResult.hasError()) {
                 response = ObjectStorageValidateResponse.builder()
