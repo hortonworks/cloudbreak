@@ -68,6 +68,14 @@ public class ClusterStartHandlerService {
         LOGGER.info("Starting cluster manager and its agents on {} cluster", stack.getName());
         apiConnectors.getConnector(stack).startClusterManagerAndAgents();
         if (datalakeStack.isPresent()) {
+            refreshSharedRdsConfigIfNeeded(stack);
+        }
+        LOGGER.info("Starting services on {} cluster", stack.getName());
+        apiConnectors.getConnector(stack).startCluster(true);
+    }
+
+    private void refreshSharedRdsConfigIfNeeded(Stack stack) {
+        try {
             Predicate<RDSConfig> cmServicePredicate = this::isClouderaManagerService;
             Predicate<RDSConfig> sharedDbPredicate = this::isSharedDatabase;
             Set<RDSConfig> rdsConfigs = rdsSettingsMigrationService.collectRdsConfigs(stack.getClusterId(), cmServicePredicate.and(sharedDbPredicate));
@@ -79,9 +87,10 @@ public class ClusterStartHandlerService {
             } else {
                 LOGGER.info("No rds config update is needed on datahub {}", stack.getName());
             }
+        } catch (Exception ex) {
+            LOGGER.warn("Exception happened during rds config update during cluster start." +
+                    " The start flow will be continued, maybe manual changes will be needed on CM UI.", ex);
         }
-        LOGGER.info("Starting services on {} cluster", stack.getName());
-        apiConnectors.getConnector(stack).startCluster(true);
     }
 
     public void handleStopStartScalingFeature(Stack stack, CmTemplateProcessor blueprintProcessor) {
