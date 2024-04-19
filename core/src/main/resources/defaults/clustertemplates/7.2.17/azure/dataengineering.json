@@ -25,7 +25,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D16_v3"
+          "instanceType": "Standard_D16s_v3"
         },
         "nodeCount": 1,
         "type": "GATEWAY",
@@ -42,7 +42,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D5_v2"
+          "instanceType": "Standard_D16s_v3"
         },
         "nodeCount": 1,
         "type": "CORE",
@@ -65,7 +65,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D5_v2"
+          "instanceType": "Standard_D16s_v3"
         },
         "nodeCount": 3,
         "type": "CORE",
@@ -88,7 +88,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D8_v3"
+          "instanceType": "Standard_D8s_v3"
         },
         "nodeCount": 0,
         "type": "CORE",

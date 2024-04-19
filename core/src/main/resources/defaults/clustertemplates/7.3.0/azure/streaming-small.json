@@ -49,7 +49,7 @@
       {
         "name": "broker",
         "template": {
-          "instanceType": "Standard_D8_v3",
+          "instanceType": "Standard_D8s_v3",
           "attachedVolumes": [
             {
               "count": 1,
@@ -76,7 +76,7 @@
           "azure": {
             "manageDisk": true
           },
-          "instanceType": "Standard_D8_v3"
+          "instanceType": "Standard_D8s_v3"
         },
         "nodeCount": 0,
         "type": "CORE",

@@ -95,7 +95,7 @@ public class AzurePlatformResources implements PlatformResources {
     @Value("${cb.azure.default.max.disk.size:32767}")
     private int maxDiskSize;
 
-    @Value("${cb.azure.default.vmtype:Standard_D16_v3}")
+    @Value("${cb.azure.default.vmtype:Standard_D16s_v3}")
     private String armVmDefault;
 
     @Value("${distrox.restrict.instance.types:true}")

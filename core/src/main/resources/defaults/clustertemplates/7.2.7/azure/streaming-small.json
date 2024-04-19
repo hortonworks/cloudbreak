@@ -30,7 +30,7 @@
       {
         "name": "broker",
         "template": {
-          "instanceType": "Standard_D8_v3",
+          "instanceType": "Standard_D8s_v3",
           "attachedVolumes": [
             {
               "count": 1,
