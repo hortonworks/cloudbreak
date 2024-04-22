@@ -396,13 +396,23 @@ public class AzureProperties {
 
         private String resourceGroupName;
 
+        private String managedIdentity;
+
         public String getEncryptionKeyUrl() {
-                return encryptionKeyUrl;
-            }
+            return encryptionKeyUrl;
+        }
 
         public void setEncryptionKeyUrl(String encryptionKeyUrl) {
                 this.encryptionKeyUrl = encryptionKeyUrl;
             }
+
+        public String getManagedIdentity() {
+            return managedIdentity;
+        }
+
+        public void setManagedIdentity(String managedIdentity) {
+            this.managedIdentity = managedIdentity;
+        }
 
         public String getResourceGroupName() {
                 return resourceGroupName;

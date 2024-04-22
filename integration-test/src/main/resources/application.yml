@@ -259,6 +259,7 @@ integrationtest:
     diskEncryption:
       encryptionKeyUrl:
       resourceGroupName:
+      managedIdentity:
 
   # gcp parameters
   gcp:

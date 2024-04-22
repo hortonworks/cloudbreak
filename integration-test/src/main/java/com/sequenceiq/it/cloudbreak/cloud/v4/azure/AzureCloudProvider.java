@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.testng.util.Strings;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
@@ -532,10 +533,15 @@ public class AzureCloudProvider extends AbstractCloudProvider {
             environmentTestDto.setAzure(AzureEnvironmentParameters.builder().build());
         }
         AzureEnvironmentParameters azureEnvironmentParameters = environmentTestDto.getAzure();
-        azureEnvironmentParameters.setResourceEncryptionParameters(AzureResourceEncryptionParameters.builder()
+
+
+        AzureResourceEncryptionParameters.Builder builder = AzureResourceEncryptionParameters.builder()
                 .withEncryptionKeyResourceGroupName(getEncryptionResourceGroupName())
-                .withEncryptionKeyUrl(getEncryptionKeyUrl())
-                .build());
+                .withEncryptionKeyUrl(getEncryptionKeyUrl());
+        if (!Strings.isNullOrEmpty(getEncryptionManagedIdentity())) {
+            builder.withUserManagedIdentity(getEncryptionManagedIdentity());
+        }
+        azureEnvironmentParameters.setResourceEncryptionParameters(builder.build());
         environmentTestDto.setAzure(azureEnvironmentParameters);
         return environmentTestDto;
     }
@@ -551,6 +557,10 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     public String getEncryptionKeyUrl() {
         return azureProperties.getDiskEncryption().getEncryptionKeyUrl();
+    }
+
+    public String getEncryptionManagedIdentity() {
+        return azureProperties.getDiskEncryption().getManagedIdentity();
     }
 
     @Override
