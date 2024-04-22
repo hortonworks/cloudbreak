@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.structuredevent.service.db;
 import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.FLOW;
 import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.NOTIFICATION;
 import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.REST;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -96,6 +97,7 @@ public class CDPStructuredEventDBServiceTest {
     @Test
     public void testCreateWhenResourceCrnIsNotEmpty() {
         CDPStructuredEvent event = new CDPStructuredRestCallEvent();
+        event.setType("NOTIFICATION");
         CDPOperationDetails operation = new CDPOperationDetails();
         operation.setResourceCrn("crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
         event.setOperation(operation);
@@ -104,5 +106,21 @@ public class CDPStructuredEventDBServiceTest {
         underTest.create(event);
         verify(cdpStructuredEventToCDPStructuredEventEntityConverter, Mockito.times(1)).convert(event);
         verify(structuredEventRepository, Mockito.times(1)).save(entity);
+    }
+
+    @Test
+    public void testCreateWithRestEvent() {
+        CDPStructuredEvent event = new CDPStructuredRestCallEvent();
+        event.setType("REST");
+        underTest.create(event);
+        verify(structuredEventRepository, Mockito.times(0)).save(any());
+    }
+
+    @Test
+    public void testCreateWithFlowEvent() {
+        CDPStructuredEvent event = new CDPStructuredRestCallEvent();
+        event.setType("FLOW");
+        underTest.create(event);
+        verify(structuredEventRepository, Mockito.times(0)).save(any());
     }
 }

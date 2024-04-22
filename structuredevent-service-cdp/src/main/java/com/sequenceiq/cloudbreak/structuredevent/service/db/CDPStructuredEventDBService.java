@@ -50,15 +50,17 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
 
     @Override
     public void create(CDPStructuredEvent structuredEvent) {
-        LOGGER.info("Stored StructuredEvent type: {}, payload: {}", structuredEvent.getType(),
-                AnonymizerUtil.anonymize(JsonUtil.writeValueAsStringSilent(structuredEvent)));
-        ValidationResult validationResult = validate(structuredEvent);
-        if (validationResult.hasError()) {
-            LOGGER.warn(validationResult.getFormattedErrors());
-        } else {
-            CDPStructuredEventEntity structuredEventEntityEntity = cdpStructuredEventToCDPStructuredEventEntityConverter
-                    .convert(structuredEvent);
-            create(structuredEventEntityEntity, structuredEventEntityEntity.getAccountId());
+        if (structuredEvent != null && StructuredEventType.NOTIFICATION.name().equals(structuredEvent.getType())) {
+            LOGGER.info("Stored StructuredEvent type: {}, payload: {}", structuredEvent.getType(),
+                    AnonymizerUtil.anonymize(JsonUtil.writeValueAsStringSilent(structuredEvent)));
+            ValidationResult validationResult = validate(structuredEvent);
+            if (validationResult.hasError()) {
+                LOGGER.warn(validationResult.getFormattedErrors());
+            } else {
+                CDPStructuredEventEntity structuredEventEntityEntity = cdpStructuredEventToCDPStructuredEventEntityConverter
+                        .convert(structuredEvent);
+                create(structuredEventEntityEntity, structuredEventEntityEntity.getAccountId());
+            }
         }
     }
 
