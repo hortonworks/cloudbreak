@@ -73,7 +73,7 @@ ext {
   gsonVersion = '2.8.9'
   jacksonVersion = '2.16.1'
   jacksonDatabindVersion = '2.16.1'
-  jacksonVersionForBuild = '2.15.3'
+  jacksonVersionForBuild = '2.17.0'
   jsonSmartVersion = '2.4.9'
   snakeYamlVersion = '2.2'
   xerces = '2.12.2'
