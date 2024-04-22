@@ -9,7 +9,7 @@ public class DefaultEnvironmentExceptionMapper extends SearchCauseExceptionMappe
 
     @Override
     public Status getResponseStatus(Exception exception) {
-        return Status.INTERNAL_SERVER_ERROR;
+        return Status.BAD_REQUEST;
     }
 
     @Override

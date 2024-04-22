@@ -152,6 +152,10 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
             String formattedErrors = validationResult.getFormattedErrors();
             LOGGER.debug("Validation failed for environment {} with {}.", environment.getId(), formattedErrors);
             throw new EnvironmentServiceException(formattedErrors);
+        } else if (validationResult.hasWarning()) {
+            eventSenderService.sendEventAndNotification(environmentDto,
+                    ThreadBasedUserCrnProvider.getUserCrn(),
+                    ResourceEvent.ENVIRONMENT_VALIDATION_WARNINGS, Set.of(validationResult.getFormattedWarnings()));
         }
     }
 

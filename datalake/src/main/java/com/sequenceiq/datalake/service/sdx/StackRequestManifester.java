@@ -206,11 +206,12 @@ public class StackRequestManifester {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
         if (validationResult.hasWarning()) {
-            LOGGER.info(validationResult.getFormattedWarnings());
+            String warnings = validationResult.getFormattedWarnings();
+            LOGGER.info(warnings);
             eventSenderService.sendEventAndNotification(sdxCluster,
-                    ResourceEvent.SDX_VALIDATION_FAILED_AND_SKIPPED, Set.of(validationResult.getFormattedWarnings()));
+                    ResourceEvent.SDX_VALIDATION_FAILED_AND_SKIPPED, Set.of(warnings));
             sdxNotificationService.send(ResourceEvent.SDX_VALIDATION_FAILED_AND_SKIPPED,
-                    Set.of(validationResult.getFormattedWarnings()), sdxCluster);
+                    Set.of(warnings), sdxCluster);
         }
     }
 
