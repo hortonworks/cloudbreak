@@ -91,6 +91,7 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.cm.config.modification.ClouderaManagerConfigModificationService;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
@@ -1409,8 +1410,8 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     void testUpdateConfig() throws Exception {
-        doNothing().when(clouderaManagerConfigModificationService).updateConfig(any(), any(), any());
-        when(clouderaManagerConfigModificationService.serviceNames(any(), any(), any())).thenReturn(List.of("test"));
+        doNothing().when(clouderaManagerConfigModificationService).updateConfigs(any(), any(), any());
+        when(clouderaManagerConfigModificationService.getServiceNames(any(), any(), any())).thenReturn(List.of("test"));
 
         underTest.updateConfig(HashBasedTable.create());
 

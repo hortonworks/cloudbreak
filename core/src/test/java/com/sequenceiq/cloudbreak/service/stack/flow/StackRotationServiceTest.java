@@ -82,18 +82,18 @@ public class StackRotationServiceTest {
         underTest.markMultiClusterChildrenResources(ENV_CRN, "DEMO_MULTI_SECRET");
 
         verify(stackService).getByEnvironmentCrnAndStackType(eq(ENV_CRN), any());
-        verify(stackService, times(0)).findByDatalakeCrn(any());
+        verify(stackService, times(0)).findNotTerminatedByDatalakeCrn(any());
     }
 
     @Test
     public void testMarkMultiClusterChildrenResourceByDL() {
-        when(stackService.findByDatalakeCrn(any())).thenReturn(Set.of(getStackIdView()));
+        when(stackService.findNotTerminatedByDatalakeCrn(any())).thenReturn(Set.of(getStackIdView()));
         doNothing().when(multiClusterRotationService).markChildrenMultiRotationEntriesLocally(any(), any());
 
         underTest.markMultiClusterChildrenResources(DATALAKE_CRN, "DEMO_MULTI_SECRET");
 
         verify(stackService, times(0)).getByEnvironmentCrnAndStackType(any(), any());
-        verify(stackService).findByDatalakeCrn(eq(DATALAKE_CRN));
+        verify(stackService).findNotTerminatedByDatalakeCrn(eq(DATALAKE_CRN));
     }
 
     private static StackIdView getStackIdView() {

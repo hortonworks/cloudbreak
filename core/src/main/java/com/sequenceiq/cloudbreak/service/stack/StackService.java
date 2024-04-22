@@ -363,6 +363,14 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         }
     }
 
+    public Set<StackIdView> findNotTerminatedByDatalakeCrn(String crn) {
+        try {
+            return transactionService.required(() -> stackRepository.findNotTerminatedByDatalakeCrn(crn));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
     public StackClusterStatusView getStatusByCrn(String crn) {
         return stackRepository.getStatusByCrn(crn).orElseThrow(notFound("stack", crn));
     }

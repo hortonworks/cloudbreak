@@ -251,9 +251,9 @@ public class ClouderaManagerConfigService {
     }
 
     @Retryable(value = ClouderaManagerOperationFailedException.class, backoff = @Backoff(delay = BACKOFF))
-    public void modifyRoleConfigGroups(ApiClient client, String clusterName, String serviceName, String roleConfigGroupName, Map<String, String> config) {
+    public void modifyRoleConfigGroup(ApiClient client, String clusterName, String serviceName, String roleConfigGroupName, Map<String, String> config) {
         try {
-            LOGGER.debug("Modifying {} config group of {} service regarding configs [{}] in Cloudera Manager for cluster {}.",
+            LOGGER.debug("Modifying {} role config group of {} service regarding configs [{}] in Cloudera Manager for cluster {}.",
                     roleConfigGroupName, serviceName, Joiner.on(",").join(config.keySet()), clusterName);
             RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(client);
             ApiRoleConfigGroup apiRoleConfigGroup = new ApiRoleConfigGroup();

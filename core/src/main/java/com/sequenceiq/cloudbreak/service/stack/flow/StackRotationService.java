@@ -90,7 +90,7 @@ public class StackRotationService {
         if (CrnResourceDescriptor.getByCrnString(parentCrn).equals(ENVIRONMENT)) {
             crns = stackService.getByEnvironmentCrnAndStackType(parentCrn, StackType.WORKLOAD).stream().map(StackIdView::getCrn).collect(Collectors.toSet());
         } else if (CrnResourceDescriptor.getByCrnString(parentCrn).equals(DATALAKE)) {
-            crns = stackService.findByDatalakeCrn(parentCrn).stream().map(StackIdView::getCrn).collect(Collectors.toSet());
+            crns = stackService.findNotTerminatedByDatalakeCrn(parentCrn).stream().map(StackIdView::getCrn).collect(Collectors.toSet());
         }
         return crns;
     }

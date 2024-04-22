@@ -279,6 +279,9 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Query("SELECT s.id as id, s.name as name, s.resourceCrn as crn FROM Stack s WHERE s.datalakeCrn  = :crn")
     Set<StackIdView> findByDatalakeCrn(@Param("crn") String crn);
 
+    @Query("SELECT s.id as id, s.name as name, s.resourceCrn as crn FROM Stack s WHERE s.datalakeCrn = :crn AND s.terminated IS NULL")
+    Set<StackIdView> findNotTerminatedByDatalakeCrn(@Param("crn") String crn);
+
     @Query("SELECT VALUE(s.parameters) FROM Stack s WHERE s.id = :stackId AND KEY(s.parameters) = :ttlKey")
     String findTimeToLiveValueForSTack(@Param("stackId") Long stackId, @Param("ttlKey") String ttl);
 

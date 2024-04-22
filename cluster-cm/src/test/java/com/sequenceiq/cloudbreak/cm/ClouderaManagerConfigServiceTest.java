@@ -391,7 +391,7 @@ public class ClouderaManagerConfigServiceTest {
         when(clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(any())).thenReturn(roleConfigGroupsResourceApi);
         when(roleConfigGroupsResourceApi.updateRoleConfigGroup(any(), any(), any(), any(), any())).thenReturn(new ApiRoleConfigGroup());
 
-        underTest.modifyRoleConfigGroups(API_CLIENT, "cluster", "service", "roleConfigGroup",
+        underTest.modifyRoleConfigGroup(API_CLIENT, "cluster", "service", "roleConfigGroup",
                 Map.of("config", "newvalue"));
 
         ArgumentCaptor<ApiRoleConfigGroup> bodyCaptor = ArgumentCaptor.forClass(ApiRoleConfigGroup.class);
@@ -406,7 +406,7 @@ public class ClouderaManagerConfigServiceTest {
         when(clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(any())).thenReturn(roleConfigGroupsResourceApi);
         when(roleConfigGroupsResourceApi.updateRoleConfigGroup(any(), any(), any(), any(), any())).thenThrow(new ApiException("something"));
 
-        assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.modifyRoleConfigGroups(API_CLIENT, "cluster",
+        assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.modifyRoleConfigGroup(API_CLIENT, "cluster",
                 "service", "roleConfigGroup", Map.of("config", "newvalue")));
 
         verify(roleConfigGroupsResourceApi).updateRoleConfigGroup(any(), any(), any(), any(), any());

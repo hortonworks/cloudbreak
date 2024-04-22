@@ -84,6 +84,9 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.cm.config.modification.ClouderaManagerConfigModificationService;
+import com.sequenceiq.cloudbreak.cm.config.modification.CmConfig;
+import com.sequenceiq.cloudbreak.cm.config.modification.CmServiceType;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerParcelActivationTimeoutException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
@@ -1167,10 +1170,13 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Override
     public void updateConfig(Table<String, String, String> configTable) throws Exception {
-        clouderaManagerConfigModificationService.updateConfig(configTable, v31Client, stack);
+        List<CmConfig> newConfigs = configTable.cellSet().stream()
+                .map(cell -> new CmConfig(new CmServiceType(cell.getRowKey()), cell.getColumnKey(), cell.getValue()))
+                .toList();
+        clouderaManagerConfigModificationService.updateConfigs(newConfigs, v31Client, stack);
         LOGGER.info("Updating relevant configs finished for cluster {} in CM, deploying client configs and restarting services.", stack.getName());
         clouderaManagerRoleRefreshService.refreshClusterRoles(v31Client, stack);
-        List<String> serviceNames = clouderaManagerConfigModificationService.serviceNames(configTable, v31Client, stack);
+        List<String> serviceNames = clouderaManagerConfigModificationService.getServiceNames(newConfigs, v31Client, stack);
         restartGivenServices(serviceNames);
     }
 
@@ -1181,7 +1187,10 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Override
     public void updateConfigWithoutRestart(Table<String, String, String> configTable) throws Exception {
-        clouderaManagerConfigModificationService.updateConfig(configTable, v31Client, stack);
+        List<CmConfig> newConfigs = configTable.cellSet().stream()
+                .map(cell -> new CmConfig(new CmServiceType(cell.getRowKey()), cell.getColumnKey(), cell.getValue()))
+                .toList();
+        clouderaManagerConfigModificationService.updateConfigs(newConfigs, v31Client, stack);
         LOGGER.info("Updating relevant configs finished for cluster {} in CM, deploying client configs and restarting services is skipped.", stack.getName());
     }
 
