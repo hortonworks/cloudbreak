@@ -58,6 +58,7 @@ public class AzureExistingPrivateDnsZoneValidatorServiceTest {
         resultBuilder = underTest.validate(azureClient, NETWORK_RESOURCE_GROUP_NAME, NETWORK_NAME, serviceToPrivateDnsZoneId, resultBuilder);
 
         assertFalse(resultBuilder.build().hasError());
+        assertFalse(resultBuilder.build().hasWarning());
         verify(azurePrivateDnsZoneValidatorService).existingPrivateDnsZoneNameIsSupported(eq(azurePrivateDnsZoneDescriptor), any(),
                 eq(resultBuilder));
         verify(azurePrivateDnsZoneValidatorService).privateDnsZoneExists(eq(azureClient), any(), eq(resultBuilder));
@@ -75,6 +76,7 @@ public class AzureExistingPrivateDnsZoneValidatorServiceTest {
 
         ValidationTestUtil.checkErrorsPresent(resultBuilder, List.of("The provided private DNS zone id invalidPrivateDnsZoneId for service " +
                 "privateDnsZoneService is not a valid azure resource id."));
+        assertFalse(resultBuilder.build().hasWarning());
         verify(azurePrivateDnsZoneValidatorService, never()).existingPrivateDnsZoneNameIsSupported(any(), any(), eq(resultBuilder));
         verify(azurePrivateDnsZoneValidatorService, never()).privateDnsZoneExists(any(), any(), any());
         verify(azurePrivateDnsZoneValidatorService, never()).privateDnsZoneConnectedToNetwork(any(), anyString(), anyString(), any(), any());
@@ -90,6 +92,7 @@ public class AzureExistingPrivateDnsZoneValidatorServiceTest {
         resultBuilder = underTest.validate(azureClient, NETWORK_RESOURCE_GROUP_NAME, NETWORK_NAME, serviceToPrivateDnsZoneId, resultBuilder);
 
         assertFalse(resultBuilder.build().hasError());
+        assertFalse(resultBuilder.build().hasWarning());
         verify(azurePrivateDnsZoneValidatorService, never()).existingPrivateDnsZoneNameIsSupported(any(), any(), eq(resultBuilder));
         verify(azurePrivateDnsZoneValidatorService, never()).privateDnsZoneExists(any(), any(), any());
         verify(azurePrivateDnsZoneValidatorService, never()).privateDnsZoneConnectedToNetwork(any(), anyString(), anyString(), any(), any());
@@ -109,6 +112,7 @@ public class AzureExistingPrivateDnsZoneValidatorServiceTest {
 
         ValidationTestUtil.checkErrorsPresent(resultBuilder, List.of("The provided private DNS zone id invalidPrivateDnsZoneId for service " +
                 "privateDnsZoneServiceB is not a valid azure resource id."));
+        assertFalse(resultBuilder.build().hasWarning());
         verify(azurePrivateDnsZoneValidatorService).existingPrivateDnsZoneNameIsSupported(eq(azurePrivateDnsZoneDescriptorA), any(),
                 eq(resultBuilder));
         verify(azurePrivateDnsZoneValidatorService).privateDnsZoneExists(eq(azureClient), any(), eq(resultBuilder));

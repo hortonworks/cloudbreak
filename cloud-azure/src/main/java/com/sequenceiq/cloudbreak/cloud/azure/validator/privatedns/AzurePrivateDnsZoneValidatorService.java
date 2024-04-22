@@ -5,6 +5,7 @@ import static com.azure.resourcemanager.privatedns.models.ProvisioningState.SUCC
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 import jakarta.inject.Inject;
 
@@ -32,13 +33,13 @@ public class AzurePrivateDnsZoneValidatorService {
     @Inject
     private AzurePrivateDnsZoneMatcherService azurePrivateDnsZoneMatcherService;
 
-    public ValidationResult.ValidationResultBuilder existingPrivateDnsZoneNameIsSupported(AzurePrivateDnsZoneDescriptor dnsZoneDescriptor,
-            ResourceId existingPrivateDnsZoneResourceId, ValidationResult.ValidationResultBuilder resultBuilder) {
+    public ValidationResultBuilder existingPrivateDnsZoneNameIsSupported(AzurePrivateDnsZoneDescriptor dnsZoneDescriptor,
+            ResourceId existingPrivateDnsZoneResourceId, ValidationResultBuilder resultBuilder) {
         if (!azurePrivateDnsZoneMatcherService.zoneNameMatchesPattern(dnsZoneDescriptor, existingPrivateDnsZoneResourceId.name())) {
             String validationMessage = String.format("The provided private DNS zone %s is not a valid DNS zone name for %s. Please use a DNS zone with " +
                     "name %s and try again.", existingPrivateDnsZoneResourceId.id(), dnsZoneDescriptor.getResourceType(),
                     dnsZoneDescriptor.getDnsZoneName(existingPrivateDnsZoneResourceId.resourceGroupName()));
-            addValidationError(validationMessage, resultBuilder);
+            addValidation(validationMessage, resultBuilder::error);
         }
         return resultBuilder;
     }
@@ -52,23 +53,24 @@ public class AzurePrivateDnsZoneValidatorService {
         if (!privateDnsZoneExists) {
             String validationMessage = String.format("The provided private DNS zone %s does not exist or you have no permission to access it. Please make " +
                     "sure the specified private DNS zone exists and try environment creation again.", privateDnsZoneResourceId.id());
-            addValidationError(validationMessage, resultBuilder);
+            addValidation(validationMessage, resultBuilder::error);
         }
         return resultBuilder;
     }
 
-    public ValidationResult.ValidationResultBuilder privateDnsZoneConnectedToNetwork(AzureClient azureClient, String networkResourceGroupName,
-            String networkName, ResourceId privateDnsZoneResourceId,
-            ValidationResult.ValidationResultBuilder resultBuilder) {
+    public ValidationResultBuilder privateDnsZoneConnectedToNetwork(AzureClient azureClient, String networkResourceGroupName,
+            String networkName, ResourceId privateDnsZoneResourceId, ValidationResultBuilder resultBuilder) {
         String networkId = azureClient.getNetworkByResourceGroup(networkResourceGroupName, networkName).id();
         List<String> connectedNetworks = azureClient.listNetworkLinksByPrivateDnsZoneName(
                         privateDnsZoneResourceId.subscriptionId(), privateDnsZoneResourceId.resourceGroupName(), privateDnsZoneResourceId.name())
                 .getStream(AZURE_HANDLE_ALL_EXCEPTIONS)
                 .map(vnl -> vnl.virtualNetwork().id()).toList();
         if (!connectedNetworks.contains(networkId)) {
-            String validationMessage = String.format("The private DNS zone %s does not have a network link to network %s. Please make sure the private DNS " +
+            String validationMessage = String.format("The private DNS zone %s does not have a network link to network %s. " +
+                    "Would you have a Hub and Spoke architecture with DNS Forwarders configured, network link is not required. " +
+                    "Otherwise, please ensure that the private DNS " +
                     "zone is connected to the network provided to the environment.", privateDnsZoneResourceId.id(), networkName);
-            addValidationError(validationMessage, resultBuilder);
+            addValidation(validationMessage, resultBuilder::warning);
         }
         return resultBuilder;
     }
@@ -88,15 +90,15 @@ public class AzurePrivateDnsZoneValidatorService {
             String validationMessage = String.format("Network link for the network %s already exists for Private DNS Zone %s in resource group %s. "
                             + "Please ensure that there is no existing network link and try again!",
                     networkId, dnsZoneName, privateZone.resourceGroupName());
-            addValidationError(validationMessage, resultBuilder);
+            addValidation(validationMessage, resultBuilder::error);
         }
 
         return resultBuilder.build();
     }
 
-    private void addValidationError(String validationMessage, ValidationResultBuilder resultBuilder) {
+    private void addValidation(String validationMessage, Function<String, ValidationResultBuilder> resultBuilderFunction) {
         LOGGER.warn(validationMessage);
-        resultBuilder.error(validationMessage);
+        resultBuilderFunction.apply(validationMessage);
     }
 
 }

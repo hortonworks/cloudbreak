@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.cluster;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -110,6 +111,25 @@ class ClusterStartHandlerServiceTest {
         when(rdsSettingsMigrationService.collectRdsConfigs(any(), any())).thenReturn(rdsConfigs);
         Table<String, String, String> cmServiceConfigs = HashBasedTable.create();
         when(rdsSettingsMigrationService.collectCMServiceConfigs(rdsConfigs)).thenReturn(cmServiceConfigs);
+        // WHEN
+        underTest.startCluster(stack, cmTemplateProcessor, false);
+        // THEN
+        verify(connector).startClusterManagerAndAgents();
+        verify(rdsSettingsMigrationService).updateCMServiceConfigs(stack, cmServiceConfigs);
+        verify(connector).startCluster(true);
+    }
+
+    @Test
+    void testStartClusterWithSharedRdsConfigRefreshAndException() throws Exception {
+        // GIVEN
+        Optional<Stack> datalake = Optional.of(new Stack());
+        when(datalakeService.getDatalakeStackByDatahubStack(stack)).thenReturn(datalake);
+        when(clusterServicesRestartService.isRemoteDataContextRefreshNeeded(any(), any())).thenReturn(false);
+        Set<RDSConfig> rdsConfigs = Set.of(new RDSConfig());
+        when(rdsSettingsMigrationService.collectRdsConfigs(any(), any())).thenReturn(rdsConfigs);
+        Table<String, String, String> cmServiceConfigs = HashBasedTable.create();
+        when(rdsSettingsMigrationService.collectCMServiceConfigs(rdsConfigs)).thenReturn(cmServiceConfigs);
+        doThrow(new RuntimeException("msg")).when(rdsSettingsMigrationService).updateCMServiceConfigs(any(), any());
         // WHEN
         underTest.startCluster(stack, cmTemplateProcessor, false);
         // THEN
