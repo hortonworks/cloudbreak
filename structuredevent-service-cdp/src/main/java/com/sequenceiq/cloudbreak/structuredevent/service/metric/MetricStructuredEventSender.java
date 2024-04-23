@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEventSenderService;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEvent;
-import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.cloudbreak.structuredevent.util.FlowStateUtil;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 
 @Component
@@ -68,7 +68,7 @@ public class MetricStructuredEventSender implements CDPStructuredEventSenderServ
 
     private void incrementFlowMetrics(FlowDetails flow) {
         AbstractFlowConfiguration flowConfiguration = flowConfigurationMap.get(flow.getFlowType());
-        Enum nextFlowState = getFlowStateEnum(flowConfiguration.getStateType(), flow.getNextFlowState());
+        Enum nextFlowState = FlowStateUtil.getFlowStateEnum(flowConfiguration.getStateType(), flow);
         String rootFlowChainType = getRootFlowChainType(flow.getFlowChainType());
         String actualFlowChainType = getActualFlowChainType(flow.getFlowChainType());
         AbstractFlowConfiguration.FlowEdgeConfig edgeConfig = flowConfiguration.getEdgeConfig();
@@ -101,29 +101,12 @@ public class MetricStructuredEventSender implements CDPStructuredEventSenderServ
             return false;
         }
         AbstractFlowConfiguration flowConfiguration = flowConfigurationMap.get(flowType);
-        Enum nextFlowState = getFlowStateEnum(flowConfiguration.getStateType(), flow.getNextFlowState());
-        if (nextFlowState == null) {
-            LOGGER.warn("Missing flow state enum for type: {}, state: {}", flowConfiguration.getStateType(), flow.getNextFlowState());
-            return false;
-        }
-        return true;
+        return FlowStateUtil.getFlowStateEnum(flowConfiguration.getStateType(), flow) != null;
     }
 
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-    private Enum<? extends FlowState> getFlowStateEnum(Class<? extends Enum> stateClass, String stateValue) {
-        if (StringUtils.isEmpty(stateValue) || stateClass == null) {
-            return null;
-        }
-        try {
-            return Enum.valueOf(stateClass, stateValue);
-        } catch (Exception e) {
-            LOGGER.warn("Cannot get enum for class: {}, value: {}", stateClass, stateValue, e);
-            return null;
-        }
     }
 
     private String getRootFlowChainType(String flowChainTypes) {

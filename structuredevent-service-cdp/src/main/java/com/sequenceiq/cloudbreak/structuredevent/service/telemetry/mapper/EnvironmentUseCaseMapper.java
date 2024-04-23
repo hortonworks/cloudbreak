@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
-import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.cloudbreak.structuredevent.util.FlowStateUtil;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 
 @Component
@@ -60,9 +60,8 @@ public class EnvironmentUseCaseMapper {
             return UNSET;
         }
         AbstractFlowConfiguration flowConfiguration = flowConfigurationMap.get(flow.getFlowType());
-        Enum nextFlowState = getFlowStateEnum(flowConfiguration.getStateType(), flow.getNextFlowState());
+        Enum nextFlowState = FlowStateUtil.getFlowStateEnum(flowConfiguration.getStateType(), flow);
         if (nextFlowState == null) {
-            LOGGER.warn("Missing flow state enum for type: {}, state: {}", flowConfiguration.getStateType(), flow.getNextFlowState());
             return UNSET;
         }
         return getUseCaseFromFlowConfiguration(nextFlowState, flow.getFlowType());
@@ -75,18 +74,6 @@ public class EnvironmentUseCaseMapper {
         } else {
             EnvironmentUseCaseAware useCaseAwareFlowConfiguration = useCaseAwareFlowConfigurationMap.get(flowType);
             return useCaseAwareFlowConfiguration.getUseCaseForFlowState(nextFlowState);
-        }
-    }
-
-    private Enum<? extends FlowState> getFlowStateEnum(Class<? extends Enum> stateClass, String stateValue) {
-        if (StringUtils.isEmpty(stateValue) || stateClass == null) {
-            return null;
-        }
-        try {
-            return Enum.valueOf(stateClass, stateValue);
-        } catch (Exception e) {
-            LOGGER.warn("Cannot get enum for class: {}, value: {}", stateClass, stateValue, e);
-            return null;
         }
     }
 }

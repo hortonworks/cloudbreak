@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
-import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.cloudbreak.structuredevent.util.FlowStateUtil;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 
@@ -70,9 +70,8 @@ public class FreeIpaUseCaseMapper {
             return UNSET;
         }
         AbstractFlowConfiguration flowConfiguration = flowConfigurationMap.get(flow.getFlowType());
-        Enum nextFlowState = getFlowStateEnum(flowConfiguration.getStateType(), flow.getNextFlowState());
+        Enum nextFlowState = FlowStateUtil.getFlowStateEnum(flowConfiguration.getStateType(), flow);
         if (nextFlowState == null) {
-            LOGGER.warn("Missing flow state enum for type: {}, state: {}", flowConfiguration.getStateType(), flow.getNextFlowState());
             return UNSET;
         }
         String rootFlowChainType = getRootFlowChainType(flow.getFlowChainType());
@@ -100,18 +99,6 @@ public class FreeIpaUseCaseMapper {
         } else {
             FreeIpaUseCaseAware useCaseAwareFlowEventChainFactory = useCaseAwareFlowEventChainFactoryMap.get(rootFlowChainType);
             return useCaseAwareFlowEventChainFactory.getUseCaseForFlowState(nextFlowState);
-        }
-    }
-
-    private Enum<? extends FlowState> getFlowStateEnum(Class<? extends Enum> stateClass, String stateValue) {
-        if (StringUtils.isEmpty(stateValue) || stateClass == null) {
-            return null;
-        }
-        try {
-            return Enum.valueOf(stateClass, stateValue);
-        } catch (Exception e) {
-            LOGGER.warn("Cannot get enum for class: {}, value: {}", stateClass, stateValue, e);
-            return null;
         }
     }
 
