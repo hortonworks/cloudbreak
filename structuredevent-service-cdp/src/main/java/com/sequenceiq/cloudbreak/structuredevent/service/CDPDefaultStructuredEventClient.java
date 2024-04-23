@@ -27,8 +27,6 @@ public class CDPDefaultStructuredEventClient {
      * Diverse implementations of {@code CDPStructuredEventSenderService} are used to send events to backing services, like DB or Kafka.
      */
     public void sendStructuredEvent(CDPStructuredEvent structuredEvent) {
-        String type = structuredEvent != null ? structuredEvent.getType() : "no structured event";
-        LOGGER.debug("Sending structured event: {}", type);
         for (CDPStructuredEventSenderService structuredEventSenderService : structuredEventServices) {
             LOGGER.trace("Send event {} with eventsender {}", structuredEvent, structuredEventSenderService.getClass());
             if (structuredEventSenderService.isEnabled()) {
@@ -40,6 +38,5 @@ public class CDPDefaultStructuredEventClient {
                 }
             }
         }
-        LOGGER.debug("Structured event sent to all receivers: {}", type);
     }
 }
