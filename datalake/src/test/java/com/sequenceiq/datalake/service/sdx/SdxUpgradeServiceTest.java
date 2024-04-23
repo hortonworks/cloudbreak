@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseResponse;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
@@ -37,6 +39,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.upgrade.OrderedOSUpgradeRequestProvider;
@@ -258,6 +261,35 @@ public class SdxUpgradeServiceTest {
         verify(exceptionMessageExtractor).getErrorMessage(exception);
     }
 
+    @Test
+    void testUpdateDbEngineVersionIfEmbeddedDbUpgradeHappenedNoDbInfo() {
+        StackV4Response stackV4Response = getStackV4Response();
+        when(sdxService.getById(STACK_ID)).thenReturn(sdxCluster);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_USER_CRN);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Set.of()), anyString())).thenReturn(stackV4Response);
+
+        underTest.updateDbEngineVersionIfEmbeddedDbUpgradeHappened(STACK_ID);
+
+        verify(sdxService, never()).updateDatabaseEngineVersion(anyString(), anyString());
+    }
+
+    @Test
+    void testUpdateDbEngineVersionIfEmbeddedDbUpgradeHappened() {
+        StackV4Response stackV4Response = getStackV4Response();
+        DatabaseResponse databaseResponse = new DatabaseResponse();
+        databaseResponse.setDatabaseEngineVersion("14");
+        stackV4Response.setExternalDatabase(databaseResponse);
+        when(sdxService.getById(STACK_ID)).thenReturn(sdxCluster);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_USER_CRN);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Set.of()), anyString())).thenReturn(stackV4Response);
+
+        underTest.updateDbEngineVersionIfEmbeddedDbUpgradeHappened(STACK_ID);
+
+        verify(sdxService, times(1)).updateDatabaseEngineVersion(sdxCluster.getCrn(), "14");
+    }
+
     private StackV4Response getStackV4Response() {
         ClouderaManagerProductV4Response cdp = new ClouderaManagerProductV4Response();
         cdp.setName("CDH");
@@ -294,6 +326,7 @@ public class SdxUpgradeServiceTest {
         sdxCluster.setId(STACK_ID);
         sdxCluster.setAccountId("accountid");
         sdxCluster.setDetached(false);
+        sdxCluster.setSdxDatabase(new SdxDatabase());
         return sdxCluster;
     }
 

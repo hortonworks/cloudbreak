@@ -109,6 +109,7 @@ integrationtest:
   upgradeDatabaseServer:
     originalDatabaseMajorVersion: 11
     targetDatabaseMajorVersion: 14
+    originalEmbeddedDbSdxVersion: 11
   privateEndpointEnabled: false
 
   spot:

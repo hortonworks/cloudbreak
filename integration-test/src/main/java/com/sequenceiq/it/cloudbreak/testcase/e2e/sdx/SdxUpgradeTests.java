@@ -9,6 +9,8 @@ import java.util.List;
 
 import jakarta.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.assertion.audit.DatalakeAuditGrpcServiceAssertion;
@@ -22,8 +24,11 @@ import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class SdxUpgradeTests extends PreconditionSdxE2ETest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxUpgradeTests.class);
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -36,6 +41,9 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest {
 
     @Inject
     private DatalakeAuditGrpcServiceAssertion datalakeAuditGrpcServiceAssertion;
+
+    @Inject
+    private SdxUpgradeDatabaseTestUtil sdxUpgradeDatabaseTestUtil;
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
@@ -54,6 +62,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest {
                 .given(sdx, SdxTestDto.class)
                 .withCloudStorage()
                 .withRuntimeVersion(commonClusterManagerProperties.getUpgrade().getCurrentRuntimeVersion())
+                .withExternalDatabase(sdxDbRequest())
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
@@ -74,9 +83,17 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
+                .then((tc, testDto, client) -> sdxUpgradeDatabaseTestUtil.checkEmbeddedDatabaseVersionFromMasterNode(tc, testDto))
                 // This assertion is disabled until the Audit Service is not configured.
                 //.then(datalakeAuditGrpcServiceAssertion::upgradeClusterByNameInternal)
                 .validate();
+    }
+
+    private SdxDatabaseRequest sdxDbRequest() {
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+        sdxDatabaseRequest.setDatabaseEngineVersion(commonClusterManagerProperties.getUpgradeDatabaseServer().getOriginalEmbeddedDbSdxVersion());
+        return sdxDatabaseRequest;
     }
 
     @Test(dataProvider = TEST_CONTEXT)

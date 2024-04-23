@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSetRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
@@ -133,6 +134,28 @@ public class SdxUpgradeService {
         LOGGER.info("Trying to update the runtime version from Cloudbreak for cluster: {}", clusterName);
         StackV4Response stack = retrieveStack(sdxCluster);
         return sdxService.updateRuntimeVersionFromStackResponse(sdxCluster, stack);
+    }
+
+    public void updateDbEngineVersionIfEmbeddedDbUpgradeHappened(Long sdxId) {
+        SdxCluster sdxCluster = sdxService.getById(sdxId);
+        if (!sdxCluster.getSdxDatabase().hasExternalDatabase()) {
+            StackV4Response stackV4Response = retrieveStack(sdxCluster);
+            updateDatabaseEngineVersion(stackV4Response, sdxCluster);
+        }
+    }
+
+    private void updateDatabaseEngineVersion(StackV4Response stackV4Response, SdxCluster sdxCluster) {
+        Optional.ofNullable(stackV4Response)
+                .map(StackV4Response::getExternalDatabase)
+                .map(DatabaseResponse::getDatabaseEngineVersion)
+                .ifPresentOrElse(engineVersion -> {
+                    if (!engineVersion.equals(sdxCluster.getDatabaseEngineVersion())) {
+                        sdxService.updateDatabaseEngineVersion(sdxCluster.getCrn(), stackV4Response.getExternalDatabase().getDatabaseEngineVersion());
+                        LOGGER.info("The embedded db engine version has been updated from Cloudbreak for cluster: {}", sdxCluster.getClusterName());
+                    }
+                }, () -> {
+                    LOGGER.info("The embedded db version is missing from the stack response, sdx db version update will be skipped!");
+                });
     }
 
     private StackV4Response retrieveStack(SdxCluster sdxCluster) {
