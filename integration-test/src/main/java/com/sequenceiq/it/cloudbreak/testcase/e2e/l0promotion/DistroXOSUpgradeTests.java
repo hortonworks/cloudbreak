@@ -4,7 +4,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import jakarta.inject.Inject;
 
-import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeReplaceVms;
@@ -47,11 +46,10 @@ public class DistroXOSUpgradeTests extends AbstractE2ETest {
         createEnvironmentWithFreeIpa(testContext);
     }
 
-    @Ignore("This test case should be re-enabled in case of OPSAPS-62124 has been resolved at MOW-Dev")
-    @Test(dataProvider = TEST_CONTEXT, description = "We need to wait the OPSAPS-62124 to be resolved")
+    @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running environment with freeIPA in available state",
-            when = "SDX (light duty) and base DistroX (5 nodes with master, compute and workers) should be created successfully",
+            when = "Default SDX and base DistroX (5 nodes with master, compute and workers) should be created successfully",
             and = "SDX then DistroX runtime upgrade done successfully after that OS upgrade called on DistroX",
             then = "DistroX upgrade should be successful, the cluster should be up and running")
     public void testBaseDistroXOSUpgrade(TestContext testContext) {
