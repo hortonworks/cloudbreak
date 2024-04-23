@@ -39,6 +39,7 @@ import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.binduser.UserSyncBindUserService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.config.SidGenerationConfigurator;
 import com.sequenceiq.freeipa.service.freeipa.host.MaxHostnameLengthPolicyService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
@@ -91,6 +92,9 @@ class FreeIpaPostInstallServiceTest {
 
     @Mock
     private MaxHostnameLengthPolicyService hostnameLengthPolicyService;
+
+    @Mock
+    private SidGenerationConfigurator sidGenerationConfigurator;
 
     @InjectMocks
     private FreeIpaPostInstallService underTest;
@@ -201,6 +205,7 @@ class FreeIpaPostInstallServiceTest {
         verifyNoInteractions(userSyncService);
         verifyUsersyncCommanPart(stack, gatewayConfig, nodes, ipaClient, user);
         verify(hostnameLengthPolicyService).updateMaxHostnameLength(stack, ipaClient);
+        verify(sidGenerationConfigurator).enableAndTriggerSidGeneration(stack, ipaClient);
     }
 
     private void mockUsersyncCommonPart(Stack stack, FreeIpaClient ipaClient, User user) throws FreeIpaClientException {
