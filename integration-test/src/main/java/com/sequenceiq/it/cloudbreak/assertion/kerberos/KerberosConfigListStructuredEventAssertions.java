@@ -23,7 +23,7 @@ public class KerberosConfigListStructuredEventAssertions {
         List<CDPStructuredEvent> auditEvents = client.getDefaultClient()
                 .structuredEventsV1Endpoint()
                 .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
-        eventAssertionCommon.checkRestEvents(auditEvents, Collections.singletonList("delete-kerberos"));
+        eventAssertionCommon.noRestEventsAreAllowedInDB(auditEvents);
         return testDto;
     }
 }

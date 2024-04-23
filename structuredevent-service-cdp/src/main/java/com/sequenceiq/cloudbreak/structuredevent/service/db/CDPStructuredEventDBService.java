@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.common.service.account.AbstractAccountAwareReso
 import com.sequenceiq.cloudbreak.structuredevent.domain.CDPStructuredEventEntity;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredNotificationEvent;
 import com.sequenceiq.cloudbreak.structuredevent.repository.CDPPagingStructuredEventRepository;
 import com.sequenceiq.cloudbreak.structuredevent.repository.CDPStructuredEventRepository;
 import com.sequenceiq.cloudbreak.structuredevent.service.CDPStructuredEventService;
@@ -50,15 +51,17 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
 
     @Override
     public void create(CDPStructuredEvent structuredEvent) {
-        LOGGER.info("Stored StructuredEvent type: {}, payload: {}", structuredEvent.getType(),
-                AnonymizerUtil.anonymize(JsonUtil.writeValueAsStringSilent(structuredEvent)));
-        ValidationResult validationResult = validate(structuredEvent);
-        if (validationResult.hasError()) {
-            LOGGER.warn(validationResult.getFormattedErrors());
-        } else {
-            CDPStructuredEventEntity structuredEventEntityEntity = cdpStructuredEventToCDPStructuredEventEntityConverter
-                    .convert(structuredEvent);
-            create(structuredEventEntityEntity, structuredEventEntityEntity.getAccountId());
+        if (structuredEvent != null && CDPStructuredNotificationEvent.class.getSimpleName().equals(structuredEvent.getType())) {
+            LOGGER.info("Stored StructuredEvent type: {}, payload: {}", structuredEvent.getType(),
+                    AnonymizerUtil.anonymize(JsonUtil.writeValueAsStringSilent(structuredEvent)));
+            ValidationResult validationResult = validate(structuredEvent);
+            if (validationResult.hasError()) {
+                LOGGER.warn(validationResult.getFormattedErrors());
+            } else {
+                CDPStructuredEventEntity structuredEventEntityEntity = cdpStructuredEventToCDPStructuredEventEntityConverter
+                        .convert(structuredEvent);
+                create(structuredEventEntityEntity, structuredEventEntityEntity.getAccountId());
+            }
         }
     }
 

@@ -32,16 +32,14 @@ public class EventAssertionCommon {
         return id;
     }
 
-    public void checkRestEvents(List<CDPStructuredEvent> auditEvents, List<String> expectedIds) {
+    public void noRestEventsAreAllowedInDB(List<CDPStructuredEvent> auditEvents) {
         List<String> eventStates = auditEvents.stream()
                 .filter(event -> "CDPStructuredRestCallEvent".equals(event.getType()))
                 .map(event -> generateRestId((CDPStructuredRestCallEvent) event))
                 .collect(Collectors.toList());
-        boolean containsAll = eventStates.containsAll(expectedIds);
-        if (!containsAll) {
-            List<String> mutableList = new ArrayList<>(expectedIds);
-            mutableList.removeAll(eventStates);
-            throw new TestFailException("Cannot find all rest events: " + mutableList);
+
+        if (!eventStates.isEmpty()) {
+            throw new TestFailException("CDPStructuredRestCallEvent are present in the DB: " + eventStates);
         }
     }
 
@@ -58,16 +56,14 @@ public class EventAssertionCommon {
         }
     }
 
-    public void checkFlowEvents(List<CDPStructuredEvent> auditEvents, List<String> expectedStates) {
+    public void noFlowEventsAreAllowedInDB(List<CDPStructuredEvent> auditEvents) {
         List<String> eventStates = auditEvents.stream()
                 .filter(event -> "CDPStructuredFlowEvent".equals(event.getType()))
                 .map(event -> ((CDPStructuredFlowEvent) event).getFlow().getFlowState())
                 .collect(Collectors.toList());
-        boolean containsAll = eventStates.containsAll(expectedStates);
-        if (!containsAll) {
-            List<String> mutableList = new ArrayList<>(expectedStates);
-            mutableList.removeAll(eventStates);
-            throw new TestFailException("Cannot find all flow state: " + mutableList);
+
+        if (!eventStates.isEmpty()) {
+            throw new TestFailException("CDPStructuredFlowEvent are present in the DB: " + eventStates);
         }
     }
 }

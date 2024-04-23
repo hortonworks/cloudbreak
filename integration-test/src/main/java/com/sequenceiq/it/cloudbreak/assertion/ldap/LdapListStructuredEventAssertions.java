@@ -23,7 +23,7 @@ public class LdapListStructuredEventAssertions {
         List<CDPStructuredEvent> auditEvents = client.getDefaultClient()
                 .structuredEventsV1Endpoint()
                 .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
-        eventAssertionCommon.checkRestEvents(auditEvents, Collections.singletonList("post-ldap"));
+        eventAssertionCommon.noRestEventsAreAllowedInDB(auditEvents);
         return testDto;
     }
 
@@ -31,7 +31,7 @@ public class LdapListStructuredEventAssertions {
         List<CDPStructuredEvent> auditEvents = client.getDefaultClient()
                 .structuredEventsV1Endpoint()
                 .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
-        eventAssertionCommon.checkRestEvents(auditEvents, Collections.singletonList("delete-ldap"));
+        eventAssertionCommon.noRestEventsAreAllowedInDB(auditEvents);
         return testDto;
     }
 }

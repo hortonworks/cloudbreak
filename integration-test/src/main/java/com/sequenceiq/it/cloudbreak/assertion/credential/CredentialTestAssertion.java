@@ -23,9 +23,7 @@ public class CredentialTestAssertion {
         return (testContext, entity, client) -> {
             List<CDPStructuredEvent> auditEvents = client.getDefaultClient().structuredEventsV1Endpoint()
                     .getAuditEvents(entity.getCrn(), Collections.emptyList(), 0, 100);
-            eventAssertionCommon.checkRestEvents(auditEvents, List.of("post-credential",
-                    "put-credential",
-                    "delete-credential-" + entity.getName()));
+            eventAssertionCommon.noRestEventsAreAllowedInDB(auditEvents);
             return entity;
         };
     }
