@@ -238,6 +238,7 @@ public class DatalakeUpgradeActions {
                         ResourceEvent.DATALAKE_UPGRADE_FINISHED,
                         "Upgrade finished",
                         payload.getResourceId());
+                sdxUpgradeService.updateDbEngineVersionIfEmbeddedDbUpgradeHappened(payload.getResourceId());
                 sendEvent(context, DATALAKE_UPGRADE_FINALIZED_EVENT.event(), payload);
             }
 
