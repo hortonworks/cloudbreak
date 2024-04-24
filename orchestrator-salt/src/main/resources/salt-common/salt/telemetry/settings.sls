@@ -2,6 +2,7 @@
 
 {% set platform = salt['pillar.get']('telemetry:platform') %}
 
+{% set environment_crn = salt['pillar.get']('telemetry:environmentCrn') %}
 {% set cluster_crn = salt['pillar.get']('telemetry:clusterCrn') %}
 {% set cluster_name = salt['pillar.get']('telemetry:clusterName') %}
 {% set cluster_version = salt['pillar.get']('telemetry:clusterVersion') %}
@@ -102,6 +103,7 @@
 
 {% do telemetry.update({
     "platform": platform,
+    "environmentCrn": environment_crn,
     "clusterCrn": cluster_crn,
     "clusterName": cluster_name,
     "clusterVersion": cluster_version,

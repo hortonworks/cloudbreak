@@ -20,6 +20,8 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 public class MeteringConfigServiceTest {
 
+    private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:default:environment:e438a2db-d650-4132-ae62-242c5ba2f784";
+
     private MeteringConfigService underTest;
 
     @BeforeEach
@@ -85,6 +87,7 @@ public class MeteringConfigServiceTest {
         TelemetryClusterDetails clusterDetails = TelemetryClusterDetails.Builder.builder()
                 .withPlatform("AWS")
                 .withCrn("crn")
+                .withEnvironmentCrn(ENVIRONMENT_CRN)
                 .build();
         context.setClusterDetails(clusterDetails);
         Telemetry telemetry = new Telemetry();

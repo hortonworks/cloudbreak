@@ -4,4 +4,5 @@ telemetry:
   clusterCrn:
   clusterOwner:
   clusterVersion:
+  environmentCrn:
 

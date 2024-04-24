@@ -31,6 +31,8 @@ public class TelemetryClusterDetails {
 
     private final String databusS3Endpoint;
 
+    private final String environmentCrn;
+
     private TelemetryClusterDetails(Builder builder) {
         this.name = builder.name;
         this.type = builder.type;
@@ -41,6 +43,7 @@ public class TelemetryClusterDetails {
         this.databusEndpoint = builder.databusEndpoint;
         this.databusEndpointValidation = builder.databusEndpointValidation;
         this.databusS3Endpoint = builder.databusS3Endpoint;
+        this.environmentCrn = builder.environmentCrn;
     }
 
     public String getName() {
@@ -75,12 +78,17 @@ public class TelemetryClusterDetails {
         return databusEndpointValidation;
     }
 
+    public String getEnvironmentCrn() {
+        return environmentCrn;
+    }
+
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("platform", ObjectUtils.defaultIfNull(this.platform, EMPTY_CONFIG_DEFAULT));
         map.put("clusterName", this.name);
         map.put("clusterType", ObjectUtils.defaultIfNull(this.type, CLUSTER_TYPE_DEFAULT));
         map.put(CLUSTER_CRN_KEY, this.crn);
+        map.put("environmentCrn", this.environmentCrn);
         map.put("clusterOwner", this.owner);
         map.put("clusterVersion", this.version);
         map.put("databusEndpoint", this.databusEndpoint);
@@ -108,6 +116,8 @@ public class TelemetryClusterDetails {
         private boolean databusEndpointValidation;
 
         private String databusS3Endpoint;
+
+        private String environmentCrn;
 
         private Builder() {
         }
@@ -162,6 +172,11 @@ public class TelemetryClusterDetails {
 
         public Builder withDatabusS3Endpoint(String databusS3Endpoint) {
             this.databusS3Endpoint = databusS3Endpoint;
+            return this;
+        }
+
+        public Builder withEnvironmentCrn(String environmentCrn) {
+            this.environmentCrn = environmentCrn;
             return this;
         }
 

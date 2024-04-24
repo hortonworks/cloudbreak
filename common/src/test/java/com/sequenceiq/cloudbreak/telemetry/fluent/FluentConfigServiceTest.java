@@ -37,8 +37,11 @@ public class FluentConfigServiceTest {
 
     private static final String DATAHUB_CRN = "crn:cdp:datahub:eu-1:1234:user:91011";
 
+    private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:default:environment:e438a2db-d650-4132-ae62-242c5ba2f784";
+
     private static final TelemetryClusterDetails DEFAULT_FLUENT_CLUSTER_DETAILS =
-            TelemetryClusterDetails.Builder.builder().withType(CLUSTER_TYPE_DEFAULT).withPlatform(PLATFORM_DEFAULT).withCrn(DATAHUB_CRN).build();
+            TelemetryClusterDetails.Builder.builder().withType(CLUSTER_TYPE_DEFAULT).withPlatform(PLATFORM_DEFAULT)
+                    .withCrn(DATAHUB_CRN).withEnvironmentCrn(ENVIRONMENT_CRN).build();
 
     private FluentConfigService underTest;
 

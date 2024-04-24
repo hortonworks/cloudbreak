@@ -260,6 +260,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
                 .withName(stack.getName())
                 .withType(mapToFluentClusterType(stack.getType()).value())
                 .withCrn(clusterCrn)
+                .withEnvironmentCrn(stack.getEnvironmentCrn())
                 .withPlatform(stack.getCloudPlatform())
                 .withVersion(version)
                 .withDatabusEndpoint(databusContext.getEndpoint())

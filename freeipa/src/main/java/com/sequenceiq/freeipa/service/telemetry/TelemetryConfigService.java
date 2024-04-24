@@ -241,6 +241,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
                 .withVersion(version)
                 .withPlatform(stack.getCloudPlatform())
                 .withCrn(stack.getResourceCrn())
+                .withEnvironmentCrn(stack.getEnvironmentCrn())
                 .withName(stack.getName())
                 .withType(FluentClusterType.FREEIPA.value())
                 .withOwner(stack.getOwner())

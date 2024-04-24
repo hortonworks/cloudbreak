@@ -69,6 +69,7 @@ scrape_configs:
          app_type: {{ telemetry.clusterType }}
          cluster_id: {{ telemetry.clusterCrn }}
          platform: {{ telemetry.platform }}
+         environment_crn: {{ telemetry.environmentCrn }}
 {%- if hostgroup %}
          hostgroup: {{ hostgroup }}
 {%- endif %}
@@ -92,6 +93,7 @@ scrape_configs:
          app_type: {{ telemetry.clusterType }}
          cluster_id: {{ telemetry.clusterCrn }}
          platform: {{ telemetry.platform }}
+         environment_crn: {{ telemetry.environmentCrn }}
 {%- if hostgroup %}
          hostgroup: {{ hostgroup }}
 {%- endif %}
@@ -118,6 +120,7 @@ scrape_configs:
         labels:
           resource_crn: {{ telemetry.clusterCrn }}
           platform: {{ telemetry.platform }}
+          environment_crn: {{ telemetry.environmentCrn }}
 {%- if hostgroup %}
           hostgroup: {{ hostgroup }}
 {%- endif %}
@@ -150,6 +153,7 @@ scrape_configs:
         labels:
           resource_crn: {{ telemetry.clusterCrn }}
           platform: {{ telemetry.platform }}
+          environment_crn: {{ telemetry.environmentCrn }}
 {%- if hostgroup %}
           hostgroup: {{ hostgroup }}
 {%- endif %}
@@ -183,6 +187,7 @@ scrape_configs:
         labels:
           resource_crn: {{ telemetry.clusterCrn }}
           platform: {{ telemetry.platform }}
+          environment_crn: {{ telemetry.environmentCrn }}
 {%- if hostgroup %}
           hostgroup: {{ hostgroup }}
 {%- endif %}
@@ -213,6 +218,7 @@ scrape_configs:
         labels:
           cluster_id: {{ telemetry.clusterCrn }}
           platform: {{ telemetry.platform }}
+          environment_crn: {{ telemetry.environmentCrn }}
     relabel_configs:
       - target_label: instance
         replacement: {{ instance_name }}:{{ monitoring.cmMetricsExporterPort }}
