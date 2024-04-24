@@ -53,13 +53,13 @@ docker run -v "$(pwd)"/integcb/docker-containers/docker-environment:/integcb/doc
  busybox:1.31.1 /bin/sh -c "sed -i '/environment-\$VERSION/c\ADD environment.jar /' /integcb/docker-containers/docker-environment/Dockerfile"
 
 date
-echo -e "\n\033[1;96m--- Copy ../environment/build/libs/remote-environment.jar to docker-remote-environment directory\033[0m\n"
-cp -R ../docker-remote-environment/ ./integcb/docker-containers/docker-remote-environment/
-cp ../environment-remote/build/libs/remote-environment.jar ./integcb/docker-containers/docker-remote-environment
+echo -e "\n\033[1;96m--- Copy ../environment/build/libs/remote-environment.jar to docker-environment-remote directory\033[0m\n"
+cp -R ../docker-environment-remote/ ./integcb/docker-containers/docker-environment-remote/
+cp ../environment-remote/build/libs/remote-environment.jar ./integcb/docker-containers/docker-environment-remote
 date
 echo -e "\n\033[1;96m--- Change Dockerfile \033[0m\n"
-docker run -v "$(pwd)"/integcb/docker-containers/docker-remote-environment:/integcb/docker-containers/docker-remote-environment \
- busybox:1.31.1 /bin/sh -c "sed -i '/environment-remote-\$VERSION/c\ADD remote-environment.jar /' /integcb/docker-containers/docker-remote-environment/Dockerfile"
+docker run -v "$(pwd)"/integcb/docker-containers/docker-environment-remote:/integcb/docker-containers/docker-environment-remote \
+ busybox:1.31.1 /bin/sh -c "sed -i '/environment-remote-\$VERSION/c\ADD remote-environment.jar /' /integcb/docker-containers/docker-environment-remote/Dockerfile"
 
 date
 echo -e "\n\033[1;96m--- Copy ../redbeams/build/libs/redbeams.jar to docker-redbeams directory\033[0m\n"

@@ -6,6 +6,7 @@ set -e
 : ${TRUSTED_CERT_DIR:=/certs/trusted}
 : ${EXPOSE_JMX_BIND_ADDRESS:=0.0.0.0}
 : ${SERVICE_SPECIFIC_CERT_DIR:=/remoteenvironmentservice/certs}
+: ${CRYPTOSENSE_ENABLED:=false}
 
 echo "Importing certificates to the default Java certificate  trust store."
 
@@ -36,6 +37,10 @@ echo "Starting the Remote Environment application..."
 set -x
 if [ "$SECURE_RANDOM" == "false" ]; then
   REMOTE_ENVIRONMENT_JAVA_OPTS="$REMOTE_ENVIRONMENT_JAVA_OPTS -Djava.security.egd=file:/dev/./urandom"
+fi
+
+if [ "$CRYPTOSENSE_ENABLED" == "true" ]; then
+  REMOTE_ENVIRONMENT_JAVA_OPTS="$REMOTE_ENVIRONMENT_JAVA_OPTS -Dcryptosense.agent.out=/cryptosense/logs -javaagent:/cryptosense/cs-java-tracer.jar"
 fi
 
 REMOTE_ENVIRONMENT_JAVA_OPTS="$REMOTE_ENVIRONMENT_JAVA_OPTS -Djavax.net.ssl.keyStore=NONE -Djavax.net.ssl.keyStoreType=PKCS11 -Djavax.net.ssl.trustStore=NONE -Djavax.net.ssl.trustStoreType=PKCS11"
