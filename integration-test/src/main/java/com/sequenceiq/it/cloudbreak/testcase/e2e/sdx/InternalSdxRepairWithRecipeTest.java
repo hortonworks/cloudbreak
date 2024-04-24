@@ -22,7 +22,6 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
@@ -37,13 +36,11 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
-import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.SecretRotationCheckUtil;
@@ -118,17 +115,11 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
         String clouderaManager = resourcePropertyProvider().getName();
         String recipeName = resourcePropertyProvider().getName();
         String stack = resourcePropertyProvider().getName();
-        String imageSettings = resourcePropertyProvider().getName();
 
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
 
-        String selectedImageID = getLatestPrewarmedImageId(testContext);
-
         testContext
-                .given(imageSettings, ImageSettingsTestDto.class)
-                .withImageCatalog(commonCloudProperties().getImageCatalogName())
-                .withImageId(selectedImageID)
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
                 .withBlueprintName(getDefaultSDXBlueprintName())
@@ -150,7 +141,6 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .given(stack, StackTestDto.class)
                 .withCluster(cluster)
                 .withInstanceGroups(MASTER_INSTANCEGROUP, IDBROKER_INSTANCEGROUP)
-                .withImageSettings(imageSettings)
                 .given(TELEMETRY, TelemetryTestDto.class)
                 .withLogging()
                 .withReportClusterLogs()
@@ -163,14 +153,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .awaitForHealthyInstances()
-                .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName(), IDBROKER.getName()), FILEPATH, FILENAME, 1, sshJUtil))
-                .then((tc, dto, client) -> {
-                    if (!StringUtils.equalsIgnoreCase(dto.getResponse().getStackV4Response().getImage().getId(), selectedImageID)) {
-                        throw new TestFailException(String.format("The datalake image Id (%s) do NOT match with the selected pre-warmed image Id: '%s'!",
-                                dto.getResponse().getStackV4Response().getImage().getId(), selectedImageID));
-                    }
-                    return dto;
-                });
+                .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName(), IDBROKER.getName()), FILEPATH, FILENAME, 1, sshJUtil));
     }
 
     private void secretRotation(TestContext testContext) {

@@ -36,9 +36,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpFreeIp
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.RootVolumeV4TestDto;
@@ -55,7 +53,6 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestD
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentSecurityAccessTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
@@ -63,7 +60,6 @@ import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
-import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.gcp.GcpCloudFunctionality;
 
@@ -438,42 +434,8 @@ public class GcpCloudProvider extends AbstractCloudProvider {
         return gcpProperties.getCloudStorage().getGcs().getServiceAccountEmail();
     }
 
-    @Override
-    public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
-        return imageSettings
-                .withImageId(gcpProperties.getBaseimage().getImageId())
-                .withImageCatalog(commonCloudProperties().getImageCatalogName());
-    }
-
-    @Override
-    public String getLatestPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        return getLatestPreWarmedImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.GCP.name(), false);
-    }
-
-    @Override
-    public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        if (gcpProperties.getBaseimage().getImageId() == null || gcpProperties.getBaseimage().getImageId().isEmpty()) {
-            return getLatestDefaultBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.GCP.name(), false);
-        } else {
-            return getLatestBaseImageID();
-        }
-    }
-
-    @Override
-    public String getLatestBaseImageID() {
-        Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
-        Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
-        Log.log(LOGGER, format(" Image ID for SDX create: %s ", gcpProperties.getBaseimage().getImageId()));
-        return gcpProperties.getBaseimage().getImageId();
-    }
-
     public String getImageCatalogUrl() {
         return commonCloudProperties().getImageCatalogUrl();
-    }
-
-    @Override
-    public void setImageId(String id) {
-        gcpProperties.getBaseimage().setImageId(id);
     }
 
     private <T> T notImplementedException() {
@@ -542,10 +504,5 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     @Override
     public boolean isExternalDatabaseSslEnforcementSupported() {
         return gcpProperties.getExternalDatabaseSslEnforcementSupported();
-    }
-
-    @Override
-    public String getLatestPreWarmedImageIDByRuntime(TestContext tc, ImageCatalogTestDto dto, CloudbreakClient client, String runtime) {
-        return getLatestDefaultPreWarmedImageByRuntimeVersion(dto, client, CloudPlatform.GCP.name(), false, runtime);
     }
 }

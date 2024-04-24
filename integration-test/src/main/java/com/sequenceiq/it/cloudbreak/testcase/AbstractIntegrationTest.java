@@ -9,12 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.ITestResult;
 import org.testng.annotations.BeforeMethod;
+import org.testng.util.Strings;
 
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
-import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateRetryAction;
 import com.sequenceiq.it.cloudbreak.client.AzureMarketplaceTermsClient;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
@@ -135,6 +135,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     }
 
     protected void initiateDatalakeCreation(TestContext testContext) {
+        createDefaultImageCatalog(testContext);
         testContext
                 .given(SdxInternalTestDto.class)
                     .withCloudStorage(getCloudStorageRequest(testContext))
@@ -145,6 +146,8 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     }
 
     protected void initiateDatalakeCreationWithAutoTlsAndExternalDb(TestContext testContext) {
+        createDefaultImageCatalog(testContext);
+
         SdxDatabaseRequest databaseRequest = new SdxDatabaseRequest();
         databaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
 
@@ -168,6 +171,8 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     }
 
     protected void createDatalakeWithoutDatabase(TestContext testContext) {
+        createDefaultImageCatalog(testContext);
+
         SdxDatabaseRequest database = new SdxDatabaseRequest();
         database.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
         database.setCreate(false);
@@ -272,8 +277,23 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     protected void createDefaultImageCatalog(TestContext testContext) {
         testContext
                 .given(ImageCatalogTestDto.class)
-                .when(new ImageCatalogCreateRetryAction())
+                .when(imageCatalogTestClient.createIfNotExistV4())
                 .validate();
+        createImageValidationImageCatalog(testContext);
+    }
+
+    protected void createImageValidationImageCatalog(TestContext testContext) {
+        String catalogName = commonCloudProperties().getImageValidation().getSourceCatalogName();
+        String catalogUrl = commonCloudProperties().getImageValidation().getSourceCatalogUrl();
+        if (Strings.isNotNullAndNotEmpty(catalogName) && Strings.isNotNullAndNotEmpty(catalogUrl)) {
+            testContext
+                    .given(ImageCatalogTestDto.class)
+                        .withName(catalogName)
+                        .withUrl(catalogUrl)
+                        .withoutCleanup()
+                    .when(imageCatalogTestClient.createIfNotExistV4())
+                    .validate();
+        }
     }
 
     protected Set<String> createDefaultLdapConfig(TestContext testContext) {

@@ -71,8 +71,6 @@ public interface CloudProvider {
 
     String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient);
 
-    String getLatestBaseImageID();
-
     String getBaseImageTestCatalogName();
 
     String getBaseImageTestCatalogUrl();
@@ -183,8 +181,6 @@ public interface CloudProvider {
 
     void setImageCatalogUrl(String url);
 
-    void setImageId(String id);
-
     void setInstanceTemplateV1Parameters(InstanceTemplateV1Request instanceTemplateV1Request);
 
     String getFreeIpaImageCatalogUrl();
@@ -223,5 +219,4 @@ public interface CloudProvider {
 
     boolean isExternalDatabaseSslEnforcementSupported();
 
-    String getLatestPreWarmedImageIDByRuntime(TestContext tc, ImageCatalogTestDto dto, CloudbreakClient client, String runtime);
 }
