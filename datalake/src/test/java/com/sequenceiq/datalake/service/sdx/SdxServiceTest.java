@@ -1435,7 +1435,64 @@ class SdxServiceTest {
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "dl-name", sdxClusterResizeRequest)));
     }
 
+    @Test
     void testSdxResizeWithPreviousDatalakeModified() throws IOException {
+        SdxClusterResizeRequest resizeRequest = new SdxClusterResizeRequest();
+        resizeRequest.setEnvironment("environment");
+        resizeRequest.setClusterShape(ENTERPRISE);
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setId(1L);
+        sdxCluster.setClusterShape(MEDIUM_DUTY_HA);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
+        sdxCluster.setRuntime("7.2.18");
+        sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.STOPPED);
+        InstanceGroupV4Response masterIg = new InstanceGroupV4Response();
+        masterIg.setName("master");
+        InstanceTemplateV4Response masterIgTemplate = new InstanceTemplateV4Response();
+        masterIgTemplate.setInstanceType("m5.x4large");
+        masterIg.setTemplate(masterIgTemplate);
+        VolumeV4Response volumeV4Response = new VolumeV4Response();
+        volumeV4Response.setSize(1024);
+        masterIgTemplate.setAttachedVolumes(Set.of(volumeV4Response));
+        stackV4Response.setInstanceGroups(List.of(masterIg));
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString()))
+                .thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
+
+        mockEnvironmentCall(resizeRequest, AWS);
+        ArgumentCaptor<SdxCluster> captorResize = ArgumentCaptor.forClass(SdxCluster.class);
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), captorResize.capture(), any(DatalakeDrSkipOptions.class)))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/light_duty.json");
+        CDPConfigKey cdpConfigKeyLightDuty = new CDPConfigKey(AWS, MEDIUM_DUTY_HA, "7.2.18");
+        String enterpriseJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
+        CDPConfigKey cdpConfigKeyEnterprise = new CDPConfigKey(AWS, ENTERPRISE, "7.2.18");
+        when(cdpConfigService.getConfigForKey(eq(cdpConfigKeyLightDuty))).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
+        when(cdpConfigService.getConfigForKey(eq(cdpConfigKeyEnterprise))).thenReturn(JsonUtil.readValue(enterpriseJson, StackV4Request.class));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.resizeSdx(USER_CRN, sdxCluster.getClusterName(), resizeRequest));
+
+        StackV4Request stackV4Request = JsonUtil.readValue(captorResize.getValue().getStackRequest(), StackV4Request.class);
+        InstanceGroupV4Request idbrokerInstGroup = stackV4Request.getInstanceGroups().stream().filter(ig -> "idbroker".equals(ig.getName())).findAny().get();
+        InstanceGroupV4Request masterInstGroup = stackV4Request.getInstanceGroups().stream().filter(ig -> "master".equals(ig.getName())).findAny().get();
+        assertEquals("t3.medium", idbrokerInstGroup.getTemplate().getInstanceType());
+        assertEquals("m5.x4large", masterInstGroup.getTemplate().getInstanceType());
+        assertEquals(1024, masterInstGroup.getTemplate().getAttachedVolumes().stream().findAny().get().getSize());
+    }
+
+    @Test
+    void testSdxResizeWithLightDutyDatalakeModifiedShouldBeIgnored() throws IOException {
         SdxClusterResizeRequest resizeRequest = new SdxClusterResizeRequest();
         resizeRequest.setEnvironment("environment");
         resizeRequest.setClusterShape(ENTERPRISE);
@@ -1486,8 +1543,8 @@ class SdxServiceTest {
         InstanceGroupV4Request idbrokerInstGroup = stackV4Request.getInstanceGroups().stream().filter(ig -> "idbroker".equals(ig.getName())).findAny().get();
         InstanceGroupV4Request masterInstGroup = stackV4Request.getInstanceGroups().stream().filter(ig -> "master".equals(ig.getName())).findAny().get();
         assertEquals("t3.medium", idbrokerInstGroup.getTemplate().getInstanceType());
-        assertEquals("m5.x4large", masterInstGroup.getTemplate().getInstanceType());
-        assertEquals(1024, masterInstGroup.getTemplate().getAttachedVolumes().stream().findAny().get().getSize());
+        assertEquals("m5.xlarge", masterInstGroup.getTemplate().getInstanceType());
+        assertEquals(128, masterInstGroup.getTemplate().getAttachedVolumes().stream().findAny().get().getSize());
     }
 
     private DetailedEnvironmentResponse getDetailedEnvironmentResponse() {

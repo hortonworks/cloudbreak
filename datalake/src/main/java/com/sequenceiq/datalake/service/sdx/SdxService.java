@@ -524,7 +524,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 cloudPlatform, runtimeVersion, imageSettingsV4Request);
         setStackRequestParams(stackRequest, sdxClusterRequest.getJavaVersion(), sdxClusterRequest.isEnableRangerRaz(), sdxClusterRequest.isEnableRangerRms());
 
-        overrideDefaultInstanceType(stackRequest, sdxClusterRequest.getCustomInstanceGroups(), Collections.emptyList(), Collections.emptyList());
+        overrideDefaultInstanceType(stackRequest, sdxClusterRequest.getCustomInstanceGroups(), Collections.emptyList(), Collections.emptyList(),
+                sdxClusterRequest.getClusterShape());
         validateRecipes(sdxClusterRequest, stackRequest, userCrn);
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
         prepareDefaultSecurityConfigs(sdxClusterRequest.getClusterShape(), stackRequest, cloudPlatform);
@@ -555,7 +556,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     private void overrideDefaultInstanceType(StackV4Request defaultTemplate, List<SdxInstanceGroupRequest> customInstanceGroups,
-            List<InstanceGroupV4Request> originalInstanceGroups, List<InstanceGroupV4Response> currentInstanceGroups) {
+            List<InstanceGroupV4Request> originalInstanceGroups, List<InstanceGroupV4Response> currentInstanceGroups, SdxClusterShape sdxClusterShape) {
         if (CollectionUtils.isNotEmpty(customInstanceGroups)) {
             LOGGER.debug("Override default template with custom instance groups from request.");
             customInstanceGroups.forEach(customInstanceGroup -> {
@@ -563,7 +564,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                         .orElseThrow(() -> new BadRequestException("Custom instance group is missing from default template: " + customInstanceGroup.getName()));
                 overrideInstanceType(templateInstanceGroup, customInstanceGroup.getInstanceType());
             });
-        } else if (CollectionUtils.isNotEmpty(originalInstanceGroups) && CollectionUtils.isNotEmpty(currentInstanceGroups)) {
+        } else if (CollectionUtils.isNotEmpty(originalInstanceGroups) && CollectionUtils.isNotEmpty(currentInstanceGroups)
+                && !SdxClusterShape.LIGHT_DUTY.equals(sdxClusterShape)) {
             LOGGER.debug("Override default template with previous instance groups");
             currentInstanceGroups.forEach(currentInstanceGroup -> {
                 originalInstanceGroups
@@ -684,8 +686,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         stackRequest.setResourceCrn(newSdxCluster.getCrn());
         List<InstanceGroupV4Request> originalInstanceGroups = getInstanceGroupsByCDPConfig(sdxCluster.getClusterShape(), cloudPlatform, sdxCluster.getRuntime());
         overrideDefaultInstanceType(stackRequest, sdxClusterResizeRequest.getCustomInstanceGroups(), originalInstanceGroups,
-                stackV4Response.getInstanceGroups());
-        overrideDefaultInstanceStorage(stackRequest, sdxClusterResizeRequest.getCustomInstanceGroupDiskSize(), stackV4Response.getInstanceGroups());
+                stackV4Response.getInstanceGroups(), sdxCluster.getClusterShape());
+        overrideDefaultInstanceStorage(stackRequest, sdxClusterResizeRequest.getCustomInstanceGroupDiskSize(), stackV4Response.getInstanceGroups(),
+                sdxCluster.getClusterShape());
         overrideDefaultDatabaseProperties(newSdxCluster.getSdxDatabase(), sdxClusterResizeRequest.getCustomSdxDatabaseComputeStorage(),
                 sdxCluster.getSdxDatabase().getDatabaseCrn(), sdxCluster.getClusterShape());
         newSdxCluster.setStackRequest(stackRequest);
@@ -696,7 +699,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     private void overrideDefaultInstanceStorage(StackV4Request defaultTemplate, List<SdxInstanceGroupDiskRequest> customInstanceGroupDisks,
-            List<InstanceGroupV4Response> currentInstanceGroups) {
+            List<InstanceGroupV4Response> currentInstanceGroups, SdxClusterShape sdxClusterShape) {
         if (CollectionUtils.isNotEmpty(customInstanceGroupDisks)) {
             LOGGER.debug("Override default template with custom instance groups from request.");
             customInstanceGroupDisks.forEach(customInstanceGroupDisk -> {
@@ -706,7 +709,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                                         + customInstanceGroupDisk.getName()));
                 overrideInstanceStorage(templateInstanceGroup, customInstanceGroupDisk.getInstanceDiskSize());
             });
-        } else if (CollectionUtils.isNotEmpty(currentInstanceGroups)) {
+        } else if (CollectionUtils.isNotEmpty(currentInstanceGroups) && !SdxClusterShape.LIGHT_DUTY.equals(sdxClusterShape)) {
             LOGGER.debug("Override default template with modified instance groups from previous datalake.");
             currentInstanceGroups.forEach(instanceGroupDisk -> {
                 Optional<InstanceGroupV4Request> templateInstanceGroupOp = getTemplateInstanceGroup(defaultTemplate, instanceGroupDisk.getName());
