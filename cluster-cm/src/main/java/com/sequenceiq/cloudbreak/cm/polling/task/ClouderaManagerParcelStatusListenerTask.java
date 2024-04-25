@@ -55,6 +55,7 @@ public class ClouderaManagerParcelStatusListenerTask extends AbstractClouderaMan
     private List<ApiParcel> getNotInProperStateParcels(ApiParcelList parcels) {
         return parcels.getItems().stream()
                 .filter(parcel -> parcelVersions.containsEntry(parcel.getProduct(), parcel.getVersion()))
+                .filter(parcel -> !ParcelStatus.UNAVAILABLE.name().equals(parcel.getStage()))
                 .filter(parcel -> !parcelStatus.name().equals(parcel.getStage()))
                 .collect(Collectors.toList());
     }
