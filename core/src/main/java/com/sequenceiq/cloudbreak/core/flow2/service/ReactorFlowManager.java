@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.restore.D
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.metrics.datasizes.DetermineDatalakeDataSizesEvent.DETERMINE_DATALAKE_DATA_SIZES_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_CREATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.ClusterServicesRestartEvent.CLUSTER_SERVICES_RESTART_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_EVENT;
@@ -98,6 +99,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordTyp
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.clusterproxy.ClusterProxyReRegistrationTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.datalakemetrics.datasizes.DetermineDatalakeDataSizesBaseEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.modifyproxy.ModifyProxyConfigFlowChainTriggerEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RotateRdsCertificateTriggerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.CmSyncTriggerEvent;
@@ -545,4 +547,10 @@ public class ReactorFlowManager {
                 new StackInstanceMetadataUpdateTriggerEvent(STACK_IMDUPDATE_EVENT.event(), stackDto.getId(), updateType);
         return reactorNotifier.notify(stackDto.getId(), STACK_IMDUPDATE_EVENT.event(), triggerEvent);
     }
+
+    public FlowIdentifier triggerRotateRdsCertificate(Long stackId) {
+        String selector = ROTATE_RDS_CERTIFICATE_EVENT.event();
+        return reactorNotifier.notify(stackId, selector, new RotateRdsCertificateTriggerRequest(selector, stackId));
+    }
+
 }

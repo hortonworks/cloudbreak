@@ -618,4 +618,8 @@ public class ClusterOperationService {
         return flowManager.triggerRefreshEntitlementParams(stack.getId(), stack.getResourceCrn(),
                 changedEntitlements, saltRefreshNeeded);
     }
+
+    public FlowIdentifier rotateRdsCertificate(Stack stack) {
+        return flowManager.triggerRotateRdsCertificate(stack.getId());
+    }
 }

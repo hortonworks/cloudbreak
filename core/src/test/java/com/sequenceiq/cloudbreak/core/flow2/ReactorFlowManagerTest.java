@@ -2,12 +2,14 @@ package com.sequenceiq.cloudbreak.core.flow2;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_EVENT;
-import static org.junit.Assert.assertEquals;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.rotaterdscert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_EVENT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -22,13 +24,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.task.AsyncTaskExecutor;
 
 import com.google.api.client.util.Lists;
@@ -66,6 +68,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordType;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RotateRdsCertificateTriggerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
@@ -76,8 +79,8 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.service.FlowCancelService;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ReactorFlowManagerTest {
+@ExtendWith(MockitoExtension.class)
+class ReactorFlowManagerTest {
 
     private static final Long STACK_ID = 1L;
 
@@ -108,21 +111,21 @@ public class ReactorFlowManagerTest {
     @InjectMocks
     private ReactorFlowManager underTest;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         reset(reactorNotifier);
         stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
         stack.setTunnel(Tunnel.CCMV2_JUMPGATE);
         ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
-        when(asyncTaskExecutor.submit(captor.capture())).then(invocation -> {
+        lenient().when(asyncTaskExecutor.submit(captor.capture())).then(invocation -> {
             captor.getValue().run();
             return null;
         });
     }
 
     @Test
-    public void shouldReturnTheNextFailureTransition() {
+    void shouldReturnTheNextFailureTransition() {
         InstanceGroupAdjustmentV4Request instanceGroupAdjustment = new InstanceGroupAdjustmentV4Request();
         instanceGroupAdjustment.setScalingAdjustment(5);
         instanceGroupAdjustment.setInstanceGroup("hostgroup");
@@ -202,6 +205,7 @@ public class ReactorFlowManagerTest {
         StackAddVolumesRequest stackAddVolumesRequest = mock(StackAddVolumesRequest.class);
         doReturn(CloudVolumeUsageType.GENERAL.toString()).when(stackAddVolumesRequest).getCloudVolumeUsageType();
         underTest.triggerAddVolumes(STACK_ID, stackAddVolumesRequest);
+        underTest.triggerRotateRdsCertificate(STACK_ID);
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {
@@ -217,21 +221,21 @@ public class ReactorFlowManagerTest {
     }
 
     @Test
-    public void testClusterTerminationNotForced() {
+    void testClusterTerminationNotForced() {
         underTest.triggerClusterTermination(stack, false, USER_CRN);
 
         verify(terminationTriggerService, times(1)).triggerTermination(stack, false);
     }
 
     @Test
-    public void testClusterTerminationForced() {
+    void testClusterTerminationForced() {
         underTest.triggerClusterTermination(stack, true, USER_CRN);
 
         verify(terminationTriggerService, times(1)).triggerTermination(stack, true);
     }
 
     @Test
-    public void testTriggerUpscaleWithoutClusterEvent() {
+    void testTriggerUpscaleWithoutClusterEvent() {
         InstanceGroupAdjustmentV4Request instanceGroupAdjustment = new InstanceGroupAdjustmentV4Request();
         instanceGroupAdjustment.setInstanceGroup("ig");
         instanceGroupAdjustment.setScalingAdjustment(3);
@@ -252,7 +256,7 @@ public class ReactorFlowManagerTest {
     }
 
     @Test
-    public void testTriggerUpscaleWithClusterEvent() {
+    void testTriggerUpscaleWithClusterEvent() {
         InstanceGroupAdjustmentV4Request instanceGroupAdjustment = new InstanceGroupAdjustmentV4Request();
         instanceGroupAdjustment.setInstanceGroup("ig");
         instanceGroupAdjustment.setScalingAdjustment(3);
@@ -273,7 +277,7 @@ public class ReactorFlowManagerTest {
     }
 
     @Test
-    public void testTriggerStackImageUpdate() {
+    void testTriggerStackImageUpdate() {
         long stackId = 1L;
         String imageID = "imageID";
         String imageCatalogName = "imageCatalogName";
@@ -290,7 +294,7 @@ public class ReactorFlowManagerTest {
     }
 
     @Test
-    public void testTriggerMaintenanceModeValidationFlow() {
+    void testTriggerMaintenanceModeValidationFlow() {
         long stackId = 1L;
         underTest.triggerMaintenanceModeValidationFlow(stackId);
         ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
@@ -301,7 +305,7 @@ public class ReactorFlowManagerTest {
     }
 
     @Test
-    public void testTriggerDatabaseBackupFlowchain() {
+    void testTriggerDatabaseBackupFlowchain() {
         long stackId = 1L;
         String backupId = UUID.randomUUID().toString();
         underTest.triggerDatalakeDatabaseBackup(stackId, BACKUP_LOCATION, backupId, true, Collections.emptyList(), 0, false);
@@ -315,7 +319,7 @@ public class ReactorFlowManagerTest {
     }
 
     @Test
-    public void testTriggerDatabaseBackupFlowchainWithCustomizedMaxDuration() {
+    void testTriggerDatabaseBackupFlowchainWithCustomizedMaxDuration() {
         long stackId = 1L;
         int databaseMaxDurationInMin = 20;
         String backupId = UUID.randomUUID().toString();
@@ -327,7 +331,7 @@ public class ReactorFlowManagerTest {
     }
 
     @Test
-    public void testTriggerDatabaseBackupRestoreWithCustomizedMaxDuration() {
+    void testTriggerDatabaseBackupRestoreWithCustomizedMaxDuration() {
         long stackId = 1L;
         int databaseMaxDurationInMin = 20;
         String backupId = UUID.randomUUID().toString();
@@ -339,7 +343,7 @@ public class ReactorFlowManagerTest {
     }
 
     @Test
-    public void testTriggerDeleteVolumes() {
+    void testTriggerDeleteVolumes() {
         long stackId = 1L;
         StackDeleteVolumesRequest stackDeleteVolumesRequest = new StackDeleteVolumesRequest();
         stackDeleteVolumesRequest.setStackId(stackId);
@@ -355,7 +359,7 @@ public class ReactorFlowManagerTest {
     }
 
     @Test
-    public void testTriggerStackUpdateDisks() {
+    void testTriggerStackUpdateDisks() {
         StackDto stackDto = mock(StackDto.class);
         doReturn(1L).when(stackDto).getId();
         DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
@@ -369,7 +373,7 @@ public class ReactorFlowManagerTest {
     }
 
     @Test
-    public void testTriggerAddVolumes() {
+    void testTriggerAddVolumes() {
         long stackId = 1L;
         StackAddVolumesRequest stackAddVolumesRequest = new StackAddVolumesRequest();
         stackAddVolumesRequest.setInstanceGroup("COMPUTE");
@@ -384,6 +388,16 @@ public class ReactorFlowManagerTest {
         assertEquals(ADD_VOLUMES_TRIGGER_EVENT.event(), event.selector());
         assertEquals(stack.getId(), event.getResourceId());
         assertEquals(stackId, event.getResourceId().longValue());
+    }
+
+    @Test
+    void testTriggerRotateRdsCertificate() {
+        underTest.triggerRotateRdsCertificate(STACK_ID);
+        ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
+        verify(reactorNotifier).notify(eq(STACK_ID), eq(ROTATE_RDS_CERTIFICATE_EVENT.event()), captor.capture());
+        RotateRdsCertificateTriggerRequest event = (RotateRdsCertificateTriggerRequest) captor.getValue();
+        assertEquals(ROTATE_RDS_CERTIFICATE_EVENT.event(), event.selector());
+        assertEquals(stack.getId(), event.getResourceId());
     }
 
     private static class TestAcceptable implements Acceptable {

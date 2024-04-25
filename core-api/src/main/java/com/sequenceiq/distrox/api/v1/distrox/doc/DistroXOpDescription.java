@@ -41,6 +41,8 @@ public class DistroXOpDescription {
     public static final String IMD_UPDATE = "update instance metadata for Distrox's instances";
     public static final String REPAIR_CLUSTER_BY_NAME = "repairs the stack by name";
     public static final String REPAIR_CLUSTER_BY_CRN = "repairs the stack by crn";
+    public static final String RDS_CERTIFICATE_ROTATION_BY_NAME = "rotate rds certificate of the stack by name";
+    public static final String RDS_CERTIFICATE_ROTATION_BY_CRN = "rotate rds certificate of the stack by crn";
     public static final String DELETE_WITH_KERBEROS_BY_NAME = "deletes the stack (with kerberos cluster) by name";
     public static final String DELETE_WITH_KERBEROS_BY_CRN = "deletes the stack (with kerberos cluster) by crn";
     public static final String GET_STACK_REQUEST_BY_NAME = "gets StackRequest by name";

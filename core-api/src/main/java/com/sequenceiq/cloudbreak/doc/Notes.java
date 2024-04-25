@@ -95,7 +95,7 @@ public class Notes {
 
     public static final String CLUSTER_COST_NOTES = "Costs of clusters";
     public static final String CLUSTER_CO2_NOTES = "CO2 cost of clusters";
-
+    public static final String ROTATE_RDS_CERTIFICATE_NOTES = "Rotate the public certificate of the RDS";
     private Notes() {
     }
 }

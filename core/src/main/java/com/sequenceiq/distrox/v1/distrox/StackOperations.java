@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
+import com.sequenceiq.cloudbreak.api.model.RotateRdsCertResponseType;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
@@ -88,6 +89,7 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.distrox.api.v1.distrox.model.rotaterdscert.RotateRdsCertificateV1Response;
 import com.sequenceiq.distrox.v1.distrox.service.DistroXClusterNameNormalizerService;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -540,5 +542,11 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     public FlowIdentifier refreshEntitlementParams(@NotNull String crn) {
         StackDto stack = stackDtoService.getByCrn(crn);
         return clusterOperationService.refreshEntitlementParams(stack);
+    }
+
+    public RotateRdsCertificateV1Response rotateRdsCertificate(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        return new RotateRdsCertificateV1Response(RotateRdsCertResponseType.TRIGGERED,
+                stackCommonService.rotateRdsCertificate(stack), null, stack.getResourceCrn());
     }
 }

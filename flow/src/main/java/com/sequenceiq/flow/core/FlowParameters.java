@@ -51,4 +51,13 @@ public class FlowParameters {
     public void setFlowOperationType(String flowOperationType) {
         this.flowOperationType = flowOperationType;
     }
+
+    @Override
+    public String toString() {
+        return "FlowParameters{" +
+                "flowId='" + flowId + '\'' +
+                ", flowTriggerUserCrn='" + flowTriggerUserCrn + '\'' +
+                ", flowOperationType='" + flowOperationType + '\'' +
+                '}';
+    }
 }

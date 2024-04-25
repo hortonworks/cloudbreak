@@ -1,6 +1,7 @@
 package com.sequenceiq.distrox.v1.distrox.controller;
 
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateReques
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.api.model.RotateRdsCertResponseType;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -35,9 +37,11 @@ import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXGenerateImageCatalogV1Response;
+import com.sequenceiq.distrox.api.v1.distrox.model.rotaterdscert.RotateRdsCertificateV1Response;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.authorization.DataHubFiltering;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 
 @ExtendWith(MockitoExtension.class)
 class DistroXV1ControllerTest {
@@ -53,6 +57,11 @@ class DistroXV1ControllerTest {
     private static final String TEST_USER_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:mockuser@cloudera.com";
 
     private static final Long WORKSPACE_ID = 1L;
+
+    private static final FlowIdentifier FLOW_IDENTIFIER = new FlowIdentifier(FlowType.FLOW, "flowId");
+
+    private static final RotateRdsCertificateV1Response RESPONSE =
+            new RotateRdsCertificateV1Response(RotateRdsCertResponseType.TRIGGERED, FLOW_IDENTIFIER, null, CRN);
 
     @Mock
     private DataHubFiltering datahubFiltering;
@@ -232,5 +241,29 @@ class DistroXV1ControllerTest {
             distroXV1Controller.addVolumesByStackCrn(CRN, stackAddVolumesRequest);
         });
         verify(stackOperations).putAddVolumes(NameOrCrn.ofCrn(CRN), stackAddVolumesRequest, "accountId");
+    }
+
+    @Test
+    void testRotateRdsCertifcateByName() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName(NAME);
+        when(workspace.getId()).thenReturn(WORKSPACE_ID);
+        when(workspaceService.getForCurrentUser()).thenReturn(workspace);
+        when(stackOperations.rotateRdsCertificate(nameOrCrn, WORKSPACE_ID)).thenReturn(RESPONSE);
+
+        RotateRdsCertificateV1Response result = distroXV1Controller.rotateRdsCertificateByName(NAME);
+        verify(stackOperations).rotateRdsCertificate(nameOrCrn, WORKSPACE_ID);
+        assertThat(result).isEqualTo(RESPONSE);
+    }
+
+    @Test
+    void testRotateRdsCertifcateByCrn() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofCrn(CRN);
+        when(workspace.getId()).thenReturn(WORKSPACE_ID);
+        when(workspaceService.getForCurrentUser()).thenReturn(workspace);
+        when(stackOperations.rotateRdsCertificate(nameOrCrn, WORKSPACE_ID)).thenReturn(RESPONSE);
+
+        RotateRdsCertificateV1Response result = distroXV1Controller.rotateRdsCertificateByCrn(CRN);
+        verify(stackOperations).rotateRdsCertificate(nameOrCrn, WORKSPACE_ID);
+        assertThat(result).isEqualTo(RESPONSE);
     }
 }

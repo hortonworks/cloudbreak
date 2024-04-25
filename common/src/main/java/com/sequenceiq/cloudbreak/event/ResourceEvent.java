@@ -671,6 +671,15 @@ public enum ResourceEvent {
     DISK_RESIZE_COMPLETE("cluster.disk.resize.complete"),
     DATALAKE_IMAGE_VALIDATION_WARNING("datalake.image.validation.warning"),
 
+    ROTATE_RDS_CERTIFICATE_CHECK_PREREQUISITES("cluster.externaldatabase.certificate.rotation.prerequisites"),
+    ROTATE_RDS_CERTIFICATE_GET_LATEST("cluster.externaldatabase.certificate.rotation.getlatest"),
+    ROTATE_RDS_CERTIFICATE_PUSH_LATEST("cluster.externaldatabase.certificate.rotation.pushlatest"),
+    ROTATE_RDS_CERTIFICATE_CM_RESTART("cluster.externaldatabase.certificate.rotation.cmrestart"),
+    ROTATE_RDS_CERTIFICATE_ROLLING_SERVICE_RESTART("cluster.externaldatabase.certificate.rotation.rollingservicerestart"),
+    ROTATE_RDS_CERTIFICATE_ON_PROVIDER("cluster.externaldatabase.certificate.rotation.onprovider"),
+    ROTATE_RDS_CERTIFICATE_FINISHED("cluster.externaldatabase.certificate.rotation.finished"),
+    ROTATE_RDS_CERTIFICATE_FAILED("cluster.externaldatabase.certificate.rotation.failed"),
+
     // deprecated
     STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.skipped"),
     CLUSTER_DELETE_VOLUMES_VALIDATION_START("cluster.changing.deletevolumes.validation.start"),

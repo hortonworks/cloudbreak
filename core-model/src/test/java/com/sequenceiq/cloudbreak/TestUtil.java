@@ -99,6 +99,8 @@ import com.sequenceiq.common.model.AwsDiskType;
 
 public class TestUtil {
 
+    public static final String STACK_CRN = "crn:cdp:cloudbreak:us-west-1:someone:stack:12345";
+
     private static final String DUMMY_DESCRIPTION = "dummyDescription";
 
     private static final String DUMMY_SECURITY_GROUP_ID = "dummySecurityGroupId";
@@ -195,7 +197,7 @@ public class TestUtil {
         stack.setCloudPlatform(credential.cloudPlatform());
         stack.setOrchestrator(orchestrator());
         stack.setEnvironmentCrn("envCrn");
-        stack.setResourceCrn("crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
+        stack.setResourceCrn(STACK_CRN);
 
         switch (credential.cloudPlatform()) {
             case AWS:

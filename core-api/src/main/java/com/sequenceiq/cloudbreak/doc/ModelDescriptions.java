@@ -859,4 +859,11 @@ public class ModelDescriptions {
     public static class InstanceMetadataUpdateRequest {
         public static final String IMD_UPDATE_TYPE = "Type of instance metadata update.";
     }
+
+    public static class RotateRdsCertificateDescription {
+        public static final String FLOW_ID = "Flow identifier for the current Rotate RDS Certificate operation.";
+        public static final String ROTATE_RDS_CERTIFICATE_RESPONSE_TYPE = "Information about the Rotate RDS Certificate operation acceptance.";
+        public static final String ROTATE_RDS_CERTIFICATE_ERROR_REASON = "Reason of the error if Rotate RDS Certificate could not be started.";
+    }
+
 }

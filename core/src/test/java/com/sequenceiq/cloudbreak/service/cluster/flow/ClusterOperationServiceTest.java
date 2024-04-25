@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_AUTORECOVERY
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED_CLUSTER_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED_HOST_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RECOVERED_NODES_REPORTED_CLUSTER_EVENT;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -82,15 +83,18 @@ import com.sequenceiq.cloudbreak.service.telemetry.DynamicEntitlementRefreshServ
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 
 @ExtendWith(MockitoExtension.class)
-public class ClusterOperationServiceTest {
+class ClusterOperationServiceTest {
 
     private static final long STACK_ID = 1;
 
     private static final String STACK_CRN = "STACK_CRN";
 
     private static final long CLUSTER_ID = 1;
+
+    private static final FlowIdentifier FLOW_IDENTIFIER = new FlowIdentifier(FlowType.FLOW, "flowId");
 
     @Mock
     private StackService stackService;
@@ -128,9 +132,6 @@ public class ClusterOperationServiceTest {
     @Mock
     private DynamicEntitlementRefreshService dynamicEntitlementRefreshService;
 
-    @InjectMocks
-    private ClusterOperationService underTest;
-
     @Mock
     private ClusterApi clusterApi;
 
@@ -149,15 +150,18 @@ public class ClusterOperationServiceTest {
     @Mock
     private StackUpdater stackUpdater;
 
+    @Spy
+    private ResourceAttributeUtil resourceAttributeUtil;
+
+    @InjectMocks
+    private ClusterOperationService underTest;
+
     private Cluster cluster;
 
     private Stack stack;
 
-    @Spy
-    private ResourceAttributeUtil resourceAttributeUtil;
-
     @BeforeEach
-    public void setUp() throws TransactionExecutionException {
+    void setUp() throws TransactionExecutionException {
         cluster = new Cluster();
         cluster.setId(CLUSTER_ID);
         cluster.setRdsConfigs(Set.of());
@@ -175,7 +179,7 @@ public class ClusterOperationServiceTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenNewHealthyAndFailedNodeAreTheSame() {
+    void shouldThrowExceptionWhenNewHealthyAndFailedNodeAreTheSame() {
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
             underTest.reportHealthChange(STACK_CRN, Map.of("host", Optional.empty()), Set.of("host"));
         });
@@ -184,7 +188,7 @@ public class ClusterOperationServiceTest {
     }
 
     @Test
-    public void shouldTriggerRecoveryInAutoRecoveryHostsAndUpdateHostMetaData() {
+    void shouldTriggerRecoveryInAutoRecoveryHostsAndUpdateHostMetaData() {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText("{ \"Blueprints\": { \"blueprint_name\": \"MyBlueprint\" } }");
         cluster.setBlueprint(blueprint);
@@ -223,7 +227,7 @@ public class ClusterOperationServiceTest {
     }
 
     @Test
-    public void shouldNotTriggerSync() {
+    void shouldNotTriggerSync() {
         String hostFQDN = "host2Name.stopped";
         InstanceMetaData instanceMd = getHost(hostFQDN, "master", InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.GATEWAY);
         when(instanceMetaDataService.getAllInstanceMetadataByStackId(eq(stack.getId()))).thenReturn(Set.of(instanceMd));
@@ -238,7 +242,7 @@ public class ClusterOperationServiceTest {
     }
 
     @Test
-    public void shouldNotUpdateHostMetaDataWhenRecoveryTriggerFails() {
+    void shouldNotUpdateHostMetaDataWhenRecoveryTriggerFails() {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText("{ \"Blueprints\": { \"blueprint_name\": \"MyBlueprint\" } }");
         cluster.setBlueprint(blueprint);
@@ -260,7 +264,7 @@ public class ClusterOperationServiceTest {
     }
 
     @Test
-    public void shouldRegisterNewHealthyHosts() {
+    void shouldRegisterNewHealthyHosts() {
         when(stackService.findByCrn(STACK_CRN)).thenReturn(stack);
 
         InstanceMetaData host1 = getHost("host1", "master", InstanceStatus.SERVICES_UNHEALTHY, InstanceGroupType.GATEWAY);
@@ -278,7 +282,7 @@ public class ClusterOperationServiceTest {
     }
 
     @Test
-    public void updateHostsTestAndCheckDownscaleAndUpscaleStatusChange() {
+    void updateHostsTestAndCheckDownscaleAndUpscaleStatusChange() {
         HostGroupAdjustmentV4Request downscaleHostGroupAdjustment = new HostGroupAdjustmentV4Request();
         downscaleHostGroupAdjustment.setHostGroup("worker");
         downscaleHostGroupAdjustment.setScalingAdjustment(-5);
@@ -299,7 +303,7 @@ public class ClusterOperationServiceTest {
     }
 
     @Test
-    public void shouldUpdateHostStatusAndNotFailWhenMissingDiscoveryFqdn() {
+    void shouldUpdateHostStatusAndNotFailWhenMissingDiscoveryFqdn() {
         when(stackService.findByCrn(STACK_CRN)).thenReturn(stack);
 
         InstanceMetaData instanceWithoutFqdn = getHost(null, "master", InstanceStatus.SERVICES_UNHEALTHY, InstanceGroupType.GATEWAY);
@@ -316,7 +320,7 @@ public class ClusterOperationServiceTest {
     }
 
     @Test
-    public void shouldTriggerDeleteVolumes() {
+    void shouldTriggerDeleteVolumes() {
         StackDeleteVolumesRequest stackDeleteVolumesRequest = new StackDeleteVolumesRequest();
         stackDeleteVolumesRequest.setStackId(1L);
         stackDeleteVolumesRequest.setGroup("COMPUTE");
@@ -331,7 +335,7 @@ public class ClusterOperationServiceTest {
     }
 
     @Test
-    public void shouldTriggerAddVolumes() {
+    void shouldTriggerAddVolumes() {
         StackAddVolumesRequest stackAddVolumesRequest = new StackAddVolumesRequest();
         stackAddVolumesRequest.setInstanceGroup("COMPUTE");
         stackAddVolumesRequest.setCloudVolumeUsageType("GENERAL");
@@ -375,6 +379,14 @@ public class ClusterOperationServiceTest {
 
         assertEquals(FlowIdentifier.notTriggered(), flowIdentifier);
         verify(flowManager, never()).triggerRefreshEntitlementParams(any(), any(), any(), any());
+    }
+
+    @Test
+    void testRotateRdsCertificate() {
+        when(flowManager.triggerRotateRdsCertificate(STACK_ID)).thenReturn(FLOW_IDENTIFIER);
+        FlowIdentifier result = underTest.rotateRdsCertificate(stack);
+        verify(flowManager).triggerRotateRdsCertificate(STACK_ID);
+        assertThat(result).isEqualTo(FLOW_IDENTIFIER);
     }
 
     private InstanceMetaData getHost(String hostName, String groupName, InstanceStatus instanceStatus, InstanceGroupType instanceGroupType) {

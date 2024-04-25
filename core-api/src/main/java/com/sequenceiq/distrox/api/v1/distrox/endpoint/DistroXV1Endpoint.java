@@ -39,6 +39,8 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.LIS
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.LIST_FLOW_PROGRESS;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.MODIFY_PROXY_CONFIG_INTERNAL;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.POST_STACK_FOR_BLUEPRINT;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RDS_CERTIFICATE_ROTATION_BY_CRN;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RDS_CERTIFICATE_ROTATION_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RENEW_CERTIFICATE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.REPAIR_CLUSTER_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.REPAIR_CLUSTER_BY_NAME;
@@ -112,6 +114,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1R
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.docs.DiagnosticsOperationDescriptions;
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.CmDiagnosticsCollectionV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.DiagnosticsCollectionV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.rotaterdscert.RotateRdsCertificateV1Response;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
 import com.sequenceiq.flow.api.model.RetryableFlowResponse;
@@ -348,6 +351,20 @@ public interface DistroXV1Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier repairClusterByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @Valid DistroXRepairV1Request clusterRepairRequest);
+
+    @PUT
+    @Path("name/{name}/rotate_rds_certificate")
+    @Operation(summary = RDS_CERTIFICATE_ROTATION_BY_NAME, description = Notes.ROTATE_RDS_CERTIFICATE_NOTES,
+            operationId = "rotateRdsCertificateByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    RotateRdsCertificateV1Response rotateRdsCertificateByName(@PathParam("name") String name);
+
+    @PUT
+    @Path("crn/{crn}/rotate_rds_certificate")
+    @Operation(summary = RDS_CERTIFICATE_ROTATION_BY_CRN, description = Notes.ROTATE_RDS_CERTIFICATE_NOTES,
+            operationId = "rotateRdsCertificateByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    RotateRdsCertificateV1Response rotateRdsCertificateByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @GET
     @Path("name/{name}/cli_create")

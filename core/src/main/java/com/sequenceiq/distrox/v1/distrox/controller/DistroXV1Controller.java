@@ -100,6 +100,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.MultipleInstanceDeleteRequest
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.CmDiagnosticsCollectionV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.DiagnosticsCollectionV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.rotaterdscert.RotateRdsCertificateV1Response;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.authorization.DataHubFiltering;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXMaintenanceModeV1ToMainenanceModeV4Converter;
@@ -422,6 +423,22 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
                 NameOrCrn.ofCrn(crn),
                 getWorkspaceIdForCurrentUser(),
                 clusterRepairRequestConverter.convert(clusterRepairRequest));
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_DATAHUB)
+    public RotateRdsCertificateV1Response rotateRdsCertificateByName(@ResourceName String name) {
+        return stackOperations.rotateRdsCertificate(
+                NameOrCrn.ofName(name),
+                getWorkspaceIdForCurrentUser());
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATAHUB)
+    public RotateRdsCertificateV1Response rotateRdsCertificateByCrn(@ResourceCrn String crn) {
+        return stackOperations.rotateRdsCertificate(
+                NameOrCrn.ofCrn(crn),
+                getWorkspaceIdForCurrentUser());
     }
 
     @Override

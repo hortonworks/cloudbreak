@@ -111,7 +111,7 @@ class UpgradeCcmFlowIntegrationTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
 
-    private static final int ALL_CALLED_ONCE = 8;
+    private static final int ALL_CALLED_ONCE = 7;
 
     private static final int UNTIL_TUNNEL_UPDATE = 1;
 
@@ -124,8 +124,6 @@ class UpgradeCcmFlowIntegrationTest {
     private static final int UNTIL_REMOVE_AGENT = 5;
 
     private static final int UNTIL_DEREGISTER_AGENT = 6;
-
-    private static final int UNTIL_FINALIZE = 7;
 
     private static final long STACK_ID = 1L;
 

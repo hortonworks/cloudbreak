@@ -66,6 +66,7 @@ import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -101,6 +102,8 @@ class StackCommonServiceTest {
     private static final String SUBNET_ID = "aSubnetId";
 
     private static final String SUBNET_ID2 = "otherSubnetId";
+
+    private static final FlowIdentifier FLOW_IDENTIFIER = new FlowIdentifier(FlowType.FLOW, "flowId");
 
     @Mock
     private ImageCatalogService imageCatalogService;
@@ -159,6 +162,9 @@ class StackCommonServiceTest {
     @Mock
     private ClusterCommonService clusterCommonService;
 
+    @Mock
+    private ClusterOperationService clusterOperationService;
+
     @InjectMocks
     private StackCommonService underTest;
 
@@ -189,7 +195,7 @@ class StackCommonServiceTest {
 
     @ParameterizedTest
     @MethodSource("scalingAdjustmentProvider")
-    public void testUpScalingForAdjustmentType(String cloudPlatform, String platformVariant,
+    void testUpScalingForAdjustmentType(String cloudPlatform, String platformVariant,
             AdjustmentType inputAdjustmentType, AdjustmentType finalAdjustmentType) {
         String group = "master";
         StackDto stack = mock(StackDto.class);
@@ -225,7 +231,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testCreateImageChangeDtoWithCatalog() {
+    void testCreateImageChangeDtoWithCatalog() {
         StackImageChangeV4Request stackImageChangeRequest = new StackImageChangeV4Request();
         stackImageChangeRequest.setImageCatalogName("catalog");
         stackImageChangeRequest.setImageId("imageId");
@@ -244,7 +250,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testCreateImageChangeDtoWithoutCatalog() {
+    void testCreateImageChangeDtoWithoutCatalog() {
         StackImageChangeV4Request stackImageChangeRequest = new StackImageChangeV4Request();
         stackImageChangeRequest.setImageId("imageId");
         when(stackService.getIdByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(STACK_ID);
@@ -258,7 +264,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testChangeImageInWorkspace() {
+    void testChangeImageInWorkspace() {
         StackImageChangeV4Request stackImageChangeRequest = new StackImageChangeV4Request();
         when(stackService.getIdByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(STACK_ID);
         when(stackOperationService.updateImage(any(ImageChangeDto.class))).thenReturn(new FlowIdentifier(FlowType.FLOW, "id"));
@@ -270,7 +276,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testThrowsExceptionWhenDeleteInstanceFromDataLake() {
+    void testThrowsExceptionWhenDeleteInstanceFromDataLake() {
         StackDto stack = mock(StackDto.class);
         StackView stackView = mock(StackView.class);
         when(stack.getStack()).thenReturn(stackView);
@@ -285,7 +291,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testDeleteInstanceFromDataHub() {
+    void testDeleteInstanceFromDataHub() {
         StackDto stack = mock(StackDto.class);
         StackView stackView = mock(StackView.class);
         when(stack.getStack()).thenReturn(stackView);
@@ -298,7 +304,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testThrowsExceptionWhenDeleteInstancesFromDataLake() {
+    void testThrowsExceptionWhenDeleteInstancesFromDataLake() {
         StackDto stack = mock(StackDto.class);
         StackView stackView = mock(StackView.class);
         when(stack.getStack()).thenReturn(stackView);
@@ -317,7 +323,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testDeleteInstancesFromDataHub() {
+    void testDeleteInstancesFromDataHub() {
         StackDto stack = mock(StackDto.class);
         StackView stackView = mock(StackView.class);
         when(stack.getStack()).thenReturn(stackView);
@@ -334,7 +340,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testStopInstancesInDatahub() {
+    void testStopInstancesInDatahub() {
         StackDto stack = mock(StackDto.class);
         StackView stackView = mock(StackView.class);
         when(stack.getStack()).thenReturn(stackView);
@@ -352,7 +358,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testThrowsExceptionWhenStopInstancesInDatalake() {
+    void testThrowsExceptionWhenStopInstancesInDatalake() {
         StackDto stack = mock(StackDto.class);
         StackView stackView = mock(StackView.class);
         when(stack.getStack()).thenReturn(stackView);
@@ -372,7 +378,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testStartInstancesInDefaultWorkspace() {
+    void testStartInstancesInDefaultWorkspace() {
         StackDto stack = mock(StackDto.class);
 
         when(stackDtoService.getByNameOrCrn(STACK_CRN, ACCOUNT_ID)).thenReturn(stack);
@@ -405,7 +411,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testValidateNetworkScaleRequestWhenVariantIsNotSupportedForMultiAzButAzHasBeenPreferredInTheRequest() {
+    void testValidateNetworkScaleRequestWhenVariantIsNotSupportedForMultiAzButAzHasBeenPreferredInTheRequest() {
         StackDto stack = mock(StackDto.class);
         String variant = AwsConstants.AwsVariant.AWS_VARIANT.name();
         when(stack.getPlatformVariant()).thenReturn(variant);
@@ -420,7 +426,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testValidateNetworkScaleRequestWhenThereIsPreferredAzAndStackProvisionedToASingleSubnet() {
+    void testValidateNetworkScaleRequestWhenThereIsPreferredAzAndStackProvisionedToASingleSubnet() {
         StackDto stack = mock(StackDto.class);
         String variant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.name();
         when(stack.getPlatformVariant()).thenReturn(variant);
@@ -436,7 +442,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testPutScalingInWorkspaceWhenThereIsPreferredAzAndStackProvisionedInMultipleSubnetButScalingIsNotSupportedOnPlatform() {
+    void testPutScalingInWorkspaceWhenThereIsPreferredAzAndStackProvisionedInMultipleSubnetButScalingIsNotSupportedOnPlatform() {
         StackDto stack = mock(StackDto.class);
         StackView stackView = mock(StackView.class);
         when(stack.getStack()).thenReturn(stackView);
@@ -462,14 +468,14 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testRotateSaltPassword() {
+    void testRotateSaltPassword() {
         ThreadBasedUserCrnProvider.doAs(ACTOR_CRN, () -> underTest.rotateSaltPassword(STACK_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL));
 
         verify(stackOperationService).rotateSaltPassword(STACK_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
     }
 
     @Test
-    public void testModifyProxyConfig() {
+    void testModifyProxyConfig() {
         NameOrCrn nameOrCrn = NameOrCrn.ofName("name");
         String previousProxyConfigCrn = "prev-proxy-crn";
 
@@ -479,7 +485,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testSyncWhenInvalidStackStatusThenBadRequest() {
+    void testSyncWhenInvalidStackStatusThenBadRequest() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setName(STACK_NAME.getName());
@@ -498,7 +504,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testSyncWhenInvalidInstanceStatusThenBadRequest() {
+    void testSyncWhenInvalidInstanceStatusThenBadRequest() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         Workspace workspace = new Workspace();
@@ -518,7 +524,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testSyncWhenValidationsPassThenSuccess() {
+    void testSyncWhenValidationsPassThenSuccess() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setName(STACK_NAME.getName());
@@ -537,7 +543,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void checkIfSaltPasswordRotationNeeded() {
+    void checkIfSaltPasswordRotationNeeded() {
         when(stackOperationService.getSaltPasswordStatus(STACK_CRN, ACCOUNT_ID)).thenReturn(SaltPasswordStatus.OK);
 
         SaltPasswordStatus result = underTest.getSaltPasswordStatus(STACK_CRN, ACCOUNT_ID);
@@ -547,7 +553,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testPutDeleteVolumesInWorkspaceSuccess() {
+    void testPutDeleteVolumesInWorkspaceSuccess() {
         Stack stack = mock(Stack.class);
         StackView stackView = mock(StackView.class);
         when(stackView.getId()).thenReturn(STACK_ID);
@@ -565,7 +571,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testPutDeleteVolumesInWorkspaceFailure() {
+    void testPutDeleteVolumesInWorkspaceFailure() {
         Stack stack = mock(Stack.class);
         StackView stackView = mock(StackView.class);
         when(stackView.getId()).thenReturn(STACK_ID);
@@ -585,7 +591,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testPutDeleteVolumesInWorkspaceFailureNotEntitled() {
+    void testPutDeleteVolumesInWorkspaceFailureNotEntitled() {
         Stack stack = mock(Stack.class);
         StackView stackView = mock(StackView.class);
         when(stackView.getId()).thenReturn(STACK_ID);
@@ -642,7 +648,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testPutAddVolumesInWorkspaceSuccess() {
+    void testPutAddVolumesInWorkspaceSuccess() {
         StackView stackDto = mock(StackView.class);
         doReturn(STACK_ID).when(stackDto).getId();
         doReturn(stackDto).when(stackDtoService).getStackViewByNameOrCrn(STACK_NAME, "accid");
@@ -663,7 +669,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testPutAddVolumesInWorkspaceFailure() {
+    void testPutAddVolumesInWorkspaceFailure() {
         StackView stackDto = mock(StackView.class);
         doReturn(STACK_ID).when(stackDto).getId();
         doReturn(stackDto).when(stackDtoService).getStackViewByNameOrCrn(STACK_CRN, "accid");
@@ -687,7 +693,7 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testPutAddVolumesInWorkspaceFailureForEntitlement() {
+    void testPutAddVolumesInWorkspaceFailureForEntitlement() {
         StackView stackDto = mock(StackView.class);
         doReturn(STACK_ID).when(stackDto).getId();
         doReturn(stackDto).when(stackDtoService).getStackViewByNameOrCrn(STACK_CRN, "accid");
@@ -708,5 +714,14 @@ class StackCommonServiceTest {
                 stackAddVolumesRequest));
 
         assertEquals("Adding Disk for Azure is not enabled for this account", exception.getMessage());
+    }
+
+    @Test
+    void testRotateRdsCertificate() {
+        Stack stack = mock(Stack.class);
+        when(clusterOperationService.rotateRdsCertificate(stack)).thenReturn(FLOW_IDENTIFIER);
+        FlowIdentifier result = underTest.rotateRdsCertificate(stack);
+        verify(clusterOperationService).rotateRdsCertificate(stack);
+        assertThat(result).isEqualTo(FLOW_IDENTIFIER);
     }
 }

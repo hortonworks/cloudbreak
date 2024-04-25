@@ -18,4 +18,11 @@ public class CommonContext {
     public FlowParameters getFlowParameters() {
         return flowParameters;
     }
+
+    @Override
+    public String toString() {
+        return "CommonContext{" +
+                "flowParameters=" + flowParameters +
+                '}';
+    }
 }

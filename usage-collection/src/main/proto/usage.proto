@@ -2160,6 +2160,13 @@ message CDPClusterStatus {
     CM_SYNC_FINISHED = 65;
     // The status when a CM sync operation is failed.
     CM_SYNC_FAILED = 66;
+
+    // The status when a Rotate RDS Certificate operation is started.
+    ROTATE_RDS_CERTIFICATE_STARTED = 67;
+    // The status when a Rotate RDS Certificate operation is finished.
+    ROTATE_RDS_CERTIFICATE_FINISHED = 68;
+    // The status when a Rotate RDS Certificate operation is failed.
+    ROTATE_RDS_CERTIFICATE_FAILED = 69;
   }
 }
 

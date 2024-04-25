@@ -524,4 +524,9 @@ public class StackCommonService {
         validateAddVolumesRequest(stack);
         return clusterCommonService.putAddVolumes(stack.getResourceCrn(), addVolumesRequest);
     }
+
+    public FlowIdentifier rotateRdsCertificate(Stack stack) {
+        MDCBuilder.buildMdcContext(stack);
+        return clusterOperationService.rotateRdsCertificate(stack);
+    }
 }

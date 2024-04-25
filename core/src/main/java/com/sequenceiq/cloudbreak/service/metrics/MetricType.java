@@ -46,7 +46,10 @@ public enum MetricType implements Metric {
     METERING_CHANGE_INSTANCE_TYPE_FAILED("metering.change.instance.type.failed"),
     METERING_CHANGE_INSTANCE_TYPE_SUCCESSFUL("metering.change.instance.type.successful"),
     AWS_VARIANT_MIGRATION_FAILED("aws.variant.migration.successful"),
-    AWS_VARIANT_MIGRATION_SUCCESSFUL("aws.variant.migration.failed");
+    AWS_VARIANT_MIGRATION_SUCCESSFUL("aws.variant.migration.failed"),
+
+    ROTATE_RDS_CERTIFICATE_SUCCESSFUL("externaldatabase.certificate.rotation.successful"),
+    ROTATE_RDS_CERTIFICATE_FAILED("externaldatabase.certificate.rotation.failed");
 
     private final String metricName;
 
