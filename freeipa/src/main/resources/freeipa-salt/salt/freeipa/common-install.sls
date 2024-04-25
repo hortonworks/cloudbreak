@@ -85,6 +85,14 @@ configure_httpd_log_filter:
     - repl: ErrorLog "|/etc/httpd/conf/httpd-log-filter.sh"
     - unless: grep "httpd-log-filter.sh" /etc/httpd/conf/httpd.conf
 
+{% if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int == 8 %}
+configure_httpd_log_filter_ssl:
+  file.replace:
+    - name: /etc/httpd/conf.d/ssl.conf
+    - pattern: ^ErrorLog.*
+    - repl: ErrorLog "|/etc/httpd/conf/httpd-log-filter.sh"
+{% endif %}
+
 disable_http_trace:
   file.append:
     - name: /etc/httpd/conf/httpd.conf
