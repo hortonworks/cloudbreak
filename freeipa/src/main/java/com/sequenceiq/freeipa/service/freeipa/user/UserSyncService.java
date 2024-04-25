@@ -169,8 +169,8 @@ public class UserSyncService {
         LOGGER.debug("Synchronizing users in account {} for environmentCrns {}, user sync filter {}", accountId, environmentCrnFilter, userSyncRequestFilter);
         List<StackUserSyncView> stacks = stackService.getAllUserSyncViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(environmentCrnFilter, accountId);
         if (stacks.isEmpty()) {
-            throw new NotFoundException(String.format("No matching FreeIPA stacks found for account %s with environment crn filter %s",
-                    accountId, environmentCrnFilter));
+            throw new NotFoundException(String.format("No matching FreeIPA stacks found for account %s with environment crn filter %s " +
+                            "or the FreeIPA is not available for user sync", accountId, environmentCrnFilter));
         } else {
             LOGGER.debug("Found {} stacks", stacks.size());
             return stacks;

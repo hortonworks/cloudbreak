@@ -149,7 +149,8 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
         if (environmentCrns.isEmpty()) {
             return Lists.newArrayList(getAllUserSyncViewByAccountId(accountId));
         } else {
-            return Benchmark.measure(() -> stackRepository.findAllUserSyncViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(environmentCrns, accountId),
+            return Benchmark.measure(() -> stackRepository.findAllUserSyncViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(environmentCrns, accountId,
+                            DetailedStackStatus.USERSYNC_STATUSES),
                     LOGGER, "getAllUserSyncViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId took {} ms for {}", environmentCrns);
         }
     }
@@ -186,7 +187,7 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
     }
 
     public Set<StackUserSyncView> getAllUserSyncViewByAccountId(String accountId) {
-        return Benchmark.measure(() -> stackRepository.findUserSyncViewByAccountId(accountId),
+        return Benchmark.measure(() -> stackRepository.findUserSyncViewByAccountId(accountId, DetailedStackStatus.USERSYNC_STATUSES),
                 LOGGER, "getAllUserSyncViewByAccountId took {} ms for {}", accountId);
     }
 

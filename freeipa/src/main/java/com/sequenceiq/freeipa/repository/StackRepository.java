@@ -90,8 +90,10 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
             + "ss.status) "
             + "FROM Stack s "
             + "LEFT JOIN StackStatus ss ON s.stackStatus.id = ss.id "
-            + "WHERE s.accountId = :accountId AND s.terminated = -1")
-    Set<StackUserSyncView> findUserSyncViewByAccountId(@Param("accountId") String accountId);
+            + "WHERE s.accountId = :accountId "
+            + "AND s.terminated = -1 "
+            + "AND ss.detailedStackStatus IN :statuses")
+    Set<StackUserSyncView> findUserSyncViewByAccountId(@Param("accountId") String accountId, @Param("statuses") Collection<DetailedStackStatus> statuses);
 
     @Query("SELECT s.resourceCrn as resourceCrn, s.id as id, s.name as name, s.environmentCrn as environmentCrn " +
             "FROM Stack s WHERE s.accountId = :accountId AND s.terminated = -1")
@@ -124,10 +126,11 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
             + "LEFT JOIN ChildEnvironment c ON c.stack.id = s.id "
             + "LEFT JOIN StackStatus ss ON s.stackStatus.id = ss.id "
             + "WHERE s.accountId = :accountId "
-            + "AND (s.environmentCrn IN :environmentCrns OR c.environmentCrn IN :environmentCrns) AND s.terminated = -1")
-    List<StackUserSyncView> findAllUserSyncViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(
-            @Param("environmentCrns") Collection<String> environmentCrns,
-            @Param("accountId") String accountId);
+            + "AND (s.environmentCrn IN :environmentCrns OR c.environmentCrn IN :environmentCrns) "
+            + "AND s.terminated = -1 "
+            + "AND ss.detailedStackStatus IN :statuses")
+    List<StackUserSyncView> findAllUserSyncViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(@Param("environmentCrns") Collection<String> environmentCrns,
+            @Param("accountId") String accountId, @Param("statuses") Collection<DetailedStackStatus> statuses);
 
     @Query("SELECT DISTINCT s FROM Stack s "
             + "LEFT JOIN FETCH s.instanceGroups ig "

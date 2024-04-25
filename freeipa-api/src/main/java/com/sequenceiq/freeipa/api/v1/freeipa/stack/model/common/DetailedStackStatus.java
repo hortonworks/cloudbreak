@@ -1,8 +1,11 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.commons.collections4.CollectionUtils;
 
 public enum DetailedStackStatus {
     UNKNOWN(Status.UNKNOWN, AvailabilityStatus.UNKNOWN),
@@ -95,13 +98,12 @@ public enum DetailedStackStatus {
     REBUILD_IN_PROGRESS(Status.REBUILD_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
     REBUILD_FAILED(Status.REBUILD_FAILED, AvailabilityStatus.UNAVAILABLE);
 
-    public static final Collection<DetailedStackStatus> AVAILABLE_STATUSES;
+    public static final Collection<DetailedStackStatus> AVAILABLE_STATUSES = Stream.of(DetailedStackStatus.values())
+            .filter(s -> s.getAvailabilityStatus().isAvailable())
+            .collect(Collectors.toList());
 
-    static {
-        AVAILABLE_STATUSES = Stream.of(DetailedStackStatus.values())
-                .filter(s -> s.getAvailabilityStatus().isAvailable())
-                .collect(Collectors.toList());
-    }
+    public static final Collection<DetailedStackStatus> USERSYNC_STATUSES =
+            CollectionUtils.union(AVAILABLE_STATUSES, List.of(POSTINSTALL_FREEIPA_CONFIGURATION));
 
     private final Status status;
 
