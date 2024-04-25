@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTimeoutException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.util.Benchmark;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -35,6 +36,7 @@ import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.binduser.UserSyncBindUserService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.config.SidGenerationConfigurator;
 import com.sequenceiq.freeipa.service.freeipa.host.MaxHostnameLengthPolicyService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
@@ -89,6 +91,9 @@ public class FreeIpaPostInstallService {
     @Inject
     private MaxHostnameLengthPolicyService hostnameLengthPolicyService;
 
+    @Inject
+    private SidGenerationConfigurator sidGenerationConfigurator;
+
     @Retryable(value = FreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
@@ -99,6 +104,7 @@ public class FreeIpaPostInstallService {
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
         freeIpaTopologyService.updateReplicationTopology(stackId, Set.of(), freeIpaClient);
         hostnameLengthPolicyService.updateMaxHostnameLength(stack, freeIpaClient);
+        Benchmark.measure(() -> sidGenerationConfigurator.enableAndTriggerSidGeneration(stack, freeIpaClient), LOGGER, "Post-install configuration took {}ms.");
         if (fullPostInstall) {
             setInitialFreeIpaPolicies(stack, freeIpaClient);
             userSyncBindUserService.createUserAndLdapConfig(stack, freeIpaClient);

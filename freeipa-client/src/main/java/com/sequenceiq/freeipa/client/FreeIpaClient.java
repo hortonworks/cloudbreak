@@ -351,6 +351,13 @@ public class FreeIpaClient {
         invoke("config_mod", List.of(), params, Object.class);
     }
 
+    public void enableAndTriggerSidGeneration() throws FreeIpaClientException {
+        Map<String, Object> params = Map.of(
+                "enable_sid", true,
+                "add_sids", true);
+        invoke("config_mod", List.of(), params, Object.class);
+    }
+
     public void addPermissionToPrivilege(String privilege, String permission) throws FreeIpaClientException {
         addPermissionsToPrivilege(privilege, List.of(permission));
     }
