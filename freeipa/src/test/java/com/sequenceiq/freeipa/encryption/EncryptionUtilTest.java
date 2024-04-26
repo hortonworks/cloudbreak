@@ -103,12 +103,13 @@ class EncryptionUtilTest {
         when(cloudPlatformConnectors.get(Platform.platform(CloudPlatform.AWS.name()), Variant.variant(CloudPlatform.AWS.name()))).thenReturn(cloudConnector);
         when(cryptoConnector.encrypt(encryptRequestArgumentCaptor.capture())).thenReturn("encrypted-secret");
 
-        String encryptResult = underTest.encrypt(CloudPlatform.AWS, "secret", environment, "SECRET_NAME");
-
-        EncryptionKeySource expectedKeySource = EncryptionKeySource.builder()
+        EncryptionKeySource keySource = EncryptionKeySource.builder()
                 .withKeyType(EncryptionKeyType.AWS_KMS_KEY_ARN)
                 .withKeyValue("keyArn")
                 .build();
+
+        String encryptResult = underTest.encrypt(CloudPlatform.AWS, "secret", environment, "SECRET_NAME", keySource);
+
         Map<String, String> expectedEncryptionContext = Map.of("ENVIRONMENT_CRN", "environment-crn", "SECRET_NAME", "SECRET_NAME");
 
         assertEquals("encrypted-secret", encryptResult);
@@ -116,26 +117,17 @@ class EncryptionUtilTest {
         verify(cloudCredentialConverter, times(1)).convert(any());
         EncryptRequest capturedEncryptRequest = encryptRequestArgumentCaptor.getValue();
         assertEquals("secret", capturedEncryptRequest.input());
-        assertEquals(expectedKeySource, capturedEncryptRequest.keySource());
+        assertEquals(keySource, capturedEncryptRequest.keySource());
         assertEquals(cloudCredential, capturedEncryptRequest.cloudCredential());
         assertEquals("us-gov-west-1", capturedEncryptRequest.regionName());
         assertEquals(expectedEncryptionContext, capturedEncryptRequest.encryptionContext());
     }
 
     @Test
-    void testThrowIfSecretEncryptionNotAvailable() {
-        environment.setCloudPlatform(CloudPlatform.AZURE.name());
-        when(cloudPlatformConnectors.get(Platform.platform(CloudPlatform.AZURE.name()), Variant.variant(CloudPlatform.AZURE.name())))
-                .thenReturn(cloudConnector);
-
-        assertThrows(CloudConnectorException.class, () -> underTest.encrypt(CloudPlatform.AZURE, "secret", environment, "SECRET_NAME"));
-    }
-
-    @Test
     void testgetEncryptionKeySource() {
         environment.setCloudPlatform(CloudPlatform.AWS.name());
 
-        EncryptionKeySource encryptionKeySource = underTest.getEncryptionKeySource(CloudPlatform.AWS, environment);
+        EncryptionKeySource encryptionKeySource = underTest.getEncryptionKeySource(CloudPlatform.AWS, "keyArn");
 
         assertEquals(EncryptionKeyType.AWS_KMS_KEY_ARN, encryptionKeySource.keyType());
         assertEquals("keyArn", encryptionKeySource.keyValue());
@@ -145,7 +137,7 @@ class EncryptionUtilTest {
     void testgetEncryptionKeySourceWithUnknownCloudPlatform() {
         environment.setCloudPlatform(CloudPlatform.AZURE.name());
 
-        assertThrows(CloudConnectorException.class, () -> underTest.getEncryptionKeySource(CloudPlatform.AZURE, environment));
+        assertThrows(CloudConnectorException.class, () -> underTest.getEncryptionKeySource(CloudPlatform.AZURE, "keyArn"));
     }
 
 }

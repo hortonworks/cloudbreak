@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -288,6 +289,15 @@ class AwsEncryptionResourcesTest {
         when(amazonKmsUtil.listResourceTagsWithAllPages(eq(kmsClient), any(ListResourceTagsRequest.class))).thenReturn(List.of(tag));
     }
 
+    private void setupKeyListingForExistingKeyFailure(String keyArn, String keyId, String tagValueClouderaKMSKeyTarget) {
+        KeyListEntry keyListEntry = KeyListEntry.builder()
+                .keyArn(keyArn)
+                .keyId(keyId)
+                .build();
+        when(amazonKmsUtil.listKeysWithAllPages(kmsClient)).thenReturn(List.of(keyListEntry));
+        doThrow(new RuntimeException()).when(amazonKmsUtil).listResourceTagsWithAllPages(eq(kmsClient), any(ListResourceTagsRequest.class));
+    }
+
     private void verifyListResourceTagsRequest(String keyArnExpected) {
         verify(amazonKmsUtil).listResourceTagsWithAllPages(eq(kmsClient), listResourceTagsRequestCaptor.capture());
         assertThat(listResourceTagsRequestCaptor.getValue().keyId()).isEqualTo(keyArnExpected);
@@ -344,6 +354,27 @@ class AwsEncryptionResourcesTest {
 
         verifyCloudEncryptionKey(cloudEncryptionKey, metadataMap);
         verify(amazonKmsUtil, never()).listResourceTagsWithAllPages(eq(kmsClient), any(ListResourceTagsRequest.class));
+        verifyCreateKeyRequest();
+        verifyKeyCloudResourcePersistence();
+    }
+
+    @Test
+    void createEncryptionKeyTestWhenCloudResourcesAbsentAndFetchingKmsKeysFailAndCreateNewKmsKey() {
+        when(awsClient.createAWSKMS(any(AwsCredentialView.class), eq(REGION))).thenReturn(kmsClient);
+
+        setupKeyListingForExistingKeyFailure(ARN_KMS_KEY, KMS_KEY_ID, KEY_NAME);
+
+        setupPrincipalMapping();
+        setupTagMapping();
+
+        setupKeyMetadataForNewKey();
+
+        when(persistenceNotifier.notifyAllocation(any(CloudResource.class), eq(cloudContext))).thenReturn(resourcePersisted);
+
+        CloudEncryptionKey cloudEncryptionKey = underTest.createEncryptionKey(encryptionKeyCreationRequest);
+
+        verifyCloudEncryptionKey(cloudEncryptionKey, metadataMap);
+        verify(amazonKmsUtil).listResourceTagsWithAllPages(eq(kmsClient), any(ListResourceTagsRequest.class));
         verifyCreateKeyRequest();
         verifyKeyCloudResourcePersistence();
     }

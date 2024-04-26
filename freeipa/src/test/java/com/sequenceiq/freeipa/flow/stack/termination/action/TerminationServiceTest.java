@@ -23,6 +23,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KeytabCleanupService;
+import com.sequenceiq.freeipa.service.StackEncryptionService;
 import com.sequenceiq.freeipa.service.freeipa.cleanup.StructuredEventCleanupService;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -59,6 +60,9 @@ class TerminationServiceTest {
 
     @Mock
     private StructuredEventCleanupService mockStructuredEventCleanupService;
+
+    @Mock
+    private StackEncryptionService stackEncryptionService;
 
     @InjectMocks
     private TerminationService underTest;
@@ -136,6 +140,7 @@ class TerminationServiceTest {
         verify(stackService).save(eq(stack));
         verify(instanceMetaDataService, never()).save(any());
         verify(freeIpaRecipeService).deleteRecipes(STACK_ID);
+        verify(stackEncryptionService).deleteStackEncryption(STACK_ID);
     }
 
 }

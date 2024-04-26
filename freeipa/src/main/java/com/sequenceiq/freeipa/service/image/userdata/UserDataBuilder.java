@@ -38,6 +38,8 @@ import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.encryption.EncryptionUtil;
+import com.sequenceiq.freeipa.entity.StackEncryption;
+import com.sequenceiq.freeipa.service.StackEncryptionService;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -65,17 +67,21 @@ public class UserDataBuilder {
     @Inject
     private EncryptionUtil encryptionUtil;
 
+    @Inject
+    private StackEncryptionService stackEncryptionService;
+
     public String buildUserData(String accountId, DetailedEnvironmentResponse environment, Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
             PlatformParameters parameters, String saltBootPassword, String cbCert,
-            CcmConnectivityParameters ccmConnectivityParameters, ProxyConfig proxyConfig) {
+            CcmConnectivityParameters ccmConnectivityParameters, ProxyConfig proxyConfig, Long stackId) {
         String userData = build(accountId, environment, cloudPlatform, cbSshKeyDer, sshUser, parameters, saltBootPassword,
-                cbCert, ccmConnectivityParameters, proxyConfig);
-        LOGGER.debug("User data content: {}", anonymize(userData));
+                cbCert, ccmConnectivityParameters, proxyConfig, stackId);
+        LOGGER.debug("User data content: {}", userData);
         return userData;
     }
 
     private String build(String accountId, DetailedEnvironmentResponse environment, Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
-            PlatformParameters params, String saltBootPassword, String cbCert, CcmConnectivityParameters ccmConnectivityParameters, ProxyConfig proxyConfig) {
+            PlatformParameters params, String saltBootPassword, String cbCert, CcmConnectivityParameters ccmConnectivityParameters,
+            ProxyConfig proxyConfig, Long stackId) {
         Map<String, Object> model = new HashMap<>();
         model.put("environmentCrn", environment.getCrn());
         model.put("cloudPlatform", cloudPlatform.value());
@@ -90,7 +96,7 @@ public class UserDataBuilder {
         model.put("cdpApiEndpointUrl", Strings.nullToEmpty(cdpApiEndpointUrl));
         extendModelWithCcmConnectivity(InstanceGroupType.GATEWAY, ccmConnectivityParameters, accountId, environment, model);
         extendModelWithProxyParams(proxyConfig, model);
-        extendModelAndEncryptSecretsIfSecretEncryptionEnabled(environment, model);
+        extendModelAndEncryptSecretsIfSecretEncryptionEnabled(environment, model, stackId);
         return build(model);
     }
 
@@ -140,11 +146,12 @@ public class UserDataBuilder {
         }
     }
 
-    private void extendModelAndEncryptSecretsIfSecretEncryptionEnabled(DetailedEnvironmentResponse environment, Map<String, Object> model) {
+    private void extendModelAndEncryptSecretsIfSecretEncryptionEnabled(DetailedEnvironmentResponse environment, Map<String, Object> model, Long stackId) {
         if (environment.isEnableSecretEncryption()) {
             Map<String, String> secretKeysAndNames = validateAndReturnSecretKeysAndNames();
             CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
-            EncryptionKeySource secretEncryptionKeySource = encryptionUtil.getEncryptionKeySource(cloudPlatform, environment);
+            StackEncryption stackEncryption = stackEncryptionService.getStackEncryption(stackId);
+            EncryptionKeySource secretEncryptionKeySource = encryptionUtil.getEncryptionKeySource(cloudPlatform, stackEncryption.getEncryptionKeyLuks());
 
             model.put("secretEncryptionEnabled", Boolean.TRUE);
             model.put("secretEncryptionKeySource", secretEncryptionKeySource.keyValue());
@@ -157,7 +164,7 @@ public class UserDataBuilder {
                     LOGGER.debug("Encrypting secret {}...", key);
 
                     if (!secretValue.isEmpty()) {
-                        entry.setValue(encryptionUtil.encrypt(cloudPlatform, secretValue, environment, secretName));
+                        entry.setValue(encryptionUtil.encrypt(cloudPlatform, secretValue, environment, secretName, secretEncryptionKeySource));
                         LOGGER.debug("Succesfully encrypted secret {}.", key);
                     } else {
                         LOGGER.debug("Secret {} is an empty String, therefore skipping encryption for it.", key);

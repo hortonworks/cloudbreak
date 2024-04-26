@@ -13,6 +13,8 @@ import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationFailed;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationSuccess;
+import com.sequenceiq.freeipa.flow.stack.provision.event.encryption.GenerateEncryptionKeysFailed;
+import com.sequenceiq.freeipa.flow.stack.provision.event.encryption.GenerateEncryptionKeysSuccess;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackFailed;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackSuccess;
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserDataFailed;
@@ -22,6 +24,8 @@ public enum StackProvisionEvent implements FlowEvent {
     START_CREATION_EVENT("STACK_PROVISION_TRIGGER_EVENT"),
     VALIDATION_FINISHED_EVENT(CloudPlatformResult.selector(ValidationResult.class)),
     VALIDATION_FAILED_EVENT(CloudPlatformResult.failureSelector(ValidationResult.class)),
+    GENERATE_ENCRYPTION_KEYS_FINISHED_EVENT(EventSelectorUtil.selector(GenerateEncryptionKeysSuccess.class)),
+    GENERATE_ENCRYPTION_KEYS_FAILED_EVENT(EventSelectorUtil.selector(GenerateEncryptionKeysFailed.class)),
     CREATE_USER_DATA_FINISHED_EVENT(EventSelectorUtil.selector(CreateUserDataSuccess.class)),
     CREATE_USER_DATA_FAILED_EVENT(EventSelectorUtil.selector(CreateUserDataFailed.class)),
     SETUP_FINISHED_EVENT(CloudPlatformResult.selector(SetupResult.class)),

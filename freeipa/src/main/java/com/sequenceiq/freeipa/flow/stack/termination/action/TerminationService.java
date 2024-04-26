@@ -22,6 +22,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.termination.TerminationFailedException;
 import com.sequenceiq.freeipa.kerberosmgmt.exception.DeleteException;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KeytabCleanupService;
+import com.sequenceiq.freeipa.service.StackEncryptionService;
 import com.sequenceiq.freeipa.service.freeipa.cleanup.StructuredEventCleanupService;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -57,6 +58,9 @@ public class TerminationService {
     private FreeIpaRecipeService freeIpaRecipeService;
 
     @Inject
+    private StackEncryptionService stackEncryptionService;
+
+    @Inject
     private StructuredEventCleanupService structuredEventCleanupService;
 
     public void finalizeTermination(Long stackId) {
@@ -81,6 +85,7 @@ public class TerminationService {
         terminateMetaDataInstances(stack, null);
         cleanupVault(stack);
         freeIpaRecipeService.deleteRecipes(stack.getId());
+        stackEncryptionService.deleteStackEncryption(stack.getId());
         stackUpdater.updateStackStatus(stack, DetailedStackStatus.DELETE_COMPLETED, "Stack was terminated successfully.");
         stackService.save(stack);
     }

@@ -38,13 +38,14 @@ public class EncryptionUtil {
     @Inject
     private SecretService secretService;
 
-    public String encrypt(CloudPlatform cloudPlatform, String input, DetailedEnvironmentResponse environment, String secretName) {
+    public String encrypt(CloudPlatform cloudPlatform, String input, DetailedEnvironmentResponse environment, String secretName,
+            EncryptionKeySource secretEncryptionKeySource) {
         CloudConnector cloudConnector = cloudPlatformConnectors.get(Platform.platform(cloudPlatform.name()), Variant.variant(cloudPlatform.name()));
         CryptoConnector cryptoConnector = cloudConnector.cryptoConnector();
         CloudCredential cloudCredential = cloudCredentialConverter.convert(convertToCredential(environment.getCredential()));
         EncryptRequest parameters = EncryptRequest.builder()
                 .withInput(input)
-                .withKeySource(getEncryptionKeySource(cloudPlatform, environment))
+                .withKeySource(secretEncryptionKeySource)
                 .withCloudCredential(cloudCredential)
                 .withRegionName(environment.getLocation().getName())
                 .withEnvironmentCrn(environment.getCrn())
@@ -53,11 +54,11 @@ public class EncryptionUtil {
         return cryptoConnector.encrypt(parameters);
     }
 
-    public EncryptionKeySource getEncryptionKeySource(CloudPlatform cloudPlatform, DetailedEnvironmentResponse environment) {
+    public EncryptionKeySource getEncryptionKeySource(CloudPlatform cloudPlatform, String luksKmsKey) {
         return switch (cloudPlatform) {
             case AWS -> EncryptionKeySource.builder()
                     .withKeyType(EncryptionKeyType.AWS_KMS_KEY_ARN)
-                    .withKeyValue(environment.getAws().getAwsDiskEncryptionParameters().getEncryptionKeyArn())
+                    .withKeyValue(luksKmsKey)
                     .build();
             default -> throw new CloudConnectorException(String.format("Couldn't specify secret encryption key source for cloud platform %s.", cloudPlatform));
         };

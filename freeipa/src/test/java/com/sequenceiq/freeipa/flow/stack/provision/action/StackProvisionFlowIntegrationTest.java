@@ -79,10 +79,12 @@ import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.provision.handler.ClusterProxyRegistrationHandler;
 import com.sequenceiq.freeipa.flow.stack.provision.handler.CreateUserDataHandler;
+import com.sequenceiq.freeipa.flow.stack.provision.handler.GenerateEncryptionKeysHandler;
 import com.sequenceiq.freeipa.flow.stack.provision.handler.ImageFallbackHandler;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.TlsSetupService;
+import com.sequenceiq.freeipa.service.encryption.EncryptionKeyService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.image.ImageFallbackService;
 import com.sequenceiq.freeipa.service.image.ImageService;
@@ -169,6 +171,9 @@ class StackProvisionFlowIntegrationTest {
 
     @MockBean
     private MeterRegistry meterRegistry;
+
+    @MockBean
+    private EncryptionKeyService encryptionKeyService;
 
     private ResourceConnector resourceConnector = mock(ResourceConnector.class);
 
@@ -273,6 +278,7 @@ class StackProvisionFlowIntegrationTest {
             StackProvisionFlowConfig.class,
             CheckImageAction.class,
             ClusterProxyRegistrationHandler.class,
+            GenerateEncryptionKeysHandler.class,
             CreateUserDataHandler.class,
             ImageFallbackHandler.class,
             StackProvisionService.class,

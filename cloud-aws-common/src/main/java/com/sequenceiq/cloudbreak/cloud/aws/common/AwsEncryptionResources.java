@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import static com.sequenceiq.common.api.type.ResourceType.AWS_KMS_KEY;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -130,7 +131,12 @@ public class AwsEncryptionResources implements EncryptionResources {
             ListResourceTagsRequest listResourceTagsRequest = ListResourceTagsRequest.builder()
                     .keyId(keyArn)
                     .build();
-            List<Tag> tags = amazonKmsUtil.listResourceTagsWithAllPages(kmsClient, listResourceTagsRequest);
+            List<Tag> tags = new ArrayList<>();
+            try {
+                tags = amazonKmsUtil.listResourceTagsWithAllPages(kmsClient, listResourceTagsRequest);
+            } catch (Exception e) {
+                LOGGER.error("Unable to fetch tags for {}", keyArn, e);
+            }
             return tags.stream()
                     .anyMatch(tag -> TAG_KEY_CLOUDERA_KMS_KEY_TARGET.equals(tag.tagKey()) && tagValueClouderaKMSKeyTarget.equals(tag.tagValue()));
         };

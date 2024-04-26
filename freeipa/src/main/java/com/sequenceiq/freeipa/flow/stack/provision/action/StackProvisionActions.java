@@ -56,6 +56,8 @@ import com.sequenceiq.freeipa.flow.stack.provision.SetupResultToStackEventConver
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationRequest;
+import com.sequenceiq.freeipa.flow.stack.provision.event.encryption.GenerateEncryptionKeysRequest;
+import com.sequenceiq.freeipa.flow.stack.provision.event.encryption.GenerateEncryptionKeysSuccess;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackFailed;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackRequest;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.LaunchStackResultToStackEventConverter;
@@ -108,11 +110,27 @@ public class StackProvisionActions {
         };
     }
 
-    @Bean(name = "CREATE_USER_DATA_STATE")
-    public Action<?, ?> createUserDataAction() {
+    @Bean(name = "GENERATE_ENCRYPTION_KEYS_STATE")
+    public Action<?, ?> generateEncryptionKeysAction() {
         return new AbstractStackProvisionAction<>(ValidationResult.class) {
             @Override
             protected void doExecute(StackContext context, ValidationResult payload, Map<Object, Object> variables) {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                LOGGER.info("Generate Encryption keys with Stack {}", context.getStack().getId());
+                return new GenerateEncryptionKeysRequest(context.getStack().getId());
+            }
+        };
+    }
+
+    @Bean(name = "CREATE_USER_DATA_STATE")
+    public Action<?, ?> createUserDataAction() {
+        return new AbstractStackProvisionAction<>(GenerateEncryptionKeysSuccess.class) {
+            @Override
+            protected void doExecute(StackContext context, GenerateEncryptionKeysSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 
