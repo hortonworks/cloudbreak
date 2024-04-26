@@ -45,7 +45,7 @@ public class DatalakeResizeFlowEventChainTest {
         DatalakeResizeFlowChainStartEvent event = new DatalakeResizeFlowChainStartEvent(sdxCluster.getId(), sdxCluster, USER_CRN, BACKUP_LOCATION,
                 true, true, new DatalakeDrSkipOptions(false, false, false, false));
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
-        assertEquals(9, flowTriggerEventQueue.getQueue().size());
+        assertEquals(8, flowTriggerEventQueue.getQueue().size());
         assertTriggerBackupEvent(flowTriggerEventQueue);
     }
 
@@ -55,7 +55,7 @@ public class DatalakeResizeFlowEventChainTest {
         DatalakeResizeFlowChainStartEvent event = new DatalakeResizeFlowChainStartEvent(clusterWithRaz.getId(), clusterWithRaz, USER_CRN, BACKUP_LOCATION,
                 true, true, new DatalakeDrSkipOptions(false, false, false, false));
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
-        assertEquals(9, flowTriggerEventQueue.getQueue().size());
+        assertEquals(8, flowTriggerEventQueue.getQueue().size());
         assertTriggerBackupEvent(flowTriggerEventQueue);
     }
 

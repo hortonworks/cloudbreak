@@ -25,7 +25,6 @@ import com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupFailureReason;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeTriggerBackupEvent;
 import com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreFailureReason;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent;
-import com.sequenceiq.datalake.flow.refresh.event.DatahubRefreshStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
@@ -80,7 +79,6 @@ public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactor
         // Delete the detached Sdx
         chain.add(new SdxDeleteStartEvent(SDX_DELETE_EVENT.event(), event.getResourceId(), event.getUserId(), true));
 
-        chain.add(new DatahubRefreshStartEvent(event.getResourceId(), event.getSdxCluster().getClusterName(), event.getUserId()));
         chain.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
 
         return new FlowTriggerEventQueue(getName(), event, chain);
