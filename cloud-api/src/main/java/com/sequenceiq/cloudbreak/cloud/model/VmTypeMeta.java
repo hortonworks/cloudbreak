@@ -115,9 +115,9 @@ public class VmTypeMeta {
         return resourceDiskAttached != null ? Boolean.valueOf(resourceDiskAttached.toString()) : Boolean.TRUE;
     }
 
-    public Boolean getHostEncryptionSupported() {
+    public boolean getHostEncryptionSupported() {
         Object hostEncryptionSupported = properties.get(HOST_ENCRYPTION_SUPPORTED);
-        return hostEncryptionSupported != null ? Boolean.valueOf(hostEncryptionSupported.toString()) : Boolean.TRUE;
+        return hostEncryptionSupported != null ? Boolean.parseBoolean(hostEncryptionSupported.toString()) : true;
     }
 
     public void setProperties(Map<String, Object> properties) {

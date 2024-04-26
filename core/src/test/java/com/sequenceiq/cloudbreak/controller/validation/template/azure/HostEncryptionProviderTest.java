@@ -4,13 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,9 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
-import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
@@ -62,21 +57,23 @@ class HostEncryptionProviderTest {
     }
 
     @Test
-    public void testUpdateWithHostEncryptionAzureWithEncryptionDisabled() {
+    public void testUpdateWithHostEncryptionAzureWithEncryptionDisabledShouldThrowBadRequestExceptionIfEnvironmentHasHostEncryptionEnabled() {
         Credential credential = createMockCredential(CloudPlatform.AZURE);
         Template template = new Template();
         VmType vmType = createMockVmType();
+        when(vmType.getValue()).thenReturn("D3");
         VmTypeMeta vmTypeMeta = mock(VmTypeMeta.class);
         DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
         when(hostEncryptionCalculator.hostEncryptionRequired(any())).thenReturn(true);
         when(vmType.getMetaData()).thenReturn(vmTypeMeta);
         when(vmTypeMeta.getHostEncryptionSupported()).thenReturn(false);
-        when(templateService.savePure(any())).thenReturn(template);
 
-        Template result = hostEncryptionProvider.updateWithHostEncryption(environmentResponse, credential, template, vmType);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> hostEncryptionProvider.updateWithHostEncryption(environmentResponse, credential, template, vmType));
 
-        assertEquals(result.getAttributes(), new Json(Map.of(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED, false)));
-        verify(templateService, atLeast(1)).savePure(any(Template.class));
+        assertEquals(badRequestException.getMessage(), "The virtual machine type D3 does not support host encryption, " +
+                "but your Environment configured to enable host encryption. Please make sure you are " +
+                "choosing and instancetype which support host encryption.");
     }
 
     @Test

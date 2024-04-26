@@ -36,8 +36,14 @@ public class HostEncryptionProvider {
             }
             Json attributesJson = template.getAttributes();
             if (hostEncryptionCalculator.hostEncryptionRequired(environmentResponse)) {
+                boolean hostEncryptionSupportedOnInstance = vmType.getMetaData() == null ? false : vmType.getMetaData().getHostEncryptionSupported();
+                if (!hostEncryptionSupportedOnInstance) {
+                    throw new BadRequestException(String.format("The virtual machine type %s does not support host encryption," +
+                            " but your Environment configured to enable host encryption. " +
+                            "Please make sure you are choosing and instancetype which support host encryption.", vmType.getValue()));
+                }
                 Map<String, Object> attributes = Optional.ofNullable(attributesJson).map(Json::getMap).orElseGet(HashMap::new);
-                attributes.put(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED, vmType.getMetaData().getHostEncryptionSupported());
+                attributes.put(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED, hostEncryptionSupportedOnInstance);
                 template.setAttributes(new Json(attributes));
                 return templateService.savePure(template);
             }
