@@ -15,13 +15,10 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
-import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
-import com.sequenceiq.sdx.api.model.SdxInstanceGroupDiskRequest;
-import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 
 @Component
 public class SdxResizeTestUtil {
@@ -37,7 +34,7 @@ public class SdxResizeTestUtil {
     public void runResizeTest(TestContext testContext, String sdxKey, SdxCloudStorageRequest cloudStorageRequest) {
         SdxResizeTestValidator resizeTestValidator = new SdxResizeTestValidator(SdxClusterShape.ENTERPRISE);
 
-        performInitialResizeSteps(testContext, sdxKey, cloudStorageRequest, resizeTestValidator, false, false)
+        performInitialResizeSteps(testContext, sdxKey, cloudStorageRequest, resizeTestValidator, false)
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxKey))
                 .awaitForHealthyInstances()
 
@@ -49,7 +46,7 @@ public class SdxResizeTestUtil {
     public void runResizeRecoveryFromProvisioningFailureTest(TestContext testContext, String sdxKey, SdxCloudStorageRequest cloudStorageRequest) {
         SdxResizeTestValidator resizeTestValidator = new SdxResizeTestValidator(SdxClusterShape.CUSTOM);
 
-        performInitialResizeSteps(testContext, sdxKey, cloudStorageRequest, resizeTestValidator, true, false)
+        performInitialResizeSteps(testContext, sdxKey, cloudStorageRequest, resizeTestValidator, true)
                 .then((tc, testDto, client) -> performProvisioningFailureAndRecovery(testDto, sdxKey))
 
                 // Ensure current cluster is identical to original cluster.
@@ -57,24 +54,15 @@ public class SdxResizeTestUtil {
                 .validate();
     }
 
-    public void runCustomInstancesResizeTest(TestContext testContext, String sdxKey, SdxCloudStorageRequest cloudStorageRequest) {
-        SdxResizeTestValidator resizeTestValidator = new SdxResizeTestValidator(SdxClusterShape.ENTERPRISE);
-
-        performInitialResizeSteps(testContext, sdxKey, cloudStorageRequest, resizeTestValidator, false, true)
-                .await(SdxClusterStatusResponse.RUNNING, key(sdxKey))
-                .awaitForHealthyInstances()
-                .then((tc, dto, client) -> resizeTestValidator.validateResizedCluster(dto))
-                .validate();
-    }
-
     private SdxInternalTestDto performInitialResizeSteps(TestContext testContext, String sdxKey, SdxCloudStorageRequest cloudStorageRequest,
-            SdxResizeTestValidator validator, Boolean recoveryTest, Boolean useCustomInstances) {
+            SdxResizeTestValidator validator, Boolean recoveryTest) {
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
         return testContext
                 .given("telemetry", TelemetryTestDto.class)
                 .withLogging()
                 .withReportClusterLogs()
+                // Create original SDX cluster.
                 .given(sdxKey, SdxInternalTestDto.class)
                 .withDatabase(sdxDatabaseRequest)
                 .withCloudStorage(cloudStorageRequest)
@@ -84,6 +72,8 @@ public class SdxResizeTestUtil {
                 .when(sdxTestClient.createInternal(), key(sdxKey))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxKey))
                 .awaitForHealthyInstances()
+
+                // Initialize validator with info from original cluster.
                 .then((tc, testDto, client) -> {
                     validator.setExpectedCrn(sdxUtil.getCrn(testDto, client));
                     validator.setExpectedName(testDto.getName());
@@ -93,15 +83,8 @@ public class SdxResizeTestUtil {
                     }
                     return testDto;
                 })
-                .then((tc, testDto, client) -> {
-                    if (useCustomInstances) {
-                        SdxClusterResizeRequest sdxClusterResizeRequest = testDto.getSdxResizeRequest();
-                        populateSdxClusterResizeRequestWithCustomInstances(sdxClusterResizeRequest);
-                        validator.setExpectedCustomInstanceGroups(sdxClusterResizeRequest.getCustomInstanceGroups());
-                        validator.setExpectedSdxInstanceGroupDiskRequest(sdxClusterResizeRequest.getCustomInstanceGroupDiskSize());
-                    }
-                    return testDto;
-                })
+
+                // Perform resize and await start of new cluster creation.
                 .when(sdxTestClient.resize(), key(sdxKey))
                 .await(SdxClusterStatusResponse.STOP_IN_PROGRESS, key(sdxKey).withoutWaitForFlow())
                 .await(SdxClusterStatusResponse.STACK_CREATION_IN_PROGRESS, key(sdxKey).withoutWaitForFlow());
@@ -123,17 +106,5 @@ public class SdxResizeTestUtil {
                 .when(sdxTestClient.recoverFromResizeInternal(), key(sdxKey))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxKey))
                 .awaitForHealthyInstances();
-    }
-
-    private void populateSdxClusterResizeRequestWithCustomInstances(SdxClusterResizeRequest sdxClusterResizeRequest) {
-        SdxInstanceGroupRequest sdxInstanceGroupRequest = new SdxInstanceGroupRequest();
-        sdxInstanceGroupRequest.setName("master");
-        sdxInstanceGroupRequest.setInstanceType("m5.2xlarge");
-        SdxInstanceGroupDiskRequest sdxInstanceGroupDiskRequest = new SdxInstanceGroupDiskRequest();
-        sdxInstanceGroupDiskRequest.setName("master");
-        sdxInstanceGroupDiskRequest.setInstanceDiskSize(300);
-
-        sdxClusterResizeRequest.setCustomInstanceGroups(List.of(sdxInstanceGroupRequest));
-        sdxClusterResizeRequest.setCustomInstanceGroupDiskSize(List.of(sdxInstanceGroupDiskRequest));
     }
 }
