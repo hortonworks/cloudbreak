@@ -42,7 +42,8 @@ public interface SdxRestoreEndpoint {
             @QueryParam("skipAtlasMetadata") boolean skipAtlasMetadata,
             @QueryParam("skipRangerAudits") boolean skipRangerAudits,
             @QueryParam("skipRangerMetadata") boolean skipRangerMetadata,
-            @QueryParam("fullDrMaxDurationInMin") int fullDrMaxDurationInMin);
+            @QueryParam("fullDrMaxDurationInMin") int fullDrMaxDurationInMin,
+            @QueryParam("validationOnly") boolean validationOnly);
 
     @POST
     @Path("{name}/restoreDatalakeStatus")
