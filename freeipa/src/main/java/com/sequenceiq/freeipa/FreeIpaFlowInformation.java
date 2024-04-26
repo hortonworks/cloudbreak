@@ -26,6 +26,7 @@ import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootEvent;
+import com.sequenceiq.freeipa.flow.stack.dynamicentitlement.RefreshEntitlementParamsEvent;
 import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents;
 import com.sequenceiq.freeipa.flow.stack.migration.AwsVariantMigrationEvent;
 import com.sequenceiq.freeipa.flow.stack.modify.proxy.selector.ModifyProxyConfigEvent;
@@ -39,6 +40,7 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 public class FreeIpaFlowInformation implements ApplicationFlowInformation {
 
     private static final List<String> PARALLEL_FLOWS = List.of(
+            RefreshEntitlementParamsEvent.REFRESH_ENTITLEMENT_PARAMS_TRIGGER_EVENT.event(),
             FreeIpaCleanupEvent.CLEANUP_EVENT.event(),
             StackTerminationEvent.TERMINATION_EVENT.event(),
             CreateBindUserFlowEvent.CREATE_BIND_USER_EVENT.event(),

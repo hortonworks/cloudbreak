@@ -383,6 +383,9 @@ authdistributor:
 ccmRevertJob:
   activationInMinutes: 5
 
+dynamic-entitlement:
+  entitlements: CDP_CENTRAL_COMPUTE_MONITORING
+
 wiam:
   host: localhost
   port: 8982

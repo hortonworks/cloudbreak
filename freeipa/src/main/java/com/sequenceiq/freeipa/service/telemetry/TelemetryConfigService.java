@@ -150,7 +150,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
         }
     }
 
-    private void storeTelemetry(Long stackId, Telemetry telemetry) {
+    public void storeTelemetry(Long stackId, Telemetry telemetry) {
         try {
             transactionService.required(() -> {
                 Stack stack = stackService.getStackById(stackId);
