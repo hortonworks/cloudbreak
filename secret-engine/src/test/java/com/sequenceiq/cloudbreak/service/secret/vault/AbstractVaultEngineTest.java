@@ -16,15 +16,15 @@ public class AbstractVaultEngineTest {
 
     private final Gson gson = new Gson();
 
-    private final VaultSecret secret = new VaultSecret("cb", "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV1Engine",
+    private final VaultSecret secret = new VaultSecret("cb", "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine",
             "cb/foo/bar/6f18609d-8d24-4a39-a283-154c1e8ab46a-f186");
 
     @Spy
-    private AbstractVaultEngine<VaultKvV1Engine> underTest;
+    private AbstractVaultEngine<VaultKvV2Engine> underTest;
 
     @Before
     public void setup() {
-        when(underTest.clazz()).thenReturn(VaultKvV1Engine.class);
+        when(underTest.clazz()).thenReturn(VaultKvV2Engine.class);
     }
 
     @Test
@@ -50,14 +50,14 @@ public class AbstractVaultEngineTest {
 
     @Test
     public void testIsSecretPathMissing() {
-        VaultSecret secret = new VaultSecret("ep", "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV1Engine", null);
+        VaultSecret secret = new VaultSecret("ep", "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine", null);
 
         Assert.assertFalse(underTest.isSecret(gson.toJson(secret)));
     }
 
     @Test
     public void testIsSecretClassDifferent() {
-        VaultSecret secret = new VaultSecret("ep", "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine", "p");
+        VaultSecret secret = new VaultSecret("ep", "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV1Engine", "p");
 
         Assert.assertFalse(underTest.isSecret(gson.toJson(secret)));
     }

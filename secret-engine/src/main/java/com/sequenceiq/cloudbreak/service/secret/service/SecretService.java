@@ -25,14 +25,13 @@ import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
 import com.sequenceiq.cloudbreak.service.secret.conf.VaultConfig;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
-import com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV1Engine;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
 import com.sequenceiq.cloudbreak.vault.ThreadBasedVaultReadFieldProvider;
 import com.sequenceiq.cloudbreak.vault.VaultConstants;
 
 @Service
-@ConditionalOnBean({VaultKvV2Engine.class, VaultKvV1Engine.class, VaultConfig.class})
+@ConditionalOnBean({VaultKvV2Engine.class, VaultConfig.class})
 public class SecretService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecretService.class);
