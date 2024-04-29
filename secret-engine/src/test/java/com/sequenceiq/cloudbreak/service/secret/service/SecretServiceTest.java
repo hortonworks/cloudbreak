@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
-import java.time.Duration;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -23,22 +22,18 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.ReflectionUtils;
 
-import com.sequenceiq.cloudbreak.common.metrics.MetricService;
-import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
 import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine;
 
 @ExtendWith(MockitoExtension.class)
 public class SecretServiceTest {
 
-    private final MetricService metricService = Mockito.mock(MetricService.class);
-
     private final SecretEngine persistentEngine = Mockito.mock(VaultKvV2Engine.class);
 
     private final VaultRetryService vaultRetryService = Mockito.mock(VaultRetryService.class);
 
     @InjectMocks
-    private final SecretService underTest = new SecretService(metricService, List.of(persistentEngine), vaultRetryService);
+    private final SecretService underTest = new SecretService(List.of(persistentEngine), vaultRetryService);
 
     @BeforeEach
     public void setup() {
@@ -65,7 +60,6 @@ public class SecretServiceTest {
         String result = underTest.put("key", "value");
 
         verify(persistentEngine, times(1)).put(eq("key"), eq("value"));
-        verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_WRITE), any(Duration.class), any(String[].class));
         assertEquals("secret", result);
     }
 
@@ -81,7 +75,6 @@ public class SecretServiceTest {
         String result = underTest.get("secret");
 
         verify(persistentEngine, times(1)).isSecret(anyString());
-        verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_READ), any(Duration.class), any(String[].class));
 
         assertNull(result);
     }
@@ -103,7 +96,6 @@ public class SecretServiceTest {
 
         verify(persistentEngine, times(1)).isSecret(any());
         verify(persistentEngine, times(0)).delete(anyString());
-        verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_DELETE), any(Duration.class), any(String[].class));
     }
 
     @Test
@@ -112,7 +104,6 @@ public class SecretServiceTest {
 
         verify(persistentEngine, times(1)).isSecret(anyString());
         verify(persistentEngine, times(1)).delete(anyString());
-        verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_DELETE), any(Duration.class), any(String[].class));
     }
 
     @Test

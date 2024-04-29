@@ -12,7 +12,7 @@ public class DummySecretService extends SecretService {
     private Map<String, String> store;
 
     public DummySecretService() {
-        super(null, null, null);
+        super(null, null);
     }
 
     @Override
