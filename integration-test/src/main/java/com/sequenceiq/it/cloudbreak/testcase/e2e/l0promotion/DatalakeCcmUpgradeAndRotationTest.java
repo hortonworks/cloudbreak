@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -43,6 +44,7 @@ import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.EnvironmentUtil;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
@@ -67,6 +69,9 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest {
     @Inject
     private SdxUtil sdxUtil;
 
+    @Inject
+    private SshJUtil sshJUtil;
+
     @Override
     protected void setupTest(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
@@ -84,9 +89,13 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest {
     public void testCcmV1Upgrade(TestContext testContext) {
         createEnvironmentWithCcm(testContext, Tunnel.CCM);
         createSdxForEnvironment(testContext);
+        validateCcmServices(testContext, Tunnel.CCM);
         upgradeCcmOnEnvironment(testContext);
+        validateCcmServices(testContext, Tunnel.CCMV2_JUMPGATE);
         rotateCcmV2JumpgateAgentAccessKey(testContext);
+        validateCcmServices(testContext, Tunnel.CCMV2_JUMPGATE);
         repairMasterNodes(testContext);
+        validateCcmServices(testContext, Tunnel.CCMV2_JUMPGATE);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -98,8 +107,11 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest {
     public void testCcmV2Upgrade(TestContext testContext) {
         createEnvironmentWithCcm(testContext, Tunnel.CCMV2);
         createSdxForEnvironment(testContext);
+        validateCcmServices(testContext, Tunnel.CCMV2);
         upgradeCcmOnEnvironment(testContext);
+        validateCcmServices(testContext, Tunnel.CCMV2_JUMPGATE);
         repairMasterNodes(testContext);
+        validateCcmServices(testContext, Tunnel.CCMV2_JUMPGATE);
     }
 
     private void createEnvironmentWithCcm(TestContext testContext, Tunnel ccmVersion) {
@@ -113,6 +125,30 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest {
                 .await(OperationState.COMPLETED)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
+                .validate();
+    }
+
+    private void validateCcmServices(TestContext testContext, Tunnel ccmVersion) {
+        testContext
+                .given(FreeIpaTestDto.class)
+                .then((tc, testDto, client) -> {
+                    Map<String, Boolean> serviceStatusesByName = Map.of(
+                            "ccm-tunnel@GATEWAY", ccmVersion.useCcmV1(),
+                            "ccm-tunnel@KNOX", ccmVersion.useCcmV1(),
+                            "jumpgate-agent", ccmVersion.useCcmV2OrJumpgate()
+                    );
+                    return sshJUtil.checkSystemctlServiceStatus(testDto, testDto.getEnvironmentCrn(), client, serviceStatusesByName);
+                })
+                .given(SdxInternalTestDto.class)
+                .then((tc, testDto, client) -> {
+                    Map<String, Boolean> serviceStatusesByName = Map.of(
+                            "ccm-tunnel@GATEWAY", ccmVersion.useCcmV1(),
+                            "ccm-tunnel@KNOX", ccmVersion.useCcmV1(),
+                            "jumpgate-agent", ccmVersion.useCcmV2()
+                    );
+                    List<InstanceGroupV4Response> instanceGroups = testDto.getResponse().getStackV4Response().getInstanceGroups();
+                    return sshJUtil.checkSystemctlServiceStatus(testDto, instanceGroups, List.of(MASTER.getName()), serviceStatusesByName);
+                })
                 .validate();
     }
 

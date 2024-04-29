@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.util.ssh;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -85,11 +86,21 @@ public class SshJUtil {
         return sshJClientActions.checkFluentdStatus(testDto, environmentCrn, freeipaClient);
     }
 
-    public <T extends CloudbreakTestDto> T checkServiceStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
-        return sshJClientActions.checkServiceStatus(testDto, instanceGroups, hostGroupNames);
+    public <T extends CloudbreakTestDto> T checkCdpServiceStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+        return sshJClientActions.checkCdpServiceStatus(testDto, instanceGroups, hostGroupNames);
     }
 
-    public FreeIpaTestDto checkServiceStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
-        return sshJClientActions.checkServiceStatus(testDto, environmentCrn, freeipaClient);
+    public FreeIpaTestDto checkCdpServiceStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
+        return sshJClientActions.checkCdpServiceStatus(testDto, environmentCrn, freeipaClient);
+    }
+
+    public <T extends CloudbreakTestDto> T checkSystemctlServiceStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames,
+            Map<String, Boolean> serviceStatusesByName) {
+        return sshJClientActions.checkSystemctlServiceStatus(testDto, instanceGroups, hostGroupNames, serviceStatusesByName);
+    }
+
+    public FreeIpaTestDto checkSystemctlServiceStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient,
+            Map<String, Boolean> serviceStatusesByName) {
+        return sshJClientActions.checkSystemctlServiceStatus(testDto, environmentCrn, freeipaClient, serviceStatusesByName);
     }
 }

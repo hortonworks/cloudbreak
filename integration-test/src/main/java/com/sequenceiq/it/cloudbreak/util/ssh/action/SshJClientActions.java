@@ -613,17 +613,17 @@ public class SshJClientActions {
         return testDto;
     }
 
-    public FreeIpaTestDto checkServiceStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
+    public FreeIpaTestDto checkCdpServiceStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
         List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false);
-        return checkCdpServiceStatus(testDto, instanceIps, List.of("infraServices", "freeipaServices"));
+        return doCheckCdpServiceStatus(testDto, instanceIps, List.of("infraServices", "freeipaServices"));
     }
 
-    public <T extends CloudbreakTestDto> T checkServiceStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+    public <T extends CloudbreakTestDto> T checkCdpServiceStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
         List<String> instanceIps = getInstanceGroupIps(instanceGroups, hostGroupNames, false);
-        return checkCdpServiceStatus(testDto, instanceIps, List.of("infraServices", "cmServices"));
+        return doCheckCdpServiceStatus(testDto, instanceIps, List.of("infraServices", "cmServices"));
     }
 
-    private <T extends CloudbreakTestDto> T checkCdpServiceStatus(T testDto, List<String> instanceIps, List<String> statusCategories) {
+    private <T extends CloudbreakTestDto> T doCheckCdpServiceStatus(T testDto, List<String> instanceIps, List<String> statusCategories) {
         statusCategories.forEach(statusCategory -> {
             String cdpServiceStatusCommand =
                     format("sudo cdp-doctor service status --format json | jq -r '.%s[] | \"\\(.name) \\(.status)\"'", statusCategory);
@@ -639,6 +639,36 @@ public class SshJClientActions {
                             statusReport.getKey()));
                 }
             }
+        });
+        return testDto;
+    }
+
+    public FreeIpaTestDto checkSystemctlServiceStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient,
+            Map<String, Boolean> serviceStatusesByName) {
+        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false);
+        return checkSystemctlServiceStatus(testDto, instanceIps, serviceStatusesByName);
+    }
+
+    public <T extends CloudbreakTestDto> T checkSystemctlServiceStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames,
+            Map<String, Boolean> serviceStatusesByName) {
+        List<String> instanceIps = getInstanceGroupIps(instanceGroups, hostGroupNames, false);
+        return checkSystemctlServiceStatus(testDto, instanceIps, serviceStatusesByName);
+    }
+
+    private <T extends CloudbreakTestDto> T checkSystemctlServiceStatus(T testDto, List<String> instanceIps, Map<String, Boolean> serviceStatusesByName) {
+        serviceStatusesByName.forEach((serviceName, serviceStatus) -> {
+            String systemctlServiceStatusCommand = format("systemctl is-active %s", serviceName);
+            Map<String, Pair<Integer, String>> systemctlServiceStatusByIp = instanceIps.stream()
+                    .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, systemctlServiceStatusCommand)));
+            systemctlServiceStatusByIp.forEach((ip, result) -> {
+                String status = result.getValue().trim();
+                if (serviceStatus != "active".equals(status)) {
+                    String message = format(" systemctl service %s status on node %s is %s, but expected to be %s ",
+                            serviceName, ip, status, serviceStatus ? "active" : "not active");
+                    Log.error(LOGGER, message);
+                    throw new TestFailException(message);
+                }
+            });
         });
         return testDto;
     }
