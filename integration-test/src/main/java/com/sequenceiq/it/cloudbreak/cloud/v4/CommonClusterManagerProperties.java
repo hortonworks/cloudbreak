@@ -227,22 +227,12 @@ public class CommonClusterManagerProperties {
 
         private String targetDatabaseMajorVersion;
 
-        private String originalEmbeddedDbSdxVersion;
-
         public String getOriginalDatabaseMajorVersion() {
             return originalDatabaseMajorVersion;
         }
 
         public void setOriginalDatabaseMajorVersion(String originalDatabaseMajorVersion) {
             this.originalDatabaseMajorVersion = originalDatabaseMajorVersion;
-        }
-
-        public String getOriginalEmbeddedDbSdxVersion() {
-            return originalEmbeddedDbSdxVersion;
-        }
-
-        public void setOriginalEmbeddedDbSdxVersion(String originalEmbeddedDbSdxVersion) {
-            this.originalEmbeddedDbSdxVersion = originalEmbeddedDbSdxVersion;
         }
 
         public String getTargetDatabaseMajorVersion() {

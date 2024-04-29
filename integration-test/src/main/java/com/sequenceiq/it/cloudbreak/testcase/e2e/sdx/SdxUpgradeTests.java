@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.assertion.audit.DatalakeAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -62,7 +63,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest {
                 .given(sdx, SdxTestDto.class)
                 .withCloudStorage()
                 .withRuntimeVersion(commonClusterManagerProperties.getUpgrade().getCurrentRuntimeVersion())
-                .withExternalDatabase(sdxDbRequest())
+                .withExternalDatabase(sdxDbRequest(testContext.getCloudProvider()))
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
@@ -89,10 +90,10 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest {
                 .validate();
     }
 
-    private SdxDatabaseRequest sdxDbRequest() {
+    private SdxDatabaseRequest sdxDbRequest(CloudProvider cloudProvider) {
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-        sdxDatabaseRequest.setDatabaseEngineVersion(commonClusterManagerProperties.getUpgradeDatabaseServer().getOriginalEmbeddedDbSdxVersion());
+        sdxDatabaseRequest.setDatabaseEngineVersion(cloudProvider.getEmbeddedDbUpgradeSourceVersion());
         return sdxDatabaseRequest;
     }
 

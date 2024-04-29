@@ -505,4 +505,9 @@ public class CloudProviderProxy implements CloudProvider {
     public boolean isExternalDatabaseSslEnforcementSupported() {
         return delegate.isExternalDatabaseSslEnforcementSupported();
     }
+
+    @Override
+    public String getEmbeddedDbUpgradeSourceVersion() {
+        return delegate.getEmbeddedDbUpgradeSourceVersion();
+    }
 }

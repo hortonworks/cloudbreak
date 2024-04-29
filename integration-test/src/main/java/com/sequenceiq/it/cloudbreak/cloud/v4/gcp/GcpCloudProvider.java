@@ -505,4 +505,9 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     public boolean isExternalDatabaseSslEnforcementSupported() {
         return gcpProperties.getExternalDatabaseSslEnforcementSupported();
     }
+
+    @Override
+    public String getEmbeddedDbUpgradeSourceVersion() {
+        return gcpProperties.getEmbeddedDbUpgradeSourceVersion();
+    }
 }

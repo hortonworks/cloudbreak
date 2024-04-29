@@ -32,6 +32,8 @@ public class AwsProperties {
 
     private Boolean externalDatabaseSslEnforcementSupported;
 
+    private String embeddedDbUpgradeSourceVersion;
+
     private final Instance instance = new Instance();
 
     private final Instance storageOptimizedInstance = new Instance();
@@ -92,6 +94,14 @@ public class AwsProperties {
 
     public void setExternalDatabaseSslEnforcementSupported(Boolean externalDatabaseSslEnforcementSupported) {
         this.externalDatabaseSslEnforcementSupported = externalDatabaseSslEnforcementSupported;
+    }
+
+    public String getEmbeddedDbUpgradeSourceVersion() {
+        return embeddedDbUpgradeSourceVersion;
+    }
+
+    public void setEmbeddedDbUpgradeSourceVersion(String embeddedDbUpgradeSourceVersion) {
+        this.embeddedDbUpgradeSourceVersion = embeddedDbUpgradeSourceVersion;
     }
 
     public String getLocation() {

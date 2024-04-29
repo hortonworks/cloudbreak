@@ -543,4 +543,9 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     public boolean isExternalDatabaseSslEnforcementSupported() {
         return awsProperties.getExternalDatabaseSslEnforcementSupported();
     }
+
+    @Override
+    public String getEmbeddedDbUpgradeSourceVersion() {
+        return awsProperties.getEmbeddedDbUpgradeSourceVersion();
+    }
 }

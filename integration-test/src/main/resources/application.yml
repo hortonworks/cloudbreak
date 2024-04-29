@@ -109,7 +109,6 @@ integrationtest:
   upgradeDatabaseServer:
     originalDatabaseMajorVersion: 11
     targetDatabaseMajorVersion: 14
-    originalEmbeddedDbSdxVersion: 11
   privateEndpointEnabled: false
 
   spot:
@@ -179,6 +178,7 @@ integrationtest:
     diskEncryption:
       environmentKey:
       datahubKey:
+    embeddedDbUpgradeSourceVersion: 10
 
   # azure parameters
   azure:
@@ -261,6 +261,7 @@ integrationtest:
       encryptionKeyUrl:
       resourceGroupName:
       managedIdentity:
+    embeddedDbUpgradeSourceVersion: 11
 
   # gcp parameters
   gcp:
@@ -323,6 +324,7 @@ integrationtest:
     diskEncryption:
       environmentKey:
       datahubKey:
+    embeddedDbUpgradeSourceVersion: 14
 
   # yarn parameters
   yarn:

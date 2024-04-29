@@ -41,6 +41,8 @@ public class AzureProperties {
 
     private MarketplaceProperties marketplace = new MarketplaceProperties();
 
+    private String embeddedDbUpgradeSourceVersion;
+
     public VerticalScaleProperties getVerticalScale() {
         return verticalScale;
     }
@@ -123,6 +125,14 @@ public class AzureProperties {
 
     public void setMarketplace(MarketplaceProperties marketplace) {
         this.marketplace = marketplace;
+    }
+
+    public String getEmbeddedDbUpgradeSourceVersion() {
+        return embeddedDbUpgradeSourceVersion;
+    }
+
+    public void setEmbeddedDbUpgradeSourceVersion(String embeddedDbUpgradeSourceVersion) {
+        this.embeddedDbUpgradeSourceVersion = embeddedDbUpgradeSourceVersion;
     }
 
     public static class Credential {

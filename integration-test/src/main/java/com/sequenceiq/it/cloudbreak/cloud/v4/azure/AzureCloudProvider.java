@@ -556,4 +556,9 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     public boolean isExternalDatabaseSslEnforcementSupported() {
         return azureProperties.getExternalDatabaseSslEnforcementSupported();
     }
+
+    @Override
+    public String getEmbeddedDbUpgradeSourceVersion() {
+        return azureProperties.getEmbeddedDbUpgradeSourceVersion();
+    }
 }

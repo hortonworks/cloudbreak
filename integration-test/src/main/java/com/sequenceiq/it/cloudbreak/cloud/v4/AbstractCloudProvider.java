@@ -450,6 +450,11 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     @Override
+    public String getEmbeddedDbUpgradeSourceVersion() {
+        return "14";
+    }
+
+    @Override
     public EnvironmentNetworkTestDto newNetwork(EnvironmentNetworkTestDto network) {
         return network;
     }

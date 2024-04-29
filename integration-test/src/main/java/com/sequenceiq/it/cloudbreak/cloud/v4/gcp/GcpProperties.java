@@ -22,6 +22,8 @@ public class GcpProperties {
 
     private Boolean externalDatabaseSslEnforcementSupported;
 
+    private String embeddedDbUpgradeSourceVersion;
+
     private final Credential credential = new Credential();
 
     private final Instance instance = new Instance();
@@ -73,6 +75,14 @@ public class GcpProperties {
 
     public void setExternalDatabaseSslEnforcementSupported(Boolean externalDatabaseSslEnforcementSupported) {
         this.externalDatabaseSslEnforcementSupported = externalDatabaseSslEnforcementSupported;
+    }
+
+    public String getEmbeddedDbUpgradeSourceVersion() {
+        return embeddedDbUpgradeSourceVersion;
+    }
+
+    public void setEmbeddedDbUpgradeSourceVersion(String embeddedDbUpgradeSourceVersion) {
+        this.embeddedDbUpgradeSourceVersion = embeddedDbUpgradeSourceVersion;
     }
 
     public String getAvailabilityZone() {

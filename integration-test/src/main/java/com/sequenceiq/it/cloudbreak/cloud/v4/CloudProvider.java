@@ -219,4 +219,5 @@ public interface CloudProvider {
 
     boolean isExternalDatabaseSslEnforcementSupported();
 
+    String getEmbeddedDbUpgradeSourceVersion();
 }
