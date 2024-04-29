@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
@@ -17,8 +18,8 @@ public class EnvironmentDetailsToCDPFreeIPADetailsConverter {
 
     private static final int DEFAULT_INTEGER_VALUE = -1;
 
-    public UsageProto.CDPFreeIPADetails convert(EnvironmentDetails environmentDetails) {
-        UsageProto.CDPFreeIPADetails.Builder cdpFreeIPADetails = UsageProto.CDPFreeIPADetails.newBuilder();
+    public CDPFreeIPADetails convert(EnvironmentDetails environmentDetails) {
+        CDPFreeIPADetails.Builder cdpFreeIPADetails = CDPFreeIPADetails.newBuilder();
         cdpFreeIPADetails.setNodes(DEFAULT_INTEGER_VALUE);
 
         if (environmentDetails != null) {
@@ -39,7 +40,7 @@ public class EnvironmentDetailsToCDPFreeIPADetailsConverter {
             }
         }
 
-        UsageProto.CDPFreeIPADetails ret = cdpFreeIPADetails.build();
+        CDPFreeIPADetails ret = cdpFreeIPADetails.build();
         LOGGER.debug("Converted CDPFreeIPADetails: {}", ret);
         return ret;
     }

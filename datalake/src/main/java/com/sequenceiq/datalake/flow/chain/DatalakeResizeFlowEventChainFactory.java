@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.flow.chain;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value;
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_VALIDATION_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVENT;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_EVENT;
@@ -15,6 +16,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.DatalakeUseCaseAware;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeleteStartEvent;
 import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent;
@@ -25,11 +27,16 @@ import com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreFailureReason;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent;
 import com.sequenceiq.datalake.flow.refresh.event.DatahubRefreshStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
+import com.sequenceiq.flow.core.chain.finalize.config.FlowChainFinalizeState;
+import com.sequenceiq.flow.core.chain.finalize.flowevents.FlowChainFinalizePayload;
+import com.sequenceiq.flow.core.chain.init.config.FlowChainInitState;
+import com.sequenceiq.flow.core.chain.init.flowevents.FlowChainInitPayload;
 
 @Component
-public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactory<DatalakeResizeFlowChainStartEvent> {
+public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactory<DatalakeResizeFlowChainStartEvent>, DatalakeUseCaseAware {
 
     private static final boolean STOP_DATAHUBS = false;
 
@@ -41,6 +48,8 @@ public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactor
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(DatalakeResizeFlowChainStartEvent event) {
         Queue<Selectable> chain = new ConcurrentLinkedQueue<>();
+
+        chain.add(new FlowChainInitPayload(getName(), event.getResourceId(), event.accepted()));
 
         if (event.shouldTakeBackup()) {
             // Take a backup
@@ -72,7 +81,21 @@ public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactor
         chain.add(new SdxDeleteStartEvent(SDX_DELETE_EVENT.event(), event.getResourceId(), event.getUserId(), true));
 
         chain.add(new DatahubRefreshStartEvent(event.getResourceId(), event.getSdxCluster().getClusterName(), event.getUserId()));
+        chain.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
 
         return new FlowTriggerEventQueue(getName(), event, chain);
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (FlowChainInitState.INIT_STATE.equals(flowState)) {
+            return Value.DATALAKE_RESIZE_STARTED;
+        } else if (FlowChainFinalizeState.FLOWCHAIN_FINALIZE_FINISHED_STATE.equals(flowState)) {
+            return Value.DATALAKE_RESIZE_FINISHED;
+        } else if (flowState.toString().contains("_FAIL")) {
+            return Value.DATALAKE_RESIZE_FAILED;
+        } else {
+            return Value.UNSET;
+        }
     }
 }

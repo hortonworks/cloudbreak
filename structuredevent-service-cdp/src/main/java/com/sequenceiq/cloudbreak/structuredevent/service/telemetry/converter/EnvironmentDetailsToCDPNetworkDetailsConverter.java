@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOwnDnsZones;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetails;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 
 import java.util.List;
@@ -12,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -31,8 +33,8 @@ public class EnvironmentDetailsToCDPNetworkDetailsConverter {
 
     private static final int DEFAULT_INTEGER_VALUE = -1;
 
-    public UsageProto.CDPNetworkDetails convert(EnvironmentDetails environmentDetails) {
-        UsageProto.CDPNetworkDetails.Builder cdpNetworkDetails = UsageProto.CDPNetworkDetails.newBuilder();
+    public CDPNetworkDetails convert(EnvironmentDetails environmentDetails) {
+        CDPNetworkDetails.Builder cdpNetworkDetails = CDPNetworkDetails.newBuilder();
         cdpNetworkDetails.setNumberPublicSubnets(DEFAULT_INTEGER_VALUE);
         cdpNetworkDetails.setNumberPrivateSubnets(DEFAULT_INTEGER_VALUE);
 
@@ -65,12 +67,12 @@ public class EnvironmentDetailsToCDPNetworkDetailsConverter {
         cdpNetworkDetails.setDomain(defaultIfEmpty(environmentDetails.getDomain(), ""));
         cdpNetworkDetails.setOwnDnsZones(convertOwnDnsZones(network, environmentDetails.getCloudPlatform()));
 
-        UsageProto.CDPNetworkDetails ret = cdpNetworkDetails.build();
+        CDPNetworkDetails ret = cdpNetworkDetails.build();
         LOGGER.debug("Converted CDPNetworkDetails: {}", ret);
         return ret;
     }
 
-    private void setupNetworks(UsageProto.CDPNetworkDetails.Builder cdpNetworkDetails, NetworkDto network) {
+    private void setupNetworks(CDPNetworkDetails.Builder cdpNetworkDetails, NetworkDto network) {
         if (network.getSubnetMetas() != null) {
             if (network.getSubnetMetas().isEmpty()) {
                 cdpNetworkDetails.setNumberPrivateSubnets(0);
@@ -94,7 +96,7 @@ public class EnvironmentDetailsToCDPNetworkDetailsConverter {
         }
     }
 
-    private void setupLoadBalancer(UsageProto.CDPNetworkDetails.Builder cdpNetworkDetails, NetworkDto network) {
+    private void setupLoadBalancer(CDPNetworkDetails.Builder cdpNetworkDetails, NetworkDto network) {
         if (network.getEndpointGatewaySubnetIds() != null) {
             if (network.getEndpointGatewaySubnetIds().isEmpty()) {
                 cdpNetworkDetails.setNumberPrivateLoadBalancerSubnets(0);
@@ -118,8 +120,8 @@ public class EnvironmentDetailsToCDPNetworkDetailsConverter {
         }
     }
 
-    private UsageProto.CDPProxyDetails convertProxy(ProxyDetails proxyDetails) {
-        UsageProto.CDPProxyDetails.Builder cdpProxyDetailsBuilder = UsageProto.CDPProxyDetails.newBuilder();
+    private CDPProxyDetails convertProxy(ProxyDetails proxyDetails) {
+        CDPProxyDetails.Builder cdpProxyDetailsBuilder = CDPProxyDetails.newBuilder();
         if (proxyDetails != null) {
             cdpProxyDetailsBuilder.setProxy(proxyDetails.isEnabled());
             cdpProxyDetailsBuilder.setProtocol(proxyDetails.getProtocol());
@@ -128,8 +130,8 @@ public class EnvironmentDetailsToCDPNetworkDetailsConverter {
         return cdpProxyDetailsBuilder.build();
     }
 
-    private UsageProto.CDPOwnDnsZones convertOwnDnsZones(NetworkDto networkDto, String cloudPlatform) {
-        UsageProto.CDPOwnDnsZones.Builder builder = UsageProto.CDPOwnDnsZones.newBuilder();
+    private CDPOwnDnsZones convertOwnDnsZones(NetworkDto networkDto, String cloudPlatform) {
+        CDPOwnDnsZones.Builder builder = CDPOwnDnsZones.newBuilder();
         if (networkDto == null || cloudPlatform == null) {
             return builder.build();
         }

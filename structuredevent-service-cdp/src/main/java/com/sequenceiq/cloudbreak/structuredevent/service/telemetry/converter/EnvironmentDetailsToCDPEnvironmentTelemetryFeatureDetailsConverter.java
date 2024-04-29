@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 
@@ -13,9 +14,8 @@ public class EnvironmentDetailsToCDPEnvironmentTelemetryFeatureDetailsConverter 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentDetailsToCDPEnvironmentTelemetryFeatureDetailsConverter.class);
 
-    public UsageProto.CDPEnvironmentTelemetryFeatureDetails convert(EnvironmentDetails environmentDetails) {
-        UsageProto.CDPEnvironmentTelemetryFeatureDetails.Builder cdpTelemetryFeatureDetailsBuilder =
-                UsageProto.CDPEnvironmentTelemetryFeatureDetails.newBuilder();
+    public CDPEnvironmentTelemetryFeatureDetails convert(EnvironmentDetails environmentDetails) {
+        CDPEnvironmentTelemetryFeatureDetails.Builder cdpTelemetryFeatureDetailsBuilder = CDPEnvironmentTelemetryFeatureDetails.newBuilder();
 
         if (environmentDetails != null && environmentDetails.getEnvironmentTelemetryFeatures() != null) {
             EnvironmentFeatures environmentFeatures = environmentDetails.getEnvironmentTelemetryFeatures();
@@ -27,7 +27,7 @@ public class EnvironmentDetailsToCDPEnvironmentTelemetryFeatureDetailsConverter 
             }
         }
 
-        UsageProto.CDPEnvironmentTelemetryFeatureDetails ret = cdpTelemetryFeatureDetailsBuilder.build();
+        CDPEnvironmentTelemetryFeatureDetails ret = cdpTelemetryFeatureDetailsBuilder.build();
         LOGGER.debug("Converted CDPEnvironmentTelemetryFeatureDetails: {}", ret);
         return ret;
     }

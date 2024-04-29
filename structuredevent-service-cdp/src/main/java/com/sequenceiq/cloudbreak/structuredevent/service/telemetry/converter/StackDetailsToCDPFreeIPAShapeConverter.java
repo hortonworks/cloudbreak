@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAShape;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.InstanceGroupDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 
@@ -15,8 +16,8 @@ public class StackDetailsToCDPFreeIPAShapeConverter {
 
     private static final int DEFAULT_INTEGER_VALUE = -1;
 
-    public UsageProto.CDPFreeIPAShape convert(StackDetails stackDetails) {
-        UsageProto.CDPFreeIPAShape.Builder cdpFreeIPAShape = UsageProto.CDPFreeIPAShape.newBuilder();
+    public CDPFreeIPAShape convert(StackDetails stackDetails) {
+        CDPFreeIPAShape.Builder cdpFreeIPAShape = CDPFreeIPAShape.newBuilder();
         cdpFreeIPAShape.setNodes(DEFAULT_INTEGER_VALUE);
 
         if (stackDetails != null && stackDetails.getInstanceGroups() != null) {

@@ -10,10 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Queue;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -25,7 +25,9 @@ import com.sequenceiq.datalake.flow.loadbalancer.dns.event.StartUpdateLoadBalanc
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
+@ExtendWith(MockitoExtension.class)
 public class DatalakeResizeRecoveryFlowEventChainTest {
+
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
     private static final long OLD_CLUSTER_SDX_ID = 1L;
@@ -34,11 +36,6 @@ public class DatalakeResizeRecoveryFlowEventChainTest {
 
     @InjectMocks
     private DatalakeResizeRecoveryFlowEventChainFactory factory;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     public void chainCreationTestAllEvents() {

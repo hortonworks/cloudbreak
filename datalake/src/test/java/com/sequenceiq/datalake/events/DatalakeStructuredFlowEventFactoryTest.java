@@ -1,8 +1,10 @@
 package com.sequenceiq.datalake.events;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,11 +15,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
+import com.sequenceiq.cloudbreak.structuredevent.event.DatabaseDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.datalake.DatalakeDetails;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -27,6 +33,7 @@ import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.repository.SdxStatusRepository;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
 @ExtendWith(MockitoExtension.class)
 class DatalakeStructuredFlowEventFactoryTest {
@@ -39,9 +46,6 @@ class DatalakeStructuredFlowEventFactoryTest {
     private SdxService mockSdxService;
 
     @Mock
-    private SdxClusterDtoConverter mockSdxClusterDtoConverter;
-
-    @Mock
     private NodeConfig mockNodeConfig;
 
     @Mock
@@ -49,9 +53,6 @@ class DatalakeStructuredFlowEventFactoryTest {
 
     @Mock
     private SdxStatusRepository mockSdxStatusRepository;
-
-    @Mock
-    private SdxClusterDto mockSdxClusterDto;
 
     @Mock
     private SdxStatusEntity mockSdxStatusEntity;
@@ -72,33 +73,40 @@ class DatalakeStructuredFlowEventFactoryTest {
         lenient().when(mockSdxService.getById(SDX_ID)).thenReturn(cluster);
         lenient().when(mockClock.getCurrentTimeMillis()).thenReturn(TIMESTAMP);
         lenient().when(mockFlowDetails.getFlowState()).thenReturn(DatalakeStatusEnum.RUNNING.name());
-        lenient().when(mockSdxClusterDtoConverter.sdxClusterToDto(createSdxCluster())).thenReturn(mockSdxClusterDto);
-        lenient().when(mockSdxStatusRepository.findFirstByDatalakeIsOrderByIdDesc(createSdxCluster())).thenReturn(mockSdxStatusEntity);
+        lenient().when(mockSdxStatusRepository.findFirstByDatalakeIsOrderByIdDesc(eq(cluster))).thenReturn(mockSdxStatusEntity);
     }
 
     @Test
     void testMakeCdpOperationDetailsWhenExceptionIsNull() {
-        CDPStructuredFlowEvent<SdxClusterDto> result = underTest.createStructuredFlowEvent(SDX_ID, mockFlowDetails, null);
+        CDPStructuredFlowEvent<DatalakeDetails> result = underTest.createStructuredFlowEvent(SDX_ID, mockFlowDetails, null);
 
-        assertEquals(result.getOperation().getResourceId(), SDX_ID);
-        assertEquals(result.getOperation().getResourceCrn(), cluster.getResourceCrn());
-        assertEquals(result.getOperation().getResourceName(), cluster.getClusterName());
-        assertEquals(result.getOperation().getAccountId(), cluster.getAccountId());
-        assertEquals(result.getOperation().getEnvironmentCrn(), cluster.getEnvCrn());
-        assertEquals(result.getOperation().getTimestamp(), TIMESTAMP);
+        assertEquals(SDX_ID, result.getOperation().getResourceId());
+        assertEquals(cluster.getResourceCrn(), result.getOperation().getResourceCrn());
+        assertEquals(cluster.getClusterName(), result.getOperation().getResourceName());
+        assertEquals(cluster.getAccountId(), result.getOperation().getAccountId());
+        assertEquals(cluster.getEnvCrn(), result.getOperation().getEnvironmentCrn());
+        assertEquals(TIMESTAMP, result.getOperation().getTimestamp());
         assertTrue(StringUtils.isNotEmpty(result.getOperation().getUuid()));
-        assertEquals(result.getOperation().getResourceType(), "datalake");
-        assertEquals(result.getOperation().getEventType(), StructuredEventType.FLOW);
-        assertEquals(result.getOperation().getCloudbreakId(), "nodeId");
-        assertEquals(result.getStatus(), mockSdxStatusEntity.getStatus().name());
-        assertEquals(result.getStatusReason(), mockSdxStatusEntity.getStatusReason());
+        assertEquals("datalake", result.getOperation().getResourceType());
+        assertEquals(StructuredEventType.FLOW, result.getOperation().getEventType());
+        assertEquals("nodeId", result.getOperation().getCloudbreakId());
+        assertEquals(mockSdxStatusEntity.getStatus().name(), result.getStatus());
+        assertEquals(mockSdxStatusEntity.getStatusReason(), result.getStatusReason());
         assertNull(result.getException());
+        DatalakeDetails datalakeDetails = result.getPayload();
+        assertNotNull(datalakeDetails);
+        assertEquals("AZURE", datalakeDetails.getCloudPlatform());
+        assertEquals(mockSdxStatusEntity.getStatus().name(), datalakeDetails.getStatus());
+        assertEquals(mockSdxStatusEntity.getStatusReason(), datalakeDetails.getStatusReason());
+        DatabaseDetails databaseDetails = datalakeDetails.getDatabaseDetails();
+        assertEquals("1", databaseDetails.getEngineVersion());
+        assertEquals("HA", databaseDetails.getAvailabilityType());
     }
 
     @Test
     void testMakeCdpOperationDetailsWhenExceptionIsNotNull() {
         Exception exception = new Exception("someMessage");
-        CDPStructuredFlowEvent<SdxClusterDto> result = underTest.createStructuredFlowEvent(SDX_ID, null, exception);
+        CDPStructuredFlowEvent<DatalakeDetails> result = underTest.createStructuredFlowEvent(SDX_ID, null, exception);
 
         assertTrue(result.getException().contains(exception.getMessage()));
     }
@@ -119,7 +127,13 @@ class DatalakeStructuredFlowEventFactoryTest {
         sdxCluster.setSdxClusterServiceVersion("7.2.0");
         sdxCluster.setCloudStorageBaseLocation("cloudStorageBaseLocation");
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.ADLS);
-        sdxCluster.setSdxDatabase(new SdxDatabase());
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA);
+        sdxDatabase.setDatabaseEngineVersion("1");
+        sdxCluster.setSdxDatabase(sdxDatabase);
+        StackV4Request stackRequest = new StackV4Request();
+        stackRequest.setAzure(new AzureStackV4Parameters());
+        sdxCluster.setStackRequest(stackRequest);
 
 
         return sdxCluster;

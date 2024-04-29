@@ -48,12 +48,10 @@ public class ClusterLogger implements LegacyTelemetryEventLogger {
                 switch (resourceType) {
                     case "datalake":
                         LOGGER.debug("Sending usage report for {}", resourceType);
-                        usageReporter.cdpDatalakeRequested(datalakeRequestedConverter.convert(structuredFlowEvent));
                         usageReporter.cdpDatalakeStatusChanged(datalakeStatusChangedConverter.convert(structuredFlowEvent, useCase));
                         break;
                     case "datahub":
                         LOGGER.debug("Sending usage report for {}", resourceType);
-                        usageReporter.cdpDatahubRequested(datahubRequestedConverter.convert(structuredFlowEvent));
                         usageReporter.cdpDatahubStatusChanged(datahubStatusChangedConverter.convert(structuredFlowEvent, useCase));
                         break;
                     default:

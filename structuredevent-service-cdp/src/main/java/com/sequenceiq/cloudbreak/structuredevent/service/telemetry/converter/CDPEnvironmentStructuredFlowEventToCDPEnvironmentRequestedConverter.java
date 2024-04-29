@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentRequested;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 
@@ -27,8 +28,8 @@ public class CDPEnvironmentStructuredFlowEventToCDPEnvironmentRequestedConverter
     @Inject
     private EnvironmentDetailsToCDPEnvironmentTelemetryFeatureDetailsConverter telemetryFeatureDetailsConverter;
 
-    public UsageProto.CDPEnvironmentRequested convert(CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent) {
-        UsageProto.CDPEnvironmentRequested.Builder cdpEnvironmentRequestedBuilder = UsageProto.CDPEnvironmentRequested.newBuilder();
+    public CDPEnvironmentRequested convert(CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent) {
+        CDPEnvironmentRequested.Builder cdpEnvironmentRequestedBuilder = CDPEnvironmentRequested.newBuilder();
 
         if (cdpStructuredFlowEvent != null) {
             String cloudProvider = cdpStructuredFlowEvent.getPayload() != null ? cdpStructuredFlowEvent.getPayload().getCloudPlatform() : null;
@@ -40,7 +41,7 @@ public class CDPEnvironmentStructuredFlowEventToCDPEnvironmentRequestedConverter
             cdpEnvironmentRequestedBuilder.setFreeIPA(freeIPADetailsConverter.convert(environmentDetails));
         }
 
-        UsageProto.CDPEnvironmentRequested ret = cdpEnvironmentRequestedBuilder.build();
+        CDPEnvironmentRequested ret = cdpEnvironmentRequestedBuilder.build();
         LOGGER.debug("Converted CDPEnvironmentRequested event: {}", ret);
         return ret;
     }

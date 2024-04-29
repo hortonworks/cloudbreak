@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.CCM_UPGRADE_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.CCM_UPGRADE_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.CCM_UPGRADE_STARTED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.CREATE_FAILED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.CREATE_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.CREATE_STARTED;
@@ -17,11 +20,14 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value;
+import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.service.TestEvent;
 import com.sequenceiq.cloudbreak.structuredevent.service.TestFlowConfig;
 import com.sequenceiq.cloudbreak.structuredevent.service.TestFlowState;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,6 +35,9 @@ class EnvironmentUseCaseMapperTest {
 
     @Spy
     private List<AbstractFlowConfiguration> flowConfigurations = new ArrayList<>();
+
+    @Spy
+    private List<FlowEventChainFactory> flowEventChainFactories = new ArrayList<>();
 
     @Spy
     private CDPRequestProcessingStepMapper cdpRequestProcessingStepMapper;
@@ -39,6 +48,7 @@ class EnvironmentUseCaseMapperTest {
     @BeforeEach()
     void setUp() {
         flowConfigurations.add(new TestEnvironmentFlowConfig(TestFlowState.class, TestEvent.class));
+        flowEventChainFactories.add(new EnvironmentUseCaseMapperTest.TestFlowEventChainFactory());
         underTest.init();
     }
 
@@ -50,14 +60,6 @@ class EnvironmentUseCaseMapperTest {
     @Test
     void testEmptyFlowDetailsMappedToUnset() {
         Assertions.assertEquals(UNSET, underTest.useCase(new FlowDetails()));
-    }
-
-    @Test
-    void testFlowChainTypeIsIgnored() {
-        Assertions.assertEquals(CREATE_STARTED,
-                mapFlowDetailsToUseCase("INIT_STATE", "TestEnvironmentFlowConfig", ""));
-        Assertions.assertEquals(CREATE_STARTED,
-                mapFlowDetailsToUseCase("INIT_STATE", "TestEnvironmentFlowConfig", "TestFlowChain"));
     }
 
     @Test
@@ -106,6 +108,32 @@ class EnvironmentUseCaseMapperTest {
         flowDetails.setFlowType(flowType);
         flowDetails.setFlowChainType(flowChainType);
         return underTest.useCase(flowDetails);
+    }
+
+    private class TestFlowEventChainFactory implements FlowEventChainFactory, EnvironmentUseCaseAware {
+
+        @Override
+        public String initEvent() {
+            return null;
+        }
+
+        @Override
+        public FlowTriggerEventQueue createFlowTriggerEventQueue(Payload event) {
+            return null;
+        }
+
+        @Override
+        public Value getUseCaseForFlowState(Enum flowState) {
+            if (flowState.equals(TestFlowState.INIT_STATE)) {
+                return CCM_UPGRADE_STARTED;
+            } else if (flowState.toString().endsWith("FAILED_STATE")
+                    && !flowState.equals(TestFlowState.NOT_THE_LATEST_FAILED_STATE)) {
+                return CCM_UPGRADE_FAILED;
+            } else if (flowState.equals(TestFlowState.FINISHED_STATE)) {
+                return CCM_UPGRADE_FINISHED;
+            }
+            return UNSET;
+        }
     }
 
     private class TestEnvironmentFlowConfig extends TestFlowConfig implements EnvironmentUseCaseAware {

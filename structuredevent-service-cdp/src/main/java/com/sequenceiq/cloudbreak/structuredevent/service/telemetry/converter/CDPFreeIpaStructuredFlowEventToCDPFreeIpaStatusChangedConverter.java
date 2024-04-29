@@ -1,12 +1,14 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatusChanged;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.freeipa.CDPFreeIpaStructuredFlowEvent;
 
@@ -24,8 +26,8 @@ public class CDPFreeIpaStructuredFlowEventToCDPFreeIpaStatusChangedConverter {
     @Inject
     private StackDetailsToCDPFreeIPAStatusDetailsConverter freeIPAStatusDetailsConverter;
 
-    public UsageProto.CDPFreeIPAStatusChanged convert(CDPFreeIpaStructuredFlowEvent cdpStructuredFlowEvent, UsageProto.CDPFreeIPAStatus.Value status) {
-        UsageProto.CDPFreeIPAStatusChanged.Builder cdpFreeIPAStatusChangedBuilder = UsageProto.CDPFreeIPAStatusChanged.newBuilder();
+    public CDPFreeIPAStatusChanged convert(CDPFreeIpaStructuredFlowEvent cdpStructuredFlowEvent, CDPFreeIPAStatus.Value status) {
+        CDPFreeIPAStatusChanged.Builder cdpFreeIPAStatusChangedBuilder = CDPFreeIPAStatusChanged.newBuilder();
 
         cdpFreeIPAStatusChangedBuilder.setNewStatus(status);
 
@@ -42,7 +44,7 @@ public class CDPFreeIpaStructuredFlowEventToCDPFreeIpaStatusChangedConverter {
             cdpFreeIPAStatusChangedBuilder.setStatusDetails(freeIPAStatusDetailsConverter.convert(stackDetails));
         }
 
-        UsageProto.CDPFreeIPAStatusChanged ret = cdpFreeIPAStatusChangedBuilder.build();
+        CDPFreeIPAStatusChanged ret = cdpFreeIPAStatusChangedBuilder.build();
         LOGGER.debug("Converted CDPFreeIPAStatusChanged event: {}", ret);
         return ret;
     }

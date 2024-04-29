@@ -72,6 +72,7 @@ dependencies {
   implementation     project(":structuredevent-service-cdp")
   implementation     project(':environment-common')
   implementation     project(':service-common')
+  implementation     project(':usage-collection')
 
   implementation     group: 'com.squareup.okhttp3',      name: 'okhttp',                          version: okhttpVersion
   implementation     group: 'com.google.code.gson',      name: 'gson',                            version: gsonVersion

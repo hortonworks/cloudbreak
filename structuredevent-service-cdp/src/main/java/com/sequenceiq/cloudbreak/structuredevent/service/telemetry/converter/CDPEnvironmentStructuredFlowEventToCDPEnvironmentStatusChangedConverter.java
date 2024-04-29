@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatusChanged;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 
 import jakarta.inject.Inject;
@@ -8,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 
@@ -29,9 +30,8 @@ public class CDPEnvironmentStructuredFlowEventToCDPEnvironmentStatusChangedConve
     @Inject
     private EnvironmentDetailsToCDPEnvironmentTelemetryFeatureDetailsConverter telemetryFeatureDetailsConverter;
 
-    public UsageProto.CDPEnvironmentStatusChanged convert(CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent,
-            UsageProto.CDPEnvironmentStatus.Value status) {
-        UsageProto.CDPEnvironmentStatusChanged.Builder cdpEnvironmentStatusChangedBuilder = UsageProto.CDPEnvironmentStatusChanged.newBuilder();
+    public CDPEnvironmentStatusChanged convert(CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent, CDPEnvironmentStatus.Value status) {
+        CDPEnvironmentStatusChanged.Builder cdpEnvironmentStatusChangedBuilder = CDPEnvironmentStatusChanged.newBuilder();
 
         cdpEnvironmentStatusChangedBuilder.setNewStatus(status);
 
@@ -47,7 +47,7 @@ public class CDPEnvironmentStructuredFlowEventToCDPEnvironmentStatusChangedConve
             cdpEnvironmentStatusChangedBuilder.setFreeIPA(freeIPADetailsConverter.convert(environmentDetails));
         }
 
-        UsageProto.CDPEnvironmentStatusChanged ret = cdpEnvironmentStatusChangedBuilder.build();
+        CDPEnvironmentStatusChanged ret = cdpEnvironmentStatusChangedBuilder.build();
         LOGGER.debug("Converted CDPEnvironmentStatusChanged event: {}", ret);
         return ret;
     }

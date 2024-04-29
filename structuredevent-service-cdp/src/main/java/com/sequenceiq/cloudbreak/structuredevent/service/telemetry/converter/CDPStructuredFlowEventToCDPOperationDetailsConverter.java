@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentType;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 
 import jakarta.inject.Inject;
@@ -36,7 +37,7 @@ public class CDPStructuredFlowEventToCDPOperationDetailsConverter {
             }
 
             if (cloudPlatform != null) {
-                cdpOperationDetails.setEnvironmentType(UsageProto.CDPEnvironmentsEnvironmentType.Value.valueOf(cloudPlatform));
+                cdpOperationDetails.setEnvironmentType(CDPEnvironmentsEnvironmentType.Value.valueOf(cloudPlatform));
             }
 
             FlowDetails flowDetails = cdpStructuredFlowEvent.getFlow();
