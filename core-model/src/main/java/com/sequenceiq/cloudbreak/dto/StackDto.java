@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -322,31 +324,51 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
         return gateway != null;
     }
 
+    @Override
     public Set<Node> getAllFunctioningNodes() {
-        Set<Node> ret = new HashSet<>();
-        getInstanceGroupDtos().forEach(ig -> {
-            InstanceGroupView instanceGroup = ig.getInstanceGroup();
-            List<InstanceMetadataView> notDeletedInstanceMetaData = ig.getNotDeletedInstanceMetaData();
-            filterDuplicatedPrivateIPs(notDeletedInstanceMetaData).values().forEach(im -> {
-                        if (StringUtils.isNotBlank(im.getDiscoveryFQDN())) {
-                            ret.add(new Node(im.getPrivateIp(), im.getPublicIp(), im.getInstanceId(),
-                                    instanceGroup.getTemplate().getInstanceType(), im.getDiscoveryFQDN(), instanceGroup.getGroupName()));
-                        }
-                    });
-        });
-        return ret;
+        return getNodesByMetaDataFilter(InstanceGroupDto::getNotDeletedAndNotZombieInstanceMetaData);
     }
 
-    private Map<String, InstanceMetadataView> filterDuplicatedPrivateIPs(List<InstanceMetadataView> notDeletedInstanceMetaData) {
-        return notDeletedInstanceMetaData.stream()
-                .collect(Collectors.toMap(InstanceMetadataView::getPrivateIp, instanceMetadataView -> instanceMetadataView, (i1, i2) -> {
+    @Override
+    public Set<Node> getAllNotDeletedNodes() {
+        return getNodesByMetaDataFilter(InstanceGroupDto::getNotDeletedInstanceMetaData);
+    }
+
+    private Set<Node> getNodesByMetaDataFilter(Function<InstanceGroupDto, List<InstanceMetadataView>> metadataFilter) {
+        Map<InstanceMetadataView, InstanceGroupView> instanceMetadataMap = mapFilteredInstanceMetadatasWithFQDNToGroup(metadataFilter);
+        Map<InstanceMetadataView, InstanceGroupView> deduplicatedByPrivateIp = deduplicateByPrivateIp(instanceMetadataMap);
+        return deduplicatedByPrivateIp.entrySet().stream().map(entry -> {
+            InstanceMetadataView im = entry.getKey();
+            InstanceGroupView instanceGroup = entry.getValue();
+            return new Node(im.getPrivateIp(),
+                    im.getPublicIp(),
+                    im.getInstanceId(),
+                    instanceGroup.getTemplate().getInstanceType(),
+                    im.getDiscoveryFQDN(),
+                    instanceGroup.getGroupName());
+        }).collect(Collectors.toSet());
+    }
+
+    private Map<InstanceMetadataView, InstanceGroupView> deduplicateByPrivateIp(Map<InstanceMetadataView, InstanceGroupView> instanceMetadataMap) {
+        return instanceMetadataMap.entrySet().stream()
+                .collect(Collectors.toMap(entry -> entry.getKey().getPrivateIp(), entry -> entry, (i1, i2) -> {
                     LOGGER.warn("We have the same ip address for two nodes, we will return with the newer node! Affected nodes: {}, {}", i1, i2);
-                    if (i1.getStartDate().compareTo(i2.getStartDate()) < 0) {
+                    if (i1.getKey().getStartDate().compareTo(i2.getKey().getStartDate()) < 0) {
                         return i2;
                     } else {
                         return i1;
                     }
-                }));
+                })).entrySet().stream()
+                .collect(Collectors.toMap(entry -> entry.getValue().getKey(), entry -> entry.getValue().getValue()));
+    }
+
+    private Map<InstanceMetadataView, InstanceGroupView> mapFilteredInstanceMetadatasWithFQDNToGroup(
+            Function<InstanceGroupDto, List<InstanceMetadataView>> metadataFilter) {
+        return getInstanceGroupDtos().stream()
+                .flatMap(dto -> metadataFilter.apply(dto).stream()
+                        .map(metadata -> new SimpleImmutableEntry<>(dto.getInstanceGroup(), metadata)))
+                .filter(entry -> StringUtils.isNotBlank(entry.getValue().getDiscoveryFQDN()))
+                .collect(Collectors.toMap(SimpleImmutableEntry::getValue, SimpleImmutableEntry::getKey));
     }
 
     public Optional<InstanceGroupView> getGatewayGroup() {

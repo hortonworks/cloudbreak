@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.common.domain.IdAware;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestrationNode;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
@@ -608,7 +609,12 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
     }
 
     @Override
-    public Set<OrchestrationNode> getAllNodesForOrchestration() {
-        return new HashSet<>(getNotDeletedInstanceMetaDataSet());
+    public Set<Node> getAllFunctioningNodes() {
+        return getAllNotDeletedNodes();
+    }
+
+    @Override
+    public Set<Node> getAllNotDeletedNodes() {
+        return new HashSet<>(getNotDeletedInstanceMetaDataSet()).stream().map(OrchestrationNode::getNode).collect(Collectors.toSet());
     }
 }

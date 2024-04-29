@@ -394,7 +394,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private void saveHostsPillar(OrchestratorAware stack, ExitCriteriaModel exitModel,
             Set<String> gatewayTargetIpAddresses, SaltConnector sc) throws Exception {
-        OrchestratorBootstrap hostSave = PillarSave.createHostsPillar(sc, gatewayTargetIpAddresses, stack.getAllFunctioningNodes());
+        OrchestratorBootstrap hostSave = PillarSave.createHostsPillar(sc, gatewayTargetIpAddresses, stack.getAllNotDeletedNodes());
         Callable<Boolean> saltPillarRunner = saltRunner.runnerWithConfiguredErrorCount(hostSave, exitCriteria, exitModel);
         saltPillarRunner.call();
     }

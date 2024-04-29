@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.common.domain.IdAware;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestrationNode;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -1178,10 +1179,20 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     }
 
     @Override
-    public Set<OrchestrationNode> getAllNodesForOrchestration() {
+    public Set<Node> getAllFunctioningNodes() {
         return instanceGroups.stream()
                 .flatMap(ig -> ig.getNotDeletedAndNotZombieInstanceMetaDataSet().stream())
                 .filter(im -> StringUtils.isNotBlank(im.getDiscoveryFQDN()))
+                .map(OrchestrationNode::getNode)
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<Node> getAllNotDeletedNodes() {
+        return instanceGroups.stream()
+                .flatMap(ig -> ig.getNotDeletedInstanceMetaDataSet().stream())
+                .filter(im -> StringUtils.isNotBlank(im.getDiscoveryFQDN()))
+                .map(OrchestrationNode::getNode)
                 .collect(Collectors.toSet());
     }
 
