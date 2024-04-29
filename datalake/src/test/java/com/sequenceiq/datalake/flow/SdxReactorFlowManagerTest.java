@@ -191,7 +191,7 @@ class SdxReactorFlowManagerTest {
     @Test
     void testTriggerSdxResizeEventSend() {
         SdxCluster sdxCluster = getValidSdxCluster();
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerSdxResize(sdxCluster.getId(), sdxCluster, SKIP_OPTIONS, false));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerSdxResize(sdxCluster.getId(), sdxCluster, SKIP_OPTIONS));
         verify(eventSenderService, times(1)).sendEventAndNotification(eq(sdxCluster), eq(ResourceEvent.DATALAKE_RESIZE_TRIGGERED));
         verify(reactor, times(1)).notify(eq(SDX_RESIZE_FLOW_CHAIN_START_EVENT), any(Event.class));
     }
@@ -265,7 +265,7 @@ class SdxReactorFlowManagerTest {
         when(environmentClientService.getBackupLocation(eq(sdxCluster.getEnvCrn()))).thenReturn("WRONG_LOCATION");
         when(sdxBackupRestoreService.modifyBackupLocation(any(), any())).thenReturn("CORRECT_LOCATION");
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerSdxResize(sdxCluster.getId(), sdxCluster, SKIP_OPTIONS, false));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerSdxResize(sdxCluster.getId(), sdxCluster, SKIP_OPTIONS));
 
         verify(eventFactory).createEventWithErrHandler(anyMap(), argumentCaptor.capture());
         DatalakeResizeFlowChainStartEvent resizeEvent = (DatalakeResizeFlowChainStartEvent) argumentCaptor.getValue();
