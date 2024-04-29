@@ -1,11 +1,11 @@
-NEW_IMAGE=$(curl https://release.infra.cloudera.com/hwre-api/latestimage\?image_name\=ubi8/cldr-openjdk-21-runtime-cis | jq .image_name --raw-output)
+NEW_IMAGE=$(curl https://release.infra.cloudera.com/hwre-api/latestimage\?image_name\=ubi9/cldr-openjdk-21-runtime-cis | jq .image_name --raw-output)
 echo "The latest image from RE is $NEW_IMAGE"
 
 cd ..
 git checkout master
 git reset --hard origin/master
 
-FROM_REGEX="docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-openjdk-21-runtime-cis[^[:space:]]+(.*)$"
+FROM_REGEX="docker-private.infra.cloudera.com/cloudera_base/ubi9/cldr-openjdk-21-runtime-cis[^[:space:]]+(.*)$"
 
 for i in $(find . -name "Dockerfile" -o -name "docker-build.sh" -o -name "docker-compose_template.yml"); do
     sed -E -i "s|$FROM_REGEX|$NEW_IMAGE\1|g" "$i"
