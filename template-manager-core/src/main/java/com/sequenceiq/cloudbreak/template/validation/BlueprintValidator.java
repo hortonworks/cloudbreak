@@ -16,8 +16,8 @@ public interface BlueprintValidator {
         boolean validateServiceCardinality)
             throws BlueprintValidationException;
 
-    void validateHostGroupScalingRequest(String accountId, Blueprint blueprint, Optional<ClouderaManagerProduct> clouderaManagerRepo,
-            String hostGroupName, Integer adjustment, Collection<InstanceGroup> instanceGroups)
+    void validateHostGroupScalingRequest(String accountId, Blueprint blueprint, Optional<ClouderaManagerProduct> cdhProduct,
+            String hostGroupName, Integer adjustment, Collection<InstanceGroup> instanceGroups, boolean forced)
             throws BlueprintValidationException;
 
 }
