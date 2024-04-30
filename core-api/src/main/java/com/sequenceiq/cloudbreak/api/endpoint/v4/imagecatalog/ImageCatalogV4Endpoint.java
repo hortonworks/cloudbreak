@@ -56,7 +56,8 @@ public interface ImageCatalogV4Endpoint {
             operationId = "getImageCatalogInWorkspace",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     ImageCatalogV4Response getByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("withImages") @DefaultValue("false") Boolean withImages);
+            @QueryParam("withImages") @DefaultValue("false") Boolean withImages,
+            @QueryParam("applyVersionBasedFiltering") @DefaultValue("true") Boolean applyVersionBasedFiltering);
 
     @GET
     @Path("name/{name}/internal")
@@ -65,7 +66,9 @@ public interface ImageCatalogV4Endpoint {
             operationId = "getImageCatalogInWorkspaceInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     ImageCatalogV4Response getByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("withImages") @DefaultValue("false") Boolean withImages, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("withImages") @DefaultValue("false") Boolean withImages,
+            @QueryParam("applyVersionBasedFiltering") @DefaultValue("true") Boolean applyVersionBasedFiltering,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @GET
     @Path("crn/{crn}")

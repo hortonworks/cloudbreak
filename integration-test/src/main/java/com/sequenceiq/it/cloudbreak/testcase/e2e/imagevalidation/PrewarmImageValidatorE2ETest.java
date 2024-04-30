@@ -27,14 +27,14 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
-import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
+import com.sequenceiq.it.util.imagevalidation.PrewarmedImageValidatorE2ETest;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEventEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements ImageValidatorE2ETest {
+public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements PrewarmedImageValidatorE2ETest {
 
     private static final int IMAGE_SETUP_SLEEP_TIME_IN_SECONDS = 10;
 
@@ -135,15 +135,5 @@ public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements Ima
             }
             return AttemptResults.justContinue();
         };
-    }
-
-    @Override
-    public String getImageId(TestContext testContext) {
-        return testContext.get(SdxInternalTestDto.class).getResponse().getStackV4Response().getImage().getId();
-    }
-
-    @Override
-    public boolean isPrewarmedImageTest() {
-        return true;
     }
 }

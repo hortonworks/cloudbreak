@@ -8,11 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
+import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 
 public class PreconditionSdxE2ETest extends AbstractE2ETest {
 
@@ -20,6 +22,12 @@ public class PreconditionSdxE2ETest extends AbstractE2ETest {
 
     @Inject
     private SdxTestClient sdxTestClient;
+
+    @Inject
+    private SdxUtil sdxUtil;
+
+    @Inject
+    private CommonClusterManagerProperties commonClusterManagerProperties;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -33,6 +41,14 @@ public class PreconditionSdxE2ETest extends AbstractE2ETest {
 
     protected SdxTestClient sdxTestClient() {
         return sdxTestClient;
+    }
+
+    protected SdxUtil sdxUtil() {
+        return sdxUtil;
+    }
+
+    protected CommonClusterManagerProperties commonClusterManagerProperties() {
+        return commonClusterManagerProperties;
     }
 
     protected String getDefaultSDXBlueprintName() {

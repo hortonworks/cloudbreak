@@ -38,8 +38,12 @@ public class ImageCatalogTestClient {
         return new ImageCatalogGetAction();
     }
 
-    public Action<ImageCatalogTestDto, CloudbreakClient> getV4(Boolean withImages) {
-        return new ImageCatalogGetAction(withImages);
+    public Action<ImageCatalogTestDto, CloudbreakClient> getV4WithAdvertisedImages() {
+        return new ImageCatalogGetAction(true);
+    }
+
+    public Action<ImageCatalogTestDto, CloudbreakClient> getV4WithAllImages() {
+        return new ImageCatalogGetAction(true, false);
     }
 
     public Action<ImageCatalogTestDto, CloudbreakClient> getImagesByNameV4() {

@@ -3,7 +3,10 @@ package com.sequenceiq.it.util.imagevalidation;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import jakarta.inject.Inject;
@@ -96,7 +99,7 @@ public class ImageValidatorE2ETestUtil {
 
     private ImagesV4Response getImages(TestContext testContext) {
         testContext.given(ImageCatalogTestDto.class)
-                .when(imageCatalogTestClient.getV4(true))
+                .when(imageCatalogTestClient.getV4WithAllImages())
                 .validate();
         return testContext.get(ImageCatalogTestDto.class).getResponse().getImages();
     }
@@ -130,5 +133,22 @@ public class ImageValidatorE2ETestUtil {
         } catch (IOException e) {
             LOGGER.error("Writing image id to file failed: ", e);
         }
+    }
+
+    public Optional<ImageV4Response> getLatestImageWithSameRuntimeAsImageUnderValidation(TestContext testContext) {
+        List<ImageV4Response> images = getImages(testContext).getCdhImages();
+        ImageV4Response imageUnderValidation = images.stream()
+                .filter(img -> img.getUuid().equalsIgnoreCase(getImageUuid()))
+                .findFirst()
+                .orElseThrow();
+        return images.stream()
+                .filter(img -> img.getCreated() < imageUnderValidation.getCreated())
+                .filter(img -> Objects.equals(imageUnderValidation.getImageSetsByProvider().keySet(), img.getImageSetsByProvider().keySet()))
+                .filter(img -> Objects.equals(imageUnderValidation.getOs(), img.getOs()))
+                .filter(img -> Objects.equals(
+                        imageUnderValidation.getPackageVersions().get("cm-build-number"), img.getPackageVersions().get("cm-build-number")))
+                .filter(img -> Objects.equals(
+                        imageUnderValidation.getPackageVersions().get("cdh-build-number"), img.getPackageVersions().get("cdh-build-number")))
+                .max(Comparator.comparing(ImageV4Response::getCreated));
     }
 }

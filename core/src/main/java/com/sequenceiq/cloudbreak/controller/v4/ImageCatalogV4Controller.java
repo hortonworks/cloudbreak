@@ -115,10 +115,11 @@ public class ImageCatalogV4Controller extends NotificationController implements 
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
-    public ImageCatalogV4Response getByName(Long workspaceId, @ResourceName String name, Boolean withImages) {
+    public ImageCatalogV4Response getByName(Long workspaceId, @ResourceName String name, Boolean withImages, Boolean applyVersionBasedFiltering) {
         ImageCatalog catalog = imageCatalogService.getImageCatalogByName(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
         ImageCatalogV4Response imageCatalogResponse = imageCatalogToImageCatalogV4ResponseConverter.convert(catalog);
-        Images images = imageCatalogService.propagateImagesIfRequested(restRequestThreadLocalService.getRequestedWorkspaceId(), name, withImages);
+        Images images = imageCatalogService.propagateImagesIfRequested(restRequestThreadLocalService.getRequestedWorkspaceId(), name,
+                withImages, applyVersionBasedFiltering);
         if (images != null) {
             imageCatalogResponse.setImages(imagesToImagesV4ResponseConverter.convert(images));
         }
@@ -127,11 +128,12 @@ public class ImageCatalogV4Controller extends NotificationController implements 
 
     @Override
     @InternalOnly
-    public ImageCatalogV4Response getByNameInternal(Long workspaceId, @ResourceName String name, Boolean withImages,
+    public ImageCatalogV4Response getByNameInternal(Long workspaceId, @ResourceName String name, Boolean withImages, Boolean applyVersionBasedFiltering,
             @InitiatorUserCrn String initiatorUserCrn) {
         ImageCatalog catalog = imageCatalogService.getImageCatalogByName(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
         ImageCatalogV4Response imageCatalogResponse = imageCatalogToImageCatalogV4ResponseConverter.convert(catalog);
-        Images images = imageCatalogService.propagateImagesIfRequested(restRequestThreadLocalService.getRequestedWorkspaceId(), name, withImages);
+        Images images = imageCatalogService.propagateImagesIfRequested(restRequestThreadLocalService.getRequestedWorkspaceId(), name,
+                withImages, applyVersionBasedFiltering);
         if (images != null) {
             imageCatalogResponse.setImages(imagesToImagesV4ResponseConverter.convert(images));
         }
