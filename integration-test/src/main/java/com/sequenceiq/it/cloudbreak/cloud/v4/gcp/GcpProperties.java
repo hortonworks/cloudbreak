@@ -30,8 +30,6 @@ public class GcpProperties {
 
     private final SecurityAccess securityAccess = new SecurityAccess();
 
-    private final Baseimage baseimage = new Baseimage();
-
     private final CloudStorage cloudStorage = new CloudStorage();
 
     private final Network network = new Network();
@@ -75,10 +73,6 @@ public class GcpProperties {
 
     public void setExternalDatabaseSslEnforcementSupported(Boolean externalDatabaseSslEnforcementSupported) {
         this.externalDatabaseSslEnforcementSupported = externalDatabaseSslEnforcementSupported;
-    }
-
-    public Baseimage getBaseimage() {
-        return baseimage;
     }
 
     public String getAvailabilityZone() {
@@ -131,19 +125,6 @@ public class GcpProperties {
 
     public GcpProperties.Instance getStorageOptimizedInstance() {
         return storageOptimizedInstance;
-    }
-
-    public static class Baseimage {
-
-        private String imageId;
-
-        public String getImageId() {
-            return imageId;
-        }
-
-        public void setImageId(String imageId) {
-            this.imageId = imageId;
-        }
     }
 
     public static class SecurityAccess {

@@ -62,6 +62,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaRespons
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.Clue;
 import com.sequenceiq.it.cloudbreak.context.Investigable;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
@@ -100,6 +101,9 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     @Inject
     private YarnCloudFunctionality yarnCloudFunctionality;
 
+    @Inject
+    private CommonCloudProperties commonCloudProperties;
+
     private CloudPlatform cloudPlatformFromStack;
 
     public FreeIpaTestDto(TestContext testContext) {
@@ -117,6 +121,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
                 .withAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
                 .withFreeIpa("ipatest.local", "ipaserver", "admin1234", "admins")
                 .withCatalog(getCloudProvider().getFreeIpaImageCatalogUrl())
+                .withImageValidationCatalogAndImageIfPresent()
                 .withTunnel(getTestContext().getTunnel())
                 .withTags(getCloudProvider().getTags())
                 .withVariant();
@@ -405,7 +410,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         return this;
     }
 
-    public FreeIpaTestDto withCatalog(String imageCatalog, String imageUuid) {
+    public FreeIpaTestDto withImage(String imageCatalog, String imageUuid) {
         if (!Strings.isNullOrEmpty(imageCatalog) && !Strings.isNullOrEmpty(imageUuid)) {
             LOGGER.info("Using catalog [{}] and image [{}] for creating FreeIPA", imageCatalog, imageUuid);
             ImageSettingsRequest imageSettingsRequest = new ImageSettingsRequest();
@@ -456,11 +461,15 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     }
 
     public FreeIpaTestDto withUpgradeCatalogAndImage() {
-        return withCatalog(getCloudProvider().getFreeIpaUpgradeImageCatalog(), getCloudProvider().getFreeIpaUpgradeImageId());
+        return withImage(getCloudProvider().getFreeIpaUpgradeImageCatalog(), getCloudProvider().getFreeIpaUpgradeImageId());
     }
 
     public FreeIpaTestDto withMarketplaceUpgradeCatalogAndImage() {
-        return withCatalog(getCloudProvider().getFreeIpaMarketplaceUpgradeImageCatalog(), getCloudProvider().getFreeIpaMarketplaceUpgradeImageId());
+        return withImage(getCloudProvider().getFreeIpaMarketplaceUpgradeImageCatalog(), getCloudProvider().getFreeIpaMarketplaceUpgradeImageId());
+    }
+
+    public FreeIpaTestDto withImageValidationCatalogAndImageIfPresent() {
+        return withImage(commonCloudProperties.getImageValidation().getFreeIpaImageCatalog(), commonCloudProperties.getImageValidation().getFreeIpaImageUuid());
     }
 
     public FreeIpaTestDto await(Status status) {

@@ -13,6 +13,7 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.util.Strings;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
@@ -24,6 +25,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeI
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties.ImageValidation;
 import com.sequenceiq.it.cloudbreak.config.testinformation.TestInformationService;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
@@ -93,19 +95,47 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     @Override
     public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
-        return imageCatalog.withName(commonCloudProperties.getImageCatalogName());
+        return imageCatalog.withName(commonCloudProperties.getImageCatalogName())
+                .withUrl(commonCloudProperties.getImageCatalogUrl())
+                .withoutCleanup();
     }
 
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
-        imageSettings.withImageCatalog(commonCloudProperties.getImageCatalogName());
+        ImageValidation imageValidation = commonCloudProperties.getImageValidation();
+        if (Strings.isNotNullAndNotEmpty(imageValidation.getSourceCatalogName())) {
+            imageSettings.withImageCatalog(imageValidation.getSourceCatalogName());
+            if (Strings.isNotNullAndNotEmpty(imageValidation.getImageUuid())) {
+                imageSettings.withImageId(imageValidation.getImageUuid());
+            }
+        } else {
+            imageSettings.withImageCatalog(commonCloudProperties.getImageCatalogName());
+        }
         return imageSettings;
     }
 
     @Override
     public DistroXImageTestDto imageSettings(DistroXImageTestDto imageSettings) {
-        imageSettings.withImageCatalog(commonCloudProperties.getImageCatalogName());
+        ImageValidation imageValidation = commonCloudProperties.getImageValidation();
+        if (Strings.isNotNullAndNotEmpty(imageValidation.getSourceCatalogName())) {
+            imageSettings.withImageCatalog(imageValidation.getSourceCatalogName());
+            if (Strings.isNotNullAndNotEmpty(imageValidation.getImageUuid())) {
+                imageSettings.withImageId(imageValidation.getImageUuid());
+            }
+        } else {
+            imageSettings.withImageCatalog(commonCloudProperties.getImageCatalogName());
+        }
         return imageSettings;
+    }
+
+    @Override
+    public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
+        return getLatestDefaultBaseImage(imageCatalogTestDto, cloudbreakClient, getCloudPlatform().name(), getGovCloud());
+    }
+
+    @Override
+    public String getLatestPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
+        return getLatestPreWarmedImage(imageCatalogTestDto, cloudbreakClient, getCloudPlatform().name(), getGovCloud());
     }
 
     @Override

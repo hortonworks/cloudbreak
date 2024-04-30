@@ -145,11 +145,6 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
-    public String getLatestBaseImageID() {
-        return delegate.getLatestBaseImageID();
-    }
-
-    @Override
     public InstanceTemplateV4TestDto template(InstanceTemplateV4TestDto template) {
         return getDelegate(template).template(template);
     }
@@ -395,11 +390,6 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
-    public void setImageId(String id) {
-        delegate.setImageId(id);
-    }
-
-    @Override
     public void setInstanceTemplateV1Parameters(InstanceTemplateV1Request instanceTemplateV1Request) {
         getDelegate(instanceTemplateV1Request.getCloudPlatform()).setInstanceTemplateV1Parameters(instanceTemplateV1Request);
     }
@@ -514,10 +504,5 @@ public class CloudProviderProxy implements CloudProvider {
 
     public boolean isExternalDatabaseSslEnforcementSupported() {
         return delegate.isExternalDatabaseSslEnforcementSupported();
-    }
-
-    @Override
-    public String getLatestPreWarmedImageIDByRuntime(TestContext tc, ImageCatalogTestDto dto, CloudbreakClient client, String runtime) {
-        return delegate.getLatestPreWarmedImageIDByRuntime(tc, dto, client, runtime);
     }
 }

@@ -45,7 +45,6 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.azure.AzureProperties.Network;
 import com.sequenceiq.it.cloudbreak.config.azure.ResourceGroupProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.RootVolumeV4TestDto;
@@ -428,18 +427,6 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
-        return imageSettings
-                .withImageId(azureProperties.getBaseimage().getImageId())
-                .withImageCatalog(commonCloudProperties().getImageCatalogName());
-    }
-
-    @Override
-    public String getLatestPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        return getLatestPreWarmedImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AZURE.name(), false);
-    }
-
-    @Override
     public String getLatestMarketplacePreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient,
             String runtimeVersion) {
         try {
@@ -469,28 +456,6 @@ public class AzureCloudProvider extends AbstractCloudProvider {
             LOGGER.error("Cannot fetch pre-warmed images from '{}' image catalog, because of: {}", imageCatalogTestDto.getRequest().getName(), e);
             throw new TestFailException(format("Cannot fetch pre-warmed images from '%s' image catalog!", imageCatalogTestDto.getRequest().getName(), e));
         }
-    }
-
-    @Override
-    public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        if (azureProperties.getBaseimage().getImageId() == null || azureProperties.getBaseimage().getImageId().isEmpty()) {
-            return getLatestDefaultBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AZURE.name(), false);
-        } else {
-            return getLatestBaseImageID();
-        }
-    }
-
-    @Override
-    public String getLatestBaseImageID() {
-        Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
-        Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
-        Log.log(LOGGER, format(" Image ID for SDX create: %s ", azureProperties.getBaseimage().getImageId()));
-        return azureProperties.getBaseimage().getImageId();
-    }
-
-    @Override
-    public void setImageId(String id) {
-        azureProperties.getBaseimage().setImageId(id);
     }
 
     private String notImplementedException() {
@@ -590,10 +555,5 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public boolean isExternalDatabaseSslEnforcementSupported() {
         return azureProperties.getExternalDatabaseSslEnforcementSupported();
-    }
-
-    @Override
-    public String getLatestPreWarmedImageIDByRuntime(TestContext tc, ImageCatalogTestDto dto, CloudbreakClient client, String runtime) {
-        return getLatestDefaultPreWarmedImageByRuntimeVersion(dto, client, CloudPlatform.AZURE.name(), false, runtime);
     }
 }

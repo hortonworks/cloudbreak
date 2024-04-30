@@ -126,7 +126,7 @@ public class PerformanceTest extends AbstractMockTest {
 
     private Future<String> executeEnvironmentCreation(TestContext testContext, String name, ExecutorService threadPoolExecutor) {
         return threadPoolExecutor.submit(() -> {
-            createEnvironmentWithFreeipa(testContext, name);
+            createEnvironmentWithFreeIpa(testContext, name);
             createDatalake(testContext, name);
             waitingForEnv(testContext, name);
             return name;
@@ -176,12 +176,9 @@ public class PerformanceTest extends AbstractMockTest {
                 .validate();
     }
 
-    private void createEnvironmentWithFreeipa(TestContext testContext, String name) {
-        String freeIpaImageCatalogUrl = testContext.getCloudProvider().getFreeIpaImageCatalogUrl();
-        String latestBaseImageID = testContext.getCloudProvider().getLatestBaseImageID();
+    private void createEnvironmentWithFreeIpa(TestContext testContext, String name) {
         testContext.given(name, EnvironmentTestDto.class)
                 .withName(name)
-                .withFreeIpaImage(freeIpaImageCatalogUrl, latestBaseImageID)
                 .when(environmentTestClient.create());
     }
 

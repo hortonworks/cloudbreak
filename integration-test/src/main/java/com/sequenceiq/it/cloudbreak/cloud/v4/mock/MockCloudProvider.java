@@ -51,8 +51,6 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
-import com.sequenceiq.it.cloudbreak.log.Log;
-import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 
@@ -135,11 +133,6 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public boolean verticalScalingSupported() {
         return mockProperties.getVerticalScale().isSupported();
-    }
-
-    @Override
-    public String getLatestPreWarmedImageIDByRuntime(TestContext tc, ImageCatalogTestDto dto, CloudbreakClient client, String runtime) {
-        return getLatestDefaultPreWarmedImageByRuntimeVersion(dto, client, CloudPlatform.MOCK.name(), false, runtime);
     }
 
     @Override
@@ -245,28 +238,6 @@ public class MockCloudProvider extends AbstractCloudProvider {
                 "`integrationtest.cloudProvider` property, Values: AZURE, AWS", getCloudPlatform()));
     }
 
-    @Override
-    public String getLatestPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        return getLatestPreWarmedImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.MOCK.name(), false);
-    }
-
-    @Override
-    public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        if (mockProperties.getBaseimage().getRedhat7().getImageId() == null || mockProperties.getBaseimage().getRedhat7().getImageId().isEmpty()) {
-            return getLatestDefaultBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.MOCK.name(), false);
-        } else {
-            return getLatestBaseImageID();
-        }
-    }
-
-    @Override
-    public String getLatestBaseImageID() {
-        Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
-        Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
-        Log.log(LOGGER, format(" Image ID for SDX create: %s ", mockProperties.getBaseimage().getRedhat7().getImageId()));
-        return mockProperties.getBaseimage().getRedhat7().getImageId();
-    }
-
     public String getImageCatalogUrl() {
         return commonCloudProperties().getImageCatalogUrl();
     }
@@ -279,12 +250,6 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public String getStorageOptimizedInstanceType() {
         return mockProperties.getInstance().getType();
-    }
-
-    @Override
-    public void setImageId(String id) {
-        LOGGER.info("New base image UUID: {}", id);
-        mockProperties.getBaseimage().getRedhat7().setImageId(id);
     }
 
     @Override

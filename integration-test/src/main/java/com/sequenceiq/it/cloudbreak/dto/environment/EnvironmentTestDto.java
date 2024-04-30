@@ -119,7 +119,8 @@ public class EnvironmentTestDto
                 .withResourceGroup(resourceGroupProperties.getResourceGroupUsage(), resourceGroupProperties.getResourceGroupName())
                 .withNetwork()
                 .withCloudStorageValidation(CloudStorageValidation.ENABLED)
-                .withTunnel(getTestContext().getTunnel());
+                .withTunnel(getTestContext().getTunnel())
+                .withImageValidationFreeIpaCatalogAndImageIfPresent();
     }
 
     public EnvironmentTestDto withOneFreeIpaNode() {
@@ -151,6 +152,11 @@ public class EnvironmentTestDto
             getRequest().getFreeIpa().setImage(imageRequest);
         }
         return this;
+    }
+
+    public EnvironmentTestDto withImageValidationFreeIpaCatalogAndImageIfPresent() {
+        return withFreeIpaImage(commonCloudProperties.getImageValidation().getFreeIpaImageCatalog(),
+                commonCloudProperties.getImageValidation().getFreeIpaImageUuid());
     }
 
     public EnvironmentTestDto withFreeIpaOs(String os) {

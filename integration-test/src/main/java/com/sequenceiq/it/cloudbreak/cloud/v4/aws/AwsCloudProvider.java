@@ -45,9 +45,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIp
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.RootVolumeV4TestDto;
@@ -63,14 +61,12 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXRootVolumeT
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
-import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.aws.AwsCloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.spot.SpotUtil;
@@ -399,42 +395,8 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         return awsProperties.getCloudStorage().getS3().getInstanceProfile();
     }
 
-    @Override
-    public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
-        return imageSettings
-                .withImageId(awsProperties.getBaseimage().getImageId())
-                .withImageCatalog(commonCloudProperties().getImageCatalogName());
-    }
-
-    @Override
-    public String getLatestPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        return getLatestPreWarmedImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AWS.name(), getGovCloud());
-    }
-
-    @Override
-    public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        if (awsProperties.getBaseimage().getImageId() == null || awsProperties.getBaseimage().getImageId().isEmpty()) {
-            return getLatestDefaultBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AWS.name(), getGovCloud());
-        } else {
-            return getLatestBaseImageID();
-        }
-    }
-
-    @Override
-    public String getLatestBaseImageID() {
-        Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
-        Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
-        Log.log(LOGGER, format(" Image ID for SDX create: %s ", awsProperties.getBaseimage().getImageId()));
-        return awsProperties.getBaseimage().getImageId();
-    }
-
     public String getImageCatalogUrl() {
         return commonCloudProperties().getImageCatalogUrl();
-    }
-
-    @Override
-    public void setImageId(String id) {
-        awsProperties.getBaseimage().setImageId(id);
     }
 
     @Override
@@ -580,10 +542,5 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public boolean isExternalDatabaseSslEnforcementSupported() {
         return awsProperties.getExternalDatabaseSslEnforcementSupported();
-    }
-
-    @Override
-    public String getLatestPreWarmedImageIDByRuntime(TestContext tc, ImageCatalogTestDto dto, CloudbreakClient client, String runtime) {
-        return getLatestDefaultPreWarmedImageByRuntimeVersion(dto, client, CloudPlatform.AWS.name(), false, runtime);
     }
 }
