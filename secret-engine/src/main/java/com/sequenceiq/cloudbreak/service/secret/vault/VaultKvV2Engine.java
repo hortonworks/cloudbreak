@@ -19,8 +19,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.Versioned;
 
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
+import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
 import com.sequenceiq.cloudbreak.service.secret.conf.VaultConfig;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
@@ -28,7 +30,7 @@ import com.sequenceiq.cloudbreak.vault.VaultConstants;
 
 @Component("VaultKvV2Engine")
 @ConditionalOnBean(VaultConfig.class)
-public class VaultKvV2Engine extends AbstractVaultEngine<VaultKvV2Engine> {
+public class VaultKvV2Engine implements SecretEngine {
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultKvV2Engine.class);
 
     @Value("${vault.kv.engine.v2.path:}")
@@ -41,9 +43,16 @@ public class VaultKvV2Engine extends AbstractVaultEngine<VaultKvV2Engine> {
 
     private final VaultTemplate vaultRestTemplate;
 
-    public VaultKvV2Engine(@Qualifier("CommonMetricService") MetricService metricService, VaultTemplate vaultRestTemplate) {
+    private final VaultSecretInputValidator vaultSecretInputValidator;
+
+    private final VaultSecretConverter vaultSecretConverter;
+
+    public VaultKvV2Engine(@Qualifier("CommonMetricService") MetricService metricService, VaultTemplate vaultRestTemplate,
+            VaultSecretInputValidator vaultSecretInputValidator, VaultSecretConverter vaultSecretConverter) {
         this.metricService = metricService;
         this.vaultRestTemplate = vaultRestTemplate;
+        this.vaultSecretInputValidator = vaultSecretInputValidator;
+        this.vaultSecretConverter = vaultSecretConverter;
     }
 
     @Override
@@ -57,6 +66,12 @@ public class VaultKvV2Engine extends AbstractVaultEngine<VaultKvV2Engine> {
     }
 
     @Override
+    public boolean isSecret(String secret) {
+        VaultSecret vaultSecret = vaultSecretConverter.convert(secret);
+        return vaultSecret != null && vaultSecret.getEngineClass().equals(getClass().getCanonicalName());
+    }
+
+    @Override
     @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, allEntries = true)
     public String put(String path, String value) {
         return put(path, Collections.singletonMap(VaultConstants.FIELD_SECRET, value));
@@ -67,18 +82,19 @@ public class VaultKvV2Engine extends AbstractVaultEngine<VaultKvV2Engine> {
     public String put(String path, Map<String, String> value) {
         long start = System.currentTimeMillis();
         LOGGER.info("Storing secret to {}", path);
-        VaultSecret secret = convertToVaultSecret(enginePath, appPath + path);
-        vaultRestTemplate.opsForVersionedKeyValue(enginePath).put(secret.getPath(), value);
+        String fullPath = appPath + path;
+        Versioned.Metadata metadata = vaultRestTemplate.opsForVersionedKeyValue(enginePath).put(fullPath, value);
+        VaultSecret vaultSecret = new VaultSecret(enginePath, getClass().getCanonicalName(), fullPath);
         long duration = System.currentTimeMillis() - start;
         metricService.recordTimerMetric(MetricType.VAULT_WRITE, Duration.ofMillis(duration));
-        LOGGER.trace("Secret write took {} ms", duration);
-        return gson().toJson(secret);
+        LOGGER.trace("Secret write took {} ms, version: {}", duration, metadata.getVersion().getVersion());
+        return JsonUtil.writeValueAsStringSilent(vaultSecret);
     }
 
     @Override
     public boolean exists(String secret) {
         long start = System.currentTimeMillis();
-        boolean ret = Optional.ofNullable(convertToVaultSecret(secret)).map(s -> {
+        boolean ret = Optional.ofNullable(vaultSecretConverter.convert(secret)).map(s -> {
             Versioned<Map<String, Object>> response = vaultRestTemplate.opsForVersionedKeyValue(s.getEnginePath()).get(s.getPath());
             return response != null && response.getData() != null;
         }).orElse(false);
@@ -92,7 +108,7 @@ public class VaultKvV2Engine extends AbstractVaultEngine<VaultKvV2Engine> {
     @Cacheable(cacheNames = VaultConstants.CACHE_NAME)
     public String get(@NotNull String secret, @NotNull String field) {
         long start = System.currentTimeMillis();
-        String ret = Optional.ofNullable(convertToVaultSecret(secret)).map(s -> {
+        String ret = Optional.ofNullable(vaultSecretConverter.convert(secret)).map(s -> {
             Versioned<Map<String, Object>> response = vaultRestTemplate.opsForVersionedKeyValue(s.getEnginePath()).get(s.getPath());
             return response != null && response.getData() != null && response.getData().containsKey(field) ?
                     String.valueOf(response.getData().get(field)) : null;
@@ -106,7 +122,7 @@ public class VaultKvV2Engine extends AbstractVaultEngine<VaultKvV2Engine> {
     @Override
     public RotationSecret getRotation(@NotNull String secret) {
         long start = System.currentTimeMillis();
-        RotationSecret rotationSecret = Optional.ofNullable(convertToVaultSecret(secret)).map(s -> {
+        RotationSecret rotationSecret = Optional.ofNullable(vaultSecretConverter.convert(secret)).map(s -> {
             Versioned<Map<String, Object>> response = vaultRestTemplate.opsForVersionedKeyValue(s.getEnginePath()).get(s.getPath());
             logRotationMeta(response);
             return response != null && response.getData() != null ?
@@ -127,19 +143,14 @@ public class VaultKvV2Engine extends AbstractVaultEngine<VaultKvV2Engine> {
     @Override
     @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, allEntries = true)
     public void delete(String secret) {
-        Optional.ofNullable(convertToVaultSecret(secret)).ifPresent(s -> deleteAllVersionsOfSecret(s.getEnginePath(), s.getPath()));
+        Optional.ofNullable(vaultSecretConverter.convert(secret)).ifPresent(s -> deleteAllVersionsOfSecret(s.getEnginePath(), s.getPath()));
     }
 
     @Override
     public SecretResponse convertToExternal(String secret) {
-        return Optional.ofNullable(convertToVaultSecret(secret))
+        return Optional.ofNullable(vaultSecretConverter.convert(secret))
                 .map(s -> new SecretResponse(s.getEnginePath(), s.getPath()))
                 .orElse(null);
-    }
-
-    @Override
-    protected Class<VaultKvV2Engine> clazz() {
-        return VaultKvV2Engine.class;
     }
 
     public List<String> listEntries(String path) {

@@ -14,15 +14,18 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.vault.core.VaultTemplate;
@@ -39,7 +42,7 @@ import com.sequenceiq.cloudbreak.vault.VaultConstants;
 @ExtendWith(MockitoExtension.class)
 public class VaultKvV2EngineTest {
 
-    private final VaultSecret secret = new VaultSecret("cb", "com.sequenceiq.secret.vault.VaultKvV2Engine",
+    private final VaultSecret secret = new VaultSecret("cb", "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine",
             "cb/foo/bar/6f18609d-8d24-4a39-a283-154c1e8ab46a-f186");
 
     @InjectMocks
@@ -57,6 +60,9 @@ public class VaultKvV2EngineTest {
     @Mock
     private MetricService metricService;
 
+    @Spy
+    private VaultSecretConverter vaultSecretConverter;
+
     @BeforeEach
     public void setup() {
         lenient().when(template.opsForVersionedKeyValue(anyString())).thenReturn(vaultVersionedKeyValueOperations);
@@ -70,11 +76,46 @@ public class VaultKvV2EngineTest {
         Field appPathField = ReflectionUtils.findField(VaultKvV2Engine.class, "appPath");
         ReflectionUtils.makeAccessible(appPathField);
         ReflectionUtils.setField(appPathField, underTest, "appPath");
+    }
 
-        //set maxSecretPathLength
-        Field maxSecretPathLengthField = ReflectionUtils.findField(AbstractVaultEngine.class, "maxSecretPathLength");
-        ReflectionUtils.makeAccessible(maxSecretPathLengthField);
-        ReflectionUtils.setField(maxSecretPathLengthField, underTest, 255);
+    @Test
+    public void testIsSecretNotJson() {
+        String secret = "secret";
+
+        Assert.assertFalse(underTest.isSecret(secret));
+    }
+
+    @Test
+    public void testIsSecretEnginePathMissingg() {
+        VaultSecret secret = new VaultSecret(null, "ec", "p");
+
+        Assert.assertFalse(underTest.isSecret(JsonUtil.writeValueAsStringSilent(secret)));
+    }
+
+    @Test
+    public void testIsSecretEngineClassMissing() {
+        VaultSecret secret = new VaultSecret("ep", null, "p");
+
+        Assert.assertFalse(underTest.isSecret(JsonUtil.writeValueAsStringSilent(secret)));
+    }
+
+    @Test
+    public void testIsSecretPathMissing() {
+        VaultSecret secret = new VaultSecret("ep", "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine", null);
+
+        Assert.assertFalse(underTest.isSecret(JsonUtil.writeValueAsStringSilent(secret)));
+    }
+
+    @Test
+    public void testIsSecretClassDifferent() {
+        VaultSecret secret = new VaultSecret("ep", "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV1Engine", "p");
+
+        Assert.assertFalse(underTest.isSecret(JsonUtil.writeValueAsStringSilent(secret)));
+    }
+
+    @Test
+    public void testIsSecretOk() {
+        Assert.assertTrue(underTest.isSecret(JsonUtil.writeValueAsStringSilent(secret)));
     }
 
     @Test
@@ -199,7 +240,7 @@ public class VaultKvV2EngineTest {
 
     @Test
     public void testPut() {
-        when(vaultVersionedKeyValueOperations.put(anyString(), any())).thenReturn(null);
+        when(vaultVersionedKeyValueOperations.put(anyString(), any())).thenReturn(versionedMetadata());
 
         String result = underTest.put("/path", "value");
 
@@ -234,5 +275,9 @@ public class VaultKvV2EngineTest {
         underTest.delete(JsonUtil.writeValueAsStringSilent(secret));
 
         verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_DELETE), any(Duration.class), any(String[].class));
+    }
+
+    private Versioned.Metadata versionedMetadata() {
+        return Versioned.Metadata.builder().version(Versioned.Version.from(1)).createdAt(Instant.now()).build();
     }
 }
