@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -106,7 +107,7 @@ class HiveMetastoreConfigProviderTest {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
                 .withRdsViews(Set.of(createRdsConfig(null))
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", false))
                         .collect(Collectors.toSet()))
                 .withStackType(StackType.DATALAKE)
                 .withProductDetails(generateCmRepo(cmVersion), null)
@@ -148,12 +149,13 @@ class HiveMetastoreConfigProviderTest {
         assertThat(configNameToVariableNameMap).isEmpty();
     }
 
-    @Test
-    void getServiceConfigsTestDbOnlyWithSsl() {
+    @ParameterizedTest(name = "cloudPlatform={0}")
+    @ValueSource(strings = {"AWS", "GCP"})
+    void getServiceConfigsTestDbOnlyWithSsl(String cloudPlatform) {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
                 .withRdsViews(Set.of(createRdsConfig(RdsSslMode.ENABLED))
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, SSL_CERTS_FILE_PATH))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, SSL_CERTS_FILE_PATH, cloudPlatform, true))
                         .collect(Collectors.toSet()))
                 .withStackType(StackType.DATALAKE)
                 .withRdsSslCertificateFilePath(SSL_CERTS_FILE_PATH)
@@ -162,10 +164,12 @@ class HiveMetastoreConfigProviderTest {
 
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(templateProcessor, tpo);
 
-        verifyDbOnlySslResult(result);
+        String sslMode = "GCP".equals(cloudPlatform) ? "verify-ca" : "verify-full";
+
+        verifyDbOnlySslResult(result, sslMode);
     }
 
-    private void verifyDbOnlySslResult(List<ApiClusterTemplateConfig> result) {
+    private void verifyDbOnlySslResult(List<ApiClusterTemplateConfig> result, String sslMode) {
         Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
         assertThat(configNameToValueMap).containsOnly(
                 entry(HIVE_METASTORE_DATABASE_HOST, "10.1.1.1"),
@@ -174,7 +178,7 @@ class HiveMetastoreConfigProviderTest {
                 entry(HIVE_METASTORE_DATABASE_PORT, "5432"),
                 entry(HIVE_METASTORE_DATABASE_TYPE, "postgresql"),
                 entry(HIVE_METASTORE_DATABASE_USER, "heyitsme"),
-                entry(JDBC_URL_OVERRIDE, "jdbc:postgresql://10.1.1.1:5432/hive?sslmode=verify-full&sslrootcert=" + SSL_CERTS_FILE_PATH),
+                entry(JDBC_URL_OVERRIDE, "jdbc:postgresql://10.1.1.1:5432/hive?sslmode=" + sslMode + "&sslrootcert=" + SSL_CERTS_FILE_PATH),
                 entry("hive_service_config_safety_valve", "<property><name>hive.metastore.try.direct.sql.ddl</name><value>true</value></property>" +
                         "<property><name>hive.metastore.try.direct.sql</name><value>true</value></property>")
         );
@@ -196,7 +200,7 @@ class HiveMetastoreConfigProviderTest {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
                 .withRdsViews(Set.of(createRdsConfig(RdsSslMode.ENABLED))
                     .stream()
-                    .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                    .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                     .collect(Collectors.toSet()))
                 .withStackType(StackType.DATALAKE)
                 .withProductDetails(generateCmRepo(cmVersion), null)
@@ -207,12 +211,13 @@ class HiveMetastoreConfigProviderTest {
         verifyDbOnlyMinimalResult(result);
     }
 
-    @Test
-    void getServiceConfigsTestDbOnlyWithSslAndTemplateWithHarmlessHmsServiceConfigs() {
+    @ParameterizedTest(name = "cloudPlatform={0}")
+    @ValueSource(strings = {"AWS", "GCP"})
+    void getServiceConfigsTestDbOnlyWithSslAndTemplateWithHarmlessHmsServiceConfigs(String cloudPlatform) {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
                 .withRdsViews(Set.of(createRdsConfig(RdsSslMode.ENABLED))
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, SSL_CERTS_FILE_PATH))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, SSL_CERTS_FILE_PATH, cloudPlatform, true))
                         .collect(Collectors.toSet()))
                 .withStackType(StackType.DATALAKE)
                 .withRdsSslCertificateFilePath(SSL_CERTS_FILE_PATH)
@@ -222,7 +227,9 @@ class HiveMetastoreConfigProviderTest {
 
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(templateProcessor, tpo);
 
-        verifyDbOnlySslResult(result);
+        String sslMode = "GCP".equals(cloudPlatform) ? "verify-ca" : "verify-full";
+
+        verifyDbOnlySslResult(result, sslMode);
     }
 
     private void initHmsServiceConfigs(List<ApiClusterTemplateConfig> serviceConfigs) {
@@ -231,12 +238,13 @@ class HiveMetastoreConfigProviderTest {
         when(templateProcessor.getServiceByType(HiveRoles.HIVE)).thenReturn(Optional.of(service));
     }
 
-    @Test
-    void getServiceConfigsTestDbOnlyWithSslAndTemplateWithHarmlessHmsServiceConfigsAndDummyCustomHmsDbKeys() {
+    @ParameterizedTest(name = "cloudPlatform={0}")
+    @ValueSource(strings = {"AWS", "GCP"})
+    void getServiceConfigsTestDbOnlyWithSslAndTemplateWithHarmlessHmsServiceConfigsAndDummyCustomHmsDbKeys(String cloudPlatform) {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
                 .withRdsViews(Set.of(createRdsConfig(RdsSslMode.ENABLED))
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, SSL_CERTS_FILE_PATH))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, SSL_CERTS_FILE_PATH, cloudPlatform, true))
                         .collect(Collectors.toSet()))
                 .withStackType(StackType.DATALAKE)
                 .withRdsSslCertificateFilePath(SSL_CERTS_FILE_PATH)
@@ -246,7 +254,9 @@ class HiveMetastoreConfigProviderTest {
 
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(templateProcessor, tpo);
 
-        verifyDbOnlySslResult(result);
+        String sslMode = "GCP".equals(cloudPlatform) ? "verify-ca" : "verify-full";
+
+        verifyDbOnlySslResult(result, sslMode);
     }
 
     @Test
@@ -254,7 +264,7 @@ class HiveMetastoreConfigProviderTest {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
                 .withRdsViews(Set.of(createRdsConfig(RdsSslMode.ENABLED))
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, SSL_CERTS_FILE_PATH))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, SSL_CERTS_FILE_PATH, true))
                         .collect(Collectors.toSet()))
                 .withStackType(StackType.DATALAKE)
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
@@ -271,7 +281,7 @@ class HiveMetastoreConfigProviderTest {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
                 .withRdsViews(Set.of(createRdsConfig(null))
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                         .collect(Collectors.toSet()))
                 .withStackType(StackType.DATALAKE)
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
@@ -301,7 +311,7 @@ class HiveMetastoreConfigProviderTest {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
                 .withRdsViews(Set.of(createRdsConfig(null))
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                         .collect(Collectors.toSet()))
                 .withStackType(StackType.DATALAKE)
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
@@ -318,7 +328,7 @@ class HiveMetastoreConfigProviderTest {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
                 .withRdsViews(Set.of(createRdsConfig(null))
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                         .collect(Collectors.toSet()))
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .withStackType(StackType.DATALAKE)
@@ -349,7 +359,7 @@ class HiveMetastoreConfigProviderTest {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
                 .withRdsViews(Set.of(createRdsConfig(null))
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                         .collect(Collectors.toSet()))
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0), null)
                 .withStackType(StackType.WORKLOAD).build();
@@ -363,7 +373,7 @@ class HiveMetastoreConfigProviderTest {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
                 .withRdsViews(Set.of(createRdsConfig(null))
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                         .collect(Collectors.toSet()))
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_1), null)
                 .withStackType(StackType.WORKLOAD).build();
@@ -389,7 +399,7 @@ class HiveMetastoreConfigProviderTest {
         TemplatePreparationObject source = new TemplatePreparationObject.Builder()
                 .withRdsViews(Set.of(createRdsConfig(null))
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                         .collect(Collectors.toSet()))
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .withStackType(StackType.DATALAKE)

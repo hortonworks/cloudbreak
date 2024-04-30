@@ -19,6 +19,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -141,8 +143,9 @@ public class HueConfigProviderTest {
         assertThat(configToVariable).isEmpty();
     }
 
-    @Test
-    public void getServiceConfigsTestWhenDbSsl() {
+    @ParameterizedTest(name = "connectionUrl={0}")
+    @ValueSource(strings = {"sslmode=verify-full", "sslmode=verify-ca"})
+    public void getServiceConfigsTestWhenDbSsl(String connectionUrl) {
         BlueprintView blueprintView = getMockBlueprintView("7.2.2");
 
         RdsView rdsConfig = mock(RdsView.class);
@@ -153,6 +156,7 @@ public class HueConfigProviderTest {
         when(rdsConfig.getSubprotocol()).thenReturn(DB_PROVIDER);
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
+        when(rdsConfig.getConnectionURL()).thenReturn(connectionUrl);
         when(rdsConfig.isUseSsl()).thenReturn(true);
         when(rdsConfig.getSslCertificateFilePath()).thenReturn("/foo/bar.pem");
 
@@ -163,7 +167,8 @@ public class HueConfigProviderTest {
                 .build();
 
         when(iniFileFactory.create()).thenReturn(safetyValve);
-        String expectedSafetyValveValue = "[desktop]\n[[database]]\noptions='{\"sslmode\": \"verify-full\", \"sslrootcert\": \"/foo/bar.pem\"}'";
+        String expectedSslMode = connectionUrl.contains("verify-ca") ? "\"verify-ca\"" : "\"verify-full\"";
+        String expectedSafetyValveValue = "[desktop]\n[[database]]\noptions='{\"sslmode\": " + expectedSslMode + ", \"sslrootcert\": \"/foo/bar.pem\"}'";
         when(safetyValve.print()).thenReturn(expectedSafetyValveValue);
 
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
@@ -289,8 +294,9 @@ public class HueConfigProviderTest {
     }
 
     // Note: Due to the conflicting CM version requirements, it is impossible to have both the Knox Proxy Hosts and DB SSL settings in the Safety Valve!
-    @Test
-    public void getServiceConfigsWhenKnoxConfiguredToExternalDomainWhenNoSafetyValveAndDbSsl() {
+    @ParameterizedTest(name = "connectionUrl={0}")
+    @ValueSource(strings = {"sslmode=verify-full", "sslmode=verify-ca"})
+    public void getServiceConfigsWhenKnoxConfiguredToExternalDomainWhenNoSafetyValveAndDbSsl(String connectionUrl) {
         BlueprintView blueprintView = getMockBlueprintView("7.2.2");
 
         RdsView rdsConfig = mock(RdsView.class);
@@ -301,6 +307,7 @@ public class HueConfigProviderTest {
         when(rdsConfig.getDatabaseName()).thenReturn(DB_NAME);
         when(rdsConfig.getPort()).thenReturn(PORT);
         when(rdsConfig.getSubprotocol()).thenReturn(DB_PROVIDER);
+        when(rdsConfig.getConnectionURL()).thenReturn(connectionUrl);
         when(rdsConfig.isUseSsl()).thenReturn(true);
         when(rdsConfig.getSslCertificateFilePath()).thenReturn("/foo/bar.pem");
 
@@ -321,7 +328,8 @@ public class HueConfigProviderTest {
                 .build();
 
         when(iniFileFactory.create()).thenReturn(safetyValve);
-        String expectedSafetyValveValue = "[desktop]\n[[database]]\noptions='{\"sslmode\": \"verify-full\", \"sslrootcert\": \"/foo/bar.pem\"}'";
+        String expectedSslMode = connectionUrl.contains("verify-ca") ? "\"verify-ca\"" : "\"verify-full\"";
+        String expectedSafetyValveValue = "[desktop]\n[[database]]\noptions='{\"sslmode\": " + expectedSslMode + ", \"sslrootcert\": \"/foo/bar.pem\"}'";
         when(safetyValve.print()).thenReturn(expectedSafetyValveValue);
 
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);

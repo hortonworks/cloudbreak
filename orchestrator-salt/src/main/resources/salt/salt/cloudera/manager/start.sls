@@ -2,7 +2,7 @@
 {%- from 'gateway/settings.sls' import gateway with context %}
 {%- from 'postgresql/settings.sls' import postgresql with context %}
 
-{% set cloudera_manager_database_connection_url = 'jdbc:' ~ cloudera_manager.cloudera_manager_database.subprotocol ~ '://' ~ cloudera_manager.cloudera_manager_database.host ~ '/' ~ cloudera_manager.cloudera_manager_database.databaseName ~ '?sslmode=verify-full&sslrootcert=' ~ postgresql.root_certs_file %}
+{% set cloudera_manager_database_connection_url = 'jdbc:' ~ cloudera_manager.cloudera_manager_database.subprotocol ~ '://' ~ cloudera_manager.cloudera_manager_database.host ~ '/' ~ cloudera_manager.cloudera_manager_database.databaseName ~ '?sslmode=' ~ postgresql.ssl_verification_mode ~ '&sslrootcert=' ~ postgresql.root_certs_file %}
 
 init-cloudera-manager-db:
   cmd.run:

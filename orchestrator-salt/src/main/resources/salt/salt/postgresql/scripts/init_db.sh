@@ -7,7 +7,7 @@ echo "CONFIG_DIR: $CONFIG_DIR"
 {%- from 'postgresql/settings.sls' import postgresql with context %}
 {% if postgresql.ssl_enabled == True %}
 export PGSSLROOTCERT="{{ postgresql.root_certs_file }}"
-export PGSSLMODE=verify-full
+export PGSSLMODE="{{ postgresql.ssl_verification_mode }}"
 
 sed -i 's/^host\([[:space:]]\+.*\)/hostssl\1/g' $CONFIG_DIR/pg_hba.conf
 {%- endif %}

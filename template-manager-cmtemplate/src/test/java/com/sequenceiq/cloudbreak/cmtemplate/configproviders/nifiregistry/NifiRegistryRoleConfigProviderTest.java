@@ -87,23 +87,35 @@ class NifiRegistryRoleConfigProviderTest {
 
     static Object[][] getRoleConfigsTestWhenSslDataProvider() {
         return new Object[][]{
-                // cfmVersion, sslMode, expectedDbUrl
-                {"2.2.5.100", RdsSslMode.DISABLED, "jdbc:postgresql://testhost:5432/nifi_registry"},
-                {"2.2.5.100", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=require&sslrootcert=/foo/bar.pem"},
-                {"2.2.6.0", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=require&sslrootcert=/foo/bar.pem"},
-                {"2.2.6.199", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=require&sslrootcert=/foo/bar.pem"},
-                {"2.2.6.200", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=verify-full&sslrootcert=/foo/bar.pem"},
-                {"2.2.6.201", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=verify-full&sslrootcert=/foo/bar.pem"},
-                {"2.2.7.0", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=verify-full&sslrootcert=/foo/bar.pem"},
+                // cfmVersion, sslMode, expectedDbUrl, cloudPlatform, externalDB
+                {"2.2.5.100", RdsSslMode.DISABLED, "jdbc:postgresql://testhost:5432/nifi_registry", "AWS", true},
+                {"2.2.5.100", RdsSslMode.DISABLED, "jdbc:postgresql://testhost:5432/nifi_registry", "GCP", true},
+                {"2.2.5.100", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=require&sslrootcert=/foo/bar.pem", "AWS", true},
+                {"2.2.6.0", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=require&sslrootcert=/foo/bar.pem", "AWS", true},
+                {"2.2.6.199", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=require&sslrootcert=/foo/bar.pem", "AWS", true},
+                {"2.2.6.200", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=verify-full&sslrootcert=/foo/bar.pem", "AWS", true},
+                {"2.2.6.201", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=verify-full&sslrootcert=/foo/bar.pem", "AWS", true},
+                {"2.2.7.0", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=verify-full&sslrootcert=/foo/bar.pem", "AWS", true},
+                {"2.2.5.100", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=require&sslrootcert=/foo/bar.pem", "GCP", true},
+                {"2.2.6.0", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=require&sslrootcert=/foo/bar.pem", "GCP", true},
+                {"2.2.6.199", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=require&sslrootcert=/foo/bar.pem", "GCP", true},
+                {"2.2.6.200", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=verify-full&sslrootcert=/foo/bar.pem", "GCP", false},
+                {"2.2.6.201", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=verify-full&sslrootcert=/foo/bar.pem", "GCP", false},
+                {"2.2.7.0", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=verify-full&sslrootcert=/foo/bar.pem", "GCP", false},
+                {"2.2.6.200", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=verify-ca&sslrootcert=/foo/bar.pem", "GCP", true},
+                {"2.2.6.201", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=verify-ca&sslrootcert=/foo/bar.pem", "GCP", true},
+                {"2.2.7.0", RdsSslMode.ENABLED, "jdbc:postgresql://testhost:5432/nifi_registry?sslmode=verify-ca&sslrootcert=/foo/bar.pem", "GCP", true}
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("getRoleConfigsTestWhenSslDataProvider")
-    void getRoleConfigsTestWhenSsl(String cfmVersion, RdsSslMode sslMode, String expectedDbUrl) {
+    void getRoleConfigsTestWhenSsl(String cfmVersion, RdsSslMode sslMode, String expectedDbUrl,
+            String cloudPlatform, boolean externalDBRequested) {
         String inputJson = loadBlueprint("7.2.0");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor, cfmVersion, sslMode);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor, cfmVersion, sslMode, cloudPlatform,
+                externalDBRequested);
 
         List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(NifiRegistryRoles.NIFI_REGISTRY_SERVER, preparationObject);
 
@@ -120,10 +132,11 @@ class NifiRegistryRoleConfigProviderTest {
     }
 
     private TemplatePreparationObject getTemplatePreparationObject(CmTemplateProcessor cmTemplateProcessor, String cfmVersion) {
-        return getTemplatePreparationObject(cmTemplateProcessor, cfmVersion, RdsSslMode.DISABLED);
+        return getTemplatePreparationObject(cmTemplateProcessor, cfmVersion, RdsSslMode.DISABLED, "AWS", true);
     }
 
-    private TemplatePreparationObject getTemplatePreparationObject(CmTemplateProcessor cmTemplateProcessor, String cfmVersion, RdsSslMode sslMode) {
+    private TemplatePreparationObject getTemplatePreparationObject(CmTemplateProcessor cmTemplateProcessor, String cfmVersion, RdsSslMode sslMode,
+            String cloudPlatform, boolean externalDBRequested) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 3);
         BlueprintView blueprintView = new BlueprintView(null, null, null, cmTemplateProcessor);
@@ -144,7 +157,7 @@ class NifiRegistryRoleConfigProviderTest {
                 .withHostgroupViews(Set.of(master, worker))
                 .withRdsViews(Set.of(rdsConfig)
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "/foo/bar.pem"))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "/foo/bar.pem", cloudPlatform, externalDBRequested))
                         .collect(Collectors.toSet()))
                 .withProductDetails(repo, products)
                 .build();

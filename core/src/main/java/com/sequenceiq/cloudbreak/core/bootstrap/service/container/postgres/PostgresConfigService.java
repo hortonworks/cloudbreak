@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
@@ -80,7 +81,8 @@ public class PostgresConfigService {
             sslSaltConfig = getSslSaltConfigWhenRootCertAlreadyInitialized(stackDto);
         }
         if (StringUtils.isNotBlank(sslSaltConfig.getRootCertsBundle())) {
-            generateDatabaseSSLConfiguration(servicePillar, sslSaltConfig);
+            boolean externalDatabaseRequested = StringUtils.isNotEmpty(stackDto.getCluster().getDatabaseServerCrn());
+            generateDatabaseSSLConfiguration(servicePillar, sslSaltConfig, stackDto.getCloudPlatform(), externalDatabaseRequested);
         }
 
         if (!postgresConfig.isEmpty()) {
@@ -154,9 +156,15 @@ public class PostgresConfigService {
         return available;
     }
 
-    private void generateDatabaseSSLConfiguration(Map<String, SaltPillarProperties> servicePillar, SSLSaltConfig sslSaltConfig) {
+    private void generateDatabaseSSLConfiguration(Map<String, SaltPillarProperties> servicePillar, SSLSaltConfig sslSaltConfig, String cloudPlatform,
+            boolean externalDatabaseRequested) {
         Map<String, Object> rootSslCertsMap = new HashMap<>(sslSaltConfig.toMap());
         rootSslCertsMap.put("ssl_certs_file_path", databaseSslService.getSslCertsFilePath());
+        if (cloudPlatform.equalsIgnoreCase(CloudPlatform.GCP.name()) && externalDatabaseRequested) {
+            rootSslCertsMap.put("ssl_verification_mode", "verify-ca");
+        } else {
+            rootSslCertsMap.put("ssl_verification_mode", "verify-full");
+        }
         servicePillar.put(POSTGRES_COMMON, new SaltPillarProperties("/postgresql/root-certs.sls",
                 singletonMap("postgres_root_certs", rootSslCertsMap)));
     }

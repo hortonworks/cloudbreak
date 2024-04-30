@@ -259,6 +259,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(environmentResponse.getIdBrokerMappingSource()).thenReturn(IdBrokerMappingSource.MOCK);
         when(environmentResponse.getCrn()).thenReturn(TEST_ENVIRONMENT_CRN);
         when(environmentResponse.getName()).thenReturn("testEnvironment");
+        when(environmentResponse.getCloudPlatform()).thenReturn("AWS");
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
@@ -311,8 +312,8 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         for (String rdsConfigName : rdsConfigNames) {
             RdsConfigWithoutCluster rdsConfig = TestUtil.rdsConfigWithoutCluster(DatabaseType.values()[i++], RdsSslMode.DISABLED);
             rdsConfigs.add(rdsConfig);
-            RdsView rdsView = realRdsViewProvider.getRdsView(rdsConfig);
-            when(rdsViewProvider.getRdsView(rdsConfig)).thenReturn(rdsView);
+            RdsView rdsView = realRdsViewProvider.getRdsView(rdsConfig, "AWS", false);
+            when(rdsViewProvider.getRdsView(rdsConfig, "AWS", false)).thenReturn(rdsView);
             when(rdsConfig.getName()).thenReturn(rdsConfigName);
         }
         when(rdsConfigWithoutClusterService.findAllByNamesAndWorkspaceId(rdsConfigNames, workspace)).thenReturn(rdsConfigs);

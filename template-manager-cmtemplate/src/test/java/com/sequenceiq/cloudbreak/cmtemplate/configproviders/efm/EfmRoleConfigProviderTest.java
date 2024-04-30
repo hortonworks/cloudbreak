@@ -67,7 +67,7 @@ public class EfmRoleConfigProviderTest {
             .withBlueprintView(blueprintView)
             .withRdsViews(Set.of(rdsConfig)
                 .stream()
-                .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", false))
                 .collect(Collectors.toSet()))
             .build();
     }

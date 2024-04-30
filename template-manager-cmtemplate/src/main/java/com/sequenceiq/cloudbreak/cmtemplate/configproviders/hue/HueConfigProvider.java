@@ -44,7 +44,7 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
 
     private static final String SAFETY_VALVE_DATABASE_KEY_PATTERN = "[desktop]\n[[database]]\noptions=";
 
-    private static final String DATABASE_OPTIONS_FORMAT = "'{\"sslmode\": \"verify-full\", \"sslrootcert\": \"%s\"}'";
+    private static final String DATABASE_OPTIONS_FORMAT = "'{\"sslmode\": \"%s\", \"sslrootcert\": \"%s\"}'";
 
     @Inject
     private IniFileFactory iniFileFactory;
@@ -74,7 +74,10 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
         configureKnoxProxyHostsServiceConfig(source, result, safetyValve);
         if (isDbSslNeeded(source, hueRdsView)) {
             LOGGER.info("Adding DB SSL options to {}", HUE_SERVICE_SAFETY_VALVE);
-            String dbSslConfig = SAFETY_VALVE_DATABASE_KEY_PATTERN.concat(String.format(DATABASE_OPTIONS_FORMAT, hueRdsView.getSslCertificateFilePath()));
+            String connectionURL = hueRdsView.getConnectionURL();
+            String sslMode = connectionURL.contains("verify-ca") ? "verify-ca" : "verify-full";
+            String dbSslConfig = SAFETY_VALVE_DATABASE_KEY_PATTERN.concat(String.format(DATABASE_OPTIONS_FORMAT, sslMode,
+                    hueRdsView.getSslCertificateFilePath()));
             safetyValve.addContent(dbSslConfig);
         }
         String valveValue = safetyValve.print();

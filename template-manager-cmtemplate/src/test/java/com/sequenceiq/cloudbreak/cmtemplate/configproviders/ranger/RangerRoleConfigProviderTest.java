@@ -119,7 +119,7 @@ public class RangerRoleConfigProviderTest {
                 .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
                 .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED))
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                         .collect(Collectors.toSet()))
                 .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
                 .withProductDetails(generateCmRepo(() -> cdhVersion), null)
@@ -164,7 +164,7 @@ public class RangerRoleConfigProviderTest {
                 .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
                 .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED))
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                         .collect(Collectors.toSet()))
                 .withProductDetails(generateCmRepo(() -> "7.0.0"), null)
                 .build();
@@ -206,7 +206,7 @@ public class RangerRoleConfigProviderTest {
                 .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
                 .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED))
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                         .collect(Collectors.toSet()))
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
@@ -243,7 +243,7 @@ public class RangerRoleConfigProviderTest {
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withHostgroupViews(Set.of(master, worker))
                 .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.HIVE, RdsSslMode.DISABLED)).stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                         .collect(Collectors.toSet()))
                 .build();
 
@@ -261,7 +261,7 @@ public class RangerRoleConfigProviderTest {
                         rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED),
                         rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED))
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                         .collect(Collectors.toSet()))
                 .build())
                 .isInstanceOf(IllegalStateException.class);
@@ -274,7 +274,7 @@ public class RangerRoleConfigProviderTest {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
                 .withRdsViews(Set.of(rdsConfig)
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, SSL_CERTS_FILE_PATH))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, SSL_CERTS_FILE_PATH, "AWS", true))
                         .collect(Collectors.toSet()))
                 .withRdsSslCertificateFilePath(SSL_CERTS_FILE_PATH)
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)

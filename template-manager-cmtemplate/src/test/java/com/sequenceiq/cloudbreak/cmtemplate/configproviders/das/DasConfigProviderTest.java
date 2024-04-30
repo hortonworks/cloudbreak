@@ -62,7 +62,7 @@ public class DasConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withRdsViews(Set.of(rdsConfig)
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", false))
                         .collect(Collectors.toSet()))
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
@@ -105,7 +105,7 @@ public class DasConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withRdsViews(Set.of(rdsConfig)
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", false))
                         .collect(Collectors.toSet()))
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_9_2), null)
                 .build();
@@ -116,7 +116,7 @@ public class DasConfigProviderTest {
     }
 
     @Test
-    public void getServiceConfigsWhenDbSsl() {
+    public void getServiceConfigsWhenDbSslVerifyFullSSLMode() {
         RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
         when(rdsConfig.getType()).thenReturn(HIVE_DAS);
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
@@ -127,7 +127,7 @@ public class DasConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withRdsViews(Set.of(rdsConfig)
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "/foo/cert.pem"))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "/foo/cert.pem", "AWS", true))
                         .collect(Collectors.toSet()))
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_9_2), null)
                 .build();
@@ -142,6 +142,38 @@ public class DasConfigProviderTest {
                 entry("data_analytics_studio_database_username", USER_NAME),
                 entry("data_analytics_studio_database_password", PASSWORD),
                 entry("data_analytics_studio_database_url_query_params", "?sslmode=verify-full&sslrootcert=/foo/cert.pem"));
+
+        Map<String, String> configToVariable = ConfigTestUtil.getConfigNameToVariableNameMap(result);
+        assertThat(configToVariable).isEmpty();
+    }
+
+    @Test
+    public void getServiceConfigsWhenDbSslVerifyCaSSLMode() {
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        when(rdsConfig.getType()).thenReturn(HIVE_DAS);
+        when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
+        when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
+        when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
+        when(rdsConfig.getSslMode()).thenReturn(RdsSslMode.ENABLED);
+
+        TemplatePreparationObject tpo = new Builder()
+                .withRdsViews(Set.of(rdsConfig)
+                        .stream()
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "/foo/cert.pem", "GCP", true))
+                        .collect(Collectors.toSet()))
+                .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_9_2), null)
+                .build();
+
+        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
+
+        Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
+        assertThat(configToValue).containsOnly(
+                entry("data_analytics_studio_database_host", HOST),
+                entry("data_analytics_studio_database_port", PORT),
+                entry("data_analytics_studio_database_name", DB_NAME),
+                entry("data_analytics_studio_database_username", USER_NAME),
+                entry("data_analytics_studio_database_password", PASSWORD),
+                entry("data_analytics_studio_database_url_query_params", "?sslmode=verify-ca&sslrootcert=/foo/cert.pem"));
 
         Map<String, String> configToVariable = ConfigTestUtil.getConfigNameToVariableNameMap(result);
         assertThat(configToVariable).isEmpty();
@@ -187,7 +219,7 @@ public class DasConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withRdsViews(Set.of(rdsConfig)
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", false))
                         .collect(Collectors.toSet())
                 ).build();
 
@@ -210,7 +242,7 @@ public class DasConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withRdsViews(Set.of(rdsConfig)
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", false))
                         .collect(Collectors.toSet())
                 ).build();
 

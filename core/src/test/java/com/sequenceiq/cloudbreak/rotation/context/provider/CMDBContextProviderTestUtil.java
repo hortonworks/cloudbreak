@@ -19,7 +19,7 @@ public class CMDBContextProviderTestUtil {
     public static StackDto mockStack(Cluster cluster, String crn) {
         StackDto stackDto = mock(StackDto.class);
         when(stackDto.getCluster()).thenReturn(cluster);
-        when(stackDto.getResourceCrn()).thenReturn(crn);
+        lenient().when(stackDto.getResourceCrn()).thenReturn(crn);
         return stackDto;
     }
 

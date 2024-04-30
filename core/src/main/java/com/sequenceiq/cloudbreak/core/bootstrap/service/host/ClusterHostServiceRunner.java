@@ -35,6 +35,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.conn.util.InetAddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -626,7 +627,7 @@ public class ClusterHostServiceRunner {
         decorateWithClouderaManagerEnterpriseDetails(telemetry, servicePillar);
         Optional<String> licenseOpt = decoratePillarWithClouderaManagerLicense(stack, servicePillar);
         decoratePillarWithClouderaManagerRepo(clouderaManagerRepo, servicePillar, licenseOpt);
-        decoratePillarWithClouderaManagerDatabase(cluster, servicePillar);
+        decoratePillarWithClouderaManagerDatabase(cluster, servicePillar, stack.getCloudPlatform());
         decoratePillarWithClouderaManagerCommunicationSettings(stackDto, servicePillar);
         decoratePillarWithClouderaManagerAutoTls(cluster, servicePillar);
         csdParcelDecorator.decoratePillarWithCsdParcels(stackDto, servicePillar);
@@ -647,19 +648,20 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public void decoratePillarWithClouderaManagerDatabase(ClusterView cluster, Map<String, SaltPillarProperties> servicePillar)
+    public void decoratePillarWithClouderaManagerDatabase(ClusterView cluster, Map<String, SaltPillarProperties> servicePillar, String cloudPlatform)
             throws CloudbreakOrchestratorFailedException {
-        SaltPillarProperties saltPillarProperties = getClouderaManagerDatabasePillarProperties(cluster.getId());
+        SaltPillarProperties saltPillarProperties = getClouderaManagerDatabasePillarProperties(cluster.getId(), cloudPlatform, cluster.getDatabaseServerCrn());
         servicePillar.put(CM_DATABASE_PILLAR_KEY, saltPillarProperties);
     }
 
-    public SaltPillarProperties getClouderaManagerDatabasePillarProperties(Long clusterId) throws CloudbreakOrchestratorFailedException {
+    public SaltPillarProperties getClouderaManagerDatabasePillarProperties(Long clusterId, String cloudPlatform, String databaseServerCrn)
+            throws CloudbreakOrchestratorFailedException {
         RdsConfigWithoutCluster clouderaManagerRdsConfig =
                 rdsConfigWithoutClusterService.findByClusterIdAndType(clusterId, DatabaseType.CLOUDERA_MANAGER);
         if (clouderaManagerRdsConfig == null) {
             throw new CloudbreakOrchestratorFailedException("Cloudera Manager RDSConfig is missing for stackDto");
         }
-        RdsView rdsView = rdsViewProvider.getRdsView(clouderaManagerRdsConfig);
+        RdsView rdsView = rdsViewProvider.getRdsView(clouderaManagerRdsConfig, cloudPlatform, StringUtils.isNotEmpty(databaseServerCrn));
         SaltPillarProperties saltPillarProperties = new SaltPillarProperties("/cloudera-manager/database.sls",
                 singletonMap("cloudera-manager", singletonMap("database", rdsView)));
         return saltPillarProperties;

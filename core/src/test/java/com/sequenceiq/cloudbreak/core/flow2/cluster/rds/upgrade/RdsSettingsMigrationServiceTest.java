@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -58,6 +59,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.rdsconfig.AbstractRdsConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.salt.SaltStateParamsService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @ExtendWith(MockitoExtension.class)
 class RdsSettingsMigrationServiceTest {
@@ -232,8 +234,11 @@ class RdsSettingsMigrationServiceTest {
     @Test
     void updateSaltPillars() throws Exception {
         // GIVEN
-        when(clusterHostServiceRunner.getClouderaManagerDatabasePillarProperties(any())).thenReturn(new SaltPillarProperties("path", Map.of()));
+        when(clusterHostServiceRunner.getClouderaManagerDatabasePillarProperties(any(), anyString(), any()))
+                .thenReturn(new SaltPillarProperties("path", Map.of()));
         when(postgresConfigService.getPostgreSQLServerPropertiesForRotation(stackDto)).thenReturn(new SaltPillarProperties("path1", Map.of()));
+        when(stackDto.getCloudPlatform()).thenReturn("AWS");
+        when(stackDto.getCluster()).thenReturn(mock(ClusterView.class));
         // WHEN
         underTest.updateSaltPillars(stackDto, CLUSTER_ID);
         // THEN

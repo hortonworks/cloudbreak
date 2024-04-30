@@ -41,7 +41,7 @@ public class ExternalDatabaseConfig {
     @Value("${cb.externaldatabase.pause.supported.platform:AWS,AZURE,GCP}")
     private Set<CloudPlatform> dbServicePauseSupportedPlatforms;
 
-    @Value("${cb.externaldatabase.sslenforcement.supported.platform:AWS,AZURE}")
+    @Value("${cb.externaldatabase.sslenforcement.supported.platform:GCP,AWS,AZURE}")
     private Set<CloudPlatform> dbServiceSslEnforcementSupportedPlatforms;
 
     private final Map<CloudPlatform, Set<? extends DatabaseType>> databaseTypeMap = Map.of(CloudPlatform.AZURE, EnumSet.allOf(AzureDatabaseType.class));

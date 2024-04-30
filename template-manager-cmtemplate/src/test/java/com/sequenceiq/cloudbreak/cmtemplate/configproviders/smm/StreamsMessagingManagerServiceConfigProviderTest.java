@@ -98,7 +98,7 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
                 .withHostgroupViews(Set.of(master, worker))
                 .withRdsViews(Set.of(rdsConfig)
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                         .collect(Collectors.toSet()))
                 .build();
     }

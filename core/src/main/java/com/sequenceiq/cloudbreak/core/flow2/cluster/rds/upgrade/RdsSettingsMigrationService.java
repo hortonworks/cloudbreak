@@ -121,7 +121,8 @@ public class RdsSettingsMigrationService {
     public void updateSaltPillars(StackDto stackDto, Long clusterId) throws CloudbreakOrchestratorFailedException {
         Map<String, SaltPillarProperties> pillarPropertiesSet = Maps.newHashMap();
         pillarPropertiesSet.put(ClusterHostServiceRunner.CM_DATABASE_PILLAR_KEY,
-                clusterHostServiceRunner.getClouderaManagerDatabasePillarProperties(clusterId));
+                clusterHostServiceRunner.getClouderaManagerDatabasePillarProperties(clusterId, stackDto.getCloudPlatform(),
+                        stackDto.getCluster().getDatabaseServerCrn()));
         pillarPropertiesSet.put(PostgresConfigService.POSTGRESQL_SERVER, postgresConfigService.getPostgreSQLServerPropertiesForRotation(stackDto));
         LOGGER.debug("Updating db related pillars for db server upgrade: {}", String.join(",", pillarPropertiesSet.keySet()));
         hostOrchestrator.saveCustomPillars(new SaltConfig(pillarPropertiesSet), exitCriteriaProvider.get(stackDto),

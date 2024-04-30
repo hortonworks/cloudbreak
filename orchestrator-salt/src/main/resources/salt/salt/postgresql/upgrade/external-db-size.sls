@@ -15,7 +15,7 @@ set_pgsslrootcert:
 set_pgsslmode:
   environ.setenv:
     - name: PGSSLMODE
-    - value: verify-full
+    - value: {{ postgresql.ssl_verification_mode }}
     - update_minion: True
 {%- endif %}
 

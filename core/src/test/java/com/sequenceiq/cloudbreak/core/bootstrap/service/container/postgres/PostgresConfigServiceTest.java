@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -40,6 +39,8 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.UpgradeRdsBackupRestoreStateParamsProvider;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
+
+import io.micrometer.common.util.StringUtils;
 
 @ExtendWith(MockitoExtension.class)
 class PostgresConfigServiceTest {
@@ -172,9 +173,23 @@ class PostgresConfigServiceTest {
         verify(databaseSslService, never()).isDbSslEnabledByClusterView(any(StackView.class), any(ClusterView.class));
     }
 
-    @ParameterizedTest(name = "sslEnabledForStack={0}")
-    @ValueSource(booleans = {false, true})
-    void decorateServicePillarWithPostgresIfNeededTestCertsWhenSslEnabled(boolean sslEnabledForStack) {
+    static Object[][] sslAndCloudPlatformDataProvider() {
+        return new Object[][]{
+                // sslEnabledForStack, cloudProvider, externalDbServerCrn
+                {false, "GCP", null},
+                {false, "GCP", "crn"},
+                {true, "GCP", null},
+                {true, "GCP", "crn"},
+                {false, "AWS", null},
+                {false, "AWS", "crn"},
+                {true, "AWS", null},
+                {true, "AWS", "crn"}
+        };
+    }
+
+    @ParameterizedTest(name = "sslEnabledForStack={0}, cloudProvider={1}, externalDbServerCrn={2}")
+    @MethodSource("sslAndCloudPlatformDataProvider")
+    void decorateServicePillarWithPostgresIfNeededTestCertsWhenSslEnabled(boolean sslEnabledForStack, String cloudProvider, String externalDbServerCrn) {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
 
         Set<String> rootCerts = new LinkedHashSet<>();
@@ -184,8 +199,10 @@ class PostgresConfigServiceTest {
         cluster.setDbSslRootCertBundle(null);
         cluster.setDatabaseServerCrn("crn");
         cluster.setId(CLUSTER_ID);
+        cluster.setDatabaseServerCrn(externalDbServerCrn);
         when(stack.getCluster()).thenReturn(cluster);
         when(stack.getExternalDatabaseEngineVersion()).thenReturn(DBVERSION);
+        when(stack.getCloudPlatform()).thenReturn(cloudProvider);
         when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(true);
         when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
         when(databaseSslService.getDbSslDetailsForCreationAndUpdateInCluster(stack)).thenReturn(new DatabaseSslDetails(rootCerts, sslEnabledForStack));
@@ -202,20 +219,22 @@ class PostgresConfigServiceTest {
         assertThat(properties).hasSize(1);
 
         Map<String, Object> rootSslCertsMap = (Map<String, Object>) properties.get("postgres_root_certs");
+        String sslVerificationMode = "GCP".equals(cloudProvider) && StringUtils.isNotEmpty(externalDbServerCrn) ? "verify-ca" : "verify-full";
         assertThat(rootSslCertsMap).isNotNull();
         assertThat(rootSslCertsMap).containsOnly(
                 entry("ssl_certs", "cert1\ncert2"),
                 entry("ssl_certs_file_path", SSL_CERTS_FILE_PATH),
                 entry("ssl_restart_required", "false"),
                 entry("ssl_for_cm_db_natively_supported", "false"),
-                entry("ssl_enabled", String.valueOf(sslEnabledForStack)));
+                entry("ssl_enabled", String.valueOf(sslEnabledForStack)),
+                entry("ssl_verification_mode", sslVerificationMode));
 
         verify(databaseSslService, never()).isDbSslEnabledByClusterView(any(StackView.class), any(ClusterView.class));
     }
 
-    @ParameterizedTest(name = "sslEnabledForStack={0}")
-    @ValueSource(booleans = {false, true})
-    void decorateServicePillarWithPostgresIfNeededTestCertsWhenSslEnabledAndRestartRequired(boolean sslEnabledForStack) {
+    @ParameterizedTest(name = "sslEnabledForStack={0}, cloudProvider={1}")
+    @MethodSource("sslAndCloudPlatformDataProvider")
+    void decorateServicePillarWithPostgresIfNeededTestCertsWhenSslEnabledAndRestartRequired(boolean sslEnabledForStack, String cloudProvider) {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
 
         Stack stackView = new Stack();
@@ -224,8 +243,10 @@ class PostgresConfigServiceTest {
         cluster.setDbSslRootCertBundle("cert1");
         cluster.setDatabaseServerCrn("crn");
         cluster.setId(CLUSTER_ID);
+        cluster.setDatabaseServerCrn("crn");
         when(stack.getStack()).thenReturn(stackView);
         when(stack.getCluster()).thenReturn(cluster);
+        when(stack.getCloudPlatform()).thenReturn(cloudProvider);
         when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
         when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(true);
         when(databaseSslService.isDbSslEnabledByClusterView(stackView, cluster)).thenReturn(sslEnabledForStack);
@@ -242,37 +263,49 @@ class PostgresConfigServiceTest {
         assertThat(properties).hasSize(1);
 
         Map<String, Object> rootSslCertsMap = (Map<String, Object>) properties.get("postgres_root_certs");
+        String sslVerificationMode = "GCP".equals(cloudProvider) ? "verify-ca" : "verify-full";
         assertThat(rootSslCertsMap).isNotNull();
         assertThat(rootSslCertsMap).containsOnly(
                 entry("ssl_certs", "cert1"),
                 entry("ssl_certs_file_path", SSL_CERTS_FILE_PATH),
                 entry("ssl_restart_required", "true"),
                 entry("ssl_for_cm_db_natively_supported", "false"),
-                entry("ssl_enabled", String.valueOf(sslEnabledForStack)));
+                entry("ssl_enabled", String.valueOf(sslEnabledForStack)),
+                entry("ssl_verification_mode", sslVerificationMode));
 
         verify(databaseSslService, never()).getDbSslDetailsForCreationAndUpdateInCluster(any(StackDto.class));
     }
 
     static Object[][] sslForCmDbNativeSupportDataProvider() {
         return new Object[][]{
-                // cmRepoDetailsAvailable, cmVersion, sslForCmDbNativelySupportedExpected
-                {false, null, false},
-                {true, null, false},
-                {true, "", false},
-                {true, " ", false},
-                {true, "7.6.2", false},
-                {true, "7.9.0", false},
-                {true, "7.9.1", false},
-                {true, "7.9.2", true},
-                {true, "7.9.3", true},
-                {true, "7.10.0", true},
+                // cmRepoDetailsAvailable, cmVersion, sslForCmDbNativelySupportedExpected, cloudPlatform
+                {false, null, false, "AWS"},
+                {true, null, false, "AWS"},
+                {true, "", false, "AWS"},
+                {true, " ", false, "AWS"},
+                {true, "7.6.2", false, "AWS"},
+                {true, "7.9.0", false, "AWS"},
+                {true, "7.9.1", false, "AWS"},
+                {true, "7.9.2", true, "AWS"},
+                {true, "7.9.3", true, "AWS"},
+                {true, "7.10.0", true, "AWS"},
+                {false, null, false, "GCP"},
+                {true, null, false, "GCP"},
+                {true, "", false, "GCP"},
+                {true, " ", false, "GCP"},
+                {true, "7.6.2", false, "GCP"},
+                {true, "7.9.0", false, "GCP"},
+                {true, "7.9.1", false, "GCP"},
+                {true, "7.9.2", true, "GCP"},
+                {true, "7.9.3", true, "GCP"},
+                {true, "7.10.0", true, "GCP"}
         };
     }
 
-    @ParameterizedTest(name = "cmRepoDetailsAvailable={0}, cmVersion={1}")
+    @ParameterizedTest(name = "cmRepoDetailsAvailable={0}, cmVersion={1}, cloudProvider={3}")
     @MethodSource("sslForCmDbNativeSupportDataProvider")
     void decorateServicePillarWithPostgresIfNeededTestCertsWhenSslEnabledAndCmDbNativeSupport(boolean cmRepoDetailsAvailable, String cmVersion,
-            boolean sslForCmDbNativelySupportedExpected) {
+            boolean sslForCmDbNativelySupportedExpected, String cloudProvider) {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
 
         Set<String> rootCerts = new LinkedHashSet<>();
@@ -284,6 +317,8 @@ class PostgresConfigServiceTest {
         cluster.setId(CLUSTER_ID);
         when(stack.getExternalDatabaseEngineVersion()).thenReturn(DBVERSION);
         when(stack.getCluster()).thenReturn(cluster);
+        when(stack.getCloudPlatform()).thenReturn(cloudProvider);
+        cluster.setDatabaseServerCrn("crn");
         when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(true);
         when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
         when(databaseSslService.getDbSslDetailsForCreationAndUpdateInCluster(stack)).thenReturn(new DatabaseSslDetails(rootCerts, true));
@@ -301,12 +336,14 @@ class PostgresConfigServiceTest {
 
         Map<String, Object> rootSslCertsMap = (Map<String, Object>) properties.get("postgres_root_certs");
         assertThat(rootSslCertsMap).isNotNull();
+        String sslVerificationMode = "GCP".equals(cloudProvider) ? "verify-ca" : "verify-full";
         assertThat(rootSslCertsMap).containsOnly(
                 entry("ssl_certs", "cert1\ncert2"),
                 entry("ssl_certs_file_path", SSL_CERTS_FILE_PATH),
                 entry("ssl_restart_required", "false"),
                 entry("ssl_for_cm_db_natively_supported", String.valueOf(sslForCmDbNativelySupportedExpected)),
-                entry("ssl_enabled", "true"));
+                entry("ssl_enabled", "true"),
+                entry("ssl_verification_mode", sslVerificationMode));
 
         verify(databaseSslService, never()).isDbSslEnabledByClusterView(any(StackView.class), any(ClusterView.class));
     }
@@ -319,10 +356,10 @@ class PostgresConfigServiceTest {
                 .withVersion(version.getVersion());
     }
 
-    @ParameterizedTest(name = "cmRepoDetailsAvailable={0}, cmVersion={1}")
+    @ParameterizedTest(name = "cmRepoDetailsAvailable={0}, cmVersion={1}, cloudProvider={3}")
     @MethodSource("sslForCmDbNativeSupportDataProvider")
     void decorateServicePillarWithPostgresIfNeededTestCertsWhenSslEnabledAndCmDbNativeSupportAndRestartRequired(boolean cmRepoDetailsAvailable, String cmVersion,
-            boolean sslForCmDbNativelySupportedExpected) {
+            boolean sslForCmDbNativelySupportedExpected, String cloudProvider) {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
 
         Stack stackView = new Stack();
@@ -333,6 +370,8 @@ class PostgresConfigServiceTest {
         cluster.setId(CLUSTER_ID);
         when(stack.getStack()).thenReturn(stackView);
         when(stack.getCluster()).thenReturn(cluster);
+        when(stack.getCloudPlatform()).thenReturn(cloudProvider);
+        cluster.setDatabaseServerCrn("crn");
         when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
         when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(true);
         when(databaseSslService.isDbSslEnabledByClusterView(stackView, cluster)).thenReturn(true);
@@ -350,12 +389,14 @@ class PostgresConfigServiceTest {
 
         Map<String, Object> rootSslCertsMap = (Map<String, Object>) properties.get("postgres_root_certs");
         assertThat(rootSslCertsMap).isNotNull();
+        String sslVerificationMode = "GCP".equals(cloudProvider) ? "verify-ca" : "verify-full";
         assertThat(rootSslCertsMap).containsOnly(
                 entry("ssl_certs", "cert1"),
                 entry("ssl_certs_file_path", SSL_CERTS_FILE_PATH),
                 entry("ssl_restart_required", "true"),
                 entry("ssl_for_cm_db_natively_supported", String.valueOf(sslForCmDbNativelySupportedExpected)),
-                entry("ssl_enabled", "true"));
+                entry("ssl_enabled", "true"),
+                entry("ssl_verification_mode", sslVerificationMode));
 
         verify(databaseSslService, never()).getDbSslDetailsForCreationAndUpdateInCluster(any(StackDto.class));
     }

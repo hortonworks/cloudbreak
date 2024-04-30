@@ -49,7 +49,7 @@ exec 1> >(tee -a "${LOGFILE}") 2> >(tee -a "${LOGFILE}" >&2)
 {%- from 'postgresql/settings.sls' import postgresql with context %}
 {% if postgresql.ssl_enabled == True %}
 export PGSSLROOTCERT="{{ postgresql.root_certs_file }}"
-export PGSSLMODE=verify-full
+export PGSSLMODE="{{ postgresql.ssl_verification_mode }}"
 {%- endif %}
 
 dump_global_objects() {

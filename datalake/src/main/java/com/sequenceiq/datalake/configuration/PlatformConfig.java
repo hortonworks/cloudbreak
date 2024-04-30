@@ -43,7 +43,7 @@ public class PlatformConfig {
     @Value("${datalake.supported.externaldb.pause.platform:AWS,GCP,AZURE,MOCK}")
     private Set<CloudPlatform> dbServicePauseSupportedPlatforms;
 
-    @Value("${datalake.supported.externaldb.sslenforcement.platform:AWS,AZURE,MOCK}")
+    @Value("${datalake.supported.externaldb.sslenforcement.platform:GCP,AWS,AZURE,MOCK}")
     private Set<CloudPlatform> dbServiceSslEnforcementSupportedPlatforms;
 
     @Value("${datalake.supported.raz.platform:AWS,AZURE,GCP}")

@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.SSLModeProviderService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
@@ -72,7 +73,8 @@ public class NifiRegistryRoleConfigProvider extends AbstractRdsRoleConfigProvide
                 && !isVersionEqualToLimited(cfm.get().getVersion(), CMRepositoryVersionUtil.CFM_VERSION_2_2_5_300))) {
             configs.add(config(DRIVER_DIRECTORY, "/usr/share/java/"));
             if (nifiRegistryRdsView.isUseSsl()) {
-                connectionURL = connectionURL.replace("sslmode=verify-full", "sslmode=require");
+                String targetString = SSLModeProviderService.getSslModeBasedOnConnectionString(connectionURL);
+                connectionURL = connectionURL.replace(targetString, "sslmode=require");
             }
         }
         configs.add(config(DATABASE_URL, connectionURL));

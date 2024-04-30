@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -86,6 +87,8 @@ import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
+import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMappingService;
+import com.sequenceiq.cloudbreak.service.identitymapping.GcpMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -212,6 +215,12 @@ public class StackToTemplatePreparationObjectConverterTest {
     private AwsMockAccountMappingService awsMockAccountMappingService;
 
     @Mock
+    private AzureMockAccountMappingService azureMockAccountMappingService;
+
+    @Mock
+    private GcpMockAccountMappingService gcpMockAccountMappingService;
+
+    @Mock
     private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
 
     @Mock
@@ -324,8 +333,12 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(credentialConverter.convert(any(CredentialResponse.class))).thenReturn(credential);
-        when(awsMockAccountMappingService.getGroupMappings(REGION, cloudCredential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
-        when(awsMockAccountMappingService.getUserMappings(REGION, cloudCredential)).thenReturn(MOCK_USER_MAPPINGS);
+        lenient().when(awsMockAccountMappingService.getGroupMappings(REGION, cloudCredential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
+        lenient().when(awsMockAccountMappingService.getUserMappings(REGION, cloudCredential)).thenReturn(MOCK_USER_MAPPINGS);
+        lenient().when(azureMockAccountMappingService.getGroupMappings("msi", cloudCredential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
+        lenient().when(azureMockAccountMappingService.getUserMappings("msi", cloudCredential)).thenReturn(MOCK_USER_MAPPINGS);
+        lenient().when(gcpMockAccountMappingService.getGroupMappings(REGION, cloudCredential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
+        lenient().when(gcpMockAccountMappingService.getUserMappings(REGION, cloudCredential)).thenReturn(MOCK_USER_MAPPINGS);
         when(ldapConfigService.get(anyString(), anyString())).thenReturn(Optional.empty());
         when(exposedServiceCollector.getAllKnoxExposed(any())).thenReturn(Set.of());
         when(stackMock.getResources()).thenReturn(Collections.EMPTY_SET);
@@ -374,6 +387,48 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(cmCloudStorageConfigProvider.getConfigQueryEntries()).thenReturn(configQueryEntries);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
         when(stackMock.getStack()).thenReturn(stackMock);
+
+        TemplatePreparationObject result = underTest.convert(stackMock);
+
+        assertThat(result.getFileSystemConfigurationView().isPresent()).isTrue();
+        assertThat(result.getFileSystemConfigurationView().get()).isEqualTo(expected);
+        verify(fileSystemConfigurationProvider, times(1)).fileSystemConfiguration(eq(sourceFileSystem),
+                eq(stackMock), any(), eq(new Json("")), eq(configQueryEntries));
+    }
+
+    @Test
+    public void testConvertWhenClusterProvidesFileSystemThenBaseFileSystemConfigurationsViewShouldBeExistsAzure() throws IOException {
+        FileSystem sourceFileSystem = new FileSystem();
+        ConfigQueryEntries configQueryEntries = new ConfigQueryEntries();
+        BaseFileSystemConfigurationsView expected = mock(BaseFileSystemConfigurationsView.class);
+        when(sourceCluster.getFileSystem()).thenReturn(sourceFileSystem);
+        when(fileSystemConfigurationProvider.fileSystemConfiguration(eq(sourceFileSystem), eq(stackMock), any(),
+                eq(new Json("")), eq(configQueryEntries))).thenReturn(expected);
+        when(cmCloudStorageConfigProvider.getConfigQueryEntries()).thenReturn(configQueryEntries);
+        when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
+        when(stackMock.getCloudPlatform()).thenReturn("AZURE");
+
+        TemplatePreparationObject result = underTest.convert(stackMock);
+
+        assertThat(result.getFileSystemConfigurationView().isPresent()).isTrue();
+        assertThat(result.getFileSystemConfigurationView().get()).isEqualTo(expected);
+        verify(fileSystemConfigurationProvider, times(1)).fileSystemConfiguration(eq(sourceFileSystem),
+                eq(stackMock), any(), eq(new Json("")), eq(configQueryEntries));
+    }
+
+    @Test
+    public void testConvertWhenClusterProvidesFileSystemThenBaseFileSystemConfigurationsViewShouldBeExistsGCP() throws IOException {
+        FileSystem sourceFileSystem = new FileSystem();
+        ConfigQueryEntries configQueryEntries = new ConfigQueryEntries();
+        BaseFileSystemConfigurationsView expected = mock(BaseFileSystemConfigurationsView.class);
+        when(sourceCluster.getFileSystem()).thenReturn(sourceFileSystem);
+        when(fileSystemConfigurationProvider.fileSystemConfiguration(eq(sourceFileSystem), eq(stackMock), any(),
+                eq(new Json("")), eq(configQueryEntries))).thenReturn(expected);
+        when(cmCloudStorageConfigProvider.getConfigQueryEntries()).thenReturn(configQueryEntries);
+        when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
+        when(stackMock.getCloudPlatform()).thenReturn("GCP");
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 

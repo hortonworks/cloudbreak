@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -110,7 +111,9 @@ public class ClusterServicesRestartService {
         try {
             if (rdsConfig.isPresent()) {
                 LOGGER.info("Refreshing the database configuration.");
-                apiConnectors.getConnector(dataHubStack).updateServiceConfig(service, getRdsConfigMap(rdsConfig.get()));
+                boolean externalDatabaseRequested = StringUtils.isNotEmpty(cluster.getDatabaseServerCrn());
+                apiConnectors.getConnector(dataHubStack).updateServiceConfig(service, getRdsConfigMap(rdsConfig.get(), dataHubStack.getCloudPlatform(),
+                        externalDatabaseRequested));
             } else {
                 LOGGER.error("Could not find RDS configuration for Hive");
             }
@@ -119,8 +122,8 @@ public class ClusterServicesRestartService {
         }
     }
 
-    private Map<String, String> getRdsConfigMap(RdsConfigWithoutCluster rdsConfig) {
-        RdsView hiveRdsView = rdsViewProvider.getRdsView(rdsConfig, databaseSslService.getSslCertsFilePath());
+    private Map<String, String> getRdsConfigMap(RdsConfigWithoutCluster rdsConfig, String cloudPlatform, boolean externalDatabaseRequested) {
+        RdsView hiveRdsView = rdsViewProvider.getRdsView(rdsConfig, databaseSslService.getSslCertsFilePath(), cloudPlatform, externalDatabaseRequested);
         Map<String, String> configs = new HashMap<>();
         configs.put(HIVE_METASTORE_DATABASE_HOST, hiveRdsView.getHost());
         configs.put(HIVE_METASTORE_DATABASE_NAME, hiveRdsView.getDatabaseName());

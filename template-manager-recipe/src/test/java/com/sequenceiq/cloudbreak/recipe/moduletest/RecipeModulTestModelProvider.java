@@ -50,7 +50,7 @@ class RecipeModulTestModelProvider {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withRdsViews(Set.of(TemplateCoreTestUtil.rdsViewProvider()
-                        .getRdsView(rdsConfigWithoutCluster(DatabaseType.HIVE, RdsSslMode.DISABLED))))
+                        .getRdsView(rdsConfigWithoutCluster(DatabaseType.HIVE, RdsSslMode.DISABLED), "AWS", true)))
                 .build();
     }
 
@@ -159,7 +159,7 @@ class RecipeModulTestModelProvider {
                                 rdsConfigWithoutCluster(DatabaseType.DRUID, RdsSslMode.DISABLED),
                                 rdsConfigWithoutCluster(DatabaseType.HIVE, RdsSslMode.DISABLED))
                             .stream()
-                            .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                            .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                             .collect(Collectors.toSet())
                 )
                 .build();
@@ -173,7 +173,7 @@ class RecipeModulTestModelProvider {
                                 rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED),
                                 rdsConfigWithoutCluster(DatabaseType.HIVE, RdsSslMode.DISABLED))
                                 .stream()
-                                .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                                .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                                 .collect(Collectors.toSet())
                 )
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
@@ -194,7 +194,7 @@ class RecipeModulTestModelProvider {
                 .withRdsViews(
                         Sets.newHashSet(rdsConfigWithoutCluster(DatabaseType.HIVE, RdsSslMode.DISABLED))
                                 .stream()
-                                .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                                .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                                 .collect(Collectors.toSet())
                 )
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
@@ -207,7 +207,7 @@ class RecipeModulTestModelProvider {
                 .withRdsViews(
                         Sets.newHashSet(rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED))
                                 .stream()
-                                .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                                .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                                 .collect(Collectors.toSet())
                 )
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
@@ -220,7 +220,7 @@ class RecipeModulTestModelProvider {
                 .withRdsViews(
                         Sets.newHashSet(rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED))
                                 .stream()
-                                .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                                .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                                 .collect(Collectors.toSet())
                 )
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
@@ -236,7 +236,7 @@ class RecipeModulTestModelProvider {
                         Sets.newHashSet(rdsConfigWithoutCluster(DatabaseType.RANGER, RdsSslMode.DISABLED),
                                 rdsConfigWithoutCluster(DatabaseType.HIVE, RdsSslMode.DISABLED))
                                 .stream()
-                                .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e))
+                                .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                                 .collect(Collectors.toSet())
                 )
                 .withHostgroups(hostNames.length == 0 ? getHostGroups("master", "worker", "compute") : getHostGroups(hostNames),

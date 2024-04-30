@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
@@ -27,7 +28,9 @@ public class RdsViewProvider {
 
     private static final Pattern WITHOUT_JDBC_PREFIX_PATTERN = Pattern.compile(WITHOUT_JDBC_PREFIX_REGEX);
 
-    private static final String SSL_OPTIONS_WITHOUT_CERTIFICATE_FILE_PATH = "sslmode=verify-full&sslrootcert=";
+    private static final String VERIFY_FULL_SSL_OPTIONS_WITHOUT_CERTIFICATE_FILE_PATH = "sslmode=verify-full&sslrootcert=";
+
+    private static final String VERIFY_CA_SSL_OPTIONS_WITHOUT_CERTIFICATE_FILE_PATH = "sslmode=verify-ca&sslrootcert=";
 
     private static final int HOST_GROUP_INDEX = 1;
 
@@ -35,11 +38,12 @@ public class RdsViewProvider {
 
     private static final int DATABASE_GROUP_INDEX = 3;
 
-    public RdsView getRdsView(RdsConfigWithoutCluster rdsConfig) {
-        return getRdsView(rdsConfig, "");
+    public RdsView getRdsView(RdsConfigWithoutCluster rdsConfig, String cloudPlatform, boolean externalDatabaseRequested) {
+        return getRdsView(rdsConfig, "", cloudPlatform, externalDatabaseRequested);
     }
 
-    public RdsView getRdsView(RdsConfigWithoutCluster rdsConfigWithoutCluster, String sslCertificateFilePath) {
+    public RdsView getRdsView(RdsConfigWithoutCluster rdsConfigWithoutCluster, String sslCertificateFilePath, String cloudPlatform,
+            boolean externalDatabaseRequested) {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setArchived(rdsConfigWithoutCluster.isArchived());
         rdsConfig.setConnectionDriver(rdsConfigWithoutCluster.getConnectionDriver());
@@ -55,14 +59,14 @@ public class RdsViewProvider {
         rdsConfig.setName(rdsConfigWithoutCluster.getName());
         rdsConfig.setSslMode(rdsConfigWithoutCluster.getSslMode());
         rdsConfig.setType(rdsConfigWithoutCluster.getType());
-        return getRdsView(rdsConfig, Objects.requireNonNullElse(sslCertificateFilePath, ""));
+        return getRdsView(rdsConfig, Objects.requireNonNullElse(sslCertificateFilePath, ""), cloudPlatform, externalDatabaseRequested);
     }
 
-    public RdsView getRdsView(RDSConfig rdsConfig) {
-        return getRdsView(rdsConfig, "");
+    public RdsView getRdsView(RDSConfig rdsConfig, String cloudPlatform, boolean externalDatabaseRequested) {
+        return getRdsView(rdsConfig, "", cloudPlatform, externalDatabaseRequested);
     }
 
-    public RdsView getRdsView(@Nonnull RDSConfig rdsConfig, String sslCertificateFilePath) {
+    public RdsView getRdsView(@Nonnull RDSConfig rdsConfig, String sslCertificateFilePath, String cloudPlatform, boolean externalDatabaseRequested) {
         RdsView rdsView = new RdsView();
         rdsView.setSslCertificateFilePath(Objects.requireNonNullElse(sslCertificateFilePath, ""));
         // Note: any value is valid for sslCertificateFile for sake of backward compatibility.
@@ -76,7 +80,7 @@ public class RdsViewProvider {
             } else {
                 sb.append('?');
             }
-            sb.append(SSL_OPTIONS_WITHOUT_CERTIFICATE_FILE_PATH);
+            populateSSLMode(cloudPlatform, externalDatabaseRequested, sb);
             sb.append(rdsView.getSslCertificateFilePath());
             rdsView.setConnectionURL(sb.toString());
         } else {
@@ -115,6 +119,14 @@ public class RdsViewProvider {
             rdsView.setConnectionString(rdsView.getConnectionURL());
         }
         return rdsView;
+    }
+
+    private static void populateSSLMode(String cloudPlatform, boolean externalDatabaseRequested, StringBuilder sb) {
+        if (CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform) && externalDatabaseRequested) {
+            sb.append(VERIFY_CA_SSL_OPTIONS_WITHOUT_CERTIFICATE_FILE_PATH);
+        } else {
+            sb.append(VERIFY_FULL_SSL_OPTIONS_WITHOUT_CERTIFICATE_FILE_PATH);
+        }
     }
 
     private RdsViewDialect createDialect(RDSConfig rdsConfig) {

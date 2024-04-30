@@ -5,9 +5,11 @@ import static com.sequenceiq.cloudbreak.rotation.context.provider.CMDBContextPro
 import static com.sequenceiq.cloudbreak.rotation.context.provider.CMDBContextProviderTestUtil.mockRdsConfig;
 import static com.sequenceiq.cloudbreak.rotation.context.provider.CMDBContextProviderTestUtil.mockStack;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -25,11 +27,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
@@ -67,32 +74,59 @@ public class CMDBPasswordRotationContextProviderTest {
     @Mock
     private SecretService secretService;
 
+    @Mock
+    private PostgresConfigService postgresConfigService;
+
+    @Mock
+    private ClusterHostServiceRunner clusterHostServiceRunner;
+
     @InjectMocks
     private CMDBPasswordRotationContextProvider underTest;
+
+    private StackDto stackDto;
+
+    private Cluster cluster;
 
     @BeforeEach
     public void setup() throws IllegalAccessException {
         lenient().when(exitCriteriaProvider.get(any())).thenReturn(ClusterDeletionBasedExitCriteriaModel.nonCancellableModel());
         FieldUtils.writeField(underTest, "rdsRoleConfigProviders", List.of(rdsRoleConfigProvider), true);
         FieldUtils.writeField(underTest, "rdsConfigProviders", List.of(rdsConfigProvider), true);
-        Cluster cluster = mockCluster(1L);
-        StackDto stackDto = mockStack(cluster, "resource");
+        cluster = mockCluster(1L);
+        cluster.setDatabaseServerCrn("crn");
+        stackDto = mockStack(cluster, "resource");
+        lenient().when(rdsConfigProvider.getRdsType()).thenReturn(TEST_DB_TYPE);
+        lenient().when(rdsConfigProvider.getDbUser()).thenReturn("user");
+    }
+
+    @Test
+    public void testGetContext() {
         RDSConfig rdsConfig = mockRdsConfig(TEST_DB_TYPE);
         GatewayConfig gatewayConfig = mockGwConfig();
-        when(rdsConfigProvider.getRdsType()).thenReturn(TEST_DB_TYPE);
-        lenient().when(rdsConfigProvider.getDbUser()).thenReturn("user");
         when(rdsConfigService.findByClusterId(any())).thenReturn(Set.of(rdsConfig));
         when(rdsConfigService.getClustersUsingResource(any())).thenReturn(Set.of(cluster));
         when(stackService.getByCrn(anyString())).thenReturn(stackDto);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(secretService.getRotation(any())).thenReturn(new RotationSecret("new", "old"));
-    }
-
-    @Test
-    public void testGetContext() {
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts("resource");
 
         assertEquals(4, contexts.size());
         assertTrue(CloudbreakSecretType.CLUSTER_CM_DB_PASSWORD.getSteps().stream().allMatch(contexts::containsKey));
+    }
+
+    @Test
+    public void testGetPillarProperties() {
+        when(stackDto.getCloudPlatform()).thenReturn("mock");
+        Map<String, SaltPillarProperties> pillarProperties = underTest.getPillarProperties(stackDto);
+        assertTrue(pillarProperties.containsKey(ClusterHostServiceRunner.CM_DATABASE_PILLAR_KEY));
+    }
+
+    @Test
+    public void testGetPillarPropertiesThrowsException() throws CloudbreakOrchestratorFailedException {
+        when(stackDto.getCloudPlatform()).thenReturn("mock");
+        doThrow(new CloudbreakOrchestratorFailedException("TEST")).when(clusterHostServiceRunner)
+                .getClouderaManagerDatabasePillarProperties(1L, "mock", "crn");
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.getPillarProperties(stackDto));
+        assertEquals("Failed to generate pillar properties for CM DB username/password rotation.", exception.getMessage());
     }
 }

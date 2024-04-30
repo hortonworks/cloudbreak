@@ -3,7 +3,7 @@
 {%- from 'postgresql/settings.sls' import postgresql with context %}
 {% if postgresql.ssl_enabled == True %}
 export PGSSLROOTCERT="{{ postgresql.root_certs_file }}"
-export PGSSLMODE=verify-full
+export PGSSLMODE="{{ postgresql.ssl_verification_mode }}"
 {%- endif %}
 
 {% set recovery_reused_dbs =  salt['pillar.get']('postgres:recovery_reused_databases') %}
