@@ -6,8 +6,10 @@ public class Secret implements Serializable {
 
     public static final Secret EMPTY = new Secret();
 
+    // this is the actual sensitive value
     private final String raw;
 
+    // JSON representation of @com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret
     private final String secret;
 
     private Secret() {

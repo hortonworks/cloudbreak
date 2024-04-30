@@ -32,11 +32,11 @@ public class DatabaseServerV4ResponseTest {
         response.setConnectionDriver("postgresql.jar");
         assertEquals("postgresql.jar", response.getConnectionDriver());
 
-        SecretResponse username = new SecretResponse("engine", "username");
+        SecretResponse username = new SecretResponse("engine", "username", 3);
         response.setConnectionUserName(username);
         verifyEqualSecretResponses(username, response.getConnectionUserName());
 
-        SecretResponse password = new SecretResponse("engine", "password");
+        SecretResponse password = new SecretResponse("engine", "password", 4);
         response.setConnectionPassword(password);
         verifyEqualSecretResponses(password, response.getConnectionPassword());
 

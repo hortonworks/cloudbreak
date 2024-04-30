@@ -5,48 +5,43 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Field;
-import java.util.List;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
-import org.mockito.Mockito;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
-import com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine;
 
 @ExtendWith(MockitoExtension.class)
 public class SecretServiceTest {
 
-    private final SecretEngine persistentEngine = Mockito.mock(VaultKvV2Engine.class);
+    @Mock
+    private SecretEngine persistentEngine;
 
-    private final VaultRetryService vaultRetryService = Mockito.mock(VaultRetryService.class);
+    @Mock
+    private VaultRetryService vaultRetryService;
 
     @InjectMocks
-    private final SecretService underTest = new SecretService(List.of(persistentEngine), vaultRetryService);
+    private SecretService underTest;
 
     @BeforeEach
     public void setup() {
-        when(persistentEngine.isSecret(anyString())).thenReturn(true);
+        lenient().when(persistentEngine.isSecret(anyString())).thenReturn(true);
 
-        Field enginesField = ReflectionUtils.findField(SecretService.class, "engines");
-        ReflectionUtils.makeAccessible(enginesField);
-        ReflectionUtils.setField(enginesField, underTest, List.of(persistentEngine));
-        when(vaultRetryService.tryReadingVault(any())).then(i -> {
+        lenient().when(vaultRetryService.tryReadingVault(any())).then(i -> {
             Supplier s = i.getArgument(0);
             return s.get();
         });
-        when(vaultRetryService.tryWritingVault(any())).then(i -> {
+        lenient().when(vaultRetryService.tryWritingVault(any())).then(i -> {
             Supplier s = i.getArgument(0);
             return s.get();
         });
@@ -55,7 +50,6 @@ public class SecretServiceTest {
     @Test
     public void testPutOk() throws Exception {
         when(persistentEngine.put("key", "value")).thenReturn("secret");
-        when(persistentEngine.exists("key")).thenReturn(false);
 
         String result = underTest.put("key", "value");
 
@@ -94,7 +88,6 @@ public class SecretServiceTest {
 
         underTest.delete(null);
 
-        verify(persistentEngine, times(1)).isSecret(any());
         verify(persistentEngine, times(0)).delete(anyString());
     }
 
@@ -107,28 +100,26 @@ public class SecretServiceTest {
     }
 
     @Test
-    void testGetKvV2SecretByPathAndFieldPathNull() {
-        String result = underTest.getKvV2SecretByPathAndField(null, "field");
+    void testGetLatestSecretByPathAndFieldPathNull() {
+        String result = underTest.getLatestSecretWithoutCache(null, "field");
         assertNull(result);
     }
 
     @Test
-    void testGetKvV2SecretByPathAndFieldFieldNull() {
-        String result = underTest.getKvV2SecretByPathAndField("path", null);
+    void testGetLatestSecretWithoutCacheNull() {
+        String result = underTest.getLatestSecretWithoutCache("path", null);
         assertNull(result);
     }
 
     @Test
-    void testGetKvV2SecretByPathAndField() {
-        when(persistentEngine.enginePath()).thenReturn("enginePath");
-        String result = underTest.getKvV2SecretByPathAndField("path", "field");
+    void testGetLatestSecretWithoutCache() {
+        when(persistentEngine.getLatestSecretWithoutCache("path", "field")).thenReturn("hello");
 
-        ArgumentCaptor<String> secretJsonCaptor = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<String> fieldCaptor = ArgumentCaptor.forClass(String.class);
-        verify(persistentEngine).get(secretJsonCaptor.capture(), fieldCaptor.capture());
-        assertEquals("{\"enginePath\":\"enginePath\",\"engineClass\":\"com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine\"," +
-                "\"path\":\"path\"}", secretJsonCaptor.getValue());
-        assertEquals("field", fieldCaptor.getValue());
+        String result = underTest.getLatestSecretWithoutCache("path", "field");
+
+        verify(persistentEngine, times(1)).getLatestSecretWithoutCache(eq("path"), eq("field"));
+        assertEquals("hello", result);
+
     }
 
 }

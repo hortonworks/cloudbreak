@@ -178,8 +178,8 @@ class AbstractRdsConfigProviderTest {
         DatabaseServerV4Response resp = new DatabaseServerV4Response();
         resp.setHost(DB_HOST);
         resp.setPort(DB_PORT);
-        SecretResponse username = new SecretResponse("user", "name");
-        SecretResponse password = new SecretResponse("pass", "word");
+        SecretResponse username = new SecretResponse("user", "name", 1);
+        SecretResponse password = new SecretResponse("pass", "word", 2);
         resp.setConnectionUserName(username);
         resp.setConnectionPassword(password);
         when(dbServerConfigurer.getDatabaseServer(any())).thenReturn(resp);

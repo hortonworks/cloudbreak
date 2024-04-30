@@ -4,6 +4,7 @@ public class SecretResponseModelDescription {
 
     public static final String ENGINE_PATH = "Engine path of the secret.";
     public static final String SECRET_PATH = "Path of the secret.";
+    public static final String SECRET_VERSION = "Version of the secret.";
 
     private SecretResponseModelDescription() {
 

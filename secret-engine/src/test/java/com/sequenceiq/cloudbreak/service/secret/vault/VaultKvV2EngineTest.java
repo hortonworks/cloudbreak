@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.secret.vault;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,7 +42,7 @@ import com.sequenceiq.cloudbreak.vault.VaultConstants;
 public class VaultKvV2EngineTest {
 
     private final VaultSecret secret = new VaultSecret("cb", "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine",
-            "cb/foo/bar/6f18609d-8d24-4a39-a283-154c1e8ab46a-f186");
+            "cb/foo/bar/6f18609d-8d24-4a39-a283-154c1e8ab46a-f186", 1);
 
     @InjectMocks
     private VaultKvV2Engine underTest;
@@ -87,28 +86,28 @@ public class VaultKvV2EngineTest {
 
     @Test
     public void testIsSecretEnginePathMissingg() {
-        VaultSecret secret = new VaultSecret(null, "ec", "p");
+        VaultSecret secret = new VaultSecret(null, "ec", "p", 1);
 
         Assert.assertFalse(underTest.isSecret(JsonUtil.writeValueAsStringSilent(secret)));
     }
 
     @Test
     public void testIsSecretEngineClassMissing() {
-        VaultSecret secret = new VaultSecret("ep", null, "p");
+        VaultSecret secret = new VaultSecret("ep", null, "p", 1);
 
         Assert.assertFalse(underTest.isSecret(JsonUtil.writeValueAsStringSilent(secret)));
     }
 
     @Test
     public void testIsSecretPathMissing() {
-        VaultSecret secret = new VaultSecret("ep", "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine", null);
+        VaultSecret secret = new VaultSecret("ep", "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine", null, null);
 
         Assert.assertFalse(underTest.isSecret(JsonUtil.writeValueAsStringSilent(secret)));
     }
 
     @Test
     public void testIsSecretClassDifferent() {
-        VaultSecret secret = new VaultSecret("ep", "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV1Engine", "p");
+        VaultSecret secret = new VaultSecret("ep", "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV1Engine", "p", 1);
 
         Assert.assertFalse(underTest.isSecret(JsonUtil.writeValueAsStringSilent(secret)));
     }
@@ -122,35 +121,6 @@ public class VaultKvV2EngineTest {
     public void testEnginePathAndAppPath() {
         assertEquals("enginePath", underTest.enginePath());
         assertEquals("appPath", underTest.appPath());
-    }
-
-    @Test
-    public void testIsExistsNull() {
-        when(vaultVersionedKeyValueOperations.get(anyString())).thenReturn(null);
-
-        assertFalse(underTest.exists(JsonUtil.writeValueAsStringSilent(secret)));
-
-        verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_READ), any(Duration.class), any(String[].class));
-    }
-
-    @Test
-    public void testIsExistsButNull() {
-        when(vaultResponse.getData()).thenReturn(null);
-        when(vaultVersionedKeyValueOperations.get(anyString())).thenReturn(vaultResponse);
-
-        assertFalse(underTest.exists(JsonUtil.writeValueAsStringSilent(secret)));
-
-        verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_READ), any(Duration.class), any(String[].class));
-    }
-
-    @Test
-    public void testIsExists() {
-        when(vaultResponse.getData()).thenReturn(Collections.emptyMap());
-        when(vaultVersionedKeyValueOperations.get(anyString())).thenReturn(vaultResponse);
-
-        assertTrue(underTest.exists(JsonUtil.writeValueAsStringSilent(secret)));
-
-        verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_READ), any(Duration.class), any(String[].class));
     }
 
     @Test
@@ -245,7 +215,7 @@ public class VaultKvV2EngineTest {
         String result = underTest.put("/path", "value");
 
         assertEquals("{\"enginePath\":\"enginePath\",\"engineClass\":\"com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine\"," +
-                "\"path\":\"appPath/path\"}", result);
+                "\"path\":\"appPath/path\",\"version\":1}", result);
 
         verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_WRITE), any(Duration.class), any(String[].class));
     }

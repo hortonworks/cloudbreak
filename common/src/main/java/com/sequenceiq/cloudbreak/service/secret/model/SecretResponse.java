@@ -18,12 +18,16 @@ public class SecretResponse implements Serializable {
     @Schema(description = SecretResponseModelDescription.SECRET_PATH)
     private String secretPath;
 
+    @Schema(description = SecretResponseModelDescription.SECRET_VERSION)
+    private Integer secretVersion;
+
     public SecretResponse() {
     }
 
-    public SecretResponse(String enginePath, String secretPath) {
+    public SecretResponse(String enginePath, String secretPath, Integer secretVersion) {
         this.enginePath = enginePath;
         this.secretPath = secretPath;
+        this.secretVersion = secretVersion;
     }
 
     public String getEnginePath() {
@@ -42,11 +46,20 @@ public class SecretResponse implements Serializable {
         this.secretPath = secretPath;
     }
 
+    public Integer getSecretVersion() {
+        return secretVersion;
+    }
+
+    public void setSecretVersion(Integer secretVersion) {
+        this.secretVersion = secretVersion;
+    }
+
     @Override
     public String toString() {
         return "SecretResponse{" +
                 "enginePath='" + enginePath + '\'' +
                 ", secretPath='" + secretPath + '\'' +
+                ", secretVersion=" + secretVersion +
                 '}';
     }
 }

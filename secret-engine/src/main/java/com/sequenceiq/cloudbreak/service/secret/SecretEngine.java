@@ -16,9 +16,12 @@ public interface SecretEngine {
 
     String put(String key, Map<String, String> value);
 
-    boolean exists(String secret);
-
     String get(String secret, String field);
+
+    /**
+     * This is slow, since it can't be cached, always fetch the latest secret without a version information
+     */
+    String getLatestSecretWithoutCache(String secretPath, String field);
 
     RotationSecret getRotation(String secret);
 

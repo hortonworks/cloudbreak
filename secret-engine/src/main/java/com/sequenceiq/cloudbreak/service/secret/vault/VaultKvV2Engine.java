@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.vault.core.VaultTemplate;
@@ -28,6 +27,20 @@ import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.vault.VaultConstants;
 
+/**
+ * This class is responsible for interacting with vault if the secret is not in cache. It uses and exponential backoff retry mechanism while trying to
+ * get the secret from vault.
+ *
+ * Caching:
+ * This class uses Spring's Cache abstraction to cache the secrets. The cache is NOT distributed, so it is not possible to invalidate the cache completely,
+ * because the entries still remain cached on other nodes. We will rely on eviction to remove the secrets from cache.
+ *
+ * Since every newly created secret or updated secret will contain a secret version (unique Integer what we are getting from Vault), we can use this version
+ * to ensure that the cache is consistent, because if an entry is updated, the version will be incremented.
+ *
+ * Relying on cache eviction to remove the secrets from cache is not ideal, since there will be entries that are not used anymore, but still remain in cache.
+ * To minimize the number of unused entries we use LRU cache for Vault secrets.
+ */
 @Component("VaultKvV2Engine")
 @ConditionalOnBean(VaultConfig.class)
 public class VaultKvV2Engine implements SecretEngine {
@@ -67,41 +80,30 @@ public class VaultKvV2Engine implements SecretEngine {
 
     @Override
     public boolean isSecret(String secret) {
+        if (secret == null) {
+            return false;
+        }
         VaultSecret vaultSecret = vaultSecretConverter.convert(secret);
         return vaultSecret != null && vaultSecret.getEngineClass().equals(getClass().getCanonicalName());
     }
 
     @Override
-    @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, allEntries = true)
     public String put(String path, String value) {
         return put(path, Collections.singletonMap(VaultConstants.FIELD_SECRET, value));
     }
 
     @Override
-    @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, allEntries = true)
     public String put(String path, Map<String, String> value) {
         long start = System.currentTimeMillis();
         LOGGER.info("Storing secret to {}", path);
         String fullPath = appPath + path;
         Versioned.Metadata metadata = vaultRestTemplate.opsForVersionedKeyValue(enginePath).put(fullPath, value);
-        VaultSecret vaultSecret = new VaultSecret(enginePath, getClass().getCanonicalName(), fullPath);
+        Integer version = metadata.getVersion().getVersion();
+        VaultSecret vaultSecret = new VaultSecret(enginePath, getClass().getCanonicalName(), fullPath, version);
         long duration = System.currentTimeMillis() - start;
         metricService.recordTimerMetric(MetricType.VAULT_WRITE, Duration.ofMillis(duration));
-        LOGGER.trace("Secret write took {} ms, version: {}", duration, metadata.getVersion().getVersion());
+        LOGGER.trace("Secret write took {} ms, version: {}", duration, version);
         return JsonUtil.writeValueAsStringSilent(vaultSecret);
-    }
-
-    @Override
-    public boolean exists(String secret) {
-        long start = System.currentTimeMillis();
-        boolean ret = Optional.ofNullable(vaultSecretConverter.convert(secret)).map(s -> {
-            Versioned<Map<String, Object>> response = vaultRestTemplate.opsForVersionedKeyValue(s.getEnginePath()).get(s.getPath());
-            return response != null && response.getData() != null;
-        }).orElse(false);
-        long duration = System.currentTimeMillis() - start;
-        metricService.recordTimerMetric(MetricType.VAULT_READ, Duration.ofMillis(duration));
-        LOGGER.trace("Secret read took {} ms", duration);
-        return ret;
     }
 
     @Override
@@ -120,6 +122,19 @@ public class VaultKvV2Engine implements SecretEngine {
     }
 
     @Override
+    public String getLatestSecretWithoutCache(String secretPath, String field) {
+        long start = System.currentTimeMillis();
+        Versioned<Map<String, Object>> response = vaultRestTemplate.opsForVersionedKeyValue(enginePath).get(secretPath);
+        String ret = response != null && response.getData() != null && response.getData().containsKey(field) ?
+                String.valueOf(response.getData().get(field)) : null;
+        long duration = System.currentTimeMillis() - start;
+        metricService.recordTimerMetric(MetricType.VAULT_READ, Duration.ofMillis(duration));
+        LOGGER.trace("Secret read took {} ms", duration);
+        return ret;
+    }
+
+    @Override
+    // no cache for rotation secrets, the reason for this is that the cache is based on secret + field, and this method has only secret parameter
     public RotationSecret getRotation(@NotNull String secret) {
         long start = System.currentTimeMillis();
         RotationSecret rotationSecret = Optional.ofNullable(vaultSecretConverter.convert(secret)).map(s -> {
@@ -141,7 +156,7 @@ public class VaultKvV2Engine implements SecretEngine {
     }
 
     @Override
-    @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, allEntries = true)
+    // no eviction is required or possible, see the comment in the top of the class
     public void delete(String secret) {
         Optional.ofNullable(vaultSecretConverter.convert(secret)).ifPresent(s -> deleteAllVersionsOfSecret(s.getEnginePath(), s.getPath()));
     }
@@ -149,7 +164,7 @@ public class VaultKvV2Engine implements SecretEngine {
     @Override
     public SecretResponse convertToExternal(String secret) {
         return Optional.ofNullable(vaultSecretConverter.convert(secret))
-                .map(s -> new SecretResponse(s.getEnginePath(), s.getPath()))
+                .map(s -> new SecretResponse(s.getEnginePath(), s.getPath(), s.getVersion()))
                 .orElse(null);
     }
 
@@ -163,7 +178,7 @@ public class VaultKvV2Engine implements SecretEngine {
     }
 
     @Override
-    @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, allEntries = true)
+    // no eviction is required or possible, see the comment in the top of the class
     public void cleanup(String path) {
         deleteAllVersionsOfSecret(enginePath, appPath + path);
     }
