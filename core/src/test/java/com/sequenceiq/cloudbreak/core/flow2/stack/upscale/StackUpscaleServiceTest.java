@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.TestUtil.instanceMetaData;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_QUOTA_ISSUE;
 import static java.util.Collections.emptyMap;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -41,6 +42,8 @@ import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -48,19 +51,23 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
+import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CoreVerticalScaleRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 class StackUpscaleServiceTest {
@@ -76,6 +83,9 @@ class StackUpscaleServiceTest {
 
     @Mock
     private CloudbreakFlowMessageService flowMessageService;
+
+    @Mock
+    private MetadataSetupService metadataSetupService;
 
     @InjectMocks
     private StackUpscaleService underTest;
@@ -433,5 +443,25 @@ class StackUpscaleServiceTest {
         InstanceStoreMetadata instanceStoreMetadata = underTest.getInstanceStorageInfo(ac, "m5d.2xlarge", cloudConnector);
         verify(metadataCollector, times(1)).collectInstanceStorageCount(eq(ac), eq(List.of("m5d.2xlarge")));
         assertEquals(resultMetadata, instanceStoreMetadata);
+    }
+
+    @Test
+    void testFinishInstances() {
+        ArrayList<CloudResourceStatus> cloudResourceStatuses = new ArrayList<>();
+        CloudResource cloudResourceMock = mock(CloudResource.class);
+        when(cloudResourceMock.getType()).thenReturn(ResourceType.AWS_INSTANCE);
+        cloudResourceStatuses.add(new CloudResourceStatus(cloudResourceMock, ResourceStatus.CREATED, 10L));
+        cloudResourceStatuses.add(new CloudResourceStatus(cloudResourceMock, ResourceStatus.FAILED, 11L));
+        cloudResourceStatuses.add(new CloudResourceStatus(cloudResourceMock, ResourceStatus.CREATED, 12L));
+        StackScalingFlowContext stackScalingFlowContext = mock(StackScalingFlowContext.class);
+        when(stackScalingFlowContext.getHostGroupWithAdjustment()).thenReturn(Map.of("worker", 3));
+        when(stackScalingFlowContext.getStackId()).thenReturn(1L);
+        underTest.finishAddInstances(stackScalingFlowContext, new UpscaleStackResult(1L, ResourceStatus.CREATED, cloudResourceStatuses));
+        ArgumentCaptor<Set<String>> hostGroupCaptor = ArgumentCaptor.forClass(Set.class);
+        ArgumentCaptor<Set<Long>> privateIdCaptor = ArgumentCaptor.forClass(Set.class);
+        verify(metadataSetupService, times(1)).cleanupRequestedInstancesIfNotInList(eq(1L), hostGroupCaptor.capture(),
+                privateIdCaptor.capture());
+        assertThat(hostGroupCaptor.getValue()).containsExactly("worker");
+        assertThat(privateIdCaptor.getValue()).containsExactly(10L, 12L);
     }
 }

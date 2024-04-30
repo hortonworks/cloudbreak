@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -113,7 +114,9 @@ public class StackUpscaleService {
         LOGGER.debug("Upscale stack result: {}", payload);
         List<CloudResourceStatus> results = payload.getResults();
         validateResourceResults(context, payload.getErrorDetails(), results);
-        Set<Long> successfulPrivateIds = results.stream().map(CloudResourceStatus::getPrivateId).filter(Objects::nonNull).collect(Collectors.toSet());
+        Set<Long> successfulPrivateIds = results.stream()
+                .filter(cloudResourceStatus -> !ResourceStatus.FAILED.equals(cloudResourceStatus.getStatus()))
+                .map(CloudResourceStatus::getPrivateId).filter(Objects::nonNull).collect(Collectors.toSet());
         Set<String> instanceGroups = context.getHostGroupWithAdjustment().keySet();
         metadataSetupService.cleanupRequestedInstancesIfNotInList(context.getStackId(), instanceGroups, successfulPrivateIds);
         if (successfulPrivateIds.isEmpty()) {
