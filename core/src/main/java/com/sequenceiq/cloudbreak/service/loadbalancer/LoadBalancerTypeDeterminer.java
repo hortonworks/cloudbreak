@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.loadbalancer;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 
 import java.util.Map;
 
@@ -34,15 +35,18 @@ public class LoadBalancerTypeDeterminer {
 
     /**
      * In case of Azure, private subnet as such has no meaning, and SubnetType is null
+     * In case of GCP, the IGW presence determines if the subnet is categorized as PUBLIC.
+     * It seems though that GCP subnets gets an IGW assigned in any case.
      *
      * @param environment {@link DetailedEnvironmentResponse}
-     * @return true if private subnets are present for endpoint gateway subnet, however the "privateness" is not checked with Azure
+     * @return true if private subnets are present for endpoint gateway subnet, however the "privateness" is not checked with Azure or GCP
      */
     private boolean isSubnetPrivateIfApplicable(DetailedEnvironmentResponse environment) {
         boolean azure = AZURE.equalsIgnoreCase(environment.getCloudPlatform());
+        boolean gcp = GCP.equalsIgnoreCase(environment.getCloudPlatform());
         Map<String, CloudSubnet> gatewayEndpointSubnetMetas = environment.getNetwork().getGatewayEndpointSubnetMetas();
-        return azure && MapUtils.isNotEmpty(gatewayEndpointSubnetMetas)
-                || !azure && MapUtils.isNotEmpty(gatewayEndpointSubnetMetas) && gatewayEndpointSubnetMetas.entrySet().stream()
+        return (azure || gcp) && MapUtils.isNotEmpty(gatewayEndpointSubnetMetas)
+                || !azure && !gcp && MapUtils.isNotEmpty(gatewayEndpointSubnetMetas) && gatewayEndpointSubnetMetas.entrySet().stream()
                         .allMatch(e -> e.getValue().getType() == SubnetType.PRIVATE);
     }
 
