@@ -1,5 +1,17 @@
+buildscript {
+  repositories {
+    mavenCentral()
+    maven { url = "$repoUrl" }
+  }
+  dependencies {
+    classpath "com.google.protobuf:protobuf-gradle-plugin:${protobufPluginVersion}"
+    classpath "org.openapitools:openapi-generator-gradle-plugin:$openapiGeneratorGradlePlugin"
+  }
+}
+
 plugins {
   id 'java'
+  id 'org.openapi.generator' version "$openapiGeneratorGradlePlugin"
 }
 
 repositories {
@@ -13,5 +25,43 @@ dependencies {
   implementation project(":structuredevent-api-cdp")
   implementation project(":structuredevent-model")
 
+  implementation     group: 'org.glassfish.jersey.media',  name: 'jersey-media-multipart',         version: jerseyCoreVersion
+  implementation     group: 'org.openapitools',            name: 'jackson-databind-nullable',      version: "$jacksonDatabindNullable"
+  implementation     group: 'javax.annotation',            name: 'javax.annotation-api',           version: javaxAnnotationApiVersion
+
   testImplementation project(path: ':common', configuration: 'tests')
+}
+
+openApiGenerate {
+  globalProperties.set([
+          apis: "false",
+          apiDocs: "false",
+          apiTests: "false",
+          verbose: "true",
+          generateSupportingFiles: "false",
+          modelDocs: "false",
+          modelTests: "false",
+          models: ""
+//          models: 'DescribeEnvironmentRequest,DescribeEnvironmentResponse,Environment,Authentication'
+  ])
+  generatorName = "java"
+  library = "native"
+  inputSpec = "$projectDir/src/main/yaml/environments2.yaml"
+  outputDir = "$projectDir/src/generated"
+  modelPackage = "com.cloudera.cdp.environments2.model"
+  configOptions = [
+          dateLibrary: "java8"
+  ]
+}
+
+compileJava.dependsOn tasks.openApiGenerate
+
+sourceSets {
+  main {
+    java.srcDirs += "${projectDir}/src/generated/src/main/java"
+  }
+}
+
+clean {
+  delete "${projectDir}/src/generated/"
 }
