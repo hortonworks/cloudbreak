@@ -139,7 +139,13 @@ public class ImageService {
             User user, Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> imagePredicate)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         ImageCatalogPlatform platform = platformStringTransformer.getPlatformStringForImageCatalog(platformString, variant);
-
+        String clusterVersion = getClusterVersion(blueprint);
+        Set<String> operatingSystems;
+        try {
+            operatingSystems = getSupportedOperatingSystems(workspaceId, imageSettings, clusterVersion, platform);
+        } catch (Exception ex) {
+            throw new CloudbreakImageCatalogException(ex);
+        }
         if (imageSettings != null && StringUtils.isNotEmpty(imageSettings.getId())) {
             LOGGER.debug("Image id {} is specified for the stack.", imageSettings.getId());
 
@@ -147,18 +153,10 @@ public class ImageService {
                 imageSettings.setCatalog(CDP_DEFAULT_CATALOG_NAME);
             }
             StatedImage image = imageCatalogService.getImageByCatalogName(workspaceId, imageSettings.getId(), imageSettings.getCatalog());
+            validateBaseImageOs(image, operatingSystems);
             return checkIfBasePermitted(image, baseImageEnabled);
         } else if (useBaseImage && !baseImageEnabled) {
             throw new CloudbreakImageCatalogException("Inconsistent request, base images are disabled but custom repo information is submitted!");
-        }
-
-        String clusterVersion = getClusterVersion(blueprint);
-
-        Set<String> operatingSystems;
-        try {
-            operatingSystems = getSupportedOperatingSystems(workspaceId, imageSettings, clusterVersion, platform);
-        } catch (Exception ex) {
-            throw new CloudbreakImageCatalogException(ex);
         }
 
         ImageCatalog imageCatalog = getImageCatalogFromRequestOrDefault(workspaceId, imageSettings, user);
@@ -177,6 +175,14 @@ public class ImageService {
         } else {
             LOGGER.info("Trying to select a prewarmed image.");
             return imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilter, imagePredicate);
+        }
+    }
+
+    private void validateBaseImageOs(StatedImage statedImage, Set<String> operatingSystems) throws CloudbreakImageCatalogException {
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = statedImage.getImage();
+        if (!image.isPrewarmed() && !operatingSystems.contains(image.getOs())) {
+            throw new CloudbreakImageCatalogException(String.format("The OS of the selected base image (%s) is not compatible with the runtime version. "
+                    + "Please select another image with the following OS: %s", image.getUuid(), operatingSystems));
         }
     }
 

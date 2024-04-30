@@ -8,7 +8,6 @@ import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.INVALID_PLAT
 import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.OTHER_REGION;
 import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.PLATFORM;
 import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.REGION;
-import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -88,7 +87,7 @@ public class ImageServiceTest {
 
     private static final long ORG_ID = 100L;
 
-    private static final String OS = "anOS";
+    private static final String OS = "centos7";
 
     private static final long USER_ID = 1000L;
 
@@ -99,6 +98,10 @@ public class ImageServiceTest {
     private static final String DEFAULT_REGION_EXISTING_ID = "ami-09fea90f257c85514";
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
+
+    private static final String IMAGE_CATALOG_NAME = "aCatalog";
+
+    private static final ImageCatalogPlatform IMAGE_CATALOG_PLATFORM = new ImageCatalogPlatform(PLATFORM);
 
     @Mock
     private ImageCatalogService imageCatalogService;
@@ -157,18 +160,21 @@ public class ImageServiceTest {
     }
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
         imageSettingsV4Request = new ImageSettingsV4Request();
-        imageSettingsV4Request.setCatalog("aCatalog");
+        imageSettingsV4Request.setCatalog(IMAGE_CATALOG_NAME);
         imageSettingsV4Request.setId("anImageId");
         imageSettingsV4Request.setOs(OS);
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(STACK_VERSION);
-        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, "aCatalog")).thenReturn(getImageCatalog());
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(getImageCatalog());
         CloudConnector connector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.getDefault(Platform.platform(PLATFORM))).thenReturn(connector);
         when(cloudPlatformConnectors.getDefault(Platform.platform(CloudPlatform.YARN.name()))).thenReturn(connector);
         when(connector.regionToDisplayName(REGION)).thenReturn(REGION);
+        when(platformStringTransformer.getPlatformStringForImageCatalog(PLATFORM, PLATFORM)).thenReturn(IMAGE_CATALOG_PLATFORM);
+        when(stackMatrixService.getSupportedOperatingSystems(WORKSPACE_ID, STACK_VERSION, IMAGE_CATALOG_PLATFORM, OS, IMAGE_CATALOG_NAME))
+                .thenReturn(Set.of(OS));
     }
 
     @Test
@@ -211,7 +217,7 @@ public class ImageServiceTest {
     @Test
     public void testDetermineImageFromCatalogWithNonExistingCatalogNameAndIdSpecified()
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        when(imageCatalogService.getImageByCatalogName(WORKSPACE_ID, "anImageId", "aCatalog"))
+        when(imageCatalogService.getImageByCatalogName(WORKSPACE_ID, "anImageId", IMAGE_CATALOG_NAME))
                 .thenThrow(new CloudbreakImageCatalogException("Image catalog not found with name: aCatalog"));
 
         CloudbreakImageCatalogException exception = assertThrows(CloudbreakImageCatalogException.class, () ->
@@ -231,10 +237,10 @@ public class ImageServiceTest {
 
     @Test
     public void testDetermineImageFromCatalogWithNonExistingCatalogName() {
-        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, "aCatalog"))
+        when(imageCatalogService.getImageCatalogByName(WORKSPACE_ID, IMAGE_CATALOG_NAME))
                 .thenThrow(new NotFoundException("Image catalog not found with name: aCatalog"));
         ImageSettingsV4Request imageRequest = new ImageSettingsV4Request();
-        imageRequest.setCatalog("aCatalog");
+        imageRequest.setCatalog(IMAGE_CATALOG_NAME);
         imageRequest.setOs(OS);
 
         CloudbreakImageCatalogException exception = assertThrows(CloudbreakImageCatalogException.class, () ->
@@ -268,6 +274,28 @@ public class ImageServiceTest {
                         TestUtil.user(USER_ID, USER_ID_STRING),
                         image -> true));
         assertEquals("Inconsistent request, base images are disabled but image with id uuid is base image!", exception.getMessage());
+    }
+
+    @Test
+    public void testGivenBaseImageIdAndTheOSIsNotSupportedByTheTemplateShouldReturnError() throws Exception {
+        imageSettingsV4Request.setOs(null);
+        when(stackMatrixService.getSupportedOperatingSystems(WORKSPACE_ID, STACK_VERSION, IMAGE_CATALOG_PLATFORM, null, IMAGE_CATALOG_NAME))
+                .thenReturn(Set.of("redhat7"));
+        when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString()))
+                .thenReturn(ImageTestUtil.getImageFromCatalog(false, "uuid", STACK_VERSION));
+        CloudbreakImageCatalogException exception = assertThrows(CloudbreakImageCatalogException.class, () ->
+                underTest.determineImageFromCatalog(
+                        WORKSPACE_ID,
+                        imageSettingsV4Request,
+                        PLATFORM,
+                        PLATFORM,
+                        TestUtil.blueprint(),
+                        false,
+                        false,
+                        TestUtil.user(USER_ID, USER_ID_STRING),
+                        image -> true));
+        assertEquals("The OS of the selected base image (uuid) is not compatible with the runtime version. "
+                + "Please select another image with the following OS: [redhat7]", exception.getMessage());
     }
 
     @Test
@@ -329,7 +357,7 @@ public class ImageServiceTest {
         imageSettingsV4Request.setId(null);
         when(imageCatalogService.getLatestBaseImageDefaultPreferred(imageFilterCaptor.capture(), any()))
                 .thenReturn(ImageTestUtil.getImageFromCatalog(false, "uuid", STACK_VERSION));
-        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform(PLATFORM));
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(IMAGE_CATALOG_PLATFORM);
         StatedImage statedImage = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
@@ -350,7 +378,7 @@ public class ImageServiceTest {
         imageSettingsV4Request.setId(null);
         when(imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilterCaptor.capture(), any()))
                 .thenReturn(ImageTestUtil.getImageFromCatalog(false, "uuid", STACK_VERSION));
-        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform(PLATFORM));
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(IMAGE_CATALOG_PLATFORM);
         StatedImage statedImage = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
@@ -371,7 +399,7 @@ public class ImageServiceTest {
         imageSettingsV4Request.setId(null);
         when(imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilterCaptor.capture(), any()))
                 .thenReturn(ImageTestUtil.getImageFromCatalog(true, "uuid", STACK_VERSION));
-        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform(PLATFORM));
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(IMAGE_CATALOG_PLATFORM);
         StatedImage statedImage = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
@@ -408,14 +436,12 @@ public class ImageServiceTest {
     @Test
     public void testDetermineImageNameFound() {
         Image image = mock(Image.class);
-        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
-
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
 
         String imageName = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> {
                     try {
-                        return underTest.determineImageName(PLATFORM, imageCatalogPlatform, REGION, image);
+                        return underTest.determineImageName(PLATFORM, IMAGE_CATALOG_PLATFORM, REGION, image);
                     } catch (CloudbreakImageNotFoundException e) {
                         throw new RuntimeException(e);
                     }
@@ -427,7 +453,6 @@ public class ImageServiceTest {
     public void testDetermineImageNameFoundYCloud() {
         Image image = mock(Image.class);
         String platform = CloudPlatform.YARN.name().toLowerCase(Locale.ROOT);
-        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(platform);
         when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(false);
 
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(platform,
@@ -437,7 +462,7 @@ public class ImageServiceTest {
 
         String imageName = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             try {
-                return underTest.determineImageName(platform, imageCatalogPlatform, null, image);
+                return underTest.determineImageName(platform, new ImageCatalogPlatform(platform), null, image);
             } catch (CloudbreakImageNotFoundException e) {
                 throw new RuntimeException(e);
             }
@@ -448,7 +473,6 @@ public class ImageServiceTest {
     @Test
     public void testDetermineImageNameFoundDefaultPreferred() {
         Image image = mock(Image.class);
-        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
         when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(true);
 
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(PLATFORM,
@@ -458,7 +482,7 @@ public class ImageServiceTest {
 
         String imageName = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             try {
-                return underTest.determineImageName(PLATFORM, imageCatalogPlatform, REGION, image);
+                return underTest.determineImageName(PLATFORM, IMAGE_CATALOG_PLATFORM, REGION, image);
             } catch (CloudbreakImageNotFoundException e) {
                 throw new RuntimeException(e);
             }
@@ -469,7 +493,6 @@ public class ImageServiceTest {
     @Test
     public void testDetermineImageNameNotDefaultPreferredFallbackToRegion() {
         Image image = mock(Image.class);
-        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
         when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(true);
 
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(PLATFORM,
@@ -477,7 +500,7 @@ public class ImageServiceTest {
 
         String imageName = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             try {
-                return underTest.determineImageName(PLATFORM, imageCatalogPlatform, REGION, image);
+                return underTest.determineImageName(PLATFORM, IMAGE_CATALOG_PLATFORM, REGION, image);
             } catch (CloudbreakImageNotFoundException e) {
                 throw new RuntimeException(e);
             }
@@ -488,7 +511,6 @@ public class ImageServiceTest {
     @Test
     public void testDetermineImageNameNotFoundDefaultNorFallback() {
         Image image = mock(Image.class);
-        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
         when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(true);
 
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(PLATFORM,
@@ -498,7 +520,7 @@ public class ImageServiceTest {
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
                         () -> {
                             try {
-                                return underTest.determineImageName(PLATFORM, imageCatalogPlatform, REGION, image);
+                                return underTest.determineImageName(PLATFORM, IMAGE_CATALOG_PLATFORM, REGION, image);
                             } catch (CloudbreakImageNotFoundException e) {
                                 throw new RuntimeException(e);
                             }
@@ -511,7 +533,6 @@ public class ImageServiceTest {
     @Test
     public void testDetermineImageNameFoundNoMpEntitlement() {
         Image image = mock(Image.class);
-        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
         when(entitlementService.azureMarketplaceImagesEnabled(any())).thenReturn(false);
 
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(PLATFORM,
@@ -521,7 +542,7 @@ public class ImageServiceTest {
 
         String imageName = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             try {
-                return underTest.determineImageName(PLATFORM, imageCatalogPlatform, REGION, image);
+                return underTest.determineImageName(PLATFORM, IMAGE_CATALOG_PLATFORM, REGION, image);
             } catch (CloudbreakImageNotFoundException e) {
                 throw new RuntimeException(e);
             }
@@ -532,13 +553,11 @@ public class ImageServiceTest {
     @Test
     public void testDetermineImageNameNotFound() {
         Image image = mock(Image.class);
-        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
-
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
 
         Exception exception = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> assertThrows(CloudbreakImageNotFoundException.class,
-                        () -> underTest.determineImageName(PLATFORM, imageCatalogPlatform, "fake-region", image)));
+                        () -> underTest.determineImageName(PLATFORM, IMAGE_CATALOG_PLATFORM, "fake-region", image)));
         String exceptionMessage = "The virtual machine image couldn't be found for azure";
         MatcherAssert.assertThat(exception.getMessage(), CoreMatchers.containsString(exceptionMessage));
     }
@@ -546,13 +565,11 @@ public class ImageServiceTest {
     @Test
     public void testDetermineImageNameImageForPlatformNotFound() {
         Image image = mock(Image.class);
-        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(PLATFORM);
-
         when(image.getImageSetsByProvider()).thenReturn(Collections.singletonMap(INVALID_PLATFORM, Collections.singletonMap(REGION, EXISTING_ID)));
         when(image.toString()).thenReturn("Image");
 
         Exception exception = assertThrows(CloudbreakImageNotFoundException.class, () ->
-                underTest.determineImageName(PLATFORM, imageCatalogPlatform, REGION, image));
+                underTest.determineImageName(PLATFORM, IMAGE_CATALOG_PLATFORM, REGION, image));
         String exceptionMessage = "The selected image: 'Image' "
                 + "doesn't contain virtual machine image for the selected platform: 'ImageCatalogPlatform{platform='azure'}'.";
         MatcherAssert.assertThat(exception.getMessage(), CoreMatchers.containsString(exceptionMessage));
@@ -566,7 +583,7 @@ public class ImageServiceTest {
         stack.setRegion(REGION);
 
 
-        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform(PLATFORM));
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(IMAGE_CATALOG_PLATFORM);
 
         CloudConnector connector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.getDefault(Platform.platform(PLATFORM))).thenReturn(connector);
