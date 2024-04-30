@@ -50,11 +50,12 @@ public class PrivateControlPlaneService extends AbstractAccountAwareResourceServ
         for (PrivateControlPlaneRegistrationRequest item : request.getItems()) {
             String crn = item.getCrn();
             PrivateControlPlane privateControlPlane = new PrivateControlPlane();
-
-            privateControlPlane.setAccountId(Crn.fromString(crn).getAccountId());
+            Crn pvcCrn = Crn.fromString(crn);
+            privateControlPlane.setAccountId(pvcCrn.getAccountId());
             privateControlPlane.setResourceCrn(crn);
             privateControlPlane.setName(item.getName());
             privateControlPlane.setUrl(item.getUrl());
+            privateControlPlane.setPrivateCloudAccountId(pvcCrn.getResource());
 
             repository().save(privateControlPlane);
         }
@@ -68,6 +69,10 @@ public class PrivateControlPlaneService extends AbstractAccountAwareResourceServ
                 .collect(Collectors.toSet());
         deleteByResourceCrns(crns);
         return privateControlPlaneDeRegistrationRequestsConverter.convert(request);
+    }
+
+    public Optional<PrivateControlPlane> getByPrivateCloudAccountIdAndPublicCloudAccountId(String privateCloudAccountId, String publicCloudAccountId) {
+        return privateControlPlaneRepository.findByPvcAccountAndPbcAccountId(privateCloudAccountId, publicCloudAccountId);
     }
 
     @Override

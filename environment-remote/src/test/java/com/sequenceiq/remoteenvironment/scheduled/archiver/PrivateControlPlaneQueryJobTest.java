@@ -36,16 +36,32 @@ class PrivateControlPlaneQueryJobTest {
     @Test
     public void testQueryPrivateControlPlaneConfigs() throws JobExecutionException {
         List<PvcControlPlaneConfiguration> remoteControlPlanes = new ArrayList<>();
-        remoteControlPlanes.add(getPvcControlPlaneConfiguration("CRN1", "NAME1", "URL1"));
-        remoteControlPlanes.add(getPvcControlPlaneConfiguration("CRN2", "NAME2", "URL22"));
-        remoteControlPlanes.add(getPvcControlPlaneConfiguration("CRN3", "NAME3", "URL3"));
-        remoteControlPlanes.add(getPvcControlPlaneConfiguration("CRN4", "NAME4", "URL4"));
+        remoteControlPlanes.add(getPvcControlPlaneConfiguration(
+                "crn:cdp:hybrid:us-west-1:73d:pvcControlPlane:b24e0aff-2cc5-40d0-b5fa-89bd85152ad1",
+                "NAME1", "URL1"));
+        remoteControlPlanes.add(getPvcControlPlaneConfiguration(
+                "crn:cdp:hybrid:us-west-1:73d:pvcControlPlane:b24e0aff-2cc5-40d0-b5fa-89bd85152ad2",
+                "NAME2", "URL22"));
+        remoteControlPlanes.add(getPvcControlPlaneConfiguration(
+                "crn:cdp:hybrid:us-west-1:73d:pvcControlPlane:b24e0aff-2cc5-40d0-b5fa-89bd85152ad3",
+                "NAME3", "URL3"));
+        remoteControlPlanes.add(getPvcControlPlaneConfiguration(
+                "crn:cdp:hybrid:us-west-1:73d:pvcControlPlane:b24e0aff-2cc5-40d0-b5fa-89bd85152ad4",
+                "NAME4", "URL4"));
 
         List<PrivateControlPlane> controlPlanesInOurDatabase = new ArrayList<>();
-        controlPlanesInOurDatabase.add(getPrivateControlPlane("CRN1", "NAME1", "URL1"));
-        controlPlanesInOurDatabase.add(getPrivateControlPlane("CRN2", "NAME2", "URL2"));
-        controlPlanesInOurDatabase.add(getPrivateControlPlane("CRN3", "NAME3", "URL3"));
-        controlPlanesInOurDatabase.add(getPrivateControlPlane("CRN5", "NAME5", "URL5"));
+        controlPlanesInOurDatabase.add(getPrivateControlPlane(
+                "crn:cdp:hybrid:us-west-1:73d:pvcControlPlane:b24e0aff-2cc5-40d0-b5fa-89bd85152ad1",
+                "NAME1", "URL1"));
+        controlPlanesInOurDatabase.add(getPrivateControlPlane(
+                "crn:cdp:hybrid:us-west-1:73d:pvcControlPlane:b24e0aff-2cc5-40d0-b5fa-89bd85152ad2",
+                "NAME2", "URL2"));
+        controlPlanesInOurDatabase.add(getPrivateControlPlane(
+                "crn:cdp:hybrid:us-west-1:73d:pvcControlPlane:b24e0aff-2cc5-40d0-b5fa-89bd85152ad3",
+                "NAME3", "URL3"));
+        controlPlanesInOurDatabase.add(getPrivateControlPlane(
+                "crn:cdp:hybrid:us-west-1:73d:pvcControlPlane:b24e0aff-2cc5-40d0-b5fa-89bd85152ad5",
+                "NAME5", "URL5"));
 
         when(grpcRemoteClusterClient.listAllPrivateControlPlanes()).thenReturn(remoteControlPlanes);
         when(privateControlPlaneService.findAll()).thenReturn(controlPlanesInOurDatabase);
@@ -65,6 +81,7 @@ class PrivateControlPlaneQueryJobTest {
         privateControlPlane.setUrl(url);
         privateControlPlane.setName(name);
         privateControlPlane.setResourceCrn(crn);
+        privateControlPlane.setPrivateCloudAccountId("account");
         return privateControlPlane;
     }
 

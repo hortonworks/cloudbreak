@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,7 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyHybridClient;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.controller.v1.converter.PrivateControlPlaneEnvironmentToRemoteEnvironmentConverter;
@@ -38,22 +41,37 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
     @Inject
     private EntitlementService entitlementService;
 
-    public Set<SimpleRemoteEnvironmentResponse> listRemoteEnvironment(String accountId) {
+    public Set<SimpleRemoteEnvironmentResponse> listRemoteEnvironments(String publicCloudAccountId) {
         Set<SimpleRemoteEnvironmentResponse> responses = new HashSet<>();
-        if (entitlementService.hybridCloudEnabled(accountId)) {
-            Set<PrivateControlPlane> privateControlPlanes = privateControlPlaneService.listByAccountId(accountId);
+        if (entitlementService.hybridCloudEnabled(publicCloudAccountId)) {
+            Set<PrivateControlPlane> privateControlPlanes = privateControlPlaneService.listByAccountId(publicCloudAccountId);
             privateControlPlanes.stream()
                 .parallel()
-                .forEach(item -> responses.addAll(getEnvironmentsFromPrivateControlPlane(item)));
+                .forEach(item -> responses.addAll(listEnvironmentsFromPrivateControlPlane(item)));
         }
         return responses;
     }
 
-    private List<SimpleRemoteEnvironmentResponse> getEnvironmentsFromPrivateControlPlane(PrivateControlPlane controlPlane) {
+    public Object getRemoteEnvironment(String publicCloudAccountId, String environmentCrn) {
+        Object response = null;
+        if (entitlementService.hybridCloudEnabled(publicCloudAccountId)) {
+            String privateCloudAccountId = Crn.fromString(environmentCrn).getAccountId();
+            Optional<PrivateControlPlane> privateControlPlanes =
+                    privateControlPlaneService.getByPrivateCloudAccountIdAndPublicCloudAccountId(privateCloudAccountId, publicCloudAccountId);
+            if (privateControlPlanes.isPresent()) {
+                response = describeRemoteEnvironment(privateControlPlanes.get(), environmentCrn);
+            } else {
+                throw new BadRequestException(String.format("There is no control plane for this account with account id %s.", privateCloudAccountId));
+            }
+        }
+        return response;
+    }
+
+    private List<SimpleRemoteEnvironmentResponse> listEnvironmentsFromPrivateControlPlane(PrivateControlPlane controlPlane) {
         LOGGER.debug("The processing of private control plane('{}') is executed by thread: {}", controlPlane.getName(), Thread.currentThread().getName());
         List<SimpleRemoteEnvironmentResponse> responses = new ArrayList<>();
         try {
-            responses = measure(() -> clusterProxyHybridClient.readConfig(controlPlane.getResourceCrn())
+            responses = measure(() -> clusterProxyHybridClient.listEnvironments(controlPlane.getResourceCrn())
                     .getEnvironments()
                     .stream()
                     .parallel()
@@ -67,5 +85,22 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
             LOGGER.warn("Failed to query environments from url {}", controlPlane.getUrl());
         }
         return responses;
+    }
+
+    public Object describeRemoteEnvironment(PrivateControlPlane controlPlane, String environmentCrn) {
+        LOGGER.debug("The processing of remote environment('{}') is executed by thread: {}", environmentCrn, Thread.currentThread().getName());
+        Object response = null;
+        try {
+            response = measure(() ->
+                    clusterProxyHybridClient.getEnvironment(
+                            controlPlane.getResourceCrn(),
+                            controlPlane.getPrivateCloudAccountId(),
+                            environmentCrn),
+                    LOGGER,
+                    "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
+        } catch (Exception e) {
+            LOGGER.warn("Failed to query environment for crn {}", environmentCrn);
+        }
+        return response;
     }
 }

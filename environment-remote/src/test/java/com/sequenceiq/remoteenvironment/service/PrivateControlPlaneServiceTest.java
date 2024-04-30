@@ -1,12 +1,14 @@
 package com.sequenceiq.remoteenvironment.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -75,6 +77,34 @@ class PrivateControlPlaneServiceTest {
         verify(privateControlPlaneRepositoryMock, times(1)).deleteByResourceCrns(any(Set.class));
         verify(deRegistrationConverterMock, times(1)).convert(eq(request));
         assertEquals(0, result.getItems().size());
+    }
+
+    @Test
+    public void testGetByPrivateCloudAccountIdAndPublicCloudAccountIdWhenExistsReturnsOptionalWithPrivateControlPlane() {
+        String privateCloudAccountId = "privateAccountId";
+        String publicCloudAccountId = "publicAccountId";
+        PrivateControlPlane expectedControlPlane = new PrivateControlPlane(); // Assuming PrivateControlPlane is your entity class
+        when(privateControlPlaneRepositoryMock.findByPvcAccountAndPbcAccountId(privateCloudAccountId, publicCloudAccountId))
+                .thenReturn(Optional.of(expectedControlPlane));
+
+        Optional<PrivateControlPlane> result = privateControlPlaneService
+                .getByPrivateCloudAccountIdAndPublicCloudAccountId(privateCloudAccountId, publicCloudAccountId);
+
+        assertTrue(result.isPresent());
+        assertEquals(expectedControlPlane, result.get());
+    }
+
+    @Test
+    void testGetByPrivateCloudAccountIdAndPublicCloudAccountIdWhenNotExistsReturnsEmptyOptional() {
+        String privateCloudAccountId = "privateAccountId";
+        String publicCloudAccountId = "publicAccountId";
+        when(privateControlPlaneRepositoryMock.findByPvcAccountAndPbcAccountId(privateCloudAccountId, publicCloudAccountId))
+                .thenReturn(Optional.empty());
+
+        Optional<PrivateControlPlane> result = privateControlPlaneService
+                .getByPrivateCloudAccountIdAndPublicCloudAccountId(privateCloudAccountId, publicCloudAccountId);
+
+        assertTrue(result.isEmpty());
     }
 
 }

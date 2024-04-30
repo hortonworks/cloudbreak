@@ -77,8 +77,8 @@ class RemoteEnvironmentServiceTest {
         RemoteEnvironmentResponses environmentResponses2 = new RemoteEnvironmentResponses();
         environmentResponses2.setEnvironments(Set.of(environment2));
 
-        when(clusterProxyHybridClientMock.readConfig(eq("CRN1"))).thenReturn(environmentResponses1);
-        when(clusterProxyHybridClientMock.readConfig(eq("CRN2"))).thenReturn(environmentResponses2);
+        when(clusterProxyHybridClientMock.listEnvironments(eq("CRN1"))).thenReturn(environmentResponses1);
+        when(clusterProxyHybridClientMock.listEnvironments(eq("CRN2"))).thenReturn(environmentResponses2);
 
         when(entitlementService.hybridCloudEnabled(anyString())).thenReturn(true);
 
@@ -101,7 +101,7 @@ class RemoteEnvironmentServiceTest {
         when(converterMock.convert(eq(environment1), eq(privateControlPlane1))).thenReturn(response1);
         when(converterMock.convert(eq(environment2), eq(privateControlPlane2))).thenReturn(response2);
 
-        Set<SimpleRemoteEnvironmentResponse> result = remoteEnvironmentService.listRemoteEnvironment("sampleAccountId");
+        Set<SimpleRemoteEnvironmentResponse> result = remoteEnvironmentService.listRemoteEnvironments("sampleAccountId");
 
         assertEquals(2, result.size());
         assertTrue(result.stream()
@@ -120,7 +120,7 @@ class RemoteEnvironmentServiceTest {
     public void testListRemoteEnvironmentWhenEntitlementNotGrantedShouldThrowBadRequest() {
         when(entitlementService.hybridCloudEnabled(anyString())).thenReturn(false);
 
-        Set<SimpleRemoteEnvironmentResponse> responses = remoteEnvironmentService.listRemoteEnvironment("sampleAccountId");
+        Set<SimpleRemoteEnvironmentResponse> responses = remoteEnvironmentService.listRemoteEnvironments("sampleAccountId");
 
         assertEquals(responses.size(), 0);
     }

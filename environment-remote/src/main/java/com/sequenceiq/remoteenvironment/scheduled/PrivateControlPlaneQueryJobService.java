@@ -91,7 +91,7 @@ public class PrivateControlPlaneQueryJobService implements JobSchedulerService {
         return Date.from(
                 ZonedDateTime.now()
                         .toInstant()
-                .plus(Duration.ofMinutes(FIVE_MINUTES)));
+                .plus(Duration.ofMinutes(privateControlPlaneQueryConfig.getDelayedFirstStartInMinutes())));
     }
 
     @Override

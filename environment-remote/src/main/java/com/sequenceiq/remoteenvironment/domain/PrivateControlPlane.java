@@ -33,6 +33,9 @@ public class PrivateControlPlane implements AuthResource, AccountAwareResource {
     private String accountId;
 
     @Column(nullable = false)
+    private String privateCloudAccountId;
+
+    @Column(nullable = false)
     private String url;
 
     @Override
@@ -81,6 +84,14 @@ public class PrivateControlPlane implements AuthResource, AccountAwareResource {
         this.url = url;
     }
 
+    public String getPrivateCloudAccountId() {
+        return privateCloudAccountId;
+    }
+
+    public void setPrivateCloudAccountId(String privateCloudAccountId) {
+        this.privateCloudAccountId = privateCloudAccountId;
+    }
+
     @java.lang.Override
     public java.lang.String toString() {
         return "PrivateControlPlane{" +
@@ -89,6 +100,7 @@ public class PrivateControlPlane implements AuthResource, AccountAwareResource {
                 ", resourceCrn='" + resourceCrn + '\'' +
                 ", url='" + url + '\'' +
                 ", accountId='" + accountId + '\'' +
+                ", privateCloudAccountId='" + privateCloudAccountId + '\'' +
                 '}';
     }
 
@@ -103,11 +115,13 @@ public class PrivateControlPlane implements AuthResource, AccountAwareResource {
         PrivateControlPlane that = (PrivateControlPlane) o;
         return Objects.equals(id, that.id) && Objects.equals(name, that.name)
                 && Objects.equals(resourceCrn, that.resourceCrn)
-                && Objects.equals(accountId, that.accountId) && Objects.equals(url, that.url);
+                && Objects.equals(accountId, that.accountId)
+                && Objects.equals(privateCloudAccountId, that.privateCloudAccountId)
+                && Objects.equals(url, that.url);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, resourceCrn, accountId, url);
+        return Objects.hash(id, name, resourceCrn, accountId, privateCloudAccountId, url);
     }
 }

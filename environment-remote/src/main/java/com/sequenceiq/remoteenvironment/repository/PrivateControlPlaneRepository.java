@@ -31,6 +31,13 @@ public interface PrivateControlPlaneRepository extends AccountAwareResourceRepos
             "AND e.accountId = :accountId")
     List<String> findAllCrnByNameInAndAccountId(@Param("names") Collection<String> names, @Param("accountId") String accountId);
 
+    @Query("SELECT e FROM PrivateControlPlane e " +
+            "WHERE e.accountId = :publicCloudAccountId " +
+            "AND e.privateCloudAccountId = :privateCloudAccountId")
+    Optional<PrivateControlPlane> findByPvcAccountAndPbcAccountId(
+            @Param("privateCloudAccountId") String privateCloudAccountId,
+            @Param("publicCloudAccountId") String publicCloudAccountId);
+
     @Query("SELECT e.id FROM PrivateControlPlane e " +
             "WHERE e.accountId = :accountId " +
             "AND e.resourceCrn = :resourceCrn")

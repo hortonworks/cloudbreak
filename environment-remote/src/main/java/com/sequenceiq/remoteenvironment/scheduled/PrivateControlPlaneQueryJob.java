@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.PvcControlPlaneConfiguration;
+import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.MdcQuartzJob;
@@ -120,9 +122,11 @@ public class PrivateControlPlaneQueryJob extends MdcQuartzJob {
 
             if (registeredControlPlane.isPresent()) {
                 PvcControlPlaneConfiguration pvcControlPlaneConfiguration = registeredControlPlane.get();
-                if (!pvcControlPlaneConfiguration.getName().equals(item.getName()) || !pvcControlPlaneConfiguration.getBaseUrl().equals(item.getUrl())) {
+                if (urlOrNameChanged(item, pvcControlPlaneConfiguration) || emptyPvcAccountId(item)) {
+                    Crn pvcCrn = Crn.fromString(pvcControlPlaneConfiguration.getPvcCrn());
                     item.setName(pvcControlPlaneConfiguration.getName());
                     item.setUrl(pvcControlPlaneConfiguration.getBaseUrl());
+                    item.setPrivateCloudAccountId(pvcCrn.getResource());
                     LOGGER.debug("updating control plane configurations in our database with {} crn because " +
                                     "the data on our side is out of sync name: {} url: {}.",
                             item.getResourceCrn(), item.getName(), item.getUrl());
@@ -130,5 +134,13 @@ public class PrivateControlPlaneQueryJob extends MdcQuartzJob {
                 }
             }
         }
+    }
+
+    private boolean urlOrNameChanged(PrivateControlPlane item, PvcControlPlaneConfiguration pvcControlPlaneConfiguration) {
+        return !pvcControlPlaneConfiguration.getName().equals(item.getName()) || !pvcControlPlaneConfiguration.getBaseUrl().equals(item.getUrl());
+    }
+
+    private boolean emptyPvcAccountId(PrivateControlPlane item) {
+        return Strings.isNullOrEmpty(item.getPrivateCloudAccountId());
     }
 }
