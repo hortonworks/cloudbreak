@@ -40,7 +40,7 @@ public class ImageCatalogService implements AuthorizationResourceCrnProvider {
     public String getResourceCrnByResourceName(String resourceName) {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         ImageCatalogV4Endpoint imageCatalogV4Endpoint = cloudbreakInternalCrnClient.withInternalCrn().imageCatalogV4Endpoint();
-        ImageCatalogV4Response response = imageCatalogV4Endpoint.getByNameInternal(SdxService.WORKSPACE_ID_DEFAULT, resourceName, false, initiatorUserCrn);
+        ImageCatalogV4Response response = imageCatalogV4Endpoint.getByNameInternal(SdxService.WORKSPACE_ID_DEFAULT, resourceName, false, null, initiatorUserCrn);
 
         return response.getCrn();
     }

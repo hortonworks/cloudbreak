@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.testng.util.Strings;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.YarnNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
@@ -49,7 +50,6 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
-import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 
@@ -87,11 +87,6 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     @Override
     public boolean verticalScalingSupported() {
         return yarnProperties.getVerticalScale().isSupported();
-    }
-
-    @Override
-    public String getLatestPreWarmedImageIDByRuntime(TestContext tc, ImageCatalogTestDto dto, CloudbreakClient client, String runtime) {
-        return getLatestDefaultPreWarmedImageByRuntimeVersion(dto, client, CloudPlatform.YARN.name(), false, runtime);
     }
 
     @Override
@@ -171,11 +166,6 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public void setImageId(String id) {
-        yarnProperties.getBaseimage().setImageId(id);
-    }
-
-    @Override
     public void setInstanceTemplateV1Parameters(InstanceTemplateV1Request instanceTemplateV1Request) {
     }
 
@@ -242,21 +232,28 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     @Override
     public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
         return imageCatalog.withName(getImageCatalogName())
-                .withUrl(yarnProperties.getBaseimage().getImageCatalogUrl());
+                .withUrl(yarnProperties.getBaseimage().getImageCatalogUrl())
+                .withoutCleanup();
     }
 
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
-        return imageSettings.withImageId(yarnProperties.getBaseimage().getImageId())
-                .withOs(getOsType().getOs())
-                .withImageCatalog(getImageCatalogName());
+        if (Strings.isNullOrEmpty(imageSettings.getRequest().getId())) {
+            imageSettings.withImageId(yarnProperties.getBaseimage().getImageId())
+                    .withOs(getOsType().getOs())
+                    .withImageCatalog(getImageCatalogName());
+        }
+        return imageSettings;
     }
 
     @Override
     public DistroXImageTestDto imageSettings(DistroXImageTestDto imageSettings) {
-        return imageSettings.withImageId(yarnProperties.getBaseimage().getImageId())
-                .withOs(getOsType().getOs())
-                .withImageCatalog(getImageCatalogName());
+        if (Strings.isNullOrEmpty(imageSettings.getRequest().getId())) {
+            imageSettings.withImageId(yarnProperties.getBaseimage().getImageId())
+                    .withOs(getOsType().getOs())
+                    .withImageCatalog(getImageCatalogName());
+        }
+        return imageSettings;
     }
 
     @Override
@@ -264,23 +261,6 @@ public class YarnCloudProvider extends AbstractCloudProvider {
         // At cloudbreak-default (https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-cb-image-catalog.jsonDelete) catalog we have only
         // Base Image for YCloud provider.
         return throwNotImplementedException();
-    }
-
-    @Override
-    public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        if (yarnProperties.getBaseimage().getImageId() == null || yarnProperties.getBaseimage().getImageId().isEmpty()) {
-            return getLatestDefaultBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.YARN.name(), false);
-        } else {
-            return getLatestBaseImageID();
-        }
-    }
-
-    @Override
-    public String getLatestBaseImageID() {
-        Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
-        Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
-        Log.log(LOGGER, format(" Image ID for SDX create: %s ", yarnProperties.getBaseimage().getImageId()));
-        return yarnProperties.getBaseimage().getImageId();
     }
 
     private <T> T throwNotImplementedException() {

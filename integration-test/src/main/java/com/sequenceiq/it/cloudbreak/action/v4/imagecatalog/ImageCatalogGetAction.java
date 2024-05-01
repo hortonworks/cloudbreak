@@ -15,6 +15,8 @@ public class ImageCatalogGetAction implements Action<ImageCatalogTestDto, Cloudb
 
     private boolean withImages = Boolean.FALSE;
 
+    private Boolean applyVersionBasedFiltering;
+
     public ImageCatalogGetAction() {
     }
 
@@ -22,12 +24,18 @@ public class ImageCatalogGetAction implements Action<ImageCatalogTestDto, Cloudb
         this.withImages = withImages;
     }
 
+    public ImageCatalogGetAction(boolean withImages, boolean applyVersionBasedFiltering) {
+        this.withImages = withImages;
+        this.applyVersionBasedFiltering = applyVersionBasedFiltering;
+    }
+
     @Override
     public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         Log.when(LOGGER, "Get Imagecatalog by name: " + testDto.getRequest().getName());
         try {
             testDto.setResponse(
-                    cloudbreakClient.getDefaultClient().imageCatalogV4Endpoint().getByName(cloudbreakClient.getWorkspaceId(), testDto.getName(), withImages)
+                    cloudbreakClient.getDefaultClient().imageCatalogV4Endpoint()
+                            .getByName(cloudbreakClient.getWorkspaceId(), testDto.getName(), withImages, applyVersionBasedFiltering)
             );
             Log.whenJson(LOGGER, "Imagecatalog has been fetched successfully: ", testDto.getRequest());
         } catch (Exception e) {

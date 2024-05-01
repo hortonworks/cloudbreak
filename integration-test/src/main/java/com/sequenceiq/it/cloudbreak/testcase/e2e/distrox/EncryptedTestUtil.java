@@ -170,8 +170,6 @@ public class EncryptedTestUtil {
         testContext.given(FreeIpaTestDto.class)
                 .withEnvironment()
                 .withTelemetry("telemetry")
-                .withCatalog(commonCloudProperties.getImageValidation().getFreeIpaImageCatalog(),
-                        commonCloudProperties.getImageValidation().getFreeIpaImageUuid())
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
                 .awaitForHealthyInstances();

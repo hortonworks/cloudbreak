@@ -38,8 +38,6 @@ public class AwsProperties {
 
     private final Credential credential = new Credential();
 
-    private final Baseimage baseimage = new Baseimage();
-
     private final Cloudstorage cloudstorage = new Cloudstorage();
 
     private final DiskEncryption diskEncryption = new DiskEncryption();
@@ -138,10 +136,6 @@ public class AwsProperties {
 
     public Credential getCredential() {
         return credential;
-    }
-
-    public Baseimage getBaseimage() {
-        return baseimage;
     }
 
     public Cloudstorage getCloudStorage() {
@@ -261,18 +255,6 @@ public class AwsProperties {
         public void setSecretKey(String secretKey) {
             this.secretKey = secretKey;
         }
-    }
-
-    public static class Baseimage {
-        private String imageId;
-
-        public String getImageId() {
-                return imageId;
-            }
-
-        public void setImageId(String imageId) {
-                this.imageId = imageId;
-            }
     }
 
     public static class Cloudstorage {

@@ -79,8 +79,8 @@ integrationtest:
   imageCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-dev-cb-image-catalog.json
   gatewayPort: null
   imageValidation:
-    sourceCatalogName: v3-dev
-    sourceCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-dev-cb-image-catalog.json
+    sourceCatalogName:
+    sourceCatalogUrl:
   baseImageTest:
     sourceCatalogName: v3-test
     sourceCatalogUrl: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-cb-image-catalog.json

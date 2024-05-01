@@ -27,7 +27,7 @@ public class ImageCatalogCreateIfNotExistsAction implements Action<ImageCatalogT
             Log.when(LOGGER, "Cannot create Imagecatalog, fetch existed one: " + testDto.getRequest().getName());
             testDto.setResponse(
                     client.getDefaultClient().imageCatalogV4Endpoint()
-                            .getByName(client.getWorkspaceId(), testDto.getRequest().getName(), Boolean.FALSE));
+                            .getByName(client.getWorkspaceId(), testDto.getRequest().getName(), Boolean.FALSE, Boolean.FALSE));
             Log.whenJson(LOGGER, "Imagecatalog fetched successfully: ", testDto.getRequest());
         }
         if (testDto.getResponse() == null) {

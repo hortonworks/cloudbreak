@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.mock.MockProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
@@ -30,6 +31,9 @@ public abstract class AbstractMockTest extends AbstractIntegrationTest {
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
+
+    @Inject
+    private MockProperties mockProperties;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -63,9 +67,10 @@ public abstract class AbstractMockTest extends AbstractIntegrationTest {
      */
     protected void createEnvironmentWithFreeIpa(TestContext testContext) {
         String freeIpaImageCatalogUrl = testContext.getCloudProvider().getFreeIpaImageCatalogUrl();
-        String latestBaseImageID = testContext.getCloudProvider().getLatestBaseImageID();
-        testContext.given(EnvironmentTestDto.class)
-                .withFreeIpaImage(freeIpaImageCatalogUrl, latestBaseImageID)
+        String imageId = mockProperties.getBaseimage().getRedhat7().getImageId();
+        testContext
+                .given(EnvironmentTestDto.class)
+                    .withFreeIpaImage(freeIpaImageCatalogUrl, imageId)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe())

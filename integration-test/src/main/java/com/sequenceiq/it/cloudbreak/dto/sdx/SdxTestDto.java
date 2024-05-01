@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Clue;
 import com.sequenceiq.it.cloudbreak.context.Investigable;
@@ -85,6 +86,9 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     @Inject
     private CommonClusterManagerProperties commonClusterManagerProperties;
 
+    @Inject
+    private CommonCloudProperties commonCloudProperties;
+
     public SdxTestDto(TestContext testContex) {
         super(new SdxClusterRequest(), testContex);
     }
@@ -96,7 +100,8 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
                 .withClusterShape(getCloudProvider().getClusterShape())
                 .withTags(getCloudProvider().getTags())
                 .withRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion())
-                .withEnableMultiAz(getCloudProvider().isMultiAZ());
+                .withEnableMultiAz(getCloudProvider().isMultiAZ())
+                .withImageValidationCatalogAndImageIfPresent();
         return getCloudProvider().sdx(this);
     }
 
@@ -449,10 +454,14 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     }
 
     public SdxTestDto withMarketplaceUpgradeCatalogAndImage(String imgCatalogKey) {
-        return withCatalog(imgCatalogKey, getCloudProvider().getSdxMarketplaceUpgradeImageId());
+        return withImage(imgCatalogKey, getCloudProvider().getSdxMarketplaceUpgradeImageId());
     }
 
-    public SdxTestDto withCatalog(String imageCatalog, String imageUuid) {
+    public SdxTestDto withImageValidationCatalogAndImageIfPresent() {
+        return withImage(commonCloudProperties.getImageValidation().getSourceCatalogName(), commonCloudProperties.getImageValidation().getImageUuid());
+    }
+
+    public SdxTestDto withImage(String imageCatalog, String imageUuid) {
         if (!Strings.isNullOrEmpty(imageCatalog) && !Strings.isNullOrEmpty(imageUuid)) {
             LOGGER.info("Using catalog [{}] and image [{}] for creating SDX", imageCatalog, imageUuid);
             ImageSettingsV4Request imageSettingsRequest = new ImageSettingsV4Request();

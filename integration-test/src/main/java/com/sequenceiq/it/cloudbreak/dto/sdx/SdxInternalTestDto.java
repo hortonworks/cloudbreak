@@ -29,6 +29,7 @@ import jakarta.ws.rs.NotFoundException;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.testng.util.Strings;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
@@ -46,6 +47,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Clue;
 import com.sequenceiq.it.cloudbreak.context.Investigable;
@@ -103,6 +105,9 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     @Inject
     private CommonClusterManagerProperties commonClusterManagerProperties;
 
+    @Inject
+    private CommonCloudProperties commonCloudProperties;
+
     private String sdxMasterPrivateIp;
 
     public SdxInternalTestDto(TestContext testContext) {
@@ -115,7 +120,8 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 .withDefaultSDXSettings()
                 .withClusterShape(getCloudProvider().getInternalClusterShape())
                 .withTags(getCloudProvider().getTags())
-                .withEnableMultiAz(getCloudProvider().isMultiAZ());
+                .withEnableMultiAz(getCloudProvider().isMultiAZ())
+                .withImageValidationCatalogAndImageIfPresent();
         EnvironmentTestDto environmentTestDto = getTestContext().get(EnvironmentTestDto.class);
 
         if (environmentTestDto != null && environmentTestDto.getResponse() != null) {
@@ -342,11 +348,20 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     public SdxInternalTestDto withImageCatalogNameAndImageId(String imageCatalogName, String imageId) {
-        ImageSettingsV4Request image = new ImageSettingsV4Request();
-        image.setCatalog(imageCatalogName);
-        image.setId(imageId);
-        getRequest().getStackV4Request().setImage(image);
+        if (!Strings.isNullOrEmpty(imageCatalogName) && !Strings.isNullOrEmpty(imageId)) {
+            ImageSettingsV4Request image = new ImageSettingsV4Request();
+            image.setCatalog(imageCatalogName);
+            image.setId(imageId);
+            getRequest().getStackV4Request().setImage(image);
+        } else {
+            LOGGER.warn("Catalog [{}] or image [{}] is null or empty", imageCatalogName, imageId);
+        }
         return this;
+    }
+
+    public SdxInternalTestDto withImageValidationCatalogAndImageIfPresent() {
+        return withImageCatalogNameAndImageId(commonCloudProperties.getImageValidation().getSourceCatalogName(),
+                commonCloudProperties.getImageValidation().getImageUuid());
     }
 
     public SdxInternalTestDto withEnableMultiAz(boolean enableMultiAz) {
