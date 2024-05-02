@@ -135,7 +135,6 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     }
 
     protected void initiateDatalakeCreation(TestContext testContext) {
-        createDefaultImageCatalog(testContext);
         testContext
                 .given(SdxInternalTestDto.class)
                     .withCloudStorage(getCloudStorageRequest(testContext))
@@ -146,8 +145,6 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     }
 
     protected void initiateDatalakeCreationWithAutoTlsAndExternalDb(TestContext testContext) {
-        createDefaultImageCatalog(testContext);
-
         SdxDatabaseRequest databaseRequest = new SdxDatabaseRequest();
         databaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
 
@@ -171,8 +168,6 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     }
 
     protected void createDatalakeWithoutDatabase(TestContext testContext) {
-        createDefaultImageCatalog(testContext);
-
         SdxDatabaseRequest database = new SdxDatabaseRequest();
         database.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
         database.setCreate(false);

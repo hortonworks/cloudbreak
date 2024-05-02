@@ -19,12 +19,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -113,18 +113,48 @@ public class CmTemplateValidatorTest {
                 .validate(blueprint, hostGroups, instanceGroups, true));
     }
 
-    @Test
-    public void testDownscaleValidationIfKafkaPresentedThenShouldThrowBadRequest() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testDownscaleValidationIfKafkaPresentedThenShouldThrowBadRequest(boolean forced) {
         Blueprint blueprint = readBlueprint("input/kafka.bp");
 
         String hostGroup = "broker";
         ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
         clouderaManagerRepo.setVersion("7.0.0");
 
-        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+        if (!forced) {
+            when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+        }
 
-        assertThrows(BadRequestException.class, () -> subject
-                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -1, List.of()));
+        if (forced) {
+            assertDoesNotThrow(() -> subject
+                    .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -1, List.of(), true));
+        } else {
+            assertThrows(BadRequestException.class, () -> subject
+                    .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -1, List.of(), false));
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testDownscaleValidationIfInstanceGroupAdjustmentsAndKafkaPresentedThenShouldThrowBadRequest(boolean forced) {
+        Blueprint blueprint = readBlueprint("input/kafka.bp");
+
+        String hostGroup = "broker";
+        ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
+        clouderaManagerRepo.setVersion("7.0.0");
+
+        if (!forced) {
+            when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+        }
+
+        if (forced) {
+            assertDoesNotThrow(() -> subject
+                    .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Map.of(hostGroup, -1), Optional.of(clouderaManagerRepo), List.of(), true));
+        } else {
+            assertThrows(BadRequestException.class, () -> subject
+                    .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Map.of(hostGroup, -1), Optional.of(clouderaManagerRepo), List.of(), false));
+        }
     }
 
     @Test
@@ -138,21 +168,29 @@ public class CmTemplateValidatorTest {
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
         assertDoesNotThrow(() -> subject
-                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -1, List.of()));
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -1, List.of(), false));
     }
 
-    @Test
-    public void testUpscaleValidationIfKafkaPresentedThenValidationShouldThrowBadRequest() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testUpscaleValidationIfKafkaPresentedThenValidationShouldThrowBadRequest(boolean forced) {
         Blueprint blueprint = readBlueprint("input/kafka.bp");
 
         String hostGroup = "broker";
         ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
         clouderaManagerRepo.setVersion("7.0.0");
 
-        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+        if (!forced) {
+            when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+        }
 
-        assertThrows(BadRequestException.class, () -> subject
-                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of()));
+        if (forced) {
+            assertDoesNotThrow(() -> subject
+                    .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of(), true));
+        } else {
+            assertThrows(BadRequestException.class, () -> subject
+                    .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of(), false));
+        }
     }
 
     @Test
@@ -166,21 +204,29 @@ public class CmTemplateValidatorTest {
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
         assertDoesNotThrow(() -> subject
-                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of()));
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of(), false));
     }
 
-    @Test
-    public void testValidationIfNifiPresentedAndDownScaleThenValidationShouldThrowException() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testValidationIfNifiPresentedAndDownScaleThenValidationShouldThrowException(boolean forced) {
         Blueprint blueprint = readBlueprint("input/nifi.bp");
 
         String hostGroup = "master";
         ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
         clouderaManagerRepo.setVersion("7.0.0");
 
-        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+        if (!forced) {
+            when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+        }
 
-        assertThrows(BadRequestException.class, () -> subject
-                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of()));
+        if (forced) {
+            assertDoesNotThrow(() -> subject
+                    .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of(), true));
+        } else {
+            assertThrows(BadRequestException.class, () -> subject
+                    .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of(), false));
+        }
     }
 
     @Test
@@ -194,7 +240,7 @@ public class CmTemplateValidatorTest {
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
         assertDoesNotThrow(() -> subject
-                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of()));
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of(), false));
     }
 
     @Test
@@ -208,11 +254,11 @@ public class CmTemplateValidatorTest {
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
         assertThrows(BadRequestException.class, () -> subject
-                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of()));
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of(), false));
     }
 
     @Test
-    public void testValidationIfNifi726PresentedAndUpScaleThenValidationShouldNotThrowBecauseTheBPVersionIsHigher() {
+    public void testValidationIfNifi726PresentedAndUpScaleThenValidationShouldThrowBecauseTheBPVersionIsLower() {
         Blueprint blueprint = readBlueprint("input/nifi_7_2_6.bp");
 
         String hostGroup = "master";
@@ -222,7 +268,7 @@ public class CmTemplateValidatorTest {
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
         assertThrows(BadRequestException.class, () -> subject
-                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of()));
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of(), false));
     }
 
     @Test
@@ -236,7 +282,7 @@ public class CmTemplateValidatorTest {
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
         assertDoesNotThrow(() -> subject
-                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of()));
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of(), false));
     }
 
     @Test
@@ -250,21 +296,29 @@ public class CmTemplateValidatorTest {
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
         assertDoesNotThrow(() -> subject
-                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of()));
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of(), false));
     }
 
-    @Test
-    public void testValidationIfNifiPresentedAndUpScaleThenValidationShouldThrowException() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testValidationIfNifiPresentedAndUpScaleThenValidationShouldThrowException(boolean forced) {
         Blueprint blueprint = readBlueprint("input/nifi.bp");
 
         String hostGroup = "master";
         ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
         clouderaManagerRepo.setVersion("7.0.0");
 
-        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+        if (!forced) {
+            when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+        }
 
-        assertThrows(BadRequestException.class, () -> subject
-                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of()));
+        if (forced) {
+            assertDoesNotThrow(() -> subject
+                    .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of(), true));
+        } else {
+            assertThrows(BadRequestException.class, () -> subject
+                    .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of(), false));
+        }
     }
 
     @Test
@@ -278,21 +332,29 @@ public class CmTemplateValidatorTest {
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
         assertDoesNotThrow(() -> subject
-                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of()));
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of(), false));
     }
 
-    @Test
-    public void testValidationIfKafkaUpgradedTo7211PresentedAndUpScaleThenValidationShouldThrowError() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testValidationIfKafkaUpgradedTo7211PresentedAndUpScaleThenValidationShouldThrowError(boolean forced) {
         Blueprint blueprint = readBlueprint("input/kafka.bp");
 
         String hostGroup = "broker";
         ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
         clouderaManagerRepo.setVersion("7.2.11");
 
-        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+        if (!forced) {
+            when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+        }
 
-        assertThrows(BadRequestException.class, () -> subject
-                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, +1, List.of()));
+        if (forced) {
+            assertDoesNotThrow(() -> subject
+                    .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, +1, List.of(), true));
+        } else {
+            assertThrows(BadRequestException.class, () -> subject
+                    .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, +1, List.of(), false));
+        }
     }
 
     @Test
@@ -306,7 +368,7 @@ public class CmTemplateValidatorTest {
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
         assertDoesNotThrow(() -> subject
-                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, +1, List.of()));
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, +1, List.of(), false));
     }
 
     @Test
@@ -320,21 +382,29 @@ public class CmTemplateValidatorTest {
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
         assertDoesNotThrow(() -> subject
-                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of()));
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of(), false));
     }
 
-    @Test
-    public void testValidationIfKafka7212WithoutCruiseControlPresentedAndDownScaleThenValidationShouldThrowError() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testValidationIfKafka7212WithoutCruiseControlPresentedAndDownScaleThenValidationShouldThrowError(boolean forced) {
         Blueprint blueprint = readBlueprint("input/kafka-no-cc_7_2_12.bp");
 
         String hostGroup = "broker";
         ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
         clouderaManagerRepo.setVersion("7.2.12");
 
-        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+        if (!forced) {
+            when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+        }
 
-        assertThrows(BadRequestException.class, () -> subject
-                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of()));
+        if (forced) {
+            assertDoesNotThrow(() -> subject
+                    .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of(), true));
+        } else {
+            assertThrows(BadRequestException.class, () -> subject
+                    .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of(), false));
+        }
     }
 
     @Test
@@ -353,7 +423,7 @@ public class CmTemplateValidatorTest {
         worker.setInstanceMetaData(Set.of(new InstanceMetaData()));
 
         subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint,
-                Optional.of(clouderaManagerRepo), hostGroup, -2, Set.of(compute, worker));
+                Optional.of(clouderaManagerRepo), hostGroup, -2, Set.of(compute, worker), false);
     }
 
     @Test
@@ -372,7 +442,7 @@ public class CmTemplateValidatorTest {
         worker.setInstanceMetaData(Set.of());
 
         subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint,
-                Optional.of(clouderaManagerRepo), hostGroup, -2, Set.of(compute, worker));
+                Optional.of(clouderaManagerRepo), hostGroup, -2, Set.of(compute, worker), false);
     }
 
     @ParameterizedTest
@@ -389,9 +459,9 @@ public class CmTemplateValidatorTest {
         Mockito.lenient().when(processor.getComponentsByHostGroup()).thenReturn(componentsByHostGroup);
         Optional<ClouderaManagerProduct> product = Optional.of(clouderaManagerRepo);
         if (!allowUpscale) {
-            Throwable exception = Assertions.assertThrows(BadRequestException.class,
+            Throwable exception = assertThrows(BadRequestException.class,
                     () -> subject.validateBlackListedScalingRoles(ACCOUNT_ID, processor, hostGroup, 1, product));
-            assertEquals(String.format("'KAFKA_BROKER' service is not enabled to scaling up until CDP 7.2.12", version), exception.getMessage());
+            assertEquals("'KAFKA_BROKER' service is not enabled to scaling up until CDP 7.2.12", exception.getMessage());
         } else {
             subject.validateBlackListedScalingRoles(ACCOUNT_ID, processor, hostGroup, 1, product);
         }
@@ -419,7 +489,8 @@ public class CmTemplateValidatorTest {
         worker.setInstanceMetaData(Set.of());
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () ->
-                subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -3, List.of(compute, worker)));
+                subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -3, List.of(compute, worker),
+                        false));
         assertEquals("Scaling adjustment is not allowed. NODEMANAGER role must be present on 1 host(s) but after the scaling operation 0 host(s) " +
                         "would have this role. Based on the template this role is present on the compute, worker host group(s).",
                 badRequestException.getMessage());
