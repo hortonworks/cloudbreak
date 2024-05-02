@@ -171,20 +171,21 @@ public class UpdateNodeCountValidator {
     }
 
     public void validateServiceRoles(StackDto stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
-        validateServiceRoles(stack, instanceGroupAdjustmentJson.getInstanceGroup(), instanceGroupAdjustmentJson.getScalingAdjustment());
+        validateServiceRoles(stack, instanceGroupAdjustmentJson.getInstanceGroup(), instanceGroupAdjustmentJson.getScalingAdjustment(), false);
     }
 
-    public void validateServiceRoles(StackDto stack, Map<String, Integer> instanceGroupAdjustments) {
+    public void validateServiceRoles(StackDto stack, Map<String, Integer> instanceGroupAdjustments, boolean forced) {
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
         cmTemplateValidator.validateHostGroupScalingRequest(
                 accountId,
                 stack.getBlueprint(),
                 instanceGroupAdjustments,
                 clusterComponentConfigProvider.getNormalizedCdhProductWithNormalizedVersion(stack.getCluster().getId()),
-                instanceGroupService.findNotTerminatedByStackId(stack.getId()));
+                instanceGroupService.findNotTerminatedByStackId(stack.getId()),
+                forced);
     }
 
-    public void validateServiceRoles(StackDto stack, String instanceGroup, int scalingAdjustment) {
+    public void validateServiceRoles(StackDto stack, String instanceGroup, int scalingAdjustment, boolean forced) {
         if (hostGroupService.hasHostGroupInCluster(stack.getCluster().getId(), instanceGroup)) {
             String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
             cmTemplateValidator.validateHostGroupScalingRequest(
@@ -193,7 +194,8 @@ public class UpdateNodeCountValidator {
                     clusterComponentConfigProvider.getNormalizedCdhProductWithNormalizedVersion(stack.getCluster().getId()),
                     instanceGroup,
                     scalingAdjustment,
-                    instanceGroupService.findNotTerminatedByStackId(stack.getId()));
+                    instanceGroupService.findNotTerminatedByStackId(stack.getId()),
+                    forced);
         }
     }
 
