@@ -185,7 +185,8 @@ public class ClusterCommonService {
                     clusterComponentConfigProvider.getNormalizedCdhProductWithNormalizedVersion(stack.getCluster().getId()),
                     hostGroupName,
                     updateJson.getHostGroupAdjustment().getScalingAdjustment(),
-                    instanceGroupService.findNotTerminatedByStackId(stack.getId()));
+                    instanceGroupService.findNotTerminatedByStackId(stack.getId()),
+                    false);
         }
         return clusterOperationService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
     }

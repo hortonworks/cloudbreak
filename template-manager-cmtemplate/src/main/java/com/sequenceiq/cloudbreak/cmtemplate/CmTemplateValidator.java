@@ -65,17 +65,21 @@ public class CmTemplateValidator implements BlueprintValidator {
     @Override
     public void validateHostGroupScalingRequest(String accountId, Blueprint blueprint, Optional<ClouderaManagerProduct> cdhProduct,
             String hostGroupName, Integer adjustment,
-            Collection<InstanceGroup> instanceGroups) {
-        validateHostGroupScalingRequest(accountId, blueprint, Map.of(hostGroupName, adjustment), cdhProduct, instanceGroups);
+            Collection<InstanceGroup> instanceGroups, boolean forced) {
+        validateHostGroupScalingRequest(accountId, blueprint, Map.of(hostGroupName, adjustment), cdhProduct, instanceGroups, forced);
     }
 
     public void validateHostGroupScalingRequest(String accountId, Blueprint blueprint, Map<String, Integer> instanceGroupAdjustments,
-            Optional<ClouderaManagerProduct> cdhProduct, Collection<InstanceGroup> instanceGroups) {
+            Optional<ClouderaManagerProduct> cdhProduct, Collection<InstanceGroup> instanceGroups, boolean forced) {
         CmTemplateProcessor templateProcessor = processorFactory.get(blueprint.getBlueprintJsonText());
         validateRequiredRoleCountInCluster(instanceGroupAdjustments, instanceGroups, templateProcessor);
-        instanceGroupAdjustments.forEach((hostGroupName, adjustment) -> {
-            validateBlackListedScalingRoles(accountId, templateProcessor, hostGroupName, adjustment, cdhProduct);
-        });
+        if (forced) {
+            LOGGER.info("Host group scaling uses forced == true. Skipping validation of black listed roles.");
+        } else {
+            instanceGroupAdjustments.forEach((hostGroupName, adjustment) -> {
+                validateBlackListedScalingRoles(accountId, templateProcessor, hostGroupName, adjustment, cdhProduct);
+            });
+        }
     }
 
     public boolean isVersionEnablesScaling(Versioned blueprintVersion, BlackListedScaleRole role) {
