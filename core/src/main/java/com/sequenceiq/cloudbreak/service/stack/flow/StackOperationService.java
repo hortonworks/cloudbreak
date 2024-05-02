@@ -131,7 +131,7 @@ public class StackOperationService {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack.getStack());
         String instanceGroupName = metaData.getInstanceGroupName();
         int scalingAdjustment = -1;
-        updateNodeCountValidator.validateServiceRoles(stack, instanceGroupName, scalingAdjustment);
+        updateNodeCountValidator.validateServiceRoles(stack, instanceGroupName, scalingAdjustment, forced);
         if (!forced) {
             updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, instanceGroupName, scalingAdjustment);
             updateNodeCountValidator.validateScalingAdjustment(instanceGroupName, scalingAdjustment, stack);
@@ -147,7 +147,7 @@ public class StackOperationService {
         }
         updateNodeCountValidator.validateServiceRoles(stack, instanceIdsByHostgroupMap.entrySet()
                 .stream()
-                .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().size() * -1)));
+                .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().size() * -1)), forced);
         if (!forced) {
             for (Map.Entry<String, Set<Long>> entry : instanceIdsByHostgroupMap.entrySet()) {
                 String instanceGroupName = entry.getKey();
@@ -188,7 +188,7 @@ public class StackOperationService {
         LOGGER.info("InstanceIds without metadata: [{}]", instanceIdsWithoutMetadata);
         updateNodeCountValidator.validateServiceRoles(stackDto, instanceIdsByHostgroupMap.entrySet()
                 .stream()
-                .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().size() * -1)));
+                .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().size() * -1)), forced);
         updateNodeCountValidator.validateInstanceGroupForStopStart(stackDto, instanceIdsByHostgroupMap.keySet().iterator().next(),
                 instanceIdsByHostgroupMap.entrySet().iterator().next().getValue().size() * -1);
         LOGGER.info("Stopping the following instances: {}", instanceIdsByHostgroupMap);

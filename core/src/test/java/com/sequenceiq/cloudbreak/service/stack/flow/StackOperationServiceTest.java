@@ -38,7 +38,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -88,10 +90,6 @@ public class StackOperationServiceTest {
     private static final RotateSaltPasswordReason REASON = RotateSaltPasswordReason.MANUAL;
 
     private static final long STACK_ID = 9876L;
-
-    private static final String CRN = "crn:cdp:datahub:us-west-1:tenant:cluster:878605d9-f9e9-44c6-9da6-e4bce9570ef5";
-
-    private static final String TEST_BLUEPRINT_TEXT = "blueprintText";
 
     @InjectMocks
     private StackOperationService underTest;
@@ -152,6 +150,9 @@ public class StackOperationServiceTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Captor
+    private ArgumentCaptor<Map<String, Set<Long>>> capturedInstances;
 
     @Test
     public void testStartWhenStackAvailable() {
@@ -214,7 +215,7 @@ public class StackOperationServiceTest {
     @Test
     public void testStartWhenStackStopFailed() {
         Stack stack = new Stack();
-        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.STOP_FAILED));
+        stack.setStackStatus(new StackStatus(stack, STOP_FAILED));
         stack.setId(1L);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
@@ -395,8 +396,9 @@ public class StackOperationServiceTest {
         );
     }
 
-    @Test
-    public void testRemoveInstances() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void testRemoveInstances(boolean forced) {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
@@ -417,19 +419,21 @@ public class StackOperationServiceTest {
         doReturn(im2).when(updateNodeCountValidator).validateInstanceForDownscale(im2.getInstanceId(), stack);
         doReturn(im3).when(updateNodeCountValidator).validateInstanceForDownscale(im3.getInstanceId(), stack);
 
-        doNothing().when(updateNodeCountValidator).validateServiceRoles(any(), anyMap());
-        doNothing().when(updateNodeCountValidator).validateScalabilityOfInstanceGroup(any(), anyString(), anyInt());
+        doNothing().when(updateNodeCountValidator).validateServiceRoles(any(), anyMap(), eq(forced));
+        if (!forced) {
+            doNothing().when(updateNodeCountValidator).validateScalabilityOfInstanceGroup(any(), anyString(), anyInt());
+        }
         doNothing().when(updateNodeCountValidator).validateInstanceGroupForStopStart(any(), anyString(), anyInt());
         doNothing().when(updateNodeCountValidator).validateInstanceGroup(any(), anyString());
-        doNothing().when(updateNodeCountValidator).validateScalingAdjustment(anyString(), anyInt(), any());
+        if (!forced) {
+            doNothing().when(updateNodeCountValidator).validateScalingAdjustment(anyString(), anyInt(), any());
+        }
 
-        ArgumentCaptor<Map<String, Set<Long>>> capturedInstances;
         Map<String, Set<Long>> captured;
 
         // Verify non stop-start invocation
-        capturedInstances = ArgumentCaptor.forClass(Map.class);
-        underTest.removeInstances(stackDto, instanceIds, false);
-        verify(flowManager).triggerStackRemoveInstances(eq(stack.getId()), capturedInstances.capture(), eq(false));
+        underTest.removeInstances(stackDto, instanceIds, forced);
+        verify(flowManager).triggerStackRemoveInstances(eq(stack.getId()), capturedInstances.capture(), eq(forced));
         captured = capturedInstances.getValue();
         assertEquals(1, captured.size());
         assertEquals("group1", captured.keySet().iterator().next());
@@ -442,41 +446,63 @@ public class StackOperationServiceTest {
 
         // Verify stop-start invocation
         reset(flowManager);
-        capturedInstances = ArgumentCaptor.forClass(Map.class);
-        underTest.stopInstances(stackDto, instanceIds, false);
-        verify(flowManager).triggerStopStartStackDownscale(eq(stack.getId()), capturedInstances.capture(), eq(false));
+        underTest.stopInstances(stackDto, instanceIds, forced);
+        verify(flowManager).triggerStopStartStackDownscale(eq(stack.getId()), capturedInstances.capture(), eq(forced));
         captured = capturedInstances.getValue();
         assertEquals(1, captured.size());
         assertEquals("group1", captured.keySet().iterator().next());
         assertEquals(3, captured.entrySet().iterator().next().getValue().size());
 
         // No requestIds sent - BadRequest stopstart
-        assertThatThrownBy(() -> underTest.stopInstances(stackDto, null, false))
+        assertThatThrownBy(() -> underTest.stopInstances(stackDto, null, forced))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Stop request cannot process an empty instanceIds collection");
 
-        // stopstart supports a single hostGroup only
+        // Stop-start supports a single hostGroup only
         reset(flowManager);
         InstanceMetaData im4 = createInstanceMetadataForTest(4L, "group2");
         doReturn(im4).when(updateNodeCountValidator).validateInstanceForStop(im4.getInstanceId(), stack);
         instanceIds.add("i4");
-        assertThatThrownBy(() -> underTest.stopInstances(stackDto, instanceIds, false))
+        assertThatThrownBy(() -> underTest.stopInstances(stackDto, instanceIds, forced))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Downscale via Instance Stop cannot process more than one host group");
 
         // regular scaling supports multiple hostgroups
         reset(flowManager);
         doReturn(im4).when(updateNodeCountValidator).validateInstanceForDownscale(im4.getInstanceId(), stack);
-        underTest.removeInstances(stackDto, instanceIds, false);
+        underTest.removeInstances(stackDto, instanceIds, forced);
         verify(stackUpdater).updateStackStatus(eq(stack.getId()), eq(DetailedStackStatus.DOWNSCALE_REQUESTED),
                 eq("Requested node count for downscaling: 3, instance group(s): [group1]"));
-        verify(flowManager).triggerStackRemoveInstances(eq(stack.getId()), capturedInstances.capture(), eq(false));
+        verify(flowManager).triggerStackRemoveInstances(eq(stack.getId()), capturedInstances.capture(), eq(forced));
         captured = capturedInstances.getValue();
         assertEquals(2, captured.size());
         assertTrue(captured.containsKey("group1"));
         assertTrue(captured.containsKey("group2"));
         assertEquals(3, captured.get("group1").size());
         assertEquals(1, captured.get("group2").size());
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void removeInstanceTest(boolean forced) {
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getId()).thenReturn(STACK_ID);
+        when(stackDto.getStack()).thenReturn(stack);
+
+        InstanceMetaData im = createInstanceMetadataForTest(1L, "group1");
+        when(updateNodeCountValidator.validateInstanceForDownscale(im.getInstanceId(), stack)).thenReturn(im);
+
+        underTest.removeInstance(stackDto, im.getInstanceId(), forced);
+
+        verify(updateNodeCountValidator).validateServiceRoles(stackDto, "group1", -1, forced);
+        verify(flowManager).triggerStackRemoveInstance(stack.getId(), "group1", 1L, forced);
+        if (!forced) {
+            verify(updateNodeCountValidator).validateScalabilityOfInstanceGroup(stackDto, "group1", -1);
+            verify(updateNodeCountValidator).validateScalingAdjustment("group1", -1, stackDto);
+        }
     }
 
     @Test
