@@ -10,10 +10,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
+import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
+import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
+import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
+import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
 @Component
 public class SdxUpgradeDatabaseTestUtil {
@@ -40,11 +47,10 @@ public class SdxUpgradeDatabaseTestUtil {
     @Inject
     private SshJClientActions sshJClientActions;
 
-    public SdxTestDto checkEmbeddedDatabaseVersionFromMasterNode(TestContext tc, SdxTestDto testDto) {
-        return checkDatabaseVersionFromMasterNode(tc, testDto, EMBEDDED_DBSERVER_VERSION_CMD, testDto.getResponse().getDatabaseEngineVersion());
-    }
+    @Inject
+    private CommonClusterManagerProperties commonClusterManagerProperties;
 
-    public SdxTestDto checkDbEngineVersionIsUpdated(String targetDatabaseMajorVersion, SdxTestDto testDto) {
+    public <T extends AbstractSdxTestDto<?, SdxClusterDetailResponse, ?>> T checkDbEngineVersionIsUpdated(String targetDatabaseMajorVersion, T testDto) {
         String actualDatabaseMajorVersion = testDto.getResponse().getDatabaseEngineVersion();
         if (!targetDatabaseMajorVersion.equals(actualDatabaseMajorVersion)) {
             String errorMsg = String.format("Datalake's database engine version is wrong: %s, expected: %s",
@@ -55,23 +61,63 @@ public class SdxUpgradeDatabaseTestUtil {
         return testDto;
     }
 
-    public SdxTestDto checkCloudProviderDatabaseVersionFromMasterNode(String targetDatabaseMajorVersion, TestContext tc, SdxTestDto testDto) {
-        String command = tc.getCloudProvider().isExternalDatabaseSslEnforcementSupported() ? DBSERVER_VERSION_CMD_SSL : DBSERVER_VERSION_CMD;
-        return checkDatabaseVersionFromMasterNode(tc, testDto, command, targetDatabaseMajorVersion);
+    public <T extends AbstractSdxTestDto<?, SdxClusterDetailResponse, ?>> T checkCloudProviderDatabaseVersionFromMasterNode(
+            String databaseMajorVersion, TestContext tc, T testDto) {
+        SdxDatabaseAvailabilityType availabilityType = testDto.getResponse().getSdxDatabaseResponse().getAvailabilityType();
+        List<InstanceGroupV4Response> instanceGroups = testDto.getResponse().getStackV4Response().getInstanceGroups();
+        return SdxDatabaseAvailabilityType.hasExternalDatabase(availabilityType)
+                ? checkExternalDatabaseVersionFromMasterNode(tc, testDto, instanceGroups, databaseMajorVersion)
+                : checkEmbeddedDatabaseVersionFromMasterNode(tc, testDto, instanceGroups, databaseMajorVersion);
     }
 
-    private SdxTestDto checkDatabaseVersionFromMasterNode(TestContext tc, SdxTestDto testDto, String checkCmd, String targetDatabaseMajorVersion) {
-        Map<String, Pair<Integer, String>> dbVersions = sshJClientActions.executeSshCommandOnPrimaryGateways(
-                testDto.getResponse().getStackV4Response().getInstanceGroups(), checkCmd, false);
+    private <T extends CloudbreakTestDto> T checkEmbeddedDatabaseVersionFromMasterNode(
+            TestContext tc, T testDto, List<InstanceGroupV4Response> instanceGroups, String databaseMajorVersion) {
+        Map<String, Boolean> serviceStatusesByName = Map.of(
+                "postgresql-10", "10".equals(databaseMajorVersion),
+                "postgresql-11", "11".equals(databaseMajorVersion),
+                "postgresql-14", "14".equals(databaseMajorVersion)
+        );
+        sshJClientActions.checkSystemctlServiceStatus(
+                testDto, instanceGroups, List.of(HostGroupType.MASTER.getName()), serviceStatusesByName);
+        return checkDatabaseVersionFromMasterNode(testDto, instanceGroups, databaseMajorVersion, EMBEDDED_DBSERVER_VERSION_CMD);
+    }
+
+    private <T extends CloudbreakTestDto> T checkExternalDatabaseVersionFromMasterNode(TestContext tc, T testDto, List<InstanceGroupV4Response> instanceGroups,
+            String databaseMajorVersion) {
+        String command = tc.getCloudProvider().isExternalDatabaseSslEnforcementSupported() ? DBSERVER_VERSION_CMD_SSL : DBSERVER_VERSION_CMD;
+        return checkDatabaseVersionFromMasterNode(testDto, instanceGroups, databaseMajorVersion, command);
+    }
+
+    private <T extends CloudbreakTestDto> T checkDatabaseVersionFromMasterNode(T testDto, List<InstanceGroupV4Response> instanceGroups,
+            String databaseMajorVersion, String command) {
+        Map<String, Pair<Integer, String>> dbVersions = sshJClientActions.executeSshCommandOnPrimaryGateways(instanceGroups, command, false);
         List<Pair<Integer, String>> wrongVersions = dbVersions.values().stream()
-                .filter(ssh -> !ssh.getValue().startsWith(targetDatabaseMajorVersion))
+                .filter(ssh -> !ssh.getValue().startsWith(databaseMajorVersion))
                 .toList();
         if (!wrongVersions.isEmpty()) {
             String errorMsg = String.format("Datalake's database engine version check is wrong on primary gateways: %s, expected: %s",
-                    dbVersions, targetDatabaseMajorVersion);
+                    dbVersions, databaseMajorVersion);
             LOGGER.error(errorMsg);
             throw new TestFailException(errorMsg);
         }
         return testDto;
+    }
+
+    public String getOriginalDatabaseMajorVersion() {
+        return commonClusterManagerProperties.getUpgradeDatabaseServer().getOriginalDatabaseMajorVersion();
+    }
+
+    public TargetMajorVersion getTargetMajorVersion() {
+        String versionString = commonClusterManagerProperties.getUpgradeDatabaseServer().getTargetDatabaseMajorVersion();
+        return parseTargetMajorVersion(versionString);
+    }
+
+    private TargetMajorVersion parseTargetMajorVersion(String versionString) {
+        try {
+            return TargetMajorVersion.valueOf("VERSION" + versionString);
+        } catch (Exception exception) {
+            LOGGER.warn("Failed to parse given versionString {}, falling back to default", versionString, exception);
+            return TargetMajorVersion.VERSION11;
+        }
     }
 }

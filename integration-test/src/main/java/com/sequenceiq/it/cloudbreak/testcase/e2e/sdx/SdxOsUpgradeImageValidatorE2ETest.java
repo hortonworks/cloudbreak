@@ -8,6 +8,7 @@ import org.testng.SkipException;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
@@ -15,11 +16,16 @@ import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
 import com.sequenceiq.it.util.imagevalidation.PrewarmedImageValidatorE2ETest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
-public class SdxOsUpgradeImageValidatiorE2ETest extends PreconditionSdxE2ETest implements PrewarmedImageValidatorE2ETest {
+public class SdxOsUpgradeImageValidatorE2ETest extends PreconditionSdxE2ETest implements PrewarmedImageValidatorE2ETest {
 
     @Inject
     private ImageValidatorE2ETestUtil imageValidatorE2ETestUtil;
+
+    @Inject
+    private SdxUpgradeDatabaseTestUtil sdxUpgradeDatabaseTestUtil;
 
     private ImageV4Response latestImageWithSameRuntime;
 
@@ -35,23 +41,36 @@ public class SdxOsUpgradeImageValidatiorE2ETest extends PreconditionSdxE2ETest i
     @UseSpotInstances
     @Description(
             given = "an SDX cluster with the latest image with same runtime components as the validated image is in available state",
+            and = "it uses an old DB version",
             when = "upgrade called on the SDX cluster to the validated image",
-            then = "SDX OS upgrade should be successful, the cluster should be up and running"
+            then = "SDX OS upgrade should be successful, the cluster should be up and running and using a newer DB version"
     )
     public void testSDXOsUpgrade(TestContext testContext) {
+        String originalDatabaseMajorVersion = sdxUpgradeDatabaseTestUtil.getOriginalDatabaseMajorVersion();
+        TargetMajorVersion targetDatabaseMajorVersion = sdxUpgradeDatabaseTestUtil.getTargetMajorVersion();
+
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+        sdxDatabaseRequest.setDatabaseEngineVersion(originalDatabaseMajorVersion);
+
         testContext
                 .given(SdxInternalTestDto.class)
                     .withCloudStorage()
                     .withoutDatabase()
                     .withTemplate(commonClusterManagerProperties().getInternalSdxBlueprintName())
                     .withImageCatalogNameAndImageId(commonCloudProperties().getImageValidation().getSourceCatalogName(), latestImageWithSameRuntime.getUuid())
+                    .withDatabase(sdxDatabaseRequest)
                 .when(sdxTestClient().createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> sdxUpgradeDatabaseTestUtil.checkCloudProviderDatabaseVersionFromMasterNode(
+                        originalDatabaseMajorVersion, tc, testDto))
                 .when(sdxTestClient().osUpgradeInternal(commonCloudProperties().getImageValidation().getImageUuid()))
                 .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, emptyRunningParameter().withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
+                .then((tc, testDto, client) -> sdxUpgradeDatabaseTestUtil.checkCloudProviderDatabaseVersionFromMasterNode(
+                        targetDatabaseMajorVersion.getMajorVersion(), tc, testDto))
                 .validate();
     }
 }

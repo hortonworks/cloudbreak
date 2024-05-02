@@ -468,6 +468,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
             imageSettingsRequest.setCatalog(imageCatalog);
             imageSettingsRequest.setId(imageUuid);
 
+            withRuntimeVersion(null);
             getRequest().setImage(imageSettingsRequest);
         } else {
             LOGGER.warn("Catalog [{}] or image [{}] is null or empty", imageCatalog, imageUuid);

@@ -10,7 +10,6 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
-import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
@@ -27,9 +26,6 @@ public class SdxUpgradeDatabaseServerTests extends PreconditionSdxE2ETest {
     private SdxTestClient sdxTestClient;
 
     @Inject
-    private CommonClusterManagerProperties commonClusterManagerProperties;
-
-    @Inject
     private SdxUpgradeDatabaseTestUtil sdxUpgradeDatabaseTestUtil;
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -42,37 +38,29 @@ public class SdxUpgradeDatabaseServerTests extends PreconditionSdxE2ETest {
     public void testSDXDatabaseUpgrade(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
 
-        String originalDatabaseMajorVersion = commonClusterManagerProperties.getUpgradeDatabaseServer().getOriginalDatabaseMajorVersion();
-        String targetDatabaseMajorVersion = commonClusterManagerProperties.getUpgradeDatabaseServer().getTargetDatabaseMajorVersion();
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
-        sdxDatabaseRequest.setDatabaseEngineVersion(originalDatabaseMajorVersion);
+        sdxDatabaseRequest.setDatabaseEngineVersion(sdxUpgradeDatabaseTestUtil.getOriginalDatabaseMajorVersion());
+
+        TargetMajorVersion targetDatabaseMajorVersion = sdxUpgradeDatabaseTestUtil.getTargetMajorVersion();
 
         testContext
                 .given(sdx, SdxTestDto.class)
-                .withCloudStorage()
-                .withExternalDatabase(sdxDatabaseRequest)
+                    .withCloudStorage()
+                    .withExternalDatabase(sdxDatabaseRequest)
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
                 .given(SdxUpgradeDatabaseServerTestDto.class)
-                .withTargetMajorVersion(fromVersionString(targetDatabaseMajorVersion))
+                    .withTargetMajorVersion(targetDatabaseMajorVersion)
                 .given(sdx, SdxTestDto.class)
                 .when(sdxTestClient.upgradeDatabaseServer(), key(sdx))
                 .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_DATABASE_SERVER_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> sdxUpgradeDatabaseTestUtil.checkDbEngineVersionIsUpdated(targetDatabaseMajorVersion, testDto))
+                .then((tc, testDto, client) -> sdxUpgradeDatabaseTestUtil.checkDbEngineVersionIsUpdated(targetDatabaseMajorVersion.getMajorVersion(), testDto))
                 .then((tc, testDto, client) -> sdxUpgradeDatabaseTestUtil.checkCloudProviderDatabaseVersionFromMasterNode(
-                        targetDatabaseMajorVersion, tc, testDto))
+                        targetDatabaseMajorVersion.getMajorVersion(), tc, testDto))
                 .validate();
-    }
-
-    private TargetMajorVersion fromVersionString(String versionString) {
-        try {
-            return TargetMajorVersion.valueOf("VERSION_" + versionString);
-        } catch (Exception exception) {
-            return TargetMajorVersion.VERSION_11;
-        }
     }
 }

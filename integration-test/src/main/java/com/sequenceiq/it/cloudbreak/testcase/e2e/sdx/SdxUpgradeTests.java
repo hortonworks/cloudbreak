@@ -84,7 +84,8 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
-                .then((tc, testDto, client) -> sdxUpgradeDatabaseTestUtil.checkEmbeddedDatabaseVersionFromMasterNode(tc, testDto))
+                .then((tc, testDto, client) -> sdxUpgradeDatabaseTestUtil.checkCloudProviderDatabaseVersionFromMasterNode(
+                        testDto.getResponse().getDatabaseEngineVersion(), tc, testDto))
                 // This assertion is disabled until the Audit Service is not configured.
                 //.then(datalakeAuditGrpcServiceAssertion::upgradeClusterByNameInternal)
                 .validate();
