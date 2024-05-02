@@ -17,10 +17,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
+import com.cloudera.cdp.environments2.model.DescribeEnvironmentRequest;
+import com.cloudera.cdp.environments2.model.DescribeEnvironmentRequest.OutputViewEnum;
+import com.cloudera.cdp.environments2.model.DescribeEnvironmentResponse;
+import com.cloudera.cdp.environments2.model.ListEnvironmentsResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.clusterproxy.remoteenvironment.DescribeRemoteEnvironmentRequest;
-import com.sequenceiq.cloudbreak.clusterproxy.remoteenvironment.OutputView;
-import com.sequenceiq.cloudbreak.clusterproxy.remoteenvironment.RemoteEnvironmentResponses;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Component
@@ -42,16 +43,16 @@ public class ClusterProxyHybridClient {
         this.restTemplate = restTemplate;
     }
 
-    public RemoteEnvironmentResponses listEnvironments(String clusterIdentifier) {
+    public ListEnvironmentsResponse listEnvironments(String clusterIdentifier) {
         String readConfigUrl = String.format(clusterProxyConfiguration.getClusterProxyUrl() + REMOTE_CLUSTER_LIST_ENVIRONMENT_CONFIG_PATH, clusterIdentifier);
         try {
             LOGGER.info("Reading remote cluster with cluster proxy configuration for cluster identifer: {}", clusterIdentifier);
-            Optional<ResponseEntity<RemoteEnvironmentResponses>> response = measure(() ->
+            Optional<ResponseEntity<ListEnvironmentsResponse>> response = measure(() ->
                     listEnvironmentsFromUrl(readConfigUrl),
                     LOGGER,
                     "Query environments from {} ms took {}.", clusterIdentifier);
             LOGGER.info("Cluster proxy with remote cluster read configuration response: {}", response);
-            return response.isEmpty() ? new RemoteEnvironmentResponses() : response.get().getBody();
+            return response.isEmpty() ? new ListEnvironmentsResponse() : response.get().getBody();
         } catch (RestClientResponseException e) {
             String message = String.format("Error reading cluster proxy configuration for cluster identifier '%s' from Remote Cluster, " +
                             "Error Response Body '%s'", clusterIdentifier, e.getResponseBodyAsString());
@@ -65,17 +66,17 @@ public class ClusterProxyHybridClient {
         }
     }
 
-    public Object getEnvironment(String clusterIdentifier, String pvcAccountId, String environmentCrn) {
+    public DescribeEnvironmentResponse getEnvironment(String clusterIdentifier, String pvcAccountId, String environmentCrn) {
         String getConfigUrl = String.format(clusterProxyConfiguration.getClusterProxyUrl() + REMOTE_CLUSTER_GET_ENVIRONMENT_CONFIG_PATH,
                 clusterIdentifier);
         try {
             LOGGER.info("Reading remote cluster with cluster proxy configuration for cluster identifer: {}", clusterIdentifier);
-            Optional<ResponseEntity<Object>> response = measure(() ->
+            Optional<ResponseEntity<DescribeEnvironmentResponse>> response = measure(() ->
                             getEnvironmentsFromUrl(getConfigUrl, pvcAccountId, environmentCrn),
                     LOGGER,
                     "Query environment from {} with crn {} ms took {}.", clusterIdentifier, environmentCrn);
             LOGGER.info("Cluster proxy with remote cluster get environment configuration response: {}", response);
-            return response.isEmpty() ? new RemoteEnvironmentResponses() : response.get().getBody();
+            return response.isEmpty() ? new DescribeEnvironmentResponse() : response.get().getBody();
         } catch (RestClientResponseException e) {
             String message = String.format("Error getting environment '%s' cluster proxy configuration for cluster identifier '%s' from Remote Cluster, " +
                     "Error Response Body '%s'", environmentCrn, clusterIdentifier, e.getResponseBodyAsString());
@@ -89,27 +90,26 @@ public class ClusterProxyHybridClient {
         }
     }
 
-    private Optional<ResponseEntity<Object>> getEnvironmentsFromUrl(String readConfigUrl, String accountId, String environment) {
+    private Optional<ResponseEntity<DescribeEnvironmentResponse>> getEnvironmentsFromUrl(String readConfigUrl, String accountId, String environment) {
         try {
-            DescribeRemoteEnvironmentRequest postRequest = new DescribeRemoteEnvironmentRequest();
-            postRequest.setEnvironment(environment);
-            postRequest.setAccountId(accountId);
-            postRequest.setOutputView(OutputView.FULL);
+            DescribeEnvironmentRequest postRequest = new DescribeEnvironmentRequest();
+            postRequest.setEnvironmentName(environment);
+            postRequest.setOutputView(OutputViewEnum.FULL);
 
             return Optional.of(
                     restTemplate.postForEntity(readConfigUrl,
-                            requestEntity(postRequest), Object.class));
+                            requestEntity(postRequest), DescribeEnvironmentResponse.class));
         } catch (JsonProcessingException e) {
             LOGGER.warn("Error occurred when tried to parse the response json.", e);
             return Optional.empty();
         }
     }
 
-    private Optional<ResponseEntity<RemoteEnvironmentResponses>> listEnvironmentsFromUrl(String readConfigUrl) {
+    private Optional<ResponseEntity<ListEnvironmentsResponse>> listEnvironmentsFromUrl(String readConfigUrl) {
         try {
             return Optional.of(
                     restTemplate.postForEntity(readConfigUrl,
-                            requestEntity(new Object()), RemoteEnvironmentResponses.class));
+                            requestEntity(new Object()), ListEnvironmentsResponse.class));
         } catch (JsonProcessingException e) {
             LOGGER.warn("Error occurred when tried to parse the response json.", e);
             return Optional.empty();

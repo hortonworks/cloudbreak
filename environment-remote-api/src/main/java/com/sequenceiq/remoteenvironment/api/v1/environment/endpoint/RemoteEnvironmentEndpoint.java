@@ -13,6 +13,7 @@ import jakarta.ws.rs.core.MediaType;
 
 import org.springframework.validation.annotation.Validated;
 
+import com.cloudera.cdp.environments2.model.DescribeEnvironmentResponse;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
@@ -37,10 +38,10 @@ public interface RemoteEnvironmentEndpoint {
     SimpleRemoteEnvironmentResponses list();
 
     @GET
-    @Path("/crn/{crn}")
+    @Path("/crn/{crn:.+}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = GET_BY_CRN, description = ENVIRONMENT_NOTES, operationId = "getRemoteEnvironmentV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    Object getByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
+    DescribeEnvironmentResponse getByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
 
 }

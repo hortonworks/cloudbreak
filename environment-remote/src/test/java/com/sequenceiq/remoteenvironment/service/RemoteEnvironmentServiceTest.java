@@ -1,6 +1,7 @@
 package com.sequenceiq.remoteenvironment.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -9,6 +10,8 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -17,10 +20,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.cloudera.cdp.environments2.model.DescribeEnvironmentResponse;
+import com.cloudera.cdp.environments2.model.EnvironmentSummary;
+import com.cloudera.cdp.environments2.model.ListEnvironmentsResponse;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyHybridClient;
-import com.sequenceiq.cloudbreak.clusterproxy.remoteenvironment.RemoteEnvironmentResponse;
-import com.sequenceiq.cloudbreak.clusterproxy.remoteenvironment.RemoteEnvironmentResponses;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.controller.v1.converter.PrivateControlPlaneEnvironmentToRemoteEnvironmentConverter;
 import com.sequenceiq.remoteenvironment.domain.PrivateControlPlane;
@@ -60,22 +65,22 @@ class RemoteEnvironmentServiceTest {
         when(privateControlPlaneServiceMock.listByAccountId(anyString()))
                 .thenReturn(new HashSet<>(Arrays.asList(privateControlPlane1, privateControlPlane2)));
 
-        RemoteEnvironmentResponse environment1 = new RemoteEnvironmentResponse();
+        EnvironmentSummary environment1 = new EnvironmentSummary();
         environment1.setEnvironmentName("NAME1");
         environment1.setCrn("CRN1");
         environment1.setStatus("AVAILABLE");
         environment1.setCloudPlatform("HYBRID");
-        RemoteEnvironmentResponse environment2 = new RemoteEnvironmentResponse();
+        EnvironmentSummary environment2 = new EnvironmentSummary();
         environment2.setEnvironmentName("NAME2");
         environment2.setCrn("CRN2");
         environment2.setStatus("AVAILABLE");
         environment2.setCloudPlatform("HYBRID");
 
-        RemoteEnvironmentResponses environmentResponses1 = new RemoteEnvironmentResponses();
-        environmentResponses1.setEnvironments(Set.of(environment1));
+        ListEnvironmentsResponse environmentResponses1 = new ListEnvironmentsResponse();
+        environmentResponses1.setEnvironments(List.of(environment1));
 
-        RemoteEnvironmentResponses environmentResponses2 = new RemoteEnvironmentResponses();
-        environmentResponses2.setEnvironments(Set.of(environment2));
+        ListEnvironmentsResponse environmentResponses2 = new ListEnvironmentsResponse();
+        environmentResponses2.setEnvironments(List.of(environment2));
 
         when(clusterProxyHybridClientMock.listEnvironments(eq("CRN1"))).thenReturn(environmentResponses1);
         when(clusterProxyHybridClientMock.listEnvironments(eq("CRN2"))).thenReturn(environmentResponses2);
@@ -123,5 +128,45 @@ class RemoteEnvironmentServiceTest {
         Set<SimpleRemoteEnvironmentResponse> responses = remoteEnvironmentService.listRemoteEnvironments("sampleAccountId");
 
         assertEquals(responses.size(), 0);
+    }
+
+    @Test
+    public void testGetRemoteEnvironmentWhenEntitlementGrantedAndPrivateControlPlanePresentedShouldReturnEnv() {
+        PrivateControlPlane privateControlPlane = new PrivateControlPlane();
+        privateControlPlane.setPrivateCloudAccountId("accountId");
+        privateControlPlane.setUrl("url");
+        privateControlPlane.setResourceCrn("crn");
+        privateControlPlane.setId(1L);
+        privateControlPlane.setPrivateCloudAccountId("pvcAccountId");
+
+        DescribeEnvironmentResponse describeEnvironmentResponse = new DescribeEnvironmentResponse();
+
+        when(entitlementService.hybridCloudEnabled(anyString())).thenReturn(true);
+        when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(anyString(), anyString()))
+                .thenReturn(Optional.of(privateControlPlane));
+        when(clusterProxyHybridClientMock.getEnvironment(anyString(), anyString(), anyString()))
+                .thenReturn(describeEnvironmentResponse);
+
+        DescribeEnvironmentResponse result = remoteEnvironmentService
+                .getRemoteEnvironment(
+                        "publicCloudAccountId",
+                        "crn:altus:environments:us-west-1:5abe6882-ff63-4ad2-af86-a5582872a9cd:environment:test-hybrid-1/06533e78-b2bd-41c9-8ac4-c4109af7797b");
+
+        assertEquals(describeEnvironmentResponse, result);
+    }
+
+    @Test
+    public void testGetRemoteEnvironmentWhenEntitlementGrantedAndPrivateControlPlaneNotPresentedShouldReturnEnv() {
+        when(entitlementService.hybridCloudEnabled(anyString())).thenReturn(true);
+        when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(anyString(), anyString()))
+                .thenReturn(Optional.empty());
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> remoteEnvironmentService
+                .getRemoteEnvironment(
+                        "publicCloudAccountId",
+                        "crn:altus:environments:us-west-1:5abe6882-ff63-4ad2-af86-a5582872a9cd:environment:test-hybrid-1/06533e78-b2bd-41c9-8ac4-c4109af7797b"));
+
+        assertEquals("There is no control plane for this account with account id 5abe6882-ff63-4ad2-af86-a5582872a9cd.",
+                ex.getMessage());
     }
 }

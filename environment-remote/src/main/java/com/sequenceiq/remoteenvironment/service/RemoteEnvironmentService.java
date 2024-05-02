@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.cdp.environments2.model.DescribeEnvironmentResponse;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyHybridClient;
@@ -52,8 +53,8 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
         return responses;
     }
 
-    public Object getRemoteEnvironment(String publicCloudAccountId, String environmentCrn) {
-        Object response = null;
+    public DescribeEnvironmentResponse getRemoteEnvironment(String publicCloudAccountId, String environmentCrn) {
+        DescribeEnvironmentResponse response = null;
         if (entitlementService.hybridCloudEnabled(publicCloudAccountId)) {
             String privateCloudAccountId = Crn.fromString(environmentCrn).getAccountId();
             Optional<PrivateControlPlane> privateControlPlanes =
@@ -87,9 +88,9 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
         return responses;
     }
 
-    public Object describeRemoteEnvironment(PrivateControlPlane controlPlane, String environmentCrn) {
+    private DescribeEnvironmentResponse describeRemoteEnvironment(PrivateControlPlane controlPlane, String environmentCrn) {
         LOGGER.debug("The processing of remote environment('{}') is executed by thread: {}", environmentCrn, Thread.currentThread().getName());
-        Object response = null;
+        DescribeEnvironmentResponse response = null;
         try {
             response = measure(() ->
                     clusterProxyHybridClient.getEnvironment(

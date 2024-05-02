@@ -44,7 +44,7 @@ class PrivateControlPlaneServiceTest {
     private PrivateControlPlaneService privateControlPlaneService;
 
     @Test
-    public void testRegister() {
+    void testRegister() {
         PrivateControlPlaneRegistrationRequest requestItem = new PrivateControlPlaneRegistrationRequest();
         requestItem.setCrn("crn:cdp:iam:us-west-1:1234:user:234123");
         PrivateControlPlaneRegistrationRequests request = new PrivateControlPlaneRegistrationRequests();
@@ -64,7 +64,7 @@ class PrivateControlPlaneServiceTest {
     }
 
     @Test
-    public void testDeregister() {
+    void testDeregister() {
         PrivateControlPlaneDeRegistrationRequest requestItem = new PrivateControlPlaneDeRegistrationRequest();
         requestItem.setCrn("crn:cdp:iam:us-west-1:1234:user:234123");
         PrivateControlPlaneDeRegistrationRequests request = new PrivateControlPlaneDeRegistrationRequests();
@@ -80,10 +80,10 @@ class PrivateControlPlaneServiceTest {
     }
 
     @Test
-    public void testGetByPrivateCloudAccountIdAndPublicCloudAccountIdWhenExistsReturnsOptionalWithPrivateControlPlane() {
+    void testGetByPrivateCloudAccountIdAndPublicCloudAccountIdWhenExistsReturnsOptionalWithPrivateControlPlane() {
         String privateCloudAccountId = "privateAccountId";
         String publicCloudAccountId = "publicAccountId";
-        PrivateControlPlane expectedControlPlane = new PrivateControlPlane(); // Assuming PrivateControlPlane is your entity class
+        PrivateControlPlane expectedControlPlane = new PrivateControlPlane();
         when(privateControlPlaneRepositoryMock.findByPvcAccountAndPbcAccountId(privateCloudAccountId, publicCloudAccountId))
                 .thenReturn(Optional.of(expectedControlPlane));
 

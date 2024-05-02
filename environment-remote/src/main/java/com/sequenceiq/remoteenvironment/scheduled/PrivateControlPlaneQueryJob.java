@@ -122,7 +122,7 @@ public class PrivateControlPlaneQueryJob extends MdcQuartzJob {
 
             if (registeredControlPlane.isPresent()) {
                 PvcControlPlaneConfiguration pvcControlPlaneConfiguration = registeredControlPlane.get();
-                if (urlOrNameChanged(item, pvcControlPlaneConfiguration) || emptyPvcAccountId(item)) {
+                if (urlOrNameChangedOREmptyBaseUrl(item, pvcControlPlaneConfiguration) || emptyPvcAccountId(item)) {
                     Crn pvcCrn = Crn.fromString(pvcControlPlaneConfiguration.getPvcCrn());
                     item.setName(pvcControlPlaneConfiguration.getName());
                     item.setUrl(pvcControlPlaneConfiguration.getBaseUrl());
@@ -136,7 +136,7 @@ public class PrivateControlPlaneQueryJob extends MdcQuartzJob {
         }
     }
 
-    private boolean urlOrNameChanged(PrivateControlPlane item, PvcControlPlaneConfiguration pvcControlPlaneConfiguration) {
+    private boolean urlOrNameChangedOREmptyBaseUrl(PrivateControlPlane item, PvcControlPlaneConfiguration pvcControlPlaneConfiguration) {
         return !pvcControlPlaneConfiguration.getName().equals(item.getName()) || !pvcControlPlaneConfiguration.getBaseUrl().equals(item.getUrl());
     }
 

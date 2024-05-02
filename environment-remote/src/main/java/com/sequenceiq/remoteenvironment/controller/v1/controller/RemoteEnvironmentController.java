@@ -4,6 +4,7 @@ import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Controller;
 
+import com.cloudera.cdp.environments2.model.DescribeEnvironmentResponse;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -30,7 +31,7 @@ public class RemoteEnvironmentController implements RemoteEnvironmentEndpoint {
 
     @Override
     @DisableCheckPermissions
-    public Object getByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn) {
+    public DescribeEnvironmentResponse getByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn) {
         MDCBuilder.buildMdcContext();
         return remoteEnvironmentService
                 .getRemoteEnvironment(ThreadBasedUserCrnProvider.getAccountId(), crn);

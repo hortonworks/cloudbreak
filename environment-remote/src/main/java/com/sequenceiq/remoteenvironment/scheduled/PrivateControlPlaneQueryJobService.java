@@ -31,8 +31,6 @@ public class PrivateControlPlaneQueryJobService implements JobSchedulerService {
 
     private static final String TRIGGER_GROUP = "query-triggers";
 
-    private static final int FIVE_MINUTES = 5;
-
     @Inject
     private TransactionalScheduler scheduler;
 

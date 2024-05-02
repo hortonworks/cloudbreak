@@ -514,8 +514,15 @@ http://localhost:8089/remoteenvironmentservice/api/v1/control_plane
 You can list environments with:
 ```
 curl -X GET -H "Content-Type: application/json" \
--H "x-cdp-actor-crn: crn:cdp:iam:us-west-1:hortonworks:user:rdoktorics@hortonworks.com" \
+-H "x-cdp-actor-crn: crn:cdp:iam:us-west-1:hortonworks:user:user@hortonworks.com" \
 http://localhost:8089/remoteenvironmentservice/api/v1/env
+```
+
+You can describe environment with:
+```
+curl -X GET -H "Content-Type: application/json" \
+-H "x-cdp-actor-crn: crn:cdp:iam:us-west-1:hortonworks:user:user@hortonworks.com" \
+http://localhost:8089/remoteenvironmentservice/api/v1/env/crn/crn:altus:environments:us-west-1:5abe6882-ff63-4ad2-af86-a5582872a9cd:environment:test-hybrid-1/06533e78-b2bd-41c9-8ac4-c4109af7797b
 ```
 
 ### Running the Externalized Compute Service in IDEA

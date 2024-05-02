@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
-import com.sequenceiq.cloudbreak.clusterproxy.remoteenvironment.RemoteEnvironmentResponse;
+import com.cloudera.cdp.environments2.model.EnvironmentSummary;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.domain.PrivateControlPlane;
 
@@ -13,7 +13,7 @@ class PrivateControlPlaneEnvironmentToRemoteEnvironmentConverterTest {
 
     @Test
     public void testConvert() {
-        RemoteEnvironmentResponse source = new RemoteEnvironmentResponse();
+        EnvironmentSummary source = new EnvironmentSummary();
         source.setStatus("ACTIVE");
         source.setCloudPlatform("AWS");
         source.setCrn("SAMPLE_CRN");
