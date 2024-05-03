@@ -14,6 +14,7 @@ import static com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterR
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -30,18 +31,22 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateState;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.StopStartUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -51,8 +56,10 @@ import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CentosToRedHatUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
@@ -69,6 +76,9 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
 
     @Inject
     private ClusterRepairService clusterRepairService;
+
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private ScalingHardLimitsService scalingHardLimitsService;
@@ -104,13 +114,40 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
 
         LOGGER.debug("Creating flow trigger event queue for distrox upgrade with event {}", event);
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
+
         addUpgradeValidationTriggerEvent(eventForRuntimeUpgrade).ifPresent(flowEventChain::add);
         addClusterUpgradePreparationTriggerEvent(eventForRuntimeUpgrade).ifPresent(flowEventChain::add);
+        addClusterScaleTriggerEventIfNeeded(event.getResourceId()).ifPresent(flowEventChain::add);
         addSaltUpdateTriggerEvent(eventForRuntimeUpgrade).ifPresent(flowEventChain::add);
         addClusterUpgradeTriggerEvent(eventForRuntimeUpgrade).ifPresent(flowEventChain::add);
         addImageUpdateTriggerEvent(event).ifPresent(flowEventChain::add);
         addClusterRepairTriggerEventIfNecessary(event).ifPresent(flowEventChain::add);
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
+    }
+
+    private Optional<StopStartUpscaleTriggerEvent> addClusterScaleTriggerEventIfNeeded(Long stackId) {
+        String hostGroup = "";
+        List<String> stoppedInstances = new ArrayList<>();
+        for (InstanceMetadataView instanceMetadataView : instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(stackId)) {
+            if (instanceMetadataView.getInstanceStatus().equals(InstanceStatus.STOPPED)) {
+                stoppedInstances.add(instanceMetadataView.getInstanceId());
+                hostGroup = instanceMetadataView.getInstanceGroupName();
+            }
+        }
+
+        if (stoppedInstances.isEmpty()) {
+            LOGGER.info("There are no stopped instances present.");
+            return Optional.empty();
+        } else {
+            LOGGER.info("There are {} stopped nodes present. Starting them before the upgrade.", stoppedInstances.size());
+            return Optional.of(new StopStartUpscaleTriggerEvent(
+                    StopStartUpscaleEvent.STOPSTART_UPSCALE_TRIGGER_EVENT.event(),
+                    stackId,
+                    hostGroup,
+                    stoppedInstances.size(),
+                    ClusterManagerType.CLOUDERA_MANAGER,
+                    false));
+        }
     }
 
     private DistroXUpgradeTriggerEvent createEventForRuntimeUpgrade(Image helperImage, DistroXUpgradeTriggerEvent event) {

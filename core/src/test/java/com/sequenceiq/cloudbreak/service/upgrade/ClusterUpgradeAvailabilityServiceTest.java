@@ -101,7 +101,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
 
     @Test
     public void testCheckForUpgradesByNameAndSomeInstancesAreStopped() throws CloudbreakImageNotFoundException {
-        Stack stack = createStack(createStackStatus(Status.AVAILABLE), StackType.WORKLOAD);
+        Stack stack = createStack(createStackStatus(Status.AVAILABLE), StackType.DATALAKE);
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage();
         Image properImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         ImageFilterParams imageFilterParams = createImageFilterParams(stack, currentImage);
@@ -138,7 +138,6 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(clusterUpgradeImageFilter.getAvailableImagesForUpgrade(WORKSPACE_ID, CATALOG_NAME, imageFilterParams)).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName())).thenReturn(response);
-        when(instanceMetaDataService.anyInstanceStopped(stack.getId())).thenReturn(false);
 
         UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, INTERNAL_UPGRADE_SETTINGS, false, null);
 
@@ -163,7 +162,6 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(clusterUpgradeImageFilter.getAvailableImagesForUpgrade(WORKSPACE_ID, CATALOG_NAME, imageFilterParams)).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName())).thenReturn(response);
-        when(instanceMetaDataService.anyInstanceStopped(stack.getId())).thenReturn(false);
 
         UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, INTERNAL_UPGRADE_SETTINGS, false, null);
 
@@ -185,7 +183,6 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(clusterUpgradeImageFilter.getAvailableImagesForUpgrade(WORKSPACE_ID, CATALOG_NAME, imageFilterParams)).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(currentImage, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName())).thenReturn(response);
-        when(instanceMetaDataService.anyInstanceStopped(stack.getId())).thenReturn(false);
 
         UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, false, INTERNAL_UPGRADE_SETTINGS, false, null);
 
@@ -261,7 +258,6 @@ public class ClusterUpgradeAvailabilityServiceTest {
         String validationError = "External RDS is not attached.";
         when(result.getError()).thenReturn(repairValidation);
         when(repairValidation.getValidationErrors()).thenReturn(Collections.singletonList(validationError));
-        when(instanceMetaDataService.anyInstanceStopped(stack.getId())).thenReturn(false);
 
         UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, INTERNAL_UPGRADE_SETTINGS, false, null);
 

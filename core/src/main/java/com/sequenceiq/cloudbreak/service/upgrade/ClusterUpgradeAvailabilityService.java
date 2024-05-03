@@ -80,7 +80,7 @@ public class ClusterUpgradeAvailabilityService {
             if (!stack.getStatus().isAvailable()) {
                 upgradeOptions.setReason(String.format("Cannot upgrade cluster because it is in %s state.", stack.getStatus()));
                 LOGGER.warn(upgradeOptions.getReason());
-            } else if (instanceMetaDataService.anyInstanceStopped(stack.getId())) {
+            } else if (stack.isDatalake() && instanceMetaDataService.anyInstanceStopped(stack.getId())) {
                 upgradeOptions.setReason("Cannot upgrade cluster because there is stopped instance.");
                 LOGGER.warn(upgradeOptions.getReason());
             } else if (shouldValidateForRepair(lockComponents, replaceVms)) {
