@@ -646,6 +646,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         String environmentName = sdxClusterResizeRequest.getEnvironment();
         SdxClusterShape shape = sdxClusterResizeRequest.getClusterShape();
 
+        if (sdxClusterResizeRequest.isValidationOnly() && sdxClusterResizeRequest.isSkipValidation()) {
+            throw new BadRequestException("The Validation Only flag cannot be used with the SkipValidation flag");
+        }
+
         final SdxCluster sdxCluster = sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, clusterName)
                 .orElseThrow(() -> notFound("SDX cluster", clusterName).get());
 
@@ -694,7 +698,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         newSdxCluster.setStackRequest(stackRequest);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxResize(sdxCluster.getId(), newSdxCluster,
                 new DatalakeDrSkipOptions(sdxClusterResizeRequest.isSkipValidation(), sdxClusterResizeRequest.isSkipAtlasMetadata(),
-                        sdxClusterResizeRequest.isSkipRangerAudits(), sdxClusterResizeRequest.isSkipRangerMetadata()));
+                        sdxClusterResizeRequest.isSkipRangerAudits(), sdxClusterResizeRequest.isSkipRangerMetadata()),
+                        sdxClusterResizeRequest.isValidationOnly());
         return Pair.of(sdxCluster, flowIdentifier);
     }
 

@@ -552,7 +552,7 @@ class SdxServiceTest {
         when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
 
         mockEnvironmentCall(resizeRequest, AWS);
-        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class)))
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class), eq(false)))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
@@ -625,7 +625,7 @@ class SdxServiceTest {
         when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
 
         mockEnvironmentCall(sdxClusterResizeRequest, GCP);
-        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class)))
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class), eq(false)))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.15/gcp/medium_duty_ha.json");
@@ -731,7 +731,7 @@ class SdxServiceTest {
         when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
 
         mockEnvironmentCall(sdxClusterResizeRequest, CloudPlatform.AWS);
-        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class)))
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class), eq(false)))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
@@ -937,7 +937,7 @@ class SdxServiceTest {
         when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
 
         mockEnvironmentCall(sdxClusterResizeRequest, AWS);
-        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class)))
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class), eq(false)))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
@@ -1176,7 +1176,7 @@ class SdxServiceTest {
 
         mockEnvironmentCall(resizeRequest, AWS);
         ArgumentCaptor<SdxCluster> captorResize = ArgumentCaptor.forClass(SdxCluster.class);
-        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), captorResize.capture(), any(DatalakeDrSkipOptions.class)))
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), captorResize.capture(), any(DatalakeDrSkipOptions.class), eq(false)))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
@@ -1222,7 +1222,7 @@ class SdxServiceTest {
 
         mockEnvironmentCall(resizeRequest, AWS);
         ArgumentCaptor<SdxCluster> captorResize = ArgumentCaptor.forClass(SdxCluster.class);
-        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), captorResize.capture(), any(DatalakeDrSkipOptions.class)))
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), captorResize.capture(), any(DatalakeDrSkipOptions.class), eq(false)))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
@@ -1466,7 +1466,7 @@ class SdxServiceTest {
 
         mockEnvironmentCall(resizeRequest, AWS);
         ArgumentCaptor<SdxCluster> captorResize = ArgumentCaptor.forClass(SdxCluster.class);
-        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), captorResize.capture(), any(DatalakeDrSkipOptions.class)))
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), captorResize.capture(), any(DatalakeDrSkipOptions.class), eq(false)))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/light_duty.json");
@@ -1522,7 +1522,7 @@ class SdxServiceTest {
 
         mockEnvironmentCall(resizeRequest, AWS);
         ArgumentCaptor<SdxCluster> captorResize = ArgumentCaptor.forClass(SdxCluster.class);
-        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), captorResize.capture(), any(DatalakeDrSkipOptions.class)))
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), captorResize.capture(), any(DatalakeDrSkipOptions.class), eq(false)))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/light_duty.json");

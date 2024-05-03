@@ -94,12 +94,14 @@ public class SdxResizeTestUtil {
                     return testDto;
                 })
                 .then((tc, testDto, client) -> {
+                    SdxClusterResizeRequest sdxClusterResizeRequest = testDto.getSdxResizeRequest();
                     if (useCustomInstances) {
-                        SdxClusterResizeRequest sdxClusterResizeRequest = testDto.getSdxResizeRequest();
                         populateSdxClusterResizeRequestWithCustomInstances(sdxClusterResizeRequest);
                         validator.setExpectedCustomInstanceGroups(sdxClusterResizeRequest.getCustomInstanceGroups());
                         validator.setExpectedSdxInstanceGroupDiskRequest(sdxClusterResizeRequest.getCustomInstanceGroupDiskSize());
                     }
+                    sdxClusterResizeRequest.setSkipValidation(true);
+
                     return testDto;
                 })
                 .when(sdxTestClient.resize(), key(sdxKey))
