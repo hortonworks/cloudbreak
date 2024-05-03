@@ -45,10 +45,11 @@ import com.sequenceiq.it.cloudbreak.util.EnvironmentUtil;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
+import com.sequenceiq.it.util.imagevalidation.PrewarmedImageValidatorE2ETest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
-public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest {
+public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implements PrewarmedImageValidatorE2ETest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeCcmUpgradeAndRotationTest.class);
 

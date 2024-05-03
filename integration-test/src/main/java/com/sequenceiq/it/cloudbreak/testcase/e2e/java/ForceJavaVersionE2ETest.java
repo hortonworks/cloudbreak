@@ -1,29 +1,41 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.java;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
+import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
+import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJavaVersionActions;
+import com.sequenceiq.it.util.imagevalidation.PrewarmedImageValidatorE2ETest;
 
-public class ForceJavaVersionE2ETest extends AbstractE2ETest {
+public class ForceJavaVersionE2ETest extends AbstractE2ETest implements PrewarmedImageValidatorE2ETest {
 
-    private static final int JAVA_VERSION = 11;
+    @Value("#{'${integrationtest.java.supportedVersions}'.split(',')}")
+    private List<Integer> supportedJavaVersions;
 
     @Inject
     private SshJavaVersionActions sshJavaVersionActions;
+
+    @Inject
+    private DistroXTestClient distroXTestClient;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -40,37 +52,72 @@ public class ForceJavaVersionE2ETest extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running environment ",
-            when = "create a SDX and DataHub clusters with forced java version ",
+            when = "create a SDX and DataHub clusters with forcing all supported java versions ",
             then = "clusters are available and default java version is the forced one on all instances ")
     public void testClusterProvisionWithForcedJavaVersion(TestContext testContext) {
-        testContext.given(SdxInternalTestDto.class).withJavaVersion(JAVA_VERSION);
+        Integer sdxJavaVersion = supportedJavaVersions.getFirst();
+        testContext.given(SdxInternalTestDto.class).withJavaVersion(sdxJavaVersion);
         createDatalakeWithoutDatabase(testContext);
-        validateJavaVersions(sshJavaVersionActions.getJavaMajorVersions(getSdxPrivateIpAddresses(testContext)));
+        Map<String, Integer> javaMajorVersions = sshJavaVersionActions.getJavaMajorVersions(getSdxPrivateIpAddresses(testContext));
+        validateJavaVersions(sdxJavaVersion, javaMajorVersions);
 
-        testContext.given(DistroXTestDto.class).withJavaVersion(JAVA_VERSION);
-        createDefaultDatahubForExistingDatalake(testContext);
-        validateJavaVersions(sshJavaVersionActions.getJavaMajorVersions(getDatahubPrivateIpAddresses(testContext)));
+        // create and validate distrox with all remaining supported java versions, but use the same java as sdx if only a single version is supported
+        if (supportedJavaVersions.size() > 1) {
+            supportedJavaVersions.remove(sdxJavaVersion);
+        }
+        Map<Integer, DistroXTestDto> distroXTestDtos = getDistroxTestDtos(testContext, supportedJavaVersions);
+        distroXTestDtos.forEach(this::createDistroxWithJavaVersion);
+        distroXTestDtos.forEach(this::awaitAndValidateDistroxWithJavaVersion);
     }
 
     private Set<String> getSdxPrivateIpAddresses(TestContext context) {
         SdxInternalTestDto dto = context.get(SdxInternalTestDto.class);
         return dto.getResponse().getStackV4Response().getInstanceGroups().stream()
-                .flatMap(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream())
+                .flatMap(instanceGroup -> instanceGroup.getMetadata().stream())
                 .map(InstanceMetaDataV4Response::getPrivateIp)
                 .collect(Collectors.toSet());
     }
 
-    private Set<String> getDatahubPrivateIpAddresses(TestContext context) {
-        DistroXTestDto dto = context.get(DistroXTestDto.class);
-        return dto.getResponse().getInstanceGroups().stream().flatMap(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream())
+    private Map<Integer, DistroXTestDto> getDistroxTestDtos(TestContext testContext, List<Integer> supportedJavaVersions) {
+        Map<Integer, DistroXTestDto> distroXTestDtos = new HashMap<>();
+        supportedJavaVersions.forEach(javaVersion -> distroXTestDtos.put(javaVersion, getDistroxTestDto(testContext, javaVersion)));
+        return distroXTestDtos;
+    }
+
+    private DistroXTestDto getDistroxTestDto(TestContext testContext, Integer javaVersion) {
+        return testContext.given(getDistroxKey(javaVersion).getKey(), DistroXTestDto.class).withJavaVersion(javaVersion);
+    }
+
+    private RunningParameter getDistroxKey(Integer javaVersion) {
+        return key("distrox-with-java" + javaVersion);
+    }
+
+    private void createDistroxWithJavaVersion(Integer javaVersion, DistroXTestDto distroXTestDto) {
+        distroXTestDto
+                .when(distroXTestClient.create(), getDistroxKey(javaVersion))
+                .validate();
+    }
+
+    private void awaitAndValidateDistroxWithJavaVersion(Integer javaVersion, DistroXTestDto distroXTestDto) {
+        distroXTestDto
+                .await(STACK_AVAILABLE, getDistroxKey(javaVersion))
+                .awaitForHealthyInstances()
+                .validate();
+        Map<String, Integer> javaMajorVersions = sshJavaVersionActions.getJavaMajorVersions(getDatahubPrivateIpAddresses(distroXTestDto));
+        validateJavaVersions(javaVersion, javaMajorVersions);
+    }
+
+    private Set<String> getDatahubPrivateIpAddresses(DistroXTestDto dto) {
+        return dto.getResponse().getInstanceGroups().stream()
+                .flatMap(instanceGroup -> instanceGroup.getMetadata().stream())
                 .map(InstanceMetaDataV4Response::getPrivateIp)
                 .collect(Collectors.toSet());
     }
 
-    private void validateJavaVersions(Map<String, Integer> javaVersionByInstanceIps) {
+    private void validateJavaVersions(Integer expectedVersion, Map<String, Integer> javaVersionByInstanceIps) {
         String errorMessage = javaVersionByInstanceIps.entrySet().stream()
-                .filter(entry -> !entry.getValue().equals(JAVA_VERSION))
-                .map(entry -> String.format("Java version on '%s' is '%d'", entry.getKey(), entry.getValue()))
+                .filter(entry -> !entry.getValue().equals(expectedVersion))
+                .map(entry -> String.format("Java version on '%s' is '%d' instead of %d", entry.getKey(), entry.getValue(), expectedVersion))
                 .collect(Collectors.joining(", "));
 
         if (!Strings.isNullOrEmpty(errorMessage)) {

@@ -1,0 +1,5 @@
+name: "java-image-validation-tests"
+tests:
+  - name: "java_image_validation_tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.java.ForceJavaVersionE2ETest
