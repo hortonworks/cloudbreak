@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.entity;
 
-import java.util.StringJoiner;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -15,6 +13,8 @@ import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
+import com.sequenceiq.freeipa.dto.SidGeneration;
+import com.sequenceiq.freeipa.entity.util.SidGenerationConverter;
 
 @Entity
 public class FreeIpa implements AccountIdAwareResource {
@@ -37,6 +37,9 @@ public class FreeIpa implements AccountIdAwareResource {
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret adminPassword = Secret.EMPTY;
+
+    @Convert(converter = SidGenerationConverter.class)
+    private SidGeneration sidGeneration;
 
     public Long getId() {
         return id;
@@ -94,6 +97,14 @@ public class FreeIpa implements AccountIdAwareResource {
         this.adminPassword = new Secret(adminPassword);
     }
 
+    public SidGeneration getSidGeneration() {
+        return sidGeneration;
+    }
+
+    public void setSidGeneration(SidGeneration sidGeneration) {
+        this.sidGeneration = sidGeneration;
+    }
+
     @Override
     public String getAccountId() {
         return stack.getAccountId();
@@ -101,12 +112,13 @@ public class FreeIpa implements AccountIdAwareResource {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", FreeIpa.class.getSimpleName() + "[", "]")
-                .add("id=" + id)
-                .add("stack='" + stack + '\'')
-                .add("hostname='" + hostname + "'")
-                .add("domain='" + domain + "'")
-                .add("adminGroupName='" + adminGroupName + "'")
-                .toString();
+        return "FreeIpa{" +
+                "id=" + id +
+                ", stack=" + stack +
+                ", hostname='" + hostname + '\'' +
+                ", domain='" + domain + '\'' +
+                ", adminGroupName='" + adminGroupName + '\'' +
+                ", sidGeneration=" + sidGeneration +
+                '}';
     }
 }
