@@ -50,8 +50,8 @@ public class FreeIpaService implements ResourceIdProvider {
         return repository.getByStackId(stackId).orElseThrow(() -> new NotFoundException(String.format("FreeIpa not found for Stack [%s]", stackId)));
     }
 
-    public FreeIpa create(Stack stack, FreeIpaServerRequest request) {
-        FreeIpa freeIpa = freeIpaConverter.convert(request);
+    public FreeIpa create(Stack stack, FreeIpaServerRequest request, String osType) {
+        FreeIpa freeIpa = freeIpaConverter.convert(request, osType);
         freeIpa.setStack(stack);
         return save(freeIpa);
     }

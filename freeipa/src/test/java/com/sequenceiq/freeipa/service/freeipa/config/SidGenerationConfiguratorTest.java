@@ -23,8 +23,11 @@ import com.sequenceiq.cloudbreak.util.CheckedSupplier;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientService;
+import com.sequenceiq.freeipa.dto.SidGeneration;
+import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.host.Rhel8ClientHelper;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,6 +41,9 @@ class SidGenerationConfiguratorTest {
 
     @Mock
     private RetryableFreeIpaClientService retryService;
+
+    @Mock
+    private FreeIpaService freeIpaService;
 
     @InjectMocks
     private SidGenerationConfigurator underTest;
@@ -57,11 +63,14 @@ class SidGenerationConfiguratorTest {
         Stack stack = new Stack();
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
         when(rhel8ClientHelper.isClientConnectedToRhel8(stack, freeIpaClient)).thenReturn(true);
+        FreeIpa freeIpa = new FreeIpa();
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
 
         underTest.enableAndTriggerSidGeneration(stack, freeIpaClient);
 
         verify(freeIpaClient).enableAndTriggerSidGeneration();
         verify(rhel8ClientHelper, never()).findRhel8Instance(stack);
+        verify(freeIpaService).save(freeIpa);
     }
 
     @Test
@@ -72,11 +81,15 @@ class SidGenerationConfiguratorTest {
         when(rhel8ClientHelper.findRhel8Instance(stack)).thenReturn(Optional.of("rhel8ipa"));
         FreeIpaClient rhel8FreeIpaClient = mock(FreeIpaClient.class);
         when(freeIpaClientFactory.getFreeIpaClientForInstance(stack, "rhel8ipa")).thenReturn(rhel8FreeIpaClient);
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setSidGeneration(SidGeneration.DISABLED);
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
 
         underTest.enableAndTriggerSidGeneration(stack, freeIpaClient);
 
         verify(rhel8FreeIpaClient).enableAndTriggerSidGeneration();
         verifyNoInteractions(freeIpaClient);
+        verify(freeIpaService).save(freeIpa);
     }
 
     @Test
@@ -85,11 +98,13 @@ class SidGenerationConfiguratorTest {
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
         when(rhel8ClientHelper.isClientConnectedToRhel8(stack, freeIpaClient)).thenReturn(false);
         when(rhel8ClientHelper.findRhel8Instance(stack)).thenReturn(Optional.empty());
+        when(freeIpaService.findByStack(stack)).thenReturn(new FreeIpa());
 
         underTest.enableAndTriggerSidGeneration(stack, freeIpaClient);
 
         verifyNoInteractions(freeIpaClient);
         verifyNoInteractions(retryService);
+        verify(freeIpaService, never()).save(any());
     }
 
     @Test
@@ -98,7 +113,25 @@ class SidGenerationConfiguratorTest {
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
         when(rhel8ClientHelper.isClientConnectedToRhel8(stack, freeIpaClient)).thenReturn(true);
         doThrow(new FreeIpaClientException("asdf")).when(freeIpaClient).enableAndTriggerSidGeneration();
+        when(freeIpaService.findByStack(stack)).thenReturn(new FreeIpa());
 
         underTest.enableAndTriggerSidGeneration(stack, freeIpaClient);
+
+        verify(freeIpaService, never()).save(any());
+    }
+
+    @Test
+    void testSidAlreadyEnabled() throws FreeIpaClientException {
+        Stack stack = new Stack();
+        FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setSidGeneration(SidGeneration.ENABLED);
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
+
+        underTest.enableAndTriggerSidGeneration(stack, freeIpaClient);
+
+        verify(freeIpaClient, never()).enableAndTriggerSidGeneration();
+        verify(rhel8ClientHelper, never()).findRhel8Instance(stack);
+        verify(freeIpaService, never()).save(freeIpa);
     }
 }

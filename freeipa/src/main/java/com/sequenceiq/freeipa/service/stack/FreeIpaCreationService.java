@@ -179,7 +179,7 @@ public class FreeIpaCreationService {
                 Image imageForIm = imageConverter.convert(image);
                 stack.getAllInstanceMetaDataList().forEach(im -> im.setImage(new Json(imageForIm)));
                 savedStack = setSupportedImdsVersionForStackIfNecessary(savedStack, image, accountId).orElse(savedStack);
-                FreeIpa freeIpa = freeIpaService.create(savedStack, request.getFreeIpa());
+                FreeIpa freeIpa = freeIpaService.create(savedStack, request.getFreeIpa(), image.getOsType());
                 return Triple.of(savedStack, image, freeIpa);
             });
             flowManager.notify(FlowChainTriggers.PROVISION_TRIGGER_EVENT,
