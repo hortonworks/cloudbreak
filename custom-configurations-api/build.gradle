@@ -9,7 +9,7 @@ repositories {
 
 dependencies {
     implementation project(':common')
-    implementation group: 'jakarta.ws.rs',                 name: 'jakarta.ws.rs-api',              version: '3.1.0'
+    implementation group: 'jakarta.ws.rs',                 name: 'jakarta.ws.rs-api',              version: '4.0.0'
     implementation group: 'io.swagger.core.v3',            name: 'swagger-jaxrs2-jakarta',         version: swaggerCoreVersion
 
     testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-api',              version: junitJupiterVersion
