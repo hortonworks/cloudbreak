@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.junit.jupiter.api.Test;
 
-import com.cloudera.cdp.environments2.model.EnvironmentSummary;
+import com.cloudera.thunderhead.service.environments2api.model.EnvironmentSummary;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.domain.PrivateControlPlane;
 

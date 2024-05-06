@@ -4,7 +4,7 @@ import java.util.Date;
 
 import org.springframework.stereotype.Component;
 
-import com.cloudera.cdp.environments2.model.EnvironmentSummary;
+import com.cloudera.thunderhead.service.environments2api.model.EnvironmentSummary;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.domain.PrivateControlPlane;
 

@@ -17,10 +17,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
-import com.cloudera.cdp.environments2.model.DescribeEnvironmentRequest;
-import com.cloudera.cdp.environments2.model.DescribeEnvironmentRequest.OutputViewEnum;
-import com.cloudera.cdp.environments2.model.DescribeEnvironmentResponse;
-import com.cloudera.cdp.environments2.model.ListEnvironmentsResponse;
+import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentRequest;
+import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
+import com.cloudera.thunderhead.service.environments2api.model.ListEnvironmentsResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
@@ -48,14 +47,14 @@ public class ClusterProxyHybridClient {
         try {
             LOGGER.info("Reading remote cluster with cluster proxy configuration for cluster identifer: {}", clusterIdentifier);
             Optional<ResponseEntity<ListEnvironmentsResponse>> response = measure(() ->
-                    listEnvironmentsFromUrl(readConfigUrl),
+                            listEnvironmentsFromUrl(readConfigUrl),
                     LOGGER,
                     "Query environments from {} ms took {}.", clusterIdentifier);
             LOGGER.info("Cluster proxy with remote cluster read configuration response: {}", response);
             return response.isEmpty() ? new ListEnvironmentsResponse() : response.get().getBody();
         } catch (RestClientResponseException e) {
             String message = String.format("Error reading cluster proxy configuration for cluster identifier '%s' from Remote Cluster, " +
-                            "Error Response Body '%s'", clusterIdentifier, e.getResponseBodyAsString());
+                    "Error Response Body '%s'", clusterIdentifier, e.getResponseBodyAsString());
             LOGGER.warn(message + " URL: " + readConfigUrl, e);
             throw new ClusterProxyException(message, e);
         } catch (Exception e) {
@@ -84,7 +83,7 @@ public class ClusterProxyHybridClient {
             throw new ClusterProxyException(message, e);
         } catch (Exception e) {
             String message = String.format("Error reading cluster proxy configuration for cluster identifier '%s' and " +
-                            "environment crn '%s' from Remote Cluster.", clusterIdentifier, environmentCrn);
+                    "environment crn '%s' from Remote Cluster.", clusterIdentifier, environmentCrn);
             LOGGER.warn(message + " URL: " + getConfigUrl, e);
             throw new ClusterProxyException(message, e);
         }
@@ -94,7 +93,7 @@ public class ClusterProxyHybridClient {
         try {
             DescribeEnvironmentRequest postRequest = new DescribeEnvironmentRequest();
             postRequest.setEnvironmentName(environment);
-            postRequest.setOutputView(OutputViewEnum.FULL);
+            postRequest.setOutputView(DescribeEnvironmentRequest.OutputViewEnum.FULL);
 
             return Optional.of(
                     restTemplate.postForEntity(readConfigUrl,

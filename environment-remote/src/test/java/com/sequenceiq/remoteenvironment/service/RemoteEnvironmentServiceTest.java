@@ -20,9 +20,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.cloudera.cdp.environments2.model.DescribeEnvironmentResponse;
-import com.cloudera.cdp.environments2.model.EnvironmentSummary;
-import com.cloudera.cdp.environments2.model.ListEnvironmentsResponse;
+import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
+import com.cloudera.thunderhead.service.environments2api.model.EnvironmentSummary;
+import com.cloudera.thunderhead.service.environments2api.model.ListEnvironmentsResponse;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyHybridClient;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;

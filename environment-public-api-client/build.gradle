@@ -22,11 +22,6 @@ dependencies {
 }
 
 openApiGenerate {
-  generatorName = "java"
-  library = "jersey3"
-  inputSpec = "$projectDir/src/main/yaml/environments2.yaml"
-  outputDir = "$projectDir/src/generated"
-  modelPackage = "com.cloudera.cdp.environments2.model"
   globalProperties.set([
           apis: "false",
           apiDocs: "false",
@@ -34,8 +29,14 @@ openApiGenerate {
           verbose: "true",
           generateSupportingFiles: "false",
           modelDocs: "false",
-          modelTests: "false"
+          modelTests: "false",
+          models: ""
   ])
+  generatorName = "java"
+  library = "native"
+  inputSpec = "$projectDir/src/main/yaml/environments2.yaml"
+  outputDir = "$projectDir/src/generated"
+  modelPackage = "com.cloudera.thunderhead.service.environments2api.model"
   configOptions.set([
           dateLibrary: "java8"
   ])
@@ -62,4 +63,8 @@ sourceSets {
   main {
     java.srcDirs += "${projectDir}/src/generated/src/main/java"
   }
+}
+
+clean {
+  delete "${projectDir}/src/generated/"
 }

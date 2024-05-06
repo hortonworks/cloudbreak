@@ -4,7 +4,7 @@ import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Controller;
 
-import com.cloudera.cdp.environments2.model.DescribeEnvironmentResponse;
+import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;

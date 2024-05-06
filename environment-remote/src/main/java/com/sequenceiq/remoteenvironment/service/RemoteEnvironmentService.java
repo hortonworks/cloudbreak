@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.cdp.environments2.model.DescribeEnvironmentResponse;
+import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyHybridClient;
@@ -47,8 +47,8 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
         if (entitlementService.hybridCloudEnabled(publicCloudAccountId)) {
             Set<PrivateControlPlane> privateControlPlanes = privateControlPlaneService.listByAccountId(publicCloudAccountId);
             privateControlPlanes.stream()
-                .parallel()
-                .forEach(item -> responses.addAll(listEnvironmentsFromPrivateControlPlane(item)));
+                    .parallel()
+                    .forEach(item -> responses.addAll(listEnvironmentsFromPrivateControlPlane(item)));
         }
         return responses;
     }
@@ -93,10 +93,10 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
         DescribeEnvironmentResponse response = null;
         try {
             response = measure(() ->
-                    clusterProxyHybridClient.getEnvironment(
-                            controlPlane.getResourceCrn(),
-                            controlPlane.getPrivateCloudAccountId(),
-                            environmentCrn),
+                            clusterProxyHybridClient.getEnvironment(
+                                    controlPlane.getResourceCrn(),
+                                    controlPlane.getPrivateCloudAccountId(),
+                                    environmentCrn),
                     LOGGER,
                     "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
         } catch (Exception e) {
