@@ -38,6 +38,7 @@
     * [Coding Guidelines](#coding-guidelines)
     * [Catching Up](#catching-up)
     * [Additional Info](#additional-info)
+- [Api definitions](#api-definitions)
 - Documentation: https://docs.cloudera.com/management-console/cloud/index.html
 
 # Local Development Setup
@@ -834,6 +835,19 @@ For example: `https://tb-nt-local.tb-local.xcu2-8y8x.workload-dev.cloudera.com/c
 
 > Be aware of that this routing mechanism is based on cookies, so if you have problems to reach the CM UI directly especially when you reached any service through Knox previously then the deletion of cookies could solve your issues.
 
+# Api definitions
+
+We are using Openapi to create API definitions for our services. The following list contains all the service and the specific link for the definitions.
+
+|      Service      |                                     Openapi JSON                                      | 
+|:-----------------:|:-------------------------------------------------------------------------------------:|
+|    Cloudbreak     |    https://cloudbreak-swagger.s3.eu-central-1.amazonaws.com/openapi-<VERSION>.json    |
+|      FreeIPA      |       https://freeipa-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json       |
+|    Environment    |     https://environment-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json     |
+|     DataLake      |      https://datalake-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json       |
+|     RedBeams      |      https://redbeams-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json       |
+| RemoteEnvironment |  https://remoteenvironment-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json  |
+|  ExternalCompute  |https://externalizedcompute-swagger.s3.us-east-2.amazonaws.com/openapi-<VERSION>.json |
 
 # How to Contribute
 
