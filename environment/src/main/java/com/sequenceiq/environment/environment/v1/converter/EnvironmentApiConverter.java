@@ -84,8 +84,6 @@ public class EnvironmentApiConverter {
 
     private static final String DEFAULT_CIDR = "0.0.0.0/0";
 
-    private static final String DEFAULT_OUTBOUND_TYPE = "userDefinedRouting";
-
     private final CredentialService credentialService;
 
     private final TelemetryApiConverter telemetryApiConverter;
@@ -192,8 +190,6 @@ public class EnvironmentApiConverter {
                     .withPrivateCluster(externalizedCompute.isPrivateCluster());
             if (StringUtils.hasText(externalizedCompute.getOutboundType())) {
                 builder.withOutboundType(externalizedCompute.getOutboundType());
-            } else {
-                builder.withOutboundType(DEFAULT_OUTBOUND_TYPE);
             }
             if (StringUtils.hasText(externalizedCompute.getKubeApiAuthorizedIpRanges())) {
                 builder.withKubeApiAuthorizedIpRanges(externalizedCompute.getKubeApiAuthorizedIpRanges());
