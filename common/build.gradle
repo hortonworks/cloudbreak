@@ -39,7 +39,7 @@ dependencies {
   implementation group: 'org.openapitools',                 name: 'jackson-databind-nullable',                version: "$jacksonDatabindNullable"
   implementation group: 'net.sf.json-lib',                  name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
   api group: 'net.jcip',                                    name: 'jcip-annotations',               version: '1.0'
-  api group: 'com.github.spotbugs',                         name: 'spotbugs-annotations',           version: '4.8.4'
+  api group: 'com.github.spotbugs',                         name: 'spotbugs-annotations',           version: '4.8.5'
   api group: 'org.reflections',                             name: 'reflections',                    version: '0.10.2'
 
   implementation group: 'com.github.ben-manes.caffeine',    name: 'caffeine',                       version: caffeineVersion
