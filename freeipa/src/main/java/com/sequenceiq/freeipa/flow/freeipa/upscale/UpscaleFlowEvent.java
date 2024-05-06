@@ -18,9 +18,11 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInsta
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesFailed;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesSuccess;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleCreateUserdataSecretsSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackImageFallbackResult;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackResult;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleUpdateUserdataSecretsSuccess;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationFailed;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationSuccess;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackFailed;
@@ -29,6 +31,7 @@ import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFall
 public enum UpscaleFlowEvent implements FlowEvent {
     UPSCALE_EVENT("UPSCALE_EVENT"),
     UPSCALE_STARTING_FINISHED_EVENT("UPSCALE_STARTING_FINISHED_EVENT"),
+    UPSCALE_CREATE_USERDATA_SECRETS_FINISHED_EVENT(EventSelectorUtil.selector(UpscaleCreateUserdataSecretsSuccess.class)),
     UPSCALE_ADD_INSTANCES_FINISHED_EVENT(CloudPlatformResult.selector(UpscaleStackResult.class)),
     UPSCALE_ADD_INSTANCES_FAILED_EVENT(CloudPlatformResult.failureSelector(UpscaleStackResult.class)),
     FREEIPA_UPSCALE_IMAGE_FALLBACK_EVENT(CloudPlatformResult.selector(UpscaleStackImageFallbackResult.class)),
@@ -40,6 +43,7 @@ public enum UpscaleFlowEvent implements FlowEvent {
     UPSCALE_EXTEND_METADATA_FINISHED_EVENT(CloudPlatformResult.selector(CollectMetadataResult.class)),
     UPSCALE_EXTEND_METADATA_FAILED_EVENT(CloudPlatformResult.failureSelector(CollectMetadataResult.class)),
     UPSCALE_SAVE_METADATA_FINISHED_EVENT("UPSCALE_SAVE_METADATA_FINISHED_EVENT"),
+    UPSCALE_UPDATE_USERDATA_SECRETS_FINISHED_EVENT(EventSelectorUtil.selector(UpscaleUpdateUserdataSecretsSuccess.class)),
     UPSCALE_TLS_SETUP_FINISHED_EVENT("UPSCALE_TLS_SETUP_FINISHED_EVENT"),
     UPSCALE_CLUSTER_PROXY_REGISTRATION_FINISHED_EVENT(EventSelectorUtil.selector(ClusterProxyRegistrationSuccess.class)),
     UPSCALE_CLUSTER_PROXY_REGISTRATION_FAILED_EVENT(EventSelectorUtil.selector(ClusterProxyRegistrationFailed.class)),

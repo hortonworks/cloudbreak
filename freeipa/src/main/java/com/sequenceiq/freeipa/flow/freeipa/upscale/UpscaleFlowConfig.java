@@ -16,6 +16,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCA
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_BOOTSTRAP_MACHINES_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_CLUSTER_PROXY_REGISTRATION_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_CLUSTER_PROXY_REGISTRATION_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_CREATE_USERDATA_SECRETS_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_EXTEND_METADATA_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_EXTEND_METADATA_FINISHED_EVENT;
@@ -39,6 +40,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCA
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_METADATA_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_USERDATA_SECRETS_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATE_INSTANCES_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATE_INSTANCES_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATE_NEW_INSTANCES_HEALTH_FINISHED_EVENT;
@@ -51,6 +53,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.INIT_STAT
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_ADD_INSTANCES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_BOOTSTRAPPING_MACHINES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_COLLECTING_HOST_METADATA_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_CREATE_USERDATA_SECRETS_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_EXTEND_METADATA_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_FAIL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_FINISHED_STATE;
@@ -66,6 +69,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_U
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_UPDATE_METADATA_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_UPDATE_USERDATA_SECRETS_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_VALIDATE_INSTANCES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_VALIDATE_NEW_INSTANCES_HEALTH_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_VALIDATING_CLOUD_STORAGE_STATE;
@@ -91,8 +95,12 @@ public class UpscaleFlowConfig extends AbstractFlowConfiguration<UpscaleState, U
                     .event(UPSCALE_EVENT)
                     .defaultFailureEvent()
 
-                    .from(UPSCALE_STARTING_STATE).to(UPSCALE_ADD_INSTANCES_STATE)
+                    .from(UPSCALE_STARTING_STATE).to(UPSCALE_CREATE_USERDATA_SECRETS_STATE)
                     .event(UPSCALE_STARTING_FINISHED_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(UPSCALE_CREATE_USERDATA_SECRETS_STATE).to(UPSCALE_ADD_INSTANCES_STATE)
+                    .event(UPSCALE_CREATE_USERDATA_SECRETS_FINISHED_EVENT)
                     .defaultFailureEvent()
 
                     .from(UPSCALE_ADD_INSTANCES_STATE).to(UPSCALE_VALIDATE_INSTANCES_STATE)
@@ -119,8 +127,12 @@ public class UpscaleFlowConfig extends AbstractFlowConfiguration<UpscaleState, U
                     .event(UPSCALE_EXTEND_METADATA_FINISHED_EVENT)
                     .failureEvent(UPSCALE_EXTEND_METADATA_FAILED_EVENT)
 
-                    .from(UPSCALE_SAVE_METADATA_STATE).to(UPSCALE_TLS_SETUP_STATE)
+                    .from(UPSCALE_SAVE_METADATA_STATE).to(UPSCALE_UPDATE_USERDATA_SECRETS_STATE)
                     .event(UPSCALE_SAVE_METADATA_FINISHED_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(UPSCALE_UPDATE_USERDATA_SECRETS_STATE).to(UPSCALE_TLS_SETUP_STATE)
+                    .event(UPSCALE_UPDATE_USERDATA_SECRETS_FINISHED_EVENT)
                     .defaultFailureEvent()
 
                     .from(UPSCALE_TLS_SETUP_STATE).to(UPSCALE_UPDATE_CLUSTERPROXY_REGISTRATION_PRE_BOOTSTRAP_STATE)

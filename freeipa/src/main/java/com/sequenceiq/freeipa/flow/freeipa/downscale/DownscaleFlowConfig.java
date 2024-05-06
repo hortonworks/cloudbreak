@@ -13,6 +13,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.D
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_REMOVE_USERDATA_SECRETS_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_UPDATE_DNS_SOA_RECORDS_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_UPDATE_DNS_SOA_RECORDS_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT;
@@ -48,6 +49,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNS
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REMOVE_INSTANCES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REMOVE_REPLICATION_AGREEMENTS_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REMOVE_SERVERS_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REMOVE_USERDATA_SECRETS_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REVOKE_CERTS_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_STOP_TELEMETRY_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_UPDATE_DNS_SOA_RECORDS_STATE;
@@ -100,8 +102,12 @@ public class DownscaleFlowConfig extends AbstractFlowConfiguration<DownscaleStat
                     .event(DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_FINISHED_EVENT)
                     .defaultFailureEvent()
 
-                    .from(DOWNSCALE_STOP_TELEMETRY_STATE).to(DOWNSCALE_COLLECT_RESOURCES_STATE)
+                    .from(DOWNSCALE_STOP_TELEMETRY_STATE).to(DOWNSCALE_REMOVE_USERDATA_SECRETS_STATE)
                     .event(STOP_TELEMETRY_FINISHED_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(DOWNSCALE_REMOVE_USERDATA_SECRETS_STATE).to(DOWNSCALE_COLLECT_RESOURCES_STATE)
+                    .event(DOWNSCALE_REMOVE_USERDATA_SECRETS_FINISHED_EVENT)
                     .defaultFailureEvent()
 
                     .from(DOWNSCALE_COLLECT_RESOURCES_STATE).to(DOWNSCALE_REMOVE_INSTANCES_STATE)

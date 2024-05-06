@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.action;
 
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNullOtherwise;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.IMAGE_FALLBACK_START_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_FINISHED_EVENT;
@@ -23,6 +24,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
+import java.util.stream.StreamSupport;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.ClientErrorException;
@@ -53,6 +56,7 @@ import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessage
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.PayloadConverter;
@@ -76,14 +80,18 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInsta
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesSuccess;
-import com.sequenceiq.freeipa.flow.freeipa.upscale.ImageFallbackSuccessToStackEventConverter;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.ImageFallbackSuccessToUpscaleCreateUserdataSecretsSuccessConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleStackResultToStackEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleCreateUserdataSecretsRequest;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleCreateUserdataSecretsSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackRequest;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackResult;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleUpdateUserdataSecretsRequest;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleUpdateUserdataSecretsSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.ValidateInstancesHealthEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.BootstrapMachinesFailedToUpscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.ClusterProxyRegistrationFailedToUpscaleFailureEventConverter;
@@ -103,10 +111,12 @@ import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFall
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackRequest;
 import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.TlsSetupService;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.config.KerberosConfigUpdateService;
 import com.sequenceiq.freeipa.service.image.ImageFallbackService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
+import com.sequenceiq.freeipa.service.secret.UserdataSecretsService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
@@ -119,6 +129,10 @@ public class FreeIpaUpscaleActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaUpscaleActions.class);
 
     private static final String IMAGE_FALLBACK_STARTED = "IMAGE_FALLBACK_STARTED";
+
+    private static final String NEW_INSTANCE_ENTITY_IDS = "NEW_INSTANCE_ENTITY_IDS";
+
+    private static final String SECRET_ENCRYPTION_ENABLED = "SECRET_ENCRYPTION_ENABLED";
 
     @Inject
     private ResourceService resourceService;
@@ -153,6 +167,12 @@ public class FreeIpaUpscaleActions {
     @Inject
     private ImageFallbackService imageFallbackService;
 
+    @Inject
+    private CachedEnvironmentClientService cachedEnvironmentClientService;
+
+    @Inject
+    private UserdataSecretsService userdataSecretsService;
+
     @Bean(name = "UPSCALE_STARTING_STATE")
     public Action<?, ?> startingAction() {
         return new AbstractUpscaleAction<>(UpscaleEvent.class) {
@@ -181,12 +201,42 @@ public class FreeIpaUpscaleActions {
         };
     }
 
-    @Bean(name = "UPSCALE_ADD_INSTANCES_STATE")
-    public Action<?, ?> addInstancesAction() {
+    @Bean(name = "UPSCALE_CREATE_USERDATA_SECRETS_STATE")
+    public Action<?, ?> createUserdataSecretsAction() {
         return new AbstractUpscaleAction<>(StackEvent.class) {
 
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+                DetailedEnvironmentResponse environment = cachedEnvironmentClientService.getByCrn(stack.getEnvironmentCrn());
+                if (environment.isEnableSecretEncryption()) {
+                    variables.put(SECRET_ENCRYPTION_ENABLED, Boolean.TRUE);
+                    stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Creating userdata secrets");
+                    int instanceCountByGroup = getInstanceCountByGroup(variables);
+                    int numberOfSecretsToCreate = stack.getInstanceGroups().stream()
+                            .map(ig -> instanceCountByGroup - ig.getNotDeletedInstanceMetaDataSet().size())
+                            .reduce(0, Integer::sum);
+                    LOGGER.info("Going to create [{}] new userdata secrets for stack [{}].", numberOfSecretsToCreate, stack.getName());
+                    long firstValidPrivateId = privateIdProvider.getFirstValidPrivateId(stack.getInstanceGroups());
+                    List<Long> newPrivateIds = LongStream.range(firstValidPrivateId, firstValidPrivateId + numberOfSecretsToCreate).boxed().toList();
+                    UpscaleCreateUserdataSecretsRequest request = new UpscaleCreateUserdataSecretsRequest(stack.getId(), context.getCloudContext(),
+                            context.getCloudCredential(), newPrivateIds);
+                    sendEvent(context, request.selector(), request);
+                } else {
+                    variables.put(SECRET_ENCRYPTION_ENABLED, Boolean.FALSE);
+                    LOGGER.info("Skipping userdata secret creation, since secret encryption is not enabled.");
+                    sendEvent(context, new UpscaleCreateUserdataSecretsSuccess(stack.getId(), List.of()));
+                }
+            }
+        };
+    }
+
+    @Bean(name = "UPSCALE_ADD_INSTANCES_STATE")
+    public Action<?, ?> addInstancesAction() {
+        return new AbstractUpscaleAction<>(UpscaleCreateUserdataSecretsSuccess.class) {
+
+            @Override
+            protected void doExecute(StackContext context, UpscaleCreateUserdataSecretsSuccess payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Adding instances");
 
@@ -195,8 +245,8 @@ public class FreeIpaUpscaleActions {
                 if (newInstances.isEmpty()) {
                     skipAddingNewInstances(context, stack.getId());
                 } else {
-                    List<String> instanceIdsToRemove = Optional.ofNullable(getInstanceIds(variables)).orElseGet(ArrayList::new);
-                    addNewInstances(context, stack, newInstances, instanceIdsToRemove);
+                    List<Long> createdSecretResourceIds = payload.getCreatedSecretResourceIds();
+                    addNewInstances(context, stack, newInstances, createdSecretResourceIds, variables);
                 }
             }
 
@@ -206,20 +256,22 @@ public class FreeIpaUpscaleActions {
                 sendEvent(context, result.selector(), result);
             }
 
-            private void addNewInstances(StackContext context, Stack stack, List<CloudInstance> newInstances, List<String> instanceIdsToRemove) {
+            private void addNewInstances(StackContext context, Stack stack, List<CloudInstance> newInstances, List<Long> createdSecretResourceIds,
+                    Map<Object, Object> variables) {
+                List<String> instanceIdsToRemove = Optional.ofNullable(getInstanceIds(variables)).orElseGet(ArrayList::new);
                 List<InstanceMetaData> instancesToRemove = stack.getInstanceGroups().stream().flatMap(ig -> ig.getInstanceMetaData().stream())
                         .filter(im -> instanceIdsToRemove.contains(im.getInstanceId()) && Objects.nonNull(im.getSubnetId()))
                         .collect(Collectors.toList());
                 LOGGER.debug("Instances to replace and keep the AZ: {}", instancesToRemove);
                 Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, newInstances, instancesToRemove);
+                assignNewSecretsToNewInstances(updatedStack, createdSecretResourceIds, variables);
                 List<CloudResource> cloudResources = resourceService.findAllByStackId(stack.getId()).stream()
                         .map(resource -> resourceConverter.convert(resource))
                         .collect(Collectors.toList());
                 CloudStack updatedCloudStack = cloudStackConverter.convert(updatedStack);
                 Optional<String> fallbackImage = imageFallbackService.determineFallbackImageIfPermitted(context);
-                UpscaleStackRequest<UpscaleStackResult> request = new UpscaleStackRequest<>(
-                        context.getCloudContext(), context.getCloudCredential(), updatedCloudStack, cloudResources,
-                        new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) newInstances.size()), fallbackImage);
+                UpscaleStackRequest<UpscaleStackResult> request = new UpscaleStackRequest<>(context.getCloudContext(), context.getCloudCredential(),
+                        updatedCloudStack, cloudResources, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) newInstances.size()), fallbackImage);
                 sendEvent(context, request.selector(), request);
             }
 
@@ -236,9 +288,22 @@ public class FreeIpaUpscaleActions {
                 return newInstances;
             }
 
+            private void assignNewSecretsToNewInstances(Stack stack, List<Long> createdSecretResourceIds, Map<Object, Object> variables) {
+                if (!createdSecretResourceIds.isEmpty()) {
+                    List<Resource> secretResources = StreamSupport.stream(
+                            resourceService.findAllByResourceId(createdSecretResourceIds).spliterator(), false).toList();
+                    List<InstanceMetaData> newInstanceMetadas = stack.getInstanceGroups().stream()
+                            .flatMap(ig -> ig.getNotDeletedInstanceMetaDataSet().stream())
+                            .filter(imd -> imd.getInstanceId() == null && imd.getUserdataSecretResourceId() == null)
+                            .toList();
+                    variables.put(NEW_INSTANCE_ENTITY_IDS, newInstanceMetadas.stream().map(InstanceMetaData::getId).toList());
+                    userdataSecretsService.assignSecretsToInstances(stack, secretResources, newInstanceMetadas);
+                }
+            }
+
             @Override
-            protected void initPayloadConverterMap(List<PayloadConverter<StackEvent>> payloadConverters) {
-                payloadConverters.add(new ImageFallbackSuccessToStackEventConverter());
+            protected void initPayloadConverterMap(List<PayloadConverter<UpscaleCreateUserdataSecretsSuccess>> payloadConverters) {
+                payloadConverters.add(new ImageFallbackSuccessToUpscaleCreateUserdataSecretsSuccessConverter());
             }
         };
     }
@@ -352,6 +417,26 @@ public class FreeIpaUpscaleActions {
                 metadataSetupService.saveInstanceMetaData(stack, payload.getResults(),
                         com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.CREATED);
                 sendEvent(context, UPSCALE_SAVE_METADATA_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
+            }
+        };
+    }
+
+    @Bean(name = "UPSCALE_UPDATE_USERDATA_SECRETS_STATE")
+    public Action<?, ?> updateUserdataSecretsAction() {
+        return new AbstractUpscaleAction<>(StackEvent.class) {
+
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+                if ((Boolean) variables.getOrDefault(SECRET_ENCRYPTION_ENABLED, Boolean.FALSE)) {
+                    stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Updating userdata secrets");
+                    List<Long> newInstanceIds = getIfNotNullOtherwise(variables.remove(NEW_INSTANCE_ENTITY_IDS), x -> (List<Long>) x, List.of());
+                    UpscaleUpdateUserdataSecretsRequest request = new UpscaleUpdateUserdataSecretsRequest(stack.getId(), context.getCloudContext(),
+                            context.getCloudCredential(), newInstanceIds);
+                    sendEvent(context, request.selector(), request);
+                } else {
+                    sendEvent(context, new UpscaleUpdateUserdataSecretsSuccess(stack.getId()));
+                }
             }
         };
     }

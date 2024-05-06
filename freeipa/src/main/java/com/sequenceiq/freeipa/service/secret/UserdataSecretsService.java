@@ -101,13 +101,14 @@ public class UserdataSecretsService {
         String stackName = stack.getName();
         String stackCrn = stack.getResourceCrn();
         for (InstanceMetaData instance : instances) {
+            String secretName = createSecretName(stackName, stackCrn, instance.getPrivateId());
             Optional<Long> secretId = secretResources.stream()
-                    .filter(resource -> resource.getResourceName().equals(createSecretName(stackName, stackCrn, instance.getPrivateId())))
+                    .filter(resource -> resource.getResourceName().equals(secretName))
                     .map(Resource::getId)
                     .findFirst();
             LOGGER.info("Assigning userdata secret to instance {}...", instance);
             secretId.ifPresentOrElse(instance::setUserdataSecretResourceId, () -> {
-                throw new UserdataSecretsException("Secret resource not found for instance: " + instance);
+                throw new UserdataSecretsException(String.format("Secret resource under name '%s', not found for instance: %s", secretName, instance));
             });
         }
         instanceMetaDataService.saveAll(instances);

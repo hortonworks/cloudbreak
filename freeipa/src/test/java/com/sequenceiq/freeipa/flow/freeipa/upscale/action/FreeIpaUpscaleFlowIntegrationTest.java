@@ -74,6 +74,7 @@ import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
@@ -104,6 +105,8 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.handler.FreeipaUpscaleStackHandler;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.handler.UpscaleCreateUserdataSecretsHandler;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.handler.UpscaleUpdateUserdataSecretsHandler;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.handler.ValidateInstancesHealthHandler;
 import com.sequenceiq.freeipa.flow.stack.provision.action.CheckImageAction;
 import com.sequenceiq.freeipa.flow.stack.provision.action.StackProvisionService;
@@ -240,6 +243,9 @@ class FreeIpaUpscaleFlowIntegrationTest {
     @MockBean
     private MeterRegistry meterRegistry;
 
+    @MockBean
+    private CachedEnvironmentClientService cachedEnvironmentClientService;
+
     private ResourceConnector resourceConnector = mock(ResourceConnector.class);
 
     private Stack stack;
@@ -284,6 +290,8 @@ class FreeIpaUpscaleFlowIntegrationTest {
                 .thenReturn(List.of(new CloudResourceStatus(cloudResource, ResourceStatus.CREATED)));
         when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(Set.of(im0));
         when(crnGeneratorFactory.iam()).thenReturn(mock(RegionAwareInternalCrnGenerator.class));
+        when(cachedEnvironmentClientService.getByCrn(any())).thenReturn(new DetailedEnvironmentResponse());
+        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(any(), anyList(), anyList())).thenReturn(stack);
     }
 
     @Test
@@ -407,7 +415,9 @@ class FreeIpaUpscaleFlowIntegrationTest {
             InstallFreeIpaServicesHandler.class,
             ClusterProxyUpdateRegistrationHandler.class,
             PostInstallFreeIpaHandler.class,
-            ValidateInstancesHealthHandler.class
+            ValidateInstancesHealthHandler.class,
+            UpscaleCreateUserdataSecretsHandler.class,
+            UpscaleUpdateUserdataSecretsHandler.class
     })
     static class Config {
         @MockBean
@@ -445,9 +455,6 @@ class FreeIpaUpscaleFlowIntegrationTest {
 
         @MockBean
         private InstanceValidationService instanceValidationService;
-
-        @MockBean
-        private CachedEnvironmentClientService cachedEnvironmentClientService;
 
         @MockBean
         private UserdataSecretsService userdataSecretsService;

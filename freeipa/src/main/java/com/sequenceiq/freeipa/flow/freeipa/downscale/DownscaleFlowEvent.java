@@ -12,6 +12,7 @@ import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removehosts.RemoveHos
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removereplication.RemoveReplicationAgreementsResponse;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removeserver.RemoveServersResponse;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stoptelemetry.StopTelemetryResponse;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.userdatasecrets.RemoveUserdataSecretsSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterProxyUpdateRegistrationFailed;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterProxyUpdateRegistrationSuccess;
 
@@ -25,6 +26,7 @@ public enum DownscaleFlowEvent implements FlowEvent {
     DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FAILED_EVENT("DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FAILED_EVENT"),
     DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_FINISHED_EVENT("DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_FINISHED_EVENT"),
     STOP_TELEMETRY_FINISHED_EVENT(EventSelectorUtil.selector(StopTelemetryResponse.class)),
+    DOWNSCALE_REMOVE_USERDATA_SECRETS_FINISHED_EVENT(EventSelectorUtil.selector(RemoveUserdataSecretsSuccess.class)),
     COLLECT_RESOURCES_FINISHED_EVENT(EventSelectorUtil.selector(DownscaleStackCollectResourcesResult.class)),
     COLLECT_RESOURCES_FAILED_EVENT(EventSelectorUtil.failureSelector(DownscaleStackCollectResourcesResult.class)),
     REMOVE_INSTANCES_FINISHED_EVENT(EventSelectorUtil.selector(DownscaleStackResult.class)),

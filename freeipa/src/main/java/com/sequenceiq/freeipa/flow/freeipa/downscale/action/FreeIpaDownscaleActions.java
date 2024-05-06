@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.PayloadConverter;
@@ -67,6 +68,8 @@ import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removeserver.RemoveSe
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removeserver.RemoveServersResponse;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stoptelemetry.StopTelemetryRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stoptelemetry.StopTelemetryResponse;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.userdatasecrets.RemoveUserdataSecretsRequest;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.userdatasecrets.RemoveUserdataSecretsSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.failure.ClusterProxyUpdateRegistrationFailedToDownscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.failure.DownscaleStackCollectResourcesResultToDownscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.failure.DownscaleStackResultToDownscaleFailureEventConverter;
@@ -80,6 +83,7 @@ import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.termination.action.TerminationService;
 import com.sequenceiq.freeipa.service.EnvironmentService;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.config.KerberosConfigUpdateService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -98,6 +102,9 @@ public class FreeIpaDownscaleActions {
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
+    private CachedEnvironmentClientService cachedEnvironmentClientService;
 
     @Bean(name = "STARTING_DOWNSCALE_STATE")
     public Action<?, ?> startingDownscaleAction() {
@@ -210,11 +217,31 @@ public class FreeIpaDownscaleActions {
         };
     }
 
-    @Bean(name = "DOWNSCALE_COLLECT_RESOURCES_STATE")
-    public Action<?, ?> collectResourcesAction() {
+    @Bean(name = "DOWNSCALE_REMOVE_USERDATA_SECRETS_STATE")
+    public Action<?, ?> deleteUserdataSecretsAction() {
         return new AbstractDownscaleAction<>(StopTelemetryResponse.class) {
             @Override
             protected void doExecute(StackContext context, StopTelemetryResponse payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+                DetailedEnvironmentResponse environment = cachedEnvironmentClientService.getByCrn(stack.getEnvironmentCrn());
+                if (environment.isEnableSecretEncryption()) {
+                    stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Removing userdata secrets");
+                    RemoveUserdataSecretsRequest request = new RemoveUserdataSecretsRequest(stack.getId(), context.getCloudContext(),
+                            context.getCloudCredential(), getDownscaleHosts(variables));
+                    sendEvent(context, request.selector(), request);
+                } else {
+                    LOGGER.info("Skipping userdata secret deletion, since secret encryption is not enabled.");
+                    sendEvent(context, new RemoveUserdataSecretsSuccess(stack.getId()));
+                }
+            }
+        };
+    }
+
+    @Bean(name = "DOWNSCALE_COLLECT_RESOURCES_STATE")
+    public Action<?, ?> collectResourcesAction() {
+        return new AbstractDownscaleAction<>(RemoveUserdataSecretsSuccess.class) {
+            @Override
+            protected void doExecute(StackContext context, RemoveUserdataSecretsSuccess payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Collecting resources");
                 List<String> repairInstanceIds = getInstanceIds(variables);
