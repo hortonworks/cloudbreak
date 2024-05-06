@@ -102,7 +102,7 @@ class EnvironmentApiConverterTest {
 
     private static final String AUTHORIZED_IP_RANGES = "0.0.0.0/0";
 
-    private static final String OUTBOUND_TYPE = "userDefinedRouting";
+    private static final String OUTBOUND_TYPE = "udr";
 
     private static final String SECURITY_ACCESS_CIDR = "1.1.1.1/16";
 
