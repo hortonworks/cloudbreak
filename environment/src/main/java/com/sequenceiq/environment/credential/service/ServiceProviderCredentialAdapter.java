@@ -2,12 +2,9 @@ package com.sequenceiq.environment.credential.service;
 
 import static com.sequenceiq.environment.TempConstants.TEMP_USER_ID;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -50,8 +47,6 @@ public class ServiceProviderCredentialAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceProviderCredentialAdapter.class);
 
     private static final String FAILED_CREDENTIAL_VERFICIATION_MSG = "Couldn't verify credential.";
-
-    private static final String SMART_SENSE_ID = "smartSenseId";
 
     @Inject
     private EventBus eventBus;
@@ -106,9 +101,8 @@ public class ServiceProviderCredentialAdapter {
             changed = setNewStatusText(credential, cloudCredentialStatus);
             CloudCredential cloudCredentialResponse = cloudCredentialStatus.getCloudCredential();
             if (cloudCredentialStatus.isDefaultRegionChanged()) {
-                changed = mergeCloudProviderParameters(credential, cloudCredentialResponse, Collections.singleton(SMART_SENSE_ID));
+                changed = mergeCloudProviderParameters(credential, cloudCredentialResponse.getParameters());
             }
-            changed = changed || mergeCloudProviderParameters(credential, cloudCredentialResponse, Collections.singleton(SMART_SENSE_ID));
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing credential verification", e);
             throw new OperationException(e);
@@ -181,25 +175,16 @@ public class ServiceProviderCredentialAdapter {
         return credential;
     }
 
-    private boolean mergeCloudProviderParameters(Credential credential, CloudCredential cloudCredentialResponse, Set<String> skippedKeys) {
-        return mergeCloudProviderParameters(credential, cloudCredentialResponse, skippedKeys, true);
-    }
+    private boolean mergeCloudProviderParameters(Credential credential, Map<String, Object> newAttributes) {
+        Map<String, Object> mergedAttributes = new Json(credential.getAttributes()).getMap();
 
-    private boolean mergeCloudProviderParameters(Credential credential, CloudCredential cloudCredentialResponse, Set<String> skippedKeys,
-            boolean overrideParameters) {
-        Json attributes = new Json(credential.getAttributes());
-        Map<String, Object> newAttributes = attributes.getMap();
         boolean newAttributesAdded = false;
-        for (Entry<String, Object> cloudParam : cloudCredentialResponse.getParameters().entrySet()) {
-            if (!skippedKeys.contains(cloudParam.getKey()) && cloudParam.getValue() != null) {
-                if (overrideParameters || newAttributes.get(cloudParam.getKey()) == null) {
-                    newAttributes.put(cloudParam.getKey(), cloudParam.getValue());
-                    newAttributesAdded = true;
-                }
-            }
-        }
-        if (newAttributesAdded) {
-            credential.setAttributes(new Json(newAttributes).getValue());
+        // compare the new attributes with the existing ones
+        if (!mergedAttributes.equals(newAttributes)) {
+            mergedAttributes.putAll(newAttributes);
+            credential.setAttributes(new Json(mergedAttributes).getValue());
+            newAttributesAdded = true;
+            LOGGER.info("New attributes added or changed in credetial, therefore the credential is recreated, and vault is updated: {}", credential);
         }
         return newAttributesAdded;
     }
