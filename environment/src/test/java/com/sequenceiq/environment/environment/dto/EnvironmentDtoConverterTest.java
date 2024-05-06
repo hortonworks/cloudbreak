@@ -134,7 +134,7 @@ class EnvironmentDtoConverterTest {
 
     private static final String AUTHORIZED_IP_RANGES = "0.0.0.0/0";
 
-    private static final String OUTBOUND_TYPE = "userDefinedRouting";
+    private static final String OUTBOUND_TYPE = "udr";
 
     @Mock
     private AuthenticationDtoConverter authenticationDtoConverter;
