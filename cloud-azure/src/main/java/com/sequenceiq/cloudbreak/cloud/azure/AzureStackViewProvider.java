@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStorageView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -55,6 +56,9 @@ public class AzureStackViewProvider {
     @Inject
     @Qualifier("DefaultRetryService")
     private Retry retryService;
+
+    @Inject
+    private AzureAddressPrefixProvider azureAddressPrefixProvider;
 
     public AzureStackView getAzureStack(AzureCredentialView azureCredentialView, CloudStack cloudStack, AzureClient client, AuthenticatedContext ac) {
         Map<String, String> customImageNamePerInstance = getCustomImageNamePerInstance(ac, cloudStack);
@@ -115,11 +119,21 @@ public class AzureStackViewProvider {
         return result;
     }
 
-    private long getAvailableAddresses(Subnet subnet) {
-        SubnetUtils su = new SubnetUtils(subnet.addressPrefix());
+    long getAvailableAddresses(Subnet subnet) {
+        String addressPrefix = getAddressPrefix(subnet);
+        SubnetUtils su = new SubnetUtils(addressPrefix);
         su.setInclusiveHostCount(true);
         long available = su.getInfo().getAddressCountLong();
         long used = subnet.networkInterfaceIPConfigurationCount();
         return available - used - AZURE_NUMBER_OF_RESERVED_IPS;
+    }
+
+    private String getAddressPrefix(Subnet subnet) {
+        try {
+            return azureAddressPrefixProvider.getAddressPrefix(subnet);
+        } catch (RuntimeException exception) {
+            String message = String.format("Couldn't get address prefix: %s", exception.getMessage());
+            throw new CloudConnectorException(message, exception);
+        }
     }
 }
