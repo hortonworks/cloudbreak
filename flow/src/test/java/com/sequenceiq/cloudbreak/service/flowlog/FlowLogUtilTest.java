@@ -4,10 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -16,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.domain.StateStatus;
 
 class FlowLogUtilTest {
@@ -94,6 +98,41 @@ class FlowLogUtilTest {
 
         Optional<FlowLog> mostRecentFailedLog = FlowLogUtil.getMostRecentFailedLog(flowLogs);
         assertEquals(mostRecentFailedLog.get(), failedFlowLog2);
+    }
+
+    @Test
+    void testIsFlowInFailedState() {
+        List<FlowLogWithoutPayload> flowLogs = new ArrayList<>();
+
+        FlowLogWithoutPayload failedFlowLog = mock(FlowLogWithoutPayload.class);
+        when(failedFlowLog.getStateStatus()).thenReturn(StateStatus.FAILED);
+        when(failedFlowLog.getCurrentState()).thenReturn("FAILED_CURRENT_STATE1");
+        when(failedFlowLog.getCreated()).thenReturn(10L);
+        when(failedFlowLog.getFinalized()).thenReturn(true);
+        flowLogs.add(failedFlowLog);
+
+        FlowLogWithoutPayload successfulFlowLog1 = mock(FlowLogWithoutPayload.class);
+        when(successfulFlowLog1.getStateStatus()).thenReturn(StateStatus.SUCCESSFUL);
+        when(successfulFlowLog1.getNextEvent()).thenReturn("NEXT_EVENT1");
+        when(successfulFlowLog1.getCreated()).thenReturn(3L);
+        when(successfulFlowLog1.getCurrentState()).thenReturn("CURRENT_STATE1");
+        flowLogs.add(successfulFlowLog1);
+
+        FlowLogWithoutPayload successfulFlowLog2 = mock(FlowLogWithoutPayload.class);
+        when(successfulFlowLog2.getStateStatus()).thenReturn(StateStatus.SUCCESSFUL);
+        when(successfulFlowLog2.getNextEvent()).thenReturn("NEXT_EVENT2");
+        when(successfulFlowLog2.getCreated()).thenReturn(9L);
+        when(successfulFlowLog2.getCurrentState()).thenReturn("CURRENT_STATE2");
+        flowLogs.add(successfulFlowLog2);
+
+        FlowLogWithoutPayload successfulFlowLog3 = mock(FlowLogWithoutPayload.class);
+        when(successfulFlowLog3.getStateStatus()).thenReturn(StateStatus.SUCCESSFUL);
+        when(successfulFlowLog3.getNextEvent()).thenReturn("NEXT_EVENT3");
+        when(successfulFlowLog3.getCreated()).thenReturn(4L);
+        when(successfulFlowLog3.getCurrentState()).thenReturn("CURRENT_STATE3");
+        flowLogs.add(successfulFlowLog3);
+
+        assertTrue(FlowLogUtil.isFlowInFailedState(flowLogs, Set.of("FAILED_HANDLED_EVENT")));
     }
 
     @Test
