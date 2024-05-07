@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
@@ -188,7 +187,6 @@ public class StackCreatorService {
         long start = System.currentTimeMillis();
         String stackName = stackRequest.getName();
         String crn = getCrnForCreation(Optional.ofNullable(stackRequest.getResourceCrn()));
-        String accountId = Crn.safeFromString(crn).getAccountId();
 
         measure(() -> recipeValidatorService.validateRecipeExistenceOnInstanceGroups(stackRequest.getInstanceGroups(), workspace.getId()),
                 LOGGER,
@@ -266,7 +264,7 @@ public class StackCreatorService {
                         "Select the correct image took {} ms");
                 javaVersionValidator.validateImage(imgFromCatalog.getImage(), stackRequest.getJavaVersion(), ThreadBasedUserCrnProvider.getAccountId());
                 stackRuntimeVersionValidator.validate(stackRequest, imgFromCatalog.getImage(), stackType);
-                imageService.getSupportedImdsVersion(accountId, stack.cloudPlatform(), imgFromCatalog).ifPresent(stack::setSupportedImdsVersion);
+                imageService.getSupportedImdsVersion(stack.cloudPlatform(), imgFromCatalog).ifPresent(stack::setSupportedImdsVersion);
                 Stack newStack = measure(
                         () -> stackService.create(stack, imgFromCatalog, user, workspace, stackRequest.getExternalDatabase()),
                         LOGGER,

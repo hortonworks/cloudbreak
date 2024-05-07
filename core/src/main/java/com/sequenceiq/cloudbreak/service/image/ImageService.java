@@ -355,14 +355,12 @@ public class ImageService {
         return components;
     }
 
-    public Optional<String> getSupportedImdsVersion(String accountId, String cloudPlatform, StatedImage image) {
+    public Optional<String> getSupportedImdsVersion(String cloudPlatform, StatedImage image) {
         if (CloudPlatform.AWS.equals(CloudPlatform.valueOf(cloudPlatform))) {
-            if (entitlementService.isAwsImdsV2Enforced(accountId)) {
-                Map<String, String> packageVersions = image.getImage().getPackageVersions();
-                if (packageVersions.containsKey(ImagePackageVersion.IMDS_VERSION.getKey()) &&
-                        StringUtils.equals(packageVersions.get(ImagePackageVersion.IMDS_VERSION.getKey()), AWS_IMDS_VERSION_V2)) {
-                    return Optional.of(AWS_IMDS_VERSION_V2);
-                }
+            Map<String, String> packageVersions = image.getImage().getPackageVersions();
+            if (packageVersions.containsKey(ImagePackageVersion.IMDS_VERSION.getKey()) &&
+                    StringUtils.equals(packageVersions.get(ImagePackageVersion.IMDS_VERSION.getKey()), AWS_IMDS_VERSION_V2)) {
+                return Optional.of(AWS_IMDS_VERSION_V2);
             }
             return Optional.of(AWS_IMDS_VERSION_V1);
         }
