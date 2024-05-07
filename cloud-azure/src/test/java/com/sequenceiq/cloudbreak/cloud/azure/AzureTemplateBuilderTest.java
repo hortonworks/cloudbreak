@@ -199,7 +199,7 @@ public class AzureTemplateBuilderTest {
     public static Iterable<?> templatesPathDataProvider() {
         List<String> templates = Lists.newArrayList(LATEST_TEMPLATE_PATH);
         File[] templateFiles = new File(AzureTemplateBuilderTest.class.getClassLoader().getResource("templates").getPath()).listFiles();
-        List<String> olderTemplates = Arrays.stream(templateFiles).map(file -> {
+        List<String> olderTemplates = Arrays.stream(templateFiles).filter(File::isFile).map(file -> {
             String[] path = file.getPath().split("/");
             return "templates/" + path[path.length - 1];
         }).collect(Collectors.toList());
