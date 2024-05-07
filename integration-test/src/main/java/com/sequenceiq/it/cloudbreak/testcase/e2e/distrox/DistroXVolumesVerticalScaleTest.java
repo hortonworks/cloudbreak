@@ -104,7 +104,7 @@ public class DistroXVolumesVerticalScaleTest extends AbstractE2ETest {
             .await(SdxClusterStatusResponse.RUNNING)
             .awaitForHealthyInstances()
             .given("dx", DistroXTestDto.class)
-            .withTemplate(commonClusterManagerProperties.getInternalDistroXVerticalScaleBlueprintName())
+            .withTemplate(commonClusterManagerProperties.getDataMartDistroXBlueprintNameForCurrentRuntime())
             .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
                     .verticalScaleHostGroup()
                     .withInstanceType(instanceType)

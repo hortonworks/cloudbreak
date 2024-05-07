@@ -92,7 +92,7 @@ public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements Pre
                 .when(sdxTestClient.describeInternal())
                 .validate();
         testContext.given(DistroXTestDto.class)
-                .withTemplate(commonClusterManagerProperties().getInternalDistroXBlueprintNameForCurrentRuntime())
+                .withTemplate(commonClusterManagerProperties().getDataEngDistroXBlueprintNameForCurrentRuntime())
                 .withImageSettings(testContext
                         .given(DistroXImageTestDto.class)
                         .withImageCatalog(testContext.get(SdxInternalTestDto.class).getResponse().getStackV4Response().getImage().getCatalogName())

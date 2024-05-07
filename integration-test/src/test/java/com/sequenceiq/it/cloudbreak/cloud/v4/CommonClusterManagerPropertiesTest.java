@@ -12,20 +12,20 @@ class CommonClusterManagerPropertiesTest {
     @BeforeEach
     void setUp() {
         underTest = new CommonClusterManagerProperties();
-        underTest.setInternalDistroXBlueprintName("%s - Data Engineering: Apache Spark%s, Apache Hive, Apache Oozie");
+        underTest.setDataEngDistroXBlueprintName("%s - Data Engineering: Apache Spark%s, Apache Hive, Apache Oozie");
     }
 
     @Test
     void getInternalDistroXBlueprintNameFor7217() {
         underTest.setRuntimeVersion("7.2.17");
-        String result = underTest.getInternalDistroXBlueprintNameForCurrentRuntime();
+        String result = underTest.getDataEngDistroXBlueprintNameForCurrentRuntime();
         assertEquals(result, "7.2.17 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie");
     }
 
     @Test
     void getInternalDistroXBlueprintNameFor7218() {
         underTest.setRuntimeVersion("7.2.18");
-        String result = underTest.getInternalDistroXBlueprintNameForCurrentRuntime();
+        String result = underTest.getDataEngDistroXBlueprintNameForCurrentRuntime();
         assertEquals(result, "7.2.18 - Data Engineering: Apache Spark3, Apache Hive, Apache Oozie");
     }
 

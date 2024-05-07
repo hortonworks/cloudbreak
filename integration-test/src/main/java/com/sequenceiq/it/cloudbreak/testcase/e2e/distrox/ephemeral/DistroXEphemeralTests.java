@@ -63,7 +63,7 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
         String currentUpgradeRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion();
         createAndWaitDatalakeWithRuntime(testContext, currentUpgradeRuntimeVersion);
         createDataHubWithStorageOptimizedInstancesAndWithRuntime(testContext, currentUpgradeRuntimeVersion);
-        waitForDefaultDatahubCreation(testContext);
+        waitForDatahubCreation(testContext);
     }
 
     private void createAndWaitDatalakeWithRuntime(TestContext testContext, String currentRuntimeVersion) {
@@ -80,7 +80,7 @@ public class DistroXEphemeralTests extends AbstractE2ETest {
     private void createDataHubWithStorageOptimizedInstancesAndWithRuntime(TestContext testContext, String currentRuntimeVersion) {
         testContext
                 .given(DistroXTestDto.class)
-                .withTemplate(commonClusterManagerProperties.getInternalDistroXBlueprintName(currentRuntimeVersion))
+                .withTemplate(commonClusterManagerProperties.getDataEngDistroXBlueprintName(currentRuntimeVersion))
                 .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
                         .defaultHostGroup()
                         .withStorageOptimizedInstancetype()

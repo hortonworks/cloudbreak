@@ -145,12 +145,12 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     protected ClusterTestDto withCluster(ClusterTestDto cluster) {
         return cluster
                 .withValidateBlueprint(Boolean.FALSE)
-                .withBlueprintName(getBlueprintName());
+                .withBlueprintName(commonClusterManagerProperties().getInternalSdxBlueprintName());
     }
 
     @Override
     protected DistroXClusterTestDto withCluster(DistroXClusterTestDto cluster) {
-        return cluster.withBlueprintName(getBlueprintName());
+        return cluster.withBlueprintName(commonClusterManagerProperties().getInternalSdxBlueprintName());
     }
 
     @Override
@@ -281,11 +281,6 @@ public class YarnCloudProvider extends AbstractCloudProvider {
                 : request.getPublicKey());
         stackAuthenticationEntity.withLoginUserName(request.getLoginUserName());
         return stackAuthenticationEntity;
-    }
-
-    @Override
-    public String getBlueprintName() {
-        return commonClusterManagerProperties().getInternalSdxBlueprintName();
     }
 
     @Override

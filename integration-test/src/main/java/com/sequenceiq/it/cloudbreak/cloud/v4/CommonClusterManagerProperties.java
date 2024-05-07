@@ -26,9 +26,9 @@ public class CommonClusterManagerProperties {
 
     private String internalSdxBlueprintName;
 
-    private String internalDistroXBlueprintName;
+    private String dataEngDistroXBlueprintName;
 
-    private String internalDistroXVerticalScaleBlueprintName;
+    private String dataMartDistroXBlueprintName;
 
     private UpgradeProperties upgrade = new UpgradeProperties();
 
@@ -74,28 +74,28 @@ public class CommonClusterManagerProperties {
         return clouderamanager;
     }
 
-    public String getInternalDistroXBlueprintNameForCurrentRuntime() {
-        return getInternalDistroXBlueprintName(runtimeVersion);
+    public String getDataEngDistroXBlueprintNameForCurrentRuntime() {
+        return getDataEngDistroXBlueprintName(runtimeVersion);
     }
 
-    public String getInternalDistroXBlueprintName(String distroXUpgradeCurrentVersion) {
-        return String.format(internalDistroXBlueprintName, distroXUpgradeCurrentVersion, getSparkVersion(distroXUpgradeCurrentVersion));
+    public String getDataEngDistroXBlueprintName(String distroXUpgradeCurrentVersion) {
+        return String.format(dataEngDistroXBlueprintName, distroXUpgradeCurrentVersion, getSparkVersion(distroXUpgradeCurrentVersion));
     }
 
     private String getSparkVersion(String distroXUpgradeCurrentVersion) {
         return versionComparator.compare(() -> distroXUpgradeCurrentVersion, () -> FIRST_RUNTIME_VERSION_WITH_SPARK_VERSION) >= 0 ? SPARK_VERSION : "";
     }
 
-    public void setInternalDistroXBlueprintName(String internalDistroXBlueprintName) {
-        this.internalDistroXBlueprintName = internalDistroXBlueprintName;
+    public void setDataEngDistroXBlueprintName(String dataEngDistroXBlueprintName) {
+        this.dataEngDistroXBlueprintName = dataEngDistroXBlueprintName;
     }
 
-    public String getInternalDistroXVerticalScaleBlueprintName() {
-        return String.format(internalDistroXVerticalScaleBlueprintName, runtimeVersion);
+    public String getDataMartDistroXBlueprintNameForCurrentRuntime() {
+        return String.format(dataMartDistroXBlueprintName, runtimeVersion);
     }
 
-    public void setInternalDistroXVerticalScaleBlueprintName(String internalDistroXVerticalScaleBlueprintName) {
-        this.internalDistroXVerticalScaleBlueprintName = internalDistroXVerticalScaleBlueprintName;
+    public void setDataMartDistroXBlueprintName(String dataMartDistroXBlueprintName) {
+        this.dataMartDistroXBlueprintName = dataMartDistroXBlueprintName;
     }
 
     public UpgradeProperties getUpgrade() {

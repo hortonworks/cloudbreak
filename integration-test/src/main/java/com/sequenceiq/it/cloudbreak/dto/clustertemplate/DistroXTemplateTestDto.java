@@ -84,7 +84,7 @@ public class DistroXTemplateTestDto extends DeletableTestDto<DistroXV1Request, C
     }
 
     public DistroXTemplateTestDto withDefaultThreeInstanceGroups() {
-        Collection<DistroXInstanceGroupTestDto> instanceGroups = DistroXInstanceGroupTestDto.defaultHostGroup(getTestContext());
+        Collection<DistroXInstanceGroupTestDto> instanceGroups = DistroXInstanceGroupTestDto.dataEngHostGroups(getTestContext());
         getRequest().setInstanceGroups(instanceGroups.stream()
                 .map(DistroXInstanceGroupTestDto::getRequest)
                 .collect(Collectors.toSet()));

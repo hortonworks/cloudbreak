@@ -89,8 +89,8 @@ integrationtest:
   clusterShape: LIGHT_DUTY
   internalClusterShape: CUSTOM
   internalSdxBlueprintName: "%s - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas"
-  internalDistroXBlueprintName: "%s - Data Engineering: Apache Spark%s, Apache Hive, Apache Oozie"
-  internalDistroXVerticalScaleBlueprintName:  "%s - Data Mart: Apache Impala, Hue"
+  dataEngDistroXBlueprintName: "%s - Data Engineering: Apache Spark%s, Apache Hive, Apache Oozie"
+  dataMartDistroXBlueprintName:  "%s - Data Mart: Apache Impala, Hue"
   clouderamanager:
     defaultUser: admin
     defaultPassword: cb1STPneh2b6KyJn

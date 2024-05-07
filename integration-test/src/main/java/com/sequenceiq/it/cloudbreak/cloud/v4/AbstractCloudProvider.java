@@ -84,6 +84,16 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     @Override
+    public String getDataMartDistroXBlueprintName() {
+        return commonClusterManagerProperties().getDataMartDistroXBlueprintNameForCurrentRuntime();
+    }
+
+    @Override
+    public String getDataEngDistroXBlueprintName() {
+        return commonClusterManagerProperties().getDataEngDistroXBlueprintNameForCurrentRuntime();
+    }
+
+    @Override
     public String getBaseImageTestCatalogName() {
         return commonCloudProperties().getBaseImageTest().getSourceCatalogName();
     }

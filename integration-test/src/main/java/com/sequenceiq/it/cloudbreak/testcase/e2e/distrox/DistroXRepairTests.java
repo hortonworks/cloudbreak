@@ -56,7 +56,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
-        createDefaultDatahubWithAutoTlsAndExternalDb(testContext);
+        createDataMartDatahubWithAutoTlsAndExternalDb(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -66,7 +66,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
             when = "in case of AWS provider secrets are getting rotated before " +
                     "recovery called on the MASTER host group, where the instance had been " +
                     "terminated",
-            then = "all the actions (secret rotatioin then recovery for AWS OR just recovery) should be successful, " +
+            then = "all the actions (secret rotation then recovery for AWS OR just recovery) should be successful, " +
                     "the cluster should be available"
     )
     public void testSecretRotationAndMasterRepairWithTerminatedInstances(TestContext testContext) {

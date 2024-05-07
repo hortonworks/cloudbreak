@@ -84,6 +84,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public String getDataMartDistroXBlueprintName() {
+        return delegate.getDataMartDistroXBlueprintName();
+    }
+
+    @Override
     public String getBaseImageTestCatalogName() {
         return delegate.getBaseImageTestCatalogName();
     }
@@ -355,8 +360,8 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
-    public String getBlueprintName() {
-        return String.format(delegate.getBlueprintName(), commonClusterManagerProperties.getRuntimeVersion());
+    public String getDataEngDistroXBlueprintName() {
+        return String.format(delegate.getDataEngDistroXBlueprintName(), commonClusterManagerProperties.getRuntimeVersion());
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup;
 
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.COMPUTE;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.COORDINATOR;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.EXECUTOR;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.GATEWAY;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.WORKER;
@@ -50,11 +52,15 @@ public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<Insta
                 .withTemplate(template);
     }
 
-    public static List<DistroXInstanceGroupTestDto> defaultHostGroup(TestContext testContext, CloudPlatform cloudPlatform) {
+    public static List<DistroXInstanceGroupTestDto> dataEngHostGroups(TestContext testContext, CloudPlatform cloudPlatform) {
         return withHostGroup(testContext, cloudPlatform, MASTER, COMPUTE, WORKER, GATEWAY);
     }
 
-    public static List<DistroXInstanceGroupTestDto> defaultHostGroup(TestContext testContext) {
+    public static List<DistroXInstanceGroupTestDto> dataMartHostGroups(TestContext testContext, CloudPlatform cloudPlatform) {
+        return withHostGroup(testContext, cloudPlatform, MASTER, COORDINATOR, EXECUTOR);
+    }
+
+    public static List<DistroXInstanceGroupTestDto> dataEngHostGroups(TestContext testContext) {
         return withHostGroup(testContext, testContext.getCloudPlatform(), MASTER, COMPUTE, WORKER, GATEWAY);
     }
 

@@ -102,14 +102,14 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public DistroXClusterTestDto withCluster(DistroXClusterTestDto cluster) {
-        return cluster.withBlueprintName(getBlueprintName());
+        return cluster.withBlueprintName(getDataEngDistroXBlueprintName());
     }
 
     @Override
     protected ClusterTestDto withCluster(ClusterTestDto cluster) {
         return cluster
                 .withValidateBlueprint(Boolean.TRUE)
-                .withBlueprintName(getBlueprintName());
+                .withBlueprintName(getDataEngDistroXBlueprintName());
     }
 
     @Override
@@ -362,11 +362,6 @@ public class MockCloudProvider extends AbstractCloudProvider {
         params.setVpcId(getVpcId());
         params.setInternetGatewayId(getInternetGatewayId());
         return params;
-    }
-
-    @Override
-    public String getBlueprintName() {
-        return commonClusterManagerProperties().getInternalDistroXBlueprintNameForCurrentRuntime();
     }
 
     @Override

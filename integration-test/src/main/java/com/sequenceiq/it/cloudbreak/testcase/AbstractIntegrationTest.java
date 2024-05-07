@@ -33,6 +33,8 @@ import com.sequenceiq.it.cloudbreak.dto.TermsPolicyDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupsBuilder;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
@@ -187,12 +189,17 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     protected void createDefaultDatahubForExistingDatalake(TestContext testContext) {
         initiateDefaultDatahubCreation(testContext);
-        waitForDefaultDatahubCreation(testContext);
+        waitForDatahubCreation(testContext);
     }
 
     protected void createDefaultDatahubWithAutoTlsAndExternalDbForExistingDatalake(TestContext testContext) {
         initiateDefaultDatahubCreationWithAutoTlsAndExternalDb(testContext);
-        waitForDefaultDatahubCreation(testContext);
+        waitForDatahubCreation(testContext);
+    }
+
+    protected void createDataMartDatahubWithAutoTlsAndExternalDbForExistingDatalake(TestContext testContext) {
+        initiateDataMartDatahubCreationWithAutoTlsAndExternalDb(testContext);
+        waitForDatahubCreation(testContext);
     }
 
     protected void createDefaultDatahub(TestContext testContext) {
@@ -205,10 +212,15 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         createDefaultDatahubWithAutoTlsAndExternalDbForExistingDatalake(testContext);
     }
 
+    protected void createDataMartDatahubWithAutoTlsAndExternalDb(TestContext testContext) {
+        createDefaultDatalakeWithAutoTlsAndExternalDb(testContext);
+        createDataMartDatahubWithAutoTlsAndExternalDbForExistingDatalake(testContext);
+    }
+
     protected void createStorageOptimizedDatahub(TestContext testContext) {
         createDefaultDatalake(testContext);
         initiateStorageOptimizedDatahubCreation(testContext);
-        waitForDefaultDatahubCreation(testContext);
+        waitForDatahubCreation(testContext);
     }
 
     protected void initiateDefaultDatahubCreation(TestContext testContext) {
@@ -230,7 +242,22 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .validate();
     }
 
-    protected void waitForDefaultDatahubCreation(TestContext testContext) {
+    protected void initiateDataMartDatahubCreationWithAutoTlsAndExternalDb(TestContext testContext) {
+        DistroXDatabaseRequest databaseRequest = new DistroXDatabaseRequest();
+        databaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.NON_HA);
+
+        testContext
+                .given(DistroXTestDto.class)
+                .withAutoTls()
+                .withExternalDatabase(databaseRequest)
+                .withCluster(testContext.given(DistroXClusterTestDto.class)
+                        .withBlueprintName(testContext.getCloudProvider().getDataMartDistroXBlueprintName()))
+                .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.dataMartHostGroups(testContext, testContext.getCloudPlatform()))
+                .when(distroXTestClient.create())
+                .validate();
+    }
+
+    protected void waitForDatahubCreation(TestContext testContext) {
         testContext.given(DistroXTestDto.class)
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
@@ -246,20 +273,6 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                         .withStorageOptimizedInstancetype()
                         .build())
                 .when(distroXTestClient.create())
-                .validate();
-    }
-
-    protected void createDatahubWithDatabase(TestContext testContext) {
-        DistroXDatabaseRequest databaseRequest = new DistroXDatabaseRequest();
-        databaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.NON_HA);
-
-        testContext
-                .given(DistroXTestDto.class)
-                    .withExternalDatabase(databaseRequest)
-                .when(distroXTestClient.create())
-                .await(STACK_AVAILABLE)
-                .awaitForHealthyInstances()
-                .when(distroXTestClient.get())
                 .validate();
     }
 
@@ -405,15 +418,6 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .init(BlueprintTestDto.class)
                 .when(blueprintTestClient.listV4())
                 .validate();
-    }
-
-    protected void createDatahubInEnvironment(TestContext testContext, String environmentName) {
-        testContext
-                .given(DistroXTestDto.class)
-                .withEnvironmentName(environmentName)
-                .when(distroXTestClient.create())
-                .validate();
-        waitForDefaultDatahubCreation(testContext);
     }
 
     protected SdxCloudStorageRequest getCloudStorageRequest(TestContext testContext) {

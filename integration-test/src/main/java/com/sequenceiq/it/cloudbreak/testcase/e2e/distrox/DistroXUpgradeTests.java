@@ -163,7 +163,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
 
         testContext
                 .given(firstDhName, DistroXTestDto.class)
-                .withTemplate(commonClusterManagerProperties.getInternalDistroXBlueprintName(currentUpgradeRuntimeVersion))
+                .withTemplate(commonClusterManagerProperties.getDataEngDistroXBlueprintName(currentUpgradeRuntimeVersion))
                 .withPreferredSubnetsForInstanceNetworkIfMultiAzEnabledOrJustFirst()
                 .when(distroXTestClient.create(), key(firstDhName))
                 .await(STACK_AVAILABLE, key(firstDhName))
@@ -181,7 +181,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .given(imageName, DistroXImageTestDto.class).withImageCatalog(thirdPartyCatalogName)
                 .withImageId(uuid.get())
                 .given(secondDhName, DistroXTestDto.class)
-                .withTemplate(commonClusterManagerProperties.getInternalDistroXBlueprintName(currentRuntimeVersion3rdParty))
+                .withTemplate(commonClusterManagerProperties.getDataEngDistroXBlueprintName(currentRuntimeVersion3rdParty))
                 .withPreferredSubnetsForInstanceNetworkIfMultiAzEnabledOrJustFirst()
                 .withImageSettings(imageName)
                 .when(distroXTestClient.create(), key(secondDhName))

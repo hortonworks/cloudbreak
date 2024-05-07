@@ -167,7 +167,9 @@ public interface CloudProvider {
 
     Integer gatewayPort(FreeIpaTestDto stackEntity);
 
-    String getBlueprintName();
+    String getDataEngDistroXBlueprintName();
+
+    String getDataMartDistroXBlueprintName();
 
     String getBlueprintCdhVersion();
 
