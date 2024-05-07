@@ -140,6 +140,10 @@ public class FreeIpaTestClient {
         return new FreeIpaUpgradeAction();
     }
 
+    public Action<FreeIpaTestDto, FreeIpaClient> upgrade(String imageCatalogUrl, String imageId) {
+        return new FreeIpaUpgradeAction(imageCatalogUrl, imageId);
+    }
+
     public Action<FreeipaChangeImageCatalogTestDto, FreeIpaClient> changeImageCatalog() {
         return new FreeIpaChangeImageCatalogAction();
     }

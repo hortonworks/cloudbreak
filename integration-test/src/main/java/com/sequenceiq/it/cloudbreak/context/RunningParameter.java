@@ -228,6 +228,10 @@ public class RunningParameter {
         return new RunningParameter().withWaitForFlow(true);
     }
 
+    public static RunningParameter doNotWaitForFlow() {
+        return new RunningParameter().withWaitForFlow(false);
+    }
+
     public static RunningParameter waitForFlowSuccess() {
         return new RunningParameter().withWaitForFlowSuccess();
     }

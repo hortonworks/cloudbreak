@@ -1,14 +1,16 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
+package com.sequenceiq.it.cloudbreak.assertion.freeipa;
 
 import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.COMPLETED;
 import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.RUNNING;
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.doNotWaitForFlow;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
@@ -17,6 +19,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
@@ -33,6 +36,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdat
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
+import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaOperationStatusTestDto;
@@ -40,47 +44,60 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 
 @Component
-public class FreeIpaUpgradeAvailabilityVerification {
+public class FreeIpaAvailabilityAssertion {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIntegrationTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaAvailabilityAssertion.class);
 
     private static final long FIVE_MINUTES_IN_SEC = 5L * 60;
 
     private static final String CHECK_DNS_LOOKUPS_CMD = "ping -c 2 %s | grep -q '%s'";
 
+    @Value("${integrationtest.freeipaAvailability.operationTimeoutInMinutes:5}")
+    private Integer operationTimeoutInMinutes;
+
     @Inject
     private SshJClientActions sshJClientActions;
 
-    public FreeIpaOperationStatusTestDto testFreeIpaAvailabilityDuringUpgrade(TestContext testContext, FreeIpaOperationStatusTestDto testDto,
-            FreeIpaClient freeIpaClient, String freeIpa) {
-        try {
-            com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient = freeIpaClient.getDefaultClient();
-            FreeIpaTestDto freeIpaTestDto = testContext.get(freeIpa);
-            String environmentCrn = freeIpaTestDto.getResponse().getEnvironmentCrn();
-            String accountId = Crn.safeFromString(environmentCrn).getAccountId();
-            boolean firstTestFailure = true;
-            while (ipaClient.getOperationV1Endpoint().getOperationStatus(testDto.getOperationId(), accountId).getStatus() == RUNNING) {
+    public Assertion<FreeIpaTestDto, FreeIpaClient> available() {
+        return (testContext, testDto, client) -> {
+            try {
+                com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient = client.getDefaultClient();
+                String environmentCrn = testDto.getResponse().getEnvironmentCrn();
+                String accountId = Crn.safeFromString(environmentCrn).getAccountId();
+
                 addAndDeleteDnsARecord(ipaClient, environmentCrn);
                 addAndDeleteDnsCnameRecord(ipaClient, environmentCrn);
                 createBindUser(testContext, ipaClient, environmentCrn);
                 generateHostKeyTab(ipaClient, environmentCrn);
                 generateServiceKeytab(ipaClient, environmentCrn);
-                dnsLookups(testContext.given(SdxTestDto.class));
+                dnsLookups(testContext.get(SdxTestDto.class));
                 cleanUp(testContext, ipaClient, environmentCrn);
 //              kinit(testContext.given(SdxTestDto.class), ipaClient, environmentCrn);
                 syncUsers(testContext, ipaClient, environmentCrn, accountId);
+            } catch (TestFailException e) {
+                throw e;
+            } catch (Exception e) {
+                LOGGER.error("Unexpected error during FreeIPA upgrade availability test", e);
+                throw new TestFailException("Unexpected error during FreeIPA upgrade availability test: " + e.getMessage(), e);
             }
-        } catch (TestFailException e) {
-            throw e;
-        } catch (Exception e) {
-            LOGGER.error("Unexpected error during FreeIPA upgrade availability test", e);
-            throw new TestFailException("Unexpected error during FreeIPA upgrade availability test: " + e.getMessage(), e);
-        }
-        return testDto;
+            return testDto;
+        };
+    }
+
+    public Assertion<FreeIpaOperationStatusTestDto, FreeIpaClient> availableDuringOperation() {
+        return (testContext, testDto, client) -> {
+            com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient = client.getDefaultClient();
+            FreeIpaTestDto freeIpaTestDto = testContext.get(FreeIpaTestDto.class);
+            String environmentCrn = freeIpaTestDto.getResponse().getEnvironmentCrn();
+            String accountId = Crn.safeFromString(environmentCrn).getAccountId();
+            while (ipaClient.getOperationV1Endpoint().getOperationStatus(testDto.getOperationId(), accountId).getStatus() == RUNNING) {
+                available().doAssertion(testContext, freeIpaTestDto, client);
+            }
+            return testDto;
+        };
     }
 
     private void syncUsers(TestContext testContext, com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient, String environmentCrn, String accountId) {
@@ -104,8 +121,8 @@ public class FreeIpaUpgradeAvailabilityVerification {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Full forced usersync test failed during upgrade", e);
-            throw new TestFailException("Full forced usersync test failed during upgrade with: " + e.getMessage(), e);
+            LOGGER.error("Full forced usersync test failed", e);
+            throw new TestFailException("Full forced usersync test failed with: " + e.getMessage(), e);
         }
     }
 
@@ -119,8 +136,8 @@ public class FreeIpaUpgradeAvailabilityVerification {
             ipaClient.getDnsV1Endpoint().addDnsARecord(aRecordRequest);
             ipaClient.getDnsV1Endpoint().deleteDnsARecord(environmentCrn, null, aRecordRequest.getHostname());
         } catch (Exception e) {
-            LOGGER.error("DNS A record test failed during upgrade", e);
-            throw new TestFailException("DNS A record test failed during upgrade with: " + e.getMessage(), e);
+            LOGGER.error("DNS A record test failed", e);
+            throw new TestFailException("DNS A record test failed with: " + e.getMessage(), e);
         }
     }
 
@@ -133,8 +150,8 @@ public class FreeIpaUpgradeAvailabilityVerification {
             ipaClient.getDnsV1Endpoint().addDnsCnameRecord(request);
             ipaClient.getDnsV1Endpoint().deleteDnsCnameRecord(environmentCrn, null, request.getCname());
         } catch (Exception e) {
-            LOGGER.error("DNS CNAME record test failed during upgrade", e);
-            throw new TestFailException("DNS CNAME record test failed during upgrade with: " + e.getMessage(), e);
+            LOGGER.error("DNS CNAME record test failed", e);
+            throw new TestFailException("DNS CNAME record test failed with: " + e.getMessage(), e);
         }
     }
 
@@ -146,9 +163,11 @@ public class FreeIpaUpgradeAvailabilityVerification {
             String initiatorUserCrn = "__internal__actor__";
             OperationStatus operationStatus = ipaClient.getFreeIpaV1Endpoint().createE2ETestBindUser(bindUserCreateRequest, initiatorUserCrn);
             waitToCompleted(testContext, operationStatus.getOperationId(), "createBindUserOperation");
+        } catch (BadRequestException e) {
+            LOGGER.warn("CREATE BIND USER failed to start, possibly because of missing E2E_TEST_ONLY entitlement, which is mock ums only", e);
         } catch (Exception e) {
-            LOGGER.error("CREATE BIND USER test failed during upgrade", e);
-            throw new TestFailException("CREATE BIND USER test failed during upgrade with: " + e.getMessage(), e);
+            LOGGER.error("CREATE BIND USER test failed", e);
+            throw new TestFailException("CREATE BIND USER test failed with: " + e.getMessage(), e);
         }
     }
 
@@ -160,8 +179,8 @@ public class FreeIpaUpgradeAvailabilityVerification {
             hostKeytabRequest.setDoNotRecreateKeytab(Boolean.FALSE);
             ipaClient.getKerberosMgmtV1Endpoint().generateHostKeytab(hostKeytabRequest);
         } catch (Exception e) {
-            LOGGER.error("Generate Host keytab test failed during upgrade", e);
-            throw new TestFailException("Generate Host keytab test failed during upgrade with: " + e.getMessage(), e);
+            LOGGER.error("Generate Host keytab test failed", e);
+            throw new TestFailException("Generate Host keytab test failed with: " + e.getMessage(), e);
         }
     }
 
@@ -174,8 +193,8 @@ public class FreeIpaUpgradeAvailabilityVerification {
             serviceKeytabRequest.setDoNotRecreateKeytab(Boolean.FALSE);
             ipaClient.getKerberosMgmtV1Endpoint().generateServiceKeytab(serviceKeytabRequest, null);
         } catch (Exception e) {
-            LOGGER.error("Generate Service keytab test failed during upgrade", e);
-            throw new TestFailException("Generate Service keytab test failed during upgrade with: " + e.getMessage(), e);
+            LOGGER.error("Generate Service keytab test failed", e);
+            throw new TestFailException("Generate Service keytab test failed with: " + e.getMessage(), e);
         }
     }
 
@@ -190,16 +209,17 @@ public class FreeIpaUpgradeAvailabilityVerification {
             String awaitExceptionKey = testContext.given("cleanupOperation", FreeIpaOperationStatusTestDto.class).getAwaitExceptionKey(COMPLETED);
             testContext.getExceptionMap().remove(awaitExceptionKey);
         } catch (Exception e) {
-            LOGGER.error("CLEANUP test failed during upgrade", e);
-//            throw new TestFailException("CLEANUP test failed during upgrade with: " + e.getMessage(), e);
+            LOGGER.error("CLEANUP test failed", e);
+//            throw new TestFailException("CLEANUP test failed with: " + e.getMessage(), e);
         }
     }
 
     private void waitToCompleted(TestContext testContext, String operationId, String operationName) {
         testContext
                 .given(operationName, FreeIpaOperationStatusTestDto.class)
-                .withOperationId(operationId)
-                .await(COMPLETED, waitForFlow().withWaitForFlow(Boolean.FALSE).withTimeoutChecker(new AbsolutTimeBasedTimeoutChecker(FIVE_MINUTES_IN_SEC)));
+                    .withOperationId(operationId)
+                .await(COMPLETED, doNotWaitForFlow().withTimeoutChecker(
+                        new AbsolutTimeBasedTimeoutChecker(TimeUnit.MINUTES.toSeconds(operationTimeoutInMinutes))));
     }
 
     private void kinit(SdxTestDto sdxTestDto, com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient, String environmentCrn) {
@@ -214,8 +234,8 @@ public class FreeIpaUpgradeAvailabilityVerification {
         } catch (TestFailException e) {
             throw e;
         } catch (Exception e) {
-            LOGGER.error("FreeIPA upgrade kinit test failed with unexpected error", e);
-            throw new TestFailException("FreeIPA upgrade kinit test failed with unexpected error: " + e.getMessage(), e);
+            LOGGER.error("FreeIPA kinit test failed with unexpected error", e);
+            throw new TestFailException("FreeIPA kinit test failed with unexpected error: " + e.getMessage(), e);
         }
     }
 

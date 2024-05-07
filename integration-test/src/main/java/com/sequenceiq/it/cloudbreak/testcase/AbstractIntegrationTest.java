@@ -46,6 +46,7 @@ import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.util.EnvironmentUtil;
@@ -465,8 +466,18 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
      */
     protected void useExistingDatalake(TestContext testContext, String datalakeName) {
         testContext
-                .given(SdxInternalTestDto.class)
+                .given(SdxTestDto.class)
                     .withName(datalakeName)
+                .when(sdxTestClient.describe());
+    }
+
+    /**
+     * Helper method to speed up local testing. Could be invoked to re-use an already existing datalake with the given name
+     */
+    protected void useExistingInternalDatalake(TestContext testContext, String datalakeName) {
+        testContext
+                .given(SdxInternalTestDto.class)
+                .withName(datalakeName)
                 .when(sdxTestClient.describeInternal());
     }
 

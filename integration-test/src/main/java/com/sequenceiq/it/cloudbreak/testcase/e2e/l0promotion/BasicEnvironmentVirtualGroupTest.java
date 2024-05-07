@@ -30,8 +30,9 @@ import com.sequenceiq.it.cloudbreak.dto.ums.UmsGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.EnvironmentUtil;
+import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
 
-public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
+public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest implements ImageValidatorE2ETest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicEnvironmentVirtualGroupTest.class);
 

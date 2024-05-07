@@ -612,6 +612,10 @@ public abstract class TestContext implements ApplicationContextAware {
         return exceptionMap;
     }
 
+    public <T extends CloudbreakTestDto> T get(String key, Class<T> clss) {
+        return get(key);
+    }
+
     public <T extends CloudbreakTestDto> T get(String key) {
         if (!resourceNames.containsKey(key) || resourceNames.get(key) == null) {
             LOGGER.warn("Key: '{}' has been provided but it has no result in the Test Context's Resources map.", key);

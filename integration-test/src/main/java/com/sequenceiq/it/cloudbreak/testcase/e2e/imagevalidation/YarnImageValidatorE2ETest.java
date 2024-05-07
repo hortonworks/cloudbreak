@@ -24,7 +24,7 @@ public class YarnImageValidatorE2ETest extends HybridCloudE2ETest implements Ima
 
     @Override
     protected void setupTest(TestContext testContext) {
-        imageValidatorE2ETestUtil.setupTest(testContext, this);
+        imageValidatorE2ETestUtil.setupTest(testContext);
         super.setupTest(testContext);
         setWorkloadPassword(testContext);
     }
@@ -49,13 +49,8 @@ public class YarnImageValidatorE2ETest extends HybridCloudE2ETest implements Ima
     }
 
     @Override
-    public String getImageId(TestContext testContext) {
+    public String getCbImageId(TestContext testContext) {
         SdxInternalTestDto sdxInternalTestDto = testContext.get(CHILD_SDX_KEY);
         return sdxInternalTestDto.getResponse().getStackV4Response().getImage().getId();
-    }
-
-    @Override
-    public boolean isPrewarmedImageTest() {
-        return false;
     }
 }

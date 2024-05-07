@@ -24,9 +24,9 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJavaVersionActions;
-import com.sequenceiq.it.util.imagevalidation.PrewarmedImageValidatorE2ETest;
+import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
 
-public class ForceJavaVersionE2ETest extends AbstractE2ETest implements PrewarmedImageValidatorE2ETest {
+public class ForceJavaVersionE2ETest extends AbstractE2ETest implements ImageValidatorE2ETest {
 
     @Value("#{'${integrationtest.java.supportedVersions}'.split(',')}")
     private List<Integer> supportedJavaVersions;

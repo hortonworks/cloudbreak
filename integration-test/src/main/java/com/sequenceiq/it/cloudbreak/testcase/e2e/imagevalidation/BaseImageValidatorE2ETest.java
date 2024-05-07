@@ -46,7 +46,7 @@ public class BaseImageValidatorE2ETest extends AbstractE2ETest implements ImageV
 
     @Override
     protected void setupTest(TestContext testContext) {
-        imageValidatorE2ETestUtil.setupTest(testContext, this);
+        imageValidatorE2ETestUtil.setupTest(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
         createEnvironmentWithFreeIpa(testContext);
@@ -94,13 +94,8 @@ public class BaseImageValidatorE2ETest extends AbstractE2ETest implements ImageV
     }
 
     @Override
-    public String getImageId(TestContext testContext) {
+    public String getCbImageId(TestContext testContext) {
         SdxInternalTestDto sdxInternalTestDto = testContext.get(sdxInternalKey);
         return sdxInternalTestDto.getResponse().getStackV4Response().getImage().getId();
-    }
-
-    @Override
-    public boolean isPrewarmedImageTest() {
-        return false;
     }
 }

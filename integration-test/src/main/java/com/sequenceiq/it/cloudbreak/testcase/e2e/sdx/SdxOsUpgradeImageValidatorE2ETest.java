@@ -4,7 +4,8 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 
 import jakarta.inject.Inject;
 
-import org.testng.SkipException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
@@ -12,14 +13,17 @@ import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
+import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
-import com.sequenceiq.it.util.imagevalidation.PrewarmedImageValidatorE2ETest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
-public class SdxOsUpgradeImageValidatorE2ETest extends PreconditionSdxE2ETest implements PrewarmedImageValidatorE2ETest {
+public class SdxOsUpgradeImageValidatorE2ETest extends PreconditionSdxE2ETest implements ImageValidatorE2ETest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxOsUpgradeImageValidatorE2ETest.class);
 
     @Inject
     private ImageValidatorE2ETestUtil imageValidatorE2ETestUtil;
@@ -31,10 +35,11 @@ public class SdxOsUpgradeImageValidatorE2ETest extends PreconditionSdxE2ETest im
 
     @Override
     protected void setupTest(TestContext testContext) {
-        imageValidatorE2ETestUtil.setupTest(testContext, this);
-        latestImageWithSameRuntime = imageValidatorE2ETestUtil.getLatestImageWithSameRuntimeAsImageUnderValidation(testContext)
-                .orElseThrow(() -> new SkipException("There are no older images with the same runtime components, so OS upgrade testing is not possible"));
-        super.setupTest(testContext);
+        imageValidatorE2ETestUtil.setupTest(testContext);
+        latestImageWithSameRuntime = imageValidatorE2ETestUtil.getLatestImageWithSameRuntimeAsImageUnderValidation(testContext);
+        if (latestImageWithSameRuntime != null) {
+            super.setupTest(testContext);
+        }
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -46,6 +51,11 @@ public class SdxOsUpgradeImageValidatorE2ETest extends PreconditionSdxE2ETest im
             then = "SDX OS upgrade should be successful, the cluster should be up and running and using a newer DB version"
     )
     public void testSDXOsUpgrade(TestContext testContext) {
+        if (latestImageWithSameRuntime == null) {
+            Log.log(LOGGER, "SKIP - There are no older images with the same runtime components, so OS upgrade testing is not possible");
+            return;
+        }
+
         String originalDatabaseMajorVersion = sdxUpgradeDatabaseTestUtil.getOriginalDatabaseMajorVersion();
         TargetMajorVersion targetDatabaseMajorVersion = sdxUpgradeDatabaseTestUtil.getTargetMajorVersion();
 
