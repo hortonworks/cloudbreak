@@ -104,13 +104,7 @@ jobs:
           export CIRCLECI=true
           ./gradlew -Penv=jenkins -b build.gradle --quiet \
             test \
-            core:jacocoTestReport \
-            freeipa:jacocoTestReport \
-            autoscale:jacocoTestReport \
-            datalake:jacocoTestReport \
-            environment:jacocoTestReport \
-            redbeams:jacocoTestReport \
-            secret-rotation:jacocoTestReport \
+            jacocoTestReport \
             -x checkstyleMain \
             -x checkstyleTest \
             -x spotbugsMain \
@@ -132,16 +126,26 @@ jobs:
           only-summary: 'true'
       - name: Add coverage to PR
         id: jacoco
-        uses: Kitchen/RE-thirdparty-actions/actions/jacoco-report@main
+        uses: cloudbreak/cloudbreak-github-actions/actions/jacoco-report@master
         with:
           paths: |
             core/build/reports/jacoco/test/jacocoTestReport.xml,
             freeipa/build/reports/jacoco/test/jacocoTestReport.xml,
             autoscale/build/reports/jacoco/test/jacocoTestReport.xml,
             datalake/build/reports/jacoco/test/jacocoTestReport.xml,
+            environment-api/build/reports/jacoco/test/jacocoTestReport.xml,
+            environment-common/build/reports/jacoco/test/jacocoTestReport.xml,
+            environment-remote/build/reports/jacoco/test/jacocoTestReport.xml,
             environment/build/reports/jacoco/test/jacocoTestReport.xml,
+            externalized-compute/build/reports/jacoco/test/jacocoTestReport.xml,
+            flow/build/reports/jacoco/test/jacocoTestReport.xml,
             redbeams/build/reports/jacoco/test/jacocoTestReport.xml,
-            secret-rotation/build/reports/jacoco/test/jacocoTestReport.xml
+            secret-engine/build/reports/jacoco/test/jacocoTestReport.xml,
+            secret-rotation/build/reports/jacoco/test/jacocoTestReport.xml,
+            template-manager-cmtemplate/build/reports/jacoco/test/jacocoTestReport.xml,
+            template-manager-core/build/reports/jacoco/test/jacocoTestReport.xml,
+            template-manager-recipe/build/reports/jacoco/test/jacocoTestReport.xml,
+            template-manager-tag/build/reports/jacoco/test/jacocoTestReport.xml
           token: ${{ steps.build_secrets.outputs.GITHUB_TOKEN}}
           min-coverage-overall: 55
           min-coverage-changed-files: 55
