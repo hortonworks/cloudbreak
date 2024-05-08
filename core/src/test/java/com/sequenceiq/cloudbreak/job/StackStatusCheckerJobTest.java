@@ -415,13 +415,13 @@ public class StackStatusCheckerJobTest {
                 new HealthCheck(HealthCheckType.CERT, HealthCheckResult.UNHEALTHY, Optional.empty()));
         ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(Map.of(HostName.hostName("host1"), healthChecks));
         lenient().when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(extendedHostStatuses);
-        lenient().when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of(instanceMetaData));
+        lenient().when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of(instanceMetaData));
         lenient().when(instanceMetaData.getInstanceStatus()).thenReturn(InstanceStatus.SERVICES_HEALTHY);
     }
 
     private void setupForCMNotAccessible() {
         setStackStatus(DetailedStackStatus.STOPPED);
-        when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of(instanceMetaData));
+        when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of(instanceMetaData));
     }
 
     private void setStackStatus(DetailedStackStatus detailedStackStatus) {

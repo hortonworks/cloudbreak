@@ -286,7 +286,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     private void doSync(StackDto stack) {
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
-        List<InstanceMetadataView> runningInstances = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stack.getId());
+        List<InstanceMetadataView> runningInstances = instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(stack.getId());
         try {
             if (isClusterManagerRunning(stack.getStack(), connector)) {
                 ExtendedHostStatuses extendedHostStatuses = getExtendedHostStatuses(stack, connector);

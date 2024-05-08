@@ -176,7 +176,7 @@ public class StackSyncService {
             instanceMetaDataService.updateInstanceStatus(instance, InstanceStatus.FAILED);
         } else if (!instance.isRunning()) {
             LOGGER.info("Instance '{}' is reported as running on the cloud provider, updating metadata.", instance.getInstanceId());
-            updateMetaDataToRunning(instance);
+            updateMetaDataToHealthy(instance);
         }
     }
 
@@ -271,9 +271,9 @@ public class StackSyncService {
                 Collections.singletonList(getInstanceName(instanceMetaData)));
     }
 
-    private void updateMetaDataToRunning(InstanceMetadataView instanceMetaData) {
-        LOGGER.info("Instance '{}' state to RUNNING.", instanceMetaData.getInstanceId());
-        instanceMetaDataService.updateInstanceStatus(instanceMetaData, InstanceStatus.SERVICES_RUNNING, "Services running");
+    private void updateMetaDataToHealthy(InstanceMetadataView instanceMetaData) {
+        LOGGER.info("Instance '{}' state to HEALTHY.", instanceMetaData.getInstanceId());
+        instanceMetaDataService.updateInstanceStatus(instanceMetaData, InstanceStatus.SERVICES_HEALTHY, "Services healthy");
     }
 
     private String getInstanceName(InstanceMetadataView instanceMetaData) {

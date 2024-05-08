@@ -239,7 +239,7 @@ class StackStatusIntegrationTest {
         when(stackDto.getStack()).thenReturn(stack);
         when(stackDto.getCluster()).thenReturn(cluster);
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
-        when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(STACK_ID)).thenReturn(runningInstances);
+        when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(STACK_ID)).thenReturn(runningInstances);
     }
 
     private void setUpClusterApi() {
@@ -333,7 +333,7 @@ class StackStatusIntegrationTest {
         setUpCloudVmInstanceStatuses(Map.of(
                 INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER,
                 INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER));
-        when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(STACK_ID)).thenReturn(runningInstances, List.of());
+        when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(STACK_ID)).thenReturn(runningInstances, List.of());
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
@@ -368,7 +368,7 @@ class StackStatusIntegrationTest {
         setUpCloudVmInstanceStatuses(Map.of(
                 INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER,
                 INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER));
-        when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(STACK_ID)).thenReturn(runningInstances, List.of());
+        when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(STACK_ID)).thenReturn(runningInstances, List.of());
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
