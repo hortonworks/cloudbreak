@@ -36,7 +36,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_BULK_HOSTS_REMOVAL;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONTAINER_READY_ENV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_EXPERIMENTAL_SCALE_LIMITS;
@@ -483,9 +482,6 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.endpointgateway.skip.validation}")
     private boolean endpointGatewaySkipValidation;
 
-    @Value("${auth.mock.cm.ha.enable}")
-    private boolean cmHAEnabled;
-
     @Value("${auth.mock.freeipa.batch.call.enable}")
     private boolean enableFmsFreeipaBatchCall;
 
@@ -910,9 +906,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (endpointGatewaySkipValidation) {
             builder.addEntitlements(createEntitlement(CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION));
-        }
-        if (cmHAEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_CM_HA));
         }
         if (diagnosticsEnabled) {
             builder.addEntitlements(createEntitlement(CDP_VM_DIAGNOSTICS));

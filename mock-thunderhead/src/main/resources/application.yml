@@ -69,7 +69,6 @@ auth:
     aws:
       native.variant.migration.enable: false
     gcp:
-    cm.ha.enable: false
     conclusion.checker.send.user.event.enable: true
     ha.repair.enable: true
     ui:

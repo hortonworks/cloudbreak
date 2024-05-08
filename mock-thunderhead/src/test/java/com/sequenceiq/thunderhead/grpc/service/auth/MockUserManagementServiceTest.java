@@ -231,9 +231,6 @@ public class MockUserManagementServiceTest {
                 {"endpointGatewaySkipValidation false", "endpointGatewaySkipValidation", false, "CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION", false},
                 {"endpointGatewaySkipValidation true", "endpointGatewaySkipValidation", true, "CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION", true},
 
-                {"cmHAEnabled false", "cmHAEnabled", false, "CDP_CM_HA", false},
-                {"cmHAEnabled true", "cmHAEnabled", true, "CDP_CM_HA", true},
-
                 {"conclusionCheckerSendUserEvent false", "conclusionCheckerSendUserEvent", false, "CDP_CONCLUSION_CHECKER_SEND_USER_EVENT", false},
                 {"conclusionCheckerSendUserEvent true", "conclusionCheckerSendUserEvent", true, "CDP_CONCLUSION_CHECKER_SEND_USER_EVENT", true},
 
