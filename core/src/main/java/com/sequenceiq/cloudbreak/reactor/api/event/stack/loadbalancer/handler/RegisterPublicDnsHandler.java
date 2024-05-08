@@ -71,10 +71,7 @@ public class RegisterPublicDnsHandler extends ExceptionCatcherEventHandler<Regis
                         .filter(ig -> ig.getId().equals(instanceGroup.getId()))
                         .forEach(ig -> ig.setInstanceMetaData(Set.copyOf(instanceMetaData)));
                     LOGGER.debug("Registering load balancer public DNS entry");
-                    boolean success = clusterPublicEndpointManagementService.provisionLoadBalancer(stack);
-                    if (!success) {
-                        throw new CloudbreakException("Public DNS registration resulted in failed state. Please consult DNS registration logs.");
-                    }
+                    clusterPublicEndpointManagementService.provisionLoadBalancer(stack);
                     LOGGER.debug("Load balancer public DNS registration was successful");
                     return new RegisterPublicDnsSuccess(stack.getId());
                 } else {

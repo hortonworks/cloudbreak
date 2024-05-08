@@ -2,8 +2,12 @@ package com.sequenceiq.cloudbreak.component;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -13,11 +17,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto;
+import com.sequenceiq.cloudbreak.PemDnsEntryCreateOrUpdateException;
 import com.sequenceiq.cloudbreak.certificate.service.DnsManagementService;
 import com.sequenceiq.cloudbreak.client.GrpcClusterDnsClient;
 
 @ExtendWith(MockitoExtension.class)
-public class DnsManagementServiceTest {
+class DnsManagementServiceTest {
 
     private static final String EXAMPLE_CLDR_DOMAIN = "envname.cldr.site";
 
@@ -85,6 +90,60 @@ public class DnsManagementServiceTest {
         Assertions.assertNotNull(result);
         Assertions.assertEquals(EXAMPLE_CLDR_DOMAIN, result);
         verify(grpcClusterDnsClient).generateManagedDomain(anyString(), any(), anyString(), any());
+    }
+
+    @Test
+    void testCreateOrUpdateDnsEntryWithIpShouldNotThrowExceptionWhenAllDnsEntriesCouldBeRegistered() throws PemDnsEntryCreateOrUpdateException {
+        PublicEndpointManagementProto.CreateDnsEntryResponse resp = PublicEndpointManagementProto.CreateDnsEntryResponse.newBuilder().build();
+        List<String> ips = List.of("10.0.1.11", "10.1.1.21");
+        when(grpcClusterDnsClient.createOrUpdateDnsEntryWithIp(eq("accountId"), eq("endpointName"), eq("environmentName"),
+                eq(false), eq(ips), any())).thenReturn(resp);
+
+        underTest.createOrUpdateDnsEntryWithIp("accountId", "endpointName", "environmentName", false, ips);
+
+        verify(grpcClusterDnsClient, times(1))
+                .createOrUpdateDnsEntryWithIp(eq("accountId"), eq("endpointName"), eq("environmentName"), eq(false), eq(ips), any());
+    }
+
+    @Test
+    void testCreateOrUpdateDnsEntryWithIpShouldThrowExceptionWhenOneOfTheDnsEntriesCouldNotBeRegistered() {
+        PublicEndpointManagementProto.CreateDnsEntryResponse resp = PublicEndpointManagementProto.CreateDnsEntryResponse.newBuilder().build();
+        List<String> ips = List.of("10.0.1.11", "10.1.1.21");
+        when(grpcClusterDnsClient.createOrUpdateDnsEntryWithIp(eq("accountId"), eq("endpointName"), eq("environmentName"), eq(false), eq(ips), any()))
+                .thenThrow(new RuntimeException("Something really bad happened...."));
+
+        PemDnsEntryCreateOrUpdateException actualException = Assertions.assertThrows(PemDnsEntryCreateOrUpdateException.class,
+                () -> underTest.createOrUpdateDnsEntryWithIp("accountId", "endpointName", "environmentName", false, ips));
+        Assertions.assertEquals(
+                "Failed to create DNS entry with endpoint name: 'endpointName', environment name: 'environmentName' and IPs: '10.0.1.11,10.1.1.21'",
+                actualException.getMessage());
+    }
+
+    @Test
+    void testCreateOrUpdateDnsEntryWithCloudDnsShouldNotThrowExceptionWhenAllDnsEntriesCouldBeRegistered() throws PemDnsEntryCreateOrUpdateException {
+        PublicEndpointManagementProto.CreateDnsEntryResponse resp = PublicEndpointManagementProto.CreateDnsEntryResponse.newBuilder().build();
+        List<String> ips = List.of("10.0.1.11", "10.1.1.21");
+        when(grpcClusterDnsClient.createOrUpdateDnsEntryWithCloudDns(eq("accountId"), eq("endpointName"), eq("environmentName"),
+                eq("cloudFQDN"), eq("hostedZoneId"), any())).thenReturn(resp);
+
+        underTest.createOrUpdateDnsEntryWithCloudDns("accountId", "endpointName", "environmentName", "cloudFQDN", "hostedZoneId");
+
+        verify(grpcClusterDnsClient, times(1))
+                .createOrUpdateDnsEntryWithCloudDns(eq("accountId"), eq("endpointName"), eq("environmentName"), eq("cloudFQDN"), eq("hostedZoneId"), any());
+    }
+
+    @Test
+    void testCreateOrUpdateDnsEntryWithCloudDnsShouldThrowExceptionWhenOneOfTheDnsEntriesCouldNotBeRegistered() {
+        PublicEndpointManagementProto.CreateDnsEntryResponse resp = PublicEndpointManagementProto.CreateDnsEntryResponse.newBuilder().build();
+        List<String> ips = List.of("10.0.1.11", "10.1.1.21");
+        when(grpcClusterDnsClient.createOrUpdateDnsEntryWithCloudDns(eq("accountId"), eq("endpointName"), eq("environmentName"),
+                eq("cloudFQDN"), eq("hostedZoneId"), any())).thenThrow(new RuntimeException("Something really bad happened...."));
+
+        PemDnsEntryCreateOrUpdateException actualException = Assertions.assertThrows(PemDnsEntryCreateOrUpdateException.class,
+                () -> underTest.createOrUpdateDnsEntryWithCloudDns("accountId", "endpointName", "environmentName", "cloudFQDN", "hostedZoneId"));
+        Assertions.assertEquals(
+                "Failed to create DNS entry with endpoint name: 'endpointName', environment name: 'environmentName' and cloud DNS: 'cloudFQDN'",
+                actualException.getMessage());
     }
 
     private PublicEndpointManagementProto.GenerateManagedDomainNamesResponse getGenerateManagedDomainNamesResponse(String subDomain) {

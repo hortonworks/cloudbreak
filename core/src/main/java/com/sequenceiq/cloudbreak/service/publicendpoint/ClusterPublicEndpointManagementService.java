@@ -29,16 +29,15 @@ public class ClusterPublicEndpointManagementService {
     @Inject
     private FreeIPAEndpointManagementService freeIPAEndpointManagementService;
 
-    public boolean provision(StackDtoDelegate stack) {
-        boolean certGenerationWasSuccessful = gatewayPublicEndpointManagementService.generateCertAndSaveForStackAndUpdateDnsEntry(stack);
+    public void provision(StackDtoDelegate stack) {
+        gatewayPublicEndpointManagementService.generateCertAndSaveForStackAndUpdateDnsEntry(stack);
         dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.createOrUpdate(stack));
-        return certGenerationWasSuccessful;
     }
 
-    public boolean provisionLoadBalancer(StackDtoDelegate stack) {
+    public void provisionLoadBalancer(StackDtoDelegate stack) {
         gatewayPublicEndpointManagementService.renewCertificate(stack);
         LOGGER.info("Certificate updated with load balancer SAN in PEM service.");
-        return gatewayPublicEndpointManagementService.updateDnsEntryForLoadBalancers(stack);
+        gatewayPublicEndpointManagementService.updateDnsEntryForLoadBalancers(stack);
     }
 
     public void terminate(StackDtoDelegate stack) {

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.PemDnsEntryCreateOrUpdateException;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -74,19 +75,16 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
                 && stack.getClusterId() != null;
     }
 
-    public boolean generateCertAndSaveForStackAndUpdateDnsEntry(StackDtoDelegate stack) {
-        boolean success = false;
+    public void generateCertAndSaveForStackAndUpdateDnsEntry(StackDtoDelegate stack) {
         if (stack != null && isCertRenewalTriggerable(stack.getStack())) {
             if (StringUtils.isEmpty(stack.getSecurityConfig().getUserFacingCert())) {
                 generateCertAndSaveForStack(stack);
             }
             updateDnsEntryForCluster(stack);
             updateDnsEntryForLoadBalancers(stack);
-            success = true;
         } else {
             LOGGER.info("External FQDN and valid certificate creation is disabled.");
         }
-        return success;
     }
 
     public String updateDnsEntry(StackDtoDelegate stack, String gatewayIp) {
@@ -107,16 +105,18 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         String endpointName = getEndpointNameForStack(stack);
         LOGGER.info("Creating DNS entry with endpoint name: '{}', environment name: '{}' and gateway IP: '{}'", endpointName, environment.getName(), gatewayIp);
         List<String> ips = List.of(gatewayIp);
-        boolean success = getDnsManagementService().createOrUpdateDnsEntryWithIp(accountId, endpointName, environment.getName(), false, ips);
-        if (success) {
+        try {
+            getDnsManagementService().createOrUpdateDnsEntryWithIp(accountId, endpointName, environment.getName(), false, ips);
             String fullQualifiedDomainName = getDomainNameProvider()
                     .getFullyQualifiedEndpointName(hueHostGroups, endpointName, environment);
-            if (fullQualifiedDomainName != null) {
-                LOGGER.info("Dns entry updated: ip: {}, FQDN: {}", gatewayIp, fullQualifiedDomainName);
-                return fullQualifiedDomainName;
-            }
+            LOGGER.info("Dns entry updated: ip: {}, FQDN: {}", gatewayIp, fullQualifiedDomainName);
+            return fullQualifiedDomainName;
+        } catch (PemDnsEntryCreateOrUpdateException exception) {
+            String message = String.format("Failed to create or update DNS entry for endpoint '%s' and environment name '%s' and IP: '%s'",
+                    endpointName, environment.getName(), gatewayIp);
+            LOGGER.warn(message, exception);
+            throw new CloudbreakServiceException(message, exception);
         }
-        return null;
     }
 
     public Set<String> getHueHostGroups(StackDtoDelegate stack) {
@@ -124,53 +124,50 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
                 .getHostGroupsWithComponent(HueRoles.HUE_SERVER);
     }
 
-    public boolean updateDnsEntryForLoadBalancers(StackDtoDelegate stack) {
-        boolean success = false;
+    public void updateDnsEntryForLoadBalancers(StackDtoDelegate stack) {
         if (manageCertificateAndDnsInPem() && stack != null) {
             Optional<LoadBalancer> loadBalancerOptional = getLoadBalancerWithEndpoint(stack);
-
             if (loadBalancerOptional.isEmpty()) {
-                LOGGER.error("Unable find appropriate load balancer in stack. Load balancer public domain name will not be registered.");
+                LOGGER.warn("Unable find appropriate load balancer in stack. Load balancer public domain name will not be registered.");
             } else {
-                success = registerLoadBalancersDnsEntries(loadBalancerOptional.get(), stack.getEnvironmentCrn(), getHueHostGroups(stack), stack.getId());
+                registerLoadBalancersDnsEntries(loadBalancerOptional.get(), stack.getEnvironmentCrn(), getHueHostGroups(stack), stack.getId());
             }
         } else {
             LOGGER.debug("DNS registration in PEM service not enabled for load balancer.");
-            success = true;
         }
-
-        return success;
     }
 
-    private boolean registerLoadBalancersDnsEntries(LoadBalancer loadBalancer, String environmentCrn, Set<String> hueHostGroups, Long stackId) {
-        boolean success = false;
+    private void registerLoadBalancersDnsEntries(LoadBalancer loadBalancer, String environmentCrn, Set<String> hueHostGroups, Long stackId) {
         LOGGER.info("Updating load balancer DNS entries");
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(environmentCrn);
-
         String endpoint = loadBalancer.getEndpoint();
-        if (loadBalancer.getDns() != null && loadBalancer.getHostedZoneId() != null) {
-            LOGGER.info("Creating load balancer DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'",
-                    endpoint, environment.getName(), loadBalancer.getDns());
-            success = getDnsManagementService().createOrUpdateDnsEntryWithCloudDns(accountId, endpoint,
-                    environment.getName(), loadBalancer.getDns(), loadBalancer.getHostedZoneId());
-        } else if (loadBalancer.getIp() != null) {
-            LOGGER.info("Creating load balancer DNS entry with endpoint name: '{}', environment name: '{}' and IP: '{}'",
-                    endpoint, environment.getName(), loadBalancer.getIp());
-            success = getDnsManagementService().createOrUpdateDnsEntryWithIp(accountId, endpoint,
-                    environment.getName(), false, List.of(loadBalancer.getIp()));
-        } else {
-            LOGGER.warn("Could not find IP or cloud DNS info for load balancer with endpoint {}" +
-                    " and environment name: '{}'. DNS registration will be skipped.", loadBalancer.getEndpoint(), environment.getName());
-        }
 
-        if (success) {
+        try {
+            if (loadBalancer.getDns() != null && loadBalancer.getHostedZoneId() != null) {
+                LOGGER.info("Creating load balancer DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'",
+                        endpoint, environment.getName(), loadBalancer.getDns());
+                getDnsManagementService().createOrUpdateDnsEntryWithCloudDns(accountId, endpoint,
+                        environment.getName(), loadBalancer.getDns(), loadBalancer.getHostedZoneId());
+            } else if (loadBalancer.getIp() != null) {
+                LOGGER.info("Creating load balancer DNS entry with endpoint name: '{}', environment name: '{}' and IP: '{}'",
+                        endpoint, environment.getName(), loadBalancer.getIp());
+                getDnsManagementService().createOrUpdateDnsEntryWithIp(accountId, endpoint,
+                        environment.getName(), false, List.of(loadBalancer.getIp()));
+            } else {
+                String message = String.format("Could not find IP or cloud DNS info for load balancer with endpoint '%s'" +
+                        " and environment name: '%s'. DNS registration could not be executed.", loadBalancer.getEndpoint(), environment.getName());
+                LOGGER.warn(message);
+                throw new CloudbreakServiceException(message);
+            }
             setLoadBalancerFqdn(hueHostGroups, loadBalancer, endpoint, environment, accountId);
-        } else {
+        } catch (PemDnsEntryCreateOrUpdateException exception) {
+            String message = String.format("Failed to create or update DNS entry for load balancer with endpoint '%s' and environment name '%s'",
+                    loadBalancer.getEndpoint(), environment.getName());
+            LOGGER.warn(message, exception);
             flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), STACK_LB_REGISTER_PUBLIC_DNS_FAILED);
+            throw new CloudbreakServiceException(message, exception);
         }
-
-        return success;
     }
 
     private void setLoadBalancerFqdn(Set<String> hueHostGroups, LoadBalancer loadBalancer, String endpoint, DetailedEnvironmentResponse env, String accountId) {
@@ -266,7 +263,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
             List<String> certs = getCertificateCreationService().create(accountId, endpointName, environmentName, csr, stack.getResourceCrn());
             saveCertificates(securityConfig, certs);
         } catch (Exception e) {
-            String msg = "The certificate could not be generated by Public Endpoint Management service: " + e.getMessage();
+            String msg = "The public certificate could not be generated by Public Endpoint Management service: " + e.getMessage();
             LOGGER.info(msg, e);
             throw new CloudbreakServiceException(msg, e);
         }

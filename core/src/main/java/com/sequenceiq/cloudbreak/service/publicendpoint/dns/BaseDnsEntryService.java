@@ -13,7 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
+import com.sequenceiq.cloudbreak.PemDnsEntryCreateOrUpdateException;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.BasePublicEndpointManagementService;
@@ -84,13 +86,29 @@ public abstract class BaseDnsEntryService extends BasePublicEndpointManagementSe
         LOGGER.info("Register DNS entries for {} for FQDNs: '{}'", logName(), String.join(",", ipsByFqdn.keySet()));
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(environmentCrn);
+        Map<String, String> finishedIpsByFqdns = new HashMap<>();
+        try {
+            for (Map.Entry<String, String> ipsByFqdnEntry : ipsByFqdn.entrySet()) {
+                String fqdn = ipsByFqdnEntry.getKey();
+                String ip = ipsByFqdnEntry.getValue();
+                getDnsManagementService().createOrUpdateDnsEntryWithIp(accountId, getShortHostname(fqdn),
+                        environment.getName(), false, List.of(ip));
+                finishedIpsByFqdns.put(fqdn, ip);
+            }
+            return ipsByFqdn;
+        } catch (PemDnsEntryCreateOrUpdateException e) {
+            String message = String.format("Failed to create DNS entry: '%s'", e.getMessage());
+            LOGGER.warn(message, e);
+            rollBackDnsEntries(finishedIpsByFqdns, accountId, environment);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
 
-        return ipsByFqdn
-                .entrySet()
-                .stream()
-                .filter(entry -> getDnsManagementService().createOrUpdateDnsEntryWithIp(accountId,
-                        getShortHostname(entry.getKey()), environment.getName(), false, List.of(entry.getValue())))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    private void rollBackDnsEntries(Map<String, String> finishedIpsByFqdns, String accountId, DetailedEnvironmentResponse environment) {
+        LOGGER.info("Rolling back, de-registering previously created or updated DNS entries for FQDNs: '{}'",
+                String.join(",", finishedIpsByFqdns.keySet()));
+        finishedIpsByFqdns.forEach((key, value) -> getDnsManagementService().deleteDnsEntryWithIp(accountId, getShortHostname(key), environment.getName(),
+                false, List.of(value)));
     }
 
     private Map<String, String> doDeregister(Map<String, String> ipsByFqdn, String environmentCrn) {

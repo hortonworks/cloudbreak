@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse;
+import com.sequenceiq.cloudbreak.PemDnsEntryCreateOrUpdateException;
 import com.sequenceiq.cloudbreak.client.GrpcClusterDnsClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
@@ -26,18 +27,20 @@ public class DnsManagementService {
     @Inject
     private GrpcClusterDnsClient grpcClusterDnsClient;
 
-    public boolean createOrUpdateDnsEntryWithIp(String accountId, String endpoint, String environment, boolean wildcard, List<String> ips) {
+    public void createOrUpdateDnsEntryWithIp(String accountId, String endpoint, String environment, boolean wildcard, List<String> ips)
+            throws PemDnsEntryCreateOrUpdateException {
         String ipsAsString = String.join(",", ips);
         try {
             LOGGER.info("Creating DNS entry with endpoint name: '{}', environment name: '{}' and IPs: '{}'", endpoint, environment, ipsAsString);
             Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getOrGenerateRequestId());
             grpcClusterDnsClient.createOrUpdateDnsEntryWithIp(accountId, endpoint, environment, wildcard, ips, requestIdOptional);
             LOGGER.info("DNS entry has been created with endpoint name: '{}', environment name: '{}' and IPs: '{}'", endpoint, environment, ipsAsString);
-            return true;
         } catch (Exception e) {
-            LOGGER.warn("Failed to create DNS entry with endpoint name: '{}', environment name: '{}' and IPs: '{}'", endpoint, environment, ipsAsString, e);
+            String message = String.format("Failed to create DNS entry with endpoint name: '%s', environment name: '%s' and IPs: '%s'", endpoint, environment,
+                    ipsAsString);
+            LOGGER.warn(message, e);
+            throw new PemDnsEntryCreateOrUpdateException(message, e);
         }
-        return false;
     }
 
     public boolean deleteDnsEntryWithIp(String accountId, String endpoint, String environment, boolean wildcard, List<String> ips) {
@@ -54,18 +57,19 @@ public class DnsManagementService {
         return false;
     }
 
-    public boolean createOrUpdateDnsEntryWithCloudDns(String accountId, String endpoint, String environment, String cloudDns,
-            String hostedZoneId) {
+    public void createOrUpdateDnsEntryWithCloudDns(String accountId, String endpoint, String environment, String cloudDns, String hostedZoneId)
+            throws PemDnsEntryCreateOrUpdateException {
         try {
             LOGGER.info("Creating DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'", endpoint, environment, cloudDns);
             Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getOrGenerateRequestId());
             grpcClusterDnsClient.createOrUpdateDnsEntryWithCloudDns(accountId, endpoint, environment, cloudDns, hostedZoneId, requestIdOptional);
             LOGGER.info("DNS entry has been created with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'", endpoint, environment, cloudDns);
-            return true;
         } catch (Exception e) {
-            LOGGER.warn("Failed to create DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'", endpoint, environment, cloudDns, e);
+            String message = String.format("Failed to create DNS entry with endpoint name: '%s', environment name: '%s' and cloud DNS: '%s'",
+                    endpoint, environment, cloudDns);
+            LOGGER.warn(message, e);
+            throw new PemDnsEntryCreateOrUpdateException(message, e);
         }
-        return false;
     }
 
     public boolean deleteDnsEntryWithCloudDns(String accountId, String endpoint, String environment, String cloudDns, String hostedZoneId) {

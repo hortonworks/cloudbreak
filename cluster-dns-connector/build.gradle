@@ -62,3 +62,9 @@ protobuf {
   }
   generatedFilesBaseDir = "$projectDir/src/generated"
 }
+
+configurations.configureEach {
+  resolutionStrategy {
+    force "net.bytebuddy:byte-buddy:${byteBuddyVersion}"
+  }
+}

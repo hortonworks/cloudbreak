@@ -2,7 +2,13 @@ package com.sequenceiq.cloudbreak.service.publicendpoint.dns;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -11,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.PemDnsEntryCreateOrUpdateException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -26,6 +34,7 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.certificate.service.CertificateCreationService;
 import com.sequenceiq.cloudbreak.certificate.service.DnsManagementService;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.nifi.NifiConfigProvider;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -103,7 +112,7 @@ class BaseDnsEntryServiceTest {
     }
 
     @Test
-    void testCreateOrUpdate() {
+    void testCreateOrUpdate() throws PemDnsEntryCreateOrUpdateException {
         Stack stack = new Stack();
         stack.setEnvironmentCrn(ENVIRONMENT_CRN);
         Cluster cluster = new Cluster();
@@ -117,12 +126,12 @@ class BaseDnsEntryServiceTest {
         when(environmentClientService.getByCrn(stack.getEnvironmentCrn())).thenReturn(environmentResponse);
         when(componentLocatorService.getComponentLocation(stack, nifiConfigProvider.getRoleTypes()))
                 .thenReturn(componentLocation);
-        when(dnsManagementService.createOrUpdateDnsEntryWithIp(ACCOUNT_ID, FQDN_1, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_1))).thenReturn(true);
-        when(dnsManagementService.createOrUpdateDnsEntryWithIp(ACCOUNT_ID, FQDN_2, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_2))).thenReturn(true);
-        when(dnsManagementService.createOrUpdateDnsEntryWithIp(ACCOUNT_ID, FQDN_3, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_3))).thenReturn(true);
 
         Map<String, String> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createOrUpdate(stack));
 
+        verify(dnsManagementService, times(1)).createOrUpdateDnsEntryWithIp(ACCOUNT_ID, FQDN_1, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_1));
+        verify(dnsManagementService, times(1)).createOrUpdateDnsEntryWithIp(ACCOUNT_ID, FQDN_2, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_2));
+        verify(dnsManagementService, times(1)).createOrUpdateDnsEntryWithIp(ACCOUNT_ID, FQDN_3, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_3));
         assertEquals(3, result.size());
         assertTrue(result.containsKey(FQDN_1));
         assertTrue(result.containsKey(FQDN_2));
@@ -133,7 +142,33 @@ class BaseDnsEntryServiceTest {
     }
 
     @Test
-    void testCreateOrUpdateCandidates() {
+    void testCreateOrUpdateWhenTheLastDnsEntryRegistrationFails() throws PemDnsEntryCreateOrUpdateException {
+        Stack stack = new Stack();
+        stack.setEnvironmentCrn(ENVIRONMENT_CRN);
+        Cluster cluster = new Cluster();
+        stack.setCluster(cluster);
+        setInstanceGroups(stack);
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setName(ENVIRONMENT_NAME);
+        Map<String, List<String>> componentLocation = Map.of(NIFI_NODE, List.of(FQDN_1, FQDN_2, FQDN_3));
+        when(environmentClientService.getByCrn(stack.getEnvironmentCrn())).thenReturn(environmentResponse);
+        when(componentLocatorService.getComponentLocation(stack, nifiConfigProvider.getRoleTypes()))
+                .thenReturn(componentLocation);
+        doNothing()
+                .doNothing()
+                .doThrow(new PemDnsEntryCreateOrUpdateException("Uh-Oh"))
+                .when(dnsManagementService).createOrUpdateDnsEntryWithIp(eq(ACCOUNT_ID), any(), eq(ENVIRONMENT_NAME), eq(false), anyList());
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.createOrUpdate(stack));
+            Assertions.assertEquals("Failed to create DNS entry: 'Uh-Oh'", exception.getMessage());
+        });
+
+        verify(dnsManagementService, times(2)).deleteDnsEntryWithIp(eq(ACCOUNT_ID), any(), eq(ENVIRONMENT_NAME), eq(false), anyList());
+    }
+
+    @Test
+    void testCreateOrUpdateCandidates() throws PemDnsEntryCreateOrUpdateException {
         Stack stack = new Stack();
         stack.setEnvironmentCrn(ENVIRONMENT_CRN);
         Cluster cluster = new Cluster();
@@ -147,13 +182,41 @@ class BaseDnsEntryServiceTest {
         when(environmentClientService.getByCrn(stack.getEnvironmentCrn())).thenReturn(environmentResponse);
         when(componentLocatorService.getComponentLocation(stack, nifiConfigProvider.getRoleTypes()))
                 .thenReturn(componentLocation);
-        when(dnsManagementService.createOrUpdateDnsEntryWithIp(ACCOUNT_ID, FQDN_1, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_1))).thenReturn(true);
 
         Map<String, String> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createOrUpdateCandidates(stack, Map.of(FQDN_1, PUBLIC_IP_1)));
 
+        verify(dnsManagementService, times(1)).createOrUpdateDnsEntryWithIp(ACCOUNT_ID, FQDN_1, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_1));
         assertEquals(1, result.size());
         assertTrue(result.containsKey(FQDN_1));
         assertEquals(PUBLIC_IP_1, result.get(FQDN_1));
+    }
+
+    @Test
+    void testCreateOrUpdateCandidatesWhenTheLastDnsEntryRegistrationFails() throws PemDnsEntryCreateOrUpdateException {
+        Stack stack = new Stack();
+        stack.setEnvironmentCrn(ENVIRONMENT_CRN);
+        Cluster cluster = new Cluster();
+        stack.setCluster(cluster);
+        setInstanceGroups(stack);
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setName(ENVIRONMENT_NAME);
+
+        Map<String, List<String>> componentLocation = Map.of(NIFI_NODE, List.of(FQDN_1, FQDN_2, FQDN_3));
+
+        when(environmentClientService.getByCrn(stack.getEnvironmentCrn())).thenReturn(environmentResponse);
+        when(componentLocatorService.getComponentLocation(stack, nifiConfigProvider.getRoleTypes()))
+                .thenReturn(componentLocation);
+        doNothing()
+                .doThrow(new PemDnsEntryCreateOrUpdateException("Uh-Oh"))
+                .when(dnsManagementService).createOrUpdateDnsEntryWithIp(eq(ACCOUNT_ID), any(), eq(ENVIRONMENT_NAME), eq(false), anyList());
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                    () -> underTest.createOrUpdateCandidates(stack, Map.of(FQDN_1, PUBLIC_IP_1, FQDN_2, PUBLIC_IP_2)));
+            Assertions.assertEquals("Failed to create DNS entry: 'Uh-Oh'", exception.getMessage());
+        });
+
+        verify(dnsManagementService, times(1)).deleteDnsEntryWithIp(eq(ACCOUNT_ID), any(), eq(ENVIRONMENT_NAME), eq(false), anyList());
     }
 
     @Test
