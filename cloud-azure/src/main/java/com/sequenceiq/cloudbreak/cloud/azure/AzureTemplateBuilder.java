@@ -94,8 +94,9 @@ public class AzureTemplateBuilder {
             model.put("credential", azureInstanceCredentialView);
             String rootDiskStorage = azureStorage.getImageStorageName(armCredentialView, cloudContext, cloudStack);
             AzureSecurityView armSecurityView = new AzureSecurityView(cloudStack.getGroups());
+            boolean containsMarketplaceImageDetails = cloudStack.getTemplate().contains("marketplaceImageDetails");
 
-            AzureLoadBalancerModelBuilder loadBalancerModelBuilder = new AzureLoadBalancerModelBuilder(cloudStack, stackName);
+            AzureLoadBalancerModelBuilder loadBalancerModelBuilder = new AzureLoadBalancerModelBuilder(cloudStack, stackName, !containsMarketplaceImageDetails);
 
             LOGGER.debug("MultiAz is {}",cloudStack.isMultiAz());
 
@@ -133,7 +134,7 @@ public class AzureTemplateBuilder {
             model.put("isUpscale", UPSCALE.equals(azureInstanceTemplateOperation));
             model.putAll(loadBalancerModelBuilder.buildModel());
             model.put("multiAz", cloudStack.isMultiAz());
-            String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(cloudStack), model);
+            String generatedTemplate = generateTemplate(cloudStack, model, containsMarketplaceImageDetails);
             LOGGER.info("Generated Arm template: {}", generatedTemplate);
             return generatedTemplate;
         } catch (IOException | TemplateException e) {
@@ -158,9 +159,24 @@ public class AzureTemplateBuilder {
         return getTemplate().toString();
     }
 
-    public Template getTemplate(CloudStack stack) {
+    // Quickfix for https://jira.cloudera.com/browse/CB-24844
+    // If the stored arm template for the stack doesn't contain marketplace image information, we have to use the latest version of the arm template.
+    // In this case after template generation we have to replace the LoadBalancers' sku type to "Basic", because without this the deployment creation will be
+    // failed on Azure.
+    private String generateTemplate(CloudStack stack, Map<String, Object> model, boolean containsMarketplaceImageDetails)
+            throws IOException, TemplateException {
+        return freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(stack.getTemplate(), containsMarketplaceImageDetails), model);
+    }
+
+    private Template getTemplate(String storedTemplate, boolean containsMarketplaceImageDetails) {
         try {
-            return new Template(armTemplatePath, stack.getTemplate(), freemarkerConfiguration);
+            if (containsMarketplaceImageDetails) {
+                LOGGER.debug("Stored arm template contains marketplace image details, let's use it.");
+                return new Template(armTemplatePath, storedTemplate, freemarkerConfiguration);
+            } else {
+                LOGGER.debug("Stored arm template doesn't contains marketplace image details, we will use the latest one.");
+                return getTemplate();
+            }
         } catch (IOException e) {
             throw new CloudConnectorException("Couldn't create template object", e);
         }
