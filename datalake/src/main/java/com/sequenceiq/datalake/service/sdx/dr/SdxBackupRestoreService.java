@@ -169,7 +169,7 @@ public class SdxBackupRestoreService {
     }
 
     public SdxRestoreResponse triggerDatalakeRestore(SdxCluster sdxCluster, String datalakeName, String backupId, String backupLocationOverride,
-            DatalakeDrSkipOptions skipOptions, int fullDrMaxDurationInMin, boolean validationOnly) {
+            DatalakeDrSkipOptions skipOptions, int fullDrMaxDurationInMin) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         String backupLocation;
         MDCBuilder.buildMdcContext(sdxCluster);
@@ -185,7 +185,7 @@ public class SdxBackupRestoreService {
             backupId = lastSuccessBackupInfo.getBackupId();
             backupLocation = lastSuccessBackupInfo.getBackupLocation();
         }
-        return triggerDatalakeRestoreFlow(sdxCluster, backupId, backupLocation, backupLocationOverride, skipOptions, fullDrMaxDurationInMin, validationOnly);
+        return triggerDatalakeRestoreFlow(sdxCluster, backupId, backupLocation, backupLocationOverride, skipOptions, fullDrMaxDurationInMin);
     }
 
     public datalakeDRProto.DatalakeBackupInfo getLastSuccessfulBackupInfo(String datalakeName, String userCrn) {
@@ -236,12 +236,11 @@ public class SdxBackupRestoreService {
     }
 
     private SdxRestoreResponse triggerDatalakeRestoreFlow(SdxCluster cluster, String backupId, String backupLocation, String backupLocationOverride,
-            DatalakeDrSkipOptions skipOptions, int fullDrMaxDurationInMin, boolean validationOnly) {
+            DatalakeDrSkipOptions skipOptions, int fullDrMaxDurationInMin) {
         String selector = DATALAKE_TRIGGER_RESTORE_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         DatalakeTriggerRestoreEvent startEvent = new DatalakeTriggerRestoreEvent(selector, cluster.getId(), null, userId,
-                backupId, backupLocation, backupLocationOverride, skipOptions, DatalakeRestoreFailureReason.USER_TRIGGERED, fullDrMaxDurationInMin,
-                validationOnly);
+                backupId, backupLocation, backupLocationOverride, skipOptions, DatalakeRestoreFailureReason.USER_TRIGGERED, fullDrMaxDurationInMin);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeRestoreFlow(startEvent, cluster.getClusterName());
         return new SdxRestoreResponse(startEvent.getDrStatus().getOperationId(), flowIdentifier);
     }
@@ -561,12 +560,12 @@ public class SdxBackupRestoreService {
     }
 
     public DatalakeRestoreStatusResponse triggerDatalakeRestore(Long id, String backupId, String backupLocationOverride, String userCrn,
-            DatalakeDrSkipOptions skipOptions, int fullDrMaxDurationInMin, boolean validationOnly) {
+            DatalakeDrSkipOptions skipOptions, int fullDrMaxDurationInMin) {
         SdxCluster sdxCluster = sdxClusterRepository.findById(id).orElseThrow(notFound("SDX cluster", id));
         LOGGER.info("Triggering datalake restore for datalake: '{}' in '{}' env from backupId '{}",
                 sdxCluster.getClusterName(), sdxCluster.getEnvName(), backupId);
         return datalakeDrClient.triggerRestore(
-                sdxCluster.getClusterName(), backupId, backupLocationOverride, userCrn, skipOptions, validationOnly);
+                sdxCluster.getClusterName(), backupId, backupLocationOverride, userCrn, skipOptions);
     }
 
     public SdxRestoreStatusResponse getDatalakeRestoreStatus(String datalakeName, String restoreId, String backupName, String userCrn) {
@@ -666,16 +665,6 @@ public class SdxBackupRestoreService {
             return false;
         }
         return true;
-    }
-
-    public boolean validationOnlyShouldBePerformed(boolean validationOnly, boolean performBackup) {
-        if (!datalakeDrConfig.isConfigured()) {
-            return false;
-        }
-        if (!performBackup) {
-            return false;
-        }
-        return validationOnly;
     }
 
     /**

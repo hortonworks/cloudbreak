@@ -38,7 +38,7 @@ public class SdxRestoreAction implements Action<SdxTestDto, SdxClient> {
         SdxRestoreResponse sdxRestoreResponse = client.getDefaultClient()
                 .sdxRestoreEndpoint()
                 .restoreDatalakeByName(sdxName, backupId, backupLocation, false, false, false, false,
-                        0, false);
+                        0);
         testDto.setFlow("SDX restore", sdxRestoreResponse.getFlowIdentifier());
 
         SdxClusterDetailResponse detailedResponse = client.getDefaultClient()

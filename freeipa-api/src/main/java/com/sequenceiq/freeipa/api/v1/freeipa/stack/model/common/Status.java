@@ -78,6 +78,8 @@ public enum Status {
 
     public static final Collection<Status> FREEIPA_CCM_UPGRADE_IN_PROGRESS_STATUSES = List.of(UPGRADE_CCM_IN_PROGRESS);
 
+    private static final Collection<Status> FREEIPA_UNSCHEDULABLE_STATUSES = List.of(CREATE_FAILED, DELETE_IN_PROGRESS, DELETE_FAILED, DELETE_COMPLETED);
+
     private static final Map<Status, Status> IN_PROGRESS_TO_FINAL_STATUS_MAPPING = ImmutableMap.<Status, Status>builder()
             .put(REQUESTED, CREATE_FAILED)
             .put(UPDATE_REQUESTED, UPDATE_FAILED)
@@ -147,6 +149,10 @@ public enum Status {
 
     public boolean isAvailable() {
         return AVAILABLE.equals(this);
+    }
+
+    public boolean isUnschedulableState() {
+        return FREEIPA_UNSCHEDULABLE_STATUSES.contains(this);
     }
 
     public boolean isVerticallyScalable() {

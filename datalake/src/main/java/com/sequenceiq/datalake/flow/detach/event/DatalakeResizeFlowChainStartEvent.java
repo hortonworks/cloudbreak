@@ -22,8 +22,6 @@ public class DatalakeResizeFlowChainStartEvent extends SdxEvent {
 
     private final DatalakeDrSkipOptions skipOptions;
 
-    private final boolean validationOnly;
-
     @SuppressWarnings("ExecutableStatementCount")
     @JsonCreator
     public DatalakeResizeFlowChainStartEvent(
@@ -33,15 +31,13 @@ public class DatalakeResizeFlowChainStartEvent extends SdxEvent {
             @JsonProperty("backupLocation") String backupLocation,
             @JsonProperty("backup") boolean backup,
             @JsonProperty("restore") boolean restore,
-            @JsonProperty("skipOptions") DatalakeDrSkipOptions skipOptions,
-            @JsonProperty("validationOnly") boolean validationOnly) {
+            @JsonProperty("skipOptions") DatalakeDrSkipOptions skipOptions) {
         super(sdxId, userId);
         this.sdxCluster = sdxCluster;
         this.backupLocation = backupLocation;
         this.backup = backup;
         this.restore = restore;
         this.skipOptions = skipOptions;
-        this.validationOnly = validationOnly;
     }
 
     public boolean shouldTakeBackup() {
@@ -70,10 +66,6 @@ public class DatalakeResizeFlowChainStartEvent extends SdxEvent {
 
     public DatalakeDrSkipOptions getSkipOptions() {
         return skipOptions;
-    }
-
-    public boolean isValidationOnly() {
-        return validationOnly;
     }
 
     @Override

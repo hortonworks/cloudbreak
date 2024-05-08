@@ -1,7 +1,7 @@
 package com.sequenceiq.datalake.flow.chain;
 
 
-import static com.sequenceiq.datalake.flow.dr.validation.DatalakeBackupValidationEvent.DATALAKE_TRIGGER_BACKUP_VALIDATION_EVENT;
+import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_TRIGGER_BACKUP_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent;
-import com.sequenceiq.datalake.flow.dr.validation.event.DatalakeTriggerBackupValidationEvent;
+import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeTriggerBackupEvent;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
@@ -43,30 +43,32 @@ public class DatalakeResizeFlowEventChainTest {
     @Test
     public void chainCreationTest() {
         DatalakeResizeFlowChainStartEvent event = new DatalakeResizeFlowChainStartEvent(sdxCluster.getId(), sdxCluster, USER_CRN, BACKUP_LOCATION,
-                true, true, new DatalakeDrSkipOptions(false, false, false, false), false);
+                true, true, new DatalakeDrSkipOptions(false, false, false, false));
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
-        assertEquals(11, flowTriggerEventQueue.getQueue().size());
-        assertTriggerBackupValidationEvent(flowTriggerEventQueue);
+        assertEquals(9, flowTriggerEventQueue.getQueue().size());
+        assertTriggerBackupEvent(flowTriggerEventQueue);
     }
 
     @Test
     public void chainCreationWithRazTest() {
         SdxCluster clusterWithRaz = getValidSdxClusterwithRaz();
         DatalakeResizeFlowChainStartEvent event = new DatalakeResizeFlowChainStartEvent(clusterWithRaz.getId(), clusterWithRaz, USER_CRN, BACKUP_LOCATION,
-                true, true, new DatalakeDrSkipOptions(false, false, false, false), false);
+                true, true, new DatalakeDrSkipOptions(false, false, false, false));
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
-        assertEquals(11, flowTriggerEventQueue.getQueue().size());
-        assertTriggerBackupValidationEvent(flowTriggerEventQueue);
+        assertEquals(9, flowTriggerEventQueue.getQueue().size());
+        assertTriggerBackupEvent(flowTriggerEventQueue);
     }
 
-    private void assertTriggerBackupValidationEvent(FlowTriggerEventQueue flowChainQueue) {
+    private void assertTriggerBackupEvent(FlowTriggerEventQueue flowChainQueue) {
         flowChainQueue.getQueue().remove();
-        Selectable triggerEvent = flowChainQueue.getQueue().remove();
-        assertEquals(DATALAKE_TRIGGER_BACKUP_VALIDATION_EVENT.selector(), triggerEvent.selector());
-        assertEquals(sdxCluster.getId(), triggerEvent.getResourceId());
-        assertTrue(triggerEvent instanceof DatalakeTriggerBackupValidationEvent);
-        DatalakeTriggerBackupValidationEvent event = (DatalakeTriggerBackupValidationEvent) triggerEvent;
+        Selectable triggerBackupEvent = flowChainQueue.getQueue().remove();
+        assertEquals(DATALAKE_TRIGGER_BACKUP_EVENT.selector(), triggerBackupEvent.selector());
+        assertEquals(sdxCluster.getId(), triggerBackupEvent.getResourceId());
+        assertTrue(triggerBackupEvent instanceof DatalakeTriggerBackupEvent);
+        DatalakeTriggerBackupEvent event = (DatalakeTriggerBackupEvent) triggerBackupEvent;
         assertEquals(BACKUP_LOCATION, event.getBackupLocation());
+        assertTrue(event.getBackupName().startsWith("resize"));
+
     }
 
     private SdxCluster getValidSdxCluster() {

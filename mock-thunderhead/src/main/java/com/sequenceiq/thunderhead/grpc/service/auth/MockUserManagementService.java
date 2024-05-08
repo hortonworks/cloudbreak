@@ -49,7 +49,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENFORCE_AWS_IMDSV2;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRONMENT_PRIVILEGED_USER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPRESS_ONBOARDING;
@@ -553,9 +552,6 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.container.ready.env.enabled}")
     private boolean containerReadyEnvEnabled;
 
-    @Value("${auth.mock.aws.imdsv2.enforced}")
-    private boolean awsImdsV2Enforced;
-
     @Value("${auth.mock.cm.observability.saas.premium}")
     private boolean cmObservabilitySaasPremium;
 
@@ -1037,9 +1033,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (containerReadyEnvEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CONTAINER_READY_ENV));
-        }
-        if (awsImdsV2Enforced) {
-            builder.addEntitlements(createEntitlement(CDP_ENFORCE_AWS_IMDSV2));
         }
         if (cmObservabilitySaasPremium) {
             builder.addEntitlements(createEntitlement(OBSERVABILITY_SAAS_PREMIUM));

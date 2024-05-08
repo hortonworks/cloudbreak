@@ -31,9 +31,16 @@ public class AzureLoadBalancerModelBuilder {
 
     private final String stackName;
 
+    private final boolean mustUseBasicSku;
+
     public AzureLoadBalancerModelBuilder(CloudStack cloudStack, String stackName) {
+        this(cloudStack, stackName, false);
+    }
+
+    public AzureLoadBalancerModelBuilder(CloudStack cloudStack, String stackName, boolean mustUseBasicSku) {
         this.cloudStack = cloudStack;
         this.stackName = stackName;
+        this.mustUseBasicSku = mustUseBasicSku;
     }
 
     /**
@@ -115,9 +122,13 @@ public class AzureLoadBalancerModelBuilder {
 
     private AzureLoadBalancer buildAzureLb(LoadBalancerType type, LoadBalancerSku sku, Set<String> instanceGroupNames,
             List<AzureLoadBalancingRule> rules, List<AzureOutboundRule> outboundRules, String stackName) {
+        if (mustUseBasicSku) {
+            LOGGER.debug("We will use Basic sku type instead of {} for azure loadbalancer because of backward compatibilty reason" +
+                            " on {} stack for {} instancegroups", sku, stackName, instanceGroupNames);
+        }
         return new AzureLoadBalancer.Builder()
                 .setType(type)
-                .setLoadBalancerSku(sku)
+                .setLoadBalancerSku(mustUseBasicSku ? LoadBalancerSku.BASIC : sku)
                 .setInstanceGroupNames(instanceGroupNames)
                 .setRules(rules)
                 .setOutboundRules(outboundRules)

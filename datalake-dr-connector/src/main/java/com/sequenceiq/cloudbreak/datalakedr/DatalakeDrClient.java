@@ -116,7 +116,7 @@ public class DatalakeDrClient {
     }
 
     public DatalakeRestoreStatusResponse triggerRestore(String datalakeName, String backupId, String backupLocationOverride, String actorCrn,
-            DatalakeDrSkipOptions datalakeDrSkipOptions, boolean validationOnly) {
+            DatalakeDrSkipOptions datalakeDrSkipOptions) {
         if (!datalakeDrConfig.isConfigured()) {
             return missingConnectorResponseOnRestore();
         }
@@ -143,7 +143,6 @@ public class DatalakeDrClient {
         if (!Strings.isNullOrEmpty(backupLocationOverride)) {
             builder.setBackupLocationOverride(backupLocationOverride);
         }
-        builder.setValidationOnly(validationOnly);
         return statusConverter.convert(
                 newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
                         .restoreDatalake(builder.build())

@@ -142,6 +142,25 @@ class AzureLoadBalancerModelBuilderTest {
     }
 
     @Test
+    void testGetModelWithStandardSkuWhenBasicSkuMustUse() {
+        CloudStack mockCloudStack = mock(CloudStack.class);
+        CloudLoadBalancer cloudLoadBalancer = createCloudLoadBalancer(LoadBalancerSku.STANDARD);
+        when(mockCloudStack.getLoadBalancers()).thenReturn(List.of(cloudLoadBalancer));
+
+        underTest = new AzureLoadBalancerModelBuilder(mockCloudStack, STACK_NAME, true);
+
+        Map<String, Object> result = underTest.buildModel();
+
+        assertThat(result).containsKey(GATEWAY_PRIVATE_LB_NEEDED_KEY).matches(r -> Boolean.FALSE.equals(r.get(GATEWAY_PRIVATE_LB_NEEDED_KEY)));
+        assertTrue(result.containsKey(LOAD_BALANCERS_KEY));
+        assertTrue(result.get(LOAD_BALANCERS_KEY) instanceof List);
+        List<AzureLoadBalancer> loadBalancers = (List<AzureLoadBalancer>) result.get(LOAD_BALANCERS_KEY);
+        assertEquals(1, loadBalancers.size());
+        AzureLoadBalancer lb = loadBalancers.get(0);
+        assertEquals(LoadBalancerSku.BASIC, lb.getSku());
+    }
+
+    @Test
     void testGetModelWithOutboundLoadBalancer() {
         CloudStack mockCloudStack = mock(CloudStack.class);
         CloudLoadBalancer privateLoadBalancer = createCloudLoadBalancer(LoadBalancerSku.STANDARD);
