@@ -24,8 +24,6 @@ public class DatalakeTriggerRestoreEvent extends DatalakeDatabaseDrStartBaseEven
 
     private final int fullDrMaxDurationInMin;
 
-    private final boolean validationOnly;
-
     @SuppressWarnings("checkstyle:ExecutableStatementCount")
     @JsonCreator
     public DatalakeTriggerRestoreEvent(
@@ -38,8 +36,7 @@ public class DatalakeTriggerRestoreEvent extends DatalakeDatabaseDrStartBaseEven
             @JsonProperty("backupLocationOverride") String backupLocationOverride,
             @JsonProperty("skipOptions") DatalakeDrSkipOptions skipOptions,
             @JsonProperty("reason") DatalakeRestoreFailureReason reason,
-            @JsonProperty("fullDrMaxDurationInMin") int fullDrMaxDurationInMin,
-            @JsonProperty("validationOnly") boolean validationOnly) {
+            @JsonProperty("fullDrMaxDurationInMin") int fullDrMaxDurationInMin) {
         super(selector, sdxId, sdxName, userId, SdxOperationType.RESTORE);
         this.backupId = backupId;
         this.backupLocation = backupLocation;
@@ -47,7 +44,6 @@ public class DatalakeTriggerRestoreEvent extends DatalakeDatabaseDrStartBaseEven
         this.skipOptions = skipOptions;
         this.reason = reason;
         this.fullDrMaxDurationInMin = fullDrMaxDurationInMin;
-        this.validationOnly = validationOnly;
     }
 
     public String getBackupId() {
@@ -72,10 +68,6 @@ public class DatalakeTriggerRestoreEvent extends DatalakeDatabaseDrStartBaseEven
 
     public int getFullDrMaxDurationInMin() {
         return fullDrMaxDurationInMin;
-    }
-
-    public boolean isValidationOnly() {
-        return validationOnly;
     }
 
     @Override

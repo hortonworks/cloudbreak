@@ -49,10 +49,10 @@ public class SdxRestoreController implements SdxRestoreEndpoint {
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.RESTORE_DATALAKE)
     public SdxRestoreResponse restoreDatalakeByName(@ResourceName String name, String backupId, String backupLocationOverride,
                                                     boolean skipValidation, boolean skipAtlasMetadata, boolean skipRangerAudits,
-                                                    boolean skipRangerMetadata, int fullDrMaxDurationInMin, boolean validationOnly) {
+                                                    boolean skipRangerMetadata, int fullDrMaxDurationInMin) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
         return sdxBackupRestoreService.triggerDatalakeRestore(sdxCluster, name, backupId, backupLocationOverride,
-                new DatalakeDrSkipOptions(skipValidation, skipAtlasMetadata, skipRangerAudits, skipRangerMetadata), fullDrMaxDurationInMin, validationOnly);
+                new DatalakeDrSkipOptions(skipValidation, skipAtlasMetadata, skipRangerAudits, skipRangerMetadata), fullDrMaxDurationInMin);
     }
 
     @Override

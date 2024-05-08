@@ -106,8 +106,6 @@ public class ModelDescriptions {
 
     public static final String DRY_RUN = "Doesn't perform the actual operation just validates if all preconditions are met.";
 
-    public static final String VALIDATION_ONLY = "Doesn't perform the actual operation just validates if all preconditions are met.";
-
     public static final String SKIP_DATAHUB_VALIDATION = "With this option, the Data Lake upgrade can be performed with running Data Hub clusters. "
             + "The usage of this option can cause problems on the running Data Hub clusters during the Data Lake upgrade.";
 
