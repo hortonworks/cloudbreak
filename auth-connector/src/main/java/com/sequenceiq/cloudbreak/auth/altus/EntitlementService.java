@@ -49,7 +49,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_BACKUP_RESTORE_PERMISSION_CHECKS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_MEDIUM_DUTY_WITH_PROFILER;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DISABLE_ENTERPRISE_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRONMENT_PRIVILEGED_USER;
@@ -243,10 +242,6 @@ public class EntitlementService {
 
     public boolean microDutySdxEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_MICRO_DUTY_SDX);
-    }
-
-    public boolean enterpriseSdxDisabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_DISABLE_ENTERPRISE_SDX);
     }
 
     public boolean datahubRuntimeUpgradeEnabled(String accountId) {

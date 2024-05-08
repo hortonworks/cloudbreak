@@ -1244,7 +1244,6 @@ class SdxServiceTest {
 
     @Test
     void testShapeValidationOfSDXCreation() throws IOException {
-        when(entitlementService.enterpriseSdxDisabled(any())).thenReturn(false);
         when(virtualMachineConfiguration.getSupportedJavaVersions()).thenReturn(Set.of(11, 17, 21));
         DetailedEnvironmentResponse detailedEnvironmentResponse = getDetailedEnvironmentResponse();
         when(environmentClientService.getByName(eq("env-name"))).thenReturn(detailedEnvironmentResponse);
@@ -1271,12 +1270,12 @@ class SdxServiceTest {
         // MEDIUM_DUTY and 7.2.18 => throws
         sdxClusterRequest.setRuntime("7.2.19");
         assertThrows(BadRequestException.class,
-            () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
 
         // MEDIUM_DUTY and 7.3.0 => throws
         sdxClusterRequest.setRuntime("7.3.0");
         assertThrows(BadRequestException.class,
-            () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
 
         // MEDIUM_DUTY and 7.2.16 => non throws
         sdxClusterRequest.setRuntime("7.2.16");
@@ -1303,7 +1302,7 @@ class SdxServiceTest {
         // ENTERPRISE and 7.2.16 => throws
         sdxClusterRequest.setRuntime("7.2.16");
         assertThrows(BadRequestException.class,
-            () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
 
         // By runtime in the image and not in the request
         sdxClusterRequest.setRuntime(null);
@@ -1318,21 +1317,21 @@ class SdxServiceTest {
         baseStackDetailsV4Response.setVersion("7.2.18");
         imageV4Response.setStackDetails(baseStackDetailsV4Response);
         assertThrows(BadRequestException.class,
-            () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
 
         // MEDIUM_DUTY and 7.2.16 => non throws
         baseStackDetailsV4Response.setVersion("7.2.16");
         imageV4Response.setStackDetails(baseStackDetailsV4Response);
         sdxClusterRequest.setClusterShape(MEDIUM_DUTY_HA);
         assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
-            () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+                () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
 
         // LIGHT_DUTY and 7.2.18 => non throws
         baseStackDetailsV4Response.setVersion("7.2.18");
         imageV4Response.setStackDetails(baseStackDetailsV4Response);
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
         assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
-            () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+                () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
 
         // LIGHT_DUTY and 7.2.17 => non throws
         baseStackDetailsV4Response.setVersion("7.2.17");
@@ -1354,7 +1353,7 @@ class SdxServiceTest {
         baseStackDetailsV4Response.setVersion("7.2.16");
         imageV4Response.setStackDetails(baseStackDetailsV4Response);
         assertThrows(BadRequestException.class,
-            () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "dl-name", sdxClusterRequest, null)));
     }
 
     @Test
