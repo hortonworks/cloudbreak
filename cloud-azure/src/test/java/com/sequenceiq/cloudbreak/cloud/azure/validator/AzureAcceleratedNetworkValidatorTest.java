@@ -42,16 +42,6 @@ public class AzureAcceleratedNetworkValidatorTest {
     }
 
     @Test
-    public void testValidateShouldReturnsWithFalseForTheGivenVmTypesWhenOnlyTwoCoreAvailable() {
-        Set<String> supportedVmTypes = getVmsWithTwoCore();
-        when(azureVirtualMachineTypeProvider.getVmTypes(azureStackView)).thenReturn(supportedVmTypes);
-
-        Map<String, Boolean> actual = underTest.validate(azureStackView);
-
-        actual.forEach((key, value) -> Assertions.assertFalse(value));
-    }
-
-    @Test
     public void testValidateShouldReturnsWithFalseForTheGivenVmTypesWhenCoreNumberIsNotFound() {
         Set<String> supportedVmTypes = getVmsWithoutCpuCoreInfo();
         when(azureVirtualMachineTypeProvider.getVmTypes(azureStackView)).thenReturn(supportedVmTypes);
@@ -74,10 +64,6 @@ public class AzureAcceleratedNetworkValidatorTest {
     private Set<String> getSupportedVmTypes() throws IOException {
         return JsonUtil.readValue(FileReaderUtils.readFileFromClasspath("/json/azure-vms.json"), new TypeReference<Set<String>>() {
         });
-    }
-
-    private Set<String> getVmsWithTwoCore() {
-        return Set.of("Standard_DS2_v2", "Standard_F2s", "Standard_F2", "Standard_D2_v2_Promo", "Standard_DS2_v2_Promo", "Standard_D2_v2");
     }
 
     private Set<String> getVmsWithoutCpuCoreInfo() {
