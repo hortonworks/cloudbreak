@@ -15,7 +15,8 @@ public enum OperationType {
     BIND_USER_CREATE,
     UPGRADE,
     UPGRADE_CCM,
-    MODIFY_PROXY_CONFIG;
+    MODIFY_PROXY_CONFIG,
+    CHANGE_DYNAMIC_ENTITLEMENTS;
 
     private final String lowerCaseName;
 

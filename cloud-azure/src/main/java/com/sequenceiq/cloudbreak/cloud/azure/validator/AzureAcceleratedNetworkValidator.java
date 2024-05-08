@@ -2,11 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.azure.validator;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -41,45 +38,13 @@ public class AzureAcceleratedNetworkValidator {
 
     public boolean isSupportedForVm(String vmType) {
         LOGGER.trace("Validating vm type: " + vmType);
-        String[] parts = vmType.split("_");
-        String transformedFlavor = "";
-        boolean validCpu = false;
-        if (parts.length > 1) {
-            String segment = parts[1];
-            validCpu = isValidCpu(segment);
-            String transformedSegment = getSegment(segment);
-            transformedFlavor = vmType.replaceAll(segment, transformedSegment).toLowerCase(Locale.ROOT);
-            LOGGER.debug("Transformed flavor to validate: " + transformedFlavor);
-        }
-        return validCpu && getSupportedVmTypes().stream().parallel().anyMatch(transformedFlavor::endsWith);
-    }
-
-    private String getSegment(String segment) {
-        return segment
-                .replaceAll("[0-9]", "")
-                .replaceAll("-", "")
-                .toLowerCase(Locale.ROOT);
-    }
-
-    private boolean isValidCpu(String segment) {
-        Matcher matcher = Pattern.compile("\\d+").matcher(segment);
-        if (matcher.find()) {
-            int cpuCoreSize = Integer.parseInt(matcher.group());
-            if (cpuCoreSize > 2) {
-                return true;
-            } else {
-                LOGGER.debug("Core number must be greater than 2.");
-                return false;
-            }
-        } else {
-            LOGGER.debug("Core number not found in the instance name.");
-            return false;
-        }
+        return getSupportedVmTypes().stream().anyMatch(type -> type.equalsIgnoreCase(vmType));
     }
 
     private Set<String> getSupportedVmTypes() {
         try {
-            return JsonUtil.readValue(FileReaderUtils.readFileFromClasspath(AZURE_ACCELERATED_NETWORK_SUPPORT_JSON), new TypeReference<Set<String>>() { });
+            return JsonUtil.readValue(FileReaderUtils.readFileFromClasspath(AZURE_ACCELERATED_NETWORK_SUPPORT_JSON), new TypeReference<>() {
+            });
         } catch (IOException e) {
             LOGGER.error("Failed to read file from location: " + AZURE_ACCELERATED_NETWORK_SUPPORT_JSON, e);
         }

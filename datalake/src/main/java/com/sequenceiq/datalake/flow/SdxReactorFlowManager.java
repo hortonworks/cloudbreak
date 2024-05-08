@@ -136,20 +136,19 @@ public class SdxReactorFlowManager {
         return notify(selector, new SdxEvent(selector, cluster.getId(), userId), cluster.getClusterName());
     }
 
-    public FlowIdentifier triggerSdxResize(Long sdxClusterId, SdxCluster newSdxCluster, DatalakeDrSkipOptions skipOptions, boolean validationOnly) {
+    public FlowIdentifier triggerSdxResize(Long sdxClusterId, SdxCluster newSdxCluster, DatalakeDrSkipOptions skipOptions) {
         LOGGER.info("Trigger Datalake resizing for: {}", sdxClusterId);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         boolean performBackup = sdxBackupRestoreService.shouldSdxBackupBePerformed(newSdxCluster);
         boolean performRestore = sdxBackupRestoreService.shouldSdxRestoreBePerformed(newSdxCluster);
         String backupLocation = sdxBackupRestoreService.modifyBackupLocation(newSdxCluster,
                 environmentClientService.getBackupLocation(newSdxCluster.getEnvCrn()));
-        boolean performValidationOnly = sdxBackupRestoreService.validationOnlyShouldBePerformed(validationOnly, performBackup);
         if (!performBackup) {
             sdxBackupRestoreService.checkExistingBackup(newSdxCluster, userId);
         }
         eventSenderService.sendEventAndNotification(newSdxCluster, DATALAKE_RESIZE_TRIGGERED);
         return notify(SDX_RESIZE_FLOW_CHAIN_START_EVENT, new DatalakeResizeFlowChainStartEvent(sdxClusterId, newSdxCluster, userId,
-                backupLocation, performBackup, performRestore, skipOptions, performValidationOnly), newSdxCluster.getClusterName());
+                backupLocation, performBackup, performRestore, skipOptions), newSdxCluster.getClusterName());
     }
 
     public FlowIdentifier triggerSdxResizeRecovery(SdxCluster oldSdxCluster, Optional<SdxCluster> newSdxCluster) {

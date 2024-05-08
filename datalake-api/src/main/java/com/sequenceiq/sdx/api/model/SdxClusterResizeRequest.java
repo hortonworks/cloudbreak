@@ -50,9 +50,6 @@ public class SdxClusterResizeRequest {
     @Schema(description = ModelDescriptions.DATABASE)
     private SdxDatabaseComputeStorageRequest customSdxDatabaseComputeStorage;
 
-    @Schema(description = ModelDescriptions.VALIDATION_ONLY)
-    private boolean validationOnly;
-
     public String getEnvironment() {
         return environment;
     }
@@ -133,28 +130,19 @@ public class SdxClusterResizeRequest {
         this.customSdxDatabaseComputeStorage = customSdxDatabaseComputeStorage;
     }
 
-    public boolean isValidationOnly() {
-        return validationOnly;
-    }
-
-    public void setValidationOnly(boolean validationOnly) {
-        this.validationOnly = validationOnly;
-    }
-
     @Override
     public String toString() {
         return "SdxClusterResizeRequest{" +
-            "environment='" + environment + '\'' +
-            ", clusterShape=" + clusterShape +
-            ", skipValidation=" + skipValidation +
-            ", skipAtlasMetadata=" + skipAtlasMetadata +
-            ", skipRangerAudits=" + skipRangerAudits +
-            ", skipRangerMetadata=" + skipRangerMetadata +
-            ", enableMultiAz=" + enableMultiAz +
-            ", customInstanceGroups=" + customInstanceGroups +
-            ", customInstanceGroupDiskSize=" + customInstanceGroupDiskSize +
-            ", customSdxDatabaseComputeStorage=" + customSdxDatabaseComputeStorage +
-            ", validationOnly=" + validationOnly +
-            '}';
+                "environment='" + environment + '\'' +
+                ", clusterShape=" + clusterShape +
+                ", skipValidation=" + skipValidation +
+                ", skipAtlasMetadata=" + skipAtlasMetadata +
+                ", skipRangerAudits=" + skipRangerAudits +
+                ", skipRangerMetadata=" + skipRangerMetadata +
+                ", enableMultiAz=" + enableMultiAz +
+                ", customInstanceGroups=" + customInstanceGroups +
+                ", customInstanceGroupDiskSize=" + customInstanceGroupDiskSize +
+                ", customSdxDatabaseComputeStorage=" + customSdxDatabaseComputeStorage +
+                '}';
     }
 }

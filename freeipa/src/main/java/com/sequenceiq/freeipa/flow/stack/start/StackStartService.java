@@ -16,6 +16,7 @@ import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.StackStartStopService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.MetadataSetupService;
+import com.sequenceiq.freeipa.sync.dynamicentitlement.DynamicEntitlementRefreshJobService;
 
 @Service
 public class StackStartService {
@@ -30,6 +31,9 @@ public class StackStartService {
 
     @Inject
     private StackStartStopService stackStartStopService;
+
+    @Inject
+    private DynamicEntitlementRefreshJobService dynamicEntitlementRefreshJobService;
 
     public void startStack(Stack stack) {
         stackUpdater.updateStackStatus(stack, DetailedStackStatus.START_IN_PROGRESS, "Stack infrastructure is now starting.");
@@ -53,6 +57,7 @@ public class StackStartService {
 
     public void finishStackStart(StackStartContext context) {
         Stack stack = context.getStack();
+        dynamicEntitlementRefreshJobService.schedule(stack.getId());
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STARTED, "Stack infrastructure started successfully.");
     }
 

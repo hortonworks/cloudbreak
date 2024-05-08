@@ -178,7 +178,7 @@ public class FreeIpaCreationService {
                 ImageEntity image = imageService.create(savedStack, Objects.nonNull(imageSettingsRequest) ? imageSettingsRequest : new ImageSettingsRequest());
                 Image imageForIm = imageConverter.convert(image);
                 stack.getAllInstanceMetaDataList().forEach(im -> im.setImage(new Json(imageForIm)));
-                savedStack = setSupportedImdsVersionForStackIfNecessary(savedStack, image, accountId).orElse(savedStack);
+                savedStack = setSupportedImdsVersionForStackIfNecessary(savedStack, image).orElse(savedStack);
                 FreeIpa freeIpa = freeIpaService.create(savedStack, request.getFreeIpa(), image.getOsType());
                 return Triple.of(savedStack, image, freeIpa);
             });
@@ -204,10 +204,9 @@ public class FreeIpaCreationService {
         return ownerFuture;
     }
 
-    private Optional<Stack> setSupportedImdsVersionForStackIfNecessary(Stack stack, ImageEntity image, String accountId) {
+    private Optional<Stack> setSupportedImdsVersionForStackIfNecessary(Stack stack, ImageEntity image) {
         if (CloudPlatform.AWS.equals(CloudPlatform.valueOf(stack.getCloudPlatform()))) {
-            if (StringUtils.equals(image.getImdsVersion(), AWS_IMDS_VERSION_V2) &&
-                    entitlementService.isAwsImdsV2Enforced(accountId)) {
+            if (StringUtils.equals(image.getImdsVersion(), AWS_IMDS_VERSION_V2)) {
                 stack.setSupportedImdsVersion(AWS_IMDS_VERSION_V2);
             } else {
                 stack.setSupportedImdsVersion(AWS_IMDS_VERSION_V1);

@@ -98,9 +98,6 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
     @Inject
     private SecurityGroupBuilderUtil securityGroupBuilderUtil;
 
-    @Inject
-    private AwsImdsUtil awsImdsUtil;
-
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
@@ -209,7 +206,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                         awsInstance.instanceId(), awsInstance.instanceType().toString(), requestedInstanceType);
             }
             if (AwsImdsUtil.APPLICABLE_UPDATE_TYPES.contains(updateType)) {
-                awsImdsUtil.validateInstanceMetadataUpdate(updateType, cloudStack, auth);
+                AwsImdsUtil.validateInstanceMetadataUpdate(updateType, cloudStack);
                 HttpTokensState requestedHttpTokenState = AwsImdsUtil.getHttpTokensStateByUpdateType(updateType);
                 HttpTokensState currentHttpTokenState = awsInstance.metadataOptions() != null && awsInstance.metadataOptions().httpTokens() != null ?
                         awsInstance.metadataOptions().httpTokens() : HttpTokensState.OPTIONAL;

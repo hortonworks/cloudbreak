@@ -8,8 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -41,7 +39,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.VolumeBuilderUtil;
-import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsImdsUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsStackNameCommonUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
@@ -60,6 +57,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -130,9 +128,6 @@ class AwsNativeInstanceResourceBuilderTest {
 
     @Mock
     private AwsStackNameCommonUtil awsStackNameCommonUtil;
-
-    @Mock
-    private AwsImdsUtil awsImdsUtil;
 
     static Object[][] testBuildWhenInstanceNoExistSource() {
         return new Object[][] {
@@ -546,7 +541,10 @@ class AwsNativeInstanceResourceBuilderTest {
                 .state(InstanceState.builder().code(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE).build())
                 .build();
         CloudResource cloudResource = setupImdsTest(instance);
-        doNothing().when(awsImdsUtil).validateInstanceMetadataUpdate(any(), any(), any());
+        Image image = mock(Image.class);
+        when(image.getImageId()).thenReturn("image");
+        when(image.getPackageVersions()).thenReturn(Map.of(ImagePackageVersion.IMDS_VERSION.getKey(), "v2"));
+        when(cloudStack.getImage()).thenReturn(image);
 
         underTest.update(awsContext, cloudResource, cloudInstance, ac, cloudStack, Optional.empty(),
                 UpdateType.INSTANCE_METADATA_UPDATE_TOKEN_REQUIRED);
@@ -579,7 +577,10 @@ class AwsNativeInstanceResourceBuilderTest {
                 .state(InstanceState.builder().code(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE).build())
                 .build();
         CloudResource cloudResource = setupImdsTest(instance);
-        doThrow(CloudbreakServiceException.class).when(awsImdsUtil).validateInstanceMetadataUpdate(any(), any(), any());
+        Image image = mock(Image.class);
+        when(image.getImageId()).thenReturn("image");
+        when(image.getPackageVersions()).thenReturn(Map.of());
+        when(cloudStack.getImage()).thenReturn(image);
 
         assertThrows(CloudbreakServiceException.class, () -> underTest.update(awsContext, cloudResource, cloudInstance, ac, cloudStack,
                 Optional.empty(), UpdateType.INSTANCE_METADATA_UPDATE_TOKEN_REQUIRED));

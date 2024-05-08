@@ -43,6 +43,7 @@ import com.sequenceiq.freeipa.metrics.MetricType;
 import com.sequenceiq.freeipa.service.config.AbstractConfigRegister;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.sync.FreeipaJobService;
+import com.sequenceiq.freeipa.sync.dynamicentitlement.DynamicEntitlementRefreshJobService;
 
 @Configuration
 public class FreeIpaProvisionActions {
@@ -54,6 +55,9 @@ public class FreeIpaProvisionActions {
 
     @Inject
     private FreeIpaMetricService metricService;
+
+    @Inject
+    private DynamicEntitlementRefreshJobService dynamicEntitlementRefreshJobService;
 
     @Bean(name = "BOOTSTRAPPING_MACHINES_STATE")
     public Action<?, ?> bootstrappingMachinesAction() {
@@ -194,6 +198,7 @@ public class FreeIpaProvisionActions {
                 configRegisters.forEach(configProvider -> configProvider.register(context.getStack().getId()));
                 metricService.incrementMetricCounter(MetricType.FREEIPA_CREATION_FINISHED, context.getStack());
                 freeipaJobService.schedule(context.getStack().getId());
+                dynamicEntitlementRefreshJobService.schedule(context.getStack().getId());
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.PROVISIONED, "FreeIPA installation finished");
                 synchronizeUsersViaWiam(context.getStack());
                 sendEvent(context);

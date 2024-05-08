@@ -50,6 +50,7 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootEvent;
+import com.sequenceiq.freeipa.flow.stack.dynamicentitlement.RefreshEntitlementParamsEvent;
 import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents;
 import com.sequenceiq.freeipa.flow.stack.migration.AwsVariantMigrationEvent;
 import com.sequenceiq.freeipa.flow.stack.modify.proxy.selector.ModifyProxyConfigEvent;
@@ -143,9 +144,10 @@ class FreeIpaParallelFlowValidatorTest {
     @Test
     public void testNewParallelFlows() {
         List<String> allowedParallelFlows = new FreeIpaFlowInformation().getAllowedParallelFlows();
-        assertEquals(19, allowedParallelFlows.size(),
+        assertEquals(20, allowedParallelFlows.size(),
                 "You have changed parallel flows for FreeIPA. Please make sure 'FreeIpaParallelFlowValidator' is adjusted if necessary");
         assertTrue(Set.of(
+                        RefreshEntitlementParamsEvent.REFRESH_ENTITLEMENT_PARAMS_TRIGGER_EVENT.event(),
                         FreeIpaCleanupEvent.CLEANUP_EVENT.event(),
                         StackTerminationEvent.TERMINATION_EVENT.event(),
                         CreateBindUserFlowEvent.CREATE_BIND_USER_EVENT.event(),

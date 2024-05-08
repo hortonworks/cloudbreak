@@ -80,7 +80,7 @@ public class FreeipaModifyProxyConfigService {
             stackUpdater.updateStackStatus(stack, MODIFY_PROXY_CONFIG_REQUESTED, "Starting proxy config modification");
             ModifyProxyFlowChainTriggerEvent event = new ModifyProxyFlowChainTriggerEvent(MODIFY_PROXY_CHAIN_TRIGGER_EVENT,
                     stack.getId(), operation.getOperationId(), previousProxyCrn);
-                flowManager.notify(MODIFY_PROXY_CHAIN_TRIGGER_EVENT, event);
+            flowManager.notify(MODIFY_PROXY_CHAIN_TRIGGER_EVENT, event);
             LOGGER.info("Started modify proxy config flow");
             return operation;
         } catch (Exception e) {

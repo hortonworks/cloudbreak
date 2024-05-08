@@ -52,9 +52,6 @@ public class AwsUpdateService {
     @Inject
     private AwsLaunchConfigurationUpdateService launchConfigurationUpdateService;
 
-    @Inject
-    private AwsImdsUtil awsImdsUtil;
-
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
             UpdateType type, Optional<String> targetGroupName) {
         ArrayList<CloudResourceStatus> cloudResourceStatuses = new ArrayList<>();
@@ -86,7 +83,7 @@ public class AwsUpdateService {
 
     private void updateInstanceMetadataOptions(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
             UpdateType updateType) {
-        awsImdsUtil.validateInstanceMetadataUpdate(updateType, stack, authenticatedContext);
+        AwsImdsUtil.validateInstanceMetadataUpdate(updateType, stack);
         HttpTokensState httpTokensState = AwsImdsUtil.getHttpTokensStateByUpdateType(updateType);
         String cfTemplate = stack.getTemplate();
         CloudResource cfResource = getCloudFormationStack(resources);
