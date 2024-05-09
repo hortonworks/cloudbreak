@@ -266,6 +266,20 @@ public class AnonymizerUtilTest {
     }
 
     @Test
+    public void testDatabaseRootPassword() {
+        String testData = "\"rootUserPassword\" : \"PdJ75W6JrbjkfH\"";
+        String expectedData = "\"rootUserPassword\" : \"" + REPLACEMENT + "\"";
+        assertEquals(expectedData, anonymize(testData));
+    }
+
+    @Test
+    public void testDatabaseRootUsername() {
+        String testData = "\"rootUserName\" : \"dbadmin\"";
+        String expectedData = "\"rootUserName\" : \"" + REPLACEMENT + "\"";
+        assertEquals(expectedData, anonymize(testData));
+    }
+
+    @Test
     public void testFreeIpaMagBearerToken() {
         String testData = "IPASESSION: MagBearerToken=abcdefghijklmnopqrstuvwxyz%2f%2bABCDEFGHIJKLMNOPQRSTUVWXYZ3d%3d, " +
                 "Set-Cookie: ipa_session=MagBearerToken=abcdefghijklmnopqrstuvwxyz%2f%2bABCDEFGHIJKLMNOPQRSTUVWXYZ3d%3d;path=/ipa;httponly;secure;, " +

@@ -32,7 +32,11 @@ public class AnonymizerUtil {
             new ReplacePattern("(ldapmodify .* -w ')([^\\s'\"]*)", REPLACEMENT),
             new ReplacePattern("(MagBearerToken=)([^\\s'\";,]*)", REPLACEMENT),
             // AZURE DB ARM TEMPLATE
-            new ReplacePattern("(\"type\": \"securestring\",\\s*\"defaultValue\" : \\s*\")[^\\s'\"]*", REPLACEMENT)
+            new ReplacePattern("(\"type\": \"securestring\",\\s*\"defaultValue\" : \\s*\")[^\\s'\"]*", REPLACEMENT),
+            // Redbeams API
+            new ReplacePattern("(\"rootUserPassword\" : \")([^\\s'\"]*)", REPLACEMENT),
+            new ReplacePattern("(\"rootUserName\" : \")([^\\s'\"]*)", REPLACEMENT),
+
     };
 
     private AnonymizerUtil() {
@@ -66,6 +70,3 @@ public class AnonymizerUtil {
     }
 
 }
-
-
-
