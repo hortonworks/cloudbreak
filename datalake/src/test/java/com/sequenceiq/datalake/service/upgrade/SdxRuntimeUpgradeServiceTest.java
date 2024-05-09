@@ -462,7 +462,6 @@ public class SdxRuntimeUpgradeServiceTest {
         assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID, true)));
         assertTrue(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isUpgradePreparation());
-        assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isDataHubRuntimeUpgradeEntitled());
         assertFalse(upgradeV4RequestCaptor.getValue().getInternalUpgradeSettings().isSkipValidations());
     }
 

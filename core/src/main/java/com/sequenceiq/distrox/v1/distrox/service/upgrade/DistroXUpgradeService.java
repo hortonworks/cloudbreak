@@ -101,17 +101,14 @@ public class DistroXUpgradeService {
 
     public FlowIdentifier triggerOsUpgradeByUpgradeSets(NameOrCrn nameOrCrn, Long workspaceId, String imageId, List<OrderedOSUpgradeSet> upgradeSets) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
-        Crn crn = Crn.safeFromString(stack.getResourceCrn());
-        ImageChangeDto imageChangeDto = deteremineImageChangeDto(nameOrCrn, imageId, stack, crn.getAccountId());
+        ImageChangeDto imageChangeDto = determineImageChangeDto(nameOrCrn, imageId, stack);
         return upgradeService.upgradeOsByUpgradeSets(stack, imageChangeDto, upgradeSets);
     }
 
-    private ImageChangeDto deteremineImageChangeDto(NameOrCrn nameOrCrn, String imageId, Stack stack, String accountId) {
-        boolean dataHubRuntimeUpgradeEnabled = entitlementService.datahubRuntimeUpgradeEnabled(accountId);
-        LOGGER.info("DH Runtime Upgrade entitlement: {}", dataHubRuntimeUpgradeEnabled);
+    private ImageChangeDto determineImageChangeDto(NameOrCrn nameOrCrn, String imageId, Stack stack) {
         boolean getAllImages = imageId != null;
         UpgradeV4Response upgradeOptions = clusterUpgradeAvailabilityService.checkForUpgrades(stack, true,
-                new InternalUpgradeSettings(false, dataHubRuntimeUpgradeEnabled), getAllImages, imageId);
+                new InternalUpgradeSettings(false), getAllImages, imageId);
         if (upgradeOptions.getUpgradeCandidates().isEmpty()) {
             throw new BadRequestException("There is no available image for upgrade.");
         }

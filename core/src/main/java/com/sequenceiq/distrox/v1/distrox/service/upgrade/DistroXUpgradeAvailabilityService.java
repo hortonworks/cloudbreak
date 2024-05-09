@@ -64,7 +64,7 @@ public class DistroXUpgradeAvailabilityService {
         UpgradeV4Response response = stackUpgradeOperations.checkForClusterUpgrade(accountId, stack, request);
         List<ImageInfoV4Response> filteredCandidates = filterCandidates(accountId, stack, request, response);
         filteredCandidates = addOsUpgradeOptionIfAvailable(stack, response, filteredCandidates);
-        List<ImageInfoV4Response> razValidatedCandidates = validateRangerRazCandidates(request, stack, filteredCandidates);
+        List<ImageInfoV4Response> razValidatedCandidates = validateRangerRazCandidates(stack, filteredCandidates);
         response.setUpgradeCandidates(razValidatedCandidates);
         return response;
     }
@@ -79,12 +79,7 @@ public class DistroXUpgradeAvailabilityService {
         return filteredCandidates;
     }
 
-    private List<ImageInfoV4Response> validateRangerRazCandidates(UpgradeV4Request request, Stack stack, List<ImageInfoV4Response> filteredCandidates) {
-        if (request.getInternalUpgradeSettings().isDataHubRuntimeUpgradeEntitled()) {
-            LOGGER.debug("Bypassing Data Hub upgrade Ranger RAZ constraint as CDP_RUNTIME_UPGRADE is enabled in this account.");
-            return filteredCandidates;
-        }
-
+    private List<ImageInfoV4Response> validateRangerRazCandidates(Stack stack, List<ImageInfoV4Response> filteredCandidates) {
         Cluster datalakeCluster = clusterService.getClusterByStackResourceCrn(stack.getDatalakeCrn());
         boolean rangerRazEnabled = datalakeCluster.isRangerRazEnabled();
         if (!rangerRazEnabled) {

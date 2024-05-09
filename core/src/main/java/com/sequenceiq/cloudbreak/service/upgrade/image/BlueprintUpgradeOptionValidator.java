@@ -19,9 +19,6 @@ class BlueprintUpgradeOptionValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintUpgradeOptionValidator.class);
 
     @Inject
-    private CustomTemplateUpgradeValidator customTemplateUpgradeValidator;
-
-    @Inject
     private BlueprintUpgradeOptionCondition blueprintUpgradeOptionCondition;
 
     BlueprintValidationResult isValidBlueprint(ImageFilterParams imageFilterParams) {
@@ -31,9 +28,7 @@ class BlueprintUpgradeOptionValidator {
             return new BlueprintValidationResult(true);
         } else {
             Blueprint blueprint = imageFilterParams.getBlueprint();
-            return isDefaultBlueprint(blueprint) ?
-                    isEnabledForDefaultBlueprint(imageFilterParams, blueprint) :
-                    isEnabledForCustomBlueprint(blueprint, imageFilterParams.isDataHubUpgradeEntitled());
+            return isDefaultBlueprint(blueprint) ? isEnabledForDefaultBlueprint(imageFilterParams, blueprint) : new BlueprintValidationResult(true);
         }
     }
 
@@ -50,12 +45,4 @@ class BlueprintUpgradeOptionValidator {
         return Optional.ofNullable(blueprint.getBlueprintUpgradeOption()).orElse(ENABLED);
     }
 
-    private BlueprintValidationResult isEnabledForCustomBlueprint(Blueprint blueprint, boolean dataHubUpgradeEntitled) {
-        if (dataHubUpgradeEntitled) {
-            LOGGER.debug("Custom blueprint options are not validated if the  DH upgrade entitlement is granted");
-            return new BlueprintValidationResult(true);
-        } else {
-            return customTemplateUpgradeValidator.isValid(blueprint);
-        }
-    }
 }

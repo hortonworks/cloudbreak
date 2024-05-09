@@ -27,33 +27,28 @@ public class BlueprintUpgradeOptionValidatorTest {
     private BlueprintUpgradeOptionValidator underTest;
 
     @Mock
-    private CustomTemplateUpgradeValidator customTemplateUpgradeValidator;
-
-    @Mock
     private BlueprintUpgradeOptionCondition blueprintUpgradeOptionCondition;
 
     private static Object[][] testScenariosProvider() {
         return new Object[][] {
-                {DEFAULT, true, false, true},
-                {DEFAULT, false,  false, true},
+                {DEFAULT, false, true},
+                {DEFAULT, false, true},
 
-                {DEFAULT, false,  false, true},
-                {DEFAULT, false,  false, false},
+                {DEFAULT, false, true},
+                {DEFAULT, false, false},
 
-                {USER_MANAGED, false, false, false},
-                {USER_MANAGED, false, false, true},
-                {USER_MANAGED, false, true, true},
+                {USER_MANAGED, false, true},
+                {USER_MANAGED, true, true},
         };
     }
 
     @ParameterizedTest(name = "Blueprint type: {0}, skipValidations: {1}, dataHubUpgradeEntitled: {2}, expected: {3}")
     @MethodSource("testScenariosProvider")
-    public void test(ResourceStatus resourceStatus, boolean skipValidations, boolean dataHubUpgradeEntitled, boolean expectedValue) {
+    public void test(ResourceStatus resourceStatus, boolean skipValidations, boolean expectedValue) {
         String errorMessage = "The cluster template is not eligible for upgrade";
         Blueprint blueprint = createBlueprint(resourceStatus);
-        ImageFilterParams imageFilterParams = createImageFilterParams(blueprint, skipValidations, dataHubUpgradeEntitled);
+        ImageFilterParams imageFilterParams = createImageFilterParams(blueprint, skipValidations);
 
-        lenient().when(customTemplateUpgradeValidator.isValid(blueprint)).thenReturn(createValidationResult(expectedValue, errorMessage));
         lenient().when(blueprintUpgradeOptionCondition.validate(imageFilterParams, BLUEPRINT_UPGRADE_OPTION))
                 .thenReturn(createValidationResult(expectedValue, errorMessage));
 
@@ -74,9 +69,9 @@ public class BlueprintUpgradeOptionValidatorTest {
         return blueprint;
     }
 
-    private ImageFilterParams createImageFilterParams(Blueprint blueprint, boolean skipValidations, boolean dataHubUpgradeEntitled) {
+    private ImageFilterParams createImageFilterParams(Blueprint blueprint, boolean skipValidations) {
         return new ImageFilterParams(null, null, null, false, null, null, blueprint, null,
-                new InternalUpgradeSettings(skipValidations, dataHubUpgradeEntitled, false), null, null, null, false);
+                new InternalUpgradeSettings(skipValidations, false), null, null, null, false);
     }
 
 }

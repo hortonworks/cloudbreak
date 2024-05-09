@@ -67,7 +67,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRE
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ROTATE_SALTUSER_PASSWORD;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS_SDX_INTEGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
@@ -238,10 +237,6 @@ public class EntitlementService {
 
     public boolean microDutySdxEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_MICRO_DUTY_SDX);
-    }
-
-    public boolean datahubRuntimeUpgradeEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_RUNTIME_UPGRADE_DATAHUB);
     }
 
     public boolean azureMarketplaceImagesEnabled(String accountId) {

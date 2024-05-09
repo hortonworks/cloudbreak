@@ -91,10 +91,6 @@ public class ImageFilterParams {
         return internalUpgradeSettings != null && internalUpgradeSettings.isSkipValidations();
     }
 
-    public boolean isDataHubUpgradeEntitled() {
-        return internalUpgradeSettings != null && internalUpgradeSettings.isDataHubRuntimeUpgradeEntitled();
-    }
-
     public boolean isRollingUpgradeEnabled() {
         return internalUpgradeSettings != null && internalUpgradeSettings.isRollingUpgradeEnabled();
     }

@@ -65,7 +65,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAW_S3;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ROTATE_SALTUSER_PASSWORD;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS_SDX_INTEGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
@@ -336,9 +335,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.cloudstoragevalidation.enable.gcp}")
     private boolean enableGcpCloudStorageValidation;
-
-    @Value("${auth.mock.datahub.runtime.upgrade.enable}")
-    private boolean datahubRuntimeUpgradeEnabled;
 
     @Value("${auth.mock.microdutysdx.enable}")
     private boolean microDutySdxEnabled;
@@ -828,9 +824,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableGcpCloudStorageValidation) {
             builder.addEntitlements(createEntitlement(CDP_CLOUD_STORAGE_VALIDATION_GCP));
-        }
-        if (datahubRuntimeUpgradeEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_RUNTIME_UPGRADE_DATAHUB));
         }
         if (microDutySdxEnabled) {
             builder.addEntitlements(createEntitlement(CDP_MICRO_DUTY_SDX));

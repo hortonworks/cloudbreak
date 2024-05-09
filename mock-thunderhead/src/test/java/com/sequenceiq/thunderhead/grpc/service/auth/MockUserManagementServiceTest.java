@@ -190,9 +190,6 @@ public class MockUserManagementServiceTest {
                 {"enableCloudStorageValidation false", "enableCloudStorageValidation", false, "CDP_CLOUD_STORAGE_VALIDATION", false},
                 {"enableCloudStorageValidation true", "enableCloudStorageValidation", true, "CDP_CLOUD_STORAGE_VALIDATION", true},
 
-                {"datahubRuntimeUpgradeEnabled false", "datahubRuntimeUpgradeEnabled", false, "CDP_RUNTIME_UPGRADE_DATAHUB", false},
-                {"datahubRuntimeUpgradeEnabled true", "datahubRuntimeUpgradeEnabled", true, "CDP_RUNTIME_UPGRADE_DATAHUB", true},
-
                 {"microDutySdxEnabled false", "microDutySdxEnabled", false, "CDP_MICRO_DUTY_SDX", false},
                 {"microDutySdxEnabled true", "microDutySdxEnabled", true, "CDP_MICRO_DUTY_SDX", true},
 

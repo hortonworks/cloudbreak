@@ -10,7 +10,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeS
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.AccountIdService;
 import com.sequenceiq.common.model.UpgradeShowAvailableImages;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXCcmUpgradeV1Response;
@@ -22,9 +21,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Respo
 public class UpgradeConverter {
 
     @Inject
-    private EntitlementService entitlementService;
-
-    @Inject
     private AccountIdService accountIdService;
 
     public UpgradeV4Request convert(DistroXUpgradeV1Request source, String initiatorUserCrn, boolean skipValidations) {
@@ -33,16 +29,11 @@ public class UpgradeConverter {
         request.setRuntime(source.getRuntime());
         request.setDryRun(source.getDryRun());
         request.setLockComponents(source.getLockComponents());
-        request.setInternalUpgradeSettings(new InternalUpgradeSettings(skipValidations, isRuntimeUpgradeEnabledByUserCrn(initiatorUserCrn),
-                Boolean.TRUE.equals(source.getRollingUpgradeEnabled())));
+        request.setInternalUpgradeSettings(new InternalUpgradeSettings(skipValidations, Boolean.TRUE.equals(source.getRollingUpgradeEnabled())));
         Optional.ofNullable(source.getShowAvailableImages())
                 .ifPresent(value -> request.setShowAvailableImages(UpgradeShowAvailableImages.valueOf(value.name())));
         request.setReplaceVms(convertReplaceVms(source));
         return request;
-    }
-
-    private boolean isRuntimeUpgradeEnabledByUserCrn(String userCrn) {
-        return entitlementService.datahubRuntimeUpgradeEnabled(getAccountId(userCrn));
     }
 
     private Boolean convertReplaceVms(DistroXUpgradeV1Request source) {

@@ -402,7 +402,7 @@ class DistroXUpgradeServiceTest {
 
     private UpgradeV4Request createRequest(boolean osUpgradeEnabled, boolean rollingUpgradeEnabled) {
         UpgradeV4Request request = new UpgradeV4Request();
-        request.setInternalUpgradeSettings(new InternalUpgradeSettings(true, true, osUpgradeEnabled, rollingUpgradeEnabled));
+        request.setInternalUpgradeSettings(new InternalUpgradeSettings(true, osUpgradeEnabled, rollingUpgradeEnabled));
         return request;
     }
 

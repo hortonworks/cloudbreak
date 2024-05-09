@@ -133,19 +133,19 @@ public class SdxRuntimeUpgradeService {
         UpgradeV4Request request = createUpgradeV4Request(upgradeSdxClusterRequest, upgradePreparation);
 
         UpgradeV4Response upgradeV4Response = ThreadBasedUserCrnProvider
-            .doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> stackV4Endpoint.checkForClusterUpgradeByName(WORKSPACE_ID, clusterName,
-                    request, accountId));
+                .doAsInternalActor(
+                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                        () -> stackV4Endpoint.checkForClusterUpgradeByName(WORKSPACE_ID, clusterName,
+                                request, accountId));
         SdxCluster datalake = sdxService.getByNameOrCrn(ThreadBasedUserCrnProvider.getUserCrn(), NameOrCrn.ofName(clusterName));
         UpgradeV4Response filteredUpgradeV4Response = upgradeFilter.filterSdxUpgradeResponse(upgradeSdxClusterRequest, upgradeV4Response,
-            datalake.getClusterShape());
+                datalake.getClusterShape());
         return sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(filteredUpgradeV4Response);
     }
 
     private UpgradeV4Request createUpgradeV4Request(SdxUpgradeRequest upgradeSdxClusterRequest, boolean upgradePreparation) {
         UpgradeV4Request request = sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest);
-        InternalUpgradeSettings internalUpgradeSettings = new InternalUpgradeSettings(false, false, upgradePreparation,
+        InternalUpgradeSettings internalUpgradeSettings = new InternalUpgradeSettings(false, upgradePreparation,
                 Boolean.TRUE.equals(upgradeSdxClusterRequest.getRollingUpgradeEnabled()));
         request.setInternalUpgradeSettings(internalUpgradeSettings);
         return request;
