@@ -7,11 +7,11 @@ import com.sequenceiq.cloudbreak.cmtemplate.configproviders.cruisecontrol.Cruise
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 
 public enum BlackListedDownScaleRole implements BlackListedScaleRole {
-    KAFKA_BROKER(Entitlement.DATAHUB_STREAMING_SCALING, "7.2.12", CruiseControlRoles.CRUISECONTROL),
-    NIFI_NODE(Entitlement.DATAHUB_FLOW_SCALING, "7.2.11"),
-    ZEPPELIN_SERVER(Entitlement.DATAHUB_DEFAULT_SCALING),
+    KAFKA_BROKER("7.2.12", CruiseControlRoles.CRUISECONTROL),
+    NIFI_NODE("7.2.11"),
+    ZEPPELIN_SERVER,
     KUDU_TSERVER,
-    NAMENODE(Entitlement.DATAHUB_DEFAULT_SCALING);
+    NAMENODE;
 
     private final Optional<Entitlement> entitledFor;
 
@@ -20,7 +20,7 @@ public enum BlackListedDownScaleRole implements BlackListedScaleRole {
     private final Optional<String> requiredService;
 
     BlackListedDownScaleRole() {
-        this(null, null);
+        this(null, null, null);
     }
 
     BlackListedDownScaleRole(Entitlement entitledFor) {
@@ -29,6 +29,14 @@ public enum BlackListedDownScaleRole implements BlackListedScaleRole {
 
     BlackListedDownScaleRole(Entitlement entitledFor, String blockedUntilCDPVersion) {
         this(entitledFor, blockedUntilCDPVersion, null);
+    }
+
+    BlackListedDownScaleRole(String blockedUntilCDPVersion) {
+        this(null, blockedUntilCDPVersion, null);
+    }
+
+    BlackListedDownScaleRole(String blockedUntilCDPVersion, String requiredService) {
+        this(null, blockedUntilCDPVersion, requiredService);
     }
 
     BlackListedDownScaleRole(Entitlement entitledFor, String blockedUntilCDPVersion, String requiredService) {

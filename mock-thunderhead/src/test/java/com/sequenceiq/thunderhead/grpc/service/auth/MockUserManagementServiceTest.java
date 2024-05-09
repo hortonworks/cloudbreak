@@ -177,9 +177,8 @@ public class MockUserManagementServiceTest {
         List<String> entitlements = account.getEntitlementsList().stream()
                 .map(Entitlement::getEntitlementName)
                 .toList();
-        assertThat(entitlements).contains("CLOUDERA_INTERNAL_ACCOUNT", "DATAHUB_AZURE_AUTOSCALING",
-                "DATAHUB_AWS_AUTOSCALING", "DATAHUB_GCP_AUTOSCALING", "LOCAL_DEV", "DATAHUB_FLOW_SCALING", "DATAHUB_STREAMING_SCALING",
-                "CDP_CM_ADMIN_CREDENTIALS");
+        assertThat(entitlements).contains("CLOUDERA_INTERNAL_ACCOUNT",
+                "DATAHUB_GCP_AUTOSCALING", "LOCAL_DEV", "CDP_CM_ADMIN_CREDENTIALS");
     }
 
     static Object[][] conditionalEntitlementDataProvider() {
@@ -210,9 +209,6 @@ public class MockUserManagementServiceTest {
 
                 {"enableHbaseCloudStorage false", "enableHbaseCloudStorage", false, "CDP_SDX_HBASE_CLOUD_STORAGE", false},
                 {"enableHbaseCloudStorage true", "enableHbaseCloudStorage", true, "CDP_SDX_HBASE_CLOUD_STORAGE", true},
-
-                {"enableDataLakeEfs false", "enableDataLakeEfs", false, "CDP_DATA_LAKE_AWS_EFS", false},
-                {"enableDataLakeEfs true", "enableDataLakeEfs", true, "CDP_DATA_LAKE_AWS_EFS", true},
 
                 {"datalakeLoadBalancerEnabled false", "datalakeLoadBalancerEnabled", false, "CDP_DATA_LAKE_LOAD_BALANCER", false},
                 {"datalakeLoadBalancerEnabled true", "datalakeLoadBalancerEnabled", true, "CDP_DATA_LAKE_LOAD_BALANCER", true},

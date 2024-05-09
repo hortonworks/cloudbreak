@@ -638,7 +638,7 @@ public class CmTemplateProcessorTest {
         Versioned blueprintVersion = () -> "7.2.11";
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/kafka.bp"));
-        assertEquals(new ResizeRecommendation(Set.of("quorum"), Set.of("quorum")), underTest.recommendResize(List.of(), blueprintVersion));
+        assertEquals(new ResizeRecommendation(Set.of("broker", "quorum"), Set.of("broker", "quorum")), underTest.recommendResize(List.of(), blueprintVersion));
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
         Set<String> hostGroups = Set.of("gateway", "compute", "worker");

@@ -29,9 +29,9 @@ public class EntitlementValidationService {
         if (Boolean.FALSE.equals(entitlementCheckEnabled) || skipEntitlementCheckPlatforms.contains(cloudPlatform)) {
             entitled = true;
         } else if (CloudPlatform.AWS.equalsIgnoreCase(cloudPlatform)) {
-            entitled = entitlementService.awsAutoScalingEnabled(accountId);
+            entitled = true;
         } else if (CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform)) {
-            entitled = entitlementService.azureAutoScalingEnabled(accountId);
+            entitled = true;
         } else if (CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform)) {
             entitled = entitlementService.gcpAutoScalingEnabled(accountId);
         }

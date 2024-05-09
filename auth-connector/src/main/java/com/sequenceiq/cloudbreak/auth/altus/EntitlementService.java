@@ -44,7 +44,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAK
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_RESIZE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_DB_BACKUP_ENABLE_COMPRESSION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_RESIZE_RECOVERY;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_BACKUP_RESTORE_PERMISSION_CHECKS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_MEDIUM_DUTY_WITH_PROFILER;
@@ -84,9 +83,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_DATABUS_CNAME_ENDPOINT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_VM_DIAGNOSTICS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CLOUDERA_INTERNAL_ACCOUNT;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_STOP_START_SCALING;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_STOP_START_SCALING;
@@ -275,20 +272,8 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, CDP_SDX_HBASE_CLOUD_STORAGE);
     }
 
-    public boolean dataLakeEfsEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_DATA_LAKE_AWS_EFS);
-    }
-
-    public boolean awsAutoScalingEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, DATAHUB_AWS_AUTOSCALING);
-    }
-
     public boolean awsStopStartScalingEnabled(String accountId) {
         return isEntitlementRegistered(accountId, DATAHUB_AWS_STOP_START_SCALING);
-    }
-
-    public boolean azureAutoScalingEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, DATAHUB_AZURE_AUTOSCALING);
     }
 
     public boolean azureStopStartScalingEnabled(String accountId) {
