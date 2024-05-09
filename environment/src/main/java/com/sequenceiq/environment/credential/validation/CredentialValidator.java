@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -70,6 +72,14 @@ public class CredentialValidator {
         if (!enabledPlatforms.contains(cloudPlatform)) {
             throw new BadRequestException(String.format("There is no such cloud platform as '%s'", cloudPlatform));
         }
+    }
+
+    @Cacheable(cacheNames = "credentialCloudPlatformCache")
+    public Set<String> getValidPlatformsForAccountId(String accountId, CredentialType type) {
+        return enabledPlatforms
+                .stream()
+                .filter(cloudPlatform -> isCredentialCloudPlatformValid(cloudPlatform, accountId, type))
+                .collect(Collectors.toSet());
     }
 
     public boolean isCredentialCloudPlatformValid(String cloudPlatform, String accountId, CredentialType type) {

@@ -3,12 +3,16 @@ package com.sequenceiq.environment.credential.validation;
 import static com.sequenceiq.common.model.CredentialType.AUDIT;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -47,6 +51,10 @@ class CredentialValidatorTest {
 
     private static final String FOO = "FOO";
 
+    private static final String BLAH = "BLAH";
+
+    private static final String BAZ = "BAZ";
+
     private static final String AZURE_DISABLED = " & Azure disabled";
 
     private static final String AZURE_ENABLED = " & Azure enabled";
@@ -63,13 +71,17 @@ class CredentialValidatorTest {
     private CredentialDefinitionService credentialDefinitionService;
 
     @Mock
+    private ProviderCredentialValidator providerCredentialValidator;
+
+    @Mock
     private EntitlementService entitlementService;
 
     private CredentialValidator underTest;
 
     @BeforeEach
     void setUp() {
-        underTest = new CredentialValidator(Set.of(AWS, AZURE, GCP), credentialDefinitionService, Collections.emptyList(), entitlementService);
+        when(providerCredentialValidator.supportedProvider()).thenReturn("AWS");
+        underTest = new CredentialValidator(Set.of(AWS, AZURE, GCP), credentialDefinitionService, List.of(providerCredentialValidator), entitlementService);
     }
 
     // @formatter:off
@@ -107,6 +119,24 @@ class CredentialValidatorTest {
             boolean validExpected,
             CredentialType credentialType) {
         assertThat(underTest.isCredentialCloudPlatformValid(cloudPlatform, ACCOUNT_ID, credentialType)).isEqualTo(validExpected);
+    }
+
+    @Test
+    void testValidateCreateWhenNoError() {
+        CredentialRequest credentialRequest = new CredentialRequest();
+        credentialRequest.setCloudPlatform("AWS");
+
+        assertDoesNotThrow(() -> underTest.validateCreate(credentialRequest));
+    }
+
+    @Test
+    void testValidateCreateWhenError() {
+        CredentialRequest credentialRequest = new CredentialRequest();
+        credentialRequest.setCloudPlatform("AWS");
+
+        when(providerCredentialValidator.validateCreate(any(), any())).thenReturn(ValidationResult.builder().error("error").build());
+        BadRequestException exc = assertThrows(BadRequestException.class, () -> underTest.validateCreate(credentialRequest));
+        assertEquals("error", exc.getMessage());
     }
 
     @Test
@@ -185,4 +215,10 @@ class CredentialValidatorTest {
         assertFalse(result.hasError());
     }
 
+    @Test
+    void testGetValidPlatformsForAccountIdWhenAllEnabledAndEnvironmentCredential() {
+        Set<String> result = underTest.getValidPlatformsForAccountId(ACCOUNT_ID, ENVIRONMENT);
+        assertEquals(3, result.size());
+        assertTrue(result.containsAll(Arrays.asList(AWS, AZURE, GCP)));
+    }
 }

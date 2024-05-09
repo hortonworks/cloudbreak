@@ -60,10 +60,14 @@ import com.sequenceiq.environment.authorization.EnvironmentCredentialFiltering;
 import com.sequenceiq.environment.credential.reactor.handler.CredentialExperiencePolicyHandler;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.credential.service.AzureCredentialCertificateService;
+import com.sequenceiq.environment.credential.service.CredentialCreateService;
 import com.sequenceiq.environment.credential.service.CredentialDeleteService;
 import com.sequenceiq.environment.credential.service.CredentialEntitlementService;
+import com.sequenceiq.environment.credential.service.CredentialNotificationService;
 import com.sequenceiq.environment.credential.service.CredentialPrerequisiteService;
+import com.sequenceiq.environment.credential.service.CredentialRetrievalService;
 import com.sequenceiq.environment.credential.service.CredentialService;
+import com.sequenceiq.environment.credential.service.CredentialUpdateService;
 import com.sequenceiq.environment.credential.service.ServiceProviderCredentialAdapter;
 import com.sequenceiq.environment.credential.v1.CredentialV1Controller;
 import com.sequenceiq.environment.credential.v1.converter.CreateCredentialRequestToCredentialConverter;
@@ -259,6 +263,10 @@ public class CredentialExperienceTest {
     @Configuration
     @Import({CredentialPrerequisiteService.class,
             CredentialService.class,
+            CredentialNotificationService.class,
+            CredentialCreateService.class,
+            CredentialUpdateService.class,
+            CredentialRetrievalService.class,
             CredentialV1Controller.class,
             CreateCredentialRequestToCredentialConverter.class,
             AwsCredentialV1ParametersToAwsCredentialAttributesConverter.class,

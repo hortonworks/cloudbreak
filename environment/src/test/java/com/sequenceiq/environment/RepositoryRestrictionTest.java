@@ -42,7 +42,18 @@ class RepositoryRestrictionTest {
                     compoNames.add(service.getSimpleName());
                 }
             });
-            Assertions.assertTrue(count.get() <= 1, getExceptionMessage(repo.getSimpleName(), compoNames));
+
+            if (count.get() > 1) {
+                // Then it should be ensured that a Repository can be injected only to Services that has the same name prefix
+                // e.g. CredentialRepository can be injected only to Credential****Service
+
+                String allowedNamesRegexp = repo.getSimpleName().replace("Repository", ".*Service");
+                Set<String> filteredNames = compoNames.stream().filter(name -> !name.matches(allowedNamesRegexp)).collect(toSet());
+
+                Assertions.assertTrue(filteredNames.isEmpty(), getExceptionMessage(repo.getSimpleName(), compoNames));
+            } else {
+                Assertions.assertTrue(count.get() <= 1, getExceptionMessage(repo.getSimpleName(), compoNames));
+            }
         });
     }
 

@@ -37,6 +37,7 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialRes
 import com.sequenceiq.environment.api.v1.credential.model.response.InteractiveCredentialResponse;
 import com.sequenceiq.environment.authorization.EnvironmentCredentialFiltering;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.service.CredentialCreateService;
 import com.sequenceiq.environment.credential.service.CredentialDeleteService;
 import com.sequenceiq.environment.credential.service.CredentialEntitlementService;
 import com.sequenceiq.environment.credential.service.CredentialService;
@@ -49,6 +50,8 @@ import com.sequenceiq.notification.NotificationController;
 public class CredentialV1Controller extends NotificationController implements CredentialEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialV1Controller.class);
+
+    private final CredentialCreateService credentialCreateService;
 
     private final CredentialService credentialService;
 
@@ -65,6 +68,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
     private final CredentialEntitlementService credentialEntitlementService;
 
     public CredentialV1Controller(
+            CredentialCreateService credentialCreateService,
             CredentialService credentialService,
             CreateCredentialRequestToCredentialConverter credentialRequestConverter,
             EditCredentialRequestToCredentialConverter credentialEditConverter,
@@ -72,6 +76,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
             CredentialDeleteService credentialDeleteService,
             EnvironmentCredentialFiltering environmentCredentialFiltering,
             CredentialEntitlementService credentialEntitlementService) {
+        this.credentialCreateService = credentialCreateService;
         this.credentialService = credentialService;
         this.credentialRequestConverter = credentialRequestConverter;
         this.credentialResponseConverter = credentialResponseConverter;
@@ -129,7 +134,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
         LOGGER.debug("Create credential request has received: {}", createCredentialRequest);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         credentialEntitlementService.checkAzureEntitlement(accountId, createCredentialRequest.getAzure());
-        Credential createdCredential = credentialService.create(createCredentialRequest, accountId, ThreadBasedUserCrnProvider.getUserCrn(), ENVIRONMENT);
+        Credential createdCredential = credentialCreateService.create(createCredentialRequest, accountId, ThreadBasedUserCrnProvider.getUserCrn(), ENVIRONMENT);
         notify(ResourceEvent.CREDENTIAL_CREATED);
         LOGGER.debug("Credential has been created: {}", createdCredential);
         return credentialResponseConverter.convert(createdCredential);
