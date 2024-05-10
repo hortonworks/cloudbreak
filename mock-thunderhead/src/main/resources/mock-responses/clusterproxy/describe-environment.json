@@ -1,0 +1,241 @@
+{
+  "environment": {
+    "environmentCrn": "crn:altus:environments:us-west-1:07f2a6a3-2a37-4903-a7ff-786279d247f1:environment:zhe-rhl9-3/8f92a8a6-b37b-4b36-92e6-fd9daf32160a",
+    "environmentName": "zhe-rhl9-3",
+    "accountId": "",
+    "creationDate": "",
+    "creationDateMs": "0",
+    "type": "PRIVATE",
+    "validationStatus": null,
+    "status": "AVAILABLE",
+    "deletionDateMs": "0",
+    "fluentTag": "env-zhe-rhl9-3",
+    "cdpRuntimeVersion": "1.6.0",
+    "privateEnvironmentDetails": {
+      "clusterNames": [
+        "Cluster 1"
+      ],
+      "applications": {
+        "RANGER": {
+          "services": {
+            "RANGER_ADMIN": {
+              "endpoints": [
+                {
+                  "host": "ccycloud-1.zhefei-cmrhl9.root.comops.site",
+                  "port": 6182,
+                  "uri": "https://ccycloud-1.zhefei-cmrhl9.root.comops.site:6182"
+                }
+              ],
+              "config": {},
+              "type": ""
+            }
+          },
+          "config": {
+            "ranger_plugin_hdfs_audit_enabled": "true",
+            "ranger_service_http_port": "6080",
+            "ranger_service_https_port": "6182",
+            "solr_service": "SOLR-1",
+            "load_balancer_url": "",
+            "xasecure.audit.destination.solr.zookeepers": "ccycloud-1.zhefei-cmrhl9.root.comops.site:2181/solr-infra",
+            "ranger_plugin_hdfs_audit_url": "hdfs://ccycloud-1.zhefei-cmrhl9.root.comops.site:8020/ranger/audit"
+          }
+        },
+        "ATLAS": {
+          "services": {
+            "ATLAS_SERVER": {
+              "endpoints": [
+                {
+                  "host": "ccycloud-1.zhefei-cmrhl9.root.comops.site",
+                  "port": 31443,
+                  "uri": "https://ccycloud-1.zhefei-cmrhl9.root.comops.site:31443/"
+                }
+              ],
+              "config": {},
+              "type": ""
+            }
+          },
+          "config": {
+            "atlas.kafka.security.protocol": "SASL_SSL",
+            "kerberos.auth.enable": "true",
+            "ranger_service": "RANGER-1",
+            "solr_service": "SOLR-1",
+            "kafka_service": "KAFKA-1",
+            "atlas.kafka.sasl.kerberos.service.name": "kafka",
+            "atlas.kafka.bootstrap.servers": "ccycloud-1.zhefei-cmrhl9.root.comops.site:9093,ccycloud-2.zhefei-cmrhl9.root.comops.site:9093,ccycloud-3.zhefei-cmrhl9.root.comops.site:9093",
+            "atlas.jaas.KafkaClient.option.serviceName": "kafka",
+            "atlas.kafka.zookeeper.connect": "ccycloud-1.zhefei-cmrhl9.root.comops.site:2181/kafka"
+          }
+        },
+        "HIVE": {
+          "services": {
+            "HIVEMETASTORE": {
+              "endpoints": [
+                {
+                  "host": "ccycloud-1.zhefei-cmrhl9.root.comops.site",
+                  "port": 9083,
+                  "uri": "thrift://ccycloud-1.zhefei-cmrhl9.root.comops.site:9083"
+                }
+              ],
+              "config": {},
+              "type": ""
+            }
+          },
+          "config": {
+            "kerberos_princ_name": "hive",
+            "ranger_service": "RANGER-1",
+            "atlas_service": "ATLAS-1",
+            "hive_metastore_database_type": "mysql",
+            "zookeeper_service": "ZOOKEEPER-1",
+            "hadoop_rpc_protection": "privacy",
+            "hive_warehouse_directory": "/warehouse/tablespace/managed/hive",
+            "hive_warehouse_external_directory": "/warehouse/tablespace/external/hive",
+            "hive_metastore_database_user": "hive13mhnezngm",
+            "hive_metastore_database_port": "3306",
+            "hive_metastore_database_name": "hive1",
+            "hive_metastore_database_password": "hive13mhnezngm",
+            "hive_metastore_database_host": "ccycloud-1.zhefei-cmrhl9.root.comops.site"
+          }
+        },
+        "SOLR": {
+          "services": {
+            "SOLR_SERVER": {
+              "endpoints": [
+                {
+                  "host": "ccycloud-1.zhefei-cmrhl9.root.comops.site",
+                  "port": 8995,
+                  "uri": "https://ccycloud-1.zhefei-cmrhl9.root.comops.site:8995"
+                }
+              ],
+              "config": {},
+              "type": ""
+            }
+          },
+          "config": {
+            "zookeeper_service": "ZOOKEEPER-1",
+            "zookeeper_znode": "/solr-infra"
+          }
+        },
+        "KAFKA": {
+          "services": {
+            "KAFKA_BROKER": {
+              "endpoints": [
+                {
+                  "host": "ccycloud-3.zhefei-cmrhl9.root.comops.site",
+                  "port": 9093,
+                  "uri": "https://ccycloud-3.zhefei-cmrhl9.root.comops.site:9093"
+                }
+              ],
+              "config": {},
+              "type": ""
+            }
+          },
+          "config": {
+            "kerberos.auth.enable": "true",
+            "ranger_service": "RANGER-1",
+            "zookeeper_service": "ZOOKEEPER-1"
+          }
+        },
+        "ZOOKEEPER": {
+          "services": {
+            "SERVER": {
+              "endpoints": [
+                {
+                  "host": "ccycloud-1.zhefei-cmrhl9.root.comops.site",
+                  "port": 2182,
+                  "uri": "https://ccycloud-1.zhefei-cmrhl9.root.comops.site:2182"
+                }
+              ],
+              "config": {},
+              "type": ""
+            }
+          },
+          "config": {
+            "zookeeper_tls_enabled": "true"
+          }
+        }
+      },
+      "cmHost": "https://ccycloud-1.zhefei-cmrhl9.root.comops.site:7183",
+      "cmUser": "__cloudera_internal_user__zhe-rhl9-3a2b3b7de-cdc8-46be-9d20-cec3cf79d9df",
+      "authTokenType": "password",
+      "authToken": "2cd00772-0b23-4d2b-8338-e3e62ca4be528dd11adf-1a7e-4c7b-9fb7-3886f5e70209",
+      "kubeConfig": "...",
+      "cloudPlatform": "STANDARD",
+      "domain": "apps.zhe-rhl9-3.vpc.cloudera.com",
+      "dockerConfigJson": "",
+      "namespacePrefix": "zhe-rhl9-3-8f92a8a6",
+      "monitoringNamespace": "zhe-rhl9-3-8f92a8a6-monitoring-platform",
+      "storageClass": "",
+      "ozoneS3ProxyUrl": "",
+      "cmlSummary": {
+        "cmlWorkspaces": [
+          {
+            "instanceName": "test-ml",
+            "environmentName": "zhe-rhl9-3",
+            "instanceStatus": "installation:failed",
+            "instanceUrl": "http://ml-29c86d80-133.apps.zhe-rhl9-3.vpc.cloudera.com",
+            "environmentCrn": "crn:altus:environments:us-west-1:07f2a6a3-2a37-4903-a7ff-786279d247f1:environment:zhe-rhl9-3/8f92a8a6-b37b-4b36-92e6-fd9daf32160a",
+            "namespace": "",
+            "crn": "crn:cdp:ml:us-west-1:07f2a6a3-2a37-4903-a7ff-786279d247f1:workspace:cb596fc0-7a5c-422a-8576-c05ec72b33e5"
+          }
+        ]
+      },
+      "cdwSummary": {
+        "cdwCluster": {
+          "crn": "",
+          "id": "env-zhe-rhl9-3",
+          "environmentCrn": "crn:altus:environments:us-west-1:07f2a6a3-2a37-4903-a7ff-786279d247f1:environment:zhe-rhl9-3/8f92a8a6-b37b-4b36-92e6-fd9daf32160a",
+          "name": "zhe-rhl9-3",
+          "status": "Running"
+        },
+        "cdwDbc": {
+          "cdwVws": [
+            {
+              "crn": "crn:cdp:dw:us-west-1:07f2a6a3-2a37-4903-a7ff-786279d247f1:cluster:env-zhe-rhl9-3.compute-fsfsfdfsffsdf",
+              "id": "compute-fsfsfdfsffsdf",
+              "name": "fsfsfdfsffsdf",
+              "vwType": "hive",
+              "dbcId": "warehouse-zhe-rhl9-3"
+            },
+            {
+              "crn": "crn:cdp:dw:us-west-1:07f2a6a3-2a37-4903-a7ff-786279d247f1:cluster:env-zhe-rhl9-3.compute-test-cdw-vw",
+              "id": "compute-test-cdw-vw",
+              "name": "test-cdw-vw",
+              "vwType": "hive",
+              "dbcId": "warehouse-zhe-rhl9-3"
+            }
+          ],
+          "crn": "crn:cdp:dw:us-west-1:07f2a6a3-2a37-4903-a7ff-786279d247f1:cluster:env-zhe-rhl9-3.warehouse-zhe-rhl9-3",
+          "id": "warehouse-zhe-rhl9-3",
+          "name": "zhe-rhl9-3",
+          "status": "Running"
+        }
+      },
+      "cdeSummary": {
+        "cdeServices": [
+          {
+            "cdeVcs": [
+              {
+                "vcId": "dex-app-55ngk24b",
+                "vcName": "Default-VC-7jnwrslh",
+                "clusterId": "cluster-7jnwrslh",
+                "status": "AppInstalled",
+                "vcUiUrl": "https://55ngk24b.cde-7jnwrslh.apps.zhe-rhl9-3.vpc.cloudera.com/dex/ui/"
+              }
+            ],
+            "name": "cde-test1",
+            "clusterId": "cluster-7jnwrslh",
+            "environmentName": "zhe-rhl9-3",
+            "status": "ClusterCreationCompleted"
+          },
+          {
+            "cdeVcs": [],
+            "name": "hhh8888",
+            "clusterId": "cluster-mrnb5sq2",
+            "environmentName": "zhe-rhl9-3",
+            "status": "ClusterChartInstallationFailed"
+          }
+        ]
+      }
+    }
+  }
+}
