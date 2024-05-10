@@ -71,7 +71,8 @@ public class DistroXUpgradeAvailabilityService {
 
     private List<ImageInfoV4Response> addOsUpgradeOptionIfAvailable(Stack stack, UpgradeV4Response response, List<ImageInfoV4Response> filteredCandidates) {
         ImageInfoV4Response currentImage = response.getCurrent();
-        if (!filteredCandidates.contains(currentImage) && !currentImageUsageCondition.currentImageUsedOnInstances(stack.getId(), currentImage.getImageId())) {
+        boolean notContainsCurrentImage = filteredCandidates.stream().noneMatch(candidate -> candidate.getImageId().equals(currentImage.getImageId()));
+        if (notContainsCurrentImage && !currentImageUsageCondition.currentImageUsedOnInstances(stack.getId(), currentImage.getImageId())) {
             LOGGER.debug("Adding the current image for image candidates to offer OS upgrade. Current image id: {}", currentImage.getImageId());
             filteredCandidates = new ArrayList<>(filteredCandidates);
             filteredCandidates.add(currentImage);

@@ -3,29 +3,18 @@ package com.sequenceiq.cloudbreak.service.parcel;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.retry.annotation.Retryable;
-import org.springframework.retry.support.RetrySynchronizationManager;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.PaywallCredentialPopulator;
-import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
@@ -49,12 +38,6 @@ public class ParcelService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ParcelService.class);
 
-    @Value("#{'${cb.http.retryableStatusCodes:}'.split(',')}")
-    private List<Integer> retryableHttpCodes;
-
-    @Value("${cb.parcel.retry.maxAttempts:5}")
-    private Integer retryMaxAttempts;
-
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
@@ -72,12 +55,6 @@ public class ParcelService {
 
     @Inject
     private ImageReaderService imageReaderService;
-
-    @Inject
-    private RestClientFactory restClientFactory;
-
-    @Inject
-    private PaywallCredentialPopulator paywallCredentialPopulator;
 
     public Set<ClusterComponentView> getParcelComponentsByBlueprint(StackDtoDelegate stack) {
         Set<ClusterComponentView> components = getComponents(stack.getCluster().getId());
@@ -170,28 +147,5 @@ public class ParcelService {
                 .map(cmp -> cmProductMap.get(cmp.getName()))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-    }
-
-    @Retryable(value = Exception.class, maxAttemptsExpression = "${cb.parcel.retry.maxAttempts:5}",
-            backoff = @Backoff(delayExpression = "${cb.parcel.retry.backOffDelay:2000}",
-                    multiplierExpression = "${cb.parcel.retry.backOffMultiplier:2}"))
-    public Optional<Response> getHeadResponseForParcel(String url) {
-        Client client = restClientFactory.getOrCreateWithFollowRedirects();
-        WebTarget target = client.target(url);
-        paywallCredentialPopulator.populateWebTarget(url, target);
-        Response response = target.request().head();
-        LOGGER.info("Head request for {} status: {}", url, response.getStatus());
-        if (retryableHttpCodes.contains(response.getStatus())) {
-            if (RetrySynchronizationManager.getContext().getRetryCount() < retryMaxAttempts - 1) {
-                LOGGER.info("Retry for Http Status {}", response.getStatus());
-                throw new RuntimeException(String.format("Got Http Status %s", response.getStatus()));
-            } else {
-                /**
-                 * This is to ensure that Http code is returned instead of throwing exception when retry is exhausted.
-                 */
-                LOGGER.info("Retry exhausted");
-            }
-        }
-        return Optional.of(response);
     }
 }

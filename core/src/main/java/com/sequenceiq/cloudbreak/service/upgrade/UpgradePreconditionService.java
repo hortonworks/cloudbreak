@@ -10,11 +10,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 
 @Component
@@ -31,8 +33,12 @@ public class UpgradePreconditionService {
     @Inject
     private EntitlementService entitlementService;
 
-    public String checkForRunningAttachedClusters(List<? extends StackDtoDelegate> datahubsInEnvironment, Boolean skipDataHubValidation,
-            boolean rollingUpgradeEnabled, String accountId) {
+    @Inject
+    private StackDtoService stackDtoService;
+
+    public String checkForRunningAttachedClusters(String environmentCrn, Boolean skipDataHubValidation, boolean rollingUpgradeEnabled, String accountId) {
+        List<? extends StackDtoDelegate> datahubsInEnvironment = stackDtoService.findAllByEnvironmentCrnAndStackType(environmentCrn,
+                List.of(StackType.WORKLOAD));
         String notStoppedAttachedClusters = getNotStoppedAttachedClusters(datahubsInEnvironment);
         if (!skipValidation(skipDataHubValidation, rollingUpgradeEnabled, accountId)
                 && StringUtils.hasText(notStoppedAttachedClusters)) {

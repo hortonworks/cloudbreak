@@ -10,6 +10,7 @@ import jakarta.ws.rs.BadRequestException;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -28,12 +29,9 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
-import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeCandidateFilterService;
@@ -70,13 +68,7 @@ public class StackUpgradeOperations {
     private ClusterDBValidationService clusterDBValidationService;
 
     @Inject
-    private StackDtoService stackDtoService;
-
-    @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
-
-    @Inject
-    private ClusterService clusterService;
 
     @Inject
     private ClusterUpgradeCandidateFilterService clusterUpgradeCandidateFilterService;
@@ -119,7 +111,7 @@ public class StackUpgradeOperations {
     public UpgradeV4Response checkForClusterUpgrade(String accountId, @NotNull Stack stack, UpgradeV4Request request) {
         MDCBuilder.buildMdcContext(stack);
         stack.setInstanceGroups(instanceGroupService.getByStackAndFetchTemplates(stack.getId()));
-        boolean osUpgrade = upgradeService.isOsUpgrade(request);
+        boolean osUpgrade = Boolean.TRUE.equals(request.getLockComponents()) && StringUtils.isEmpty(request.getRuntime());
         boolean replaceVms = determineReplaceVmsParameter(stack, request.getReplaceVms());
         boolean getAllImages = request.getImageId() != null;
         UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, replaceVms,
@@ -134,7 +126,7 @@ public class StackUpgradeOperations {
     }
 
     private void populateCandidatesWithPreparedFlag(Stack stack, UpgradeV4Response upgradeResponse) {
-        List<String> preparedImages = getPreparedImagesList(stack.getId());
+        List<String> preparedImages = getPreparedImagesList(stack.getCluster().getId());
         upgradeResponse.getUpgradeCandidates().forEach(imageInfoV4Response -> {
             if (!ObjectUtils.isEmpty(preparedImages) && preparedImages.contains(imageInfoV4Response.getImageId())) {
                 imageInfoV4Response.setPrepared(true);
@@ -147,9 +139,7 @@ public class StackUpgradeOperations {
         if (StackType.DATALAKE == stack.getType() && (internalUpgradeSettings == null || !internalUpgradeSettings.isUpgradePreparation())) {
             LOGGER.info("Checking that the attached DataHubs of the Data lake are both in stopped state and upgradeable only in case if "
                     + "Data lake runtime upgrade is enabled in [{}] account on [{}] cluster.", accountId, stack.getName());
-            List<? extends StackDtoDelegate> datahubsInEnvironment = stackDtoService.findAllByEnvironmentCrnAndStackType(stack.getEnvironmentCrn(),
-                    List.of(StackType.WORKLOAD));
-            upgradeResponse.appendReason(upgradePreconditionService.checkForRunningAttachedClusters(datahubsInEnvironment, request.
+            upgradeResponse.appendReason(upgradePreconditionService.checkForRunningAttachedClusters(stack.getEnvironmentCrn(), request.
                     isSkipDataHubValidation(), isRollingUpgradeEnabled(request), accountId));
         }
     }
@@ -166,19 +156,16 @@ public class StackUpgradeOperations {
         }
     }
 
-    private List<String> getPreparedImagesList(long stackId) {
+    private List<String> getPreparedImagesList(long clusterId) {
         List<String> preparedImages = Lists.newArrayList();
-        Optional<Long> clusterId = clusterService.findClusterIdByStackId(stackId);
-        if (clusterId.isPresent()) {
-            ClusterComponent clusterComponent = clusterComponentConfigProvider.getComponent(clusterId.get(), ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES,
-                    ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES.name());
-            try {
-                if (!ObjectUtils.isEmpty(clusterComponent)) {
-                    preparedImages = clusterComponent.getAttributes().get(PreparedImages.class).getPreparedImages();
-                }
-            } catch (IOException ex) {
-                LOGGER.error("Unable to read prepared list of images from Cluster Component for stack - {}", stackId);
+        ClusterComponent clusterComponent = clusterComponentConfigProvider.getComponent(clusterId, ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES,
+                ComponentType.CLUSTER_UPGRADE_PREPARED_IMAGES.name());
+        try {
+            if (!ObjectUtils.isEmpty(clusterComponent)) {
+                preparedImages = clusterComponent.getAttributes().get(PreparedImages.class).getPreparedImages();
             }
+        } catch (IOException ex) {
+            LOGGER.error("Unable to read prepared list of images from Cluster Component for stack.");
         }
         return preparedImages;
     }

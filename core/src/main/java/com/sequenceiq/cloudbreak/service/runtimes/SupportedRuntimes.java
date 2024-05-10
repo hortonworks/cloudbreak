@@ -27,7 +27,7 @@ public class SupportedRuntimes {
     @Inject
     private ImageCatalogService imageCatalogService;
 
-    private VersionComparator versionComparator = new VersionComparator();
+    private final VersionComparator versionComparator = new VersionComparator();
 
     public boolean isSupported(String runtime) {
         String latestSupportedRuntime = getLatestSupportedRuntime();

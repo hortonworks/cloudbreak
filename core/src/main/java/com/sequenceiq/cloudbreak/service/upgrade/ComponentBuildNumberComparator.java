@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 @Component
-class ComponentBuildNumberComparator {
+public class ComponentBuildNumberComparator {
 
     boolean compare(Map<String, String> currentImagePackages, Map<String, String> newImagePackages, String buildNumberKey) {
         Optional<String> currentVersion = getBuildVersion(currentImagePackages, buildNumberKey);

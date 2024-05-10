@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 
 @Component
-class BlueprintUpgradeOptionValidator {
+public class BlueprintUpgradeOptionValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintUpgradeOptionValidator.class);
 

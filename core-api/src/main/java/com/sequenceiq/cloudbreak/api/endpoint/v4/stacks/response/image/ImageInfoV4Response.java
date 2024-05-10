@@ -138,9 +138,11 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
     @Override
     public String toString() {
         return "ImageInfoV4Response{" +
+                "date='" + date + '\'' +
                 "imageName='" + imageName + '\'' +
                 ", imageId='" + imageId + '\'' +
                 ", prepared='" + prepared + '\'' +
+                ", componentVersions='" + componentVersions + '\'' +
                 '}';
     }
 }

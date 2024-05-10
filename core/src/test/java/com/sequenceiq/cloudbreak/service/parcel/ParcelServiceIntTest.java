@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Optional;
 
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Invocation;
@@ -22,6 +21,7 @@ import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -45,7 +45,7 @@ public class ParcelServiceIntTest {
     private static final String ERROR_MESSAGE = "Failed to fetch the head";
 
     @Autowired
-    private ParcelService underTest;
+    private ParcelAvailabilityRetrievalService underTest;
 
     @MockBean
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
@@ -71,6 +71,9 @@ public class ParcelServiceIntTest {
     @MockBean
     private PaywallCredentialPopulator paywallCredentialPopulator;
 
+    @SpyBean
+    private ParcelAvailabilityRetrievalService parcelAvailabilityRetrievalService;
+
     @MockBean
     private Client client;
 
@@ -82,48 +85,48 @@ public class ParcelServiceIntTest {
     @Test
     void testGetHeadResponseForParcelShouldReturnResponseForNonRetryableStatus() {
         setUpMocks(0, null, List.of(200));
-        Optional<Response> actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
-        assertEquals(actual.get().getStatus(), 200);
+        Response actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
+        assertEquals(actual.getStatus(), 200);
         verify(restClientFactory, times(1)).getOrCreateWithFollowRedirects();
     }
 
     @Test
     void testGetHeadResponseForParcelShouldReturnResponseAfterRetryWithRetryableStatus() {
         setUpMocks(0, null, List.of(403, 403, 200));
-        Optional<Response> actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
-        assertEquals(actual.get().getStatus(), 200);
+        Response actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
+        assertEquals(actual.getStatus(), 200);
         verify(restClientFactory, times(3)).getOrCreateWithFollowRedirects();
     }
 
     @Test
     void testGetHeadResponseForParcelShouldReturnResponseAfterRetryWithRetryableAndNonTryableStatus() {
         setUpMocks(0, null, List.of(403, 403, 404, 200));
-        Optional<Response> actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
-        assertEquals(actual.get().getStatus(), 404);
+        Response actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
+        assertEquals(actual.getStatus(), 404);
         verify(restClientFactory, times(3)).getOrCreateWithFollowRedirects();
     }
 
     @Test
     void testGetHeadResponseForParcelShouldReturnResponseAfterMaxRetryWithRetryableStatus() {
         setUpMocks(0, null, List.of(403, 403, 403, 403, 200));
-        Optional<Response> actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
-        assertEquals(actual.get().getStatus(), 200);
+        Response actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
+        assertEquals(actual.getStatus(), 200);
         verify(restClientFactory, times(5)).getOrCreateWithFollowRedirects();
     }
 
     @Test
     void testGetHeadResponseForParcelShouldThrowExceptionAfterRetryExhaustedWithRetryableStatus() {
         setUpMocks(0, null, List.of(403, 403, 403, 403, 403, 200));
-        Optional<Response> actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
-        assertEquals(actual.get().getStatus(), 403);
+        Response actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
+        assertEquals(actual.getStatus(), 403);
         verify(restClientFactory, times(5)).getOrCreateWithFollowRedirects();
     }
 
     @Test
     void testGetHeadResponseForParcelShouldReturnResponseAfterRetryWithException() {
         setUpMocks(4, new RuntimeException(ERROR_MESSAGE), List.of(200));
-        Optional<Response> actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
-        assertEquals(actual.get().getStatus(), 200);
+        Response actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
+        assertEquals(actual.getStatus(), 200);
         verify(restClientFactory, times(5)).getOrCreateWithFollowRedirects();
     }
 

@@ -37,10 +37,10 @@ public class ParcelAvailabilityService {
     private StackDtoService stackDtoService;
 
     @Inject
-    private ParcelService parcelService;
+    private CmUrlProvider cmUrlProvider;
 
     @Inject
-    private CmUrlProvider cmUrlProvider;
+    private ParcelAvailabilityRetrievalService parcelAvailabilityRetrievalService;
 
     public Set<Response> validateAvailability(Image image, Long resourceId) {
         StackDto stackDto = stackDtoService.getById(resourceId);
@@ -98,13 +98,12 @@ public class ParcelAvailabilityService {
     }
 
     private Optional<Response> getHeadResponse(String url) {
-        Optional<Response> response = Optional.empty();
         try {
-            response = parcelService.getHeadResponseForParcel(url);
+            return Optional.of(parcelAvailabilityRetrievalService.getHeadResponseForParcel(url));
         } catch (Exception e) {
             LOGGER.warn("Failed during HEAD request to url: {} Reason: {}", url, e.getMessage());
+            return Optional.empty();
         }
-        return response;
     }
 
     private boolean isArchiveUrl(Map.Entry<String, Optional<Response>> entry) {

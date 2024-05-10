@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import jakarta.ws.rs.BadRequestException;
@@ -49,7 +48,7 @@ public class ParcelAvailabilityServiceTest {
     private StackDtoService stackDtoService;
 
     @Mock
-    private ParcelService parcelService;
+    private ParcelAvailabilityRetrievalService parcelAvailabilityRetrievalService;
 
     @Mock
     private CmUrlProvider cmUrlProvider;
@@ -138,7 +137,7 @@ public class ParcelAvailabilityServiceTest {
         when(parcelUrlProvider.getRequiredParcelsFromImage(image, stackDto)).thenReturn(requiredParcelsFromImage);
         when(cmUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
 
-        when(parcelService.getHeadResponseForParcel(ARCHIVE_PARCEL)).thenThrow(new BadRequestException());
+        when(parcelAvailabilityRetrievalService.getHeadResponseForParcel(ARCHIVE_PARCEL)).thenThrow(new BadRequestException());
 
         createMockResponse(200, PARCEL_1);
         createMockResponse(200, PARCEL_2);
@@ -154,7 +153,7 @@ public class ParcelAvailabilityServiceTest {
         when(parcelUrlProvider.getRequiredParcelsFromImage(image, stackDto)).thenReturn(requiredParcelsFromImage);
         when(cmUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
 
-        when(parcelService.getHeadResponseForParcel(PARCEL_1)).thenThrow(new BadRequestException());
+        when(parcelAvailabilityRetrievalService.getHeadResponseForParcel(PARCEL_1)).thenThrow(new BadRequestException());
 
         Response response3 = createMockResponse(200, ARCHIVE_PARCEL);
         Response response2 = createMockResponse(200, PARCEL_2);
@@ -170,7 +169,7 @@ public class ParcelAvailabilityServiceTest {
 
     private Response createMockResponse(int status, String url) {
         Response response = Response.status(status).build();
-        when(parcelService.getHeadResponseForParcel(url)).thenReturn(Optional.of(response));
+        when(parcelAvailabilityRetrievalService.getHeadResponseForParcel(url)).thenReturn(response);
         return response;
     }
 

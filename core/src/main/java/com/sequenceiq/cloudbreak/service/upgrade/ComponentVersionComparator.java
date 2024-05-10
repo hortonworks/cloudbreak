@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.VersionPrefix;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 
 @Component
-class ComponentVersionComparator {
+public class ComponentVersionComparator {
 
     boolean permitCmAndStackUpgradeByComponentVersion(String currentVersion, String newVersion) {
         boolean result = false;

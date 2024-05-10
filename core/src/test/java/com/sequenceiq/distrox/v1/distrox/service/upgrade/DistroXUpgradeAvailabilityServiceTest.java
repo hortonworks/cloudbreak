@@ -110,9 +110,8 @@ public class DistroXUpgradeAvailabilityServiceTest {
     @Test
     public void testReturnAllCandidates() {
         UpgradeV4Request request = createRequest(LATEST_ONLY, true, true);
-        UpgradeV4Response response = new UpgradeV4Response();
-        response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class), mock(ImageInfoV4Response.class)));
-        response.setCurrent(new ImageInfoV4Response());
+        UpgradeV4Response response = new UpgradeV4Response(new ImageInfoV4Response(), List.of(mock(ImageInfoV4Response.class), mock(ImageInfoV4Response.class)),
+                null);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
 
@@ -124,13 +123,10 @@ public class DistroXUpgradeAvailabilityServiceTest {
     @Test
     public void testWhenRangerRazEnabledAndEntitlementNotGrantedThenUpgradeNotAllowed() {
         UpgradeV4Request request = createRequest(LATEST_ONLY, true, false);
-        UpgradeV4Response response = new UpgradeV4Response();
-        ImageInfoV4Response currentImage = createImageInfoResponse(STACK_ID, "7.2.0");
-        ImageInfoV4Response candidateImage1 = createImageInfoResponse(3L, "7.2.1");
-        ImageInfoV4Response candidateImage2 = createImageInfoResponse(4L, "7.2.2");
-
-        response.setUpgradeCandidates(List.of(candidateImage1, candidateImage2));
-        response.setCurrent(currentImage);
+        ImageInfoV4Response currentImage = createImageInfoResponse("currentImage", STACK_ID, "7.2.0");
+        ImageInfoV4Response candidateImage1 = createImageInfoResponse("image1", 3L, "7.2.1");
+        ImageInfoV4Response candidateImage2 = createImageInfoResponse("image2", 4L, "7.2.2");
+        UpgradeV4Response response = new UpgradeV4Response(currentImage, List.of(candidateImage1, candidateImage2), null);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
         when(runtimeVersionService.getRuntimeVersion(any())).thenReturn(Optional.of("7.2.0"));
@@ -154,13 +150,10 @@ public class DistroXUpgradeAvailabilityServiceTest {
     @Test
     public void testWhenRangerRazDisabledAndEntitlementNotGrantedThenUpgradeAllowed() {
         UpgradeV4Request request = createRequest(LATEST_ONLY, true, false);
-        UpgradeV4Response response = new UpgradeV4Response();
-        ImageInfoV4Response currentImage = createImageInfoResponse(STACK_ID, "7.2.0");
-        ImageInfoV4Response candidateImage1 = createImageInfoResponse(3L, "7.2.1");
-        ImageInfoV4Response candidateImage2 = createImageInfoResponse(4L, "7.2.2");
-
-        response.setUpgradeCandidates(List.of(candidateImage1, candidateImage2));
-        response.setCurrent(currentImage);
+        ImageInfoV4Response currentImage = createImageInfoResponse("currentImage", STACK_ID, "7.2.0");
+        ImageInfoV4Response candidateImage1 = createImageInfoResponse("image1", 3L, "7.2.1");
+        ImageInfoV4Response candidateImage2 = createImageInfoResponse("image2", 4L, "7.2.2");
+        UpgradeV4Response response = new UpgradeV4Response(currentImage, List.of(candidateImage1, candidateImage2), null);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
 
@@ -172,15 +165,11 @@ public class DistroXUpgradeAvailabilityServiceTest {
     @Test
     public void testReturnLatestOnlyForDryRun() {
         UpgradeV4Request request = createRequest(LATEST_ONLY, true, true);
-        UpgradeV4Response response = new UpgradeV4Response();
-        ImageInfoV4Response image1 = new ImageInfoV4Response();
-        image1.setCreated(1L);
-        ImageInfoV4Response image2 = new ImageInfoV4Response();
-        image2.setCreated(8L);
-        ImageInfoV4Response image3 = new ImageInfoV4Response();
-        image3.setCreated(5L);
-        response.setUpgradeCandidates(List.of(image1, image2, image3));
-        response.setCurrent(createImageInfoResponse(STACK_ID, "7.2.0"));
+        ImageInfoV4Response image1 = createImageInfoResponse("image1", 1L, "A");
+        ImageInfoV4Response image2 = createImageInfoResponse("image2", 8L, "A");
+        ImageInfoV4Response image3 = createImageInfoResponse("image3", 5L, "A");
+        ImageInfoV4Response currentImage = createImageInfoResponse("currentImage", STACK_ID, "7.2.0");
+        UpgradeV4Response response = new UpgradeV4Response(currentImage, List.of(image1, image2, image3), null);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(anyString())).thenReturn(true);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
@@ -197,18 +186,17 @@ public class DistroXUpgradeAvailabilityServiceTest {
     @Test
     public void testLatestByRuntime() {
         UpgradeV4Request request = createRequest(LATEST_ONLY, false, true);
-        UpgradeV4Response response = new UpgradeV4Response();
-        ImageInfoV4Response image1 = createImageInfoResponse(STACK_ID, "A");
-        ImageInfoV4Response image2 = createImageInfoResponse(8L, "A");
-        ImageInfoV4Response image3 = createImageInfoResponse(6L, "A");
-        ImageInfoV4Response image4 = createImageInfoResponse(1L, "B");
-        ImageInfoV4Response image5 = createImageInfoResponse(4L, "B");
-        ImageInfoV4Response image6 = createImageInfoResponse(3L, "B");
-        ImageInfoV4Response image7 = createImageInfoResponse(9L, "C");
-        ImageInfoV4Response image8 = createImageInfoResponse(8L, "C");
-        ImageInfoV4Response image9 = createImageInfoResponse(6L, "C");
-        response.setUpgradeCandidates(List.of(image1, image2, image3, image4, image5, image6, image7, image8, image9));
-        response.setCurrent(createImageInfoResponse(STACK_ID, "7.2.0"));
+        ImageInfoV4Response image1 = createImageInfoResponse("image1", STACK_ID, "A");
+        ImageInfoV4Response image2 = createImageInfoResponse("image2", 8L, "A");
+        ImageInfoV4Response image3 = createImageInfoResponse("image3", 6L, "A");
+        ImageInfoV4Response image4 = createImageInfoResponse("image4", 1L, "B");
+        ImageInfoV4Response image5 = createImageInfoResponse("image5", 4L, "B");
+        ImageInfoV4Response image6 = createImageInfoResponse("image6", 3L, "B");
+        ImageInfoV4Response image7 = createImageInfoResponse("image7", 9L, "C");
+        ImageInfoV4Response image8 = createImageInfoResponse("image8", 8L, "C");
+        ImageInfoV4Response image9 = createImageInfoResponse("image9", 6L, "C");
+        ImageInfoV4Response currentImage = createImageInfoResponse("currentImage", STACK_ID, "7.2.0");
+        UpgradeV4Response response = new UpgradeV4Response(currentImage, List.of(image1, image2, image3, image4, image5, image6, image7, image8, image9), null);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
         when(currentImageUsageCondition.currentImageUsedOnInstances(any(), any())).thenReturn(true);
@@ -227,18 +215,17 @@ public class DistroXUpgradeAvailabilityServiceTest {
     @Test
     public void testOnlyReturnCandidatesWithDatalakeVersion() {
         UpgradeV4Request request = createRequest(SHOW, false, true);
-        UpgradeV4Response response = new UpgradeV4Response();
-        ImageInfoV4Response image1 = createImageInfoResponse(STACK_ID, "A");
-        ImageInfoV4Response image2 = createImageInfoResponse(8L, "A");
-        ImageInfoV4Response image3 = createImageInfoResponse(6L, "A");
-        ImageInfoV4Response image4 = createImageInfoResponse(1L, "B");
-        ImageInfoV4Response image5 = createImageInfoResponse(4L, "B");
-        ImageInfoV4Response image6 = createImageInfoResponse(3L, "B");
-        ImageInfoV4Response image7 = createImageInfoResponse(9L, "C");
-        ImageInfoV4Response image8 = createImageInfoResponse(8L, "C");
-        ImageInfoV4Response image9 = createImageInfoResponse(6L, "C");
-        response.setUpgradeCandidates(List.of(image1, image2, image3, image4, image5, image6, image7, image8, image9));
-        response.setCurrent(createImageInfoResponse(6L, "C"));
+        ImageInfoV4Response image1 = createImageInfoResponse("image1", STACK_ID, "A");
+        ImageInfoV4Response image2 = createImageInfoResponse("image2", 8L, "A");
+        ImageInfoV4Response image3 = createImageInfoResponse("image3", 6L, "A");
+        ImageInfoV4Response image4 = createImageInfoResponse("image4", 1L, "B");
+        ImageInfoV4Response image5 = createImageInfoResponse("image5", 4L, "B");
+        ImageInfoV4Response image6 = createImageInfoResponse("image6", 3L, "B");
+        ImageInfoV4Response image7 = createImageInfoResponse("image7", 9L, "C");
+        ImageInfoV4Response image8 = createImageInfoResponse("image8", 8L, "C");
+        ImageInfoV4Response image9 = createImageInfoResponse("image9", 6L, "C");
+        ImageInfoV4Response currentImage = createImageInfoResponse("currentImage", 6L, "C");
+        UpgradeV4Response response = new UpgradeV4Response(currentImage, List.of(image1, image2, image3, image4, image5, image6, image7, image8, image9), null);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
         when(currentImageUsageCondition.currentImageUsedOnInstances(any(), any())).thenReturn(true);
@@ -274,12 +261,10 @@ public class DistroXUpgradeAvailabilityServiceTest {
             + "since the upgrade options are newer than the Data Lake. Data Lake upgrade shall be suggested")
     public void testCheckForUpgradeWhenDataLakeAndDataHubIsOnTheSameVersionAndNoUpgradeIsAvailable() {
         UpgradeV4Request request = createRequest(SHOW, false, true);
-        UpgradeV4Response response = new UpgradeV4Response();
-        ImageInfoV4Response image1 = createImageInfoResponse(STACK_ID, "7.2.0");
-        ImageInfoV4Response image2 = createImageInfoResponse(8L, "7.3.0");
-        ImageInfoV4Response image3 = createImageInfoResponse(6L, "7.4.0");
-        response.setUpgradeCandidates(List.of(image1, image2, image3));
-        response.setCurrent(createImageInfoResponse(6L, "7.1.0"));
+        ImageInfoV4Response image1 = createImageInfoResponse("image1", STACK_ID, "7.2.0");
+        ImageInfoV4Response image2 = createImageInfoResponse("image2", 8L, "7.3.0");
+        ImageInfoV4Response image3 = createImageInfoResponse("image3", 6L, "7.4.0");
+        UpgradeV4Response response = new UpgradeV4Response(createImageInfoResponse("currentImage", 6L, "7.1.0"), List.of(image1, image2, image3), null);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(anyString())).thenReturn(false);
@@ -300,12 +285,10 @@ public class DistroXUpgradeAvailabilityServiceTest {
             + "since the different Data Hub version entitlement is enabled")
     public void testCheckForUpgradeWhenDataLakeAndDataHubIsOnTheSameVersionAndUpgradeIsAvailable() {
         UpgradeV4Request request = createRequest(SHOW, false, true);
-        UpgradeV4Response response = new UpgradeV4Response();
-        ImageInfoV4Response image1 = createImageInfoResponse(STACK_ID, "7.2.0");
-        ImageInfoV4Response image2 = createImageInfoResponse(8L, "7.3.0");
-        ImageInfoV4Response image3 = createImageInfoResponse(6L, "7.4.0");
-        response.setUpgradeCandidates(List.of(image1, image2, image3));
-        response.setCurrent(new ImageInfoV4Response());
+        ImageInfoV4Response image1 = createImageInfoResponse("image1", STACK_ID, "7.2.0");
+        ImageInfoV4Response image2 = createImageInfoResponse("image2", 8L, "7.3.0");
+        ImageInfoV4Response image3 = createImageInfoResponse("image3", 6L, "7.4.0");
+        UpgradeV4Response response = new UpgradeV4Response(new ImageInfoV4Response(), List.of(image1, image2, image3), null);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(anyString())).thenReturn(true);
@@ -321,13 +304,11 @@ public class DistroXUpgradeAvailabilityServiceTest {
             + " and there are 2 image candidates for maintenance upgrade and the latest should be returned with dry-run")
     public void testCheckForUpgradeWhenDataHubUpgradeIsDisabledAnMultipleMaintenanceUpgradeCandidatesAreAvailable() {
         UpgradeV4Request request = createRequest(SHOW, true, false);
-        UpgradeV4Response response = new UpgradeV4Response();
-        ImageInfoV4Response current = createImageInfoResponse(1L, "7.1.0");
-        ImageInfoV4Response image1 = createImageInfoResponse(STACK_ID, "7.1.0");
-        ImageInfoV4Response image2 = createImageInfoResponse(3L, "7.1.0");
-        ImageInfoV4Response image3 = createImageInfoResponse(6L, "7.3.0");
-        response.setUpgradeCandidates(List.of(image1, image2, image3));
-        response.setCurrent(current);
+        ImageInfoV4Response current = createImageInfoResponse("currentImage", 1L, "7.1.0");
+        ImageInfoV4Response image1 = createImageInfoResponse("image1", STACK_ID, "7.1.0");
+        ImageInfoV4Response image2 = createImageInfoResponse("image2", 3L, "7.1.0");
+        ImageInfoV4Response image3 = createImageInfoResponse("image3", 6L, "7.3.0");
+        UpgradeV4Response response = new UpgradeV4Response(current, List.of(image1, image2, image3), null);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(anyString())).thenReturn(false);
@@ -345,13 +326,11 @@ public class DistroXUpgradeAvailabilityServiceTest {
             + " and there 3 image candidates for upgrade")
     public void testCheckForUpgradeWhenDataHubUpgradeIsGaAndOneMaintenanceUpgradeCandidateIsAvailable() {
         UpgradeV4Request request = createRequest(SHOW, false, false);
-        UpgradeV4Response response = new UpgradeV4Response();
-        ImageInfoV4Response current = createImageInfoResponse(1L, "7.1.0");
-        ImageInfoV4Response image1 = createImageInfoResponse(STACK_ID, "7.1.0");
-        ImageInfoV4Response image2 = createImageInfoResponse(8L, "7.2.0");
-        ImageInfoV4Response image3 = createImageInfoResponse(6L, "7.3.0");
-        response.setUpgradeCandidates(List.of(image1, image2, image3));
-        response.setCurrent(current);
+        ImageInfoV4Response current = createImageInfoResponse("currentImage", 1L, "7.1.0");
+        ImageInfoV4Response image1 = createImageInfoResponse("image1", STACK_ID, "7.1.0");
+        ImageInfoV4Response image2 = createImageInfoResponse("image2", 8L, "7.2.0");
+        ImageInfoV4Response image3 = createImageInfoResponse("image3", 6L, "7.3.0");
+        UpgradeV4Response response = new UpgradeV4Response(current, List.of(image1, image2, image3), null);
         stack.getCluster().getBlueprint().setBlueprintUpgradeOption(BlueprintUpgradeOption.GA);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, request)).thenReturn(response);
@@ -369,13 +348,11 @@ public class DistroXUpgradeAvailabilityServiceTest {
             + " blueprints and there 3 image candidates for upgrade")
     public void testCheckForUpgradeWhenDataHubUpgradeIsNotGaAndOneMaintenanceUpgradeCandidateIsAvailable() {
         UpgradeV4Request request = createRequest(SHOW, false, false);
-        UpgradeV4Response response = new UpgradeV4Response();
-        ImageInfoV4Response current = createImageInfoResponse(1L, "7.1.0");
-        ImageInfoV4Response image1 = createImageInfoResponse(STACK_ID, "7.1.0");
-        ImageInfoV4Response image2 = createImageInfoResponse(8L, "7.2.0");
-        ImageInfoV4Response image3 = createImageInfoResponse(6L, "7.3.0");
-        response.setUpgradeCandidates(List.of(image1, image2, image3));
-        response.setCurrent(current);
+        ImageInfoV4Response current = createImageInfoResponse("currentImage", 1L, "7.1.0");
+        ImageInfoV4Response image1 = createImageInfoResponse("image1", STACK_ID, "7.1.0");
+        ImageInfoV4Response image2 = createImageInfoResponse("image2", 8L, "7.2.0");
+        ImageInfoV4Response image3 = createImageInfoResponse("image3", 6L, "7.3.0");
+        UpgradeV4Response response = new UpgradeV4Response(current, List.of(image1, image2, image3), null);
         stack.getCluster().getBlueprint().setStatus(ResourceStatus.USER_MANAGED);
         stack.getCluster().getBlueprint().setBlueprintUpgradeOption(BlueprintUpgradeOption.OS_UPGRADE_DISABLED);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
@@ -389,8 +366,9 @@ public class DistroXUpgradeAvailabilityServiceTest {
         assertTrue(result.getUpgradeCandidates().stream().anyMatch(img -> img.getCreated() == STACK_ID && "7.1.0".equals(img.getComponentVersions().getCdp())));
     }
 
-    private ImageInfoV4Response createImageInfoResponse(long creation, String cdp) {
+    private ImageInfoV4Response createImageInfoResponse(String imageId, long creation, String cdp) {
         ImageInfoV4Response image = new ImageInfoV4Response();
+        image.setImageId(imageId);
         image.setCreated(creation);
         image.setComponentVersions(new ImageComponentVersions("dontcare", "dontcare", cdp, "dontcare", CENTOS7.getOs(), "dontcare", List.of()));
         return image;
