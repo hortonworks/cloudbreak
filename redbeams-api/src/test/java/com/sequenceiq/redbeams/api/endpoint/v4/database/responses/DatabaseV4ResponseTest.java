@@ -38,11 +38,11 @@ public class DatabaseV4ResponseTest {
         response.setDatabaseEngineDisplayName("PostgreSQL");
         assertEquals("PostgreSQL", response.getDatabaseEngineDisplayName());
 
-        SecretResponse username = new SecretResponse("engine", "username", 1);
+        SecretResponse username = new SecretResponse("engine", "username");
         response.setConnectionUserName(username);
         verifyEqualSecretResponses(username, response.getConnectionUserName());
 
-        SecretResponse password = new SecretResponse("engine", "password", 2);
+        SecretResponse password = new SecretResponse("engine", "password");
         response.setConnectionPassword(password);
         verifyEqualSecretResponses(password, response.getConnectionPassword());
 

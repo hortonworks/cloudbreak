@@ -9,10 +9,15 @@ import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 public class DummySecretService extends SecretService {
 
-    private Map<String, String> store = new HashMap<>();
+    private Map<String, String> store;
 
     public DummySecretService() {
         super(null, null);
+    }
+
+    @Override
+    public void init() {
+        store = new HashMap<>();
     }
 
     @Override
@@ -53,6 +58,6 @@ public class DummySecretService extends SecretService {
 
     @Override
     public SecretResponse convertToExternal(String secret) {
-        return new SecretResponse("", secret, null);
+        return new SecretResponse("", secret);
     }
 }
