@@ -2,6 +2,7 @@ package com.sequenceiq.externalizedcompute.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -11,7 +12,6 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -57,6 +57,7 @@ class ExternalizedComputeClusterCreateServiceTest {
     void initiateCreationTest() {
         ExternalizedComputeCluster externalizedComputeCluster = new ExternalizedComputeCluster();
         externalizedComputeCluster.setName("cluser-name");
+        externalizedComputeCluster.setDefaultCluster(true);
         externalizedComputeCluster.setEnvironmentCrn("envcrn");
         Json tags = new Json(Map.of("label1", "value1"));
         externalizedComputeCluster.setTags(tags);
@@ -78,11 +79,12 @@ class ExternalizedComputeClusterCreateServiceTest {
         CreateClusterRequest clusterRequest = commonCreateClusterRequestArgumentCaptor.getValue();
         CommonClusterSpec spec = clusterRequest.getSpec();
         assertThat(spec.getNetwork().getTopology().getSubnetsList().stream().toList()).containsExactlyInAnyOrder("subnet1", "subnet2");
-        Assertions.assertTrue(spec.getDeployments().getLogging().getEnabled());
+        assertTrue(spec.getDeployments().getLogging().getEnabled());
         assertEquals(USER_CRN, clusterRequest.getMetadata().getClusterOwner().getCrn());
         assertEquals("cloudera", clusterRequest.getMetadata().getClusterOwner().getAccountId());
         assertEquals("envcrn", clusterRequest.getMetadata().getEnvironmentCrn());
         assertThat(clusterRequest.getMetadata().getLabels()).containsEntry("label1", "value1");
+        assertTrue(clusterRequest.getIsDefault());
 
         ArgumentCaptor<ExternalizedComputeCluster> externalizedComputeClusterArgumentCaptor = ArgumentCaptor.forClass(ExternalizedComputeCluster.class);
         verify(externalizedComputeClusterRepository, times(1)).save(externalizedComputeClusterArgumentCaptor.capture());

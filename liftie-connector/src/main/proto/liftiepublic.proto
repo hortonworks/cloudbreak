@@ -201,7 +201,7 @@ service LiftiePublic {
 
 // Kubernetes specs.
 message CommonKubernetes {
-  // Kubernetes version (default 1.17). Deprecated.
+  // Kubernetes version (default 1.28). Deprecated.
   string version = 1 [(options.FieldExtension.deprecated) = true];
 }
 
@@ -295,6 +295,14 @@ message CommonAccelerator {
   string type = 2;
 }
 
+// Accelerator Configurations structure
+message AcceleratorConfig {
+  // Accelerator Manufacturer type. For eg. amazon-web-service, AMD, nvidia.
+  repeated string acceleratorManufacturers = 1;
+  // Accelerator Types. For eg. gpu, inference.
+  repeated string acceleratorTypes = 2;
+}
+
 // Instance requirements structure.
 message CommonInstanceRequirements {
   // Instance types to include.
@@ -303,8 +311,6 @@ message CommonInstanceRequirements {
   repeated string cpuTypes = 2;
   // Instance types to exclude, ignored if AllowedInstanceTypes is set.
   repeated string excludedInstanceTypes = 3;
-  // Select GPU instances.
-  bool gpu = 4;
   // Maximum vCpu count.
   int64 maxCpu = 5;
   // Minimum vCpu count.
@@ -313,6 +319,8 @@ message CommonInstanceRequirements {
   int64 maxMemory = 7;
   // Minimum memory requirement in MiB.
   int64 minMemory = 8;
+  // Accelerator Config for AWS.
+  AcceleratorConfig acceleratorConfig = 9;
 }
 
 // Instance requirements with metadata structure.
@@ -607,8 +615,8 @@ message CommonClusterMetadata {
   string name = 2 [(options.FieldExtension.required) = true];
   // Cluster owner.
   CommonClusterOwner clusterOwner = 3;
-  // Cluster type. Supported values are Dedicated, Shared and DedicatedExternal. Default is DedicatedExternal.
-  string clusterType = 4;
+  // Cluster type. Supported values are Dedicated and Shared. Default is Shared. Deprecated.
+  string clusterType = 4 [(options.FieldExtension.deprecated) = true];
   // Cluster description.
   string description = 5;
   // Labels.
@@ -640,6 +648,8 @@ message CreateClusterRequest {
   CommonClusterSpec spec = 2;
   // Skip validation.
   bool skipValidation = 3;
+  // Is default compute cluster.
+  bool isDefault = 4;
 }
 
 // Request object for validating a cluster.
@@ -650,6 +660,8 @@ message ValidateClusterRequest {
   CommonClusterMetadata metadata = 1 [(options.FieldExtension.required) = true];
   // Specifies the spec.
   CommonClusterSpec spec = 2;
+  // Is default compute cluster.
+  bool isDefault = 3;
 }
 
 // Validation summary structure.
@@ -1152,16 +1164,23 @@ message EksInstance {
   string availabilityZone = 2;
 }
 
+// Accelerator Configurations structure
+message AcceleratorConfigResp {
+  // Accelerator Manufacturer type. For eg. amazon-web-service, AMD, nvidia.
+  repeated string acceleratorManufacturers = 1;
+  // Accelerator Types. For eg. gpu, inference.
+  repeated string acceleratorTypes = 2;
+}
+
 // Instance requirements structure.
 message CommonInstanceRequirementsResp {
+  reserved 4;
   // Instance types to include.
   repeated string allowedInstanceTypes = 1;
   // CPU types required. For eg. intel, amd, amazon-web-services etc.
   repeated string cpuTypes = 2;
   // Instance types to exclude, ignored if AllowedInstanceTypes is set.
   repeated string excludedInstanceTypes = 3;
-  // Select GPU instances.
-  bool gpu = 4;
   // Maximum vCpu count.
   int64 maxCpu = 5;
   // Minimum vCpu count.
@@ -1170,6 +1189,8 @@ message CommonInstanceRequirementsResp {
   int64 maxMemory = 7;
   // Minimum memory requirement in MiB.
   int64 minMemory = 8;
+  // Accelerator Config for AWS.
+  AcceleratorConfigResp acceleratorConfig = 9;
 }
 
 // Instance requirements with metadata response structure.
@@ -1428,6 +1449,8 @@ message DescribeClusterResponse {
   bool nodeImageUpgradeAvailable = 33 [(options.FieldExtension.formFactor) = "public"];
   // Lists the currently used images and the new upgrades available.
   repeated CommonNodeImageAvailableUpgrade nodeImageUpgrades = 34 [(options.FieldExtension.formFactor) = "public"];
+  // Is default compute cluster.
+  bool isDefault = 35 [(options.FieldExtension.formFactor) = "public"];
 }
 
 // Object representing sorting filters.
@@ -1536,6 +1559,8 @@ message ListClusterItem {
   CommonStorageSpecResp storage = 28 [(options.FieldExtension.hidden) = true, (options.FieldExtension.hiddenReason) = "IN_DEVELOPMENT", (options.FieldExtension.formFactor) = "public"];
   // Map of labels associated with this cluster.
   map<string,string> labels = 29;
+  // Is default compute cluster.
+  bool isDefault = 30 [(options.FieldExtension.formFactor) = "public"];
 }
 
 // List clusters response.
@@ -2127,7 +2152,7 @@ message RecommendInstanceTypesRequest{
 message RecommendInstanceTypesRequirements {
   option (options.MessageExtension.hidden) = true;
   option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
-  // CPU Architechture 
+  // CPU Architechture
   repeated CpuArch.Value cpuArchs = 1;
   // Minimum CPU count.
   int64 cpuMin = 2;

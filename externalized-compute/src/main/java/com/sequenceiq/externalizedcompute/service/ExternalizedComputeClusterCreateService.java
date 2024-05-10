@@ -96,6 +96,7 @@ public class ExternalizedComputeClusterCreateService {
         fillMetadata(createClusterBuilder, externalizedComputeCluster, userCrn);
         fillNetworkSettings(createClusterBuilder, environment);
         fillSecurity(createClusterBuilder, environment);
+        createClusterBuilder.setIsDefault(externalizedComputeCluster.isDefaultCluster());
         return createClusterBuilder.build();
     }
 
