@@ -75,4 +75,8 @@ public class AzureCredentialView {
     public String getSecretKey() {
         return Optional.ofNullable((String) appBasedParameters.get("secretKey")).orElseThrow();
     }
+
+    public CloudCredential getCloudCredential() {
+        return cloudCredential;
+    }
 }

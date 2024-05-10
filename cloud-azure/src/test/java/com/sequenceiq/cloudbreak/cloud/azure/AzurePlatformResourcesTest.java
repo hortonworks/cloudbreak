@@ -99,7 +99,7 @@ class AzurePlatformResourcesTest {
         when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
         when(azureClient.getAvailabilityZones(region.value())).thenReturn(Map.of());
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
-        when(azureAcceleratedNetworkValidator.isSupportedForVm(any())).thenReturn(true);
+        when(azureAcceleratedNetworkValidator.isSupportedForVm(any(), anyMap())).thenReturn(true);
 
         CloudVmTypes actual = underTest.virtualMachines(cloudCredential, region, Map.of());
 
@@ -125,8 +125,11 @@ class AzurePlatformResourcesTest {
                     .map(vmType -> vmType.getMetaData().getAvailabilityZones())
                     .orElse(null);
             assertEquals(availabilityZones, Collections.emptyList());
-
         });
+        assertTrue(actual.getCloudVmResponses().get(region.value()).stream()
+                .allMatch(vmType -> (boolean) vmType.getMetaData().getProperties().get("EnhancedNetwork")));
+        assertTrue(actual.getCloudVmResponses().get(region.value()).stream()
+                .noneMatch(vmType -> vmType.getMetaData().getHostEncryptionSupported()));
     }
 
     @Test
@@ -146,7 +149,6 @@ class AzurePlatformResourcesTest {
         zoneInfo.put("Standard_DS2_v2", List.of("1"));
         zoneInfo.put("Standard_E64ds_v4", List.of("1", "2", "3"));
         when(azureClient.getAvailabilityZones(region.value())).thenReturn(zoneInfo);
-        when(azureAcceleratedNetworkValidator.isSupportedForVm(any())).thenReturn(true);
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         when(azureHostEncryptionValidator.isVmSupported(any(), anyMap())).thenReturn(true);
 
@@ -169,6 +171,10 @@ class AzurePlatformResourcesTest {
             }
             assertEquals(zoneInfo.get(matchingVm.value()), matchingVm.getMetaData().getAvailabilityZones());
         });
+        assertTrue(actual.getCloudVmResponses().get(region.value()).stream()
+                .noneMatch(vmType -> (boolean) vmType.getMetaData().getProperties().get("EnhancedNetwork")));
+        assertTrue(actual.getCloudVmResponses().get(region.value()).stream()
+                .allMatch(vmType -> vmType.getMetaData().getHostEncryptionSupported()));
     }
 
     static Object []  [] dataForFilterVirtualMachines() {
@@ -247,7 +253,6 @@ class AzurePlatformResourcesTest {
         Set<VirtualMachineSize> virtualMachineSizes = zoneInfo.keySet().stream().map(vname -> createVirtualMachineSize(vname, 0))
                 .collect(Collectors.toSet());
 
-        when(azureAcceleratedNetworkValidator.isSupportedForVm(any())).thenReturn(true);
         when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         when(azureClient.getAvailabilityZones(region.value())).thenReturn(zoneInfo);

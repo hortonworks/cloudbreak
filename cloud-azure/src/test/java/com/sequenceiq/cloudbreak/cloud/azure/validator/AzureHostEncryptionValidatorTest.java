@@ -1,61 +1,51 @@
 package com.sequenceiq.cloudbreak.cloud.azure.validator;
 
-
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class AzureHostEncryptionValidatorTest {
+import com.sequenceiq.cloudbreak.cloud.azure.AzureVmCapabilities;
 
-    private AzureHostEncryptionValidator azureHostEncryptionValidator = new AzureHostEncryptionValidator();
+public class AzureHostEncryptionValidatorTest {
 
-    @Test
-    void testIsVmSupportedWhenSupported() {
-        Map<String, Boolean> hostEncryptionSupport = new HashMap<>();
-        hostEncryptionSupport.put("VirtualMachineType1", true);
+    private AzureVmCapabilities azureVmCapabilities = mock(AzureVmCapabilities.class);
 
-        boolean result = azureHostEncryptionValidator.isVmSupported("VirtualMachineType1", hostEncryptionSupport);
+    private AzureHostEncryptionValidator underTest = new AzureHostEncryptionValidator();
 
-        assertTrue(result, "Virtual machine should be supported");
+    private final String vmType = "vmType";
+
+    private Map<String, AzureVmCapabilities> capabilitiesMap;
+
+    @BeforeEach
+    public void setUp() {
+        capabilitiesMap = new HashMap<>();
     }
 
     @Test
-    void testIsVmSupportedWhenNotSupported() {
-        Map<String, Boolean> hostEncryptionSupport = new HashMap<>();
-        hostEncryptionSupport.put("VirtualMachineType1", false);
+    public void testIsVmSupportedEncryptionAtHostSupported() {
+        capabilitiesMap.put(vmType, azureVmCapabilities);
+        when(azureVmCapabilities.isEncryptionAtHostSupported()).thenReturn(true);
 
-        boolean result = azureHostEncryptionValidator.isVmSupported("VirtualMachineType1", hostEncryptionSupport);
-
-        assertFalse(result, "Virtual machine should not be supported");
+        assertTrue(underTest.isVmSupported(vmType, capabilitiesMap));
     }
 
     @Test
-    void testIsVmSupportedWhenMapIsNull() {
-        boolean result = azureHostEncryptionValidator.isVmSupported("VirtualMachineType1", null);
+    public void testIsVmSupportedEncryptionAtHostNotSupported() {
+        capabilitiesMap.put(vmType, azureVmCapabilities);
+        when(azureVmCapabilities.isEncryptionAtHostSupported()).thenReturn(false);
 
-        assertFalse(result, "Virtual machine should not be supported when map is null");
+        assertFalse(underTest.isVmSupported(vmType, capabilitiesMap));
     }
 
     @Test
-    void testIsVmSupportedWhenVmTypeNotInMap() {
-        Map<String, Boolean> hostEncryptionSupport = new HashMap<>();
-        hostEncryptionSupport.put("AnotherVirtualMachineType", true);
-
-        boolean result = azureHostEncryptionValidator.isVmSupported("VirtualMachineType1", hostEncryptionSupport);
-
-        assertFalse(result, "Virtual machine should not be supported when not in the map");
-    }
-
-    @Test
-    void testIsVmSupportedWhenVmTypeIsNull() {
-        Map<String, Boolean> hostEncryptionSupport = new HashMap<>();
-
-        boolean result = azureHostEncryptionValidator.isVmSupported(null, hostEncryptionSupport);
-
-        assertFalse(result, "Virtual machine should not be supported when vmType is null");
+    public void testIsVmSupportedCapabilitiesNotAvailable() {
+        assertFalse(underTest.isVmSupported(vmType, capabilitiesMap));
     }
 }

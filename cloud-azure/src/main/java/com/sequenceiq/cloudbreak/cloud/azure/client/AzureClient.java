@@ -60,7 +60,6 @@ import com.azure.resourcemanager.compute.models.KeyForDiskEncryptionSet;
 import com.azure.resourcemanager.compute.models.NetworkAccessPolicy;
 import com.azure.resourcemanager.compute.models.OperatingSystemStateTypes;
 import com.azure.resourcemanager.compute.models.PublicNetworkAccess;
-import com.azure.resourcemanager.compute.models.ResourceSkuCapabilities;
 import com.azure.resourcemanager.compute.models.ResourceSkuLocationInfo;
 import com.azure.resourcemanager.compute.models.SourceVault;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
@@ -124,6 +123,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureDisk;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureLoadBalancerFrontend;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneService;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureVmCapabilities;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
@@ -1088,9 +1088,8 @@ public class AzureClient {
         });
     }
 
-    public Map<String, Boolean> getHostEncryptionSupport(String region) throws ProviderAuthenticationFailedException {
+    public Map<String, AzureVmCapabilities> getHostCapabilities(String region) throws ProviderAuthenticationFailedException {
         return handleException(() -> {
-            Map<String, Boolean> hostEncryptionInfo = new HashMap<>();
             if (!StringUtils.isEmpty(region)) {
                 String criteria = "location eq '" + RegionUtil.findByLabelOrName(region).name() + "'";
                 LOGGER.debug("Fetch AZ info from Azure for region {} and criteria {}", region, criteria);
@@ -1100,24 +1099,14 @@ public class AzureClient {
                         .serviceClient()
                         .getResourceSkus()
                         .list(criteria, null, com.azure.core.util.Context.NONE));
-
-                azureResult.getStream().forEach(sku -> {
-                    List<ResourceSkuCapabilities> capabilities = sku.capabilities();
-                    if (capabilities != null) {
-                        Optional<ResourceSkuCapabilities> encryptionAtHostSupported = capabilities.stream()
-                                .filter(c -> c.name().equalsIgnoreCase("EncryptionAtHostSupported"))
-                                .findFirst();
-                        if (encryptionAtHostSupported.isPresent()) {
-                            hostEncryptionInfo.put(sku.name(), Boolean.valueOf(encryptionAtHostSupported.get().value()));
-                        } else {
-                            hostEncryptionInfo.put(sku.name(), false);
-                        }
-                    }
-                });
+                return azureResult.getStream()
+                        .filter(sku -> Objects.nonNull(sku.capabilities()))
+                        .filter(sku -> "virtualMachines".equalsIgnoreCase(sku.resourceType()))
+                        .collect(Collectors.toMap(ResourceSkuInner::name, sku -> new AzureVmCapabilities(sku.name(), sku.capabilities())));
             } else {
                 LOGGER.error("Region is not provided so not fetching the host encryption information");
+                return Map.of();
             }
-            return hostEncryptionInfo;
         });
     }
 

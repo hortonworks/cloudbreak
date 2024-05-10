@@ -1,23 +1,31 @@
 package com.sequenceiq.cloudbreak.cloud.azure.validator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.azure.resourcemanager.compute.models.ResourceSkuCapabilities;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureVmCapabilities;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureVirtualMachineTypeProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.cloud.model.VmType;
+import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 
 @ExtendWith(MockitoExtension.class)
 public class AzureAcceleratedNetworkValidatorTest {
@@ -25,53 +33,79 @@ public class AzureAcceleratedNetworkValidatorTest {
     @Mock
     private AzureVirtualMachineTypeProvider azureVirtualMachineTypeProvider;
 
-    @Mock
-    private AzureStackView azureStackView;
-
     @InjectMocks
     private AzureAcceleratedNetworkValidator underTest;
 
-    @Test
-    public void testIsvSupportedForVmShouldReturnsWithTrueForTheGivenVmTypes() throws IOException {
-        Set<String> supportedVmTypes = getSupportedVmTypes();
-        when(azureVirtualMachineTypeProvider.getVmTypes(azureStackView)).thenReturn(supportedVmTypes);
+    @Mock
+    private AzureStackView azureStackView;
 
-        Map<String, Boolean> actual = underTest.validate(azureStackView);
+    private Set<VmType> vmTypes;
 
-        actual.forEach((key, value) -> Assertions.assertTrue(value));
+    private Map<String, AzureVmCapabilities> azureVmCapabilities;
+
+    @BeforeEach
+    public void setUp() {
+        vmTypes = new HashSet<>();
+        azureVmCapabilities = new HashMap<>();
     }
 
     @Test
-    public void testValidateShouldReturnsWithFalseForTheGivenVmTypesWhenCoreNumberIsNotFound() {
-        Set<String> supportedVmTypes = getVmsWithoutCpuCoreInfo();
-        when(azureVirtualMachineTypeProvider.getVmTypes(azureStackView)).thenReturn(supportedVmTypes);
+    public void testValidateAllVmTypesSupportEnhancedNetworking() {
+        String vmFlavor1 = "vmFlavor1";
+        String vmFlavor2 = "vmFlavor2";
+        VmTypeMeta meta1 = VmTypeMeta.VmTypeMetaBuilder.builder().withEnhancedNetwork(true).create();
+        VmTypeMeta meta2 = VmTypeMeta.VmTypeMetaBuilder.builder().withEnhancedNetwork(true).create();
+        vmTypes.add(VmType.vmTypeWithMeta(vmFlavor1, meta1, true));
+        vmTypes.add(VmType.vmTypeWithMeta(vmFlavor2, meta2, true));
+        when(azureVirtualMachineTypeProvider.getVmTypes(any())).thenReturn(Set.of(vmFlavor1, vmFlavor2));
 
-        Map<String, Boolean> actual = underTest.validate(azureStackView);
+        Map<String, Boolean> result = underTest.validate(azureStackView, vmTypes);
 
-        actual.forEach((key, value) -> Assertions.assertFalse(value));
+        assertEquals(2, result.size());
+        assertTrue(result.get(vmFlavor1));
+        assertTrue(result.get(vmFlavor2));
     }
 
     @Test
-    public void testValidateShouldReturnsWithFalseForOtherVmTypes() {
-        Set<String> supportedVmTypes = getOtherVms();
-        when(azureVirtualMachineTypeProvider.getVmTypes(azureStackView)).thenReturn(supportedVmTypes);
+    public void testValidateSomeVmTypesDoNotSupportEnhancedNetworking() {
+        String vmFlavor1 = "vmFlavor1";
+        String vmFlavor2 = "vmFlavor2";
+        VmTypeMeta meta1 = VmTypeMeta.VmTypeMetaBuilder.builder().withEnhancedNetwork(true).create();
+        VmTypeMeta meta2 = VmTypeMeta.VmTypeMetaBuilder.builder().withEnhancedNetwork(false).create();
+        vmTypes.add(VmType.vmTypeWithMeta(vmFlavor1, meta1, true));
+        vmTypes.add(VmType.vmTypeWithMeta(vmFlavor2, meta2, true));
+        when(azureVirtualMachineTypeProvider.getVmTypes(any())).thenReturn(Set.of(vmFlavor1, vmFlavor2));
 
-        Map<String, Boolean> actual = underTest.validate(azureStackView);
+        Map<String, Boolean> result = underTest.validate(azureStackView, vmTypes);
 
-        actual.forEach((key, value) -> Assertions.assertFalse(value));
+        assertEquals(2, result.size());
+        assertTrue(result.get(vmFlavor1));
+        assertFalse(result.get(vmFlavor2));
     }
 
-    private Set<String> getSupportedVmTypes() throws IOException {
-        return JsonUtil.readValue(FileReaderUtils.readFileFromClasspath("/json/azure-vms.json"), new TypeReference<Set<String>>() {
-        });
+    @Test
+    public void testIsSupportedForVmAcceleratedNetworkingEnabled() {
+        String vmType = "vmType";
+        ResourceSkuCapabilities networkCapability = mock(ResourceSkuCapabilities.class);
+        when(networkCapability.name()).thenReturn("AcceleratedNetworkingEnabled");
+        when(networkCapability.value()).thenReturn("true");
+        azureVmCapabilities.put(vmType, new AzureVmCapabilities(vmType, List.of(networkCapability)));
+
+        assertTrue(underTest.isSupportedForVm(vmType, azureVmCapabilities));
     }
 
-    private Set<String> getVmsWithoutCpuCoreInfo() {
-        return Set.of("Standard_DS_v2", "Standard_Fs", "Standard_F", "Standard_D_v2_Promo", "Standard_DS_v2_Promo", "Standard_D", "FCA_E1-14s_v3");
+    @Test
+    public void testIsSupportedForVmAcceleratedNetworkingDisabled() {
+        String vmType = "vmType";
+        azureVmCapabilities.put(vmType, new AzureVmCapabilities(vmType, List.of()));
+
+        assertFalse(underTest.isSupportedForVm(vmType, azureVmCapabilities));
     }
 
-    private Set<String> getOtherVms() {
-        return Set.of("E4_Flex", "SQLG5_IaaS", "AZAP_Performance_ComputeV17C_12", "SQLG5-80m", "SQLG6", "SQLDCGen6_2");
-    }
+    @Test
+    public void testIsSupportedForVmAcceleratedNetworkingCapabilityNotAvailable() {
+        String vmType = "vmType";
 
+        assertFalse(underTest.isSupportedForVm(vmType, azureVmCapabilities));
+    }
 }

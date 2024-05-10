@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +46,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
@@ -133,6 +135,9 @@ public class AzureTemplateBuilderFreeIpaTest {
     @Spy
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
+    @Mock
+    private AzurePlatformResources platformResources;
+
     @InjectMocks
     private final AzureTemplateBuilder azureTemplateBuilder = new AzureTemplateBuilder();
 
@@ -217,6 +222,8 @@ public class AzureTemplateBuilderFreeIpaTest {
         when(customVMImageNameProvider.getImageNameFromConnectionString(anyString())).thenCallRealMethod();
         when(azureUtils.getCustomResourceGroupName(any())).thenReturn("custom-resource-group-name");
         when(azureUtils.getCustomNetworkId(any())).thenReturn("custom-vnet-id");
+        when(platformResources.virtualMachinesNonExtended(azureCredentialView.getCloudCredential(), cloudContext.getLocation().getRegion(), null))
+                .thenReturn(new CloudVmTypes());
     }
 
     @ParameterizedTest(name = "buildTestAvailabilitySetInTemplate {0}")
@@ -255,8 +262,7 @@ public class AzureTemplateBuilderFreeIpaTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
-
+        when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
@@ -311,8 +317,7 @@ public class AzureTemplateBuilderFreeIpaTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
-
+        when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
@@ -371,8 +376,7 @@ public class AzureTemplateBuilderFreeIpaTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
-
+        when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
@@ -423,8 +427,7 @@ public class AzureTemplateBuilderFreeIpaTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
-
+        when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =

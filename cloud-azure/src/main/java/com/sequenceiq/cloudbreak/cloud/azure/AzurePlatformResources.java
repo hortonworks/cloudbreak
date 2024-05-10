@@ -252,10 +252,15 @@ public class AzurePlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + #filters")
     public CloudVmTypes virtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        return virtualMachinesNonExtended(cloudCredential, region, filters);
+    }
+
+    @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + #filters")
+    public CloudVmTypes virtualMachinesNonExtended(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Set<VirtualMachineSize> vmTypes = client.getVmTypes(region.value());
         Map<String, List<String>> availabilityZones = client.getAvailabilityZones(region.value());
-        Map<String, Boolean> hostEncryptionSupport = client.getHostEncryptionSupport(region.value());
+        Map<String, AzureVmCapabilities> azureVmCapabilities = client.getHostCapabilities(region.value());
 
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
         Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
@@ -281,8 +286,8 @@ public class AzurePlatformResources implements PlatformResources {
                 } else {
                     builder.withResourceDiskAttached(false);
                 }
-                builder.withHostEncryptionSupport(azureHostEncryptionValidator.isVmSupported(virtualMachineSize.name(), hostEncryptionSupport));
-                builder.withEnhancedNetwork(azureAcceleratedNetworkValidator.isSupportedForVm(virtualMachineSize.name()));
+                builder.withHostEncryptionSupport(azureHostEncryptionValidator.isVmSupported(virtualMachineSize.name(), azureVmCapabilities));
+                builder.withEnhancedNetwork(azureAcceleratedNetworkValidator.isSupportedForVm(virtualMachineSize.name(), azureVmCapabilities));
                 builder.withAvailabilityZones(availabilityZonesForVm);
                 VmType vmType = VmType.vmTypeWithMeta(virtualMachineSize.name(), builder.create(), true);
                 types.add(vmType);

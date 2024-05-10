@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -51,6 +52,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
@@ -71,7 +73,6 @@ import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
-import com.sequenceiq.cloudbreak.util.Version;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
@@ -118,6 +119,9 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
 
     @Spy
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
+
+    @Mock
+    private AzurePlatformResources platformResources;
 
     @InjectMocks
     private final AzureTemplateBuilder azureTemplateBuilder = new AzureTemplateBuilder();
@@ -206,6 +210,8 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
         when(customVMImageNameProvider.getImageNameFromConnectionString(anyString())).thenCallRealMethod();
         when(azureUtils.getCustomResourceGroupName(any())).thenReturn("custom-resource-group-name");
         when(azureUtils.getCustomNetworkId(any())).thenReturn("custom-vnet-id");
+        when(platformResources.virtualMachinesNonExtended(azureCredentialView.getCloudCredential(), cloudContext.getLocation().getRegion(), null))
+                .thenReturn(new CloudVmTypes());
     }
 
     /**
@@ -245,7 +251,6 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
 
         Network network = new Network(new Subnet("testSubnet"));
         when(azureUtils.isPrivateIp(any())).thenReturn(false);
-        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -263,6 +268,7 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
                 null, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, null);
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
@@ -327,7 +333,7 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
+        when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
 
@@ -391,7 +397,7 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
+        when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
 
@@ -454,7 +460,7 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
         azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
 
         //WHEN
-        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
+        when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
 
@@ -469,27 +475,10 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
         validateJson(templateString);
     }
 
-    private boolean isTemplateVersionGreaterOrEqualThan2100(String templatePath) {
-        return isTemplateVersionGreaterOrEqualThan(templatePath, "2.10.0.0");
-    }
-
     private CloudCredential cloudCredential() {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("projectId", "siq-haas");
         return new CloudCredential("crn", "test", parameters, "acc");
-    }
-
-    private boolean isTemplateVersionGreaterOrEqualThan1165(String templatePath) {
-        return isTemplateVersionGreaterOrEqualThan(templatePath, "1.16.5.0");
-    }
-
-    private boolean isTemplateVersionGreaterOrEqualThan(String templatePath, String version) {
-        if (LATEST_TEMPLATE_PATH.equals(templatePath)) {
-            return true;
-        }
-        String[] splitName = templatePath.split("-");
-        String templateVersion = splitName[splitName.length - 1].replaceAll("\\.ftl", "");
-        return Version.versionCompare(templateVersion, version) > -1;
     }
 
     private GroupNetwork createGroupNetwork() {

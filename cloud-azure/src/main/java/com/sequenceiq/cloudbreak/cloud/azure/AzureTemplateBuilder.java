@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -29,8 +30,10 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 
 import freemarker.template.Configuration;
@@ -66,6 +69,9 @@ public class AzureTemplateBuilder {
     @Inject
     private AzureAcceleratedNetworkValidator azureAcceleratedNetworkValidator;
 
+    @Inject
+    private AzurePlatformResources platformResources;
+
     //CHECKSTYLE:OFF
     /**
      * Build an Azure Resource Manager template from a freemarker template, using the provided arguments.
@@ -97,6 +103,8 @@ public class AzureTemplateBuilder {
             boolean containsMarketplaceImageDetails = cloudStack.getTemplate().contains("marketplaceImageDetails");
 
             AzureLoadBalancerModelBuilder loadBalancerModelBuilder = new AzureLoadBalancerModelBuilder(cloudStack, stackName, !containsMarketplaceImageDetails);
+            Region region = cloudContext.getLocation().getRegion();
+            CloudVmTypes cloudVmTypes = platformResources.virtualMachinesNonExtended(armCredentialView.getCloudCredential(), region, null);
 
             LOGGER.debug("MultiAz is {}",cloudStack.isMultiAz());
 
@@ -115,7 +123,7 @@ public class AzureTemplateBuilder {
             model.put("storage_container_name", azureStorage.getDiskContainerName(cloudContext));
             model.put("storage_vhd_name", imageName);
             model.put("stackname", stackName);
-            model.put("region", cloudContext.getLocation().getRegion().value());
+            model.put("region", region.value());
             model.put("subnet1Prefix", network.getSubnet().getCidr());
             model.put("groups", armStack.getInstancesByGroupType());
             model.put("igs", armStack.getInstanceGroups());
@@ -130,7 +138,8 @@ public class AzureTemplateBuilder {
             model.put("noPublicIp", azureUtils.isPrivateIp(network));
             model.put("noFirewallRules", false);
             model.put("userDefinedTags", cloudStack.getTags());
-            model.put("acceleratedNetworkEnabled", azureAcceleratedNetworkValidator.validate(armStack));
+            model.put("acceleratedNetworkEnabled", azureAcceleratedNetworkValidator
+                    .validate(armStack, cloudVmTypes.getCloudVmResponses().getOrDefault(region.value(), Set.of())));
             model.put("isUpscale", UPSCALE.equals(azureInstanceTemplateOperation));
             model.putAll(loadBalancerModelBuilder.buildModel());
             model.put("multiAz", cloudStack.isMultiAz());
