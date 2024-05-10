@@ -42,6 +42,7 @@ public class RuntimeDependencyBasedUpgradeImageFilter implements UpgradeImageFil
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
         List<Image> filteredImages = filterImages(imageFilterResult, filterByPythonVersion(imageFilterParams));
         LOGGER.debug("After the filtering {} image left.", filteredImages.size());
+        logNotEligibleImages(imageFilterResult, filteredImages, LOGGER);
         return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
     }
 

@@ -955,7 +955,8 @@ public class ImageCatalogServiceTest {
     @Test
     public void testCustomImageCatalogImageFilterResult() throws CloudbreakImageCatalogException, IOException {
         ImageCatalog imageCatalog = new ImageCatalog();
-        CustomImage customImage = getCustomImage(ImageType.RUNTIME, "5b60b723-4beb-40b0-5cba-47ea9c9b6e53", CUSTOM_BASE_PARCEL_URL);
+        String imageId = "5b60b723-4beb-40b0-5cba-47ea9c9b6e53";
+        CustomImage customImage = getCustomImage(ImageType.RUNTIME, imageId, CUSTOM_BASE_PARCEL_URL);
         Image image = getImage();
         imageCatalog.setCustomImages(Set.of(customImage));
         StatedImage statedImage = StatedImage.statedImage(image, null, CUSTOM_CATALOG_NAME);
@@ -964,10 +965,10 @@ public class ImageCatalogServiceTest {
         when(imageCatalogRepository.findByNameAndWorkspaceId(CUSTOM_CATALOG_NAME, WORKSPACE_ID)).thenReturn(Optional.of(imageCatalog));
         when(customImageProvider.mergeSourceImageAndCustomImageProperties(any(), any(), any(), any())).thenReturn(statedImage);
 
-        ImageFilterResult actual = underTest.getImageFilterResult(WORKSPACE_ID, CUSTOM_CATALOG_NAME, IMAGE_CATALOG_PLATFORM, false);
+        ImageFilterResult actual = underTest.getImageFilterResult(WORKSPACE_ID, CUSTOM_CATALOG_NAME, IMAGE_CATALOG_PLATFORM, false, imageId);
 
         assertEquals(1, actual.getImages().size());
-        assertEquals(image, actual.getImages().get(0));
+        assertEquals(image, actual.getImages().getFirst());
         assertEquals(ImageFilterResult.EMPTY_REASON, actual.getReason());
     }
 
@@ -978,13 +979,12 @@ public class ImageCatalogServiceTest {
 
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V3_CB_CATALOG_FILE);
         when(imageCatalogRepository.findByNameAndWorkspaceId("catalog", WORKSPACE_ID)).thenReturn(Optional.of(imageCatalog));
-        PrefixMatchImages prefixMatchImages = new PrefixMatchImages(Collections.singleton("3cba3cd0-a169-4d62-8bc5-709df5f73b50"), emptySet(), emptySet());
-        when(prefixMatcherService.prefixMatchForCBVersion(any(), any())).thenReturn(prefixMatchImages);
 
-        ImageFilterResult actual = underTest.getImageFilterResult(WORKSPACE_ID, "catalog", IMAGE_CATALOG_PLATFORM, false);
+        String currentImageId = "232fe6b6-aec4-4fa9-bb02-2c295d319a36";
+        ImageFilterResult actual = underTest.getImageFilterResult(WORKSPACE_ID, "catalog", IMAGE_CATALOG_PLATFORM, false, currentImageId);
 
-        assertEquals(1, actual.getImages().size());
-        assertEquals("3cba3cd0-a169-4d62-8bc5-709df5f73b50", actual.getImages().get(0).getUuid());
+        assertEquals(4, actual.getImages().size());
+        assertTrue(actual.getImages().stream().anyMatch(image -> image.getUuid().equals(currentImageId)));
     }
 
     @Test
@@ -995,7 +995,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V3_CB_CATALOG_FILE);
         when(imageCatalogRepository.findByNameAndWorkspaceId("catalog", WORKSPACE_ID)).thenReturn(Optional.of(imageCatalog));
 
-        ImageFilterResult actual = underTest.getImageFilterResult(WORKSPACE_ID, "catalog", IMAGE_CATALOG_PLATFORM, true);
+        ImageFilterResult actual = underTest.getImageFilterResult(WORKSPACE_ID, "catalog", IMAGE_CATALOG_PLATFORM, true, "current-image-id");
 
         assertEquals(8, actual.getImages().size());
         verifyNoInteractions(prefixMatcherService);
