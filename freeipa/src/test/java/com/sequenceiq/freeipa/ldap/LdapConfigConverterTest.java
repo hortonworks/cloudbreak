@@ -79,8 +79,8 @@ class LdapConfigConverterTest {
     @Test
     public void testLdapConfigToDescribeLdapConfigResponse() {
         LdapConfig ldapConfig = createLdapConfig();
-        when(stringToSecretResponseConverter.convert(SECRET_BINDDN)).thenReturn(new SecretResponse("enginepath", "binddn-secretpath", 1));
-        when(stringToSecretResponseConverter.convert(SECRET_PWD)).thenReturn(new SecretResponse("enginepath", "pwd-secretpath", 1));
+        when(stringToSecretResponseConverter.convert(SECRET_BINDDN)).thenReturn(new SecretResponse("enginepath", "binddn-secretpath"));
+        when(stringToSecretResponseConverter.convert(SECRET_PWD)).thenReturn(new SecretResponse("enginepath", "pwd-secretpath"));
 
         DescribeLdapConfigResponse response = underTest.convertLdapConfigToDescribeLdapConfigResponse(ldapConfig);
 

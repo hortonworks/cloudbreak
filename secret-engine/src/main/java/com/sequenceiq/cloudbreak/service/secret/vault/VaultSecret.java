@@ -5,23 +5,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class VaultSecret {
 
-    private final String enginePath;
+    private String enginePath;
 
-    private final String engineClass;
+    private String engineClass;
 
-    private final String path;
-
-    private final Integer version;
+    private String path;
 
     @JsonCreator
     public VaultSecret(@JsonProperty("enginePath") String enginePath,
             @JsonProperty("engineClass") String engineClass,
-            @JsonProperty("path") String path,
-            @JsonProperty("version") Integer version) {
+            @JsonProperty("path") String path) {
         this.enginePath = enginePath;
         this.engineClass = engineClass;
         this.path = path;
-        this.version = version;
     }
 
     public String getEnginePath() {
@@ -34,9 +30,5 @@ public class VaultSecret {
 
     public String getPath() {
         return path;
-    }
-
-    public Integer getVersion() {
-        return version;
     }
 }

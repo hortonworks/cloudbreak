@@ -1,13 +1,20 @@
 package com.sequenceiq.cloudbreak.service.secret.service;
 
+import static java.lang.String.format;
+
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+import jakarta.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
@@ -28,13 +35,23 @@ public class SecretService {
     @Value("${secret.engine:}")
     private String engineClass;
 
-    private final SecretEngine persistentEngine;
+    private final List<SecretEngine> engines;
+
+    private SecretEngine persistentEngine;
 
     private final VaultRetryService vaultRetryService;
 
-    public SecretService(SecretEngine persistentEngine, VaultRetryService vaultRetryService) {
-        this.persistentEngine = persistentEngine;
+    public SecretService(List<SecretEngine> engines, VaultRetryService vaultRetryService) {
+        this.engines = engines;
         this.vaultRetryService = vaultRetryService;
+    }
+
+    @PostConstruct
+    public void init() {
+        if (StringUtils.hasLength(engineClass)) {
+            persistentEngine = engines.stream().filter(e -> e.getClass().getCanonicalName().startsWith(engineClass)).findFirst()
+                    .orElseThrow(() -> new RuntimeException(format("Selected secret engine (%s) is not found, please check secret.engine", engineClass)));
+        }
     }
 
     /**
@@ -78,7 +95,10 @@ public class SecretService {
         }
 
         RotationSecret response = vaultRetryService.tryReadingVault(() -> {
-            return persistentEngine.getRotation(secret);
+            return getFirstEngineStream(secret)
+                    .map(e -> e.getRotation(secret))
+                    .filter(Objects::nonNull)
+                    .orElse(null);
         });
         return "null".equals(response) ? null : response;
     }
@@ -100,14 +120,17 @@ public class SecretService {
      *
      * @param secret Key-value secret in Secret
      * @param field  The key of the key-value secret in Secret
-     * @return Secret content or null if the secret is not found.
+     * @return Secret content or null if the secret secret is not found.
      */
     private String get(String secret, String field) {
-        if (!isSecret(secret) || field == null) {
+        if (secret == null) {
             return null;
         }
         String response = vaultRetryService.tryReadingVault(() -> {
-            return persistentEngine.get(secret, field);
+            return getFirstEngineStream(secret)
+                    .map(e -> e.get(secret, field))
+                    .filter(Objects::nonNull)
+                    .orElse(null);
         });
         return "null".equals(response) ? null : response;
     }
@@ -123,8 +146,7 @@ public class SecretService {
         if (secretResponse == null) {
             return null;
         }
-        VaultSecret vaultSecret = new VaultSecret(secretResponse.getEnginePath(), VaultKvV2Engine.class.getCanonicalName(),
-                secretResponse.getSecretPath(), secretResponse.getSecretVersion());
+        VaultSecret vaultSecret = new VaultSecret(secretResponse.getEnginePath(), VaultKvV2Engine.class.getCanonicalName(), secretResponse.getSecretPath());
         String secretAsJson = new Gson().toJson(vaultSecret);
         return get(secretAsJson);
     }
@@ -135,14 +157,29 @@ public class SecretService {
      *
      * @param secretPath path of the Secret that refers to a Secret in the Secret engine
      * @param field      The key of the key-value secret in Secret
-     * @return Secret content or null if the secret is not found.
+     * @return Secret content or null if the secret secret is not found.
      */
-    public String getLatestSecretWithoutCache(String secretPath, String field) {
+    public String getKvV2SecretByPathAndField(String secretPath, String field) {
         if (secretPath == null || field == null) {
             return null;
         }
-        String response = vaultRetryService.tryReadingVault(() -> persistentEngine.getLatestSecretWithoutCache(secretPath, field));
-        return "null".equals(response) ? null : response;
+        VaultSecret vaultSecret = new VaultSecret(getVaultKvV2EnginePath(), VaultKvV2Engine.class.getCanonicalName(), secretPath);
+        String secretAsJson = new Gson().toJson(vaultSecret);
+        return get(secretAsJson, field);
+    }
+
+    private String getVaultKvV2EnginePath() {
+        return engines.stream()
+                .filter(e -> e instanceof VaultKvV2Engine)
+                .findFirst()
+                .map(SecretEngine::enginePath)
+                .orElse("");
+    }
+
+    private Optional<SecretEngine> getFirstEngineStream(String secret) {
+        return engines.stream()
+                .filter(e -> e.isSecret(secret))
+                .findFirst();
     }
 
     /**
@@ -151,9 +188,9 @@ public class SecretService {
      * @param secret Key-value secret in Secret
      */
     public void delete(String secret) {
-        if (isSecret(secret)) {
-            persistentEngine.delete(secret);
-        }
+        engines.stream()
+                .filter(e -> e.isSecret(secret))
+                .forEach(e -> e.delete(secret));
     }
 
     public List<String> listEntries(String secretPathPrefix) {
@@ -161,9 +198,7 @@ public class SecretService {
     }
 
     public void cleanup(String pathPrefix) {
-        if (pathPrefix != null) {
-            persistentEngine.cleanup(pathPrefix);
-        }
+        persistentEngine.cleanup(pathPrefix);
     }
 
     /**
@@ -172,7 +207,7 @@ public class SecretService {
      * @param secret Key-value key in Secret
      */
     public boolean isSecret(String secret) {
-        return persistentEngine.isSecret(secret);
+        return engines.stream().anyMatch(e -> e.isSecret(secret));
     }
 
     /**
@@ -182,6 +217,8 @@ public class SecretService {
      * @return public external secret JSON
      */
     public SecretResponse convertToExternal(String secret) {
-        return persistentEngine.convertToExternal(secret);
+        return getFirstEngineStream(secret)
+                .map(e -> e.convertToExternal(secret))
+                .orElse(null);
     }
 }

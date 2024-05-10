@@ -80,9 +80,9 @@ class ServiceKeytabServiceTest {
 
     private final Stack stack = new Stack();
 
-    private final SecretResponse keytabResponse = new SecretResponse("eng", "keytabPath", 1);
+    private final SecretResponse keytabResponse = new SecretResponse("eng", "keytabPath");
 
-    private final SecretResponse principalResponse = new SecretResponse("eng", "principalPath", 1);
+    private final SecretResponse principalResponse = new SecretResponse("eng", "principalPath");
 
     @InjectMocks
     private ServiceKeytabService underTest;
