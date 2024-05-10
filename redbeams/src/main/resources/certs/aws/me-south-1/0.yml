@@ -25,4 +25,4 @@ cert: |-
   3vfTSTKrZDNTJn4ybG6pq1zWExoXsktZPylJly6R3RBwV6nwqBM=
   -----END CERTIFICATE-----
 fingerprint: 8a69d700fb5d629cb0d1756fb7b638aa76c4bd1f
-deprecated: false
+deprecated: true
