@@ -31,9 +31,6 @@ bring-up-schema: download-cbd create-image create-cloudbreak-context schema-migr
 
 clear-ums-user-assignments: fetch-secrets-docker clean-up-ums-user-assignments-docker
 
-download-jar-from-s3:
-	./scripts/download-artifacts.sh
-
 download-cbd:
 	CB_VERSION=$(CB_VERSION) CB_TARGET_BRANCH=$(CB_TARGET_BRANCH) ./scripts/download-cbd.sh
 

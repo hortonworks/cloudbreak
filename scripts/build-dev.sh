@@ -1,10 +1,31 @@
 #!/bin/bash -e
 set -x
 
-./gradlew -Penv=jenkins -Phttps.socketTimeout=720000 -Phttps.connectionTimeout=720000 -b build.gradle buildInfo build publishBootJavaPublicationToMavenRepository :freeipa-client:publishMavenJavaPublicationToMavenRepository -Pversion=$VERSION --parallel --stacktrace -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest
+./gradlew -Penv=jenkins -Phttps.socketTimeout=720000 -Phttps.connectionTimeout=720000 -b build.gradle buildInfo build \
+  publishBootJavaPublicationToMavenRepository \
+  :freeipa-client:publishMavenJavaPublicationToMavenRepository \
+  -Pversion=$VERSION \
+  --parallel \
+  --stacktrace \
+  --quiet \
+  -x checkstyleMain \
+  -x checkstyleTest \
+  -x spotbugsMain \
+  -x spotbugsTest \
+  -x test \
+  core:test --tests=com.sequenceiq.*.openapi.OpenApiGenerator \
+  autoscale:test --tests=com.sequenceiq.*.openapi.OpenApiGenerator \
+  environment:test --tests=com.sequenceiq.*.openapi.OpenApiGenerator \
+  freeipa:test --tests=com.sequenceiq.*.openapi.OpenApiGenerator \
+  redbeams:test --tests=com.sequenceiq.*.openapi.OpenApiGenerator \
+  autoscale:test --tests=com.sequenceiq.*.openapi.OpenApiGenerator \
+  datalake:test --tests=com.sequenceiq.*.openapi.OpenApiGenerator \
+  externalized-compute:test --tests=com.sequenceiq.*.openapi.OpenApiGenerator \
+  environment-remote:test --tests=com.sequenceiq.*.openapi.OpenApiGenerator
 
 if [[ "${RUN_SONARQUBE}" == "true" ]]; then
     # removing core modul because that is instable
+    ./gradlew -Penv=jenkins -b build.gradle build --info --stacktrace --parallel -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest
     ./gradlew -Penv=jenkins -Phttp.socketTimeout=300000 -Phttp.connectionTimeout=300000 -b build.gradle core:sonarqube core:jacocoTestReport -Dorg.gradle.internal.http.socketTimeout=600000 -Dorg.gradle.internal.http.connectionTimeout=600000 -x test || true
     ./gradlew -Penv=jenkins -Phttp.socketTimeout=300000 -Phttp.connectionTimeout=300000 -b build.gradle freeipa:sonarqube freeipa:jacocoTestReport -Dorg.gradle.internal.http.socketTimeout=600000 -Dorg.gradle.internal.http.connectionTimeout=600000 -x test || true
     ./gradlew -Penv=jenkins -Phttp.socketTimeout=300000 -Phttp.connectionTimeout=300000 -b build.gradle autoscale:sonarqube autoscale:jacocoTestReport -Dorg.gradle.internal.http.socketTimeout=600000 -Dorg.gradle.internal.http.connectionTimeout=600000 -x test || true
