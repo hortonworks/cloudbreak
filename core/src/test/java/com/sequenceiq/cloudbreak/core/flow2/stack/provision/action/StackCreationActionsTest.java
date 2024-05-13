@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationResult;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
@@ -178,6 +179,24 @@ class StackCreationActionsTest {
         StackEvent stackEvent = stackEventCaptor.getValue();
         assertThat(stackEvent).isNotNull();
         verifyStackEvent(stackEvent);
+    }
+
+    @Test
+    void generateEncryptionKeysActionTestDoExecute() throws Exception {
+        StackCreationContext context = stackCreationContext();
+        ArgumentCaptor<StackEvent> stackEventCaptor = ArgumentCaptor.forClass(StackEvent.class);
+        AbstractActionTestSupport<StackCreationState, StackCreationEvent, StackCreationContext,
+                ValidationResult> testSupport =
+                new AbstractActionTestSupport<>(initAction(underTest::generateEncryptionKeysAction));
+
+        testSupport.doExecute(context, new ValidationResult(STACK_ID), Map.of());
+
+        verifyEvent(stackEventCaptor, "GENERATEENCRYPTIONKEYSREQUEST");
+
+        StackEvent stackEvent = stackEventCaptor.getValue();
+        assertThat(stackEvent).isNotNull();
+        assertThat(stackEvent.getResourceId()).isEqualTo(STACK_ID);
+        assertThat(stackEvent.getSelector()).isEqualTo("GENERATEENCRYPTIONKEYSREQUEST");
     }
 
     private void verifyStackEvent(StackEvent stackEvent) {

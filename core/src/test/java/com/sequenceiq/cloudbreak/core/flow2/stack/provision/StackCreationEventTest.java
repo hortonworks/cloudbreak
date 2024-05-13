@@ -10,6 +10,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreation
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.CREATE_CREDENTIAL_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.CREATE_USER_DATA_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.CREATE_USER_DATA_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.GENERATE_ENCRYPTION_KEYS_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.GENERATE_ENCRYPTION_KEYS_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.GET_TLS_INFO_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.GET_TLS_INFO_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_COPY_CHECK_EVENT;
@@ -49,6 +51,8 @@ class StackCreationEventTest {
     private static final Map<StackCreationEvent, String> ENUM_TO_EVENT_MAP = new EnumMap<>(Map.ofEntries(
             entry(START_CREATION_EVENT, "STACK_PROVISION_TRIGGER_EVENT"), entry(VALIDATION_FINISHED_EVENT, "VALIDATIONRESULT"),
             entry(VALIDATION_FAILED_EVENT, "VALIDATIONRESULT_ERROR"), entry(CREATE_USER_DATA_FINISHED_EVENT, "CREATEUSERDATASUCCESS"),
+            entry(GENERATE_ENCRYPTION_KEYS_FINISHED_EVENT, "GENERATEENCRYPTIONKEYSSUCCESS"),
+            entry(GENERATE_ENCRYPTION_KEYS_FAILED_EVENT, "GENERATEENCRYPTIONKEYSFAILED"),
             entry(CREATE_USER_DATA_FAILED_EVENT, "CREATEUSERDATAFAILED"), entry(SETUP_FINISHED_EVENT, "SETUPRESULT"),
             entry(SETUP_FAILED_EVENT, "SETUPRESULT_ERROR"), entry(IMAGE_PREPARATION_FINISHED_EVENT, "PREPAREIMAGERESULT"),
             entry(IMAGE_PREPARATION_FAILED_EVENT, "PREPAREIMAGERESULT_ERROR"), entry(IMAGE_COPY_CHECK_EVENT, "IMAGECOPYCHECK"),

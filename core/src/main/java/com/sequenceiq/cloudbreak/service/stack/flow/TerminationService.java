@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaCleanupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.stack.StackEncryptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
@@ -81,6 +82,9 @@ public class TerminationService {
     @Inject
     private StackRotationService stackRotationService;
 
+    @Inject
+    private StackEncryptionService stackEncryptionService;
+
     public void finalizeTermination(Long stackId, boolean force) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Date now = new Date();
@@ -100,6 +104,7 @@ public class TerminationService {
                 }
                 terminateInstanceGroups(stack);
                 terminateMetaDataInstances(stack);
+                deleteStackEncryption(stack);
                 updateToDeleteCompleted(stack.getId(), terminatedName, "Stack was terminated successfully.");
                 return null;
             });
@@ -188,6 +193,11 @@ public class TerminationService {
         List<Long> metaData = stackDto.getNotTerminatedInstanceMetaData().stream().map(InstanceMetadataView::getId).collect(Collectors.toList());
         LOGGER.debug("Deleting instance metadata entry {}", metaData);
         instanceMetaDataService.deleteAllByInstanceIds(metaData);
+    }
+
+    private void deleteStackEncryption(Stack stack) {
+        LOGGER.info("Deleting Stack Encryption for  Stack {}", stack.getId());
+        stackEncryptionService.deleteStackEncryption(stack.getId());
     }
 
 }

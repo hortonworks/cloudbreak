@@ -67,6 +67,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.ProvisionEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.StackWithFingerprintsEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.encryption.GenerateEncryptionKeysRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.encryption.GenerateEncryptionKeysSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataSuccess;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -139,12 +141,27 @@ public class StackCreationActions {
         };
     }
 
-    @Bean(name = "CREATE_USER_DATA_STATE")
-    public Action<?, ?> createUserDataAction() {
+    @Bean(name = "GENERATE_ENCRYPTION_KEYS_STATE")
+    public Action<?, ?> generateEncryptionKeysAction() {
         return new AbstractStackCreationAction<>(ValidationResult.class) {
             @Override
             protected void doExecute(StackCreationContext context, ValidationResult payload, Map<Object, Object> variables) {
                 handleValidationWarnings(context, payload);
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackCreationContext context) {
+                return new GenerateEncryptionKeysRequest(context.getStack().getId());
+            }
+        };
+    }
+
+    @Bean(name = "CREATE_USER_DATA_STATE")
+    public Action<?, ?> createUserDataAction() {
+        return new AbstractStackCreationAction<>(GenerateEncryptionKeysSuccess.class) {
+            @Override
+            protected void doExecute(StackCreationContext context, GenerateEncryptionKeysSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 

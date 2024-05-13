@@ -15,6 +15,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageFallbackFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ImageFallbackSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.consumption.AttachedVolumeConsumptionCollectionSchedulingSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.encryption.GenerateEncryptionKeysFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.encryption.GenerateEncryptionKeysSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataSuccess;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -24,6 +26,8 @@ public enum StackCreationEvent implements FlowEvent {
     START_CREATION_EVENT("STACK_PROVISION_TRIGGER_EVENT"),
     VALIDATION_FINISHED_EVENT(CloudPlatformResult.selector(ValidationResult.class)),
     VALIDATION_FAILED_EVENT(CloudPlatformResult.failureSelector(ValidationResult.class)),
+    GENERATE_ENCRYPTION_KEYS_FINISHED_EVENT(EventSelectorUtil.selector(GenerateEncryptionKeysSuccess.class)),
+    GENERATE_ENCRYPTION_KEYS_FAILED_EVENT(EventSelectorUtil.selector(GenerateEncryptionKeysFailed.class)),
     CREATE_USER_DATA_FINISHED_EVENT(EventSelectorUtil.selector(CreateUserDataSuccess.class)),
     CREATE_USER_DATA_FAILED_EVENT(EventSelectorUtil.selector(CreateUserDataFailed.class)),
     SETUP_FINISHED_EVENT(CloudPlatformResult.selector(SetupResult.class)),
