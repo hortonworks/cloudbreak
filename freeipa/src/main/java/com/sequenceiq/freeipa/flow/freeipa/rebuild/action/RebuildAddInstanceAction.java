@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.flow.freeipa.rebuild.action;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -71,7 +72,7 @@ public class RebuildAddInstanceAction extends AbstractRebuildAction<StackEvent> 
         CloudStack updatedCloudStack = cloudStackConverter.convert(updatedStack);
         UpscaleStackRequest<UpscaleStackResult> request = new UpscaleStackRequest<>(
                 context.getCloudContext(), context.getCloudCredential(), updatedCloudStack, cloudResources,
-                new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 1L));
+                new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 1L), Optional.empty());
         sendEvent(context, request.selector(), request);
     }
 

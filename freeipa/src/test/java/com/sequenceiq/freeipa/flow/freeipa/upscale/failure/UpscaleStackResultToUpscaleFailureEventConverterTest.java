@@ -27,7 +27,7 @@ public class UpscaleStackResultToUpscaleFailureEventConverterTest {
 
     @Test
     void testConvertReturnsFailureDetails() {
-        UpscaleStackResult upscaleStackResult = populateUpscaleStackResult("Error occured during upscale");
+        UpscaleStackResult upscaleStackResult = populateUpscaleStackResult("Error occurred during upscale");
         UpscaleFailureEvent upscaleFailureEvent = upscaleStackResultToUpscaleFailureEventConverter.convert(upscaleStackResult);
         assertEquals(upscaleFailureEvent.getResourceId(), upscaleStackResult.getResourceId());
         assertEquals(upscaleFailureEvent.getFailedPhase(), "Adding instances");
@@ -35,6 +35,7 @@ public class UpscaleStackResultToUpscaleFailureEventConverterTest {
         assertEquals(upscaleFailureEvent.getFailureDetails().size(), 1);
         assertTrue(upscaleFailureEvent.getFailureDetails().containsKey("statusReason"));
         assertEquals(upscaleFailureEvent.getFailureDetails().get("statusReason"), upscaleStackResult.getStatusReason());
+        assertEquals(upscaleFailureEvent.getException(), upscaleStackResult.getException());
     }
 
     @Test
@@ -45,12 +46,12 @@ public class UpscaleStackResultToUpscaleFailureEventConverterTest {
         assertEquals(upscaleFailureEvent.getFailedPhase(), "Adding instances");
         assertEquals(upscaleFailureEvent.getSuccess().size(), 0);
         assertEquals(upscaleFailureEvent.getFailureDetails().size(), 0);
+        assertEquals(upscaleFailureEvent.getException(), upscaleStackResult.getException());
     }
 
     private UpscaleStackResult populateUpscaleStackResult(String statusReason) {
-        UpscaleStackResult upscaleStackResult = new UpscaleStackResult(statusReason,
+        return new UpscaleStackResult(statusReason,
                 new Exception(statusReason), 1234L);
-        return upscaleStackResult;
     }
 
 }

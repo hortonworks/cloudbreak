@@ -29,7 +29,7 @@ public class FreeIpaV2Controller implements FreeIpaV2Endpoint {
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = REPAIR_FREEIPA)
-    public DescribeFreeIpaResponse rebuildv2(@RequestObject @Valid RebuildV2Request request) throws Exception {
+    public DescribeFreeIpaResponse rebuildv2(@RequestObject @Valid RebuildV2Request request) {
         String accountId = crnService.getCurrentAccountId();
         return rebuildService.rebuild(accountId, request);
     }

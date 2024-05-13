@@ -16,8 +16,7 @@ public class HostMetadataSetupFailedToUpscaleFailureEventConverter implements Pa
     @Override
     public UpscaleFailureEvent convert(Object payload) {
         HostMetadataSetupFailed result = (HostMetadataSetupFailed) payload;
-        UpscaleFailureEvent event = new UpscaleFailureEvent(result.getResourceId(), "Host metadata setup", Set.of(), Map.of(),
-                new Exception("Payload failed: " + payload));
-        return event;
+        return new UpscaleFailureEvent(result.getResourceId(), "Host metadata setup", Set.of(), Map.of(),
+                result.getException());
     }
 }

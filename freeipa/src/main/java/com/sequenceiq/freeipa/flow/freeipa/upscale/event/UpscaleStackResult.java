@@ -2,7 +2,6 @@ package com.sequenceiq.freeipa.flow.freeipa.upscale.event;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -48,10 +47,9 @@ public class UpscaleStackResult extends CloudPlatformResult implements FlowPaylo
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", UpscaleStackResult.class.getSimpleName() + "[", "]")
-                .add("resourceStatus=" + resourceStatus)
-                .add("results=" + results)
-                .toString();
+        return "UpscaleStackResult{" +
+                "resourceStatus=" + resourceStatus +
+                ", results=" + results +
+                "} " + super.toString();
     }
-
 }

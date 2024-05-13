@@ -103,6 +103,7 @@ import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFall
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackRequest;
 import com.sequenceiq.freeipa.service.TlsSetupService;
 import com.sequenceiq.freeipa.service.config.KerberosConfigUpdateService;
+import com.sequenceiq.freeipa.service.image.ImageFallbackService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -147,6 +148,9 @@ public class FreeIpaUpscaleActions {
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
+    private ImageFallbackService imageFallbackService;
 
     @Bean(name = "UPSCALE_STARTING_STATE")
     public Action<?, ?> startingAction() {
@@ -211,9 +215,10 @@ public class FreeIpaUpscaleActions {
                         .map(resource -> resourceConverter.convert(resource))
                         .collect(Collectors.toList());
                 CloudStack updatedCloudStack = cloudStackConverter.convert(updatedStack);
+                Optional<String> fallbackImage = imageFallbackService.determineFallbackImageIfPermitted(context);
                 UpscaleStackRequest<UpscaleStackResult> request = new UpscaleStackRequest<>(
                         context.getCloudContext(), context.getCloudCredential(), updatedCloudStack, cloudResources,
-                        new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) newInstances.size()));
+                        new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) newInstances.size()), fallbackImage);
                 sendEvent(context, request.selector(), request);
             }
 

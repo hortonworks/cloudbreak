@@ -86,18 +86,15 @@ public class FreeIpaFlowManager {
                 reactorReporter.logErrorReport();
                 throw new RuntimeException("FlowAcceptResult was null. Maybe flow is under operation, request not allowed.");
             }
-            switch (accepted.getResultType()) {
-                case RUNNING_IN_FLOW:
-                    return new FlowIdentifier(FlowType.FLOW, accepted.getAsFlowId());
-                case RUNNING_IN_FLOW_CHAIN:
-                    return new FlowIdentifier(FlowType.FLOW_CHAIN, accepted.getAsFlowChainId());
-                case ALREADY_EXISTING_FLOW:
-                    throw new FlowsAlreadyRunningException(String.format("Request not allowed, freeipa cluster already has a running operation. " +
-                                    "Running operation(s): [%s]",
-                            flowNameFormatService.formatFlows(accepted.getAlreadyRunningFlows())));
-                default:
-                    throw new IllegalStateException("Illegal resultType: " + accepted.getResultType());
-            }
+            return switch (accepted.getResultType()) {
+                case RUNNING_IN_FLOW -> new FlowIdentifier(FlowType.FLOW, accepted.getAsFlowId());
+                case RUNNING_IN_FLOW_CHAIN -> new FlowIdentifier(FlowType.FLOW_CHAIN, accepted.getAsFlowChainId());
+                case ALREADY_EXISTING_FLOW ->
+                        throw new FlowsAlreadyRunningException(String.format("Request not allowed, freeipa cluster already has a running operation. " +
+                                        "Running operation(s): [%s]",
+                                flowNameFormatService.formatFlows(accepted.getAlreadyRunningFlows())));
+                default -> throw new IllegalStateException("Illegal resultType: " + accepted.getResultType());
+            };
         } catch (InterruptedException e) {
             reactorReporter.logErrorReport();
             throw new RuntimeException(e.getMessage());

@@ -6,6 +6,7 @@ import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IM
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -63,6 +64,7 @@ import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFall
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.LaunchStackResultToStackEventConverter;
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserDataRequest;
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserDataSuccess;
+import com.sequenceiq.freeipa.service.image.ImageFallbackService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -160,6 +162,7 @@ public class StackProvisionActions {
     @Bean(name = "IMAGESETUP_STATE")
     public Action<?, ?> prepareImageAction() {
         return new AbstractStackProvisionAction<>(StackEvent.class) {
+
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 stackProvisionService.prepareImage(context.getStack());
@@ -201,6 +204,10 @@ public class StackProvisionActions {
     @Bean(name = "START_PROVISIONING_STATE")
     public Action<?, ?> startProvisioningAction() {
         return new AbstractStackProvisionAction<>(CreateCredentialResult.class) {
+
+            @Inject
+            private ImageFallbackService imageFallbackService;
+
             @Override
             protected void doExecute(StackContext context, CreateCredentialResult payload, Map<Object, Object> variables) {
                 sendEvent(context);
@@ -208,9 +215,12 @@ public class StackProvisionActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                //FIXME AdjustmentType and treshold
+
+                Optional<String> fallbackImage = imageFallbackService.determineFallbackImageIfPermitted(context);
+
+                //FIXME AdjustmentType and threshold
                 return new LaunchStackRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
-                        AdjustmentType.EXACT, 1L);
+                        AdjustmentType.EXACT, 1L, fallbackImage);
             }
         };
     }
@@ -218,6 +228,7 @@ public class StackProvisionActions {
     @Bean(name = "IMAGE_FALLBACK_STATE")
     public Action<?, ?> imageFallbackAction() {
         return new AbstractStackProvisionAction<>(StackEvent.class) {
+
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 if ((Boolean) variables.getOrDefault(IMAGE_FALLBACK_STARTED, Boolean.FALSE)) {

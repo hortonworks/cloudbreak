@@ -97,8 +97,8 @@ public class FreeIpaScalingService {
         UpscaleEvent upscaleEvent = new UpscaleEvent(UpscaleFlowEvent.UPSCALE_EVENT.event(), stack.getId(), new ArrayList<>(),
                 request.getTargetAvailabilityType().getInstanceCount(), false, false, false, operation.getOperationId(), null);
         try {
-            LOGGER.info("Trigger upscale flow with event: {}", upscaleEvent);
             FlowIdentifier flowIdentifier = flowManager.notify(UpscaleFlowEvent.UPSCALE_EVENT.event(), upscaleEvent);
+            LOGGER.info("Trigger upscale flow with event: {} and flowId: {}", upscaleEvent, flowIdentifier);
             UpscaleResponse response = new UpscaleResponse();
             response.setOperationId(operation.getOperationId());
             response.setOriginalAvailabilityType(originalAvailabilityType.getAvailabilityType());

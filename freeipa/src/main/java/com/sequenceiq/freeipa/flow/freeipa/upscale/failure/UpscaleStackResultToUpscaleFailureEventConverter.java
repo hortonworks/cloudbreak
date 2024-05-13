@@ -20,6 +20,6 @@ public class UpscaleStackResultToUpscaleFailureEventConverter implements Payload
         UpscaleStackResult result = (UpscaleStackResult) payload;
         return new UpscaleFailureEvent(result.getResourceId(), "Adding instances", Set.of(),
                 StringUtils.isNotEmpty(result.getStatusReason()) ? Map.of("statusReason", result.getStatusReason()) : Map.of(),
-                new Exception("Payload failed: " + payload));
+                result.getException());
     }
 }

@@ -71,20 +71,29 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
             eventBus.notify(result.selector(), new Event<>(launchStackRequestEvent.getHeaders(), result));
             LOGGER.debug("Launching the stack successfully finished for {}", cloudContext);
         } catch (CloudImageException e) {
-            LaunchStackResult result = new LaunchStackResult(request.getResourceId(), List.of());
-            request.getResult().onNext(result);
-            eventBus.notify("IMAGEFALLBACK", new Event<>(launchStackRequestEvent.getHeaders(), result));
-            LOGGER.debug("Marketplace image error, attempt to fallback to vhd image {}", cloudContext);
+            if (request.getFallbackImage().isPresent()) {
+                LaunchStackResult result = new LaunchStackResult(request.getResourceId(), List.of());
+                request.getResult().onNext(result);
+                eventBus.notify("IMAGEFALLBACK", new Event<>(launchStackRequestEvent.getHeaders(), result));
+                LOGGER.debug("Marketplace image error, attempt to fallback to vhd image {}", cloudContext);
+            } else {
+                LOGGER.debug("There is no fallback image available for launching stack, re-submitting original exception {}", e.getMessage());
+                failLaunchFlow(launchStackRequestEvent, e, request);
+            }
         } catch (Exception e) {
             if (ExceptionUtils.getRootCause(e) instanceof InterruptedException) {
                 LOGGER.info("Interrupted exception is ignored as it has been thrown because of graceful shutdown of the java process.");
             }
-
-            LaunchStackResult failure = new LaunchStackResult(e, request.getResourceId());
             LOGGER.warn("Error during launching the stack:", e);
-            request.getResult().onNext(failure);
-            eventBus.notify(failure.selector(), new Event<>(launchStackRequestEvent.getHeaders(), failure));
+            failLaunchFlow(launchStackRequestEvent, e, request);
         }
+    }
+
+    private void failLaunchFlow(Event<LaunchStackRequest> launchStackRequestEvent, Exception e, LaunchStackRequest request) {
+        LaunchStackResult failure = new LaunchStackResult(e, request.getResourceId());
+
+        request.getResult().onNext(failure);
+        eventBus.notify(failure.selector(), new Event<>(launchStackRequestEvent.getHeaders(), failure));
     }
 
     /**

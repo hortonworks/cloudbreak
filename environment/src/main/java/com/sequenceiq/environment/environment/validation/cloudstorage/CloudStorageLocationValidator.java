@@ -57,14 +57,12 @@ public class CloudStorageLocationValidator {
 
     private String getDocLink(String cloudPlatform) {
         String docReferenceLink = " Refer to Cloudera documentation at %s for the required rights.";
-        if (cloudPlatform.equals(CloudConstants.AWS)) {
-            return String.format(docReferenceLink, DocumentationLinkProvider.awsCloudStorageSetupLink());
-        } else if (cloudPlatform.equals(CloudConstants.AZURE)) {
-            return String.format(docReferenceLink, DocumentationLinkProvider.azureCloudStorageSetupLink());
-        } else if (cloudPlatform.equals(CloudConstants.GCP)) {
-            return String.format(docReferenceLink, DocumentationLinkProvider.googleCloudStorageSetupLink());
-        }
-        return "";
+        return switch (cloudPlatform) {
+            case CloudConstants.AWS -> String.format(docReferenceLink, DocumentationLinkProvider.awsCloudStorageSetupLink());
+            case CloudConstants.AZURE -> String.format(docReferenceLink, DocumentationLinkProvider.azureCloudStorageSetupLink());
+            case CloudConstants.GCP -> String.format(docReferenceLink, DocumentationLinkProvider.googleCloudStorageSetupLink());
+            default -> "";
+        };
     }
 
     private Optional<FileSystemType> getFileSystemType(Environment environment) {
@@ -141,5 +139,4 @@ public class CloudStorageLocationValidator {
                 .withObjectStorageType(objectStorageType)
                 .build();
     }
-
 }

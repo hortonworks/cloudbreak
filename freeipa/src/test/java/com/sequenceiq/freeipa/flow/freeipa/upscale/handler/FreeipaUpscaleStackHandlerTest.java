@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -88,7 +89,7 @@ class FreeipaUpscaleStackHandlerTest {
         when(cloudConnector.resources()).thenReturn(resourceConnector);
 
         AdjustmentTypeWithThreshold threshold = new AdjustmentTypeWithThreshold(AdjustmentType.BEST_EFFORT, 1L);
-        request = new UpscaleStackRequest<>(context, cred, stack, List.of(), threshold);
+        request = new UpscaleStackRequest<>(context, cred, stack, List.of(), threshold, Optional.of("fallbackImage"));
     }
 
     @Test
@@ -124,6 +125,26 @@ class FreeipaUpscaleStackHandlerTest {
         Event actualEvent = eventArgumentCaptor.getValue();
         assertNotNull(actualEvent);
         assertEquals(ResourceStatus.FAILED, ((UpscaleStackImageFallbackResult) actualEvent.getData()).getResourceStatus());
+    }
+
+    @Test
+    void testAcceptImageFallbackNoImageAvailable() throws Exception {
+        AdjustmentTypeWithThreshold threshold = new AdjustmentTypeWithThreshold(AdjustmentType.BEST_EFFORT, 1L);
+        request = new UpscaleStackRequest<>(context, cred, stack, List.of(), threshold, Optional.empty());
+        CloudImageException imageException = new CloudImageException("Could not sign image");
+        when(resourceConnector.upscale(eq(authContext), eq(stack), eq(List.of()), eq(request.getAdjustmentWithThreshold())))
+                .thenThrow(imageException);
+
+        underTest.accept(new Event<>(request));
+
+        ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus).notify(eq(UpscaleStackResult.class.getSimpleName().toUpperCase(Locale.ROOT) + "_ERROR"), eventArgumentCaptor.capture());
+        Event actualEvent = eventArgumentCaptor.getValue();
+        assertNotNull(actualEvent);
+        UpscaleStackResult result = (UpscaleStackResult) actualEvent.getData();
+        assertEquals(ResourceStatus.FAILED, result.getResourceStatus());
+        assertEquals(imageException, result.getException());
+        assertEquals(imageException.getMessage(), result.getStatusReason());
     }
 
     @Test

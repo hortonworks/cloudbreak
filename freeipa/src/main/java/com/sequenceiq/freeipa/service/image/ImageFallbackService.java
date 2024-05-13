@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.image;
 import static com.sequenceiq.common.model.OsType.RHEL8;
 
 import java.util.Locale;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -11,11 +12,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.stack.StackContext;
 
 @Service
 public class ImageFallbackService {
@@ -37,9 +40,29 @@ public class ImageFallbackService {
             return true;
         } else {
             String msg = String.format("Image fallback is only supported on the Azure cloud platform and Marketplace image %s", currentImage.getImageName());
-            LOGGER.warn(msg);
+            LOGGER.info(msg);
             return false;
         }
+    }
+
+    public Optional<String> determineFallbackImageIfPermitted(StackContext context) {
+        Stack stack = context.getStack();
+        CloudContext cloudContext = context.getCloudContext();
+        ImageEntity imageEntity = imageService.getByStack(stack);
+        String regionName = cloudContext.getLocation().getRegion().value();
+        String platform = cloudContext.getPlatform().getValue();
+        if (imageFallbackPermitted(imageEntity, stack)) {
+            try {
+                com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image imageForStack = imageService.getImageForStack(stack);
+                String fallbackImageName = imageService.determineImageNameByRegion(platform, regionName, imageForStack);
+                LOGGER.debug("Fallback image name: {}", fallbackImageName);
+                return Optional.of(fallbackImageName);
+            } catch (ImageNotFoundException e) {
+                LOGGER.warn("Fallback image could not be determined due to exception {}," +
+                        " we should continue execution", e.getMessage());
+            }
+        }
+        return Optional.empty();
     }
 
     public void performImageFallback(ImageEntity currentImage, Stack stack) {

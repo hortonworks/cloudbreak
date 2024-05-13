@@ -81,7 +81,6 @@ public class ImageChangeActions {
                 CloudContext cloudContext = context.getCloudContext();
 
                 ImageEntity imageEntity = imageService.getByStack(stack);
-                Image image = imageConverter.convert(imageEntity);
                 String regionName = cloudContext.getLocation().getRegion().value();
                 String platform = cloudContext.getPlatform().getValue();
                 String fallbackImageName = null;
@@ -95,6 +94,7 @@ public class ImageChangeActions {
                     }
                 }
                 CloudStack cloudStack = getCloudStackConverter().convert(stack);
+                Image image = imageConverter.convert(imageEntity);
                 PrepareImageRequest<Object> request = new PrepareImageRequest<>(cloudContext, context.getCloudCredential(), cloudStack, image,
                         PrepareImageType.EXECUTED_DURING_IMAGE_CHANGE, fallbackImageName);
                 LOGGER.info("Prepare image: {}, fallback image:{}", image, fallbackImageName);

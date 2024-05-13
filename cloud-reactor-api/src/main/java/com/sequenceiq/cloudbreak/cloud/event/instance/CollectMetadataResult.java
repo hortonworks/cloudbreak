@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.common.event.FlowPayload;
 
 public class CollectMetadataResult extends CloudPlatformResult implements FlowPayload {
+
     private final List<CloudVmMetaDataStatus> results;
 
     @JsonCreator

@@ -11,10 +11,13 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -125,8 +128,9 @@ class LaunchStackHandlerTest {
         assertEquals(cloudResource.getName(), result.getResults().get(0).getCloudResource().getName());
     }
 
-    @Test
-    void testAcceptWithAzureImageFailure() throws Exception {
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void testAcceptWithAzureImageFailure(boolean hasFallbackImage) throws Exception {
         CloudContext cloudCtx = mock(CloudContext.class);
         CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(CloudPlatform.AZURE.name(), CloudPlatform.AZURE.name());
         when(cloudCtx.getPlatformVariant()).thenReturn(cloudPlatformVariant);
@@ -134,7 +138,8 @@ class LaunchStackHandlerTest {
         CloudStack cloudStack = mock(CloudStack.class);
         CloudCredential cloudCredential = new CloudCredential();
 
-        LaunchStackRequest data = new LaunchStackRequest(cloudCtx, cloudCredential, cloudStack, AdjustmentType.EXACT, 0L);
+        LaunchStackRequest data = new LaunchStackRequest(cloudCtx, cloudCredential, cloudStack, AdjustmentType.EXACT, 0L,
+                hasFallbackImage ? Optional.of("image") : Optional.empty());
         Event<LaunchStackRequest> request = new Event<>(data);
 
         when(cloudPlatformConnectors.get(cloudPlatformVariant)).thenReturn(cloudConnector);
@@ -145,7 +150,11 @@ class LaunchStackHandlerTest {
 
         verify(authentication).authenticate(cloudCtx, cloudCredential);
         verify(resourceConnector).launch(authenticatedCtx, cloudStack, persistanceNotifier, data.getAdjustmentWithThreshold());
-        verify(eventBus).notify(eq("IMAGEFALLBACK"), any(Event.class));
+        if (hasFallbackImage) {
+            verify(eventBus).notify(eq("IMAGEFALLBACK"), any(Event.class));
+        } else {
+            verify(eventBus).notify(eq("LAUNCHSTACKRESULT_ERROR"), any(Event.class));
+        }
     }
 
     @Test

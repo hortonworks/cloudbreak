@@ -1,18 +1,22 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.action;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -79,6 +83,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackSta
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
@@ -278,13 +283,14 @@ class FreeIpaUpscaleFlowIntegrationTest {
     @Test
     public void testSuccessfulUpscale() {
         testFlow();
-        verifyNoInteractions(imageFallbackService);
+        verify(imageFallbackService).determineFallbackImageIfPermitted(any());
         verify(operationService).completeOperation(eq(stack.getAccountId()), eq(OPERATION_ID), any(), any());
     }
 
     @Test
     public void testImageFallbackMoreThanOnce() throws Exception {
         when(resourceConnector.upscale(any(), any(), any(), any())).thenThrow(new CloudImageException("MP image failure"));
+        when(imageFallbackService.determineFallbackImageIfPermitted(any())).thenReturn(Optional.of("fallbackImageId"));
         stack.setCloudPlatform(CloudPlatform.AZURE.name());
 
         FlowIdentifier flowIdentifier = triggerFlow();
@@ -304,6 +310,7 @@ class FreeIpaUpscaleFlowIntegrationTest {
         when(cloudResource.getType()).thenReturn(ResourceType.AZURE_INSTANCE);
         when(resourceConnector.upscale(any(), any(), any(), any())).thenThrow(new CloudImageException("MP image failure"))
                 .thenReturn(List.of(new CloudResourceStatus(cloudResource, ResourceStatus.CREATED)));
+        when(imageFallbackService.determineFallbackImageIfPermitted(any())).thenReturn(Optional.of("fallbackImageId"));
         stack.setCloudPlatform(CloudPlatform.AZURE.name());
 
         FlowIdentifier flowIdentifier = triggerFlow();
@@ -312,6 +319,25 @@ class FreeIpaUpscaleFlowIntegrationTest {
         flowFinishedSuccessfully();
         verify(imageFallbackService).performImageFallback(any(), eq(stack));
         verify(operationService).completeOperation(eq(stack.getAccountId()), eq(OPERATION_ID), any(), any());
+    }
+
+    @Test
+    public void testImageFallbackNotPermittedWithoutFallbackImage() throws Exception {
+        CloudResource cloudResource = mock(CloudResource.class);
+        when(cloudResource.getType()).thenReturn(ResourceType.AZURE_INSTANCE);
+        when(resourceConnector.upscale(any(), any(), any(), any())).thenThrow(new CloudImageException("MP image failure"))
+                .thenReturn(List.of(new CloudResourceStatus(cloudResource, ResourceStatus.CREATED)));
+        when(imageFallbackService.determineFallbackImageIfPermitted(any())).thenReturn(Optional.empty());
+        stack.setCloudPlatform(CloudPlatform.AZURE.name());
+
+        FlowIdentifier flowIdentifier = triggerFlow();
+        letItFlow(flowIdentifier);
+
+        verify(imageFallbackService, never()).performImageFallback(any(), eq(stack));
+        ArgumentCaptor<Collection<FailureDetails>> failureCaptor = ArgumentCaptor.forClass(Collection.class);
+        verify(operationService).failOperation(eq(stack.getAccountId()), eq(OPERATION_ID), eq("Upscale failed during Adding instances"), any(),
+                failureCaptor.capture());
+        assertEquals("MP image failure", failureCaptor.getValue().stream().toList().getFirst().getAdditionalDetails().get("statusReason"));
     }
 
     private void testFlow() {

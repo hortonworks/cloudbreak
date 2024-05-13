@@ -6,12 +6,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -49,7 +51,10 @@ import com.sequenceiq.cloudbreak.cloud.handler.ProvisionValidationHandler;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformInitializer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
@@ -60,6 +65,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.common.api.type.ImageStatusResult;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
@@ -187,6 +193,7 @@ class StackProvisionFlowIntegrationTest {
         stack.setStackStatus(new StackStatus(stack, "test", DetailedStackStatus.PROVISION_REQUESTED));
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(stackService.getStackById(STACK_ID)).thenReturn(stack);
+        when(imageFallbackService.determineFallbackImageIfPermitted(any())).thenReturn(Optional.of("fallbackImageId"));
         CloudConnector cloudConnector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         when(cloudConnector.authentication()).thenReturn(mock(Authenticator.class));
@@ -237,6 +244,21 @@ class StackProvisionFlowIntegrationTest {
 
         flowFinishedSuccessfully();
         verify(imageFallbackService).performImageFallback(any(), eq(stack));
+    }
+
+    @Test
+    public void testImageFallbackNotPermittedWithoutFallbackImage() throws Exception {
+        CloudResource cloudResource = mock(CloudResource.class);
+        when(cloudResource.getType()).thenReturn(ResourceType.AZURE_INSTANCE);
+        when(resourceConnector.launch(any(), any(), any(), any())).thenThrow(new CloudImageException("MP image failure"))
+                .thenReturn(List.of(new CloudResourceStatus(cloudResource, ResourceStatus.CREATED)));
+        when(imageFallbackService.determineFallbackImageIfPermitted(any())).thenReturn(Optional.empty());
+        stack.setCloudPlatform(CloudPlatform.AZURE.name());
+
+        FlowIdentifier flowIdentifier = triggerFlow();
+        letItFlow(flowIdentifier);
+
+        verify(imageFallbackService, never()).performImageFallback(any(), eq(stack));
     }
 
     private void testFlow() {

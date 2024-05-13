@@ -55,16 +55,25 @@ public class FreeipaUpscaleStackHandler implements CloudPlatformEventHandler<Ups
             eventBus.notify(result.selector(), new Event<>(upscaleStackRequestEvent.getHeaders(), result));
             LOGGER.debug("Upscale successfully finished for {}, and the result is: {}", cloudContext, result);
         } catch (CloudImageException e) {
-            UpscaleStackImageFallbackResult result = new UpscaleStackImageFallbackResult(request.getResourceId(), ResourceStatus.FAILED, List.of());
-            request.getResult().onNext(result);
-            eventBus.notify(result.selector(), new Event<>(upscaleStackRequestEvent.getHeaders(), result));
-            LOGGER.debug("Marketplace image error, attempt to fallback to vhd image {}", cloudContext, e);
+            if (request.getFallbackImage().isPresent()) {
+                UpscaleStackImageFallbackResult result = new UpscaleStackImageFallbackResult(request.getResourceId(), ResourceStatus.FAILED, List.of());
+                request.getResult().onNext(result);
+                eventBus.notify(result.selector(), new Event<>(upscaleStackRequestEvent.getHeaders(), result));
+                LOGGER.debug("Marketplace image error, attempt to fallback to vhd image {}", cloudContext, e);
+            } else {
+                LOGGER.debug("There is no fallback image available for upscaling stack, re-submitting original exception {}", e.getMessage());
+                failUpscaleFlow(upscaleStackRequestEvent, e, request);
+            }
         } catch (Exception e) {
             LOGGER.error("Upscaling stack failed", e);
-            UpscaleStackResult result = new UpscaleStackResult(e.getMessage(), e, request.getResourceId());
-            request.getResult().onNext(result);
-            eventBus.notify(CloudPlatformResult.failureSelector(UpscaleStackResult.class), new Event<>(upscaleStackRequestEvent.getHeaders(), result));
+            failUpscaleFlow(upscaleStackRequestEvent, e, request);
         }
+    }
+
+    private void failUpscaleFlow(Event<UpscaleStackRequest> upscaleStackRequestEvent, Exception e, UpscaleStackRequest<UpscaleStackResult> request) {
+        UpscaleStackResult result = new UpscaleStackResult(e.getMessage(), e, request.getResourceId());
+        request.getResult().onNext(result);
+        eventBus.notify(CloudPlatformResult.failureSelector(UpscaleStackResult.class), new Event<>(upscaleStackRequestEvent.getHeaders(), result));
     }
 
     private AuthenticatedContext getAuthenticatedContext(UpscaleStackRequest<UpscaleStackResult> request, CloudContext cloudContext,
@@ -73,4 +82,3 @@ public class FreeipaUpscaleStackHandler implements CloudPlatformEventHandler<Ups
     }
 
 }
-
