@@ -1,22 +1,22 @@
 package com.sequenceiq.remoteenvironment.api.v1.environment.endpoint;
 
 import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.ENVIRONMENT_NOTES;
-import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.GET_BY_CRN;
 import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.LIST;
+import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.POST_BY_CRN;
 
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
 import org.springframework.validation.annotation.Validated;
 
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
-import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponses;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,11 +37,11 @@ public interface RemoteEnvironmentEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SimpleRemoteEnvironmentResponses list();
 
-    @GET
-    @Path("/crn/{crn:.+}")
+    @POST
+    @Path("/crn")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = GET_BY_CRN, description = ENVIRONMENT_NOTES, operationId = "getRemoteEnvironmentV1ByCrn",
+    @Operation(summary = POST_BY_CRN, description = ENVIRONMENT_NOTES, operationId = "getRemoteEnvironmentV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    DescribeEnvironmentResponse getByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
+    DescribeEnvironmentResponse getByCrn(@Valid DescribeRemoteEnvironment request);
 
 }
