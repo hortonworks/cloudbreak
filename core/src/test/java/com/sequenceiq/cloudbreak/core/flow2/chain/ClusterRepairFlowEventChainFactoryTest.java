@@ -2,12 +2,13 @@ package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,20 +23,17 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
-import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.event.AwsVariantMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
@@ -44,8 +42,8 @@ import com.sequenceiq.cloudbreak.core.flow2.event.CoreVerticalScalingTriggerEven
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.service.EmbeddedDbUpgradeFlowTriggersFactory;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -55,10 +53,10 @@ import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RescheduleStatusCheckTriggerEvent;
-import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
@@ -73,6 +71,7 @@ import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.core.chain.finalize.flowevents.FlowChainFinalizePayload;
 import com.sequenceiq.flow.core.chain.init.flowevents.FlowChainInitPayload;
 
+@ExtendWith(MockitoExtension.class)
 public class ClusterRepairFlowEventChainFactoryTest {
 
     private static final long INSTANCE_GROUP_ID = 1L;
@@ -80,10 +79,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
     private static final long STACK_ID = 1L;
 
     private static final long CLUSTER_ID = 2L;
-
-    private static final boolean MULTIPLE_GATEWAY = true;
-
-    private static final boolean NOT_MULTIPLE_GATEWAY = false;
 
     private static final String HG_MASTER = "hostGroup-master";
 
@@ -116,12 +111,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
     private InstanceGroupService instanceGroupService;
 
     @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
-    private EmbeddedDatabaseService embeddedDatabaseService;
-
-    @Mock
     private StackUpgradeService stackUpgradeService;
 
     @Mock
@@ -143,21 +132,17 @@ public class ClusterRepairFlowEventChainFactoryTest {
     private ClusterRepairFlowEventChainFactory underTest;
 
     @Mock
-    private StackIdView attachedWorkload;
+    private EmbeddedDbUpgradeFlowTriggersFactory embeddedDbUpgradeFlowTriggersFactory;
 
-    @Before
+    @BeforeEach
     public void setup() {
-        MockitoAnnotations.initMocks(this);
-        ReflectionTestUtils.setField(underTest, "targetMajorVersion", TargetMajorVersion.VERSION_11);
-        when(entitlementService.isEmbeddedPostgresUpgradeEnabled(anyString())).thenReturn(false);
         setupStackDto();
         setupViews();
     }
 
     @Test
     public void testRepairSingleGatewayWithNoAttached() {
-        Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
-        setupNoConnectedCluster();
+        Stack stack = getStack();
         setupHostGroup(InstanceGroupType.GATEWAY);
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
@@ -172,11 +157,11 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Test
     public void testRepairSingleGatewayWithNoAttachedWithEmbeddedDBUpgrade() {
-        Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
-        setupNoConnectedCluster();
-        when(entitlementService.isEmbeddedPostgresUpgradeEnabled(anyString())).thenReturn(true);
-        when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stackDto)).thenReturn(true);
+        Stack stack = getStack();
         setupHostGroup(InstanceGroupType.GATEWAY);
+        when(embeddedDbUpgradeFlowTriggersFactory.createFlowTriggers(stackDto, true))
+                .thenReturn(List.of(new StackEvent("UPGRADE_EMBEDDEDDB_PREPARATION_TRIGGER_EVENT", STACK_ID),
+                        new StackEvent("UPGRADE_RDS_TRIGGER_EVENT", STACK_ID)));
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(
                 new TriggerEventBuilder(stack).withFailedPrimaryGateway().withUpgrade().build());
@@ -193,8 +178,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Test
     public void testRepairSingleGatewayWithAttached() {
-        Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
-        setupConnectedCluster();
+        Stack stack = getStack();
         setupHostGroup(InstanceGroupType.GATEWAY);
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
@@ -209,8 +193,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Test
     public void testRepairSingleGatewayMultipleNodes() {
-        Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
-        setupNoConnectedCluster();
+        Stack stack = getStack();
         setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
         setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
         setupPrimaryGateway();
@@ -228,8 +211,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Test
     public void testRepairMultipleGatewayWithNoAttached() {
-        Stack stack = getStack(MULTIPLE_GATEWAY);
-        setupNoConnectedCluster();
+        Stack stack = getStack();
         setupInstanceGroup(InstanceGroupType.GATEWAY, 5);
         setupHostGroup(InstanceGroupType.GATEWAY);
 
@@ -245,8 +227,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Test
     public void testRepairMultipleGatewayWithAttached() {
-        Stack stack = getStack(MULTIPLE_GATEWAY);
-        setupConnectedCluster();
+        Stack stack = getStack();
         setupInstanceGroup(InstanceGroupType.GATEWAY, 5);
         setupHostGroup(InstanceGroupType.GATEWAY);
 
@@ -262,8 +243,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Test
     public void testRepairCoreNodes() {
-        Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
-        setupConnectedCluster();
+        Stack stack = getStack();
         setupHostGroup(InstanceGroupType.CORE);
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
@@ -278,8 +258,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Test
     public void testRepairNotGatewayInstanceGroup() {
-        Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
-        setupNoConnectedCluster();
+        Stack stack = getStack();
         setupHostGroup(InstanceGroupType.CORE);
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
@@ -294,8 +273,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Test
     public void testRepairOneNodeFromEachHostGroupAtOnce() {
-        Stack stack = getStack(MULTIPLE_GATEWAY);
-        setupNoConnectedCluster();
+        Stack stack = getStack();
         setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
         setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
         setupHostGroup(HG_AUXILIARY, setupInstanceGroup(InstanceGroupType.CORE));
@@ -304,9 +282,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
         InstanceMetaData primaryGWInstanceMetadata = new InstanceMetaData();
         primaryGWInstanceMetadata.setDiscoveryFQDN(FAILED_PRIMARY_GATEWAY_FQDN);
         when(instanceMetaDataService.getPrimaryGatewayInstanceMetadata(STACK_ID)).thenReturn(Optional.of(primaryGWInstanceMetadata));
-        Crn crn = mock(Crn.class);
-        when(crn.getAccountId()).thenReturn("accountid");
-        when(stackService.getCrnById(anyLong())).thenReturn(crn);
         ClusterRepairTriggerEvent triggerEvent = new TriggerEventBuilder(stack)
                 .withFailedPrimaryGateway()
                 .withFailedSecondaryGateway()
@@ -365,8 +340,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Test
     public void testRepairNodesOneByOne() {
-        Stack stack = getStack(MULTIPLE_GATEWAY);
-        setupNoConnectedCluster();
+        Stack stack = getStack();
         setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
         setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
         setupHostGroup(HG_AUXILIARY, setupInstanceGroup(InstanceGroupType.CORE));
@@ -375,9 +349,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
         InstanceMetaData primaryGWInstanceMetadata = new InstanceMetaData();
         primaryGWInstanceMetadata.setDiscoveryFQDN(FAILED_PRIMARY_GATEWAY_FQDN);
         when(instanceMetaDataService.getPrimaryGatewayInstanceMetadata(STACK_ID)).thenReturn(Optional.of(primaryGWInstanceMetadata));
-        Crn crn = mock(Crn.class);
-        when(crn.getAccountId()).thenReturn("accountid");
-        when(stackService.getCrnById(anyLong())).thenReturn(crn);
         ClusterRepairTriggerEvent triggerEvent = new TriggerEventBuilder(stack)
                 .withFailedPrimaryGateway()
                 .withFailedSecondaryGateway()
@@ -442,8 +413,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Test
     public void testBatchRepair() {
-        Stack stack = getStack(MULTIPLE_GATEWAY);
-        setupNoConnectedCluster();
+        Stack stack = getStack();
         setupHostGroup(HG_MASTER, setupInstanceGroup(InstanceGroupType.GATEWAY));
         setupHostGroup(HG_CORE, setupInstanceGroup(InstanceGroupType.CORE));
         setupHostGroup(HG_AUXILIARY, setupInstanceGroup(InstanceGroupType.CORE));
@@ -453,9 +423,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
         InstanceMetaData primaryGWInstanceMetadata = new InstanceMetaData();
         primaryGWInstanceMetadata.setDiscoveryFQDN(FAILED_PRIMARY_GATEWAY_FQDN);
         when(instanceMetaDataService.getPrimaryGatewayInstanceMetadata(STACK_ID)).thenReturn(Optional.of(primaryGWInstanceMetadata));
-        Crn crn = mock(Crn.class);
-        when(crn.getAccountId()).thenReturn("accountid");
-        when(stackService.getCrnById(anyLong())).thenReturn(crn);
         ClusterRepairTriggerEvent triggerEvent = new TriggerEventBuilder(stack)
                 .withFailedPrimaryGateway()
                 .withFailedSecondaryGateway()
@@ -546,7 +513,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Test
     public void testAddAwsNativeMigrationIfNeedWhenUpgradeAndAwsNativeVariantIsTheTriggeredOnTheLegacyAwsVariantAndEntitledForMigrationButNotEntitledFor() {
-        when(entitlementService.awsVariantMigrationEnable(anyString())).thenReturn(false);
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
         String triggeredVariant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value();
@@ -561,7 +527,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
     @Test
     public void testAddAwsNativeMigrationIfNeedWhenUpgradeAndAwsNativeVariantIsTriggeredOnTheLegacyAwsVariantAndEntitledForMigration() {
-        when(entitlementService.awsVariantMigrationEnable(anyString())).thenReturn(true);
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         String groupName = "groupName";
         String triggeredVariant = "AWS_NATIVE";
@@ -573,15 +538,14 @@ public class ClusterRepairFlowEventChainFactoryTest {
 
         Assertions.assertFalse(flowTriggers.isEmpty());
         AwsVariantMigrationTriggerEvent actual = (AwsVariantMigrationTriggerEvent) flowTriggers.peek();
-        Assertions.assertEquals(groupName, actual.getHostGroupName());
+        assertEquals(groupName, actual.getHostGroupName());
     }
 
     @Test
     public void testRootDiskMigration() {
         ReflectionTestUtils.setField(underTest, "rootDiskRepairMigrationEnabled", true);
         when(rootVolumeSizeProvider.getForPlatform(any())).thenReturn(200);
-        Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
-        setupConnectedCluster();
+        Stack stack = getStack();
         setupHostGroup(InstanceGroupType.CORE);
         InstanceGroupDto instanceGroupDto = mock(InstanceGroupDto.class);
         com.sequenceiq.cloudbreak.view.InstanceGroupView instanceGroupView = mock(com.sequenceiq.cloudbreak.view.InstanceGroupView.class);
@@ -641,71 +605,49 @@ public class ClusterRepairFlowEventChainFactoryTest {
     }
 
     private void setupPrimaryGateway() {
-        when(instanceMetaDataService.getPrimaryGatewayDiscoveryFQDNByInstanceGroup(anyLong(), anyLong()))
+        lenient().when(instanceMetaDataService.getPrimaryGatewayDiscoveryFQDNByInstanceGroup(anyLong(), anyLong()))
                 .thenReturn(Optional.of(FAILED_PRIMARY_GATEWAY_FQDN));
     }
 
-    private Stack getStack(boolean multipleGateway) {
+    private Stack getStack() {
         Stack stack = mock(Stack.class);
-        when(stack.isMultipleGateway()).thenReturn(multipleGateway);
         Cluster cluster = mock(Cluster.class);
-        when(stack.getCluster()).thenReturn(cluster);
+        lenient().when(stack.getCluster()).thenReturn(cluster);
         when(stack.getId()).thenReturn(STACK_ID);
-        when(cluster.getId()).thenReturn(CLUSTER_ID);
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        lenient().when(cluster.getId()).thenReturn(CLUSTER_ID);
         return stack;
     }
 
     private void setupViews() {
-        when(stackView.getId()).thenReturn(STACK_ID);
-        Crn exampleCrn = CrnTestUtil.getDatalakeCrnBuilder()
-                .setResource("aResource")
-                .setAccountId("anAccountId")
-                .build();
-        when(stackView.getResourceCrn()).thenReturn(exampleCrn.toString());
-        when(clusterView.getId()).thenReturn(CLUSTER_ID);
+        lenient().when(clusterView.getId()).thenReturn(CLUSTER_ID);
     }
 
     private void setupStackDto() {
-        Crn exampleCrn = CrnTestUtil.getDatalakeCrnBuilder()
-                .setResource("aResource")
-                .setAccountId("anAccountId")
-                .build();
-        when(stackDto.getResourceCrn()).thenReturn(exampleCrn.toString());
-        when(stackDto.getStack()).thenReturn(stackView);
-        when(stackDto.getCluster()).thenReturn(clusterView);
-        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
-        when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stackDto)).thenReturn(false);
+        lenient().when(stackDto.getStack()).thenReturn(stackView);
+        lenient().when(stackDto.getCluster()).thenReturn(clusterView);
+        lenient().when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
     }
 
     private HostGroup setupHostGroup(String hostGroupName, InstanceGroup instanceGroup) {
         HostGroup hostGroup = mock(HostGroup.class);
         when(hostGroup.getName()).thenReturn(hostGroupName);
         when(hostGroup.getInstanceGroup()).thenReturn(instanceGroup);
-        when(hostGroupService.findHostGroupInClusterByName(anyLong(), eq(hostGroupName))).thenReturn(Optional.of(hostGroup));
+        lenient().when(hostGroupService.findHostGroupInClusterByName(anyLong(), eq(hostGroupName))).thenReturn(Optional.of(hostGroup));
         return hostGroup;
     }
 
     private InstanceGroup setupInstanceGroup(InstanceGroupType instanceGroupType) {
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
-        when(instanceGroup.getId()).thenReturn(INSTANCE_GROUP_ID);
+        lenient().when(instanceGroup.getId()).thenReturn(INSTANCE_GROUP_ID);
         when(instanceGroup.getInstanceGroupType()).thenReturn(instanceGroupType);
         return instanceGroup;
     }
 
     private void setupInstanceGroup(InstanceGroupType instanceGroupType, int nodeCount) {
         InstanceGroupView ig = mock(InstanceGroupView.class);
-        when(ig.getInstanceGroupType()).thenReturn(instanceGroupType);
+        lenient().when(ig.getInstanceGroupType()).thenReturn(instanceGroupType);
         when(ig.getNodeCount()).thenReturn(nodeCount);
         when(instanceGroupService.findViewByStackId(STACK_ID)).thenReturn(Set.of(ig));
-    }
-
-    private void setupNoConnectedCluster() {
-        when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
-    }
-
-    private void setupConnectedCluster() {
-        when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of(attachedWorkload));
     }
 
     private void assertEvents(FlowTriggerEventQueue eventQueues, List<String> expectedEvents) {

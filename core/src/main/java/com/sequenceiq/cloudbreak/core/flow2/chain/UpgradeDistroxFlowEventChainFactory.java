@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateState;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.service.EmbeddedDbUpgradeFlowTriggersFactory;
 import com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -76,6 +77,9 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
     @Inject
     private CentosToRedHatUpgradeAvailabilityService centOSToRedHatUpgradeAvailabilityService;
 
+    @Inject
+    private EmbeddedDbUpgradeFlowTriggersFactory embeddedDbUpgradeFlowTriggersFactory;
+
     @Override
     public String initEvent() {
         return DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
@@ -109,6 +113,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         addSaltUpdateTriggerEvent(eventForRuntimeUpgrade).ifPresent(flowEventChain::add);
         addClusterUpgradeTriggerEvent(eventForRuntimeUpgrade).ifPresent(flowEventChain::add);
         addImageUpdateTriggerEvent(event).ifPresent(flowEventChain::add);
+        flowEventChain.addAll(embeddedDbUpgradeFlowTriggersFactory.createFlowTriggers(event.getResourceId(), true));
         addClusterRepairTriggerEventIfNecessary(event).ifPresent(flowEventChain::add);
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
