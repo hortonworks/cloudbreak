@@ -1,0 +1,5 @@
+name: "monitoring-image-validation-tests"
+tests:
+  - name: "monitoring_image_validation_tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.MonitoringTests
