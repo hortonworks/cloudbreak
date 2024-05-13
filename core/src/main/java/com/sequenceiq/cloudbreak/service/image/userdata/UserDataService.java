@@ -156,8 +156,8 @@ public class UserDataService {
                 existingUserData.setGatewayUserdata(userdata.get(InstanceGroupType.GATEWAY));
                 result = userdataRepository.save(existingUserData);
 
-                secretService.delete(coreUserdataSecret);
-                secretService.delete(gatewayUserdataSecret);
+                secretService.deleteByVaultSecretJson(coreUserdataSecret);
+                secretService.deleteByVaultSecretJson(gatewayUserdataSecret);
             } else {
                 LOGGER.info("Creating new user data entry and stop managing user data in the image component for stack: {}", stackId);
                 Userdata newUserdata = new Userdata();

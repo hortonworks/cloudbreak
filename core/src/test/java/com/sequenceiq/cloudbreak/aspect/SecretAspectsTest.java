@@ -153,7 +153,7 @@ public class SecretAspectsTest {
 
         underTest.proceedOnRepositoryDelete(proceedingJoinPoint);
 
-        verify(secretService, times(0)).delete(anyString());
+        verify(secretService, times(0)).deleteByVaultSecretJson(anyString());
     }
 
     @Test
@@ -163,7 +163,7 @@ public class SecretAspectsTest {
 
         underTest.proceedOnRepositoryDelete(proceedingJoinPoint);
 
-        verify(secretService, times(0)).delete(anyString());
+        verify(secretService, times(0)).deleteByVaultSecretJson(anyString());
     }
 
     @Test
@@ -173,7 +173,7 @@ public class SecretAspectsTest {
 
         underTest.proceedOnRepositoryDelete(proceedingJoinPoint);
 
-        verify(secretService, times(1)).delete(eq("path"));
+        verify(secretService, times(1)).deleteByVaultSecretJson(eq("path"));
     }
 
     @Test
@@ -183,7 +183,7 @@ public class SecretAspectsTest {
 
         underTest.proceedOnRepositoryDeleteAll(proceedingJoinPoint);
 
-        verify(secretService, times(1)).delete(eq("path"));
+        verify(secretService, times(1)).deleteByVaultSecretJson(eq("path"));
     }
 
     @Test
@@ -228,7 +228,7 @@ public class SecretAspectsTest {
 
         ArgumentCaptor<String> pathCaptor = ArgumentCaptor.forClass(String.class);
 
-        doNothing().when(secretService).delete(pathCaptor.capture());
+        doNothing().when(secretService).deleteByVaultSecretJson(pathCaptor.capture());
 
         underTest.proceedOnRepositoryDelete(proceedingJoinPoint);
 

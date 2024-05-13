@@ -43,9 +43,9 @@ public class KerberosMgmtVaultComponent {
 
     public void recursivelyCleanupVault(String path) {
         LOGGER.debug("Cleaning vault path: " + path);
-        List<String> entries = secretService.listEntries(path);
+        List<String> entries = secretService.listEntriesWithoutAppPath(path);
         if (entries.isEmpty()) {
-            secretService.cleanup(path);
+            secretService.deleteByPathPostfix(path);
         } else {
             String pathWithTrailingSlash = path.endsWith("/") ? path : path + "/";
             entries.stream().forEach(entry -> {

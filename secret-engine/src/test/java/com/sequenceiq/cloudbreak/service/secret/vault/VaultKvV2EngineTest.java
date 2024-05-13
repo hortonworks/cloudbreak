@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.secret.vault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -18,8 +19,8 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,21 +36,19 @@ import org.springframework.vault.support.Versioned;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
-import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.vault.VaultConstants;
 
 @ExtendWith(MockitoExtension.class)
 public class VaultKvV2EngineTest {
 
     private final VaultSecret secret = new VaultSecret("cb", "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine",
-            "cb/foo/bar/6f18609d-8d24-4a39-a283-154c1e8ab46a-f186");
+            "cb/foo/bar/6f18609d-8d24-4a39-a283-154c1e8ab46a-f186", 1);
 
     @InjectMocks
     private VaultKvV2Engine underTest;
 
     @Mock
-    private VaultTemplate template;
+    private VaultTemplate vaultTemplate;
 
     @Mock
     private VaultVersionedKeyValueOperations vaultVersionedKeyValueOperations;
@@ -65,7 +64,7 @@ public class VaultKvV2EngineTest {
 
     @BeforeEach
     public void setup() {
-        lenient().when(template.opsForVersionedKeyValue(anyString())).thenReturn(vaultVersionedKeyValueOperations);
+        lenient().when(vaultTemplate.opsForVersionedKeyValue(anyString())).thenReturn(vaultVersionedKeyValueOperations);
 
         //set enginePath
         Field enginePathField = ReflectionUtils.findField(VaultKvV2Engine.class, "enginePath");
@@ -79,43 +78,50 @@ public class VaultKvV2EngineTest {
     }
 
     @Test
+    public void testIsSecretNull() {
+        String secret = null;
+
+        assertFalse(underTest.isSecret(secret));
+    }
+
+    @Test
     public void testIsSecretNotJson() {
         String secret = "secret";
 
-        Assert.assertFalse(underTest.isSecret(secret));
+        assertFalse(underTest.isSecret(secret));
     }
 
     @Test
     public void testIsSecretEnginePathMissingg() {
-        VaultSecret secret = new VaultSecret(null, "ec", "p");
+        VaultSecret secret = new VaultSecret(null, "ec", "p", 1);
 
-        Assert.assertFalse(underTest.isSecret(JsonUtil.writeValueAsStringSilent(secret)));
+        assertFalse(underTest.isSecret(JsonUtil.writeValueAsStringSilent(secret)));
     }
 
     @Test
     public void testIsSecretEngineClassMissing() {
-        VaultSecret secret = new VaultSecret("ep", null, "p");
+        VaultSecret secret = new VaultSecret("ep", null, "p", 1);
 
-        Assert.assertFalse(underTest.isSecret(JsonUtil.writeValueAsStringSilent(secret)));
+        assertFalse(underTest.isSecret(JsonUtil.writeValueAsStringSilent(secret)));
     }
 
     @Test
     public void testIsSecretPathMissing() {
-        VaultSecret secret = new VaultSecret("ep", "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine", null);
+        VaultSecret secret = new VaultSecret("ep", "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine", null, null);
 
-        Assert.assertFalse(underTest.isSecret(JsonUtil.writeValueAsStringSilent(secret)));
+        assertFalse(underTest.isSecret(JsonUtil.writeValueAsStringSilent(secret)));
     }
 
     @Test
     public void testIsSecretClassDifferent() {
-        VaultSecret secret = new VaultSecret("ep", "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV1Engine", "p");
+        VaultSecret secret = new VaultSecret("ep", "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV1Engine", "p", 1);
 
-        Assert.assertFalse(underTest.isSecret(JsonUtil.writeValueAsStringSilent(secret)));
+        assertFalse(underTest.isSecret(JsonUtil.writeValueAsStringSilent(secret)));
     }
 
     @Test
     public void testIsSecretOk() {
-        Assert.assertTrue(underTest.isSecret(JsonUtil.writeValueAsStringSilent(secret)));
+        assertTrue(underTest.isSecret(JsonUtil.writeValueAsStringSilent(secret)));
     }
 
     @Test
@@ -125,127 +131,36 @@ public class VaultKvV2EngineTest {
     }
 
     @Test
-    public void testIsExistsNull() {
-        when(vaultVersionedKeyValueOperations.get(anyString())).thenReturn(null);
+    public void testGet() {
+        Map<String, Object> vaultData = Map.of(VaultConstants.FIELD_SECRET, "secretValue", VaultConstants.FIELD_BACKUP, "backupValue");
 
-        assertFalse(underTest.exists(JsonUtil.writeValueAsStringSilent(secret)));
+        Versioned<Map<String, Object>> versioned = Versioned.create(vaultData, versionedMetadata());
 
-        verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_READ), any(Duration.class), any(String[].class));
+        when(vaultTemplate.opsForVersionedKeyValue(underTest.enginePath()).get(anyString())).thenReturn(versioned);
+
+        Map<String, String> result = underTest.get("testPath/" + UUID.randomUUID());
+
+        assertEquals("secretValue", result.get(VaultConstants.FIELD_SECRET));
+        assertEquals("backupValue", result.get(VaultConstants.FIELD_BACKUP));
     }
 
     @Test
-    public void testIsExistsButNull() {
-        when(vaultResponse.getData()).thenReturn(null);
-        when(vaultVersionedKeyValueOperations.get(anyString())).thenReturn(vaultResponse);
+    public void testGetWithNullResponse() {
+        Versioned<Map<String, Object>> versioned = Versioned.create(null, versionedMetadata());
 
-        assertFalse(underTest.exists(JsonUtil.writeValueAsStringSilent(secret)));
+        when(vaultTemplate.opsForVersionedKeyValue(underTest.enginePath()).get(anyString())).thenReturn(versioned);
 
-        verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_READ), any(Duration.class), any(String[].class));
-    }
-
-    @Test
-    public void testIsExists() {
-        when(vaultResponse.getData()).thenReturn(Collections.emptyMap());
-        when(vaultVersionedKeyValueOperations.get(anyString())).thenReturn(vaultResponse);
-
-        assertTrue(underTest.exists(JsonUtil.writeValueAsStringSilent(secret)));
-
-        verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_READ), any(Duration.class), any(String[].class));
-    }
-
-    @Test
-    public void testGetNotProperlyFormattedSecret() {
-        String returnedSecret = underTest.get("secret", VaultConstants.FIELD_SECRET);
-
-        assertNull(returnedSecret);
-
-        verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_READ), any(Duration.class), any(String[].class));
-    }
-
-    @Test
-    public void testGetNull() {
-        when(vaultVersionedKeyValueOperations.get(anyString())).thenReturn(null);
-
-        assertNull(underTest.get(JsonUtil.writeValueAsStringSilent(secret), VaultConstants.FIELD_SECRET));
-
-        verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_READ), any(Duration.class), any(String[].class));
-    }
-
-    @Test
-    public void testGetButNull() {
-        when(vaultResponse.getData()).thenReturn(null);
-        when(vaultVersionedKeyValueOperations.get(anyString())).thenReturn(vaultResponse);
-
-        assertNull(underTest.get(JsonUtil.writeValueAsStringSilent(secret), VaultConstants.FIELD_SECRET));
-
-        verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_READ), any(Duration.class), any(String[].class));
-    }
-
-    @Test
-    public void testGetButEmpty() {
-        when(vaultResponse.getData()).thenReturn(Collections.emptyMap());
-        when(vaultVersionedKeyValueOperations.get(anyString())).thenReturn(vaultResponse);
-
-        assertNull(underTest.get(JsonUtil.writeValueAsStringSilent(secret), VaultConstants.FIELD_SECRET));
-
-        verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_READ), any(Duration.class), any(String[].class));
-    }
-
-    @Test
-    public void testGetOk() {
-        when(vaultResponse.getData()).thenReturn(Collections.singletonMap("secret", "secret/path"));
-        when(vaultVersionedKeyValueOperations.get(anyString())).thenReturn(vaultResponse);
-
-        assertEquals("secret/path", underTest.get(JsonUtil.writeValueAsStringSilent(secret), VaultConstants.FIELD_SECRET));
-        assertNull(underTest.get(JsonUtil.writeValueAsStringSilent(secret), VaultConstants.FIELD_BACKUP));
-
-        // Since we have combined two tests into one, we need to verify the method call twice
-        verify(metricService, times(2)).recordTimerMetric(eq(MetricType.VAULT_READ), any(Duration.class), any(String[].class));
-    }
-
-    @Test
-    public void testGetRotationSecretOk() {
-        when(vaultResponse.getData()).thenReturn(Map.of("secret", "secret/rotation", "backup", "secret/path"));
-        when(vaultVersionedKeyValueOperations.get(anyString())).thenReturn(vaultResponse);
-
-        RotationSecret rotationSecret = underTest.getRotation(JsonUtil.writeValueAsStringSilent(secret));
-
-        assertEquals("secret/rotation", rotationSecret.getSecret());
-        assertEquals("secret/path", rotationSecret.getBackupSecret());
-        assertTrue(rotationSecret.isRotation());
-
-        verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_READ), any(Duration.class), any(String[].class));
-    }
-
-    @Test
-    public void testConvertToExternalNotSecret() {
-        assertNull(underTest.convertToExternal("secret"));
-
-        // Convert does not do an actual template call, so we should not see any metric calls
-        verify(template, times(0)).opsForVersionedKeyValue(anyString());
-        verify(metricService, times(0)).recordTimerMetric(eq(MetricType.VAULT_READ), any(Duration.class), any(String[].class));
-    }
-
-    @Test
-    public void testConvertToExternalOk() {
-        SecretResponse actual = underTest.convertToExternal(JsonUtil.writeValueAsStringSilent(secret));
-
-        assertEquals(secret.getEnginePath(), actual.getEnginePath());
-        assertEquals(secret.getPath(), actual.getSecretPath());
-
-        // Convert does not do an actual template call, so we should not see any metric calls
-        verify(template, times(0)).opsForVersionedKeyValue(anyString());
-        verify(metricService, times(0)).recordTimerMetric(eq(MetricType.VAULT_READ), any(Duration.class), any(String[].class));
+        assertNull(underTest.get("testPath"));
     }
 
     @Test
     public void testPut() {
         when(vaultVersionedKeyValueOperations.put(anyString(), any())).thenReturn(versionedMetadata());
 
-        String result = underTest.put("/path", "value");
+        String result = underTest.put("appPath/path", Collections.singletonMap(VaultConstants.FIELD_SECRET, "value"));
 
         assertEquals("{\"enginePath\":\"enginePath\",\"engineClass\":\"com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine\"," +
-                "\"path\":\"appPath/path\"}", result);
+                "\"path\":\"appPath/path\",\"version\":1}", result);
 
         verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_WRITE), any(Duration.class), any(String[].class));
     }
@@ -255,7 +170,7 @@ public class VaultKvV2EngineTest {
         List<String> expected = List.of("hello");
         when(vaultVersionedKeyValueOperations.list(anyString())).thenReturn(expected);
 
-        List<String> ret = underTest.listEntries("/path");
+        List<String> ret = underTest.listEntries("appPath/path");
 
         verify(vaultVersionedKeyValueOperations, times(1)).list(eq("appPath/path"));
         verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_READ), any(Duration.class), any(String[].class));
@@ -264,17 +179,34 @@ public class VaultKvV2EngineTest {
     }
 
     @Test
-    public void testCleanup() {
-        underTest.cleanup("/path");
+    public void testDelete() {
+        underTest.delete("appPath/path");
 
         verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_DELETE), any(Duration.class), any(String[].class));
     }
 
     @Test
-    public void testDelete() {
-        underTest.delete(JsonUtil.writeValueAsStringSilent(secret));
+    public void testValidatePathPatternWithEmptyPath() {
+        assertThrows(VaultIllegalArgumentException.class, () -> underTest.get(""));
+    }
 
-        verify(metricService, times(1)).recordTimerMetric(eq(MetricType.VAULT_DELETE), any(Duration.class), any(String[].class));
+    @Test
+    public void testValidatePathPatternWithInvalidCharacters() {
+        String secretPath = "{\"enginePath\":\"secret\",\"engineClass\":\"com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine\"," +
+                "\"path\":\"app/path\",\"version\":1}";
+
+        assertThrows(VaultIllegalArgumentException.class, () -> underTest.get(secretPath));
+    }
+
+    @Test
+    public void testValidatePathPatternWithMultipleAppPathOccurrences() {
+        assertThrows(VaultIllegalArgumentException.class, () -> underTest.get("appPath/appPath/something"));
+    }
+
+    @Test
+    public void testValidatePathPatternNotOwned() {
+        assertThrows(VaultIllegalArgumentException.class, () -> underTest.put("noright/something",
+                Collections.singletonMap(VaultConstants.FIELD_SECRET, "value")));
     }
 
     private Versioned.Metadata versionedMetadata() {

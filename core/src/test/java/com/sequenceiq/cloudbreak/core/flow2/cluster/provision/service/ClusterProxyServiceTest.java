@@ -535,6 +535,6 @@ class ClusterProxyServiceTest {
 
     private String vaultSecretString(String password) {
         return JsonUtil.writeValueAsStringSilent(new VaultSecret("test-engine-path", "test-engine-class",
-                "/cb/test-data/secret/" + password));
+                "/cb/test-data/secret/" + password, 1));
     }
 }

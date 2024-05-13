@@ -93,7 +93,7 @@ public class RecursiveSecretAspectService {
                         if (fieldValue instanceof Secret) {
                             Secret path = (Secret) field.get(entity);
                             if (path != null && path.getSecret() != null) {
-                                secretService.delete(path.getSecret());
+                                secretService.deleteByVaultSecretJson(path.getSecret());
                                 LOGGER.info("Secret deleted at path: {}", path);
                             } else {
                                 LOGGER.info("Secret is null for field: {}.{}", field.getDeclaringClass(), field.getName());

@@ -132,7 +132,7 @@ public class SecretAspects {
                         ReflectionUtils.makeAccessible(field);
                         Secret path = (Secret) field.get(entity);
                         if (path != null && path.getSecret() != null) {
-                            secretService.delete(path.getSecret());
+                            secretService.deleteByVaultSecretJson(path.getSecret());
                             LOGGER.debug("Secret deleted at path: {}", path);
                         } else {
                             LOGGER.debug("Secret is null for field: {}.{}", field.getDeclaringClass(), field.getName());

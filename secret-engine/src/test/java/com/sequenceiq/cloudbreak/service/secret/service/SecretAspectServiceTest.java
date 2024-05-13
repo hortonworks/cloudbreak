@@ -83,7 +83,7 @@ public class SecretAspectServiceTest {
 
         ArgumentCaptor<String> keyCaptor = ArgumentCaptor.forClass(String.class);
 
-        doNothing().when(secretService).delete(keyCaptor.capture());
+        doNothing().when(secretService).deleteByVaultSecretJson(keyCaptor.capture());
 
         underTest.proceedDelete(proceedingJoinPoint);
 

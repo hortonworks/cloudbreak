@@ -113,7 +113,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariPassword", source, "pass", "secret/path");
         TestUtil.setSecretField(Cluster.class, "dpClusterManagerUser", source, "user", "secret/path");
         TestUtil.setSecretField(Cluster.class, "dpClusterManagerPassword", source, "pass", "secret/path");
-        when(stringToSecretResponseConverter.convert("secret/path")).thenReturn(new SecretResponse("kv", "pass"));
+        when(stringToSecretResponseConverter.convert("secret/path")).thenReturn(new SecretResponse("kv", "pass", 3));
         when(blueprintToBlueprintV4ResponseConverter.convert(blueprint)).thenReturn(new BlueprintV4Response());
         when(serviceEndpointCollector.getManagerServerUrl(any(StackDtoDelegate.class), anyString())).thenReturn("http://server/");
         when(proxyConfigDtoService.getByCrn(anyString())).thenReturn(ProxyConfig.builder().withCrn("crn").withName("name").build());

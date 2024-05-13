@@ -9,15 +9,10 @@ import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
 public class DummySecretService extends SecretService {
 
-    private Map<String, String> store;
+    private Map<String, String> store = new HashMap<>();
 
     public DummySecretService() {
-        super(null, null);
-    }
-
-    @Override
-    public void init() {
-        store = new HashMap<>();
+        super(null, null, null);
     }
 
     @Override
@@ -37,18 +32,18 @@ public class DummySecretService extends SecretService {
     }
 
     @Override
-    public void delete(String secret) {
+    public void deleteByVaultSecretJson(String secret) {
         store.remove(secret);
     }
 
     @Override
-    public List<String> listEntries(String secretPathPrefix) {
-        return super.listEntries(secretPathPrefix);
+    public List<String> listEntriesWithoutAppPath(String secretPathPrefix) {
+        return super.listEntriesWithoutAppPath(secretPathPrefix);
     }
 
     @Override
-    public void cleanup(String pathPrefix) {
-        super.cleanup(pathPrefix);
+    public void deleteByPathPostfix(String pathPrefix) {
+        super.deleteByPathPostfix(pathPrefix);
     }
 
     @Override
@@ -58,6 +53,6 @@ public class DummySecretService extends SecretService {
 
     @Override
     public SecretResponse convertToExternal(String secret) {
-        return new SecretResponse("", secret);
+        return new SecretResponse("", secret, null);
     }
 }

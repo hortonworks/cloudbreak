@@ -69,7 +69,7 @@ public class ClusterProxyRotationService {
         String[] pathAndField = knoxSecretRef.split(":", 2);
         try {
             checkPathAndField(pathAndField);
-            String jwkJson = secretService.getKvV2SecretByPathAndField(pathAndField[0], pathAndField[1]);
+            String jwkJson = secretService.getBySecretPath(pathAndField[0], pathAndField[1]);
             return convertJWKToPEMKeys(jwkJson);
         } catch (IllegalArgumentException | InvalidKeySpecException | NoSuchAlgorithmException e) {
             throw new CloudbreakServiceException("Cannot read JWK format token keys from cluster-proxy.", e);

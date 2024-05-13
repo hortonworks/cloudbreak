@@ -115,7 +115,7 @@ public class UserDataService {
         image.setUserdata(null);
         image.setGatewayUserdata(userdata);
 
-        secretService.delete(gatewayUserdataSecret);
+        secretService.deleteByVaultSecretJson(gatewayUserdataSecret);
 
         return imageService.save(image);
     }
@@ -130,7 +130,7 @@ public class UserDataService {
         image.setUserdata(null);
         image.setGatewayUserdata(userdata);
 
-        secretService.delete(gatewayUserdataSecret);
+        secretService.deleteByVaultSecretJson(gatewayUserdataSecret);
 
         return imageService.save(image);
     }

@@ -88,7 +88,7 @@ public class CMUserRotationContextProviderTestUtils {
 
     private static Secret createSecret(String secret) {
         try {
-            return new Secret(secret, JsonUtil.writeValueAsString(new VaultSecret(secret, secret, secret)));
+            return new Secret(secret, JsonUtil.writeValueAsString(new VaultSecret(secret, secret, secret, 1)));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

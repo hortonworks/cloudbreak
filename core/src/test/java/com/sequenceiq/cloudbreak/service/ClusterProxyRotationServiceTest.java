@@ -60,7 +60,7 @@ class ClusterProxyRotationServiceTest {
         when(readConfigResponse.getKnoxSecretRef()).thenReturn(SECRET_PATH + ":" + SECRET_FIELD);
         ArgumentCaptor<String> secretPathArgumentCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> secretFieldArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        when(secretService.getKvV2SecretByPathAndField(secretPathArgumentCaptor.capture(), secretFieldArgumentCaptor.capture())).thenReturn(JWK);
+        when(secretService.getBySecretPath(secretPathArgumentCaptor.capture(), secretFieldArgumentCaptor.capture())).thenReturn(JWK);
 
         KeyPair keyPair = underTest.readClusterProxyTokenKeys(readConfigResponse);
         String secretField = secretFieldArgumentCaptor.getValue();
@@ -94,7 +94,7 @@ class ClusterProxyRotationServiceTest {
     @Test
     void readClusterProxyTokenKeysShouldThrowExceptionBadJwk() {
         when(readConfigResponse.getKnoxSecretRef()).thenReturn(SECRET_PATH + ":" + SECRET_FIELD);
-        when(secretService.getKvV2SecretByPathAndField(any(), any())).thenReturn("badjwk");
+        when(secretService.getBySecretPath(any(), any())).thenReturn("badjwk");
         CloudbreakServiceException e = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.readClusterProxyTokenKeys(readConfigResponse));
         assertEquals("Cannot read JWK format token keys from cluster-proxy.", e.getMessage());

@@ -52,23 +52,23 @@ public class KerberosMgmtVaultComponentV1Test {
     @Test
     public void testCleanupSecretsForCluster() throws Exception {
         List<String> emptyListing = new ArrayList<>();
-        Mockito.when(secretService.listEntries(anyString())).thenReturn(emptyListing);
+        Mockito.when(secretService.listEntriesWithoutAppPath(anyString())).thenReturn(emptyListing);
         underTest.cleanupSecrets(ENVIRONMENT_ID, CLUSTER_ID, ACCOUNT);
-        Mockito.verify(secretService).cleanup("account1/HostKeytab/serviceprincipal/12345-6789/54321-9876/");
-        Mockito.verify(secretService).cleanup("account1/HostKeytab/keytab/12345-6789/54321-9876/");
-        Mockito.verify(secretService).cleanup("account1/ServiceKeytab/serviceprincipal/12345-6789/54321-9876/");
-        Mockito.verify(secretService).cleanup("account1/ServiceKeytab/keytab/12345-6789/54321-9876/");
+        Mockito.verify(secretService).deleteByPathPostfix("account1/HostKeytab/serviceprincipal/12345-6789/54321-9876/");
+        Mockito.verify(secretService).deleteByPathPostfix("account1/HostKeytab/keytab/12345-6789/54321-9876/");
+        Mockito.verify(secretService).deleteByPathPostfix("account1/ServiceKeytab/serviceprincipal/12345-6789/54321-9876/");
+        Mockito.verify(secretService).deleteByPathPostfix("account1/ServiceKeytab/keytab/12345-6789/54321-9876/");
     }
 
     @Test
     public void testCleanupSecretsForWholeEnvironment() throws Exception {
         List<String> emptyListing = new ArrayList<>();
-        Mockito.when(secretService.listEntries(anyString())).thenReturn(emptyListing);
+        Mockito.when(secretService.listEntriesWithoutAppPath(anyString())).thenReturn(emptyListing);
         underTest.cleanupSecrets(ENVIRONMENT_ID, null, ACCOUNT);
-        Mockito.verify(secretService).cleanup("account1/HostKeytab/serviceprincipal/12345-6789/");
-        Mockito.verify(secretService).cleanup("account1/HostKeytab/keytab/12345-6789/");
-        Mockito.verify(secretService).cleanup("account1/ServiceKeytab/serviceprincipal/12345-6789/");
-        Mockito.verify(secretService).cleanup("account1/ServiceKeytab/keytab/12345-6789/");
+        Mockito.verify(secretService).deleteByPathPostfix("account1/HostKeytab/serviceprincipal/12345-6789/");
+        Mockito.verify(secretService).deleteByPathPostfix("account1/HostKeytab/keytab/12345-6789/");
+        Mockito.verify(secretService).deleteByPathPostfix("account1/ServiceKeytab/serviceprincipal/12345-6789/");
+        Mockito.verify(secretService).deleteByPathPostfix("account1/ServiceKeytab/keytab/12345-6789/");
     }
 
     @Test
@@ -87,16 +87,16 @@ public class KerberosMgmtVaultComponentV1Test {
         subdir2Listing.add(file1);
         subdir2Listing.add(file2);
         List<String> fileListing = new ArrayList<>();
-        Mockito.when(secretService.listEntries(dir1)).thenReturn(dir1Listing);
-        Mockito.when(secretService.listEntries(dir1 + subdir1)).thenReturn(subdir1Listing);
-        Mockito.when(secretService.listEntries(dir1 + subdir2)).thenReturn(subdir2Listing);
-        Mockito.when(secretService.listEntries(dir1 + subdir1 + file1)).thenReturn(fileListing);
-        Mockito.when(secretService.listEntries(dir1 + subdir2 + file1)).thenReturn(fileListing);
-        Mockito.when(secretService.listEntries(dir1 + subdir2 + file2)).thenReturn(fileListing);
+        Mockito.when(secretService.listEntriesWithoutAppPath(dir1)).thenReturn(dir1Listing);
+        Mockito.when(secretService.listEntriesWithoutAppPath(dir1 + subdir1)).thenReturn(subdir1Listing);
+        Mockito.when(secretService.listEntriesWithoutAppPath(dir1 + subdir2)).thenReturn(subdir2Listing);
+        Mockito.when(secretService.listEntriesWithoutAppPath(dir1 + subdir1 + file1)).thenReturn(fileListing);
+        Mockito.when(secretService.listEntriesWithoutAppPath(dir1 + subdir2 + file1)).thenReturn(fileListing);
+        Mockito.when(secretService.listEntriesWithoutAppPath(dir1 + subdir2 + file2)).thenReturn(fileListing);
         underTest.recursivelyCleanupVault(dir1);
-        Mockito.verify(secretService).cleanup(dir1 + subdir1 + file1);
-        Mockito.verify(secretService).cleanup(dir1 + subdir2 + file1);
-        Mockito.verify(secretService).cleanup(dir1 + subdir2 + file2);
+        Mockito.verify(secretService).deleteByPathPostfix(dir1 + subdir1 + file1);
+        Mockito.verify(secretService).deleteByPathPostfix(dir1 + subdir2 + file1);
+        Mockito.verify(secretService).deleteByPathPostfix(dir1 + subdir2 + file2);
         Mockito.verifyNoMoreInteractions(secretService);
     }
 

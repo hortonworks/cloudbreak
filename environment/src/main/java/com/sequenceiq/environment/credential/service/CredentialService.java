@@ -175,7 +175,7 @@ public class CredentialService extends AbstractCredentialService implements Comp
         credential.setCreator(original.getCreator());
 
         Credential updated = repository.save(credentialAdapter.verify(credential, accountId, true).getCredential());
-        secretService.delete(original.getAttributesSecret());
+        secretService.deleteByVaultSecretJson(original.getAttributesSecret());
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_MODIFIED);
         return updated;
     }

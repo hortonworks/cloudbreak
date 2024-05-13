@@ -62,7 +62,7 @@ public class FreeIpaCertVaultComponent {
     }
 
     public void cleanupSecrets(Stack stack) {
-        secretService.cleanup(toClientCertificateVaultPath(stack));
-        secretService.cleanup(toClientKeyVaultPath(stack));
+        secretService.deleteByPathPostfix(toClientCertificateVaultPath(stack));
+        secretService.deleteByPathPostfix(toClientKeyVaultPath(stack));
     }
 }
