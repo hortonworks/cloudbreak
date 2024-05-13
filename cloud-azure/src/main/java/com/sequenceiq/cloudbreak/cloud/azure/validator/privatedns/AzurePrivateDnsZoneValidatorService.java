@@ -52,8 +52,8 @@ public class AzurePrivateDnsZoneValidatorService {
                 .anyMatch(pz -> pz.name().equals(privateDnsZoneResourceId.name()));
         if (!privateDnsZoneExists) {
             String validationMessage = String.format("The provided private DNS zone %s does not exist or you have no permission to access it. Please make " +
-                    "sure the specified private DNS zone exists and try environment creation again.", privateDnsZoneResourceId.id());
-            addValidation(validationMessage, resultBuilder::error);
+                    "sure the specified private DNS zone exists otherwise the deployment will fail.", privateDnsZoneResourceId.id());
+            addValidation(validationMessage, resultBuilder::warning);
         }
         return resultBuilder;
     }
