@@ -41,7 +41,7 @@ dependencies {
   implementation group: 'org.postgresql',                   name: 'postgresql',                     version: postgreSQLVersion
   implementation group: 'net.sf.json-lib',                  name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
   implementation group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',               version: { strictly jacksonVersion }
-  implementation group: 'org.aspectj',                      name: 'aspectjtools',                   version: '1.9.22'
+  implementation group: 'org.aspectj',                      name: 'aspectjtools',                   version: '1.9.22.1'
   implementation group: 'dnsjava',                          name: 'dnsjava',                        version: dnsjavaVersion
 
   testImplementation group: 'org.springframework.boot',     name: 'spring-boot-starter-test',       version: springBootVersion
