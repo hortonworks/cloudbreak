@@ -253,11 +253,15 @@ subprojects {
     ignoreFailures = false
     configFile = rootProject.file('config/checkstyle/checkstyle.xml')
     configDirectory = rootProject.file("config/checkstyle")
+    minHeapSize = "200m"
+    maxHeapSize = "1g"
   }
 
   checkstyleTest {
     ignoreFailures = false
     configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+    minHeapSize = "200m"
+    maxHeapSize = "1g"
   }
 
   test {
