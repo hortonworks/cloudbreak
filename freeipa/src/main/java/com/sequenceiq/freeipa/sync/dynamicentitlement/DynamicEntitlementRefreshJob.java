@@ -57,15 +57,15 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Status status = stack.getStackStatus().getStatus();
         if (flowLogService.isOtherFlowRunning(stackId)) {
-            LOGGER.debug("DynamicEntitlementSetter cannot run, because flow is running for freeipa stack: {}", stackId);
+            LOGGER.debug("DynamicEntitlementRefreshJob cannot run, because flow is running for freeipa stack: {}", stackId);
         } else if (!status.isUnschedulableState() && !EnumSet.of(STOPPED, DELETED_ON_PROVIDER_SIDE).contains(status) &&
                 config.isDynamicEntitlementEnabled()) {
-            LOGGER.debug("DynamicEntitlementSetter will apply watched entitlement changes for stack: {}", stackId);
+            LOGGER.debug("DynamicEntitlementRefreshJob will apply watched entitlement changes for stack: {}", stackId);
             ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack));
         } else if (status.isUnschedulableState()) {
-            LOGGER.info("DynamicEntitlementSetter job will be unscheduled, stack state is {}", stack.getStackStatus().getStatus());
+            LOGGER.info("DynamicEntitlementRefreshJob will be unscheduled, stack state is {}", stack.getStackStatus().getStatus());
             jobService.unschedule(context.getJobDetail().getKey());
         }
     }

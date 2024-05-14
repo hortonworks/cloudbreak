@@ -48,9 +48,11 @@ public class DynamicEntitlementRefreshService {
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public Map<String, Boolean> getChangedWatchedEntitlements(StackDto stack) {
-        Map<String, Boolean> changedEntitlements = new HashMap<>();
+        LOGGER.debug("Checking watched entitlement changes for stack {}", stack.getName());
         Map<String, Boolean> umsEntitlements = getEntitlementsFromUms(stack.getResourceCrn(), dynamicEntitlementRefreshConfig.getWatchedEntitlements());
+        LOGGER.debug("Watched entitlements from UMS: {}", umsEntitlements);
         Map<String, Boolean> telemetryEntitlements = getOrCreateEntitlementsFromTelemetry(stack.getId(), umsEntitlements);
+        LOGGER.debug("Watched entitlements from Telemetry: {}", telemetryEntitlements);
         return getChangedEntitlements(telemetryEntitlements, umsEntitlements);
     }
 
@@ -63,6 +65,7 @@ public class DynamicEntitlementRefreshService {
     }
 
     public Boolean isClusterManagerServerReachable(StackDto stack) {
+        LOGGER.debug("Checking that CM is reachable for stack {}", stack.getName());
         return stack.getRunningInstanceMetaDataSet().stream()
                 .filter(InstanceMetadataView::getClusterManagerServer)
                 .findFirst()
@@ -71,6 +74,7 @@ public class DynamicEntitlementRefreshService {
     }
 
     public void storeChangedEntitlementsInTelemetry(Long stackId, Map<String, Boolean> changedEntitlements) {
+        LOGGER.debug("Storing changed entitlements for stack {}, {}", stackId, changedEntitlements);
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stackId);
         telemetry.getDynamicEntitlements().putAll(changedEntitlements);
         if (changedEntitlements.keySet().contains(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()) &&

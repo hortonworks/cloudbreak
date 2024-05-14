@@ -614,6 +614,7 @@ public class ClusterOperationService {
             return FlowIdentifier.notTriggered();
         }
         Boolean saltRefreshNeeded = dynamicEntitlementRefreshService.saltRefreshNeeded(changedEntitlements);
+        LOGGER.info("Changed entitlements: {}, salt refresh needed: {}", changedEntitlements, saltRefreshNeeded);
         return flowManager.triggerRefreshEntitlementParams(stack.getId(), stack.getResourceCrn(),
                 changedEntitlements, saltRefreshNeeded);
     }

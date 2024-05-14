@@ -72,6 +72,7 @@ public class DynamicEntitlementRefreshService {
     }
 
     public void storeChangedEntitlementsInTelemetry(Stack stack, Map<String, Boolean> changedEntitlements) {
+        LOGGER.debug("Storing changed entitlements for stack {}, {}", stack.getName(), changedEntitlements);
         Telemetry telemetry = stack.getTelemetry();
         telemetry.getDynamicEntitlements().putAll(changedEntitlements);
         if (changedEntitlements.keySet().contains(Entitlement.CDP_CENTRAL_COMPUTE_MONITORING.name()) &&
@@ -155,6 +156,7 @@ public class DynamicEntitlementRefreshService {
             Map<String, Boolean> changedEntitlements = getChangedWatchedEntitlements(stack);
             validateEntitlementChangedOperation(stack, changedEntitlements);
             Boolean saltRefreshNeeded = saltRefreshNeeded(changedEntitlements);
+            LOGGER.info("Changed entitlements for FreeIpa: {}, salt refresh needed: {}", changedEntitlements, saltRefreshNeeded);
             String selector = FlowChainTriggers.REFRESH_ENTITLEMENT_PARAM_CHAIN_TRIGGER_EVENT;
             Acceptable triggerEvent = new RefreshEntitlementParamsFlowChainTriggerEvent(selector, operation.getOperationId(),
                     stack.getId(), changedEntitlements, saltRefreshNeeded);

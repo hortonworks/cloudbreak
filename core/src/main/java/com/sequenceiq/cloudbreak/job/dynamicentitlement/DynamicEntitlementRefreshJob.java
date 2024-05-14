@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -46,9 +47,13 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
         StackDto stack = stackDtoService.getById(getLocalIdAsLong());
         if (!Sets.union(Status.getUnschedulableStatuses(), Set.of(STOPPED, DELETED_ON_PROVIDER_SIDE)).contains(stack.getStatus()) &&
                 config.isDynamicEntitlementEnabled()) {
-            dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack);
+            try {
+                dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack);
+            } catch (FlowsAlreadyRunningException e) {
+                LOGGER.info("DynamicEntitlementRefreshJob failed to run because another flow is running: {}", e.getMessage());
+            }
         } else if (Status.getUnschedulableStatuses().contains(stack.getStatus())) {
-            LOGGER.info("DynamicEntitlementSetter job will be unscheduled, stack state is {}", stack.getStatus());
+            LOGGER.info("DynamicEntitlementRefreshJob will be unscheduled, stack state is {}", stack.getStatus());
             jobService.unschedule(context.getJobDetail().getKey());
         }
     }
