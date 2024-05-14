@@ -1,0 +1,259 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:21-jdk-bookworm
+    steps:
+      - checkout
+      - restore_cache:
+          key: gradle-cache
+      - run:
+          name: build
+          command: ./gradlew -Penv=jenkins -b build.gradle clean build --info --stacktrace --parallel -x test -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest
+      - run:
+          name: check
+          command: git status | grep "working tree clean"
+      - save_cache:
+          key: gradle-cache
+          paths:
+            - "~/.gradle"
+      - persist_to_workspace:
+          root: .
+          paths:
+            - core/build/libs/cloudbreak.jar
+            - environment/build/libs/environment.jar
+            - freeipa/build/libs/freeipa.jar
+            - redbeams/build/libs/redbeams.jar
+            - datalake/build/libs/datalake.jar
+            - autoscale/build/libs/periscope.jar
+            - mock-thunderhead/build/libs/mock-thunderhead.jar
+            - integration-test/build/libs/cloudbreak-integration-test.jar
+
+  checkstyle-test:
+    docker:
+      - image: circleci/openjdk:21-jdk-bookworm
+    environment:
+      _JAVA_OPTIONS: "-Xmx1536m"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          key: gradle-cache
+      - run:
+          name: checkstyle-test
+          command: ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleMain -x test --no-daemon --max-workers 1 --stacktrace
+      - run:
+          name: Store checkstyle-test results
+          command: |
+            mkdir -p ~/checkstyle-test
+            set +o pipefail
+            grep -rls */build/reports/checkstyle/*.xml -e "<error line=" | xargs -I '{}' cp '{}' ~/checkstyle-test
+          when: always
+      - store_artifacts:
+          path: ~/checkstyle-test
+
+  checkstyle-main:
+    docker:
+      - image: circleci/openjdk:21-jdk-bookworm
+    environment:
+      _JAVA_OPTIONS: "-Xmx1536m"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          key: gradle-cache
+      - run:
+          name: checkstyle-main
+          command: ./gradlew -Penv=jenkins -b build.gradle check -x spotbugsMain -x spotbugsTest -x checkstyleTest -x test --no-daemon --max-workers 1 --stacktrace
+      - run:
+          name: Store checkstyle results
+          command: |
+            mkdir -p ~/checkstyle
+            set +o pipefail
+            grep -rls */build/reports/checkstyle/*.xml -e "<error line=" | xargs -I '{}' cp '{}' ~/checkstyle
+          when: always
+      - store_artifacts:
+          path: ~/checkstyle
+
+  spotbugs-main:
+    docker:
+      - image: circleci/openjdk:21-jdk-bookworm
+    environment:
+      _JAVA_OPTIONS: "-Xmx1536m"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          key: gradle-cache
+      - run:
+          name: spotbugs-main
+          command: ./gradlew -Penv=jenkins -b build.gradle check -x checkstyleMain -x checkstyleTest -x spotbugsTest -x test --no-daemon --max-workers 1 --stacktrace
+      - run:
+          name: Store spotbugs main results
+          command: |
+            mkdir -p ~/spotbugs-main
+            set +o pipefail
+            grep -rls */build/reports/spotbugs/*.html -e "<b>[^0]</b>" | xargs -I '{}' cp '{}' ~/spotbugs-main
+          when: always
+      - store_artifacts:
+          path: ~/spotbugs-main
+
+  spotbugs-test:
+    docker:
+      - image: circleci/openjdk:21-jdk-bookworm
+    environment:
+      _JAVA_OPTIONS: "-Xmx1536m"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          key: gradle-cache
+      - run:
+          name: spotbugs-test
+          command: ./gradlew -Penv=jenkins -b build.gradle check -x checkstyleMain -x checkstyleTest -x spotbugsMain -x test --no-daemon --max-workers 1 --stacktrace
+      - run:
+          name: Store spotbugs test results
+          command: |
+            mkdir -p ~/spotbugs-test
+            set +o pipefail
+            grep -rls */build/reports/spotbugs/*.html -e "<b>[^0]</b>" | xargs -I '{}' cp '{}' ~/spotbugs-test
+          when: always
+      - store_artifacts:
+          path: ~/spotbugs-test
+
+  unit-test:
+    docker:
+      - image: circleci/openjdk:21-jdk-bookworm
+    environment:
+      _JAVA_OPTIONS: "-XX:+UseContainerSupport"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - restore_cache:
+          key: gradle-cache
+      - run:
+          name: Setup Code Climate test-reporter
+          command: |
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+            chmod +x ./cc-test-reporter
+      - run:
+          name: test
+          command: |
+            ./cc-test-reporter before-build
+            ./gradlew -Penv=jenkins -b build.gradle test jacocoTestReport --info --stacktrace --parallel -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest --no-daemon --max-workers 1
+      - run:
+          name: Set jacoco.xml path for code climate
+          command: JACOCO_SOURCE_PATH=core/src/main/java ./cc-test-reporter format-coverage ./core/build/reports/jacoco/test/jacocoTestReport.xml --input-type jacoco
+      - run:
+          name: Upload code climate report
+          command: if [[ -n "${CC_TEST_REPORTER_ID}" ]]; then echo "Upload coverage"; ./cc-test-reporter upload-coverage -r $CC_TEST_REPORTER_ID; else echo "Skipping upload-coverage"; fi
+          when: on_success
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/junit/
+            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/junit/ \;
+          when: always
+      - store_test_results:
+          path: ~/junit
+      - store_artifacts:
+          path: ~/junit
+
+  integration-test:
+    machine: true
+    environment:
+      _JAVA_OPTIONS: "-Xmx1536m"
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install make
+          command: sudo apt-get install -y make
+      - run:
+          name: Install uuidgen
+          command: sudo apt-get install -y uuid-runtime
+      - run:
+          name: integration-test
+          command: cd integration-test && make without-build && make revert-db
+          no_output_timeout: 60m
+      - run:
+          name: stop-containers and get cloudbreak log
+          command: cd integration-test && make stop-containers
+          when: on_fail
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/junit/
+            cp -r integration-test/test-output/* ~/junit/
+          when: always
+      - run:
+          name: cleanup
+          command: |
+            sudo rm -rf integration-test/integcb/.deps
+            sudo rm -rf integration-test/integcb/.schema
+            sudo rm -rf integration-test/src
+          when: always
+      - store_test_results:
+          path: ~/junit
+      - store_artifacts:
+          path: ~/junit
+      - store_artifacts:
+          path: integration-test
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build:
+          filters:
+            branches:
+              ignore:
+                - master
+      - spotbugs-main:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore:
+                - master
+      - spotbugs-test:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore:
+                - master
+      - checkstyle-main:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore:
+                - master
+      - checkstyle-test:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore:
+                - master
+      - unit-test:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore:
+                - master
+      - integration-test:
+          requires:
+            - build
+          filters:
+            branches:
+              ignore:
+                - master

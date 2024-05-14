@@ -122,91 +122,93 @@ curl -k http://${PUBLIC_IP}:8091/externalizedcompute/api/openapi.json -o ./apide
 
 docker rm -f cbreak_periscope_1
 
-date
-echo -e "\n\033[1;96m--- Setting ACCESSKEY/SECRETKEY for test variables:\033[0m\n"
-export INTEGRATIONTEST_USER_ACCESSKEY=$INTEGRATIONTEST_USER_ACCESSKEY
-export INTEGRATIONTEST_USER_SECRETKEY=$INTEGRATIONTEST_USER_SECRETKEY
+if [[ "$CIRCLECI" && "$CIRCLECI" == "true" ]]; then
+    date
+    echo -e "\n\033[1;96m--- Setting ACCESSKEY/SECRETKEY for test variables:\033[0m\n"
+    export INTEGRATIONTEST_USER_ACCESSKEY=$INTEGRATIONTEST_USER_ACCESSKEY
+    export INTEGRATIONTEST_USER_SECRETKEY=$INTEGRATIONTEST_USER_SECRETKEY
 
-export INTEGRATIONTEST_SUITEFILES=$INTEGRATIONTEST_SUITEFILES
-export INTEGRATIONTEST_TESTSUITE_POLLINGINTERVAL=$INTEGRATIONTEST_TESTSUITE_POLLINGINTERVAL
+    export INTEGRATIONTEST_SUITEFILES=$INTEGRATIONTEST_SUITEFILES
+    export INTEGRATIONTEST_TESTSUITE_POLLINGINTERVAL=$INTEGRATIONTEST_TESTSUITE_POLLINGINTERVAL
 
-export INTEGRATIONTEST_UMS_HOST=$INTEGRATIONTEST_UMS_HOST
-export INTEGRATIONTEST_UMS_PORT=$INTEGRATIONTEST_UMS_PORT
-export INTEGRATIONTEST_UMS_ACCOUNTKEY=$INTEGRATIONTEST_UMS_ACCOUNTKEY
-export INTEGRATIONTEST_UMS_DEPLOYMENTKEY=$INTEGRATIONTEST_UMS_DEPLOYMENTKEY
-export INTEGRATIONTEST_UMS_JSONSECRET_VERSION=$INTEGRATIONTEST_UMS_JSONSECRET_VERSION
-export INTEGRATIONTEST_UMS_JSONSECRET_DESTINATIONPATH=$INTEGRATIONTEST_UMS_JSONSECRET_DESTINATIONPATH
-export INTEGRATIONTEST_UMS_JSONSECRET_NAME=$INTEGRATIONTEST_UMS_JSONSECRET_NAME
+    export INTEGRATIONTEST_UMS_HOST=$INTEGRATIONTEST_UMS_HOST
+    export INTEGRATIONTEST_UMS_PORT=$INTEGRATIONTEST_UMS_PORT
+    export INTEGRATIONTEST_UMS_ACCOUNTKEY=$INTEGRATIONTEST_UMS_ACCOUNTKEY
+    export INTEGRATIONTEST_UMS_DEPLOYMENTKEY=$INTEGRATIONTEST_UMS_DEPLOYMENTKEY
+    export INTEGRATIONTEST_UMS_JSONSECRET_VERSION=$INTEGRATIONTEST_UMS_JSONSECRET_VERSION
+    export INTEGRATIONTEST_UMS_JSONSECRET_DESTINATIONPATH=$INTEGRATIONTEST_UMS_JSONSECRET_DESTINATIONPATH
+    export INTEGRATIONTEST_UMS_JSONSECRET_NAME=$INTEGRATIONTEST_UMS_JSONSECRET_NAME
 
-export INTEGRATIONTEST_TESTSUITE_CLEANUP=$INTEGRATIONTEST_TESTSUITE_CLEANUP
-export INTEGRATIONTEST_TESTSUITE_CLEANUPONFAILURE=$INTEGRATIONTEST_TESTSUITE_CLEANUPONFAILURE
+    export INTEGRATIONTEST_TESTSUITE_CLEANUP=$INTEGRATIONTEST_TESTSUITE_CLEANUP
+    export INTEGRATIONTEST_TESTSUITE_CLEANUPONFAILURE=$INTEGRATIONTEST_TESTSUITE_CLEANUPONFAILURE
 
-if [[ -n "${INTEGRATIONTEST_YARN_QUEUE}" ]]; then
-  date
-  echo -e "\n\033[1;96m--- YARN smoke testing variables:\033[0m\n"
-  export CM_PRIVATE_REPO_USER=$CM_PRIVATE_REPO_USER
-  export CM_PRIVATE_REPO_PASSWORD=$CM_PRIVATE_REPO_PASSWORD
-  export INTEGRATIONTEST_CLOUDPROVIDER=$INTEGRATIONTEST_CLOUDPROVIDER
-  export INTEGRATIONTEST_YARN_DEFAULTBLUEPRINTNAME=$INTEGRATIONTEST_YARN_DEFAULTBLUEPRINTNAME
-  export INTEGRATIONTEST_YARN_QUEUE=$INTEGRATIONTEST_YARN_QUEUE
-  export INTEGRATIONTEST_YARN_IMAGECATALOGURL=$INTEGRATIONTEST_YARN_IMAGECATALOGURL
-  export INTEGRATIONTEST_YARN_IMAGEID=$INTEGRATIONTEST_YARN_IMAGEID
-  export INTEGRATIONTEST_YARN_REGION=$INTEGRATIONTEST_YARN_REGION
-  export INTEGRATIONTEST_YARN_LOCATION=$INTEGRATIONTEST_YARN_LOCATION
-elif [[ "$AWS" == true ]]; then
-  export INTEGRATIONTEST_PARALLEL=true
-  export INTEGRATIONTEST_THREADCOUNT=4
-  export INTEGRATIONTEST_CLOUDPROVIDER="AWS"
-else
-  export INTEGRATIONTEST_PARALLEL=methods
-  export INTEGRATIONTEST_THREADCOUNT=16
-  export INTEGRATIONTEST_CLOUDPROVIDER="MOCK"
-fi
+    if [[ -n "${INTEGRATIONTEST_YARN_QUEUE}" ]]; then
+        date
+        echo -e "\n\033[1;96m--- YARN smoke testing variables:\033[0m\n"
+        export CM_PRIVATE_REPO_USER=$CM_PRIVATE_REPO_USER
+        export CM_PRIVATE_REPO_PASSWORD=$CM_PRIVATE_REPO_PASSWORD
+        export INTEGRATIONTEST_CLOUDPROVIDER=$INTEGRATIONTEST_CLOUDPROVIDER
+        export INTEGRATIONTEST_YARN_DEFAULTBLUEPRINTNAME=$INTEGRATIONTEST_YARN_DEFAULTBLUEPRINTNAME
+        export INTEGRATIONTEST_YARN_QUEUE=$INTEGRATIONTEST_YARN_QUEUE
+        export INTEGRATIONTEST_YARN_IMAGECATALOGURL=$INTEGRATIONTEST_YARN_IMAGECATALOGURL
+        export INTEGRATIONTEST_YARN_IMAGEID=$INTEGRATIONTEST_YARN_IMAGEID
+        export INTEGRATIONTEST_YARN_REGION=$INTEGRATIONTEST_YARN_REGION
+        export INTEGRATIONTEST_YARN_LOCATION=$INTEGRATIONTEST_YARN_LOCATION
+    elif [[ "$AWS" == true ]]; then
+        export INTEGRATIONTEST_PARALLEL=true
+        export INTEGRATIONTEST_THREADCOUNT=4
+        export INTEGRATIONTEST_CLOUDPROVIDER="AWS"
+    else
+        export INTEGRATIONTEST_PARALLEL=methods
+        export INTEGRATIONTEST_THREADCOUNT=16
+        export INTEGRATIONTEST_CLOUDPROVIDER="MOCK"
+    fi
 
-date
-echo -e "\n\033[1;96m--- Start testing... (it may take few minutes to finish.)\033[0m\n"
-rm -rf test-output
+    date
+    echo -e "\n\033[1;96m--- Start testing... (it may take few minutes to finish.)\033[0m\n"
+    rm -rf test-output
 
-export DOCKER_CLIENT_TIMEOUT=120
-export COMPOSE_HTTP_TIMEOUT=120
+    export DOCKER_CLIENT_TIMEOUT=120
+    export COMPOSE_HTTP_TIMEOUT=120
 
-date
-echo -e "\n\033[1;96m--- Env variables started with INTEGRATIONTEST :\033[0m\n"
-env | grep -i INTEGRATIONTEST
+    date
+    echo -e "\n\033[1;96m--- Env variables started with INTEGRATIONTEST :\033[0m\n"
+    env | grep -i INTEGRATIONTEST
 
-date
-env | grep -i INTEGRATIONTEST > integrationtest.properties
+    date
+    env | grep -i INTEGRATIONTEST > integrationtest.properties
 
-if [[ "$INTEGRATIONTEST_CLOUDPROVIDER" == "MOCK" ]]; then
-  date
-  echo -e "\n\033[1;96m--- Starting prometheus:\033[0m\n"
-  docker compose --compatibility up -d prometheus
-fi
+    if [[ "$INTEGRATIONTEST_CLOUDPROVIDER" == "MOCK" ]]; then
+      date
+      echo -e "\n\033[1;96m--- Starting prometheus:\033[0m\n"
+      docker compose --compatibility up -d prometheus
+    fi
 
-date
-echo -e "\n\033[1;96m--- Tests to run:\033[0m\n"
-echo $INTEGRATIONTEST_SUITEFILES
+    date
+    echo -e "\n\033[1;96m--- Tests to run:\033[0m\n"
+    echo $INTEGRATIONTEST_SUITEFILES
 
-set -o pipefail ; docker compose --compatibility up --remove-orphans --exit-code-from test test | tee test.out
-echo -e "\n\033[1;96m--- Test finished\033[0m\n"
+    set -o pipefail ; docker compose --compatibility up --remove-orphans --exit-code-from test test | tee test.out
+    echo -e "\n\033[1;96m--- Test finished\033[0m\n"
 
-echo -e "\n\033[1;96m--- Collect docker stats:\033[0m\n"
-if [[ -z "${INTEGRATIONTEST_YARN_QUEUE}" ]] && [[ "$AWS" != true ]]; then
-  sudo mkdir -p ./test-output
-  sudo chmod -R a+rwx ./test-output
-  sudo chmod -R a+rwx ./integcb/logs
-  mkdir ./test-output/docker_stats
-  docker stats --no-stream --format "{{ .NetIO }}" cbreak_commondb_1 > ./test-output/docker_stats/pg_stat_network_io.result;
+    echo -e "\n\033[1;96m--- Collect docker stats:\033[0m\n"
+    if [[ -z "${INTEGRATIONTEST_YARN_QUEUE}" ]] && [[ "$AWS" != true ]]; then
+        sudo mkdir -p ./test-output
+        sudo chmod -R a+rwx ./test-output
+        sudo chmod -R a+rwx ./integcb/logs
+        mkdir ./test-output/docker_stats
+        docker stats --no-stream --format "{{ .NetIO }}" cbreak_commondb_1 > ./test-output/docker_stats/pg_stat_network_io.result;
 
-  docker stats --no-stream --format "table {{ .Name }}\t{{ .Container }}\t{{ .MemUsage }}\t{{ .MemPerc }}\t{{ .CPUPerc }}\t{{ .NetIO }}\t{{ .BlockIO }}" > ./test-output/docker_stats/docker_stat.html
-  docker exec cbreak_commondb_1 psql -U postgres --pset=pager=off -d cbdb -c "CREATE EXTENSION IF NOT EXISTS pg_stat_statements;";
-  docker exec cbreak_commondb_1 psql -U postgres --pset=pager=off -d cbdb -c "select * from pg_stat_statements;" --html > ./test-output/docker_stats/query_stat.html
+        docker stats --no-stream --format "table {{ .Name }}\t{{ .Container }}\t{{ .MemUsage }}\t{{ .MemPerc }}\t{{ .CPUPerc }}\t{{ .NetIO }}\t{{ .BlockIO }}" > ./test-output/docker_stats/docker_stat.html
+        docker exec cbreak_commondb_1 psql -U postgres --pset=pager=off -d cbdb -c "CREATE EXTENSION IF NOT EXISTS pg_stat_statements;";
+        docker exec cbreak_commondb_1 psql -U postgres --pset=pager=off -d cbdb -c "select * from pg_stat_statements;" --html > ./test-output/docker_stats/query_stat.html
 
-  cp ./src/main/resources/pg_stats/pg_query_stat_template.html ./test-output/docker_stats/pg_query_stat_template.html
+        cp ./src/main/resources/pg_stats/pg_query_stat_template.html ./test-output/docker_stats/pg_query_stat_template.html
 
-  #FIXME, might be better not to use in place sed
-  sed -i '/<!-- CB_PG_STAT -->/r ./test-output/docker_stats/query_stat.html' ./test-output/docker_stats/pg_query_stat_template.html
-  sed -i '/<!-- DOCKER_STAT_RESULT -->/r ./test-output/docker_stats/docker_stat.html' ./test-output/docker_stats/pg_query_stat_template.html
+        #FIXME, might be better not to use in place sed
+        sed -i '/<!-- CB_PG_STAT -->/r ./test-output/docker_stats/query_stat.html' ./test-output/docker_stats/pg_query_stat_template.html
+        sed -i '/<!-- DOCKER_STAT_RESULT -->/r ./test-output/docker_stats/docker_stat.html' ./test-output/docker_stats/pg_query_stat_template.html
 
-  mv ./test-output/docker_stats/pg_query_stat_template.html ./test-output/docker_stats/query_stat.html
+        mv ./test-output/docker_stats/pg_query_stat_template.html ./test-output/docker_stats/query_stat.html
+    fi
 fi

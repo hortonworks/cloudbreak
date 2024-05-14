@@ -10,6 +10,12 @@ beautify:
 generate-flow-graphs:
 	 ./gradlew -PmainClass=com.sequenceiq.flow.core.config.generator.OfflineStateGenerator -q :core:execute
 
+build-rc:
+	 ./scripts/build-rc.sh
+
+build-rc-patch:
+	 ./scripts/build-rc-patch.sh
+
 build-dev:
 	 ./scripts/build-dev.sh
 
@@ -40,6 +46,12 @@ build-environment-dockerhub:
 
 build-freeipa-dockerhub:
 	 make -C docker-freeipa dockerhub
+
+create-rc-version-tag:
+	 ./scripts/create-rc-version-tag.sh
+
+create-dev-version-tag:
+	 ./scripts/create-dev-version-tag.sh
 
 enable-gitconfig-local:
 	 git config --local include.path ../.gitconfig
