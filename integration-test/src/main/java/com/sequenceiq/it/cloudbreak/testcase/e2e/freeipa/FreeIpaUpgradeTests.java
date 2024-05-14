@@ -82,4 +82,9 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest implements ImageValidat
                 .then(freeIpaAvailabilityAssertion.available())
                 .validate();
     }
+
+    @Override
+    public String getCbImageId(TestContext testContext) {
+        return testContext.get(SdxTestDto.class).getResponse().getStackV4Response().getImage().getId();
+    }
 }
