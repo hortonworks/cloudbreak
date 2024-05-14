@@ -323,6 +323,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             LOGGER.debug("Starting the upgrade for the new components: {}", products);
             if (patchUpgrade) {
                 downloadAndActivateParcels(products, parcelResourceApi, true);
+                clouderaManagerRestartService.waitForRestartExecutionIfPresent(v31Client, stack, rollingUpgradeEnabled);
                 startServices();
                 callPostClouderaRuntimeUpgradeCommandIfCMIsNewerThan751(rollingUpgradeEnabled);
                 restartServices(rollingUpgradeEnabled);

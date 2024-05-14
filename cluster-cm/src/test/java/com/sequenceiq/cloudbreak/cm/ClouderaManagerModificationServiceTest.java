@@ -901,7 +901,7 @@ class ClouderaManagerModificationServiceTest {
         verify(eventService, times(1)).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_START_POST_UPGRADE);
         verify(clustersResourceApi, times(1)).startCommand(STACK_NAME);
         verify(clouderaManagerUpgradeService, times(1)).callPostRuntimeUpgradeCommand(clustersResourceApi, stack, v31Client);
-        verify(clouderaManagerRestartService).waitForRestartExecutionIfPresent(v31Client, stack, false);
+        verify(clouderaManagerRestartService, times(2)).waitForRestartExecutionIfPresent(v31Client, stack, false);
         verify(clouderaManagerApiClientProvider, times(1)).getV45Client(any(), any(), any(), any());
         ArgumentCaptor<List<ApiEntityTag>> entityTagListCaptor = ArgumentCaptor.forClass(List.class);
         verify(hostResourceApi, times(1)).addTagsAsync(eq(HOSTNAME), entityTagListCaptor.capture(), any());
@@ -973,7 +973,7 @@ class ClouderaManagerModificationServiceTest {
         verify(clouderaManagerParcelManagementService, times(1)).refreshParcelRepos(clouderaManagerResourceApi, stack, v31Client);
         verify(mgmtServiceResourceApi, times(1)).listActiveCommands("SUMMARY");
         verify(mgmtServiceResourceApi, times(1)).restartCommand();
-        verify(clouderaManagerRestartService).waitForRestartExecutionIfPresent(v31Client, stack, false);
+        verify(clouderaManagerRestartService, times(2)).waitForRestartExecutionIfPresent(v31Client, stack, false);
         verify(clouderaManagerParcelManagementService, times(1)).downloadParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
         verify(clouderaManagerParcelManagementService, times(1)).distributeParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
         verify(clouderaManagerParcelManagementService, times(1)).activateParcels(any(), eq(parcelResourceApi), eq(stack), eq(v31Client));
