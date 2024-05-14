@@ -16,7 +16,6 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.event.instance.DelayedStopInstancesRequest;
-import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -74,12 +73,8 @@ public class StackStopActions {
                         .map(i -> instanceMetaDataToCloudInstanceConverter.convert(i))
                         .collect(Collectors.toList());
                 List<CloudResource> cloudResources = getCloudResources(context.getStack().getId());
-                if (entitlementService.isFmsDelayedStopStartEnabled(context.getStack().getAccountId())) {
-                    return new DelayedStopInstancesRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources,
-                            cloudInstances, delayInSec);
-                } else {
-                    return new StopInstancesRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
-                }
+                return new DelayedStopInstancesRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources,
+                        cloudInstances, delayInSec);
             }
         };
     }
@@ -119,7 +114,7 @@ public class StackStopActions {
     private List<CloudResource> getCloudResources(Long stackId) {
         List<Resource> resources = resourceService.findAllByStackId(stackId);
         return resources.stream()
-            .map(r -> resourceToCloudResourceConverter.convert(r))
-            .collect(Collectors.toList());
+                .map(r -> resourceToCloudResourceConverter.convert(r))
+                .collect(Collectors.toList());
     }
 }

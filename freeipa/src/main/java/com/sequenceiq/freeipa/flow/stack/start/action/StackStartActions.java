@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.DelayedStartInstancesRequest;
-import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -84,12 +83,8 @@ public class StackStartActions {
                         .map(i -> metadataConverter.convert(i))
                         .collect(Collectors.toList());
                 List<CloudResource> cloudResources = getCloudResources(stack.getId());
-                if (entitlementService.isFmsDelayedStopStartEnabled(context.getStack().getAccountId())) {
-                    return new DelayedStartInstancesRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances,
-                            delayInSec);
-                } else {
-                    return new StartInstancesRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
-                }
+                return new DelayedStartInstancesRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances,
+                        delayInSec);
             }
         };
     }

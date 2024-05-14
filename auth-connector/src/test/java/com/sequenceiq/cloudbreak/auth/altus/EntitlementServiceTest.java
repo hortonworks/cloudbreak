@@ -146,9 +146,6 @@ class EntitlementServiceTest {
                 {"WORKLOAD_IAM_SYNC", (EntitlementCheckFunction) EntitlementService::isWorkloadIamSyncEnabled, false},
                 {"WORKLOAD_IAM_SYNC", (EntitlementCheckFunction) EntitlementService::isWorkloadIamSyncEnabled, true},
 
-                {"CDP_FMS_DELAYED_STOP_START", (EntitlementCheckFunction) EntitlementService::isFmsDelayedStopStartEnabled, false},
-                {"CDP_FMS_DELAYED_STOP_START", (EntitlementCheckFunction) EntitlementService::isFmsDelayedStopStartEnabled, true},
-
                 {"CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT", (EntitlementCheckFunction) EntitlementService::isUserSyncEnforceGroupMembershipLimitEnabled, false},
                 {"CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT", (EntitlementCheckFunction) EntitlementService::isUserSyncEnforceGroupMembershipLimitEnabled, true},
 
