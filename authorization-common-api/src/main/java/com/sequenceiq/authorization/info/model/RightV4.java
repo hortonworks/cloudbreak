@@ -29,6 +29,7 @@ public enum RightV4 {
     DH_CREATE(AuthorizationResourceAction.ENVIRONMENT_CREATE_DATAHUB),
     UPDATE_AZURE_ENCRYPTION_RESOURCES(AuthorizationResourceAction.UPDATE_AZURE_ENCRYPTION_RESOURCES),
     ENV_VERTICAL_SCALING(AuthorizationResourceAction.ENVIRONMENT_VERTICAL_SCALING),
+    FREEIPA_SECRETS_ROTATE(AuthorizationResourceAction.ROTATE_FREEIPA_SECRETS),
     // dh level
     DH_START(AuthorizationResourceAction.START_DATAHUB),
     DH_STOP(AuthorizationResourceAction.STOP_DATAHUB),
@@ -41,6 +42,7 @@ public enum RightV4 {
     DH_UPGRADE(AuthorizationResourceAction.UPGRADE_DATAHUB),
     DH_REFRESH_RECIPES(AuthorizationResourceAction.REFRESH_RECIPES_DATAHUB),
     DH_VERTICAL_SCALING(AuthorizationResourceAction.DATAHUB_VERTICAL_SCALING),
+    DH_SECRETS_ROTATE(AuthorizationResourceAction.ROTATE_DH_SECRETS),
     // sdx level
     SDX_UPGRADE(AuthorizationResourceAction.UPGRADE_DATALAKE),
     SDX_RECOVER(AuthorizationResourceAction.RECOVER_DATALAKE),
@@ -49,7 +51,8 @@ public enum RightV4 {
     SDX_DESCRIBE(AuthorizationResourceAction.DESCRIBE_DATALAKE),
     SDX_RESIZE(AuthorizationResourceAction.RESIZE_DATALAKE),
     SDX_VERTICAL_SCALING(AuthorizationResourceAction.DATALAKE_VERTICAL_SCALING),
-    SDX_REFRESH_RECIPES(AuthorizationResourceAction.REFRESH_RECIPES_DATALAKE);
+    SDX_REFRESH_RECIPES(AuthorizationResourceAction.REFRESH_RECIPES_DATALAKE),
+    SDX_SECRETS_ROTATE(AuthorizationResourceAction.ROTATE_DL_SECRETS);
 
     private static final Map<AuthorizationResourceAction, RightV4> BY_ACTION = Stream.of(RightV4.values())
             .collect(Collectors.toUnmodifiableMap(RightV4::getAction, Function.identity()));
