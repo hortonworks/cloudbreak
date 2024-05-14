@@ -17,6 +17,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import com.sequenceiq.cloudbreak.concurrent.ActorCrnTaskDecorator;
 import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
 import com.sequenceiq.cloudbreak.concurrent.CompositeTaskDecorator;
+import com.sequenceiq.cloudbreak.concurrent.ConcurrencyLimitDecorator;
 import com.sequenceiq.cloudbreak.concurrent.MDCCopyDecorator;
 import com.sequenceiq.cloudbreak.concurrent.TimeTaskDecorator;
 
@@ -52,7 +53,8 @@ public class UsersyncConfig {
         if (virtualThreadsAvailable) {
             return commonExecutorServiceFactory.newVirtualThreadExecutorService("usersyncExecutor-external", USERSYNC_EXTERNAL_TASK_EXECUTOR,
                     List.of(new MDCCopyDecorator(), new ActorCrnTaskDecorator(),
-                            new TimeTaskDecorator(meterRegistry, USERSYNC_EXTERNAL_TASK_EXECUTOR)));
+                            new TimeTaskDecorator(meterRegistry, USERSYNC_EXTERNAL_TASK_EXECUTOR),
+                            new ConcurrencyLimitDecorator(usersyncCorePoolSize)));
         } else {
             ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
             executor.setCorePoolSize(usersyncCorePoolSize);
@@ -70,7 +72,8 @@ public class UsersyncConfig {
         if (virtualThreadsAvailable) {
             return commonExecutorServiceFactory.newVirtualThreadExecutorService("usersyncExecutor-internal", USERSYNC_INTERNAL_TASK_EXECUTOR,
                     List.of(new MDCCopyDecorator(), new ActorCrnTaskDecorator(),
-                            new TimeTaskDecorator(meterRegistry, USERSYNC_INTERNAL_TASK_EXECUTOR)));
+                            new TimeTaskDecorator(meterRegistry, USERSYNC_INTERNAL_TASK_EXECUTOR),
+                            new ConcurrencyLimitDecorator(usersyncCorePoolSize)));
         } else {
             ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
             executor.setCorePoolSize(usersyncCorePoolSize);

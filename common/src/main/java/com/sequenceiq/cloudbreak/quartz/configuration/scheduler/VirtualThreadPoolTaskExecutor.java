@@ -40,7 +40,7 @@ public class VirtualThreadPoolTaskExecutor implements ThreadPool, AsyncTaskExecu
 
     public VirtualThreadPoolTaskExecutor(String threadName, int poolSize, boolean waitForJobsToCompleteOnShutdown) {
         this.poolSize = poolSize;
-        this.semaphore = new Semaphore(poolSize);
+        this.semaphore = new Semaphore(poolSize, true);
         shutdown = new AtomicBoolean(false);
         instanceId = new AtomicReference<>();
         instanceName = new AtomicReference<>();
