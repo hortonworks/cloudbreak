@@ -113,10 +113,10 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
 
         resultBuilder = underTest.privateDnsZoneExists(azureClient, getPrivateDnsZoneResourceId(A_RESOURCE_GROUP_NAME), resultBuilder);
 
-        ValidationTestUtil.checkErrorsPresent(resultBuilder, List.of(
+        ValidationTestUtil.checkWarningsPresent(resultBuilder, List.of(
                 "The provided private DNS zone /subscriptions/subscriptionId/resourceGroups/a-resource-group-name/providers/Microsoft.Network/privateDnsZones" +
                         "/privatelink.postgres.database.azure.com does not exist or you have no permission to access it. Please make sure the specified " +
-                        "private DNS zone exists and try environment creation again."));
+                        "private DNS zone exists otherwise the deployment will fail."));
     }
 
     @Test
