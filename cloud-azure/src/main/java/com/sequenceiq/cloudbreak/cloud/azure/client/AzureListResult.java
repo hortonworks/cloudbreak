@@ -37,13 +37,15 @@ public class AzureListResult<T> {
 
     public List<T> getWhile(Predicate<List<T>> predicate) {
         List<T> result = new ArrayList<>();
-        for (PagedResponse<T> page : pagedIterable.iterableByPage()) {
-            result.addAll(page.getValue());
-            if (predicate.test(result)) {
-                return result;
+        return azureExceptionHandler.handleException(() -> {
+            for (PagedResponse<T> page : pagedIterable.iterableByPage()) {
+                result.addAll(page.getValue());
+                if (predicate.test(result)) {
+                    return result;
+                }
             }
-        }
-        return result;
+            return result;
+        });
     }
 
 }

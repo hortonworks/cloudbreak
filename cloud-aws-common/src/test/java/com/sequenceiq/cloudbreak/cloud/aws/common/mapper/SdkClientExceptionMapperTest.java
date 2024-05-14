@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.mapper;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 import org.aspectj.lang.Signature;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsEncodedAuthorizationFailureMessageDecoder;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -20,6 +21,8 @@ import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.exception.SdkServiceException;
+import software.amazon.awssdk.http.HttpStatusCode;
 import software.amazon.awssdk.services.autoscaling.model.ScalingActivityInProgressException;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,7 +56,7 @@ class SdkClientExceptionMapperTest {
 
         RuntimeException actual = underTest.map(ac, REGION, e, signature);
 
-        Assertions.assertEquals("Cannot execute method: methodName. " + message, actual.getMessage());
+        assertEquals("Cannot execute method: methodName. " + message, actual.getMessage());
     }
 
     @Test
@@ -65,7 +68,7 @@ class SdkClientExceptionMapperTest {
 
         RuntimeException actual = underTest.map(ac, REGION, e, signature);
 
-        Assertions.assertEquals("Cannot execute method: methodName. " + message, actual.getMessage());
+        assertEquals("Cannot execute method: methodName. " + message, actual.getMessage());
     }
 
     @Test
@@ -76,8 +79,8 @@ class SdkClientExceptionMapperTest {
 
         RuntimeException actual = underTest.map(ac, REGION, e, signature);
 
-        Assertions.assertEquals(CloudConnectorException.class, actual.getClass());
-        Assertions.assertEquals("encoded: methodName", actual.getMessage());
+        assertEquals(CloudConnectorException.class, actual.getClass());
+        assertEquals("encoded: methodName", actual.getMessage());
     }
 
     @Test
@@ -89,8 +92,8 @@ class SdkClientExceptionMapperTest {
 
         RuntimeException actual = underTest.map(ac, REGION, e, signature);
 
-        Assertions.assertEquals(Retry.ActionFailedException.class, actual.getClass());
-        Assertions.assertEquals(message, actual.getMessage());
+        assertEquals(Retry.ActionFailedException.class, actual.getClass());
+        assertEquals(message, actual.getMessage());
     }
 
     @Test
@@ -102,8 +105,8 @@ class SdkClientExceptionMapperTest {
 
         RuntimeException actual = underTest.map(ac, REGION, e, signature);
 
-        Assertions.assertEquals(Retry.ActionFailedException.class, actual.getClass());
-        Assertions.assertEquals("Cannot execute method: methodName. Rate exceeded", actual.getMessage());
+        assertEquals(Retry.ActionFailedException.class, actual.getClass());
+        assertEquals("Cannot execute method: methodName. Rate exceeded", actual.getMessage());
     }
 
     @Test
@@ -115,8 +118,8 @@ class SdkClientExceptionMapperTest {
 
         RuntimeException actual = underTest.map(ac, REGION, e, signature);
 
-        Assertions.assertEquals(Retry.ActionFailedException.class, actual.getClass());
-        Assertions.assertEquals(message, actual.getMessage());
+        assertEquals(Retry.ActionFailedException.class, actual.getClass());
+        assertEquals(message, actual.getMessage());
     }
 
     @Test
@@ -128,8 +131,8 @@ class SdkClientExceptionMapperTest {
 
         RuntimeException actual = underTest.map(ac, REGION, e, signature);
 
-        Assertions.assertEquals(Retry.ActionFailedException.class, actual.getClass());
-        Assertions.assertEquals("Cannot execute method: methodName. Request limit exceeded", actual.getMessage());
+        assertEquals(Retry.ActionFailedException.class, actual.getClass());
+        assertEquals("Cannot execute method: methodName. Request limit exceeded", actual.getMessage());
     }
 
     @Test
@@ -144,9 +147,33 @@ class SdkClientExceptionMapperTest {
 
         RuntimeException actual = underTest.map(ac, REGION, e, signature);
 
-        Assertions.assertEquals(Retry.ActionFailedException.class, actual.getClass());
-        Assertions.assertEquals(
+        assertEquals(Retry.ActionFailedException.class, actual.getClass());
+        assertEquals(
                 "Cannot execute method: methodName. Activity 123 is in progress. " +
                         "(Service: null, Status Code: 0, Request ID: null)", actual.getMessage());
+    }
+
+    @Test
+    void testMapUnauthorizedException() {
+        String message = "Unauthorized";
+        SdkServiceException e = SdkServiceException.builder().statusCode(HttpStatusCode.UNAUTHORIZED).message(message).build();
+
+        when(awsEncodedAuthorizationFailureMessageDecoder.decodeAuthorizationFailureMessageIfNeeded(ac, REGION, message)).thenReturn(message);
+        RuntimeException actual = underTest.map(ac, REGION, e, signature);
+
+        assertEquals(ProviderAuthenticationFailedException.class, actual.getClass());
+        assertEquals(message, actual.getMessage());
+    }
+
+    @Test
+    void testMapForbiddenException() {
+        String message = "Forbidden";
+        SdkServiceException e = SdkServiceException.builder().statusCode(HttpStatusCode.FORBIDDEN).message(message).build();
+
+        when(awsEncodedAuthorizationFailureMessageDecoder.decodeAuthorizationFailureMessageIfNeeded(ac, REGION, message)).thenReturn(message);
+        RuntimeException actual = underTest.map(ac, REGION, e, signature);
+
+        assertEquals(ProviderAuthenticationFailedException.class, actual.getClass());
+        assertEquals(message, actual.getMessage());
     }
 }

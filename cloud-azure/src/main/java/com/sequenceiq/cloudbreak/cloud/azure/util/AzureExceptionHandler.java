@@ -55,7 +55,7 @@ public class AzureExceptionHandler {
             return function.get();
         } catch (MsalServiceException e) {
             LOGGER.warn("MsalServiceException has been thrown during azure operation", e);
-            if (isUnauthorized(e)) {
+            if (isUnauthorized(e) || isForbidden(e)) {
                 throw new ProviderAuthenticationFailedException(e.getMessage());
             } else {
                 throw e;
@@ -124,6 +124,10 @@ public class AzureExceptionHandler {
         return UNAUTHORIZED_CODE == msalServiceException.statusCode();
     }
 
+    public boolean isForbidden(MsalServiceException msalServiceException) {
+        return FORBIDDEN == msalServiceException.statusCode();
+    }
+
     public boolean isConcurrentWrite(ManagementException ex) {
         return httpAndAzureStatusCodeMatches(CONFLICT, CONCURRENT_WRITE_ERROR_CODE, Optional.empty(), ex);
     }
@@ -146,7 +150,7 @@ public class AzureExceptionHandler {
                 && e.getValue().getDetails().stream().anyMatch(detail -> MGMT_ERROR_CODE_CONFLICT.equalsIgnoreCase(detail.getCode()));
     }
 
-    private static boolean httpAndAzureStatusCodeMatches(Integer expectedHttpStatusCode, String expectedAzureErrorCode,
+    private boolean httpAndAzureStatusCodeMatches(Integer expectedHttpStatusCode, String expectedAzureErrorCode,
             Optional<String> expectedAzureErrorMessage, ManagementException exception) {
         ManagementError error = exception.getValue();
         return exception.getResponse() != null && exception.getResponse().getStatusCode() == expectedHttpStatusCode && error != null &&

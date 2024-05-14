@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.azure.core.http.HttpResponse;
+import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.compute.models.ApiError;
 import com.azure.resourcemanager.compute.models.ApiErrorException;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -77,7 +78,7 @@ public class AzureObjectStorageConnectorTest {
     public void testAuthorizationFailure() {
         ApiError apiError = AzureTestUtils.apiError("AuthorizationFailed", null);
         mockIDBrokerStorageValidationError(403, apiError);
-        when(azureExceptionHandler.isForbidden(any())).thenReturn(true);
+        when(azureExceptionHandler.isForbidden(any(ManagementException.class))).thenReturn(true);
         assertThrows(AccessDeniedException.class, () -> underTest.validateObjectStorage(getRequest()));
         verify(azureUtils, times(0)).convertToCloudConnectorException(any(), anyString());
     }

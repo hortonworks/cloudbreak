@@ -122,9 +122,20 @@ public class AzureExceptionHandlerTest {
 
     }
 
+    @Test
+    void handleExceptionWhenMsalForbiddenThenThrowsProviderAuthenticationFailedException() {
+        Supplier<String> stringSupplier = () -> {
+            throw getMsalServiceException(HttpStatus.UNAUTHORIZED);
+        };
+
+        Assertions.assertThatThrownBy(() -> underTest.handleException(stringSupplier))
+                .isExactlyInstanceOf(ProviderAuthenticationFailedException.class);
+
+    }
+
     @ParameterizedTest
-    @EnumSource(value = HttpStatus.class, names = {"UNAUTHORIZED"}, mode = EnumSource.Mode.EXCLUDE)
-    void handleExceptionWhenOtherThanMsalExceptionUnauthorizedThenThrowsOriginalException(HttpStatus httpStatus) {
+    @EnumSource(value = HttpStatus.class, names = {"UNAUTHORIZED", "FORBIDDEN"}, mode = EnumSource.Mode.EXCLUDE)
+    void handleExceptionWhenOtherThanMsalExceptionUnauthorizedOrForbiddenThenThrowsOriginalException(HttpStatus httpStatus) {
         Supplier<String> stringSupplier = () -> {
             throw getMsalServiceException(httpStatus);
         };

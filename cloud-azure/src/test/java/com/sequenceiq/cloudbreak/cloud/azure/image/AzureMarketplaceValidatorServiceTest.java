@@ -273,7 +273,7 @@ class AzureMarketplaceValidatorServiceTest {
         verify(azureImageFormatValidator).isMarketplaceImageFormat(image);
         verify(azureTemplateDeploymentService).runWhatIfAnalysis(any(), any(), any());
         verify(entitlementService).azureOnlyMarketplaceImagesEnabled(anyString());
-        verify(azureExceptionHandler).isForbidden(any());
+        verify(azureExceptionHandler).isForbidden(any(ManagementException.class));
         verifyNoMoreInteractions(azureTemplateDeploymentService, entitlementService);
     }
 
@@ -300,7 +300,7 @@ class AzureMarketplaceValidatorServiceTest {
         verify(azureImageFormatValidator).isMarketplaceImageFormat(image);
         verify(azureTemplateDeploymentService).runWhatIfAnalysis(any(), any(), any());
         verify(entitlementService).azureOnlyMarketplaceImagesEnabled(anyString());
-        verify(azureExceptionHandler).isForbidden(any());
+        verify(azureExceptionHandler).isForbidden(any(ManagementException.class));
         verifyNoMoreInteractions(azureTemplateDeploymentService, entitlementService);
     }
 

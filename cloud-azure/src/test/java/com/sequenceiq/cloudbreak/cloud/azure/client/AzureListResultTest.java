@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -52,6 +54,16 @@ public class AzureListResultTest {
         azureListResult.getAll();
 
         verify(azureExceptionHandler).handleException(any(), any(Stream.class));
+    }
+
+    @Test
+    void testGetWhile() {
+        AzureListResult<String> azureListResult = new AzureListResult<>(pagedIterable, azureExceptionHandler);
+        when(azureExceptionHandler.handleException(any(Supplier.class))).thenReturn(List.of());
+
+        azureListResult.getWhile(x -> true);
+
+        verify(azureExceptionHandler).handleException(any(Supplier.class));
     }
 
 }

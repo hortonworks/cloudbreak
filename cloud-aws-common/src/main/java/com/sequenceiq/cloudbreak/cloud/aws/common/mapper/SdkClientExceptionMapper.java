@@ -9,6 +9,7 @@ import jakarta.inject.Inject;
 import org.aspectj.lang.Signature;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsEncodedAuthorizationFailureMessageDecoder;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -18,6 +19,8 @@ import com.sequenceiq.cloudbreak.util.NullUtil;
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.exception.SdkException;
+import software.amazon.awssdk.core.exception.SdkServiceException;
+import software.amazon.awssdk.http.HttpStatusCode;
 import software.amazon.awssdk.services.autoscaling.model.ScalingActivityInProgressException;
 
 @Component
@@ -43,6 +46,13 @@ public class SdkClientExceptionMapper {
         if (e instanceof ScalingActivityInProgressException) {
             message = addMethodNameIfNotContains(message, methodName);
             return new ActionFailedException(message);
+        }
+
+        if (e instanceof SdkServiceException) {
+            SdkServiceException sdkServiceException = (SdkServiceException) e;
+            if (HttpStatusCode.FORBIDDEN == sdkServiceException.statusCode() || HttpStatusCode.UNAUTHORIZED == sdkServiceException.statusCode()) {
+                return new ProviderAuthenticationFailedException(e.getMessage());
+            }
         }
         // We use the AwsServiceException to check the cloudformation exists or not. And maybe we built much more logic to this exception.
         // Therefore, the error messages are updated instead of the wrap

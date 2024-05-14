@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.service.metering;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -22,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
@@ -150,12 +153,34 @@ class MeteringInstanceCheckerServiceTest {
         verify(mismatchedInstanceHandlerService, times(1)).handleMismatchingInstanceTypes(eq(stack), eq(Set.of()));
     }
 
+    @Test
+    void checkInstanceTypesWithProviderShouldNotThrowExceptionWhenAuthenticationFailed() throws IOException, CloudbreakOrchestratorFailedException {
+        StackDto stack = mock(StackDto.class);
+        InstanceGroupView instanceGroup = mock(InstanceGroupView.class);
+        MetadataCollector metadataCollector = mock(MetadataCollector.class);
+        prepareStackMocks(stack, instanceGroup, "large");
+        prepeareProviderMocks(stack, metadataCollector);
+        when(hostOrchestrator.getGrainOnAllHosts(any(), anyString())).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
+        when(metadataCollector.collectInstanceTypes(any(), anyList())).thenThrow(new ProviderAuthenticationFailedException("no permission"));
+
+        underTest.checkInstanceTypes(stack);
+
+        verify(gatewayConfigService, times(1)).getPrimaryGatewayConfig(eq(stack));
+        verify(hostOrchestrator, times(1)).getGrainOnAllHosts(any(), anyString());
+        verify(cloudContextProvider, times(1)).getCloudContext(eq(stack));
+        verify(credentialClientService, times(1)).getCloudCredential(any());
+        verify(cloudPlatformConnectors, times(1)).get(any());
+        verify(metadataCollector, times(1)).collectInstanceTypes(any(), eq(List.of("instanceId1", "instanceId2")));
+        verify(instanceGroup, never()).getTemplate();
+        verify(mismatchedInstanceHandlerService, never()).handleMismatchingInstanceTypes(eq(stack), eq(Set.of()));
+    }
+
     private void prepeareProviderMocks(StackDto stack, MetadataCollector metadataCollector) {
         CloudConnector cloudConnector = mock(CloudConnector.class);
         Authenticator authenticator = mock(Authenticator.class);
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         when(authenticator.authenticate(any(), any())).thenReturn(authenticatedContext);
-        when(metadataCollector.collectInstanceTypes(eq(authenticatedContext), eq(List.of("instanceId1", "instanceId2"))))
+        lenient().when(metadataCollector.collectInstanceTypes(eq(authenticatedContext), eq(List.of("instanceId1", "instanceId2"))))
                 .thenReturn(new InstanceTypeMetadata(Map.of("instanceId1", "large", "instanceId2", "large")));
         when(cloudConnector.metadata()).thenReturn(metadataCollector);
         when(cloudConnector.authentication()).thenReturn(authenticator);
@@ -171,12 +196,12 @@ class MeteringInstanceCheckerServiceTest {
         lenient().when(instance2.getDiscoveryFQDN()).thenReturn("host2");
         when(instance2.getInstanceId()).thenReturn("instanceId2");
         when(stack.getAllAvailableInstances()).thenReturn(List.of(instance1, instance2));
-        when(stack.getInstanceGroupDtos()).thenReturn(List.of(new InstanceGroupDto(instanceGroup, List.of(instance1, instance2))));
+        lenient().when(stack.getInstanceGroupDtos()).thenReturn(List.of(new InstanceGroupDto(instanceGroup, List.of(instance1, instance2))));
         when(gatewayConfigService.getPrimaryGatewayConfig(eq(stack))).thenReturn(new GatewayConfig(null, null, null, null, null, null));
 
         Template template = new Template();
         template.setInstanceType(instanceType);
-        when(instanceGroup.getTemplate()).thenReturn(template);
+        lenient().when(instanceGroup.getTemplate()).thenReturn(template);
     }
 
 }

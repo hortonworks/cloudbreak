@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -68,7 +69,11 @@ public class MeteringInstanceCheckerService {
             checkInstanceTypesWithFallback(stack);
         } catch (Exception e) {
             LOGGER.warn("Checking instance types with salt failed. Fallback and check instance types on provider.", e);
-            checkInstanceTypesOnProvider(stack);
+            try {
+                checkInstanceTypesOnProvider(stack);
+            } catch (ProviderAuthenticationFailedException ex) {
+                LOGGER.warn("Checking instance types on provider failed: {}", ex.getMessage());
+            }
         }
     }
 
@@ -87,8 +92,7 @@ public class MeteringInstanceCheckerService {
                     .collect(Collectors.toMap(instanceTypeEntry -> instanceIdsByHost.get(instanceTypeEntry.getKey()), Map.Entry::getValue));
             compareInstanceTypes(stack, instanceTypesByInstanceId, SALT);
         } else {
-            LOGGER.warn("Checking instance types with salt failed returned empty results. Fallback and check instance types on provider.");
-            checkInstanceTypesOnProvider(stack);
+            throw new RuntimeException("Getting metadata grain from salt returned empty results.");
         }
     }
 

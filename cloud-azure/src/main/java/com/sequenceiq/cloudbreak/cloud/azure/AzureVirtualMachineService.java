@@ -25,6 +25,7 @@ import com.azure.resourcemanager.compute.models.VirtualMachineInstanceView;
 import com.azure.resourcemanager.resources.fluentcore.arm.models.HasName;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimaps;
+import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
@@ -52,7 +53,7 @@ public class AzureVirtualMachineService {
     @Inject
     private AzureExceptionHandler azureExceptionHandler;
 
-    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 60)
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 60, noRetryFor = ProviderAuthenticationFailedException.class)
     public Map<String, VirtualMachine> getVirtualMachinesByName(AzureClient azureClient, String resourceGroup, Collection<String> privateInstanceIds) {
         LOGGER.debug("Starting to retrieve vm metadata from Azure for {} for ids: {}", resourceGroup, privateInstanceIds);
         List<VirtualMachine> virtualMachines = getVirtualMachinesByPrivateInstanceIds(azureClient, resourceGroup, privateInstanceIds);
