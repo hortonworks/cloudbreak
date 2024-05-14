@@ -31,6 +31,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -98,6 +99,11 @@ class UserSyncForEnvServiceTest {
     @InjectMocks
     private UserSyncForEnvService underTest;
 
+    @BeforeEach
+    public void init() {
+        ReflectionTestUtils.setField(underTest, "operationTimeout", 0L);
+    }
+
     @Test
     public void testSyncUsers() {
         StackUserSyncView stack1 = mock(StackUserSyncView.class);
@@ -120,7 +126,7 @@ class UserSyncForEnvServiceTest {
         when(asyncTaskExecutor.submit(any(Callable.class))).thenAnswer(inv -> {
             SyncStatusDetail result = (SyncStatusDetail) inv.getArgument(0, Callable.class).call();
             Future future = mock(Future.class);
-            when(future.get()).thenReturn(result);
+            when(future.get(0L, TimeUnit.MILLISECONDS)).thenReturn(result);
             return future;
         });
         when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID))).thenReturn(new UmsEventGenerationIds());
@@ -163,7 +169,7 @@ class UserSyncForEnvServiceTest {
         when(asyncTaskExecutor.submit(any(Callable.class))).thenAnswer(inv -> {
             SyncStatusDetail result = (SyncStatusDetail) inv.getArgument(0, Callable.class).call();
             Future future = mock(Future.class);
-            when(future.get()).thenReturn(result);
+            when(future.get(0L, TimeUnit.MILLISECONDS)).thenReturn(result);
             return future;
         });
         when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID))).thenReturn(new UmsEventGenerationIds());
@@ -209,7 +215,7 @@ class UserSyncForEnvServiceTest {
                 .thenReturn(Map.of(ENV_CRN, umsUsersState1));
         when(asyncTaskExecutor.submit(any(Callable.class))).thenAnswer(inv -> {
             Future future = mock(Future.class);
-            when(future.get()).thenThrow(new InterruptedException("interrupt"));
+            when(future.get(0L, TimeUnit.MILLISECONDS)).thenThrow(new InterruptedException("interrupt"));
             return future;
         });
         when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID))).thenReturn(new UmsEventGenerationIds());
@@ -251,7 +257,6 @@ class UserSyncForEnvServiceTest {
             return future;
         });
         when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID))).thenReturn(new UmsEventGenerationIds());
-        when(entitlementService.isUserSyncThreadTimeoutEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
 
         underTest.synchronizeUsers(OPERATION_ID, ACCOUNT_ID, List.of(stack1), userSyncFilter, options, System.currentTimeMillis());
 
@@ -296,7 +301,6 @@ class UserSyncForEnvServiceTest {
         });
         when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID))).thenReturn(new UmsEventGenerationIds());
         when(userSyncStatusService.getOrCreateForStack(1L)).thenReturn(new UserSyncStatus());
-        when(entitlementService.isUserSyncThreadTimeoutEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
 
         underTest.synchronizeUsers(OPERATION_ID, ACCOUNT_ID, List.of(stack1), userSyncFilter, options, System.currentTimeMillis());
 
@@ -324,7 +328,7 @@ class UserSyncForEnvServiceTest {
         when(asyncTaskExecutor.submit(any(Callable.class))).thenAnswer(inv -> {
             SyncStatusDetail result = (SyncStatusDetail) inv.getArgument(0, Callable.class).call();
             Future future = mock(Future.class);
-            when(future.get()).thenReturn(result);
+            when(future.get(0L, TimeUnit.MILLISECONDS)).thenReturn(result);
             return future;
         });
         when(userSyncForStackService.synchronizeStackForDeleteUser(stack1, "deleteMe"))

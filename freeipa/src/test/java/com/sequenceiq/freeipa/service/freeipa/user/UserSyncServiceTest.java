@@ -337,7 +337,6 @@ public class UserSyncServiceTest {
         when(userSyncStatusService.getOrCreateForStack(STACK_ID)).thenReturn(userSyncStatus);
         when(entitlementService.usersyncCredentialsUpdateOptimizationEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
         when(entitlementService.isFmsToFreeipaBatchCallEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
-        when(entitlementService.isUserSyncThreadTimeoutEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
         Future<?> usersyncTask = mock(Future.class);
         doAnswer(inv -> {
             Runnable runnable = inv.getArgument(0, Runnable.class);

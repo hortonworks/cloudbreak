@@ -170,7 +170,7 @@ public class UserSyncService {
         List<StackUserSyncView> stacks = stackService.getAllUserSyncViewByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(environmentCrnFilter, accountId);
         if (stacks.isEmpty()) {
             throw new NotFoundException(String.format("No matching FreeIPA stacks found for account %s with environment crn filter %s " +
-                            "or the FreeIPA is not available for user sync", accountId, environmentCrnFilter));
+                    "or the FreeIPA is not available for user sync", accountId, environmentCrnFilter));
         } else {
             LOGGER.debug("Found {} stacks", stacks.size());
             return stacks;
@@ -184,9 +184,7 @@ public class UserSyncService {
             long startTime = System.currentTimeMillis();
             Future<?> task = usersyncExternalTaskExecutor.submit(() ->
                     userSyncForEnvService.synchronizeUsers(operationId, accountId, stacks, userSyncFilter, options, startTime));
-            if (entitlementService.isUserSyncThreadTimeoutEnabled(accountId)) {
-                timeoutTaskScheduler.scheduleTimeoutTask(operationId, accountId, task, operationTimeout);
-            }
+            timeoutTaskScheduler.scheduleTimeoutTask(operationId, accountId, task, operationTimeout);
         } finally {
             MDCBuilder.removeOperationId();
         }

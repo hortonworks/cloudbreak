@@ -121,15 +121,10 @@ public class UserSyncForEnvService {
 
     private SyncStatusDetail waitForSyncStatusDetailResult(long startTime, Future<SyncStatusDetail> statusFuture, String accountId)
             throws InterruptedException, ExecutionException, TimeoutException {
-        if (entitlementService.isUserSyncThreadTimeoutEnabled(accountId)) {
-            long elapsedTime = System.currentTimeMillis() - startTime;
-            long timeout = operationTimeout - elapsedTime;
-            LOGGER.debug("Get SyncStatusDetail with {}ms timeout", timeout);
-            return statusFuture.get(timeout < 0 ? 0 : timeout, TimeUnit.MILLISECONDS);
-        } else {
-            LOGGER.debug("Get SyncStatusDetail without timeout");
-            return statusFuture.get();
-        }
+        long elapsedTime = System.currentTimeMillis() - startTime;
+        long timeout = operationTimeout - elapsedTime;
+        LOGGER.debug("Get SyncStatusDetail with {}ms timeout", timeout);
+        return statusFuture.get(timeout < 0 ? 0 : timeout, TimeUnit.MILLISECONDS);
     }
 
     private Map<String, Future<SyncStatusDetail>> startAsyncSyncsForStacks(String operationId, String accountId, List<StackUserSyncView> stacks,
