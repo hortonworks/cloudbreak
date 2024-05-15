@@ -399,6 +399,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     public SdxTestDto withRuntimeVersion(String runtimeVersion) {
         getRequest().setRuntime(runtimeVersion);
+        withImageId(null);
         return this;
     }
 
