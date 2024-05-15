@@ -65,6 +65,15 @@ class MeteringSyncJobTest {
         verify(meteringService, never()).sendMeteringSyncEventForStack(eq(LOCAL_ID));
     }
 
+    @Test
+    void testExecuteWhenClusterDeletedOnProviderSide() throws JobExecutionException {
+        StackView stack = stack(DetailedStackStatus.DELETED_ON_PROVIDER_SIDE);
+        when(stackDtoService.getStackViewById(eq(LOCAL_ID))).thenReturn(stack);
+        underTest.executeTracedJob(jobExecutionContext);
+        verify(meteringJobService, never()).unschedule(eq(String.valueOf(LOCAL_ID)));
+        verify(meteringService, never()).sendMeteringSyncEventForStack(eq(LOCAL_ID));
+    }
+
     private Stack stack(DetailedStackStatus detailedStackStatus) {
         Stack stack = new Stack();
         stack.setId(LOCAL_ID);

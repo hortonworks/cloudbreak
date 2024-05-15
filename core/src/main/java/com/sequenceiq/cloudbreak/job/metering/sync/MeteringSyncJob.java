@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.job.metering.sync;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETED_ON_PROVIDER_SIDE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.job.StackStatusCheckerJob.LONG_SYNCABLE_STATES;
 
 import java.util.Optional;
 import java.util.Set;
@@ -46,9 +46,11 @@ public class MeteringSyncJob extends StatusCheckerJob {
     @Override
     protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
         StackView stack = stackDtoService.getStackViewById(getLocalIdAsLong());
-        if (Sets.union(Status.getUnschedulableStatuses(), Set.of(STOPPED, DELETED_ON_PROVIDER_SIDE)).contains(stack.getStatus())) {
+        if (Sets.union(Status.getUnschedulableStatuses(), Set.of(STOPPED)).contains(stack.getStatus())) {
             LOGGER.info("Metering sync job will be unscheduled, stack state is {}", stack.getStatus());
             meteringSyncJobService.unschedule(getLocalId());
+        } else if (LONG_SYNCABLE_STATES.contains(stack.getStatus())) {
+            LOGGER.info("Metering sync job will be skipped, stack state is {}", stack.getStatus());
         } else {
             meteringService.sendMeteringSyncEventForStack(getLocalIdAsLong());
         }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.job.metering.instancechecker;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETED_ON_PROVIDER_SIDE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -63,6 +64,15 @@ class MeteringInstanceCheckerJobTest {
         when(stackDtoService.getById(eq(LOCAL_ID))).thenReturn(stack);
         underTest.executeTracedJob(jobExecutionContext);
         verify(meteringInstanceCheckerJobService, times(1)).unschedule(eq(String.valueOf(LOCAL_ID)));
+        verify(meteringInstanceCheckerService, never()).checkInstanceTypes(eq(stack));
+    }
+
+    @Test
+    void testExecuteWhenClusterDeletedOnProviderSide() throws JobExecutionException {
+        StackDto stack = stack(DELETED_ON_PROVIDER_SIDE);
+        when(stackDtoService.getById(eq(LOCAL_ID))).thenReturn(stack);
+        underTest.executeTracedJob(jobExecutionContext);
+        verify(meteringInstanceCheckerJobService, never()).unschedule(eq(String.valueOf(LOCAL_ID)));
         verify(meteringInstanceCheckerService, never()).checkInstanceTypes(eq(stack));
     }
 
