@@ -10,10 +10,10 @@ import com.sequenceiq.cloudbreak.quartz.model.JobInitializer;
 public class StackArchiverJobInitializer implements JobInitializer {
 
     @Inject
-    private StackArchiverJobService environmentArchiverJobService;
+    private StackArchiverJobService stackArchiverJobService;
 
     @Override
     public void initJobs() {
-        environmentArchiverJobService.schedule();
+        stackArchiverJobService.schedule();
     }
 }
