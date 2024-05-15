@@ -33,7 +33,7 @@ ext {
   dnsjavaVersion = '3.5.2'
   httpClientVersion = '5.2.1'
   nettyVersion = '4.1.109.Final'
-  reactorNettyHttp = '1.1.18'
+  reactorNettyHttp = '1.1.19'
   okhttpVersion = '4.12.0'
 
   // Cloud SDKs
