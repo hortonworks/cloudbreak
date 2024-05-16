@@ -49,7 +49,7 @@ public class StackArchiverJob extends MdcQuartzJob {
     public void purgeFinalisedStacks(int retentionPeriodDays) {
         LOGGER.debug("Cleaning finalised stacks");
         long timestampsBefore = timeUtil.getTimestampThatDaysBeforeNow(retentionPeriodDays);
-        stackService.getAllForArchive(timestampsBefore).stream().forEach(
+        stackService.getAllForArchive(timestampsBefore, stackArchiverConfig.getLimitForStack()).forEach(
                 crn -> {
                     LOGGER.debug("Cleaning up stack object structuredEvents with crn {}.", crn);
                     Optional<Exception> exception = structuredEventService.deleteStructuredEventByResourceCrn(crn);
@@ -59,7 +59,7 @@ public class StackArchiverJob extends MdcQuartzJob {
                         LOGGER.debug("Cleaning up stack object with crn {}.", crn);
                         stackService.deleteArchivedByResourceCrn(crn);
                     } else {
-                        LOGGER.error("Could not completely delete stack events for {} with error {}", crn, exception.get());
+                        LOGGER.error("Could not completely delete stack events for {}.", crn, exception.get());
                         throw new RuntimeException(
                                 String.format("Failed to archive terminated stack for stack: %s, exception: %s",
                                         crn, exception.get().getMessage()));

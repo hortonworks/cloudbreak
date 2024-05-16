@@ -10,6 +10,8 @@ import java.util.Set;
 import jakarta.transaction.Transactional;
 import jakarta.transaction.Transactional.TxType;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -553,7 +555,7 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     Optional<Long> findDatabaseIdByStackId(@Param("stackId") Long stackId);
 
     @Query("SELECT s.resourceCrn FROM Stack s WHERE s.terminated < :date")
-    Set<String> findAllTerminatedBefore(Long date);
+    Page<String> findAllTerminatedBefore(Long date, Pageable pageable);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups "
             + "WHERE s.resourceCrn = :resourceCrn")
