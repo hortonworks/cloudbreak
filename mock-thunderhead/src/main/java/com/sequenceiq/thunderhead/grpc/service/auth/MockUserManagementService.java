@@ -63,7 +63,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRE
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAW_S3;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ROTATE_SALTUSER_PASSWORD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS_SDX_INTEGRATION;
@@ -1042,7 +1041,6 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(LOCAL_DEV))
                                 .addEntitlements(createEntitlement(CDP_CP_CUSTOM_DL_TEMPLATE))
                                 .addEntitlements(createEntitlement(OJDBC_TOKEN_DH))
-                                .addEntitlements(createEntitlement(CDP_RAW_S3))
                                 .addEntitlements(createEntitlement(CDP_CM_BULK_HOSTS_REMOVAL))
                                 .addEntitlements(createEntitlement(CDP_DATAHUB_EXPERIMENTAL_SCALE_LIMITS))
                                 .addEntitlements(createEntitlement(CDP_GCP_RAZ))
