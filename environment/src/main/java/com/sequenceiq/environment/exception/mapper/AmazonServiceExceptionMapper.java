@@ -11,7 +11,7 @@ public class AmazonServiceExceptionMapper extends EnvironmentBaseExceptionMapper
 
     @Override
     public Status getResponseStatus(AwsServiceException exception) {
-        return Status.fromStatusCode(exception.statusCode());
+        return Status.fromStatusCode(exception.awsErrorDetails().sdkHttpResponse().statusCode());
     }
 
     @Override
