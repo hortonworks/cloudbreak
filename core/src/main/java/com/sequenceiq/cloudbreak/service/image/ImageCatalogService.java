@@ -867,8 +867,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return imageCatalogProvider.getImageCatalogMetaData(defaultCatalogUrl).getRuntimeVersions();
     }
 
-    public ImageFilterResult getImageFilterResult(Long workspaceId, String imageCatalogName, ImageCatalogPlatform imageCatalogPlatform, boolean getAllImages)
-            throws CloudbreakImageCatalogException {
+    public ImageFilterResult getImageFilterResult(Long workspaceId, String imageCatalogName, ImageCatalogPlatform imageCatalogPlatform, boolean getAllImages,
+            String currentImageId) throws CloudbreakImageCatalogException {
         ImageCatalog imageCatalog = getImageCatalogByName(workspaceId, imageCatalogName);
         if (isCustomImageCatalog(imageCatalog)) {
             StatedImages statedImages = getImages(workspaceId, imageCatalogName, null, imageCatalogPlatform);
@@ -882,9 +882,10 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                         .map(CloudbreakVersion::getDefaults)
                         .flatMap(List::stream)
                         .collect(Collectors.toSet());
-                ImageFilterResult imageFilterResult = imageCatalogServiceProxy.getImageFilterResult(v3ImageCatalog);
-                List<Image> images = imageFilterResult.getImages().stream().filter(image -> defaultImages.contains(image.getUuid())).toList();
-                return new ImageFilterResult(images, imageFilterResult.getReason());
+                List<Image> images = v3ImageCatalog.getImages().getCdhImages().stream()
+                        .filter(image -> defaultImages.contains(image.getUuid()) || currentImageId.equals(image.getUuid()))
+                        .toList();
+                return new ImageFilterResult(images);
             }
         }
     }

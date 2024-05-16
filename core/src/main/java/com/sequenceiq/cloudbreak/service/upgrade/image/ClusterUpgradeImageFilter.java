@@ -33,8 +33,8 @@ public class ClusterUpgradeImageFilter {
 
     private ImageFilterResult getImageFilterResult(Long workspaceId, String imageCatalogName, ImageFilterParams imageFilterParams) {
         try {
-            ImageFilterResult availableImages = imageCatalogService
-                    .getImageFilterResult(workspaceId, imageCatalogName, imageFilterParams.getImageCatalogPlatform(), imageFilterParams.isGetAllImages());
+            ImageFilterResult availableImages = imageCatalogService.getImageFilterResult(workspaceId, imageCatalogName,
+                    imageFilterParams.getImageCatalogPlatform(), imageFilterParams.isGetAllImages(), imageFilterParams.getCurrentImage().getImageId());
             return availableImages.getImages().isEmpty() ? availableImages : filterImages(availableImages, imageFilterParams);
         } catch (Exception ex) {
             LOGGER.error("Error during image filtering.", ex);

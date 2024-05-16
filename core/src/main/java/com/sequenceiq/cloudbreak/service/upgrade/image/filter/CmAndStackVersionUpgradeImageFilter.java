@@ -41,6 +41,7 @@ public class CmAndStackVersionUpgradeImageFilter implements UpgradeImageFilter {
         } else {
             List<Image> filteredImages =
                     filterImages(imageFilterResult, image -> CmAndStackVersionMatchResult.PERMITTED.equals(isUpgradePermitted(imageFilterParams, image)));
+            logNotEligibleImages(imageFilterResult, filteredImages, LOGGER);
             LOGGER.debug("After the filtering {} image left with proper CM and CDH version.", filteredImages.size());
             return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
         }
