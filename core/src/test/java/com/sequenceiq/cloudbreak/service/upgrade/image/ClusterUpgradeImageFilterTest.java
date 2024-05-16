@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.ModelImageTestBuilder;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.ImageFilterUpgradeService;
 
 @ExtendWith(MockitoExtension.class)
@@ -92,8 +93,8 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterResult imageFilterResult = new ImageFilterResult(Collections.emptyList(), errorMessage);
         when(blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParams)).thenReturn(new BlueprintValidationResult(true));
         when(imageCatalogService
-                .getImageFilterResult(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams.getImageCatalogPlatform(), imageFilterParams.isGetAllImages()))
-                .thenReturn(imageFilterResult);
+                .getImageFilterResult(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams.getImageCatalogPlatform(), imageFilterParams.isGetAllImages(),
+                        imageFilterParams.getCurrentImage().getImageId())).thenReturn(imageFilterResult);
 
         ImageFilterResult actual = underTest.getAvailableImagesForUpgrade(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams);
 
@@ -109,9 +110,8 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterResult imageFilterResult = new ImageFilterResult(images, EMPTY_REASON);
         ImageFilterResult otherImageFilterResult = new ImageFilterResult(otherImages, EMPTY_REASON);
         when(blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParams)).thenReturn(new BlueprintValidationResult(true));
-        when(imageCatalogService
-                .getImageFilterResult(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams.getImageCatalogPlatform(), imageFilterParams.isGetAllImages()))
-                .thenReturn(imageFilterResult);
+        when(imageCatalogService.getImageFilterResult(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams.getImageCatalogPlatform(),
+                imageFilterParams.isGetAllImages(), imageFilterParams.getCurrentImage().getImageId())).thenReturn(imageFilterResult);
         when(imageFilterUpgradeService.filterImages(imageFilterResult, imageFilterParams)).thenReturn(otherImageFilterResult);
 
         ImageFilterResult actual = underTest.getAvailableImagesForUpgrade(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams);
@@ -120,8 +120,8 @@ public class ClusterUpgradeImageFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams() {
-        return new ImageFilterParams(null, null, null, false, Collections.emptyMap(), StackType.DATALAKE, new Blueprint(), STACK_ID,
-                new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
+        return new ImageFilterParams(null, ModelImageTestBuilder.builder().withImageId("current-image-id").build(), null, false, Collections.emptyMap(),
+                StackType.DATALAKE, new Blueprint(), STACK_ID, new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
                 CLOUD_PLATFORM, REGION, false);
     }
 

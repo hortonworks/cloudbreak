@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -40,16 +39,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.RootVolumeV4Request;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
-import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleState;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.embedded.UpgradeEmbeddedDBPreparationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.AwsVariantMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
@@ -58,6 +52,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.CoreVerticalScalingTriggerEven
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StopStartUpscaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.service.EmbeddedDbUpgradeFlowTriggersFactory;
 import com.sequenceiq.cloudbreak.core.flow2.stack.migration.AwsVariantMigrationEvent;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -67,11 +62,8 @@ import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.embeddeddb.UpgradeEmbeddedDBPreparationTriggerRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsTriggerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RescheduleStatusCheckTriggerEvent;
-import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
@@ -79,7 +71,6 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -98,12 +89,7 @@ import com.sequenceiq.flow.core.chain.init.flowevents.FlowChainInitPayload;
 @Component
 public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory<ClusterRepairTriggerEvent>, ClusterUseCaseAware {
 
-    public static final String DEFAULT_DB_VERSION = "10";
-
     private static final Logger LOGGER = getLogger(ClusterRepairFlowEventChainFactory.class);
-
-    @Value("${cb.db.env.upgrade.embedded.targetversion}")
-    private TargetMajorVersion targetMajorVersion;
 
     @Value("${cb.root.disk.repair.migration.enabled:true}")
     private boolean rootDiskRepairMigrationEnabled;
@@ -130,13 +116,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     private KerberosConfigService kerberosConfigService;
 
     @Inject
-    private EntitlementService entitlementService;
-
-    @Inject
-    private CloudbreakEventService cloudbreakEventService;
-
-    @Inject
-    private EmbeddedDatabaseService embeddedDatabaseService;
+    private EmbeddedDbUpgradeFlowTriggersFactory embeddedDbUpgradeFlowTriggersFactory;
 
     @Inject
     private StackUpgradeService stackUpgradeService;
@@ -222,14 +202,8 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         }
         Map<String, Set<String>> repairableGroupsWithHostNames = new HashMap<>();
         boolean singlePrimaryGW = fillRepairableGroupsWithHostNames(repairConfig, repairableGroupsWithHostNames);
-        boolean embeddedDBUpgrade = isEmbeddedDBUpgradeNeeded(stackDto, event, targetMajorVersion);
         LOGGER.info("Repairable groups with host names: {}", repairableGroupsWithHostNames);
-        if (embeddedDBUpgrade) {
-            LOGGER.debug("Cluster repair flowchain is extended with upgrade embedded db preparation flow as embedded db upgrade is needed");
-            flowTriggers.add(new UpgradeEmbeddedDBPreparationTriggerRequest(UpgradeEmbeddedDBPreparationEvent.UPGRADE_EMBEDDEDDB_PREPARATION_EVENT.event(),
-                    event.getResourceId(), targetMajorVersion));
-            flowTriggers.add(new UpgradeRdsTriggerRequest(UpgradeRdsEvent.UPGRADE_RDS_EVENT.event(), event.getResourceId(), targetMajorVersion, null, null));
-        }
+        flowTriggers.addAll(embeddedDbUpgradeFlowTriggersFactory.createFlowTriggers(stackDto, event.isUpgrade()));
         if (rootDiskRepairMigrationEnabled) {
             addRootDiskUpdateIfNecessary(event, stackDto, repairableGroupsWithHostNames, flowTriggers);
         }
@@ -487,28 +461,6 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     private boolean isKerberosSecured(StackView stackView) {
         return kerberosConfigService.isKerberosConfigExistsForEnvironment(stackView.getEnvironmentCrn(), stackView.getName());
-    }
-
-    private boolean isEmbeddedDBUpgradeNeeded(StackDto stackDto, ClusterRepairTriggerEvent event, TargetMajorVersion targetMajorVersion) {
-        StackView stackView = stackDto.getStack();
-        boolean embeddedPostgresUpgradeEnabled =
-                entitlementService.isEmbeddedPostgresUpgradeEnabled(Crn.safeFromString(stackView.getResourceCrn()).getAccountId());
-        boolean upgradeRequested = event.isUpgrade();
-        boolean embeddedDBOnAttachedDisk = embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stackDto);
-        String currentDbVersion = StringUtils.isNotEmpty(stackDto.getExternalDatabaseEngineVersion())
-                ? stackDto.getExternalDatabaseEngineVersion() : DEFAULT_DB_VERSION;
-        boolean versionsAreDifferent = !targetMajorVersion.getMajorVersion().equals(currentDbVersion);
-        if (embeddedPostgresUpgradeEnabled && upgradeRequested && embeddedDBOnAttachedDisk && versionsAreDifferent) {
-            LOGGER.debug("Embedded db upgrade is possible and needed.");
-            return true;
-        } else {
-            LOGGER.debug("Check of embedded db upgrade necessity has evaluated to False. At least one of the following conditions is false:"
-                    + " CDP_POSTGRES_UPGRADE_EMBEDDED entitlement enabled: " + embeddedPostgresUpgradeEnabled
-                    + ", os upgrade requested: " + upgradeRequested
-                    + ", embedded database is on attached disk: " + embeddedDBOnAttachedDisk
-                    + ", target db version is different: " + versionsAreDifferent);
-            return false;
-        }
     }
 
     private static class RepairConfig {
