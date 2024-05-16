@@ -68,14 +68,19 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
 
     private void syncSdxStatus(JobExecutionContext context) {
         getCluster().ifPresent(sdx -> {
-            StackStatusV4Response stack = cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().getStatusByCrn(getRemoteResourceCrn());
-            updateCertExpirationStateIfDifferent(sdx, stack);
             SdxStatusEntity sdxStatus = sdxStatusService.getActualStatusForSdx(sdx);
-            DatalakeStatusEnum originalStatus = sdxStatus.getStatus();
-            DatalakeStatusEnum updatedStatus = updateStatusIfNecessary(stack, sdx, sdxStatus);
-            if (!Objects.equals(originalStatus, updatedStatus)) {
-                logStateChange(originalStatus, updatedStatus);
-                updateSyncScheduleIfNecessary(updatedStatus, sdx, context);
+            if (DatalakeStatusEnum.STACK_DELETED.equals(sdxStatus.getStatus())) {
+                LOGGER.info("Sdx status is {}. Unscheduling sdx sync job.", sdxStatus.getStatus());
+                unscheduleSync(sdx);
+            } else {
+                StackStatusV4Response stack = cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().getStatusByCrn(getRemoteResourceCrn());
+                updateCertExpirationStateIfDifferent(sdx, stack);
+                DatalakeStatusEnum originalStatus = sdxStatus.getStatus();
+                DatalakeStatusEnum updatedStatus = updateStatusIfNecessary(stack, sdx, sdxStatus);
+                if (!Objects.equals(originalStatus, updatedStatus)) {
+                    logStateChange(originalStatus, updatedStatus);
+                    updateSyncScheduleIfNecessary(updatedStatus, sdx, context);
+                }
             }
         });
     }

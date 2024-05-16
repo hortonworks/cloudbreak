@@ -93,6 +93,7 @@ class SdxClusterStatusCheckerJobTest {
 
         sdxCluster = new SdxCluster();
         sdxCluster.setClusterName("data-lake-cluster");
+        sdxCluster.setId(SDX_ID);
         when(sdxClusterRepository.findById(SDX_ID)).thenReturn(Optional.of(sdxCluster));
 
         stack = new StackStatusV4Response();
@@ -230,6 +231,17 @@ class SdxClusterStatusCheckerJobTest {
                 eq(Collections.singleton("data-lake-cluster")),
                 eq(""),
                 eq(sdxCluster));
+    }
+
+    @Test
+    void unscheduleSdxClustersInStackDeletedStatus() throws JobExecutionException {
+        setUpSdxStatus(DatalakeStatusEnum.STACK_DELETED);
+
+        underTest.executeTracedJob(jobExecutionContext);
+
+        verify(sdxStatusService, times(1)).getActualStatusForSdx(eq(sdxCluster));
+        verify(jobService, times(1)).unschedule(eq(String.valueOf(SDX_ID)));
+        verify(autoscaleV4Endpoint, never()).getStatusByCrn(anyString());
     }
 
     private void setUpSdxStatus(DatalakeStatusEnum status) {
