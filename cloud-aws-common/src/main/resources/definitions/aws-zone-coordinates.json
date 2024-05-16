@@ -113,6 +113,13 @@
       "k8sSupported": true
     },
     {
+      "name": "ap-south-2",
+      "displayName": "Asia Pacific (Hyderabad)",
+      "latitude": "17.387140",
+      "longitude": "78.491684",
+      "k8sSupported": true
+    },
+    {
       "name": "eu-west-2",
       "displayName": "EU (London)",
       "latitude": "51.49999473",

@@ -7,6 +7,10 @@
     "zoneid": "ap-south-1",
     "defaultvm": "i2.4xlarge"
   },
+  "Asia Pacific (Hyderabad)": {
+    "zoneid": "ap-south-2",
+    "defaultvm": "i2.4xlarge"
+  },
   "Asia Pacific (Seoul)": {
     "zoneid": "ap-northeast-2",
     "defaultvm": "i2.4xlarge"
