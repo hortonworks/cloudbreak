@@ -33,6 +33,8 @@ public class StackArchiverJobService implements JobSchedulerService {
 
     private static final int ONE_HOUR_IN_MINUTES = 60;
 
+    private static final int TEN_MINUTES = 10;
+
     @Inject
     private TransactionalScheduler scheduler;
 
@@ -91,7 +93,7 @@ public class StackArchiverJobService implements JobSchedulerService {
         return Date.from(
                 ZonedDateTime.now()
                         .toInstant()
-                        .plus(Duration.ofMinutes(1)));
+                        .plus(Duration.ofMinutes(TEN_MINUTES)));
     }
 
     @Override

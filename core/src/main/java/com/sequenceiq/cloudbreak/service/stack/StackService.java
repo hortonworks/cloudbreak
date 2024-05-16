@@ -1181,8 +1181,8 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
             Stack stack = stackOptional.get();
             try {
                 Long stackId = stack.getId();
-                cleanupInstanceGroups(stack);
                 cleanupCluster(stack, stackId);
+                cleanupInstanceGroups(stack);
 
                 LOGGER.debug("Cleanup security config for stack {}", stackId);
                 securityConfigService.deleteByStackId(stackId);
