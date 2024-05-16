@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.job.archiver.stack;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -51,14 +52,15 @@ class StackArchiverJobTest {
     @Test
     public void testExecuteTracedJob() throws Exception {
         when(stackArchiverConfig.getRetentionPeriodInDays()).thenReturn(30);
+        when(stackArchiverConfig.getLimitForStack()).thenReturn(500);
         when(timeUtil.getTimestampThatDaysBeforeNow(30)).thenReturn(1646259968L);
         stackArchiverJob.executeTracedJob(null);
-        verify(stackService, times(1)).getAllForArchive(1646259968L);
+        verify(stackService, times(1)).getAllForArchive(1646259968L, 500);
     }
 
     @Test
     public void testPurgeFinalisedStacks() throws Exception {
-        when(stackService.getAllForArchive(anyLong())).thenReturn(Set.of("crn1", "crn2"));
+        when(stackService.getAllForArchive(anyLong(), anyInt())).thenReturn(Set.of("crn1", "crn2"));
         when(structuredEventService.deleteStructuredEventByResourceCrn(anyString())).thenReturn(Optional.empty());
 
         stackArchiverJob.purgeFinalisedStacks(30);

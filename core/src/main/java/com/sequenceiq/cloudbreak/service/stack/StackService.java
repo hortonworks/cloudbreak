@@ -33,6 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -1165,8 +1167,11 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return stackRepository.getDeletedStacks(since);
     }
 
-    public Set<String> getAllForArchive(long dateFrom) {
-        return stackRepository.findAllTerminatedBefore(dateFrom);
+    public Set<String> getAllForArchive(long dateFrom, int limit) {
+        Page<String> allArchived = stackRepository
+                .findAllTerminatedBefore(dateFrom, PageRequest.of(0, limit));
+        return allArchived.stream()
+                .collect(Collectors.toSet());
     }
 
     public void deleteArchivedByResourceCrn(String crn) {
