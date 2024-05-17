@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.transform;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -37,6 +38,10 @@ class CloudResourceHelperTest {
 
     private static final CloudResource CLOUD_RESOURCE_AWS_VPC = createCloudResourceByType(ResourceType.AWS_VPC);
 
+    private static final String CLOUD_RESOURCE_NAME = "name";
+
+    private static final String CLOUD_RESOURCE_REFERENCE = "reference";
+
     @Mock
     private ResourceNotifier resourceNotifier;
 
@@ -50,7 +55,16 @@ class CloudResourceHelperTest {
         return CloudResource.builder()
                 .withType(resourceType)
                 .withStatus(CommonStatus.CREATED)
-                .withName("name")
+                .withName(CLOUD_RESOURCE_NAME)
+                .build();
+    }
+
+    private static CloudResource createCloudResourceByTypeAndReference(ResourceType resourceType, String reference) {
+        return CloudResource.builder()
+                .withType(resourceType)
+                .withStatus(CommonStatus.CREATED)
+                .withName(CLOUD_RESOURCE_NAME)
+                .withReference(reference)
                 .build();
     }
 
@@ -123,6 +137,41 @@ class CloudResourceHelperTest {
         underTest.updateDeleteOnTerminationFlag(reattachableVolumeSets, false, mock(CloudContext.class));
         verify(resourceNotifier, times(1)).notifyUpdates(listArgumentCaptor.capture(), any());
         assertThat(listArgumentCaptor.getValue()).containsExactly(cloudResource);
+    }
+
+    @Test
+    void validateRequestCloudResourceTestWhenNullCloudResource() {
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+                () -> CloudResourceHelper.validateRequestCloudResource(null, ResourceType.AWS_INSTANCE));
+
+        assertThat(illegalArgumentException).hasMessage("request.CloudResource must not be null!");
+    }
+
+    @Test
+    void validateRequestCloudResourceTestWhenNullCloudResourceReference() {
+        CloudResource cloudResource = createCloudResourceByTypeAndReference(ResourceType.AWS_INSTANCE, null);
+
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+                () -> CloudResourceHelper.validateRequestCloudResource(cloudResource, ResourceType.AWS_INSTANCE));
+
+        assertThat(illegalArgumentException).hasMessage("request.CloudResource.reference must not be null!");
+    }
+
+    @Test
+    void validateRequestCloudResourceTestWhenWrongCloudResourceType() {
+        CloudResource cloudResource = createCloudResourceByTypeAndReference(ResourceType.AWS_INSTANCE, CLOUD_RESOURCE_REFERENCE);
+
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
+                () -> CloudResourceHelper.validateRequestCloudResource(cloudResource, ResourceType.AWS_VOLUMESET));
+
+        assertThat(illegalArgumentException).hasMessage("request.CloudResource has the wrong resource type! Expected: AWS_VOLUMESET, actual: AWS_INSTANCE");
+    }
+
+    @Test
+    void validateRequestCloudResourceTestWhenSuccess() {
+        CloudResource cloudResource = createCloudResourceByTypeAndReference(ResourceType.AWS_INSTANCE, CLOUD_RESOURCE_REFERENCE);
+
+        CloudResourceHelper.validateRequestCloudResource(cloudResource, ResourceType.AWS_INSTANCE);
     }
 
 }

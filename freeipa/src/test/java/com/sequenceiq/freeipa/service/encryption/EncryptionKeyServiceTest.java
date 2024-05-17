@@ -288,7 +288,7 @@ public class EncryptionKeyServiceTest {
         assertEquals(encryptionKeyCreationRequest.tags(), expectedTags());
         assertEquals(isLuksKey(encryptionKeyCreationRequest.keyName()) ? KEY_DESC_LUKS : KEY_DESC_SECRET_MANAGER, encryptionKeyCreationRequest.description());
         assertEquals(List.of(isLuksKey(encryptionKeyCreationRequest.keyName()) ? LOGGER_INSTANCE_PROFILE : CROSS_ACCOUNT_ROLE),
-                encryptionKeyCreationRequest.targetPrincipalIds());
+                encryptionKeyCreationRequest.cryptographicPrincipals());
     }
 
     private boolean isLuksKey(String keyName) {

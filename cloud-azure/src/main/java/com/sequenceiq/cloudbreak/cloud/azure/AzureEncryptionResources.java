@@ -78,21 +78,20 @@ public class AzureEncryptionResources implements EncryptionResources {
     }
 
     @Override
-    public CreatedDiskEncryptionSet createDiskEncryptionSet(DiskEncryptionSetCreationRequest diskEncryptionSetCreationRequest) {
+    public CreatedDiskEncryptionSet createDiskEncryptionSet(DiskEncryptionSetCreationRequest request) {
         try {
-
-            AuthenticatedContext authenticatedContext = azureClientService.createAuthenticatedContext(diskEncryptionSetCreationRequest.getCloudContext(),
-                    diskEncryptionSetCreationRequest.getCloudCredential());
+            AuthenticatedContext authenticatedContext = azureClientService.createAuthenticatedContext(request.getCloudContext(),
+                    request.getCloudCredential());
             AzureClient azureClient = authenticatedContext.getParameter(AzureClient.class);
 
-            String vaultName = azureClient.getVaultNameFromEncryptionKeyUrl(diskEncryptionSetCreationRequest.getEncryptionKeyUrl());
+            String vaultName = azureClient.getVaultNameFromEncryptionKeyUrl(request.getEncryptionKeyUrl());
             if (vaultName == null) {
                 throw new IllegalArgumentException("vaultName cannot be fetched from encryptionKeyUrl. encryptionKeyUrl should be of format - " +
                         "'https://<vaultName>.vault.azure.net/keys/<keyName>/<keyVersion>'");
             }
             boolean singleResourceGroup = Boolean.TRUE;
-            String vaultResourceGroupName = diskEncryptionSetCreationRequest.getEncryptionKeyResourceGroupName();
-            String desResourceGroupName = diskEncryptionSetCreationRequest.getDiskEncryptionSetResourceGroupName();
+            String vaultResourceGroupName = request.getEncryptionKeyResourceGroupName();
+            String desResourceGroupName = request.getDiskEncryptionSetResourceGroupName();
 
             if (StringUtils.isEmpty(desResourceGroupName)) {
                 if (StringUtils.isEmpty(vaultResourceGroupName)) {
@@ -101,8 +100,8 @@ public class AzureEncryptionResources implements EncryptionResources {
                 }
                 singleResourceGroup = Boolean.FALSE;
                 desResourceGroupName = azureUtils.generateResourceGroupNameByNameAndId(
-                        String.format("%s-CDP_DES-", diskEncryptionSetCreationRequest.getCloudContext().getName()),
-                        diskEncryptionSetCreationRequest.getId());
+                        String.format("%s-CDP_DES-", request.getCloudContext().getName()),
+                        request.getId());
             }
 
             String sourceVaultId = String.format("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.KeyVault/vaults/%s",
@@ -120,12 +119,12 @@ public class AzureEncryptionResources implements EncryptionResources {
                     azureClient,
                     desResourceGroupName,
                     sourceVaultId,
-                    diskEncryptionSetCreationRequest,
+                    request,
                     singleResourceGroup);
             // The existence of the DES SP cannot be easily checked. That would need powerful special AD API permissions for the credential app itself that
             // most customers would never grant. Though there is a system assigned managed identity as well sitting behind the SP, querying the properties of
             // this identity (in order to check its existence) would also need an additional powerful Action for the role assigned to the credential app.
-            if (diskEncryptionSetCreationRequest.getUserManagedIdentity().isEmpty()) {
+            if (request.getUserManagedIdentity().isEmpty()) {
                 grantKeyVaultAccessPolicyToDiskEncryptionSetServicePrincipal(azureClient,
                         vaultResourceGroupName,
                         vaultName,
@@ -135,20 +134,20 @@ public class AzureEncryptionResources implements EncryptionResources {
             }
             return diskEncryptionSet;
         } catch (Exception e) {
-            LOGGER.error("Disk Encryption Set creation failed, request=" + diskEncryptionSetCreationRequest, e);
+            LOGGER.error("Disk Encryption Set creation failed, request=" + request, e);
             throw azureUtils.convertToCloudConnectorException(e, "Disk Encryption Set creation");
         }
     }
 
     @Override
-    public void deleteDiskEncryptionSet(DiskEncryptionSetDeletionRequest diskEncryptionSetDeletionRequest) {
+    public void deleteDiskEncryptionSet(DiskEncryptionSetDeletionRequest request) {
         try {
             Optional<CloudResource> desCloudResourceOptional =
-                    cloudResourceHelper.getResourceTypeFromList(AZURE_DISK_ENCRYPTION_SET, diskEncryptionSetDeletionRequest.getCloudResources());
+                    cloudResourceHelper.getResourceTypeFromList(AZURE_DISK_ENCRYPTION_SET, request.getCloudResources());
             Optional<CloudResource> rgCloudResourceOptional =
-                    cloudResourceHelper.getResourceTypeFromList(AZURE_RESOURCE_GROUP, diskEncryptionSetDeletionRequest.getCloudResources());
+                    cloudResourceHelper.getResourceTypeFromList(AZURE_RESOURCE_GROUP, request.getCloudResources());
             if (desCloudResourceOptional.isPresent()) {
-                AzureClient azureClient = azureClientService.getClient(diskEncryptionSetDeletionRequest.getCloudCredential());
+                AzureClient azureClient = azureClientService.getClient(request.getCloudCredential());
                 CloudResource desCloudResource = desCloudResourceOptional.get();
                 String diskEncryptionSetId = desCloudResource.getReference();
                 String diskEncryptionSetName;
@@ -170,20 +169,20 @@ public class AzureEncryptionResources implements EncryptionResources {
                 }
                 LOGGER.info("Deleting Disk Encryption Set \"{}\"", diskEncryptionSetId);
                 deleteDiskEncryptionSetOnCloud(azureClient, desResourceGroupName, diskEncryptionSetName);
-                persistenceNotifier.notifyDeletion(desCloudResource, diskEncryptionSetDeletionRequest.getCloudContext());
+                persistenceNotifier.notifyDeletion(desCloudResource, request.getCloudContext());
             } else {
-                LOGGER.info("No Disk Encryption Set found to delete, request=" + diskEncryptionSetDeletionRequest);
+                LOGGER.info("No Disk Encryption Set found to delete, request=" + request);
             }
             if (rgCloudResourceOptional.isPresent()) {
                 CloudResource rgCloudResource = rgCloudResourceOptional.get();
-                checkAndDeleteDesResourceGroupByName(azureClientService.getClient(diskEncryptionSetDeletionRequest.getCloudCredential()),
+                checkAndDeleteDesResourceGroupByName(azureClientService.getClient(request.getCloudCredential()),
                         rgCloudResource.getName());
-                persistenceNotifier.notifyDeletion(rgCloudResource, diskEncryptionSetDeletionRequest.getCloudContext());
+                persistenceNotifier.notifyDeletion(rgCloudResource, request.getCloudContext());
             } else {
-                LOGGER.info("No resource group is found to delete, request=" + diskEncryptionSetDeletionRequest);
+                LOGGER.info("No resource group is found to delete, request=" + request);
             }
         } catch (Exception e) {
-            LOGGER.error("Disk Encryption Set deletion failed, request=" + diskEncryptionSetDeletionRequest, e);
+            LOGGER.error("Disk Encryption Set deletion failed, request=" + request, e);
             throw azureUtils.convertToCloudConnectorException(e, "Disk Encryption Set deletion");
         }
     }
@@ -219,12 +218,12 @@ public class AzureEncryptionResources implements EncryptionResources {
     }
 
     private CreatedDiskEncryptionSet getOrCreateDiskEncryptionSetOnCloud(AuthenticatedContext authenticatedContext, AzureClient azureClient,
-        String desResourceGroupName, String sourceVaultId, DiskEncryptionSetCreationRequest diskEncryptionSetCreationRequest, boolean singleResourceGroup) {
-        CloudContext cloudContext = diskEncryptionSetCreationRequest.getCloudContext();
+        String desResourceGroupName, String sourceVaultId, DiskEncryptionSetCreationRequest request, boolean singleResourceGroup) {
+        CloudContext cloudContext = request.getCloudContext();
         String region = cloudContext.getLocation().getRegion().getRegionName();
-        Map<String, String> tags = diskEncryptionSetCreationRequest.getTags();
+        Map<String, String> tags = request.getTags();
         String diskEncryptionSetName = azureUtils.generateDesNameByNameAndId(
-                String.format("%s-DES-", cloudContext.getName()), diskEncryptionSetCreationRequest.getId());
+                String.format("%s-DES-", cloudContext.getName()), request.getId());
         LOGGER.info("Checking if Disk Encryption Set \"{}\" exists", diskEncryptionSetName);
         DiskEncryptionSetInner createdSet = azureClient.getDiskEncryptionSetByName(desResourceGroupName, diskEncryptionSetName);
         if (createdSet == null) {
@@ -234,8 +233,8 @@ public class AzureEncryptionResources implements EncryptionResources {
             }
             LOGGER.info("Creating Disk Encryption Set \"{}\" in resource group \"{}\"", diskEncryptionSetName, desResourceGroupName);
             createdSet = azureClient.createDiskEncryptionSet(diskEncryptionSetName,
-                    diskEncryptionSetCreationRequest.getUserManagedIdentity(),
-                    diskEncryptionSetCreationRequest.getEncryptionKeyUrl(),
+                    request.getUserManagedIdentity(),
+                    request.getEncryptionKeyUrl(),
                     region,
                     desResourceGroupName,
                     sourceVaultId,
@@ -248,7 +247,7 @@ public class AzureEncryptionResources implements EncryptionResources {
                 desResourceGroupName,
                 diskEncryptionSetName,
                 createdSet,
-                diskEncryptionSetCreationRequest.getUserManagedIdentity().isPresent());
+                request.getUserManagedIdentity().isPresent());
         // Neither of createdSet, createdSet.id() or createdSet.identity().principalId() can be null at this point; polling will fail otherwise
 
         CloudResource desCloudResource = CloudResource.builder()

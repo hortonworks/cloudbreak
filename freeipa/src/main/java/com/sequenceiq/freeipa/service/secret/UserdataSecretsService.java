@@ -115,13 +115,12 @@ public class UserdataSecretsService {
         SecretConnector secretConnector = cloudConnector.secretConnector();
         String userdata = stack.getImage().getUserdataWrapper();
         Optional<String> userdataSecretsSectionOptional = Optional.of(userdataSecretsUtil.getSecretsSection(userdata));
-        List<String> principals = buildPrincipalsList(stack, credentialResponse);
         Map<InstanceMetaData, Optional<Resource>> associations = getAssociations(instances);
         LOGGER.info("Updating the userdata secrets for stack [{}]...", stack.getName());
         UpdateCloudSecretResourceAccessRequest.Builder updatePolicyRequestBuilder = UpdateCloudSecretResourceAccessRequest.builder()
                 .withCloudContext(cloudContext)
                 .withCloudCredential(cloudCredential)
-                .withPrincipals(principals);
+                .withCryptographicPrincipals(buildCryptographicPrincipalsList(stack, credentialResponse));
         UpdateCloudSecretRequest.Builder updateRequestBuilder = UpdateCloudSecretRequest.builder()
                 .withCloudContext(cloudContext)
                 .withCloudCredential(cloudCredential)
@@ -135,7 +134,7 @@ public class UserdataSecretsService {
                 CloudResource cloudResource = resourceToCloudResourceConverter.convert(secretResourceOptional.get());
                 updatePolicyRequestBuilder
                         .withCloudResource(cloudResource)
-                        .withAuthorizedClients(buildAuthorizedClientsList(stack, instanceMetaData.getInstanceId()));
+                        .withCryptographicAuthorizedClients(buildCryptographicAuthorizedClientsList(stack, instanceMetaData.getInstanceId()));
                 secretConnector.updateCloudSecretResourceAccess(updatePolicyRequestBuilder.build());
                 updateRequestBuilder
                         .withCloudResource(cloudResource);
@@ -214,7 +213,7 @@ public class UserdataSecretsService {
         }
     }
 
-    private static List<String> buildPrincipalsList(Stack stack, CredentialResponse credentialResponse) {
+    private static List<String> buildCryptographicPrincipalsList(Stack stack, CredentialResponse credentialResponse) {
         return switch (stack.getCloudPlatform()) {
             case "AWS" -> {
                 String instanceProfileArn = stack.getTelemetry().getLogging().getS3().getInstanceProfile();
@@ -225,7 +224,7 @@ public class UserdataSecretsService {
         };
     }
 
-    private static List<String> buildAuthorizedClientsList(Stack stack, String instanceId) {
+    private static List<String> buildCryptographicAuthorizedClientsList(Stack stack, String instanceId) {
         return switch (stack.getCloudPlatform()) {
             case "AWS" -> {
                 String instanceProfileArn = stack.getTelemetry().getLogging().getS3().getInstanceProfile();
@@ -233,6 +232,7 @@ public class UserdataSecretsService {
                 if (arn.accountId().isPresent()) {
                     yield List.of(buildAwsEc2InstanceArn(arn.partition(), stack.getRegion(), arn.accountId().get(), instanceId));
                 } else {
+                    LOGGER.warn("Cannot determine AWS account ID from Logging instance profile ARN '{}'", instanceProfileArn);
                     yield Collections.emptyList();
                 }
             }

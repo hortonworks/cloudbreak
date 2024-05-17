@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.transform;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +29,16 @@ public class CloudResourceHelper {
 
     @Inject
     private ResourceNotifier resourceNotifier;
+
+    public static void validateRequestCloudResource(CloudResource cloudResource, ResourceType resourceTypeExpected) {
+        throwIfNull(cloudResource, () -> new IllegalArgumentException("request.CloudResource must not be null!"));
+        throwIfNull(cloudResource.getReference(), () -> new IllegalArgumentException("request.CloudResource.reference must not be null!"));
+        ResourceType resourceType = cloudResource.getType();
+        if (!resourceTypeExpected.equals(resourceType)) {
+            throw new IllegalArgumentException(String.format("request.CloudResource has the wrong resource type! Expected: %s, actual: %s",
+                    resourceTypeExpected, resourceType));
+        }
+    }
 
     public List<Group> getScaledGroups(CloudStack stack) {
         return stack.getGroups().stream().filter(g -> g.getInstances().stream().anyMatch(

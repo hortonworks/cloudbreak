@@ -21,6 +21,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import jakarta.inject.Inject;
+
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +35,6 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import com.sequenceiq.common.model.CloudIdentityType;
 
 import software.amazon.awssdk.arns.Arn;
-import software.amazon.awssdk.arns.ArnResource;
 import software.amazon.awssdk.core.auth.policy.Action;
 import software.amazon.awssdk.core.auth.policy.Policy;
 import software.amazon.awssdk.core.auth.policy.Resource;
@@ -55,6 +56,9 @@ public class AwsIamService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsIamService.class);
 
     private static final String POLICY_BASE_LOCATION = "definitions/cdp/";
+
+    @Inject
+    private ArnService arnService;
 
     /**
      * Validates instance profile ARN and returns an InstanceProfile object if valid
@@ -358,13 +362,6 @@ public class AwsIamService {
                 .toString();
     }
 
-    public boolean isInstanceProfileArn(String iamResourceArn) {
-        ArnResource arnResource = Arn.fromString(iamResourceArn).resource();
-        return arnResource.resourceType()
-                .map("instance-profile"::equals)
-                .orElse(false);
-    }
-
     public String getInstanceProfileRoleArn(InstanceProfile instanceProfile) {
         if (!instanceProfile.hasRoles()) {
             throw new CloudConnectorException(String.format("No IAM role is associated with EC2 Instance Profile of ARN='%s'", instanceProfile.arn()));
@@ -374,7 +371,7 @@ public class AwsIamService {
 
     public String getEffectivePrincipal(AmazonIdentityManagementClient iam, String iamPrincipalArn) {
         String effectivePrincipal;
-        if (isInstanceProfileArn(iamPrincipalArn)) {
+        if (arnService.isInstanceProfileArn(iamPrincipalArn)) {
             InstanceProfile instanceProfile = getInstanceProfileNoValidationResult(iam, iamPrincipalArn);
             effectivePrincipal = Optional.ofNullable(instanceProfile)
                     .map(this::getInstanceProfileRoleArn)

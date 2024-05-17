@@ -23,7 +23,6 @@ import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -66,6 +65,9 @@ public class AwsIamServiceTest {
 
     @Mock
     private AmazonIdentityManagementClient iam;
+
+    @Mock
+    private ArnService arnService;
 
     @InjectMocks
     private AwsIamService awsIamService;
@@ -474,21 +476,6 @@ public class AwsIamServiceTest {
         assertThat(awsIamService.getAccountRootArn(ARN_ROLE)).isEqualTo("arn:aws-us-gov:iam::123456789012:root");
     }
 
-    static Object[][] isInstanceProfileArnTestDataProvider() {
-        return new Object[][]{
-                // iamResourceArn, responseExpected
-                {ARN_ROLE, false},
-                {ARN_USER, false},
-                {ARN_INSTANCE_PROFILE, true},
-        };
-    }
-
-    @ParameterizedTest(name = "iamResourceArn={0}")
-    @MethodSource("isInstanceProfileArnTestDataProvider")
-    void isInstanceProfileArnTest(String iamResourceArn, boolean responseExpected) {
-        assertThat(awsIamService.isInstanceProfileArn(iamResourceArn)).isEqualTo(responseExpected);
-    }
-
     @Test
     void getInstanceProfileRoleArnTestWhenHasRole() {
         InstanceProfile instanceProfile = InstanceProfile.builder()
@@ -515,6 +502,7 @@ public class AwsIamServiceTest {
 
     @Test
     void getEffectivePrincipalTestWhenInstanceProfileAndSuccess() {
+        when(arnService.isInstanceProfileArn(ARN_INSTANCE_PROFILE)).thenReturn(true);
         InstanceProfile instanceProfile = InstanceProfile.builder()
                 .arn(ARN_INSTANCE_PROFILE)
                 .roles(Role.builder()
@@ -534,6 +522,7 @@ public class AwsIamServiceTest {
 
     @Test
     void getEffectivePrincipalTestWhenInstanceProfileAndNoSuchEntityException() {
+        when(arnService.isInstanceProfileArn(ARN_INSTANCE_PROFILE)).thenReturn(true);
         when(iam.getInstanceProfile(any(GetInstanceProfileRequest.class))).thenThrow(NoSuchEntityException.class);
 
         CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
@@ -546,6 +535,7 @@ public class AwsIamServiceTest {
 
     @Test
     void getEffectivePrincipalTestWhenInstanceProfileAndNoRole() {
+        when(arnService.isInstanceProfileArn(ARN_INSTANCE_PROFILE)).thenReturn(true);
         InstanceProfile instanceProfile = InstanceProfile.builder()
                 .arn(ARN_INSTANCE_PROFILE)
                 .build();
@@ -566,6 +556,8 @@ public class AwsIamServiceTest {
     @ParameterizedTest(name = "{0}")
     @ValueSource(strings = {ARN_ROLE, ARN_USER})
     void getEffectivePrincipalTestWhenNotInstanceProfile(String iamPrincipalArn) {
+        when(arnService.isInstanceProfileArn(iamPrincipalArn)).thenReturn(false);
+
         assertThat(awsIamService.getEffectivePrincipal(iam, iamPrincipalArn)).isEqualTo(iamPrincipalArn);
 
         verify(iam, never()).getInstanceProfile(any(GetInstanceProfileRequest.class));
@@ -573,6 +565,9 @@ public class AwsIamServiceTest {
 
     @Test
     void getEffectivePrincipalsTest() {
+        when(arnService.isInstanceProfileArn(ARN_ROLE)).thenReturn(false);
+        when(arnService.isInstanceProfileArn(ARN_INSTANCE_PROFILE)).thenReturn(true);
+        when(arnService.isInstanceProfileArn(ARN_USER)).thenReturn(false);
         InstanceProfile instanceProfile = InstanceProfile.builder()
                 .arn(ARN_INSTANCE_PROFILE)
                 .roles(Role.builder()

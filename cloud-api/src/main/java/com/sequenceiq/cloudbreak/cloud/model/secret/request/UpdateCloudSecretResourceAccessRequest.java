@@ -8,15 +8,15 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 
 public record UpdateCloudSecretResourceAccessRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudResource cloudResource,
-        List<String> principals, List<String> authorizedClients) {
+        List<String> cryptographicPrincipals, List<String> cryptographicAuthorizedClients) {
 
     public UpdateCloudSecretResourceAccessRequest(Builder builder) {
         this(
                 builder.cloudContext,
                 builder.cloudCredential,
                 builder.cloudResource,
-                builder.principals,
-                builder.authorizedClients
+                builder.cryptographicPrincipals,
+                builder.cryptographicAuthorizedClients
         );
     }
 
@@ -25,8 +25,8 @@ public record UpdateCloudSecretResourceAccessRequest(CloudContext cloudContext, 
                 .withCloudContext(cloudContext)
                 .withCloudCredential(cloudCredential)
                 .withCloudResource(cloudResource)
-                .withPrincipals(principals)
-                .withAuthorizedClients(authorizedClients);
+                .withCryptographicPrincipals(cryptographicPrincipals)
+                .withCryptographicAuthorizedClients(cryptographicAuthorizedClients);
     }
 
     public static Builder builder() {
@@ -41,9 +41,9 @@ public record UpdateCloudSecretResourceAccessRequest(CloudContext cloudContext, 
 
         private CloudResource cloudResource;
 
-        private List<String> principals = Collections.emptyList();
+        private List<String> cryptographicPrincipals = Collections.emptyList();
 
-        private List<String> authorizedClients = Collections.emptyList();
+        private List<String> cryptographicAuthorizedClients = Collections.emptyList();
 
         private Builder() {
         }
@@ -63,18 +63,20 @@ public record UpdateCloudSecretResourceAccessRequest(CloudContext cloudContext, 
             return this;
         }
 
-        public Builder withPrincipals(List<String> principals) {
-            this.principals = principals;
+        public Builder withCryptographicPrincipals(List<String> cryptographicPrincipals) {
+            this.cryptographicPrincipals = cryptographicPrincipals;
             return this;
         }
 
-        public Builder withAuthorizedClients(List<String> authorizedClients) {
-            this.authorizedClients = authorizedClients;
+        public Builder withCryptographicAuthorizedClients(List<String> cryptographicAuthorizedClients) {
+            this.cryptographicAuthorizedClients = cryptographicAuthorizedClients;
             return this;
         }
 
         public UpdateCloudSecretResourceAccessRequest build() {
             return new UpdateCloudSecretResourceAccessRequest(this);
         }
+
     }
+
 }

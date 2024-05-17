@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Test;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 class EncryptionKeyCreationRequestTest {
 
@@ -21,7 +19,7 @@ class EncryptionKeyCreationRequestTest {
         CloudCredential cloudCredential = new CloudCredential();
         Map<String, String> tags = Map.of();
         List<CloudResource> cloudResources = List.of();
-        List<String> targetPrincipalIds = List.of();
+        List<String> cryptographicPrincipals = List.of();
 
         EncryptionKeyCreationRequest underTest = EncryptionKeyCreationRequest.builder()
                 .withKeyName("keyName")
@@ -30,7 +28,7 @@ class EncryptionKeyCreationRequestTest {
                 .withTags(tags)
                 .withDescription("description")
                 .withCloudResources(cloudResources)
-                .withTargetPrincipalIds(targetPrincipalIds)
+                .withCryptographicPrincipals(cryptographicPrincipals)
                 .build();
 
         assertThat(underTest.keyName()).isEqualTo("keyName");
@@ -39,35 +37,7 @@ class EncryptionKeyCreationRequestTest {
         assertThat(underTest.tags()).isSameAs(tags);
         assertThat(underTest.description()).isEqualTo("description");
         assertThat(underTest.cloudResources()).isSameAs(cloudResources);
-        assertThat(underTest.targetPrincipalIds()).isSameAs(targetPrincipalIds);
-    }
-
-    @Test
-    void platformTest() {
-        CloudContext cloudContext = CloudContext.Builder.builder()
-                .withPlatform("platform")
-                .build();
-        Platform platform = cloudContext.getPlatform();
-
-        EncryptionKeyCreationRequest underTest = EncryptionKeyCreationRequest.builder()
-                .withCloudContext(cloudContext)
-                .build();
-
-        assertThat(underTest.platform()).isSameAs(platform);
-    }
-
-    @Test
-    void variantTest() {
-        CloudContext cloudContext = CloudContext.Builder.builder()
-                .withVariant("variant")
-                .build();
-        Variant variant = cloudContext.getVariant();
-
-        EncryptionKeyCreationRequest underTest = EncryptionKeyCreationRequest.builder()
-                .withCloudContext(cloudContext)
-                .build();
-
-        assertThat(underTest.variant()).isSameAs(variant);
+        assertThat(underTest.cryptographicPrincipals()).isSameAs(cryptographicPrincipals);
     }
 
 }

@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
+import static com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper.validateRequestCloudResource;
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
+import static com.sequenceiq.common.api.type.ResourceType.AWS_SECRETSMANAGER_SECRET;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,8 +17,9 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.SecretConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonSecretsManagerClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.ArnService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsIamService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
-import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -31,7 +34,6 @@ import com.sequenceiq.cloudbreak.cloud.model.secret.request.UpdateCloudSecretRes
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.common.api.type.CommonStatus;
-import com.sequenceiq.common.api.type.ResourceType;
 
 import software.amazon.awssdk.policybuilder.iam.IamAction;
 import software.amazon.awssdk.policybuilder.iam.IamConditionKey;
@@ -71,6 +73,12 @@ public class AwsSecretsManagerConnector implements SecretConnector {
     @Inject
     private PersistenceNotifier persistenceNotifier;
 
+    @Inject
+    private AwsIamService awsIamService;
+
+    @Inject
+    private ArnService arnService;
+
     @Override
     public CloudSecret createCloudSecret(CreateCloudSecretRequest request) {
         AmazonSecretsManagerClient secretsManagerClient = awsClient.createSecretsManagerClient(new AwsCredentialView(request.cloudCredential()),
@@ -107,7 +115,7 @@ public class AwsSecretsManagerConnector implements SecretConnector {
 
     @Override
     public CloudSecret getCloudSecret(GetCloudSecretRequest request) {
-        validateRequestCloudResource(request.cloudResource());
+        validateRequestCloudResource(request.cloudResource(), AWS_SECRETSMANAGER_SECRET);
         AmazonSecretsManagerClient secretsManagerClient = awsClient.createSecretsManagerClient(new AwsCredentialView(request.cloudCredential()),
                 request.cloudContext().getLocation().getRegion().getRegionName());
         return getCloudSecret(request.cloudResource().getReference(), secretsManagerClient);
@@ -118,7 +126,7 @@ public class AwsSecretsManagerConnector implements SecretConnector {
         if (!Optionals.isAnyPresent(request.newSecretValue(), request.newEncryptionKeySource())) {
             throw new IllegalArgumentException("Either a newSecretValue or a newEncryptionKeySource needs to be specified!");
         }
-        validateRequestCloudResource(request.cloudResource());
+        validateRequestCloudResource(request.cloudResource(), AWS_SECRETSMANAGER_SECRET);
         AmazonSecretsManagerClient secretsManagerClient = awsClient.createSecretsManagerClient(new AwsCredentialView(request.cloudCredential()),
                 request.cloudContext().getLocation().getRegion().getRegionName());
         CloudSecret cloudSecret = getCloudSecret(request.cloudResource().getReference(), secretsManagerClient);
@@ -169,11 +177,12 @@ public class AwsSecretsManagerConnector implements SecretConnector {
 
     @Override
     public CloudSecret updateCloudSecretResourceAccess(UpdateCloudSecretResourceAccessRequest request) {
-        validateRequestCloudResource(request.cloudResource());
-        AmazonSecretsManagerClient secretsManagerClient = awsClient.createSecretsManagerClient(new AwsCredentialView(request.cloudCredential()),
+        validateUpdateCloudSecretResourceAccessRequest(request);
+        AwsCredentialView awsCredentialView = new AwsCredentialView(request.cloudCredential());
+        AmazonSecretsManagerClient secretsManagerClient = awsClient.createSecretsManagerClient(awsCredentialView,
                 request.cloudContext().getLocation().getRegion().getRegionName());
         CloudSecret cloudSecret = getCloudSecret(request.cloudResource().getReference(), secretsManagerClient);
-        String iamPolicyJson = getIamPolicyJson(request.principals(), request.authorizedClients());
+        String iamPolicyJson = getIamPolicyJson(awsCredentialView, request.cryptographicPrincipals(), request.cryptographicAuthorizedClients());
         LOGGER.info("Updating the resource policy for secret [{}] to the following: {}", request.cloudResource().getName(), iamPolicyJson);
         PutResourcePolicyRequest putResourcePolicyRequest = PutResourcePolicyRequest.builder()
                 .secretId(request.cloudResource().getReference())
@@ -181,27 +190,58 @@ public class AwsSecretsManagerConnector implements SecretConnector {
                 .build();
         secretsManagerClient.putResourcePolicy(putResourcePolicyRequest);
         return cloudSecret.toBuilder()
-                .withPrincipals(request.principals())
-                .withAuthorizedClients(request.authorizedClients())
+                .withCryptographicPrincipals(request.cryptographicPrincipals())
+                .withCryptographicAuthorizedClients(request.cryptographicAuthorizedClients())
                 .build();
     }
 
-    private static void validateRequestCloudResource(CloudResource cloudResource) {
-        throwIfNull(cloudResource, () -> new CloudConnectorException("The CloudResource in the request cannot be null!"));
-        throwIfNull(cloudResource.getReference(), () -> new CloudConnectorException("The CloudResource reference in the request cannot be null!"));
+    private void validateUpdateCloudSecretResourceAccessRequest(UpdateCloudSecretResourceAccessRequest request) {
+        throwIfNull(request, () -> new IllegalArgumentException("request must not be null!"));
+        throwIfNull(request.cloudContext(), () -> new IllegalArgumentException("request.cloudContext must not be null!"));
+        throwIfNull(request.cloudCredential(), () -> new IllegalArgumentException("request.cloudCredential must not be null!"));
+        validateRequestCloudResource(request.cloudResource(), AWS_SECRETSMANAGER_SECRET);
+        validatePrincipals(request.cryptographicPrincipals(), "request.cryptographicPrincipals");
+        validateAuthorizedClients(request.cryptographicAuthorizedClients(), "request.cryptographicAuthorizedClients");
+    }
+
+    private void validatePrincipals(List<String> principals, String propertyName) {
+        List<String> badPrincipals = Optional.ofNullable(principals).orElse(List.of()).stream()
+                .filter(iamResourceArn -> !isInstanceProfileOrRoleArn(iamResourceArn))
+                .toList();
+        if (!badPrincipals.isEmpty()) {
+            throw new IllegalArgumentException(
+                    String.format("The following elements of %s are malformed. Only IAM instance-profile and role resource ARNs are supported. %s",
+                            propertyName, badPrincipals));
+        }
+    }
+
+    private boolean isInstanceProfileOrRoleArn(String iamResourceArn) {
+        return arnService.isInstanceProfileArn(iamResourceArn) || arnService.isRoleArn(iamResourceArn);
+    }
+
+    private void validateAuthorizedClients(List<String> authorizedClients, String propertyName) {
+        List<String> badAuthorizedClients = Optional.ofNullable(authorizedClients).orElse(List.of()).stream()
+                .filter(resourceArn -> !arnService.isEc2InstanceArn(resourceArn))
+                .toList();
+        if (!badAuthorizedClients.isEmpty()) {
+            throw new IllegalArgumentException(
+                    String.format("The following elements of %s are malformed. Only EC2 instance resource ARNs are supported. %s",
+                            propertyName, badAuthorizedClients));
+        }
     }
 
     private static CloudResource getCloudResource(String name, String arn) {
         CloudResource cloudResource = CloudResource.builder()
                 .withName(name)
                 .withReference(arn)
-                .withType(ResourceType.AWS_SECRETSMANAGER_SECRET)
+                .withType(AWS_SECRETSMANAGER_SECRET)
                 .withStatus(CommonStatus.CREATED)
                 .build();
         return cloudResource;
     }
 
-    private static String getIamPolicyJson(List<String> principals, List<String> authorizedClients) {
+    private String getIamPolicyJson(AwsCredentialView awsCredentialView, List<String> cryptographicPrincipals,
+            List<String> cryptographicAuthorizedClients) {
         IamPolicy iamPolicy = IamPolicy.builder()
                 .id("Policy generated by CDP")
                 .addStatement(IamStatement.builder()
@@ -210,8 +250,9 @@ public class AwsSecretsManagerConnector implements SecretConnector {
                         .addAction(IamAction.create("secretsmanager:DeleteSecret"))
                         .addAction(IamAction.create("secretsmanager:GetSecretValue"))
                         .addResource(IamResource.ALL)
-                        .addPrincipals(IamPrincipalType.AWS, principals)
-                        .addConditions(IamConditionOperator.ARN_EQUALS, IamConditionKey.create("ec2:SourceInstanceArn"), authorizedClients)
+                        .addPrincipals(IamPrincipalType.AWS,
+                                awsIamService.getEffectivePrincipals(awsClient.createAmazonIdentityManagement(awsCredentialView), cryptographicPrincipals))
+                        .addConditions(IamConditionOperator.ARN_EQUALS, IamConditionKey.create("ec2:SourceInstanceArn"), cryptographicAuthorizedClients)
                         .build())
                 .build();
         return iamPolicy.toJson();
@@ -219,7 +260,7 @@ public class AwsSecretsManagerConnector implements SecretConnector {
 
     private static Optional<CloudResource> getExistingCloudResource(List<CloudResource> cloudResources, String secretName) {
         return cloudResources.stream()
-                .filter(cr -> secretName.equals(cr.getName()) && ResourceType.AWS_SECRETSMANAGER_SECRET.equals(cr.getType()))
+                .filter(cr -> secretName.equals(cr.getName()) && AWS_SECRETSMANAGER_SECRET.equals(cr.getType()))
                 .findFirst();
     }
 

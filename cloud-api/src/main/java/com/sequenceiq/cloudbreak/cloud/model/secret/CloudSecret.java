@@ -8,7 +8,7 @@ import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeySource;
 
 public record CloudSecret(String secretId, String secretName, String description, String secretValue, EncryptionKeySource keySource, Instant deletionDate,
-        Map<String, String> tags, List<String> principals, List<String> authorizedClients) {
+        Map<String, String> tags, List<String> cryptographicPrincipals, List<String> cryptographicAuthorizedClients) {
 
     public CloudSecret(Builder builder) {
         this(
@@ -19,8 +19,8 @@ public record CloudSecret(String secretId, String secretName, String description
                 builder.keySource,
                 builder.deletionDate,
                 builder.tags,
-                builder.principals,
-                builder.authorizedClients
+                builder.cryptographicPrincipals,
+                builder.cryptographicAuthorizedClients
         );
     }
 
@@ -37,8 +37,8 @@ public record CloudSecret(String secretId, String secretName, String description
                 .withKeySource(keySource)
                 .withDeletionDate(deletionDate)
                 .withTags(tags)
-                .withPrincipals(principals)
-                .withAuthorizedClients(authorizedClients);
+                .withCryptographicPrincipals(cryptographicPrincipals)
+                .withCryptographicAuthorizedClients(cryptographicAuthorizedClients);
     }
 
     @Override
@@ -50,8 +50,8 @@ public record CloudSecret(String secretId, String secretName, String description
                 ", keySource='" + keySource + '\'' +
                 ", deletionDate=" + deletionDate +
                 ", tags=" + tags +
-                ", principals=" + principals +
-                ", authorizedClients=" + authorizedClients +
+                ", cryptographicPrincipals=" + cryptographicPrincipals +
+                ", cryptographicAuthorizedClients=" + cryptographicAuthorizedClients +
                 '}';
     }
 
@@ -71,9 +71,9 @@ public record CloudSecret(String secretId, String secretName, String description
 
         private Map<String, String> tags;
 
-        private List<String> principals;
+        private List<String> cryptographicPrincipals;
 
-        private List<String> authorizedClients;
+        private List<String> cryptographicAuthorizedClients;
 
         private Builder() {
         }
@@ -113,18 +113,20 @@ public record CloudSecret(String secretId, String secretName, String description
             return this;
         }
 
-        public Builder withPrincipals(List<String> principals) {
-            this.principals = principals;
+        public Builder withCryptographicPrincipals(List<String> cryptographicPrincipals) {
+            this.cryptographicPrincipals = cryptographicPrincipals;
             return this;
         }
 
-        public Builder withAuthorizedClients(List<String> authorizedClients) {
-            this.authorizedClients = authorizedClients;
+        public Builder withCryptographicAuthorizedClients(List<String> cryptographicAuthorizedClients) {
+            this.cryptographicAuthorizedClients = cryptographicAuthorizedClients;
             return this;
         }
 
         public CloudSecret build() {
             return new CloudSecret(this);
         }
+
     }
+
 }

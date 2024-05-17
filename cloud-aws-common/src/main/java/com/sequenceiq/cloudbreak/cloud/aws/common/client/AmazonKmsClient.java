@@ -5,12 +5,16 @@ import software.amazon.awssdk.services.kms.model.CreateKeyRequest;
 import software.amazon.awssdk.services.kms.model.CreateKeyResponse;
 import software.amazon.awssdk.services.kms.model.DescribeKeyRequest;
 import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
+import software.amazon.awssdk.services.kms.model.GetKeyPolicyRequest;
+import software.amazon.awssdk.services.kms.model.GetKeyPolicyResponse;
 import software.amazon.awssdk.services.kms.model.ListAliasesRequest;
 import software.amazon.awssdk.services.kms.model.ListAliasesResponse;
 import software.amazon.awssdk.services.kms.model.ListKeysRequest;
 import software.amazon.awssdk.services.kms.model.ListKeysResponse;
 import software.amazon.awssdk.services.kms.model.ListResourceTagsRequest;
 import software.amazon.awssdk.services.kms.model.ListResourceTagsResponse;
+import software.amazon.awssdk.services.kms.model.PutKeyPolicyRequest;
+import software.amazon.awssdk.services.kms.model.PutKeyPolicyResponse;
 
 public class AmazonKmsClient extends AmazonClient {
 
@@ -38,6 +42,14 @@ public class AmazonKmsClient extends AmazonClient {
 
     public CreateKeyResponse createKey(CreateKeyRequest createKeyRequest) {
         return client.createKey(createKeyRequest);
+    }
+
+    public GetKeyPolicyResponse getKeyPolicy(GetKeyPolicyRequest getKeyPolicyRequest) {
+        return client.getKeyPolicy(getKeyPolicyRequest);
+    }
+
+    public PutKeyPolicyResponse putKeyPolicy(PutKeyPolicyRequest putKeyPolicyRequest) {
+        return client.putKeyPolicy(putKeyPolicyRequest);
     }
 
 }

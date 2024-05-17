@@ -112,7 +112,7 @@ public class EncryptionKeyService {
         EncryptionKeyCreationRequest encryptionKeyCreationRequest = encryptionKeyBuilder
                 .withKeyName(keyName)
                 .withDescription(keyDescription)
-                .withTargetPrincipalIds(List.of(principalId))
+                .withCryptographicPrincipals(List.of(principalId))
                 .build();
         CloudEncryptionKey cloudEncryptionKey = encryptionResources.createEncryptionKey(encryptionKeyCreationRequest);
         return cloudEncryptionKey.getName();

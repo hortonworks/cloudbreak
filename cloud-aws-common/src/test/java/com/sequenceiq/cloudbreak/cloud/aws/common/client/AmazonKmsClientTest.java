@@ -14,12 +14,16 @@ import software.amazon.awssdk.services.kms.model.CreateKeyRequest;
 import software.amazon.awssdk.services.kms.model.CreateKeyResponse;
 import software.amazon.awssdk.services.kms.model.DescribeKeyRequest;
 import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
+import software.amazon.awssdk.services.kms.model.GetKeyPolicyRequest;
+import software.amazon.awssdk.services.kms.model.GetKeyPolicyResponse;
 import software.amazon.awssdk.services.kms.model.ListAliasesRequest;
 import software.amazon.awssdk.services.kms.model.ListAliasesResponse;
 import software.amazon.awssdk.services.kms.model.ListKeysRequest;
 import software.amazon.awssdk.services.kms.model.ListKeysResponse;
 import software.amazon.awssdk.services.kms.model.ListResourceTagsRequest;
 import software.amazon.awssdk.services.kms.model.ListResourceTagsResponse;
+import software.amazon.awssdk.services.kms.model.PutKeyPolicyRequest;
+import software.amazon.awssdk.services.kms.model.PutKeyPolicyResponse;
 
 @ExtendWith(MockitoExtension.class)
 class AmazonKmsClientTest {
@@ -83,6 +87,28 @@ class AmazonKmsClientTest {
         CreateKeyResponse response = underTest.createKey(createKeyRequest);
 
         assertThat(response).isSameAs(createKeyResponse);
+    }
+
+    @Test
+    void getKeyPolicyTest() {
+        GetKeyPolicyRequest getKeyPolicyRequest = GetKeyPolicyRequest.builder().build();
+        GetKeyPolicyResponse getKeyPolicyResponse = GetKeyPolicyResponse.builder().build();
+        when(client.getKeyPolicy(getKeyPolicyRequest)).thenReturn(getKeyPolicyResponse);
+
+        GetKeyPolicyResponse response = underTest.getKeyPolicy(getKeyPolicyRequest);
+
+        assertThat(response).isSameAs(getKeyPolicyResponse);
+    }
+
+    @Test
+    void putKeyPolicyTest() {
+        PutKeyPolicyRequest putKeyPolicyRequest = PutKeyPolicyRequest.builder().build();
+        PutKeyPolicyResponse putKeyPolicyResponse = PutKeyPolicyResponse.builder().build();
+        when(client.putKeyPolicy(putKeyPolicyRequest)).thenReturn(putKeyPolicyResponse);
+
+        PutKeyPolicyResponse response = underTest.putKeyPolicy(putKeyPolicyRequest);
+
+        assertThat(response).isSameAs(putKeyPolicyResponse);
     }
 
 }

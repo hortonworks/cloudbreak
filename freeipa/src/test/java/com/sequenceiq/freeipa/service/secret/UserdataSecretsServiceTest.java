@@ -265,8 +265,9 @@ class UserdataSecretsServiceTest {
             assertEquals(CLOUD_CONTEXT, updateCloudSecretResourceAccessRequest.cloudContext());
             assertEquals(CLOUD_CREDENTIAL, updateCloudSecretResourceAccessRequest.cloudCredential());
             assertEquals("secret-" + i, updateCloudSecretResourceAccessRequest.cloudResource().getReference());
-            assertThat(updateCloudSecretResourceAccessRequest.principals()).hasSameElementsAs(List.of(INSTANCE_PROFILE_ARN, CROSS_ACCOUNT_ROLE_ARN));
-            actualAuthorizedClients.add(updateCloudSecretResourceAccessRequest.authorizedClients().getFirst());
+            assertThat(updateCloudSecretResourceAccessRequest.cryptographicPrincipals()).hasSameElementsAs(
+                    List.of(INSTANCE_PROFILE_ARN, CROSS_ACCOUNT_ROLE_ARN));
+            actualAuthorizedClients.add(updateCloudSecretResourceAccessRequest.cryptographicAuthorizedClients().getFirst());
             UpdateCloudSecretRequest updateCloudSecretRequest = updateCloudSecretRequests.get(i);
             assertEquals(CLOUD_CONTEXT, updateCloudSecretRequest.cloudContext());
             assertEquals(CLOUD_CREDENTIAL, updateCloudSecretRequest.cloudCredential());
