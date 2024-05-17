@@ -7,6 +7,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import jakarta.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -27,22 +30,25 @@ public class SdxUpgradeFilter {
 
     private static final Versioned INVALID_TARGET_VERSION_MDL = () -> "7.2.18";
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public UpgradeV4Response filterSdxUpgradeResponse(SdxUpgradeRequest upgradeSdxClusterRequest, UpgradeV4Response upgradeV4Response,
-        SdxClusterShape clusterShape) {
+        SdxClusterShape clusterShape, String accountId) {
         if (CollectionUtils.isNotEmpty(upgradeV4Response.getUpgradeCandidates()) && Objects.nonNull(upgradeSdxClusterRequest)) {
             UpgradeV4Response filteredResponse =
                 new UpgradeV4Response(upgradeV4Response.getCurrent(), upgradeV4Response.getUpgradeCandidates(), upgradeV4Response.getReason());
-            return filterBySdxUpgradeRequestParams(upgradeSdxClusterRequest, filteredResponse, clusterShape);
+            return filterBySdxUpgradeRequestParams(upgradeSdxClusterRequest, filteredResponse, clusterShape, accountId);
         }
         return upgradeV4Response;
     }
 
     private UpgradeV4Response filterBySdxUpgradeRequestParams(SdxUpgradeRequest upgradeSdxClusterRequest, UpgradeV4Response upgradeV4Response,
-        SdxClusterShape clusterShape) {
+        SdxClusterShape clusterShape, String accountId) {
         UpgradeV4Response filteredUpgradeResponse =
             new UpgradeV4Response(upgradeV4Response.getCurrent(), upgradeV4Response.getUpgradeCandidates(), upgradeV4Response.getReason());
         if (CollectionUtils.isNotEmpty(filteredUpgradeResponse.getUpgradeCandidates())) {
-            List<ImageInfoV4Response> upgradeCandidates = filterImagesByShape(filteredUpgradeResponse, clusterShape);
+            List<ImageInfoV4Response> upgradeCandidates = filterImagesByShape(filteredUpgradeResponse, clusterShape, accountId);
             if (SdxUpgradeShowAvailableImages.LATEST_ONLY == upgradeSdxClusterRequest.getShowAvailableImages()) {
                 List<ImageInfoV4Response> latestImageByRuntime = filterLatestImageByRuntime(upgradeCandidates);
                 filteredUpgradeResponse.setUpgradeCandidates(latestImageByRuntime);
@@ -71,8 +77,9 @@ public class SdxUpgradeFilter {
             .toList();
     }
 
-    private List<ImageInfoV4Response> filterImagesByShape(UpgradeV4Response response, SdxClusterShape clusterShape) {
-        if (clusterShape != SdxClusterShape.MEDIUM_DUTY_HA) {
+    private List<ImageInfoV4Response> filterImagesByShape(UpgradeV4Response response, SdxClusterShape clusterShape, String accountId) {
+        if (clusterShape != SdxClusterShape.MEDIUM_DUTY_HA
+            || entitlementService.isSdxRuntimeUpgradeEnabledOnMediumDuty(accountId)) {
             return response.getUpgradeCandidates();
         } else {
             return response.getUpgradeCandidates()

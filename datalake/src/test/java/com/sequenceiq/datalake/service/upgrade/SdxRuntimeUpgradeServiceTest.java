@@ -18,6 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -128,7 +129,6 @@ public class SdxRuntimeUpgradeServiceTest {
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
-    @Mock
     private SdxUpgradeFilter sdxUpgradeFilter;
 
     @InjectMocks
@@ -149,7 +149,9 @@ public class SdxRuntimeUpgradeServiceTest {
         sdxUpgradeResponse.setCurrent(createCurrentImage(OsType.CENTOS7));
         sdxCluster = getValidEnterpriseCluster();
         sdxUpgradeRequest = getFullSdxUpgradeRequest();
-        when(sdxUpgradeFilter.filterSdxUpgradeResponse(any(), any(), any())).thenCallRealMethod();
+        sdxUpgradeFilter = new SdxUpgradeFilter();
+        ReflectionTestUtils.setField(sdxUpgradeFilter, "entitlementService", entitlementService, EntitlementService.class);
+        ReflectionTestUtils.setField(underTest, "upgradeFilter", sdxUpgradeFilter, SdxUpgradeFilter.class);
         ReflectionTestUtils.setField(underTest, "paywallUrl", "https://archive.coudera.com/p/cdp-public/");
     }
 
@@ -827,23 +829,12 @@ public class SdxRuntimeUpgradeServiceTest {
     void testCheckForUpgradeByName() {
         sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
         when(sdxService.getByNameOrCrn(any(), any())).thenReturn(sdxCluster);
+        setupInternalActorCrnAndUpgradeClusterConverterMock();
+        constructUpgradeV4ResponseAndSetupStackV4EndpointMock("7.2.16", "7.2.17", "7.2.18");
         SdxUpgradeRequest sdxUpgradeRequest = new SdxUpgradeRequest();
-        doCallRealMethod().when(sdxUpgradeClusterConverter).sdxUpgradeRequestToUpgradeV4Request(any(SdxUpgradeRequest.class));
-        doCallRealMethod().when(sdxUpgradeFilter).filterSdxUpgradeResponse(any(), any(), any());
-        doCallRealMethod().when(sdxUpgradeClusterConverter).upgradeResponseToSdxUpgradeResponse(any());
-        RegionAwareInternalCrnGenerator awareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(awareInternalCrnGenerator);
-        when(awareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internal_crn");
-        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        ImageInfoV4Response imageInfoV4Response1 = new ImageInfoV4Response();
-        imageInfoV4Response1.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.16", "", "", "", List.of()));
-        ImageInfoV4Response imageInfoV4Response2 = new ImageInfoV4Response();
-        imageInfoV4Response2.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.17", "", "", "", List.of()));
-        ImageInfoV4Response imageInfoV4Response3 = new ImageInfoV4Response();
-        imageInfoV4Response3.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.18", "", "", "", List.of()));
-        upgradeV4Response.setUpgradeCandidates(List.of(imageInfoV4Response1, imageInfoV4Response2, imageInfoV4Response3));
-        when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), eq(ACCOUNT_ID))).thenReturn(upgradeV4Response);
+
         SdxUpgradeResponse response = underTest.checkForUpgradeByName("CLUSTER_NAME", sdxUpgradeRequest, ACCOUNT_ID, false);
+
         List<ImageInfoV4Response> upgradeCandidates = response.getUpgradeCandidates();
         assertEquals(2, upgradeCandidates.size());
         List<String> componentVersions = upgradeCandidates.stream()
@@ -860,26 +851,14 @@ public class SdxRuntimeUpgradeServiceTest {
         validSdxCluster.setRuntime("7.2.17");
         validSdxCluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
         when(sdxService.getByNameOrCrn(any(), any())).thenReturn(sdxCluster);
-        doCallRealMethod().when(sdxUpgradeClusterConverter).sdxUpgradeRequestToUpgradeV4Request(any(SdxUpgradeRequest.class));
-        doCallRealMethod().when(sdxUpgradeClusterConverter).upgradeResponseToSdxUpgradeResponse(any());
-        RegionAwareInternalCrnGenerator awareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(awareInternalCrnGenerator);
-        when(awareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internal_crn");
-        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        ImageInfoV4Response imageInfoV4Response1 = new ImageInfoV4Response();
-        imageInfoV4Response1.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.16", "", "", "", List.of()));
-        ImageInfoV4Response imageInfoV4Response2 = new ImageInfoV4Response();
-        imageInfoV4Response2.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.17", "", "", "", List.of()));
-        ImageInfoV4Response imageInfoV4Response3 = new ImageInfoV4Response();
-        imageInfoV4Response3.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.18", "", "", "", List.of()));
-        ImageInfoV4Response imageInfoV4Response4 = new ImageInfoV4Response();
-        imageInfoV4Response4.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.3.0", "", "", "", List.of()));
-        upgradeV4Response.setUpgradeCandidates(List.of(imageInfoV4Response1, imageInfoV4Response2, imageInfoV4Response3, imageInfoV4Response4));
-        when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), eq(ACCOUNT_ID))).thenReturn(upgradeV4Response);
+        setupInternalActorCrnAndUpgradeClusterConverterMock();
+        constructUpgradeV4ResponseAndSetupStackV4EndpointMock("7.2.16", "7.2.17", "7.2.18", "7.3.0");
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         request.setRuntime(null);
         request.setImageId(null);
+
         SdxUpgradeResponse response = underTest.checkForUpgradeByName("dl-name", request, ACCOUNT_ID, false);
+
         assertEquals(4, response.getUpgradeCandidates().size());
         List<String> candidates = response.getUpgradeCandidates().stream().map(candidate -> candidate.getComponentVersions().getCdp()).toList();
         assertTrue(candidates.contains("7.2.18"));
@@ -895,26 +874,14 @@ public class SdxRuntimeUpgradeServiceTest {
         validSdxCluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
         when(sdxService.getByNameOrCrn(any(), any())).thenReturn(sdxCluster);
         when(sdxService.getByCrn(eq(USER_CRN), eq(STACK_CRN))).thenReturn(sdxCluster);
-        doCallRealMethod().when(sdxUpgradeClusterConverter).sdxUpgradeRequestToUpgradeV4Request(any(SdxUpgradeRequest.class));
-        doCallRealMethod().when(sdxUpgradeClusterConverter).upgradeResponseToSdxUpgradeResponse(any());
-        RegionAwareInternalCrnGenerator awareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(awareInternalCrnGenerator);
-        when(awareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internal_crn");
-        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        ImageInfoV4Response imageInfoV4Response1 = new ImageInfoV4Response();
-        imageInfoV4Response1.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.16", "", "", "", List.of()));
-        ImageInfoV4Response imageInfoV4Response2 = new ImageInfoV4Response();
-        imageInfoV4Response2.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.17", "", "", "", List.of()));
-        ImageInfoV4Response imageInfoV4Response3 = new ImageInfoV4Response();
-        imageInfoV4Response3.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.18", "", "", "", List.of()));
-        ImageInfoV4Response imageInfoV4Response4 = new ImageInfoV4Response();
-        imageInfoV4Response4.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.3.0", "", "", "", List.of()));
-        upgradeV4Response.setUpgradeCandidates(List.of(imageInfoV4Response1, imageInfoV4Response2, imageInfoV4Response3, imageInfoV4Response4));
-        when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), eq(ACCOUNT_ID))).thenReturn(upgradeV4Response);
+        setupInternalActorCrnAndUpgradeClusterConverterMock();
+        constructUpgradeV4ResponseAndSetupStackV4EndpointMock("7.2.16", "7.2.17", "7.2.18", "7.3.0");
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         request.setRuntime(null);
         request.setImageId(null);
+
         SdxUpgradeResponse response = underTest.checkForUpgradeByCrn(USER_CRN, STACK_CRN, request, ACCOUNT_ID, false);
+
         assertEquals(4, response.getUpgradeCandidates().size());
         List<String> candidates = response.getUpgradeCandidates().stream().map(candidate -> candidate.getComponentVersions().getCdp()).toList();
         assertTrue(candidates.contains("7.2.18"));
@@ -930,26 +897,14 @@ public class SdxRuntimeUpgradeServiceTest {
         validSdxCluster.setClusterShape(SdxClusterShape.ENTERPRISE);
         when(sdxService.getByNameOrCrn(any(), any())).thenReturn(validSdxCluster);
         when(sdxService.getByCrn(eq(USER_CRN), eq(STACK_CRN))).thenReturn(validSdxCluster);
-        doCallRealMethod().when(sdxUpgradeClusterConverter).sdxUpgradeRequestToUpgradeV4Request(any(SdxUpgradeRequest.class));
-        doCallRealMethod().when(sdxUpgradeClusterConverter).upgradeResponseToSdxUpgradeResponse(any());
-        RegionAwareInternalCrnGenerator awareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(awareInternalCrnGenerator);
-        when(awareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internal_crn");
-        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        ImageInfoV4Response imageInfoV4Response1 = new ImageInfoV4Response();
-        imageInfoV4Response1.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.16", "", "", "", List.of()));
-        ImageInfoV4Response imageInfoV4Response2 = new ImageInfoV4Response();
-        imageInfoV4Response2.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.17", "", "", "", List.of()));
-        ImageInfoV4Response imageInfoV4Response3 = new ImageInfoV4Response();
-        imageInfoV4Response3.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.18", "", "", "", List.of()));
-        ImageInfoV4Response imageInfoV4Response4 = new ImageInfoV4Response();
-        imageInfoV4Response4.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.3.0", "", "", "", List.of()));
-        upgradeV4Response.setUpgradeCandidates(List.of(imageInfoV4Response1, imageInfoV4Response2, imageInfoV4Response3, imageInfoV4Response4));
-        when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), eq(ACCOUNT_ID))).thenReturn(upgradeV4Response);
+        setupInternalActorCrnAndUpgradeClusterConverterMock();
+        constructUpgradeV4ResponseAndSetupStackV4EndpointMock("7.2.16", "7.2.17", "7.2.18", "7.3.0");
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         request.setRuntime(null);
         request.setImageId(null);
+
         SdxUpgradeResponse response = underTest.checkForUpgradeByCrn(USER_CRN, STACK_CRN, request, ACCOUNT_ID, false);
+
         assertEquals(4, response.getUpgradeCandidates().size());
         List<String> candidates = response.getUpgradeCandidates().stream().map(candidate -> candidate.getComponentVersions().getCdp()).toList();
         assertTrue(candidates.contains("7.2.18"));
@@ -965,26 +920,14 @@ public class SdxRuntimeUpgradeServiceTest {
         validSdxCluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
         when(sdxService.getByNameOrCrn(any(), any())).thenReturn(validSdxCluster);
         when(sdxService.getByCrn(eq(USER_CRN), eq(STACK_CRN))).thenReturn(validSdxCluster);
-        doCallRealMethod().when(sdxUpgradeClusterConverter).sdxUpgradeRequestToUpgradeV4Request(any(SdxUpgradeRequest.class));
-        doCallRealMethod().when(sdxUpgradeClusterConverter).upgradeResponseToSdxUpgradeResponse(any());
-        RegionAwareInternalCrnGenerator awareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(awareInternalCrnGenerator);
-        when(awareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internal_crn");
-        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        ImageInfoV4Response imageInfoV4Response1 = new ImageInfoV4Response();
-        imageInfoV4Response1.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.16", "", "", "", List.of()));
-        ImageInfoV4Response imageInfoV4Response2 = new ImageInfoV4Response();
-        imageInfoV4Response2.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.17", "", "", "", List.of()));
-        ImageInfoV4Response imageInfoV4Response3 = new ImageInfoV4Response();
-        imageInfoV4Response3.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.18", "", "", "", List.of()));
-        ImageInfoV4Response imageInfoV4Response4 = new ImageInfoV4Response();
-        imageInfoV4Response4.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.3.0", "", "", "", List.of()));
-        upgradeV4Response.setUpgradeCandidates(List.of(imageInfoV4Response1, imageInfoV4Response2, imageInfoV4Response3, imageInfoV4Response4));
-        when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), eq(ACCOUNT_ID))).thenReturn(upgradeV4Response);
+        setupInternalActorCrnAndUpgradeClusterConverterMock();
+        constructUpgradeV4ResponseAndSetupStackV4EndpointMock("7.2.16", "7.2.17", "7.2.18", "7.3.0");
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         request.setRuntime("7.2.18");
         request.setImageId(null);
+
         SdxUpgradeResponse response = underTest.checkForUpgradeByCrn(USER_CRN, STACK_CRN, request, ACCOUNT_ID, false);
+
         assertEquals(4, response.getUpgradeCandidates().size());
         List<String> candidates = response.getUpgradeCandidates().stream().map(candidate -> candidate.getComponentVersions().getCdp()).toList();
         assertTrue(candidates.contains("7.2.18"));
@@ -1000,26 +943,14 @@ public class SdxRuntimeUpgradeServiceTest {
         validSdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
         when(sdxService.getByNameOrCrn(any(), any())).thenReturn(validSdxCluster);
         when(sdxService.getByCrn(eq(USER_CRN), eq(STACK_CRN))).thenReturn(validSdxCluster);
-        doCallRealMethod().when(sdxUpgradeClusterConverter).sdxUpgradeRequestToUpgradeV4Request(any(SdxUpgradeRequest.class));
-        doCallRealMethod().when(sdxUpgradeClusterConverter).upgradeResponseToSdxUpgradeResponse(any());
-        RegionAwareInternalCrnGenerator awareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(awareInternalCrnGenerator);
-        when(awareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internal_crn");
-        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        ImageInfoV4Response imageInfoV4Response1 = new ImageInfoV4Response();
-        imageInfoV4Response1.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.16", "", "", "", List.of()));
-        ImageInfoV4Response imageInfoV4Response2 = new ImageInfoV4Response();
-        imageInfoV4Response2.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.17", "", "", "", List.of()));
-        ImageInfoV4Response imageInfoV4Response3 = new ImageInfoV4Response();
-        imageInfoV4Response3.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.18", "", "", "", List.of()));
-        ImageInfoV4Response imageInfoV4Response4 = new ImageInfoV4Response();
-        imageInfoV4Response4.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.3.0", "", "", "", List.of()));
-        upgradeV4Response.setUpgradeCandidates(List.of(imageInfoV4Response1, imageInfoV4Response2, imageInfoV4Response3, imageInfoV4Response4));
-        when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), eq(ACCOUNT_ID))).thenReturn(upgradeV4Response);
+        setupInternalActorCrnAndUpgradeClusterConverterMock();
+        constructUpgradeV4ResponseAndSetupStackV4EndpointMock("7.2.16", "7.2.17", "7.2.18", "7.3.0");
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         request.setRuntime("7.2.18");
         request.setImageId(null);
+
         SdxUpgradeResponse response = underTest.checkForUpgradeByCrn(USER_CRN, STACK_CRN, request, ACCOUNT_ID, false);
+
         assertEquals(2, response.getUpgradeCandidates().size());
         List<String> candidates = response.getUpgradeCandidates().stream().map(candidate -> candidate.getComponentVersions().getCdp()).toList();
         assertFalse(candidates.contains("7.2.18"));
@@ -1035,33 +966,65 @@ public class SdxRuntimeUpgradeServiceTest {
         validSdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
         when(sdxService.getByNameOrCrn(any(), any())).thenReturn(validSdxCluster);
         when(sdxService.getByCrn(eq(USER_CRN), eq(STACK_CRN))).thenReturn(validSdxCluster);
-        doCallRealMethod().when(sdxUpgradeClusterConverter).sdxUpgradeRequestToUpgradeV4Request(any(SdxUpgradeRequest.class));
-        doCallRealMethod().when(sdxUpgradeClusterConverter).upgradeResponseToSdxUpgradeResponse(any());
-        RegionAwareInternalCrnGenerator awareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(awareInternalCrnGenerator);
-        when(awareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internal_crn");
-        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        ImageInfoV4Response imageInfoV4Response1 = new ImageInfoV4Response();
-        imageInfoV4Response1.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.16", "", "", "", List.of()));
-        ImageInfoV4Response imageInfoV4Response2 = new ImageInfoV4Response();
-        imageInfoV4Response2.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.17", "", "", "", List.of()));
-        ImageInfoV4Response imageInfoV4Response3 = new ImageInfoV4Response();
-        imageInfoV4Response3.setImageId("image-id");
-        imageInfoV4Response3.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.2.18", "", "", "", List.of()));
-        ImageInfoV4Response imageInfoV4Response4 = new ImageInfoV4Response();
-        imageInfoV4Response4.setComponentVersions(new ImageComponentVersions("7.10", "1234", "7.3.0", "", "", "", List.of()));
-        upgradeV4Response.setUpgradeCandidates(List.of(imageInfoV4Response1, imageInfoV4Response2, imageInfoV4Response3, imageInfoV4Response4));
-        when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), eq(ACCOUNT_ID))).thenReturn(upgradeV4Response);
+        setupInternalActorCrnAndUpgradeClusterConverterMock();
+        constructUpgradeV4ResponseAndSetupStackV4EndpointMock("7.2.16", "7.2.17", "7.2.18", "7.3.0");
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         request.setRuntime(null);
         request.setImageId("image-id");
+
         SdxUpgradeResponse response = underTest.checkForUpgradeByCrn(USER_CRN, STACK_CRN, request, ACCOUNT_ID, false);
+
         assertEquals(2, response.getUpgradeCandidates().size());
         List<String> candidates = response.getUpgradeCandidates().stream().map(candidate -> candidate.getComponentVersions().getCdp()).toList();
         assertFalse(candidates.contains("7.2.18"));
         assertFalse(candidates.contains("7.3.0"));
         assertTrue(candidates.contains("7.2.16"));
         assertTrue(candidates.contains("7.2.17"));
+    }
+
+    @Test
+    void testMediumDutyCheckForUpgradeWhenTheEntitlementIsEnabled() {
+        when(entitlementService.isSdxRuntimeUpgradeEnabledOnMediumDuty(eq(ACCOUNT_ID))).thenReturn(Boolean.TRUE);
+
+        SdxCluster validSdxCluster = getValidSdxCluster();
+        validSdxCluster.setRuntime("7.2.17");
+        validSdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+        when(sdxService.getByNameOrCrn(any(), any())).thenReturn(validSdxCluster);
+        when(sdxService.getByCrn(eq(USER_CRN), eq(STACK_CRN))).thenReturn(validSdxCluster);
+        setupInternalActorCrnAndUpgradeClusterConverterMock();
+        constructUpgradeV4ResponseAndSetupStackV4EndpointMock("7.2.16", "7.2.16", "7.2.17", "7.2.18", "7.3.0");
+        SdxUpgradeRequest request = new SdxUpgradeRequest();
+        request.setRuntime("7.2.18");
+        request.setImageId(null);
+        SdxUpgradeResponse response = underTest.checkForUpgradeByCrn(USER_CRN, STACK_CRN, request, ACCOUNT_ID, false);
+
+        assertEquals(5, response.getUpgradeCandidates().size());
+        List<String> candidates = response.getUpgradeCandidates().stream().map(candidate -> candidate.getComponentVersions().getCdp()).toList();
+        assertTrue(candidates.contains("7.2.18"));
+        assertTrue(candidates.contains("7.3.0"));
+        assertTrue(candidates.contains("7.2.16"));
+        assertTrue(candidates.contains("7.2.17"));
+    }
+
+    private void constructUpgradeV4ResponseAndSetupStackV4EndpointMock(String... runtimes) {
+        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
+        List<ImageInfoV4Response> imageInfoV4Responses = Arrays.stream(runtimes)
+            .map(runtime -> {
+                ImageInfoV4Response imageInfoV4Response1 = new ImageInfoV4Response();
+                imageInfoV4Response1.setComponentVersions(new ImageComponentVersions("7.10", "1234", runtime, "", "", "", List.of()));
+                return imageInfoV4Response1;
+            })
+            .toList();
+        upgradeV4Response.setUpgradeCandidates(imageInfoV4Responses);
+        when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), eq(ACCOUNT_ID))).thenReturn(upgradeV4Response);
+    }
+
+    private void setupInternalActorCrnAndUpgradeClusterConverterMock() {
+        RegionAwareInternalCrnGenerator awareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(awareInternalCrnGenerator);
+        when(awareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("internal_crn");
+        doCallRealMethod().when(sdxUpgradeClusterConverter).sdxUpgradeRequestToUpgradeV4Request(any(SdxUpgradeRequest.class));
+        doCallRealMethod().when(sdxUpgradeClusterConverter).upgradeResponseToSdxUpgradeResponse(any());
     }
 
     private SdxCluster getValidSdxCluster() {

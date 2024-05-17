@@ -139,7 +139,7 @@ public class SdxRuntimeUpgradeService {
                                 request, accountId));
         SdxCluster datalake = sdxService.getByNameOrCrn(ThreadBasedUserCrnProvider.getUserCrn(), NameOrCrn.ofName(clusterName));
         UpgradeV4Response filteredUpgradeV4Response = upgradeFilter.filterSdxUpgradeResponse(upgradeSdxClusterRequest, upgradeV4Response,
-                datalake.getClusterShape());
+                datalake.getClusterShape(), accountId);
         return sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(filteredUpgradeV4Response);
     }
 

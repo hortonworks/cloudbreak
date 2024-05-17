@@ -95,6 +95,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ON
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_RMS_ON_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.MEDIUM_DUTY_UPGRADE_ON_HIGHER_RUNTIME;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_DMP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_REAL_TIME_JOBS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_SAAS_PREMIUM;
@@ -577,5 +578,9 @@ public class EntitlementService {
 
     public boolean hybridCloudEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_HYBRID_CLOUD);
+    }
+
+    public boolean isSdxRuntimeUpgradeEnabledOnMediumDuty(String accountId) {
+        return isEntitlementRegistered(accountId, MEDIUM_DUTY_UPGRADE_ON_HIGHER_RUNTIME);
     }
 }

@@ -1249,7 +1249,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         if (SdxClusterShape.MICRO_DUTY.equals(shape)) {
             validateMicroDutyShape(runtime, environment, validationBuilder);
         } else if (SdxClusterShape.MEDIUM_DUTY_HA.equals(shape)) {
-            validateMediumDutyShape(runtime, validationBuilder);
+            validateMediumDutyShape(runtime, validationBuilder, environment.getAccountId());
         } else if (SdxClusterShape.ENTERPRISE.equals(shape)) {
             validateEnterpriseShape(runtime, validationBuilder);
         }
@@ -1277,12 +1277,13 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     }
 
-    private void validateMediumDutyShape(String runtime, ValidationResultBuilder validationBuilder) {
+    private void validateMediumDutyShape(String runtime, ValidationResultBuilder validationBuilder, String accountId) {
         if (!isShapeVersionSupportedByMinimumRuntimeVersion(runtime, MEDIUM_DUTY_REQUIRED_VERSION)) {
             validationBuilder.error("Provisioning a Medium Duty SDX shape is only valid for CM version greater than or equal to "
                     + MEDIUM_DUTY_REQUIRED_VERSION + " and not " + runtime);
         }
-        if (!isShapeVersionSupportedByMaximumRuntimeVersion(runtime, MEDIUM_DUTY_MAXIMUM_VERSION)) {
+        if (!isShapeVersionSupportedByMaximumRuntimeVersion(runtime, MEDIUM_DUTY_MAXIMUM_VERSION)
+            && !entitlementService.isSdxRuntimeUpgradeEnabledOnMediumDuty(accountId)) {
             validationBuilder.error("Provisioning a Medium Duty SDX shape is only valid for 7.2.17 and below. If you want to provision a " +
                 runtime + " SDX, Please use the ENTERPRISE shape!");
         }
