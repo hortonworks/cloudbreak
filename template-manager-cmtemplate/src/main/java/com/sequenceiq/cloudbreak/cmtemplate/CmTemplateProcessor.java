@@ -488,7 +488,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     private boolean isEntitledForTheOptionalEntitlement(List<String> entitlements, BlackListedScaleRole blackListedScaleRole,
         Optional<Entitlement> entitledFor) {
         return (entitledFor.isEmpty() && blackListedScaleRole.getBlockedUntilCDPVersion().isEmpty())
-                || (entitledFor.isPresent() && !entitlements.contains(entitledFor.get().name()));
+                || !entitlements.contains(entitledFor.get().name());
     }
 
     public boolean isVersionEnablesScaling(Versioned blueprintVersion, BlackListedScaleRole role) {

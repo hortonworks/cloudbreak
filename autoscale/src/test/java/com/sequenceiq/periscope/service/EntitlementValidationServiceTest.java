@@ -2,6 +2,8 @@ package com.sequenceiq.periscope.service;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
@@ -37,6 +39,64 @@ class EntitlementValidationServiceTest {
         ReflectionTestUtils.setField(underTest, "entitlementCheckEnabled", false);
         boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS");
         assertTrue(entitled, "entitled should be true when entitlementCheckDisabled");
+    }
+
+    @Test
+    void testWhenAWSAndEntitled() {
+        when(entitlementService.awsAutoScalingEnabled(anyString())).thenReturn(true);
+
+        boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS");
+        assertTrue(entitled, "isEntitled should be true when entitlement found");
+    }
+
+    @Test
+    void testWhenAWSAndNotEntitled() {
+        when(entitlementService.awsAutoScalingEnabled(anyString())).thenReturn(false);
+
+        boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS");
+        assertFalse(entitled, "isEntitled should be false when entitlement is not found");
+    }
+
+    @Test
+    void testWhenAWSStopStartAndEntitled() {
+        when(entitlementService.awsAutoScalingEnabled(anyString())).thenReturn(true);
+        when(entitlementService.awsStopStartScalingEnabled(anyString())).thenReturn(true);
+
+        boolean entitled = underTest.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS");
+        assertTrue(entitled, "isEntitled should be true when entitlement found");
+    }
+
+    @Test
+    void testWhenAWSStopStartAndNotEntitled() {
+        when(entitlementService.awsAutoScalingEnabled(anyString())).thenReturn(false);
+
+        boolean entitled = underTest.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS");
+        assertFalse(entitled, "isEntitled should be false when entitlement is not found");
+    }
+
+    @Test
+    void testWhenAWSEntitledAndNotStopStart() {
+        when(entitlementService.awsAutoScalingEnabled(anyString())).thenReturn(true);
+        when(entitlementService.awsStopStartScalingEnabled(anyString())).thenReturn(false);
+
+        boolean entitled = underTest.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS");
+        assertFalse(entitled, "isEntitled should be false when entitlement is not found");
+    }
+
+    @Test
+    void testWhenAzureAndEntitled() {
+        when(entitlementService.azureAutoScalingEnabled(anyString())).thenReturn(true);
+
+        boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AZURE");
+        assertTrue(entitled, "isEntitled should be true when entitlement found");
+    }
+
+    @Test
+    void testWhenAzureAndNotEntitled() {
+        when(entitlementService.azureAutoScalingEnabled(anyString())).thenReturn(false);
+
+        boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AZURE");
+        assertFalse(entitled, "isEntitled should be false when entitlement is not found");
     }
 
     @Test

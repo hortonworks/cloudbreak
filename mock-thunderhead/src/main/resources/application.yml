@@ -39,6 +39,7 @@ auth:
     cm.observability.realtimejobs: false
     cm.observability.dmp: false
     datalake:
+      efs.enable: false
       customimage.enable: true
       loadbalancer.enable: true
       backup.on.resize.enable: true

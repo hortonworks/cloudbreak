@@ -5,7 +5,10 @@ import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -119,6 +122,10 @@ public class CmTemplateValidatorTest {
         ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
         clouderaManagerRepo.setVersion("7.0.0");
 
+        if (!forced) {
+            when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+        }
+
         if (forced) {
             assertDoesNotThrow(() -> subject
                     .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -1, List.of(), true));
@@ -137,6 +144,10 @@ public class CmTemplateValidatorTest {
         ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
         clouderaManagerRepo.setVersion("7.0.0");
 
+        if (!forced) {
+            when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+        }
+
         if (forced) {
             assertDoesNotThrow(() -> subject
                     .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Map.of(hostGroup, -1), Optional.of(clouderaManagerRepo), List.of(), true));
@@ -144,6 +155,20 @@ public class CmTemplateValidatorTest {
             assertThrows(BadRequestException.class, () -> subject
                     .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Map.of(hostGroup, -1), Optional.of(clouderaManagerRepo), List.of(), false));
         }
+    }
+
+    @Test
+    public void testDownscaleValidationIfKafkaPresentedAndEntitledForScalingThenValidationShouldReturnTrue() {
+        Blueprint blueprint = readBlueprint("input/kafka.bp");
+
+        String hostGroup = "broker";
+        ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
+        clouderaManagerRepo.setVersion("7.0.0");
+
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
+
+        assertDoesNotThrow(() -> subject
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -1, List.of(), false));
     }
 
     @ParameterizedTest
@@ -155,6 +180,10 @@ public class CmTemplateValidatorTest {
         ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
         clouderaManagerRepo.setVersion("7.0.0");
 
+        if (!forced) {
+            when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+        }
+
         if (forced) {
             assertDoesNotThrow(() -> subject
                     .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of(), true));
@@ -162,6 +191,20 @@ public class CmTemplateValidatorTest {
             assertThrows(BadRequestException.class, () -> subject
                     .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of(), false));
         }
+    }
+
+    @Test
+    public void testUpscaleValidationIfKafkaPresentedAndEntitledForScalingThenValidationShouldReturnTrue() {
+        Blueprint blueprint = readBlueprint("input/kafka.bp");
+
+        String hostGroup = "broker";
+        ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
+        clouderaManagerRepo.setVersion("7.0.0");
+
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
+
+        assertDoesNotThrow(() -> subject
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of(), false));
     }
 
     @ParameterizedTest
@@ -172,6 +215,10 @@ public class CmTemplateValidatorTest {
         String hostGroup = "master";
         ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
         clouderaManagerRepo.setVersion("7.0.0");
+
+        if (!forced) {
+            when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+        }
 
         if (forced) {
             assertDoesNotThrow(() -> subject
@@ -190,6 +237,8 @@ public class CmTemplateValidatorTest {
         ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
         clouderaManagerRepo.setVersion("7.2.8");
 
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+
         assertDoesNotThrow(() -> subject
                 .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of(), false));
     }
@@ -201,6 +250,9 @@ public class CmTemplateValidatorTest {
         String hostGroup = "master";
         ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
         clouderaManagerRepo.setVersion("7.2.7");
+
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+
         assertThrows(BadRequestException.class, () -> subject
                 .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of(), false));
     }
@@ -213,8 +265,38 @@ public class CmTemplateValidatorTest {
         ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
         clouderaManagerRepo.setVersion("7.2.6");
 
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+
         assertThrows(BadRequestException.class, () -> subject
                 .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of(), false));
+    }
+
+    @Test
+    public void testValidationIfNifi728PresentedAndDownScaleThenValidationShouldThrowException() {
+        Blueprint blueprint = readBlueprint("input/nifi_7_2_8.bp");
+
+        String hostGroup = "master";
+        ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
+        clouderaManagerRepo.setVersion("7.2.8");
+
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
+
+        assertDoesNotThrow(() -> subject
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of(), false));
+    }
+
+    @Test
+    public void testValidationIfNifiPresentedAndDownScaleAndEntitledForScalingThenValidationShouldReturnTrue() {
+        Blueprint blueprint = readBlueprint("input/nifi.bp");
+
+        String hostGroup = "master";
+        ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
+        clouderaManagerRepo.setVersion("7.0.0");
+
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
+
+        assertDoesNotThrow(() -> subject
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of(), false));
     }
 
     @ParameterizedTest
@@ -226,6 +308,10 @@ public class CmTemplateValidatorTest {
         ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
         clouderaManagerRepo.setVersion("7.0.0");
 
+        if (!forced) {
+            when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+        }
+
         if (forced) {
             assertDoesNotThrow(() -> subject
                     .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of(), true));
@@ -233,6 +319,20 @@ public class CmTemplateValidatorTest {
             assertThrows(BadRequestException.class, () -> subject
                     .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of(), false));
         }
+    }
+
+    @Test
+    public void testValidationIfNifiPresentedAndUpScaleAndEntitledForScalingThenValidationShouldReturnTrue() {
+        Blueprint blueprint = readBlueprint("input/nifi.bp");
+
+        String hostGroup = "master";
+        ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
+        clouderaManagerRepo.setVersion("7.0.0");
+
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
+
+        assertDoesNotThrow(() -> subject
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, 2, List.of(), false));
     }
 
     @ParameterizedTest
@@ -243,6 +343,10 @@ public class CmTemplateValidatorTest {
         String hostGroup = "broker";
         ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
         clouderaManagerRepo.setVersion("7.2.11");
+
+        if (!forced) {
+            when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+        }
 
         if (forced) {
             assertDoesNotThrow(() -> subject
@@ -261,6 +365,8 @@ public class CmTemplateValidatorTest {
         ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
         clouderaManagerRepo.setVersion("7.2.12");
 
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+
         assertDoesNotThrow(() -> subject
                 .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, +1, List.of(), false));
     }
@@ -272,6 +378,9 @@ public class CmTemplateValidatorTest {
         String hostGroup = "broker";
         ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
         clouderaManagerRepo.setVersion("7.2.12");
+
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
+
         assertDoesNotThrow(() -> subject
                 .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of(), false));
     }
@@ -284,6 +393,10 @@ public class CmTemplateValidatorTest {
         String hostGroup = "broker";
         ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
         clouderaManagerRepo.setVersion("7.2.12");
+
+        if (!forced) {
+            when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+        }
 
         if (forced) {
             assertDoesNotThrow(() -> subject

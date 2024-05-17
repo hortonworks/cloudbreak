@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
@@ -124,8 +125,14 @@ public class ClusterV4RequestToClusterConverterTest {
     public void testConvertWhenCloudStorageConfiguredAndRdsAndLdapAndProxyExistsAnd() {
         CloudStorageRequest cloudStorageRequest = mock(CloudStorageRequest.class);
 
+
+
+
+        when(entitlementService.dataLakeEfsEnabled(anyString())).thenReturn(true);
+
         String rdsConfigName = "rds-name";
         String proxyConfigCrn = "proxy-config-resource-crn";
+        String ldapName = "ldap-name";
 
         FileSystem fileSystem = new FileSystem();
 

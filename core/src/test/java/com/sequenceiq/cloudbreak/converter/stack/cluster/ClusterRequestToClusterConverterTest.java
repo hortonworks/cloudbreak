@@ -2,8 +2,10 @@ package com.sequenceiq.cloudbreak.converter.stack.cluster;
 
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -72,6 +74,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     @BeforeEach
     public void setUp() {
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
+        lenient().when(entitlementService.dataLakeEfsEnabled(anyString())).thenReturn(true);
     }
 
     @Test
