@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.ReflectionUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 
 @ExtendWith(MockitoExtension.class)
 public class InternalCrnModifierTest {
@@ -55,7 +57,13 @@ public class InternalCrnModifierTest {
 
     @BeforeEach
     public void before() {
-        when(proceedingJoinPoint.getSignature()).thenReturn(methodSignature);
+        lenient().when(proceedingJoinPoint.getSignature()).thenReturn(methodSignature);
+    }
+
+    @Test
+    void testChangeAccountIdInCrnString() {
+        Crn result = underTest.changeAccountIdInCrnString(INTERNAL_CRN, "1234");
+        assertEquals(EXPECTED_INTERNAL_CRN, result.toString());
     }
 
     @Test
