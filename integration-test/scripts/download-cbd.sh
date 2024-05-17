@@ -8,10 +8,7 @@ cd $INTEGCB_LOCATION
 
 os=$(uname)
 echo -e "\n\033[1;96m--- build latest cbd: $CB_TARGET_BRANCH for $os\033[0m\n"
-rm_flag=""
-if ! [[ "$CIRCLECI" && "$CIRCLECI" == "true" ]]; then
-    rm_flag="--rm"
-fi
+rm_flag="--rm"
 
 docker volume rm cbd-source 2>/dev/null || :
 docker volume create --name cbd-source 1>/dev/null
