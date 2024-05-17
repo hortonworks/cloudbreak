@@ -11,6 +11,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentChangeAuthe
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentChangeCredentialAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentChangeSecurityAccessAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentCreateAction;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentCreateDefaultExternalizedComputeClusterAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteByNameAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteMultipleByCrnsAction;
@@ -20,6 +21,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentGetByCrnAct
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentInternalGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentListAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentModifyProxyConfigAction;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentReInitializeDefaultExternalizedComputeClusterAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentStartAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentStopAction;
@@ -108,5 +110,13 @@ public class EnvironmentTestClient {
 
     public Action<EnvironmentTestDto, EnvironmentClient> modifyProxyConfig(String proxyConfigName) {
         return new EnvironmentModifyProxyConfigAction(proxyConfigName);
+    }
+
+    public Action<EnvironmentTestDto, EnvironmentClient> createDefaultExternalizedComputeCluster() {
+        return new EnvironmentCreateDefaultExternalizedComputeClusterAction();
+    }
+
+    public Action<EnvironmentTestDto, EnvironmentClient> reInitializeDefaultExternalizedComputeCluster(boolean privateCluster) {
+        return new EnvironmentReInitializeDefaultExternalizedComputeClusterAction(privateCluster);
     }
 }

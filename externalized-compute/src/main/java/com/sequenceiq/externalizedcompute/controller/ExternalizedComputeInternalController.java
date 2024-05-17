@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.externalizedcompute.api.endpoint.ExternalizedComputeClusterInternalEndpoint;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterInternalRequest;
+import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterRequest;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
 import com.sequenceiq.externalizedcompute.flow.ExternalizedComputeClusterFlowManager;
@@ -46,6 +47,12 @@ public class ExternalizedComputeInternalController implements ExternalizedComput
         LOGGER.info("Externalized Compute Cluster internal request: {}", request);
         Crn userCrn = Crn.ofUser(ThreadBasedUserCrnProvider.getUserCrn());
         return externalizedComputeClusterService.prepareComputeClusterCreation(request, request.isDefaultCluster(), userCrn);
+    }
+
+    @Override
+    public FlowIdentifier reInitialize(@TenantAwareParam ExternalizedComputeClusterRequest request, @InitiatorUserCrn String initiatorUserCrn, boolean force) {
+        LOGGER.info("Externalized Compute Cluster internal reinitialization initiated, request: {}", request);
+        return externalizedComputeClusterService.reInitializeComputeCluster(request, force);
     }
 
     @Override

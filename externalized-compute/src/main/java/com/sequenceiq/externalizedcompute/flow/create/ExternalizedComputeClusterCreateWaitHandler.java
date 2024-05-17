@@ -29,6 +29,8 @@ public class ExternalizedComputeClusterCreateWaitHandler extends ExceptionCatche
 
     public static final String DEPLOYMENT_FAILED_STATUS = "DEPLOYMENT_FAILED";
 
+    public static final String DELETE_FAILED_STATUS = "DELETE_FAILED";
+
     public static final String RUNNING_STATUS = "RUNNING";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExternalizedComputeClusterCreateWaitHandler.class);
@@ -69,6 +71,7 @@ public class ExternalizedComputeClusterCreateWaitHandler extends ExceptionCatche
                                 LOGGER.debug("Cluster created successfully");
                                 return AttemptResults.finishWith(
                                         new ExternalizedComputeClusterCreateWaitSuccessResponse(resourceId, actorCrn));
+                            case DELETE_FAILED_STATUS:
                             case DEPLOYMENT_FAILED_STATUS:
                             case CREATE_FAILED_STATUS:
                                 LOGGER.error("Cluster status is a failed status: {}", cluster.getStatus());

@@ -37,7 +37,7 @@ class ExternalizedComputeClusterDeleteWaitHandlerTest {
     @Test
     void doAcceptTestWithDeleted() {
         HandlerEvent<ExternalizedComputeClusterDeleteWaitRequest> handlerEvent = new HandlerEvent<>(
-                new Event<>(new ExternalizedComputeClusterDeleteWaitRequest(2L, "actorCrn", false)));
+                new Event<>(new ExternalizedComputeClusterDeleteWaitRequest(2L, "actorCrn", false, false)));
         ExternalizedComputeCluster externalizedComputeCluster = mock(ExternalizedComputeCluster.class);
         when(externalizedComputeCluster.getLiftieName()).thenReturn("liftieName");
         when(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster)).thenReturn("liftieCrn");
@@ -56,7 +56,7 @@ class ExternalizedComputeClusterDeleteWaitHandlerTest {
     @Test
     void doAcceptTestWithDeleteInProgressThenDeleted() {
         HandlerEvent<ExternalizedComputeClusterDeleteWaitRequest> handlerEvent = new HandlerEvent<>(
-                new Event<>(new ExternalizedComputeClusterDeleteWaitRequest(2L, "actorCrn", false)));
+                new Event<>(new ExternalizedComputeClusterDeleteWaitRequest(2L, "actorCrn", false, false)));
         ExternalizedComputeCluster externalizedComputeCluster = mock(ExternalizedComputeCluster.class);
         when(externalizedComputeCluster.getLiftieName()).thenReturn("liftieName");
         when(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster)).thenReturn("liftieCrn");
@@ -77,7 +77,7 @@ class ExternalizedComputeClusterDeleteWaitHandlerTest {
     @Test
     void doAcceptTestWithDeleteInProgressThenDeleteFailed() {
         HandlerEvent<ExternalizedComputeClusterDeleteWaitRequest> handlerEvent = new HandlerEvent<>(
-                new Event<>(new ExternalizedComputeClusterDeleteWaitRequest(2L, "actorCrn", false)));
+                new Event<>(new ExternalizedComputeClusterDeleteWaitRequest(2L, "actorCrn", false, false)));
         ExternalizedComputeCluster externalizedComputeCluster = mock(ExternalizedComputeCluster.class);
         when(externalizedComputeCluster.getLiftieName()).thenReturn("liftieName");
         when(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster)).thenReturn("liftieCrn");
@@ -99,7 +99,7 @@ class ExternalizedComputeClusterDeleteWaitHandlerTest {
     @Test
     void doAcceptTestWithDeleteInProgressThenDeleteFailedButForceDeleted() {
         HandlerEvent<ExternalizedComputeClusterDeleteWaitRequest> handlerEvent = new HandlerEvent<>(
-                new Event<>(new ExternalizedComputeClusterDeleteWaitRequest(2L, "actorCrn", true)));
+                new Event<>(new ExternalizedComputeClusterDeleteWaitRequest(2L, "actorCrn", true, false)));
         ExternalizedComputeCluster externalizedComputeCluster = mock(ExternalizedComputeCluster.class);
         when(externalizedComputeCluster.getLiftieName()).thenReturn("liftieName");
         when(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster)).thenReturn("liftieCrn");
@@ -121,7 +121,7 @@ class ExternalizedComputeClusterDeleteWaitHandlerTest {
     @Test
     void doAcceptTestWithDeleteInProgressThenDeleteTimedOutButForceDeleted() {
         HandlerEvent<ExternalizedComputeClusterDeleteWaitRequest> handlerEvent = new HandlerEvent<>(
-                new Event<>(new ExternalizedComputeClusterDeleteWaitRequest(2L, "actorCrn", true)));
+                new Event<>(new ExternalizedComputeClusterDeleteWaitRequest(2L, "actorCrn", true, false)));
         ExternalizedComputeCluster externalizedComputeCluster = mock(ExternalizedComputeCluster.class);
         when(externalizedComputeCluster.getLiftieName()).thenReturn("liftieName");
         when(externalizedComputeClusterService.getLiftieClusterCrn(externalizedComputeCluster)).thenReturn("liftieCrn");

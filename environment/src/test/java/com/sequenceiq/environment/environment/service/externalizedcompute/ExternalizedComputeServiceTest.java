@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -17,17 +19,27 @@ import jakarta.ws.rs.NotFoundException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
+import com.sequenceiq.cloudbreak.polling.PollingService;
+import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.DefaultComputeCluster;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
+import com.sequenceiq.environment.environment.flow.creation.handler.computecluster.ComputeClusterCreationRetrievalTask;
+import com.sequenceiq.environment.environment.flow.creation.handler.computecluster.ComputeClusterPollerObject;
+import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.environment.exception.ExternalizedComputeOperationFailedException;
 import com.sequenceiq.environment.util.PollingConfig;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus;
+import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterInternalRequest;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,11 +52,21 @@ class ExternalizedComputeServiceTest {
     @Mock
     private ExternalizedComputeClientService externalizedComputeClientService;
 
+    @Mock
+    private PollingService<ComputeClusterPollerObject> computeClusterPollingService;
+
+    @Mock
+    private EntitlementService entitlementService;
+
+    @Mock
+    private EnvironmentService environmentService;
+
     @InjectMocks
     private ExternalizedComputeService underTest;
 
     @Test
     void createComputeClusterWhenEnvironmentRequestContainsRequestCallToExtShouldHappen() {
+        when(entitlementService.isContainerReadyEnvEnabled(any())).thenReturn(true);
         ReflectionTestUtils.setField(underTest, "externalizedComputeEnabled", true);
         Environment environment = new Environment();
         DefaultComputeCluster defaultComputeCluster = new DefaultComputeCluster();
@@ -55,7 +77,24 @@ class ExternalizedComputeServiceTest {
     }
 
     @Test
+    void createComputeClusterWhenClusterExists() {
+        when(entitlementService.isContainerReadyEnvEnabled(any())).thenReturn(true);
+        ReflectionTestUtils.setField(underTest, "externalizedComputeEnabled", true);
+        Environment environment = new Environment();
+        environment.setName("environmentName");
+        environment.setResourceCrn("envCrn");
+        DefaultComputeCluster defaultComputeCluster = new DefaultComputeCluster();
+        defaultComputeCluster.setCreate(true);
+        environment.setDefaultComputeCluster(defaultComputeCluster);
+        when(externalizedComputeClientService.getComputeCluster(environment.getResourceCrn(), "default-environmentName-compute-cluster"))
+                .thenReturn(Optional.of(new ExternalizedComputeClusterResponse()));
+        underTest.createComputeCluster(environment);
+        verify(externalizedComputeClientService, times(0)).createComputeCluster(any());
+    }
+
+    @Test
     void createComputeClusterWhenExtComputeThrowErrorShouldThrowException() {
+        when(entitlementService.isContainerReadyEnvEnabled(any())).thenReturn(true);
         ReflectionTestUtils.setField(underTest, "externalizedComputeEnabled", true);
         when(externalizedComputeClientService.createComputeCluster(any())).thenThrow(new NotFoundException("HTTP 404 Not Found localhost:1111/faultyurl"));
         Environment environment = new Environment();
@@ -162,4 +201,87 @@ class ExternalizedComputeServiceTest {
         verify(externalizedComputeClientService, times(1)).deleteComputeCluster(envCrn, defaultCluster, false);
         verify(externalizedComputeClientService, times(1)).deleteComputeCluster(envCrn, anotherCluster, false);
     }
+
+    @Test
+    public void awaitComputeClusterCreationTest() {
+        when(computeClusterPollingService.pollWithTimeout(
+                any(ComputeClusterCreationRetrievalTask.class),
+                any(ComputeClusterPollerObject.class),
+                anyLong(),
+                anyInt(),
+                anyInt()))
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
+
+        Environment environment = new Environment();
+        environment.setId(1L);
+        environment.setResourceCrn("crn");
+        underTest.awaitComputeClusterCreation(environment, "computecluster");
+
+        verify(computeClusterPollingService, times(1)).pollWithTimeout(
+                any(ComputeClusterCreationRetrievalTask.class),
+                any(ComputeClusterPollerObject.class),
+                anyLong(),
+                anyInt(),
+                anyInt());
+    }
+
+    @Test
+    public void testUpdateDefaultComputeClusterProperties() {
+        Environment environment = new Environment();
+        environment.setStatus(EnvironmentStatus.AVAILABLE);
+        environment.setId(1L);
+        environment.setResourceCrn("crn");
+        String outboundType = "udr";
+        ExternalizedComputeClusterDto request = ExternalizedComputeClusterDto.builder()
+                .withCreate(true)
+                .withPrivateCluster(true)
+                .withOutboundType(outboundType)
+                .build();
+
+        ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
+        when(environmentService.save(environmentArgumentCaptor.capture())).thenReturn(environment);
+
+        underTest.updateDefaultComputeClusterProperties(environment, request);
+
+        verify(environmentService, times(1)).save(any());
+        DefaultComputeCluster defaultComputeCluster = environmentArgumentCaptor.getValue().getDefaultComputeCluster();
+        assertTrue(defaultComputeCluster.isPrivateCluster());
+        assertEquals(outboundType, defaultComputeCluster.getOutboundType());
+    }
+
+    @Test
+    public void testReInitializeComputeCluster() {
+        ReflectionTestUtils.setField(underTest, "externalizedComputeEnabled", true);
+        when(entitlementService.isContainerReadyEnvEnabled(any())).thenReturn(true);
+        Environment environment = new Environment();
+        String environmentName = "environmentName";
+        environment.setName(environmentName);
+        String envCrn = "envCrn";
+        environment.setResourceCrn(envCrn);
+        underTest.reInitializeComputeCluster(environment, true);
+        ArgumentCaptor<ExternalizedComputeClusterInternalRequest> argumentCaptor = ArgumentCaptor.forClass(
+                ExternalizedComputeClusterInternalRequest.class);
+        verify(externalizedComputeClientService).reInitializeComputeCluster(argumentCaptor.capture(),
+                eq(true));
+        ExternalizedComputeClusterInternalRequest request = argumentCaptor.getValue();
+        assertEquals(envCrn, request.getEnvironmentCrn());
+        assertEquals("default-" + environmentName + "-compute-cluster", request.getName());
+        assertTrue(request.isDefaultCluster());
+    }
+
+    @Test
+    public void testReInitializeComputeClusterButNotEnabled() {
+        ReflectionTestUtils.setField(underTest, "externalizedComputeEnabled", false);
+        Environment environment = new Environment();
+        String environmentName = "environmentName";
+        environment.setName(environmentName);
+        String envCrn = "envCrn";
+        environment.setResourceCrn(envCrn);
+        ExternalizedComputeOperationFailedException externalizedComputeOperationFailedException = assertThrows(
+                ExternalizedComputeOperationFailedException.class, () -> underTest.reInitializeComputeCluster(environment, true));
+        verify(externalizedComputeClientService, times(0)).reInitializeComputeCluster(any(),
+                eq(true));
+        assertEquals("Externalized compute not enabled", externalizedComputeOperationFailedException.getCause().getMessage());
+    }
+
 }

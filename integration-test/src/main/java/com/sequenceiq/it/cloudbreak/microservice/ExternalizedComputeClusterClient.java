@@ -3,9 +3,12 @@ package com.sequenceiq.it.cloudbreak.microservice;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
+import com.sequenceiq.externalizedcompute.api.ExternalizedComputeClusterApi;
 import com.sequenceiq.externalizedcompute.api.client.ExternalizedComputeClusterApiKeyClient;
 import com.sequenceiq.externalizedcompute.api.client.ExternalizedComputeClusterCrnEndpoint;
+import com.sequenceiq.externalizedcompute.api.client.ExternalizedComputeClusterInternalCrnClient;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
@@ -20,10 +23,16 @@ public class ExternalizedComputeClusterClient extends MicroserviceClient<com.seq
 
     private final com.sequenceiq.externalizedcompute.api.client.ExternalizedComputeClusterClient externalizedComputeClusterClient;
 
-    public ExternalizedComputeClusterClient(CloudbreakUser cloudbreakUser, String serviceAddress) {
+    private final ExternalizedComputeClusterInternalCrnClient externalizedComputeClusterInternalCrnClient;
+
+    public ExternalizedComputeClusterClient(CloudbreakUser cloudbreakUser, RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator,
+            String serviceAddress, String serviceInternalAddress) {
         ConfigKey configKey = new ConfigKey(false, true, true);
         externalizedComputeClusterClient = new ExternalizedComputeClusterApiKeyClient(serviceAddress, configKey)
                 .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
+
+        externalizedComputeClusterInternalCrnClient = new ExternalizedComputeClusterInternalCrnClient(serviceInternalAddress, configKey,
+                ExternalizedComputeClusterApi.API_ROOT_CONTEXT, regionAwareInternalCrnGenerator);
     }
 
     @Override
@@ -50,5 +59,11 @@ public class ExternalizedComputeClusterClient extends MicroserviceClient<com.seq
     @Override
     public Set<String> supportedTestDtos() {
         return Set.of(ExternalizedComputeClusterTestDto.class.getSimpleName());
+    }
+
+    @Override
+    public ExternalizedComputeClusterCrnEndpoint getInternalClient(TestContext testContext) {
+        checkIfInternalClientAllowed(testContext);
+        return externalizedComputeClusterInternalCrnClient.withInternalCrn();
     }
 }

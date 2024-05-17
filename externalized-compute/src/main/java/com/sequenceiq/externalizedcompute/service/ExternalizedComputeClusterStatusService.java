@@ -104,7 +104,7 @@ public class ExternalizedComputeClusterStatusService {
                 return false;
             }
             if (currentStatus.getStatus() != null && currentStatus.getStatus().isDeleteInProgressOrCompleted() &&
-                    !newStatus.isDeleteInProgressOrCompletedOrFailed()) {
+                    !newStatus.isDeleteInProgressOrCompletedOrFailedOrReinitializeInProgress()) {
                 return false;
             }
         }

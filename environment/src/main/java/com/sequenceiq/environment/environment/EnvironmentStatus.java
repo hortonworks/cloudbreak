@@ -60,6 +60,10 @@ public enum EnvironmentStatus {
     COMPUTE_CLUSTER_CREATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.
             COMPUTE_CLUSTER_CREATION_IN_PROGRESS),
 
+    // Reinitializing the compute cluster for the environment
+    COMPUTE_CLUSTER_REINITIALIZATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.
+            COMPUTE_CLUSTER_REINITIALIZATION_IN_PROGRESS),
+
     // Deleting all the attached DWX/ML ..etc cluster (currently only DWX and Monitoring)
     EXPERIENCE_DELETE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.EXPERIENCE_DELETE_IN_PROGRESS),
 

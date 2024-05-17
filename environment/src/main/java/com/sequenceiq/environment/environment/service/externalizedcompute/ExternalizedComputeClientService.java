@@ -41,6 +41,12 @@ public class ExternalizedComputeClientService {
                 initiatorUserCrn -> handleException(() -> endpoint.create(request, initiatorUserCrn), "Failed to create compute cluster"));
     }
 
+    public FlowIdentifier reInitializeComputeCluster(ExternalizedComputeClusterInternalRequest request, boolean force) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                initiatorUserCrn -> handleException(() -> endpoint.reInitialize(request, initiatorUserCrn, force), "Failed to reinitialize compute cluster"));
+    }
+
     public FlowIdentifier deleteComputeCluster(String environmentCrn, String name, boolean force) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),

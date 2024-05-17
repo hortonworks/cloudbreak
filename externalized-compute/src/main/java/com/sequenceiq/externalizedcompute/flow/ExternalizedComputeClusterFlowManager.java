@@ -1,5 +1,6 @@
 package com.sequenceiq.externalizedcompute.flow;
 
+import static com.sequenceiq.externalizedcompute.flow.chain.ExternalizedComputeClusterFlowChainTriggers.EXTERNALIZED_COMPUTE_CLUSTER_REINIT_TRIGGER_EVENT;
 import static com.sequenceiq.externalizedcompute.flow.create.ExternalizedComputeClusterCreateFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_CREATE_INITIATED_EVENT;
 import static com.sequenceiq.externalizedcompute.flow.delete.ExternalizedComputeClusterDeleteFlowEvent.EXTERNALIZED_COMPUTE_CLUSTER_DELETE_INITIATED_EVENT;
 
@@ -52,11 +53,18 @@ public class ExternalizedComputeClusterFlowManager {
                 externalizedComputeCluster.getName());
     }
 
+    public FlowIdentifier triggerExternalizedComputeClusterReInitialization(ExternalizedComputeCluster externalizedComputeCluster) {
+        String selector = EXTERNALIZED_COMPUTE_CLUSTER_REINIT_TRIGGER_EVENT;
+        String actorCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        return notify(selector, new ExternalizedComputeClusterEvent(selector, externalizedComputeCluster.getId(), actorCrn),
+                externalizedComputeCluster.getName());
+    }
+
     public FlowIdentifier triggerExternalizedComputeClusterDeletion(ExternalizedComputeCluster externalizedComputeCluster, boolean force) {
         LOGGER.info("Trigger Externalized Compute Cluster deletion for: {}", externalizedComputeCluster);
         String selector = EXTERNALIZED_COMPUTE_CLUSTER_DELETE_INITIATED_EVENT.event();
         String actorCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return notify(selector, new ExternalizedComputeClusterDeleteEvent(selector, externalizedComputeCluster.getId(), actorCrn, force),
+        return notify(selector, new ExternalizedComputeClusterDeleteEvent(selector, externalizedComputeCluster.getId(), actorCrn, force, false),
                 externalizedComputeCluster.getName());
     }
 

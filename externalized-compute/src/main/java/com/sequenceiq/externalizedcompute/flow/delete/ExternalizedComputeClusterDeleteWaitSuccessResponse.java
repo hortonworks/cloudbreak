@@ -10,8 +10,9 @@ public class ExternalizedComputeClusterDeleteWaitSuccessResponse extends Externa
     public ExternalizedComputeClusterDeleteWaitSuccessResponse(
             @JsonProperty("resourceId") Long externalizedComputeClusterId,
             @JsonProperty("actorCrn") String actorCrn,
-            @JsonProperty("force") boolean force) {
-        super(externalizedComputeClusterId, actorCrn, force);
+            @JsonProperty("force") boolean force,
+            @JsonProperty("preserveCluster") boolean preserveCluster) {
+        super(externalizedComputeClusterId, actorCrn, force, preserveCluster);
     }
 
     @Override

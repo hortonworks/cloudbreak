@@ -41,9 +41,9 @@ public class ExternalizedComputeClusterFlowInformation implements ApplicationFlo
 
     @Override
     public void handleFlowFail(FlowLog flowLog) {
-        if (ExternalizedComputeClusterCreateFlowConfig.class.equals(flowLog.getFlowType())) {
+        if (ExternalizedComputeClusterCreateFlowConfig.class.equals(flowLog.getFlowType().getClassValue())) {
             externalizedComputeClusterStatusService.setStatus(flowLog.getResourceId(), ExternalizedComputeClusterStatusEnum.CREATE_FAILED, "Flow failed");
-        } else if (ExternalizedComputeClusterDeleteFlowConfig.class.equals(flowLog.getFlowType())) {
+        } else if (ExternalizedComputeClusterDeleteFlowConfig.class.equals(flowLog.getFlowType().getClassValue())) {
             externalizedComputeClusterStatusService.setStatus(flowLog.getResourceId(), ExternalizedComputeClusterStatusEnum.DELETE_FAILED, "Flow failed");
         } else {
             externalizedComputeClusterStatusService.setStatus(flowLog.getResourceId(), ExternalizedComputeClusterStatusEnum.UNKNOWN, "Flow failed");

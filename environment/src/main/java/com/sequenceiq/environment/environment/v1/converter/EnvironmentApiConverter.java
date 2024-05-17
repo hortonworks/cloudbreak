@@ -64,6 +64,7 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
+import com.sequenceiq.environment.environment.service.externalizedcompute.ExternalizedComputeService;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
@@ -105,6 +106,8 @@ public class EnvironmentApiConverter {
 
     private final DataServicesConverter dataServicesConverter;
 
+    private final ExternalizedComputeService externalizedComputeService;
+
     public EnvironmentApiConverter(TelemetryApiConverter telemetryApiConverter,
             BackupConverter backupConverter,
             TunnelConverter tunnelConverter,
@@ -114,7 +117,8 @@ public class EnvironmentApiConverter {
             NetworkRequestToDtoConverter networkRequestToDtoConverter,
             ProxyRequestToProxyConfigConverter proxyRequestToProxyConfigConverter,
             RegionAwareCrnGenerator regionAwareCrnGenerator,
-            DataServicesConverter dataServicesConverter) {
+            DataServicesConverter dataServicesConverter,
+            ExternalizedComputeService externalizedComputeService) {
         this.backupConverter = backupConverter;
         this.telemetryApiConverter = telemetryApiConverter;
         this.accountTelemetryService = accountTelemetryService;
@@ -125,6 +129,7 @@ public class EnvironmentApiConverter {
         this.proxyRequestToProxyConfigConverter = proxyRequestToProxyConfigConverter;
         this.regionAwareCrnGenerator = regionAwareCrnGenerator;
         this.dataServicesConverter = dataServicesConverter;
+        this.externalizedComputeService = externalizedComputeService;
     }
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
@@ -140,8 +145,7 @@ public class EnvironmentApiConverter {
                 .withCredential(request)
                 .withCreated(System.currentTimeMillis())
                 .withFreeIpaCreation(freeIpaConverter.convert(request.getFreeIpa(), accountId, cloudPlatform))
-                .withExternalizedComputeCluster(requestToExternalizedComputeClusterDto(request.getExternalizedComputeCreateRequest(),
-                        request.getSecurityAccess()))
+                .withExternalizedComputeCluster(requestToExternalizedComputeClusterDto(request.getExternalizedComputeCreateRequest(), accountId))
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),
                         accountTelemetryService.getOrDefault(accountId).getFeatures(), accountId))
@@ -183,10 +187,10 @@ public class EnvironmentApiConverter {
         return builder.build();
     }
 
-    private ExternalizedComputeClusterDto requestToExternalizedComputeClusterDto(ExternalizedComputeCreateRequest externalizedCompute,
-            SecurityAccessRequest securityAccess) {
+    public ExternalizedComputeClusterDto requestToExternalizedComputeClusterDto(ExternalizedComputeCreateRequest externalizedCompute, String accountId) {
         ExternalizedComputeClusterDto.Builder builder = ExternalizedComputeClusterDto.builder();
         if (externalizedCompute != null && externalizedCompute.isCreate()) {
+            externalizedComputeService.externalizedComputeValidation(accountId);
             builder.withCreate(externalizedCompute.isCreate())
                     .withPrivateCluster(externalizedCompute.isPrivateCluster());
             if (StringUtils.hasText(externalizedCompute.getOutboundType())) {

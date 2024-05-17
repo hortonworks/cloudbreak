@@ -39,7 +39,9 @@ public class ExternalizedComputeClusterDeleteActions {
 
             @Override
             protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterDeleteEvent payload, Map<Object, Object> variables) {
-                externalizedComputeClusterStatusService.setStatus(context.getExternalizedComputeId(), ExternalizedComputeClusterStatusEnum.DELETE_IN_PROGRESS,
+                ExternalizedComputeClusterStatusEnum deleteStatus = payload.isPreserveCluster() ?
+                        ExternalizedComputeClusterStatusEnum.REINITIALIZE_IN_PROGRESS : ExternalizedComputeClusterStatusEnum.DELETE_IN_PROGRESS;
+                externalizedComputeClusterStatusService.setStatus(context.getExternalizedComputeId(), deleteStatus,
                         "Cluster delete initiated");
                 externalizedComputeClusterService.initiateDelete(context.getExternalizedComputeId());
                 sendEvent(context, EXTERNALIZED_COMPUTE_CLUSTER_DELETE_STARTED_EVENT.event(), payload);
@@ -60,7 +62,8 @@ public class ExternalizedComputeClusterDeleteActions {
             @Override
             protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterDeleteEvent payload, Map<Object, Object> variables) {
                 ExternalizedComputeClusterDeleteWaitRequest externalizedComputeClusterDeleteWaitRequest =
-                        new ExternalizedComputeClusterDeleteWaitRequest(context.getExternalizedComputeId(), context.getActorCrn(), payload.isForce());
+                        new ExternalizedComputeClusterDeleteWaitRequest(context.getExternalizedComputeId(), context.getActorCrn(), payload.isForce(),
+                                payload.isPreserveCluster());
                 sendEvent(context, externalizedComputeClusterDeleteWaitRequest.selector(), externalizedComputeClusterDeleteWaitRequest);
             }
 
@@ -78,7 +81,13 @@ public class ExternalizedComputeClusterDeleteActions {
 
             @Override
             protected void doExecute(ExternalizedComputeClusterContext context, ExternalizedComputeClusterDeleteEvent payload, Map<Object, Object> variables) {
-                externalizedComputeClusterService.deleteExternalizedComputeCluster(payload.getResourceId());
+                if (payload.isPreserveCluster()) {
+                    externalizedComputeClusterStatusService.setStatus(payload.getResourceId(), ExternalizedComputeClusterStatusEnum.REINITIALIZE_IN_PROGRESS,
+                            "Cluster delete finished. Starting new cluster creation.");
+                    externalizedComputeClusterService.deleteLiftieClusterNameForCluster(payload.getResourceId());
+                } else {
+                    externalizedComputeClusterService.deleteExternalizedComputeCluster(payload.getResourceId());
+                }
                 sendEvent(context, EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FINALIZED_EVENT.event(), payload);
             }
 

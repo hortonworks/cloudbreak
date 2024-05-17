@@ -77,6 +77,7 @@ import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
 import com.sequenceiq.environment.environment.dto.dataservices.EnvironmentDataServices;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
+import com.sequenceiq.environment.environment.service.externalizedcompute.ExternalizedComputeService;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
@@ -138,6 +139,9 @@ class EnvironmentApiConverterTest {
 
     @Mock
     private DataServicesConverter dataServicesConverter;
+
+    @Mock
+    private ExternalizedComputeService externalizedComputeService;
 
     @BeforeEach
     void init() {
@@ -204,6 +208,7 @@ class EnvironmentApiConverterTest {
         verify(tunnelConverter).convert(request.getTunnel());
         verify(networkRequestToDtoConverter).convert(request.getNetwork());
         verify(networkRequestToDtoConverter).setDefaultAvailabilityZonesIfNeeded(actual.getNetwork());
+        verify(externalizedComputeService).externalizedComputeValidation(anyString());
     }
 
     @Test

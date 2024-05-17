@@ -19,12 +19,17 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.common.api.type.DataHubStartAction;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
+import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesEvent;
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesStateSelectors;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
+import com.sequenceiq.environment.environment.flow.externalizedcluster.create.event.ExternalizedComputeClusterCreationEvent;
+import com.sequenceiq.environment.environment.flow.externalizedcluster.create.event.ExternalizedComputeClusterCreationStateSelectors;
+import com.sequenceiq.environment.environment.flow.externalizedcluster.reinitialization.event.ExternalizedComputeClusterReInitializationEvent;
+import com.sequenceiq.environment.environment.flow.externalizedcluster.reinitialization.event.ExternalizedComputeClusterReInitializationStateSelectors;
 import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalancerUpdateEvent;
 import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalancerUpdateStateSelectors;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationDefaultEvent;
@@ -219,6 +224,35 @@ public class EnvironmentReactorFlowManager {
                 .build();
         FlowIdentifier flowIdentifier = eventSender.sendEvent(environmentVerticalScaleEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
         LOGGER.debug("Environment Vertical Scale flow trigger event sent for environment {}", environment.getName());
+        return flowIdentifier;
+    }
+
+    public FlowIdentifier triggerExternalizedComputeClusterCreationFlow(String userCrn, Environment environment) {
+        ExternalizedComputeClusterCreationEvent externalizedComputeClusterCreationEvent = ExternalizedComputeClusterCreationEvent.builder()
+                .withAccepted(new Promise<>())
+                .withResourceCrn(environment.getResourceCrn())
+                .withResourceId(environment.getId())
+                .withResourceName(environment.getResourceName())
+                .withSelector(ExternalizedComputeClusterCreationStateSelectors.DEFAULT_COMPUTE_CLUSTER_CREATION_START_EVENT.selector())
+                .build();
+        FlowIdentifier flowIdentifier = eventSender.sendEvent(externalizedComputeClusterCreationEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        LOGGER.debug("Externalized compute cluster creation flow trigger event sent for environment {}", environment.getName());
+        return flowIdentifier;
+    }
+
+    public FlowIdentifier triggerExternalizedComputeReinitializationFlow(String userCrn, Environment environment, boolean force) {
+        ExternalizedComputeClusterReInitializationEvent externalizedComputeClusterReInitializationEvent =
+                ExternalizedComputeClusterReInitializationEvent.builder()
+                .withAccepted(new Promise<>())
+                .withResourceCrn(environment.getResourceCrn())
+                .withResourceId(environment.getId())
+                .withResourceName(environment.getResourceName())
+                .withForce(force)
+                .withSelector(ExternalizedComputeClusterReInitializationStateSelectors.DEFAULT_COMPUTE_CLUSTER_REINITIALIZATION_START_EVENT.selector())
+                .build();
+        FlowIdentifier flowIdentifier =
+                eventSender.sendEvent(externalizedComputeClusterReInitializationEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        LOGGER.debug("Externalized compute cluster reinitialization flow trigger event sent for environment {}", environment.getName());
         return flowIdentifier;
     }
 }

@@ -76,6 +76,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentViewDto;
 import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
+import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.service.EnvironmentCreationService;
 import com.sequenceiq.environment.environment.service.EnvironmentDeletionService;
 import com.sequenceiq.environment.environment.service.EnvironmentLoadBalancerService;
@@ -88,6 +89,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentUpgradeCcmServi
 import com.sequenceiq.environment.environment.service.EnvironmentVerticalScaleService;
 import com.sequenceiq.environment.environment.service.SupportedOperatingSystemService;
 import com.sequenceiq.environment.environment.service.cloudstorage.CloudStorageValidator;
+import com.sequenceiq.environment.environment.service.externalizedcompute.ExternalizedComputeFlowService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentApiConverter;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
@@ -145,6 +147,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final SupportedOperatingSystemService supportedOperatingSystemService;
 
+    private final ExternalizedComputeFlowService externalizedComputeFlowService;
+
     public EnvironmentController(
             EnvironmentApiConverter environmentApiConverter,
             EnvironmentResponseConverter environmentResponseConverter,
@@ -166,7 +170,9 @@ public class EnvironmentController implements EnvironmentEndpoint {
             EnvironmentVerticalScaleService environmentVerticalScaleService,
             StackV4Endpoint stackV4Endpoint,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory,
-            SupportedOperatingSystemService supportedOperatingSystemService) {
+            SupportedOperatingSystemService supportedOperatingSystemService,
+            ExternalizedComputeFlowService externalizedComputeFlowService,
+            EnvironmentReactorFlowManager environmentReactorFlowManager) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentResponseConverter = environmentResponseConverter;
         this.environmentService = environmentService;
@@ -188,6 +194,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.stackV4Endpoint = stackV4Endpoint;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
         this.supportedOperatingSystemService = supportedOperatingSystemService;
+        this.externalizedComputeFlowService = externalizedComputeFlowService;
     }
 
     @Override

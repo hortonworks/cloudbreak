@@ -9,9 +9,10 @@ public class ExternalizedComputeClusterInternalCrnClient extends AbstractUserCrn
 
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
-    public ExternalizedComputeClusterInternalCrnClient(String serviceAddress, ConfigKey configKey, String apiRoot, RegionAwareInternalCrnGenerator builder) {
+    public ExternalizedComputeClusterInternalCrnClient(String serviceAddress, ConfigKey configKey, String apiRoot,
+            RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
         super(serviceAddress, configKey, apiRoot);
-        regionAwareInternalCrnGenerator = builder;
+        this.regionAwareInternalCrnGenerator = regionAwareInternalCrnGenerator;
     }
 
     public ExternalizedComputeClusterCrnEndpoint withInternalCrn() {

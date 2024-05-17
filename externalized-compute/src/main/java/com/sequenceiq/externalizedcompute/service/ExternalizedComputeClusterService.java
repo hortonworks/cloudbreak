@@ -37,6 +37,7 @@ import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoin
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterRequest;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
+import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatus;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatusEnum;
 import com.sequenceiq.externalizedcompute.flow.ExternalizedComputeClusterFlowManager;
 import com.sequenceiq.externalizedcompute.repository.ExternalizedComputeClusterRepository;
@@ -117,6 +118,19 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
                 .stream().map(statusEntity -> statusEntity.getExternalizedComputeCluster().getId()).collect(Collectors.toSet());
     }
 
+    public FlowIdentifier reInitializeComputeCluster(ExternalizedComputeClusterRequest externalizedComputeClusterRequest, boolean force) {
+        ExternalizedComputeCluster externalizedComputeCluster = getExternalizedComputeCluster(externalizedComputeClusterRequest.getEnvironmentCrn(),
+                externalizedComputeClusterRequest.getName());
+        ExternalizedComputeClusterStatus actualStatus = externalizedComputeClusterStatusService.getActualStatus(externalizedComputeCluster);
+        if (actualStatus.getStatus().isInProgress()) {
+            throw new BadRequestException("Compute cluster is under operation.");
+        } else if (!actualStatus.getStatus().isFailed() && !force) {
+            throw new BadRequestException("Compute cluster is not in failed state.");
+        } else {
+            return externalizedComputeClusterFlowManager.triggerExternalizedComputeClusterReInitialization(externalizedComputeCluster);
+        }
+    }
+
     public FlowIdentifier prepareComputeClusterCreation(ExternalizedComputeClusterRequest externalizedComputeClusterRequest,
             boolean defaultCluster, Crn userCrn) {
         ExternalizedComputeCluster externalizedComputeCluster = new ExternalizedComputeCluster();
@@ -175,6 +189,13 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
     public ExternalizedComputeCluster getExternalizedComputeCluster(Long id) {
         return externalizedComputeClusterRepository.findByIdAndDeletedIsNull(id)
                 .orElseThrow(() -> new NotFoundException("Can't find externalized compute cluster by id: " + id));
+    }
+
+    public void deleteLiftieClusterNameForCluster(Long id) {
+        externalizedComputeClusterRepository.findById(id).ifPresent(externalizedComputeCluster -> {
+            externalizedComputeCluster.setLiftieName(null);
+            externalizedComputeClusterRepository.save(externalizedComputeCluster);
+        });
     }
 
     public void deleteExternalizedComputeCluster(Long id) {

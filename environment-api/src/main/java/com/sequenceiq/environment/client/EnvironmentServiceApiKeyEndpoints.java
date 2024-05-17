@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.client.AbstractKeyBasedServiceEndpoint;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.environment.api.v1.credential.endpoint.AuditCredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
+import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentDefaultComputeClusterEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.marketplace.endpoint.AzureMarketplaceTermsEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
@@ -37,6 +38,11 @@ public class EnvironmentServiceApiKeyEndpoints extends AbstractKeyBasedServiceEn
     @Override
     public EnvironmentEndpoint environmentV1Endpoint() {
         return getEndpoint(EnvironmentEndpoint.class);
+    }
+
+    @Override
+    public EnvironmentDefaultComputeClusterEndpoint defaultComputeClusterEndpoint() {
+        return getEndpoint(EnvironmentDefaultComputeClusterEndpoint.class);
     }
 
     @Override

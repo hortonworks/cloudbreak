@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterInternalRequest;
+import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterRequest;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -42,6 +43,15 @@ public interface ExternalizedComputeClusterInternalEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier create(@Valid ExternalizedComputeClusterInternalRequest request,
             @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @Path("reinitialize")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "reInitialize Externalized Compute cluster", description = "reInitialize Externalized Compute cluster",
+            operationId = "reInitializeExternalizedComputeCluster",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier reInitialize(@Valid ExternalizedComputeClusterRequest request,
+            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn, @QueryParam("force") boolean force);
 
     @DELETE
     @Path("{environmentCrn}/{name}")

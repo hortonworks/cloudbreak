@@ -31,6 +31,7 @@ public enum EnvironmentStatus {
     FREEIPA_DELETE_IN_PROGRESS("FreeIPA deletion in progress"),
 
     COMPUTE_CLUSTER_CREATION_IN_PROGRESS("Compute cluster creation in progress"),
+    COMPUTE_CLUSTER_REINITIALIZATION_IN_PROGRESS("Compute cluster reinitialization in progress"),
 
     EXPERIENCE_DELETE_IN_PROGRESS("Experience deletion in progress"),
 
@@ -248,6 +249,6 @@ public enum EnvironmentStatus {
     }
 
     public boolean isComputeClusterCreationInProgress() {
-        return COMPUTE_CLUSTER_CREATION_IN_PROGRESS.equals(this);
+        return COMPUTE_CLUSTER_CREATION_IN_PROGRESS.equals(this) || COMPUTE_CLUSTER_REINITIALIZATION_IN_PROGRESS.equals(this);
     }
 }

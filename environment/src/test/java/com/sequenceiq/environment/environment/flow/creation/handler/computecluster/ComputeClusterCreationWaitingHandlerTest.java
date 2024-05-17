@@ -2,11 +2,11 @@ package com.sequenceiq.environment.environment.flow.creation.handler.computeclus
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -25,8 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
-import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
-import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -34,6 +32,7 @@ import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEve
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.externalizedcompute.ExternalizedComputeService;
+import com.sequenceiq.environment.exception.ExternalizedComputeOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,9 +52,6 @@ class ComputeClusterCreationWaitingHandlerTest {
 
     @Mock
     private EnvironmentService environmentService;
-
-    @Mock
-    private PollingService<ComputeClusterPollerObject> computeClusterPollingService;
 
     @Mock
     private EventBus eventBus;
@@ -87,14 +83,8 @@ class ComputeClusterCreationWaitingHandlerTest {
         EnvironmentDto environmentDto = createEnvironmentDto();
         Environment environment = new Environment();
         environment.setName(ENVIRONMENT_NAME);
+        when(externalizedComputeService.getDefaultComputeClusterName(environment.getName())).thenReturn("clusterName");
         when(environmentService.findEnvironmentByIdOrThrow(anyLong())).thenReturn(environment);
-        when(computeClusterPollingService.pollWithTimeout(
-                any(ComputeClusterCreationRetrievalTask.class),
-                any(ComputeClusterPollerObject.class),
-                anyLong(),
-                anyInt(),
-                anyInt()))
-                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
 
         underTest.accept(Event.wrap(environmentDto));
 
@@ -105,12 +95,8 @@ class ComputeClusterCreationWaitingHandlerTest {
         assertThat(envCreationEvent.getResourceId()).isEqualTo(ENVIRONMENT_ID);
         assertThat(envCreationEvent.selector()).isEqualTo("FINISH_ENV_CREATION_EVENT");
         verify(externalizedComputeService, times(1)).getDefaultComputeClusterName(anyString());
-        verify(computeClusterPollingService, times(1)).pollWithTimeout(
-                any(ComputeClusterCreationRetrievalTask.class),
-                any(ComputeClusterPollerObject.class),
-                anyLong(),
-                anyInt(),
-                anyInt());
+        verify(externalizedComputeService, times(1)).awaitComputeClusterCreation(environment, "clusterName");
+
     }
 
     @Test
@@ -134,15 +120,9 @@ class ComputeClusterCreationWaitingHandlerTest {
         Environment environment = new Environment();
         environment.setName(ENVIRONMENT_NAME);
         when(environmentService.findEnvironmentByIdOrThrow(anyLong())).thenReturn(environment);
-        when(computeClusterPollingService.pollWithTimeout(
-                any(ComputeClusterCreationRetrievalTask.class),
-                any(ComputeClusterPollerObject.class),
-                anyLong(),
-                anyInt(),
-                anyInt()))
-                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().failure().withException(new RuntimeException("error")).build());
-
-
+        when(externalizedComputeService.getDefaultComputeClusterName(environment.getName())).thenReturn("clusterName");
+        doThrow(new ExternalizedComputeOperationFailedException("error")).when(externalizedComputeService)
+                .awaitComputeClusterCreation(eq(environment), eq("clusterName"));
         underTest.accept(Event.wrap(environmentDto));
 
         verify(externalizedComputeService, times(1)).getDefaultComputeClusterName(anyString());

@@ -9,6 +9,8 @@ import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterAp
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.assertion.Assertion;
+import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
@@ -17,6 +19,8 @@ import com.sequenceiq.it.cloudbreak.microservice.ExternalizedComputeClusterClien
 @Prototype
 public class ExternalizedComputeClusterTestDto extends AbstractTestDto<ExternalizedComputeCreateRequest, ExternalizedComputeClusterResponse,
         ExternalizedComputeClusterTestDto, ExternalizedComputeClusterClient> {
+
+    private String savedLiftieCrn;
 
     private String environmentKey;
 
@@ -51,5 +55,24 @@ public class ExternalizedComputeClusterTestDto extends AbstractTestDto<Externali
     public String getCrn() {
         // TODO: Use externalized compute cluster crn if it will be exposed through the API
         return getEnvironmentCrn();
+    }
+
+    public String getSavedLiftieCrn() {
+        return savedLiftieCrn;
+    }
+
+    public void setSavedLiftieCrn(String savedLiftieCrn) {
+        this.savedLiftieCrn = savedLiftieCrn;
+    }
+
+    @Override
+    public ExternalizedComputeClusterTestDto then(Assertion<ExternalizedComputeClusterTestDto, ExternalizedComputeClusterClient> assertion) {
+        return then(assertion, emptyRunningParameter());
+    }
+
+    @Override
+    public ExternalizedComputeClusterTestDto then(Assertion<ExternalizedComputeClusterTestDto, ExternalizedComputeClusterClient> assertion,
+            RunningParameter runningParameter) {
+        return getTestContext().then(this, ExternalizedComputeClusterClient.class, assertion, runningParameter);
     }
 }

@@ -1,12 +1,17 @@
 package com.sequenceiq.externalizedcompute.service;
 
+import static com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatusEnum.AVAILABLE;
+import static com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatusEnum.CREATE_FAILED;
+import static com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatusEnum.CREATE_IN_PROGRESS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,6 +35,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
@@ -39,6 +45,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.TagResponse;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterRequest;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeCluster;
+import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatus;
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatusEnum;
 import com.sequenceiq.externalizedcompute.flow.ExternalizedComputeClusterFlowManager;
 import com.sequenceiq.externalizedcompute.repository.ExternalizedComputeClusterRepository;
@@ -46,6 +53,8 @@ import com.sequenceiq.liftie.client.LiftieGrpcClient;
 
 @ExtendWith(MockitoExtension.class)
 class ExternalizedComputeClusterServiceTest {
+
+    public static final String ENV_CRN = "envCrn";
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:5678";
 
@@ -96,12 +105,12 @@ class ExternalizedComputeClusterServiceTest {
 
         ExternalizedComputeClusterRequest externalizedComputeClusterRequest = new ExternalizedComputeClusterRequest();
         externalizedComputeClusterRequest.setName("cluster");
-        externalizedComputeClusterRequest.setEnvironmentCrn("envCrn");
+        externalizedComputeClusterRequest.setEnvironmentCrn(ENV_CRN);
         externalizedComputeClusterRequest.setTags(Map.of("key", "value"));
 
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setTags(new TagResponse());
-        detailedEnvironmentResponse.setCrn("envCrn");
+        detailedEnvironmentResponse.setCrn(ENV_CRN);
         detailedEnvironmentResponse.setCloudPlatform("AWS");
         when(environmentEndpoint.getByCrn(externalizedComputeClusterRequest.getEnvironmentCrn())).thenReturn(detailedEnvironmentResponse);
 
@@ -136,7 +145,7 @@ class ExternalizedComputeClusterServiceTest {
 
         CDPTagGenerationRequest tags = cdpTagGenerationRequestArgumentCaptor.getValue();
         assertThat(tags.getUserDefinedTags()).containsExactlyInAnyOrderEntriesOf(Map.of("key", "value"));
-        assertEquals("envCrn", tags.getEnvironmentCrn());
+        assertEquals(ENV_CRN, tags.getEnvironmentCrn());
         assertEquals(USER_CRN, tags.getCreatorCrn());
         assertEquals("AWS", tags.getPlatform());
         assertEquals("perdos@cloudera.com", tags.getUserName());
@@ -154,7 +163,7 @@ class ExternalizedComputeClusterServiceTest {
 
         ExternalizedComputeCluster cluster = new ExternalizedComputeCluster();
         cluster.setName("cluster");
-        cluster.setEnvironmentCrn("envCrn");
+        cluster.setEnvironmentCrn(ENV_CRN);
         cluster.setLiftieName("liftie1");
         cluster.setAccountId("account");
 
@@ -182,6 +191,110 @@ class ExternalizedComputeClusterServiceTest {
         clusterService.initiateDelete(1L);
 
         verify(liftieGrpcClient).deleteCluster("crn:cdp:compute:us-west-1:account:cluster:liftie1", internalCrn, envCrn);
+    }
+
+    @Test
+    public void testReInitializeComputeCluster() {
+        ExternalizedComputeClusterRequest externalizedComputeClusterRequest = new ExternalizedComputeClusterRequest();
+        externalizedComputeClusterRequest.setName("cluster");
+        externalizedComputeClusterRequest.setEnvironmentCrn(ENV_CRN);
+        externalizedComputeClusterRequest.setTags(Map.of("key", "value"));
+
+        ExternalizedComputeCluster cluster = new ExternalizedComputeCluster();
+        cluster.setName("cluster");
+        cluster.setEnvironmentCrn(ENV_CRN);
+        cluster.setLiftieName("liftie1");
+        cluster.setAccountId("account");
+
+        when(externalizedComputeClusterRepository.findByEnvironmentCrnAndNameAndDeletedIsNull(ENV_CRN, externalizedComputeClusterRequest.getName()))
+                .thenReturn(Optional.of(cluster));
+
+        ExternalizedComputeClusterStatus externalizedComputeClusterStatus = new ExternalizedComputeClusterStatus();
+        externalizedComputeClusterStatus.setStatus(CREATE_FAILED);
+        when(externalizedComputeClusterStatusService.getActualStatus(cluster)).thenReturn(externalizedComputeClusterStatus);
+
+        clusterService.reInitializeComputeCluster(externalizedComputeClusterRequest, false);
+
+        verify(externalizedComputeClusterFlowManager, times(1)).triggerExternalizedComputeClusterReInitialization(cluster);
+    }
+
+    @Test
+    public void testReInitializeComputeClusterButNotInFailedStateAndNotForce() {
+        ExternalizedComputeClusterRequest externalizedComputeClusterRequest = new ExternalizedComputeClusterRequest();
+        externalizedComputeClusterRequest.setName("cluster");
+        externalizedComputeClusterRequest.setEnvironmentCrn(ENV_CRN);
+        externalizedComputeClusterRequest.setTags(Map.of("key", "value"));
+
+        ExternalizedComputeCluster cluster = new ExternalizedComputeCluster();
+        cluster.setName("cluster");
+        cluster.setEnvironmentCrn(ENV_CRN);
+        cluster.setLiftieName("liftie1");
+        cluster.setAccountId("account");
+
+        when(externalizedComputeClusterRepository.findByEnvironmentCrnAndNameAndDeletedIsNull(ENV_CRN, externalizedComputeClusterRequest.getName()))
+                .thenReturn(Optional.of(cluster));
+
+        ExternalizedComputeClusterStatus externalizedComputeClusterStatus = new ExternalizedComputeClusterStatus();
+        externalizedComputeClusterStatus.setStatus(AVAILABLE);
+        when(externalizedComputeClusterStatusService.getActualStatus(cluster)).thenReturn(externalizedComputeClusterStatus);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> clusterService.reInitializeComputeCluster(externalizedComputeClusterRequest, false));
+        assertEquals("Compute cluster is not in failed state.", badRequestException.getMessage());
+
+        verify(externalizedComputeClusterFlowManager, times(0)).triggerExternalizedComputeClusterReInitialization(cluster);
+    }
+
+    @Test
+    public void testReInitializeComputeClusterButNotInFailedStateAndForced() {
+        ExternalizedComputeClusterRequest externalizedComputeClusterRequest = new ExternalizedComputeClusterRequest();
+        externalizedComputeClusterRequest.setName("cluster");
+        externalizedComputeClusterRequest.setEnvironmentCrn(ENV_CRN);
+        externalizedComputeClusterRequest.setTags(Map.of("key", "value"));
+
+        ExternalizedComputeCluster cluster = new ExternalizedComputeCluster();
+        cluster.setName("cluster");
+        cluster.setEnvironmentCrn(ENV_CRN);
+        cluster.setLiftieName("liftie1");
+        cluster.setAccountId("account");
+
+        when(externalizedComputeClusterRepository.findByEnvironmentCrnAndNameAndDeletedIsNull(ENV_CRN, externalizedComputeClusterRequest.getName()))
+                .thenReturn(Optional.of(cluster));
+
+        ExternalizedComputeClusterStatus externalizedComputeClusterStatus = new ExternalizedComputeClusterStatus();
+        externalizedComputeClusterStatus.setStatus(AVAILABLE);
+        when(externalizedComputeClusterStatusService.getActualStatus(cluster)).thenReturn(externalizedComputeClusterStatus);
+
+        clusterService.reInitializeComputeCluster(externalizedComputeClusterRequest, true);
+
+        verify(externalizedComputeClusterFlowManager, times(1)).triggerExternalizedComputeClusterReInitialization(cluster);
+    }
+
+    @Test
+    public void testReInitializeComputeClusterButInProgress() {
+        ExternalizedComputeClusterRequest externalizedComputeClusterRequest = new ExternalizedComputeClusterRequest();
+        externalizedComputeClusterRequest.setName("cluster");
+        externalizedComputeClusterRequest.setEnvironmentCrn(ENV_CRN);
+        externalizedComputeClusterRequest.setTags(Map.of("key", "value"));
+
+        ExternalizedComputeCluster cluster = new ExternalizedComputeCluster();
+        cluster.setName("cluster");
+        cluster.setEnvironmentCrn(ENV_CRN);
+        cluster.setLiftieName("liftie1");
+        cluster.setAccountId("account");
+
+        when(externalizedComputeClusterRepository.findByEnvironmentCrnAndNameAndDeletedIsNull(ENV_CRN, externalizedComputeClusterRequest.getName()))
+                .thenReturn(Optional.of(cluster));
+
+        ExternalizedComputeClusterStatus externalizedComputeClusterStatus = new ExternalizedComputeClusterStatus();
+        externalizedComputeClusterStatus.setStatus(CREATE_IN_PROGRESS);
+        when(externalizedComputeClusterStatusService.getActualStatus(cluster)).thenReturn(externalizedComputeClusterStatus);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> clusterService.reInitializeComputeCluster(externalizedComputeClusterRequest, false));
+        assertEquals("Compute cluster is under operation.", badRequestException.getMessage());
+
+        verify(externalizedComputeClusterFlowManager, times(0)).triggerExternalizedComputeClusterReInitialization(cluster);
     }
 
 }

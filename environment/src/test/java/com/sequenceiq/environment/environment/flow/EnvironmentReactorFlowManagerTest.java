@@ -27,9 +27,14 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
+import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
+import com.sequenceiq.environment.environment.flow.externalizedcluster.create.event.ExternalizedComputeClusterCreationEvent;
+import com.sequenceiq.environment.environment.flow.externalizedcluster.create.event.ExternalizedComputeClusterCreationStateSelectors;
+import com.sequenceiq.environment.environment.flow.externalizedcluster.reinitialization.event.ExternalizedComputeClusterReInitializationEvent;
+import com.sequenceiq.environment.environment.flow.externalizedcluster.reinitialization.event.ExternalizedComputeClusterReInitializationStateSelectors;
 import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalancerUpdateEvent;
 import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalancerUpdateStateSelectors;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationDefaultEvent;
@@ -162,6 +167,52 @@ class EnvironmentReactorFlowManagerTest {
                 .returns(ENVIRONMENT_NAME, LoadBalancerUpdateEvent::getResourceName)
                 .returns(peag, LoadBalancerUpdateEvent::getEndpointAccessGateway)
                 .returns(subnets, LoadBalancerUpdateEvent::getSubnetIds);
+        verifyHeaders();
+    }
+
+    @Test
+    void triggerExternalizedComputeClusterCreationFlowTest() {
+        Environment environment = mock(Environment.class);
+        when(environment.getResourceCrn()).thenReturn(ENVIRONMENT_CRN);
+        when(environment.getResourceName()).thenReturn(ENVIRONMENT_NAME);
+        when(environment.getId()).thenReturn(ENVIRONMENT_ID);
+        when(eventSender.sendEvent(any(ExternalizedComputeClusterCreationEvent.class), any(Event.Headers.class))).thenReturn(flowIdentifier);
+        FlowIdentifier result = underTest.triggerExternalizedComputeClusterCreationFlow(USER_CRN, environment);
+
+        assertThat(result).isSameAs(flowIdentifier);
+        ArgumentCaptor<ExternalizedComputeClusterCreationEvent> argumentCaptor = ArgumentCaptor.forClass(
+                ExternalizedComputeClusterCreationEvent.class);
+        verify(eventSender).sendEvent(argumentCaptor.capture(), headersCaptor.capture());
+        ExternalizedComputeClusterCreationEvent event = argumentCaptor.getValue();
+        assertThat(event)
+                .returns(ExternalizedComputeClusterCreationStateSelectors.DEFAULT_COMPUTE_CLUSTER_CREATION_START_EVENT.selector(), BaseFlowEvent::selector)
+                .returns(ENVIRONMENT_CRN, ExternalizedComputeClusterCreationEvent::getResourceCrn)
+                .returns(ENVIRONMENT_NAME, ExternalizedComputeClusterCreationEvent::getResourceName)
+                .returns(ENVIRONMENT_ID, ExternalizedComputeClusterCreationEvent::getResourceId);
+        verifyHeaders();
+    }
+
+    @Test
+    void triggerExternalizedComputeClusterReinitializationFlowTest() {
+        Environment environment = mock(Environment.class);
+        when(environment.getResourceCrn()).thenReturn(ENVIRONMENT_CRN);
+        when(environment.getResourceName()).thenReturn(ENVIRONMENT_NAME);
+        when(environment.getId()).thenReturn(ENVIRONMENT_ID);
+        when(eventSender.sendEvent(any(ExternalizedComputeClusterReInitializationEvent.class), any(Event.Headers.class))).thenReturn(flowIdentifier);
+        FlowIdentifier result = underTest.triggerExternalizedComputeReinitializationFlow(USER_CRN, environment, true);
+
+        assertThat(result).isSameAs(flowIdentifier);
+        ArgumentCaptor<ExternalizedComputeClusterReInitializationEvent> argumentCaptor = ArgumentCaptor.forClass(
+                ExternalizedComputeClusterReInitializationEvent.class);
+        verify(eventSender).sendEvent(argumentCaptor.capture(), headersCaptor.capture());
+        ExternalizedComputeClusterReInitializationEvent event = argumentCaptor.getValue();
+        assertThat(event)
+                .returns(ExternalizedComputeClusterReInitializationStateSelectors.DEFAULT_COMPUTE_CLUSTER_REINITIALIZATION_START_EVENT.selector(),
+                        BaseFlowEvent::selector)
+                .returns(ENVIRONMENT_CRN, ExternalizedComputeClusterReInitializationEvent::getResourceCrn)
+                .returns(ENVIRONMENT_NAME, ExternalizedComputeClusterReInitializationEvent::getResourceName)
+                .returns(ENVIRONMENT_ID, ExternalizedComputeClusterReInitializationEvent::getResourceId)
+                .returns(true, ExternalizedComputeClusterReInitializationEvent::isForce);
         verifyHeaders();
     }
 

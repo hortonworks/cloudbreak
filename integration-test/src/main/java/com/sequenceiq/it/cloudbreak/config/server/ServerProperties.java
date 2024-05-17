@@ -223,6 +223,10 @@ public class ServerProperties {
         }
     }
 
+    public String getExternalizedComputeInternalAddress() {
+        return "http://" + externalizedComputeUrl + externalizedComputeRootContextPath;
+    }
+
     public String getSdxInternalAddress() {
         return "http://" + sdxUrl + sdxRootContextPath;
     }

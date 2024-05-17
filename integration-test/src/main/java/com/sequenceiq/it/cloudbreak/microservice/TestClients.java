@@ -144,7 +144,8 @@ public class TestClients {
     }
 
     private ExternalizedComputeClusterClient createExternalizedComputeClusterClient(CloudbreakUser cloudbreakUser) {
-        return new ExternalizedComputeClusterClient(cloudbreakUser, serverProperties.getExternalizedComputeAddress());
+        return new ExternalizedComputeClusterClient(cloudbreakUser, regionAwareInternalCrnGeneratorFactory.iam(),
+                serverProperties.getExternalizedComputeAddress(), serverProperties.getExternalizedComputeInternalAddress());
     }
 
     private UmsClient createUmsClient() {

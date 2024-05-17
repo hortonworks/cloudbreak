@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.IdempotentEvent;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
@@ -44,12 +45,13 @@ public class ExternalizedComputeClusterEvent implements IdempotentEvent<External
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long externalizedComputeId,
             @JsonProperty("externalizedComputeName") String externalizedComputeName,
-            @JsonProperty("actorCrn") String actorCrn) {
+            @JsonProperty("actorCrn") String actorCrn,
+            @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         this.selector = selector;
         this.externalizedComputeId = externalizedComputeId;
         this.externalizedComputeName = externalizedComputeName;
         this.actorCrn = actorCrn;
-        accepted = new Promise<>();
+        this.accepted = accepted;
     }
 
     public ExternalizedComputeClusterEvent(String selector, ExternalizedComputeClusterContext context) {
