@@ -113,7 +113,8 @@ public class PrewarmImageValidatorE2ETest extends AbstractE2ETest implements Ima
                         throw new TestFailException("SDX status is not running at the end of the validation. Current status is: " + clusterStatus);
                     }
                     return sdx;
-                }));
+                }))
+                .validate();
     }
 
     private AttemptMaker<Boolean> imageSetupResultAttemptMaker(SdxInternalTestDto testDto, SdxClient client) {

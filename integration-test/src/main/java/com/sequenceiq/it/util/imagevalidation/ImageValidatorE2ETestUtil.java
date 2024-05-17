@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.testng.ITestResult;
 import org.testng.util.Strings;
+import org.testng.xml.XmlSuite;
+import org.testng.xml.XmlTest;
 
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResult;
@@ -26,11 +28,22 @@ import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageBasicInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaUpgradeTests;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation.BaseImageValidatorE2ETest;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation.PrewarmImageValidatorE2ETest;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation.YarnImageValidatorE2ETest;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.java.ForceJavaVersionE2ETest;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.BasicEnvironmentVirtualGroupTest;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.DatalakeCcmUpgradeAndRotationTest;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.MonitoringTests;
+import com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeTests;
+import com.sequenceiq.it.util.TestNGUtil;
 
 @Component
 public class ImageValidatorE2ETestUtil {
@@ -45,8 +58,14 @@ public class ImageValidatorE2ETestUtil {
     @Inject
     private ImageCatalogTestClient imageCatalogTestClient;
 
+    @Inject
+    private TestNGUtil testNGUtil;
+
     @Value("${integrationtest.imageValidation.imageWait.timeoutInMinutes:15}")
     private int imageWaitTimeoutInMinutes;
+
+    @Value("${integrationtest.imageValidation.type:}")
+    private ImageValidationType imageValidationType;
 
     public void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
@@ -93,7 +112,7 @@ public class ImageValidatorE2ETestUtil {
     }
 
     private boolean isFreeIpaImageValidation() {
-        return Strings.isNotNullAndNotEmpty(commonCloudProperties.getImageValidation().getFreeIpaImageUuid());
+        return imageValidationType == ImageValidationType.FREEIPA;
     }
 
     private <T extends ImageV4Response> AttemptResult<Void> containsImageAttempt(TestContext testContext, String imageUuid) {
@@ -161,5 +180,50 @@ public class ImageValidatorE2ETestUtil {
                         imageUnderValidation.getPackageVersions().get("cdh-build-number"), img.getPackageVersions().get("cdh-build-number")))
                 .max(Comparator.comparing(ImageV4Response::getCreated))
                 .orElse(null);
+    }
+
+    public List<XmlSuite> getSuites() {
+        XmlSuite suite = testNGUtil.createSuite("Image validation test suite");
+        XmlTest basicTests = testNGUtil.createTest(suite, "Basic tests", true);
+
+        if (imageValidationType == null) {
+            throw new IllegalStateException("integrationtest.imageValidation.type must not be null");
+        }
+        switch (imageValidationType) {
+            case BASE -> {
+                if (CloudPlatform.YARN.equalsIgnoreCase(commonCloudProperties.getCloudProvider())) {
+                    testNGUtil.addTestCase(basicTests, YarnImageValidatorE2ETest.class, "testHybridSDXWithBaseImage");
+                } else {
+                    testNGUtil.addTestCase(basicTests, BaseImageValidatorE2ETest.class, "testSDXWithBaseImage");
+                }
+            }
+            case FREEIPA -> {
+                testNGUtil.addTestCase(basicTests, PrewarmImageValidatorE2ETest.class, "testCreateInternalSdxAndDistrox");
+
+                XmlTest additionalTests = testNGUtil.createTest(suite, "Additional FreeIPA tests", false);
+                testNGUtil.addTestCase(additionalTests, DatalakeCcmUpgradeAndRotationTest.class, "testCcmV1Upgrade");
+                testNGUtil.addTestCase(additionalTests, DatalakeCcmUpgradeAndRotationTest.class, "testCcmV2Upgrade");
+                testNGUtil.addTestCase(additionalTests, BasicEnvironmentVirtualGroupTest.class, "testAddUsersToEnvironment");
+                testNGUtil.addTestCase(additionalTests, BasicEnvironmentVirtualGroupTest.class, "testAddGroupsToEnvironment");
+                testNGUtil.addTestCase(additionalTests, FreeIpaUpgradeTests.class, "testHAFreeIpaInstanceUpgrade");
+                testNGUtil.addTestCase(additionalTests, MonitoringTests.class, "testMonitoringOnEnvironment");
+            }
+            case PREWARM -> {
+                testNGUtil.addTestCase(basicTests, PrewarmImageValidatorE2ETest.class, "testCreateInternalSdxAndDistrox");
+
+                XmlTest additionalTests = testNGUtil.createTest(suite, "Additional runtime tests", false);
+                testNGUtil.addTestCase(additionalTests, DatalakeCcmUpgradeAndRotationTest.class, "testCcmV1Upgrade");
+                testNGUtil.addTestCase(additionalTests, DatalakeCcmUpgradeAndRotationTest.class, "testCcmV2Upgrade");
+                testNGUtil.addTestCase(additionalTests, ForceJavaVersionE2ETest.class, "testClusterProvisionWithForcedJavaVersion");
+                testNGUtil.addTestCase(additionalTests, SdxUpgradeTests.class, "testSDXUpgrade");
+                testNGUtil.addTestCase(additionalTests, MonitoringTests.class, "testMonitoringOnFreeIpaSdxDistrox");
+            }
+            default -> throw new IllegalStateException("Unknown image validation type: " + imageValidationType);
+        }
+        return List.of(suite);
+    }
+
+    public void setImageValidationType(ImageValidationType imageValidationType) {
+        this.imageValidationType = imageValidationType;
     }
 }

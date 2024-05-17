@@ -70,7 +70,7 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
             when = "the new environment and attached freeIpa should be created",
                 and = "metering setting should be inherited from environment",
             then = "Metering Services, Scrapping and Metrics should be up and running on freeIpa")
-    public void testMoniotoringOnEnvironment(TestContext testContext) {
+    public void testMonitoringOnEnvironment(TestContext testContext) {
         testContext
                 .given(EnvironmentNetworkTestDto.class)
                 .given("telemetry", TelemetryTestDto.class)
@@ -109,7 +109,7 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
             when = "when new freeIpa and SDX are up and running then new DistroX should be created also with metering pre-warmed image and no database",
                 and = "metering should be tested on all the Master host groups",
             then = "Metering Services, Scrapping and Metrics should be up and running on instances")
-    public void testMoniotoringOnFreeIpaSdxDistrox(TestContext testContext) {
+    public void testMonitoringOnFreeIpaSdxDistrox(TestContext testContext) {
         DistroXDatabaseRequest distroXDatabaseRequest = new DistroXDatabaseRequest();
         distroXDatabaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.NONE);
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();

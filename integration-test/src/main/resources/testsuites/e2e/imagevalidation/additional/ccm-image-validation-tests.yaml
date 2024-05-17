@@ -1,5 +1,0 @@
-name: "ccm-image-validation-tests"
-tests:
-  - name: "ccm_image_validation_tests"
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.DatalakeCcmUpgradeAndRotationTest

@@ -67,5 +67,6 @@ freeipa-log/
 sdx-log/
 .deps/
 ImageId*
+resource_names_*.json
 
 *.log

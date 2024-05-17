@@ -1,7 +1,0 @@
-name: "freeipa-upgrade-image-validation-tests"
-tests:
-  - name: "freeipa_upgrade_image_validation_tests"
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaUpgradeTests
-        includedMethods:
-          - testHAFreeIpaInstanceUpgrade

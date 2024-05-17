@@ -1,12 +1,7 @@
 package com.sequenceiq.it;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -25,25 +20,15 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.core.io.InputStreamSource;
 import org.springframework.util.CollectionUtils;
 import org.testng.TestNG;
-import org.testng.internal.YamlParser;
-import org.testng.xml.IFileParser;
-import org.testng.xml.SuiteXmlParser;
-import org.testng.xml.XmlSuite;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
-import com.sequenceiq.it.cloudbreak.listener.ReportListener;
-import com.sequenceiq.it.cloudbreak.listener.TestCaseTimeoutListener;
-import com.sequenceiq.it.cloudbreak.listener.TestInvocationListener;
-import com.sequenceiq.it.cloudbreak.listener.TestNgListener;
-import com.sequenceiq.it.cloudbreak.listener.ThreadLocalTestListener;
-import com.sequenceiq.it.cloudbreak.search.CustomHTMLReporter;
-import com.sequenceiq.it.cloudbreak.search.CustomJUnitXMLReporter;
 import com.sequenceiq.it.config.ITProps;
+import com.sequenceiq.it.util.TestNGUtil;
 import com.sequenceiq.it.util.cleanup.CleanupUtil;
+import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
 
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class})
@@ -52,13 +37,9 @@ import com.sequenceiq.it.util.cleanup.CleanupUtil;
 public class IntegrationTestApp implements CommandLineRunner {
     private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestApp.class);
 
-    private static final IFileParser<XmlSuite> XML_PARSER = new SuiteXmlParser();
-
-    private static final IFileParser<XmlSuite> YAML_PARSER = new YamlParser();
-
-    private static final IFileParser<XmlSuite> DEFAULT_FILE_PARSER = XML_PARSER;
-
     private static final String CLEANUP_COMMAND = "cleanup";
+
+    private static final String IMAGE_VALIDATION_COMMAND = "imagevalidation";
 
     @Value("${integrationtest.testsuite.threadPoolSize:8}")
     private int suiteThreadPoolSize;
@@ -90,6 +71,12 @@ public class IntegrationTestApp implements CommandLineRunner {
     @Inject
     private CleanupUtil cleanupUtil;
 
+    @Inject
+    private ImageValidatorE2ETestUtil imageValidatorE2ETestUtil;
+
+    @Inject
+    private TestNGUtil testNGUtil;
+
     public static void main(String[] args) {
         long start = System.currentTimeMillis();
         SpringApplication springApp = new SpringApplication(IntegrationTestApp.class);
@@ -111,18 +98,7 @@ public class IntegrationTestApp implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        testng.setOutputDirectory(outputDirectory + "/test-output");
-        testng.setParallel(XmlSuite.ParallelMode.getValidParallel(parallel));
-        testng.setThreadCount(threadCount);
-        testng.setSuiteThreadPoolSize(suiteThreadPoolSize);
-        testng.setVerbose(2);
-        testng.addListener(new TestNgListener());
-        testng.addListener(new ThreadLocalTestListener());
-        testng.addListener(new ReportListener());
-        testng.addListener(new TestInvocationListener());
-        testng.addListener(new CustomHTMLReporter());
-        testng.addListener(new CustomJUnitXMLReporter());
-        testng.addListener(new TestCaseTimeoutListener());
+        testNGUtil.decorate(testng);
         setupSuites(testng);
         if (!CLEANUP_COMMAND.equals(itCommand)) {
             testng.run();
@@ -142,7 +118,10 @@ public class IntegrationTestApp implements CommandLineRunner {
                 break;
             case "suiteurls":
                 List<String> suitePathes = itProps.getSuiteFiles();
-                testng.setXmlSuites(loadSuites(suitePathes));
+                testng.setXmlSuites(testNGUtil.loadSuites(suitePathes));
+                break;
+            case IMAGE_VALIDATION_COMMAND:
+                testng.setXmlSuites(imageValidatorE2ETestUtil.getSuites());
                 break;
             case CLEANUP_COMMAND:
                 cleanupUtil.cleanupAllResources();
@@ -151,51 +130,5 @@ public class IntegrationTestApp implements CommandLineRunner {
                 LOG.info("Unknown command: {}", itCommand);
                 break;
         }
-    }
-
-    private List<XmlSuite> loadSuites(Iterable<String> suitePaths) throws IOException {
-        List<XmlSuite> suites = new ArrayList<>();
-        for (String suitePath : suitePaths) {
-            suites.add(loadSuite(suitePath));
-        }
-        LOG.info("parsed suites: {}", suites.size());
-        return suites;
-    }
-
-    private XmlSuite loadSuite(String suitePath) throws IOException {
-        LOG.info("load suite: {}", suitePath);
-        try {
-            return loadSuite(suitePath, applicationContext.getResource(suitePath));
-        } catch (Exception e) {
-            LOG.info(e.getMessage(), e);
-            throw e;
-        }
-    }
-
-    private XmlSuite loadSuite(String suitePath, InputStreamSource resource) throws IOException {
-        IFileParser<XmlSuite> parser = getParser(suitePath);
-        try (InputStream inputStream = resource.getInputStream()) {
-            XmlSuite xmlSuite = parser.parse(suitePath, inputStream, true);
-            xmlSuite.setParallel(XmlSuite.ParallelMode.getValidParallel(parallel));
-            xmlSuite.setThreadCount(threadCount);
-            xmlSuite.setTimeOut(timeOut);
-            xmlSuite.setVerbose(2);
-            xmlSuite.setListeners(Arrays.asList(TestNgListener.class.getName(), ThreadLocalTestListener.class.getName(),
-                    ReportListener.class.getName(), TestInvocationListener.class.getName(), CustomHTMLReporter.class.getName(),
-                    CustomJUnitXMLReporter.class.getName(), TestCaseTimeoutListener.class.getName()));
-            LOG.info("Test are running in: {} type of parallel mode, thread count: {} and with test timeout: {}",
-                    parallel.toUpperCase(Locale.ROOT), threadCount, timeOut);
-            return xmlSuite;
-        }
-    }
-
-    private IFileParser<XmlSuite> getParser(String fileName) {
-        IFileParser<XmlSuite> result = DEFAULT_FILE_PARSER;
-        if (fileName.endsWith("xml")) {
-            result = XML_PARSER;
-        } else if (fileName.endsWith("yaml") || fileName.endsWith("yml")) {
-            result = YAML_PARSER;
-        }
-        return result;
     }
 }
