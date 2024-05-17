@@ -75,9 +75,6 @@ class EntitlementServiceTest {
                 {"CDP_SDX_HBASE_CLOUD_STORAGE", (EntitlementCheckFunction) EntitlementService::sdxHbaseCloudStorageEnabled, false},
                 {"CDP_SDX_HBASE_CLOUD_STORAGE", (EntitlementCheckFunction) EntitlementService::sdxHbaseCloudStorageEnabled, true},
 
-                {"CDP_DATA_LAKE_AWS_EFS", (EntitlementCheckFunction) EntitlementService::dataLakeEfsEnabled, false},
-                {"CDP_DATA_LAKE_AWS_EFS", (EntitlementCheckFunction) EntitlementService::dataLakeEfsEnabled, true},
-
                 {"CDP_TRIAL", (EntitlementCheckFunction) EntitlementService::cdpTrialEnabled, false},
                 {"CDP_TRIAL", (EntitlementCheckFunction) EntitlementService::cdpTrialEnabled, true},
 
