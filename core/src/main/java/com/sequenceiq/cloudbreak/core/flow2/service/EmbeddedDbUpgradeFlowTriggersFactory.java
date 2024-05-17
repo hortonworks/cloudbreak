@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsEvent;
@@ -66,18 +65,15 @@ public class EmbeddedDbUpgradeFlowTriggersFactory {
 
     private boolean isEmbeddedDBUpgradeNeeded(StackDto stackDto, boolean upgradeRequested) {
         StackView stackView = stackDto.getStack();
-        boolean embeddedPostgresUpgradeEnabled =
-                entitlementService.isEmbeddedPostgresUpgradeEnabled(Crn.safeFromString(stackView.getResourceCrn()).getAccountId());
         boolean embeddedDBOnAttachedDisk = embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stackDto);
         String currentDbVersion = StringUtils.isNotEmpty(stackDto.getExternalDatabaseEngineVersion())
                 ? stackDto.getExternalDatabaseEngineVersion() : DEFAULT_DB_VERSION;
         boolean versionsAreDifferent = !targetMajorVersion.getMajorVersion().equals(currentDbVersion);
-        if (embeddedPostgresUpgradeEnabled && upgradeRequested && embeddedDBOnAttachedDisk && versionsAreDifferent) {
+        if (upgradeRequested && embeddedDBOnAttachedDisk && versionsAreDifferent) {
             LOGGER.debug("Embedded db upgrade is possible and needed.");
             return true;
         } else {
             LOGGER.debug("Check of embedded db upgrade necessity has evaluated to False. At least one of the following conditions is false:"
-                    + " CDP_POSTGRES_UPGRADE_EMBEDDED entitlement enabled: " + embeddedPostgresUpgradeEnabled
                     + ", os upgrade requested: " + upgradeRequested
                     + ", embedded database is on attached disk: " + embeddedDBOnAttachedDisk
                     + ", target db version is different: " + versionsAreDifferent);

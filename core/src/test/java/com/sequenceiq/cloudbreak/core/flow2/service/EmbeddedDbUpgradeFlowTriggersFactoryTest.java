@@ -42,14 +42,12 @@ public class EmbeddedDbUpgradeFlowTriggersFactoryTest {
     @BeforeEach
     public void setUp() {
         StackView stackView = mock(StackView.class);
-        when(stackView.getResourceCrn()).thenReturn("crn:cdp:environments:us-west-1:account:environment:resource");
         when(stackDto.getStack()).thenReturn(stackView);
         ReflectionTestUtils.setField(underTest, "targetMajorVersion", TargetMajorVersion.VERSION14);
     }
 
     @Test
     public void testCreateFlowTriggersEmbeddedDBUpgradeNeededReturnsFlowTriggers() {
-        when(entitlementService.isEmbeddedPostgresUpgradeEnabled(any())).thenReturn(true);
         when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(any())).thenReturn(true);
         when(stackDto.getId()).thenReturn(1L);
 
@@ -61,12 +59,4 @@ public class EmbeddedDbUpgradeFlowTriggersFactoryTest {
         assertEquals(UpgradeRdsTriggerRequest.class, flowTriggers.get(1).getClass());
     }
 
-    @Test
-    public void testCreateFlowTriggersEmbeddedDBUpgradeNotNeededReturnsEmptyList() {
-        when(entitlementService.isEmbeddedPostgresUpgradeEnabled(any())).thenReturn(false);
-
-        List<Selectable> flowTriggers = underTest.createFlowTriggers(stackDto, true);
-
-        assertEquals(0, flowTriggers.size());
-    }
 }

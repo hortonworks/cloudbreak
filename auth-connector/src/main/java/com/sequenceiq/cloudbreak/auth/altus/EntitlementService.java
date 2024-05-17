@@ -59,7 +59,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_HYBRID_CLOUD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EMBEDDED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP;
@@ -427,10 +426,6 @@ public class EntitlementService {
 
     public boolean isExperimentalNodeCountLimitsEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_DATAHUB_EXPERIMENTAL_SCALE_LIMITS);
-    }
-
-    public boolean isEmbeddedPostgresUpgradeEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_POSTGRES_UPGRADE_EMBEDDED);
     }
 
     public boolean isPostgresUpgradeExceptionEnabled(String accountId) {

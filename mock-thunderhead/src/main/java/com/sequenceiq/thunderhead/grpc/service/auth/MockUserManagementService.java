@@ -56,7 +56,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_HYBRID_CLOUD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EMBEDDED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP;
@@ -425,9 +424,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.workloadiam.sync.routing.enable}")
     private boolean enableWorkloadIamSyncRouting;
-
-    @Value("${auth.mock.postgres.upgrade.embedded.enable}")
-    private boolean enablePostgresUpgradeEmbedded;
 
     @Value("${auth.mock.postgres.upgrade.exception.enable}")
     private boolean enablePostgresUpgradeException;
@@ -945,9 +941,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableUsersyncEnforceGroupMemberLimit) {
             builder.addEntitlements(createEntitlement(CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT));
-        }
-        if (enablePostgresUpgradeEmbedded) {
-            builder.addEntitlements(createEntitlement(CDP_POSTGRES_UPGRADE_EMBEDDED));
         }
         if (enablePostgresUpgradeException) {
             builder.addEntitlements(createEntitlement(CDP_POSTGRES_UPGRADE_EXCEPTION));
