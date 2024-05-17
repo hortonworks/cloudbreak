@@ -35,17 +35,17 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * Private environment specific configuration.
+ * Configuration details specific to the Private Cloud environment. Only returned when the output view is set to &#39;FULL&#39;.
  */
 @JsonPropertyOrder({
-  PrivateEnvironmentDetails.JSON_PROPERTY_CM_HOST,
-  PrivateEnvironmentDetails.JSON_PROPERTY_CML_SUMMARY,
-  PrivateEnvironmentDetails.JSON_PROPERTY_CDW_SUMMARY,
-  PrivateEnvironmentDetails.JSON_PROPERTY_CDE_SUMMARY,
-  PrivateEnvironmentDetails.JSON_PROPERTY_APPLICATIONS
+  PvcEnvironmentDetails.JSON_PROPERTY_CM_HOST,
+  PvcEnvironmentDetails.JSON_PROPERTY_CML_SUMMARY,
+  PvcEnvironmentDetails.JSON_PROPERTY_CDW_SUMMARY,
+  PvcEnvironmentDetails.JSON_PROPERTY_CDE_SUMMARY,
+  PvcEnvironmentDetails.JSON_PROPERTY_APPLICATIONS
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
-public class PrivateEnvironmentDetails {
+public class PvcEnvironmentDetails {
   public static final String JSON_PROPERTY_CM_HOST = "cmHost";
   private String cmHost;
 
@@ -61,10 +61,10 @@ public class PrivateEnvironmentDetails {
   public static final String JSON_PROPERTY_APPLICATIONS = "applications";
   private Map<String, Application> applications = new HashMap<>();
 
-  public PrivateEnvironmentDetails() { 
+  public PvcEnvironmentDetails() { 
   }
 
-  public PrivateEnvironmentDetails cmHost(String cmHost) {
+  public PvcEnvironmentDetails cmHost(String cmHost) {
     this.cmHost = cmHost;
     return this;
   }
@@ -89,7 +89,7 @@ public class PrivateEnvironmentDetails {
   }
 
 
-  public PrivateEnvironmentDetails cmlSummary(CmlSummary cmlSummary) {
+  public PvcEnvironmentDetails cmlSummary(CmlSummary cmlSummary) {
     this.cmlSummary = cmlSummary;
     return this;
   }
@@ -114,7 +114,7 @@ public class PrivateEnvironmentDetails {
   }
 
 
-  public PrivateEnvironmentDetails cdwSummary(CdwSummary cdwSummary) {
+  public PvcEnvironmentDetails cdwSummary(CdwSummary cdwSummary) {
     this.cdwSummary = cdwSummary;
     return this;
   }
@@ -139,7 +139,7 @@ public class PrivateEnvironmentDetails {
   }
 
 
-  public PrivateEnvironmentDetails cdeSummary(CdeSummary cdeSummary) {
+  public PvcEnvironmentDetails cdeSummary(CdeSummary cdeSummary) {
     this.cdeSummary = cdeSummary;
     return this;
   }
@@ -164,12 +164,12 @@ public class PrivateEnvironmentDetails {
   }
 
 
-  public PrivateEnvironmentDetails applications(Map<String, Application> applications) {
+  public PvcEnvironmentDetails applications(Map<String, Application> applications) {
     this.applications = applications;
     return this;
   }
 
-  public PrivateEnvironmentDetails putApplicationsItem(String key, Application applicationsItem) {
+  public PvcEnvironmentDetails putApplicationsItem(String key, Application applicationsItem) {
     if (this.applications == null) {
       this.applications = new HashMap<>();
     }
@@ -198,7 +198,7 @@ public class PrivateEnvironmentDetails {
 
 
   /**
-   * Return true if this PrivateEnvironmentDetails object is equal to o.
+   * Return true if this PvcEnvironmentDetails object is equal to o.
    */
   @Override
   public boolean equals(Object o) {
@@ -208,12 +208,12 @@ public class PrivateEnvironmentDetails {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    PrivateEnvironmentDetails privateEnvironmentDetails = (PrivateEnvironmentDetails) o;
-    return Objects.equals(this.cmHost, privateEnvironmentDetails.cmHost) &&
-        Objects.equals(this.cmlSummary, privateEnvironmentDetails.cmlSummary) &&
-        Objects.equals(this.cdwSummary, privateEnvironmentDetails.cdwSummary) &&
-        Objects.equals(this.cdeSummary, privateEnvironmentDetails.cdeSummary) &&
-        Objects.equals(this.applications, privateEnvironmentDetails.applications);
+    PvcEnvironmentDetails pvcEnvironmentDetails = (PvcEnvironmentDetails) o;
+    return Objects.equals(this.cmHost, pvcEnvironmentDetails.cmHost) &&
+        Objects.equals(this.cmlSummary, pvcEnvironmentDetails.cmlSummary) &&
+        Objects.equals(this.cdwSummary, pvcEnvironmentDetails.cdwSummary) &&
+        Objects.equals(this.cdeSummary, pvcEnvironmentDetails.cdeSummary) &&
+        Objects.equals(this.applications, pvcEnvironmentDetails.applications);
   }
 
   @Override
@@ -224,7 +224,7 @@ public class PrivateEnvironmentDetails {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class PrivateEnvironmentDetails {\n");
+    sb.append("class PvcEnvironmentDetails {\n");
     sb.append("    cmHost: ").append(toIndentedString(cmHost)).append("\n");
     sb.append("    cmlSummary: ").append(toIndentedString(cmlSummary)).append("\n");
     sb.append("    cdwSummary: ").append(toIndentedString(cdwSummary)).append("\n");

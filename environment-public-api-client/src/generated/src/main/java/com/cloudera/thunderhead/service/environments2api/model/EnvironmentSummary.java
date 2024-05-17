@@ -43,7 +43,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   EnvironmentSummary.JSON_PROPERTY_CREATED,
   EnvironmentSummary.JSON_PROPERTY_PROXY_CONFIG_NAME,
   EnvironmentSummary.JSON_PROPERTY_ENABLE_SECRET_ENCRYPTION,
-  EnvironmentSummary.JSON_PROPERTY_CDP_RUNTIME_VERSION
+  EnvironmentSummary.JSON_PROPERTY_CDP_RUNTIME_VERSION,
+  EnvironmentSummary.JSON_PROPERTY_CLOUDERA_MANAGER_VERSION,
+  EnvironmentSummary.JSON_PROPERTY_CDP_PVC_VERSION
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
 public class EnvironmentSummary {
@@ -79,6 +81,12 @@ public class EnvironmentSummary {
 
   public static final String JSON_PROPERTY_CDP_RUNTIME_VERSION = "cdpRuntimeVersion";
   private String cdpRuntimeVersion;
+
+  public static final String JSON_PROPERTY_CLOUDERA_MANAGER_VERSION = "clouderaManagerVersion";
+  private String clouderaManagerVersion;
+
+  public static final String JSON_PROPERTY_CDP_PVC_VERSION = "cdpPvcVersion";
+  private String cdpPvcVersion;
 
   public EnvironmentSummary() { 
   }
@@ -358,6 +366,56 @@ public class EnvironmentSummary {
   }
 
 
+  public EnvironmentSummary clouderaManagerVersion(String clouderaManagerVersion) {
+    this.clouderaManagerVersion = clouderaManagerVersion;
+    return this;
+  }
+
+   /**
+   * The version of Cloudera Manager that the environment is registered with.
+   * @return clouderaManagerVersion
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_CLOUDERA_MANAGER_VERSION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public String getClouderaManagerVersion() {
+    return clouderaManagerVersion;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_CLOUDERA_MANAGER_VERSION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setClouderaManagerVersion(String clouderaManagerVersion) {
+    this.clouderaManagerVersion = clouderaManagerVersion;
+  }
+
+
+  public EnvironmentSummary cdpPvcVersion(String cdpPvcVersion) {
+    this.cdpPvcVersion = cdpPvcVersion;
+    return this;
+  }
+
+   /**
+   * The version of CDP PVC.
+   * @return cdpPvcVersion
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_CDP_PVC_VERSION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public String getCdpPvcVersion() {
+    return cdpPvcVersion;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_CDP_PVC_VERSION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setCdpPvcVersion(String cdpPvcVersion) {
+    this.cdpPvcVersion = cdpPvcVersion;
+  }
+
+
   /**
    * Return true if this EnvironmentSummary object is equal to o.
    */
@@ -380,12 +438,14 @@ public class EnvironmentSummary {
         Objects.equals(this.created, environmentSummary.created) &&
         Objects.equals(this.proxyConfigName, environmentSummary.proxyConfigName) &&
         Objects.equals(this.enableSecretEncryption, environmentSummary.enableSecretEncryption) &&
-        Objects.equals(this.cdpRuntimeVersion, environmentSummary.cdpRuntimeVersion);
+        Objects.equals(this.cdpRuntimeVersion, environmentSummary.cdpRuntimeVersion) &&
+        Objects.equals(this.clouderaManagerVersion, environmentSummary.clouderaManagerVersion) &&
+        Objects.equals(this.cdpPvcVersion, environmentSummary.cdpPvcVersion);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(environmentName, crn, status, region, cloudPlatform, credentialName, description, created, proxyConfigName, enableSecretEncryption, cdpRuntimeVersion);
+    return Objects.hash(environmentName, crn, status, region, cloudPlatform, credentialName, description, created, proxyConfigName, enableSecretEncryption, cdpRuntimeVersion, clouderaManagerVersion, cdpPvcVersion);
   }
 
   @Override
@@ -403,6 +463,8 @@ public class EnvironmentSummary {
     sb.append("    proxyConfigName: ").append(toIndentedString(proxyConfigName)).append("\n");
     sb.append("    enableSecretEncryption: ").append(toIndentedString(enableSecretEncryption)).append("\n");
     sb.append("    cdpRuntimeVersion: ").append(toIndentedString(cdpRuntimeVersion)).append("\n");
+    sb.append("    clouderaManagerVersion: ").append(toIndentedString(clouderaManagerVersion)).append("\n");
+    sb.append("    cdpPvcVersion: ").append(toIndentedString(cdpPvcVersion)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -503,6 +565,16 @@ public class EnvironmentSummary {
     // add `cdpRuntimeVersion` to the URL query string
     if (getCdpRuntimeVersion() != null) {
       joiner.add(String.format("%scdpRuntimeVersion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCdpRuntimeVersion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
+    }
+
+    // add `clouderaManagerVersion` to the URL query string
+    if (getClouderaManagerVersion() != null) {
+      joiner.add(String.format("%sclouderaManagerVersion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getClouderaManagerVersion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
+    }
+
+    // add `cdpPvcVersion` to the URL query string
+    if (getCdpPvcVersion() != null) {
+      joiner.add(String.format("%scdpPvcVersion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getCdpPvcVersion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
     }
 
     return joiner.toString();

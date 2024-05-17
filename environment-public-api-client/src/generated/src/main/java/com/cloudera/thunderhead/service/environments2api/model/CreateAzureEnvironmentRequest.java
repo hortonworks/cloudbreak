@@ -19,6 +19,7 @@ import java.util.StringJoiner;
 import java.util.Objects;
 import java.util.Map;
 import java.util.HashMap;
+import com.cloudera.thunderhead.service.environments2api.model.AzureComputeClusterConfigurationRequest;
 import com.cloudera.thunderhead.service.environments2api.model.AzureFreeIpaCreationRequest;
 import com.cloudera.thunderhead.service.environments2api.model.AzureLogStorageRequest;
 import com.cloudera.thunderhead.service.environments2api.model.CcmV2TlsType;
@@ -63,6 +64,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   CreateAzureEnvironmentRequest.JSON_PROPERTY_REPORT_DEPLOYMENT_LOGS,
   CreateAzureEnvironmentRequest.JSON_PROPERTY_CLOUD_STORAGE_LOGGING,
   CreateAzureEnvironmentRequest.JSON_PROPERTY_FREE_IPA,
+  CreateAzureEnvironmentRequest.JSON_PROPERTY_ENVIRONMENT_VERSION,
+  CreateAzureEnvironmentRequest.JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION,
   CreateAzureEnvironmentRequest.JSON_PROPERTY_IMAGE,
   CreateAzureEnvironmentRequest.JSON_PROPERTY_TAGS,
   CreateAzureEnvironmentRequest.JSON_PROPERTY_PROXY_CONFIG_NAME,
@@ -73,6 +76,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
   CreateAzureEnvironmentRequest.JSON_PROPERTY_ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS,
   CreateAzureEnvironmentRequest.JSON_PROPERTY_ENCRYPTION_AT_HOST,
   CreateAzureEnvironmentRequest.JSON_PROPERTY_USER_MANAGED_IDENTITY,
+  CreateAzureEnvironmentRequest.JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY,
   CreateAzureEnvironmentRequest.JSON_PROPERTY_ENCRYPTION_KEY_URL,
   CreateAzureEnvironmentRequest.JSON_PROPERTY_ENCRYPTION_KEY_RESOURCE_GROUP_NAME,
   CreateAzureEnvironmentRequest.JSON_PROPERTY_ID_BROKER_MAPPING_SOURCE,
@@ -139,6 +143,12 @@ public class CreateAzureEnvironmentRequest {
   public static final String JSON_PROPERTY_FREE_IPA = "freeIpa";
   private AzureFreeIpaCreationRequest freeIpa;
 
+  public static final String JSON_PROPERTY_ENVIRONMENT_VERSION = "environmentVersion";
+  private String environmentVersion;
+
+  public static final String JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION = "computeClusterConfiguration";
+  private AzureComputeClusterConfigurationRequest computeClusterConfiguration;
+
   public static final String JSON_PROPERTY_IMAGE = "image";
   private FreeIpaImageRequest image;
 
@@ -203,6 +213,9 @@ public class CreateAzureEnvironmentRequest {
 
   public static final String JSON_PROPERTY_USER_MANAGED_IDENTITY = "userManagedIdentity";
   private String userManagedIdentity;
+
+  public static final String JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY = "encryptionUserManagedIdentity";
+  private String encryptionUserManagedIdentity;
 
   public static final String JSON_PROPERTY_ENCRYPTION_KEY_URL = "encryptionKeyUrl";
   private String encryptionKeyUrl;
@@ -684,6 +697,56 @@ public class CreateAzureEnvironmentRequest {
   }
 
 
+  public CreateAzureEnvironmentRequest environmentVersion(String environmentVersion) {
+    this.environmentVersion = environmentVersion;
+    return this;
+  }
+
+   /**
+   * The environment version can be defined in this parameter. Valid values are v1,v2. Default is v1 at the moment.
+   * @return environmentVersion
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_ENVIRONMENT_VERSION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public String getEnvironmentVersion() {
+    return environmentVersion;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_ENVIRONMENT_VERSION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setEnvironmentVersion(String environmentVersion) {
+    this.environmentVersion = environmentVersion;
+  }
+
+
+  public CreateAzureEnvironmentRequest computeClusterConfiguration(AzureComputeClusterConfigurationRequest computeClusterConfiguration) {
+    this.computeClusterConfiguration = computeClusterConfiguration;
+    return this;
+  }
+
+   /**
+   * Get computeClusterConfiguration
+   * @return computeClusterConfiguration
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public AzureComputeClusterConfigurationRequest getComputeClusterConfiguration() {
+    return computeClusterConfiguration;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setComputeClusterConfiguration(AzureComputeClusterConfigurationRequest computeClusterConfiguration) {
+    this.computeClusterConfiguration = computeClusterConfiguration;
+  }
+
+
   public CreateAzureEnvironmentRequest image(FreeIpaImageRequest image) {
     this.image = image;
     return this;
@@ -931,7 +994,7 @@ public class CreateAzureEnvironmentRequest {
   }
 
    /**
-   * User managed identity for encryption.
+   * User managed identity for encryption. (deprecated)
    * @return userManagedIdentity
   **/
   @javax.annotation.Nullable
@@ -947,6 +1010,31 @@ public class CreateAzureEnvironmentRequest {
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
   public void setUserManagedIdentity(String userManagedIdentity) {
     this.userManagedIdentity = userManagedIdentity;
+  }
+
+
+  public CreateAzureEnvironmentRequest encryptionUserManagedIdentity(String encryptionUserManagedIdentity) {
+    this.encryptionUserManagedIdentity = encryptionUserManagedIdentity;
+    return this;
+  }
+
+   /**
+   * User managed identity for encryption.
+   * @return encryptionUserManagedIdentity
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public String getEncryptionUserManagedIdentity() {
+    return encryptionUserManagedIdentity;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_ENCRYPTION_USER_MANAGED_IDENTITY)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setEncryptionUserManagedIdentity(String encryptionUserManagedIdentity) {
+    this.encryptionUserManagedIdentity = encryptionUserManagedIdentity;
   }
 
 
@@ -1221,6 +1309,8 @@ public class CreateAzureEnvironmentRequest {
         Objects.equals(this.reportDeploymentLogs, createAzureEnvironmentRequest.reportDeploymentLogs) &&
         Objects.equals(this.cloudStorageLogging, createAzureEnvironmentRequest.cloudStorageLogging) &&
         Objects.equals(this.freeIpa, createAzureEnvironmentRequest.freeIpa) &&
+        Objects.equals(this.environmentVersion, createAzureEnvironmentRequest.environmentVersion) &&
+        Objects.equals(this.computeClusterConfiguration, createAzureEnvironmentRequest.computeClusterConfiguration) &&
         Objects.equals(this.image, createAzureEnvironmentRequest.image) &&
         Objects.equals(this.tags, createAzureEnvironmentRequest.tags) &&
         Objects.equals(this.proxyConfigName, createAzureEnvironmentRequest.proxyConfigName) &&
@@ -1231,6 +1321,7 @@ public class CreateAzureEnvironmentRequest {
         Objects.equals(this.endpointAccessGatewaySubnetIds, createAzureEnvironmentRequest.endpointAccessGatewaySubnetIds) &&
         Objects.equals(this.encryptionAtHost, createAzureEnvironmentRequest.encryptionAtHost) &&
         Objects.equals(this.userManagedIdentity, createAzureEnvironmentRequest.userManagedIdentity) &&
+        Objects.equals(this.encryptionUserManagedIdentity, createAzureEnvironmentRequest.encryptionUserManagedIdentity) &&
         Objects.equals(this.encryptionKeyUrl, createAzureEnvironmentRequest.encryptionKeyUrl) &&
         Objects.equals(this.encryptionKeyResourceGroupName, createAzureEnvironmentRequest.encryptionKeyResourceGroupName) &&
         Objects.equals(this.idBrokerMappingSource, createAzureEnvironmentRequest.idBrokerMappingSource) &&
@@ -1244,7 +1335,7 @@ public class CreateAzureEnvironmentRequest {
 
   @Override
   public int hashCode() {
-    return Objects.hash(environmentName, credentialName, region, publicKey, securityAccess, usePublicIp, logStorage, existingNetworkParams, newNetworkParams, description, enableTunnel, tunnelType, ccmV2TlsType, enableWorkloadAnalytics, workloadAnalytics, reportDeploymentLogs, cloudStorageLogging, freeIpa, image, tags, proxyConfigName, resourceGroupName, dedicatedStorageAccount, createPrivateEndpoints, endpointAccessGatewayScheme, endpointAccessGatewaySubnetIds, encryptionAtHost, userManagedIdentity, encryptionKeyUrl, encryptionKeyResourceGroupName, idBrokerMappingSource, enableLoadBalancers, enableOutboundLoadBalancer, availabilityZones, flexibleServerSubnetIds, dataServices, customDockerRegistry);
+    return Objects.hash(environmentName, credentialName, region, publicKey, securityAccess, usePublicIp, logStorage, existingNetworkParams, newNetworkParams, description, enableTunnel, tunnelType, ccmV2TlsType, enableWorkloadAnalytics, workloadAnalytics, reportDeploymentLogs, cloudStorageLogging, freeIpa, environmentVersion, computeClusterConfiguration, image, tags, proxyConfigName, resourceGroupName, dedicatedStorageAccount, createPrivateEndpoints, endpointAccessGatewayScheme, endpointAccessGatewaySubnetIds, encryptionAtHost, userManagedIdentity, encryptionUserManagedIdentity, encryptionKeyUrl, encryptionKeyResourceGroupName, idBrokerMappingSource, enableLoadBalancers, enableOutboundLoadBalancer, availabilityZones, flexibleServerSubnetIds, dataServices, customDockerRegistry);
   }
 
   @Override
@@ -1269,6 +1360,8 @@ public class CreateAzureEnvironmentRequest {
     sb.append("    reportDeploymentLogs: ").append(toIndentedString(reportDeploymentLogs)).append("\n");
     sb.append("    cloudStorageLogging: ").append(toIndentedString(cloudStorageLogging)).append("\n");
     sb.append("    freeIpa: ").append(toIndentedString(freeIpa)).append("\n");
+    sb.append("    environmentVersion: ").append(toIndentedString(environmentVersion)).append("\n");
+    sb.append("    computeClusterConfiguration: ").append(toIndentedString(computeClusterConfiguration)).append("\n");
     sb.append("    image: ").append(toIndentedString(image)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    proxyConfigName: ").append(toIndentedString(proxyConfigName)).append("\n");
@@ -1279,6 +1372,7 @@ public class CreateAzureEnvironmentRequest {
     sb.append("    endpointAccessGatewaySubnetIds: ").append(toIndentedString(endpointAccessGatewaySubnetIds)).append("\n");
     sb.append("    encryptionAtHost: ").append(toIndentedString(encryptionAtHost)).append("\n");
     sb.append("    userManagedIdentity: ").append(toIndentedString(userManagedIdentity)).append("\n");
+    sb.append("    encryptionUserManagedIdentity: ").append(toIndentedString(encryptionUserManagedIdentity)).append("\n");
     sb.append("    encryptionKeyUrl: ").append(toIndentedString(encryptionKeyUrl)).append("\n");
     sb.append("    encryptionKeyResourceGroupName: ").append(toIndentedString(encryptionKeyResourceGroupName)).append("\n");
     sb.append("    idBrokerMappingSource: ").append(toIndentedString(idBrokerMappingSource)).append("\n");
@@ -1425,6 +1519,16 @@ public class CreateAzureEnvironmentRequest {
       joiner.add(getFreeIpa().toUrlQueryString(prefix + "freeIpa" + suffix));
     }
 
+    // add `environmentVersion` to the URL query string
+    if (getEnvironmentVersion() != null) {
+      joiner.add(String.format("%senvironmentVersion%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEnvironmentVersion()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
+    }
+
+    // add `computeClusterConfiguration` to the URL query string
+    if (getComputeClusterConfiguration() != null) {
+      joiner.add(getComputeClusterConfiguration().toUrlQueryString(prefix + "computeClusterConfiguration" + suffix));
+    }
+
     // add `image` to the URL query string
     if (getImage() != null) {
       joiner.add(getImage().toUrlQueryString(prefix + "image" + suffix));
@@ -1482,6 +1586,11 @@ public class CreateAzureEnvironmentRequest {
     // add `userManagedIdentity` to the URL query string
     if (getUserManagedIdentity() != null) {
       joiner.add(String.format("%suserManagedIdentity%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getUserManagedIdentity()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
+    }
+
+    // add `encryptionUserManagedIdentity` to the URL query string
+    if (getEncryptionUserManagedIdentity() != null) {
+      joiner.add(String.format("%sencryptionUserManagedIdentity%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getEncryptionUserManagedIdentity()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
     }
 
     // add `encryptionKeyUrl` to the URL query string

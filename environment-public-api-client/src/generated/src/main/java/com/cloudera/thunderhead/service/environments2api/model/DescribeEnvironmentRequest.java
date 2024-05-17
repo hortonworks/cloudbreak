@@ -41,7 +41,7 @@ public class DescribeEnvironmentRequest {
   private String environmentName;
 
   /**
-   * The level of output to be returned.
+   * The level of output to be returned. &#39;FULL&#39; is only applicable in Private Cloud and does not affect Public Cloud. If left empty, it defaults to &#39;SUMMARY&#39;.
    */
   public enum OutputViewEnum {
     SUMMARY("SUMMARY"),
@@ -87,7 +87,7 @@ public class DescribeEnvironmentRequest {
   }
 
    /**
-   * The names or CRN of the environment.
+   * The names or CRN of the environment. In case of hybrid environments this can be only CRN.
    * @return environmentName
   **/
   @javax.annotation.Nonnull
@@ -112,7 +112,7 @@ public class DescribeEnvironmentRequest {
   }
 
    /**
-   * The level of output to be returned.
+   * The level of output to be returned. &#39;FULL&#39; is only applicable in Private Cloud and does not affect Public Cloud. If left empty, it defaults to &#39;SUMMARY&#39;.
    * @return outputView
   **/
   @javax.annotation.Nullable

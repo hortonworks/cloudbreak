@@ -19,8 +19,7 @@ import java.util.StringJoiner;
 import java.util.Objects;
 import java.util.Map;
 import java.util.HashMap;
-import com.cloudera.thunderhead.service.environments2api.model.CdwCluster;
-import com.cloudera.thunderhead.service.environments2api.model.CdwDbc;
+import com.cloudera.thunderhead.service.environments2api.model.Credential;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -31,75 +30,46 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * The CDW summary.
+ * Response object for an update AWS credential request.
  */
 @JsonPropertyOrder({
-  CdwSummary.JSON_PROPERTY_CDW_CLUSTER,
-  CdwSummary.JSON_PROPERTY_CDW_DBC
+  UpdateAwsCredentialResponse.JSON_PROPERTY_CREDENTIAL
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
-public class CdwSummary {
-  public static final String JSON_PROPERTY_CDW_CLUSTER = "cdwCluster";
-  private CdwCluster cdwCluster;
+public class UpdateAwsCredentialResponse {
+  public static final String JSON_PROPERTY_CREDENTIAL = "credential";
+  private Credential credential;
 
-  public static final String JSON_PROPERTY_CDW_DBC = "cdwDbc";
-  private CdwDbc cdwDbc;
-
-  public CdwSummary() { 
+  public UpdateAwsCredentialResponse() { 
   }
 
-  public CdwSummary cdwCluster(CdwCluster cdwCluster) {
-    this.cdwCluster = cdwCluster;
+  public UpdateAwsCredentialResponse credential(Credential credential) {
+    this.credential = credential;
     return this;
   }
 
    /**
-   * Get cdwCluster
-   * @return cdwCluster
+   * Get credential
+   * @return credential
   **/
   @javax.annotation.Nullable
-  @JsonProperty(JSON_PROPERTY_CDW_CLUSTER)
+  @JsonProperty(JSON_PROPERTY_CREDENTIAL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public CdwCluster getCdwCluster() {
-    return cdwCluster;
+  public Credential getCredential() {
+    return credential;
   }
 
 
-  @JsonProperty(JSON_PROPERTY_CDW_CLUSTER)
+  @JsonProperty(JSON_PROPERTY_CREDENTIAL)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCdwCluster(CdwCluster cdwCluster) {
-    this.cdwCluster = cdwCluster;
-  }
-
-
-  public CdwSummary cdwDbc(CdwDbc cdwDbc) {
-    this.cdwDbc = cdwDbc;
-    return this;
-  }
-
-   /**
-   * Get cdwDbc
-   * @return cdwDbc
-  **/
-  @javax.annotation.Nullable
-  @JsonProperty(JSON_PROPERTY_CDW_DBC)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-
-  public CdwDbc getCdwDbc() {
-    return cdwDbc;
-  }
-
-
-  @JsonProperty(JSON_PROPERTY_CDW_DBC)
-  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setCdwDbc(CdwDbc cdwDbc) {
-    this.cdwDbc = cdwDbc;
+  public void setCredential(Credential credential) {
+    this.credential = credential;
   }
 
 
   /**
-   * Return true if this CdwSummary object is equal to o.
+   * Return true if this UpdateAwsCredentialResponse object is equal to o.
    */
   @Override
   public boolean equals(Object o) {
@@ -109,22 +79,20 @@ public class CdwSummary {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    CdwSummary cdwSummary = (CdwSummary) o;
-    return Objects.equals(this.cdwCluster, cdwSummary.cdwCluster) &&
-        Objects.equals(this.cdwDbc, cdwSummary.cdwDbc);
+    UpdateAwsCredentialResponse updateAwsCredentialResponse = (UpdateAwsCredentialResponse) o;
+    return Objects.equals(this.credential, updateAwsCredentialResponse.credential);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(cdwCluster, cdwDbc);
+    return Objects.hash(credential);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class CdwSummary {\n");
-    sb.append("    cdwCluster: ").append(toIndentedString(cdwCluster)).append("\n");
-    sb.append("    cdwDbc: ").append(toIndentedString(cdwDbc)).append("\n");
+    sb.append("class UpdateAwsCredentialResponse {\n");
+    sb.append("    credential: ").append(toIndentedString(credential)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -172,14 +140,9 @@ public class CdwSummary {
 
     StringJoiner joiner = new StringJoiner("&");
 
-    // add `cdwCluster` to the URL query string
-    if (getCdwCluster() != null) {
-      joiner.add(getCdwCluster().toUrlQueryString(prefix + "cdwCluster" + suffix));
-    }
-
-    // add `cdwDbc` to the URL query string
-    if (getCdwDbc() != null) {
-      joiner.add(getCdwDbc().toUrlQueryString(prefix + "cdwDbc" + suffix));
+    // add `credential` to the URL query string
+    if (getCredential() != null) {
+      joiner.add(getCredential().toUrlQueryString(prefix + "credential" + suffix));
     }
 
     return joiner.toString();

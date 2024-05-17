@@ -19,11 +19,11 @@ import java.util.StringJoiner;
 import java.util.Objects;
 import java.util.Map;
 import java.util.HashMap;
+import com.cloudera.thunderhead.service.environments2api.model.AWSComputeClusterConfigurationRequest;
 import com.cloudera.thunderhead.service.environments2api.model.AWSFreeIpaCreationRequest;
 import com.cloudera.thunderhead.service.environments2api.model.AuthenticationRequest;
 import com.cloudera.thunderhead.service.environments2api.model.AwsLogStorageRequest;
 import com.cloudera.thunderhead.service.environments2api.model.CcmV2TlsType;
-import com.cloudera.thunderhead.service.environments2api.model.ComputeClusterConfigurationRequest;
 import com.cloudera.thunderhead.service.environments2api.model.CustomDockerRegistryRequest;
 import com.cloudera.thunderhead.service.environments2api.model.FreeIpaImageRequest;
 import com.cloudera.thunderhead.service.environments2api.model.SecurityAccessRequest;
@@ -185,7 +185,7 @@ public class CreateAWSEnvironmentRequest {
   private String environmentVersion;
 
   public static final String JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION = "computeClusterConfiguration";
-  private ComputeClusterConfigurationRequest computeClusterConfiguration;
+  private AWSComputeClusterConfigurationRequest computeClusterConfiguration;
 
   public static final String JSON_PROPERTY_IMAGE = "image";
   private FreeIpaImageRequest image;
@@ -800,7 +800,7 @@ public class CreateAWSEnvironmentRequest {
   }
 
 
-  public CreateAWSEnvironmentRequest computeClusterConfiguration(ComputeClusterConfigurationRequest computeClusterConfiguration) {
+  public CreateAWSEnvironmentRequest computeClusterConfiguration(AWSComputeClusterConfigurationRequest computeClusterConfiguration) {
     this.computeClusterConfiguration = computeClusterConfiguration;
     return this;
   }
@@ -813,14 +813,14 @@ public class CreateAWSEnvironmentRequest {
   @JsonProperty(JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
 
-  public ComputeClusterConfigurationRequest getComputeClusterConfiguration() {
+  public AWSComputeClusterConfigurationRequest getComputeClusterConfiguration() {
     return computeClusterConfiguration;
   }
 
 
   @JsonProperty(JSON_PROPERTY_COMPUTE_CLUSTER_CONFIGURATION)
   @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
-  public void setComputeClusterConfiguration(ComputeClusterConfigurationRequest computeClusterConfiguration) {
+  public void setComputeClusterConfiguration(AWSComputeClusterConfigurationRequest computeClusterConfiguration) {
     this.computeClusterConfiguration = computeClusterConfiguration;
   }
 

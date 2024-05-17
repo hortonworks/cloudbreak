@@ -32,23 +32,27 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * Request object for creating Externalized compute cluster for the environment.
  */
 @JsonPropertyOrder({
-  ComputeClusterConfigurationRequest.JSON_PROPERTY_PRIVATE_CLUSTER
+  AWSComputeClusterConfigurationRequest.JSON_PROPERTY_PRIVATE_CLUSTER,
+  AWSComputeClusterConfigurationRequest.JSON_PROPERTY_KUBE_API_AUTHORIZED_IP_RANGES
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.5.0")
-public class ComputeClusterConfigurationRequest {
+public class AWSComputeClusterConfigurationRequest {
   public static final String JSON_PROPERTY_PRIVATE_CLUSTER = "privateCluster";
   private Boolean privateCluster;
 
-  public ComputeClusterConfigurationRequest() { 
+  public static final String JSON_PROPERTY_KUBE_API_AUTHORIZED_IP_RANGES = "kubeApiAuthorizedIpRanges";
+  private String kubeApiAuthorizedIpRanges;
+
+  public AWSComputeClusterConfigurationRequest() { 
   }
 
-  public ComputeClusterConfigurationRequest privateCluster(Boolean privateCluster) {
+  public AWSComputeClusterConfigurationRequest privateCluster(Boolean privateCluster) {
     this.privateCluster = privateCluster;
     return this;
   }
 
    /**
-   * If true, creates private cluster
+   * If true, creates private cluster.
    * @return privateCluster
   **/
   @javax.annotation.Nullable
@@ -67,8 +71,33 @@ public class ComputeClusterConfigurationRequest {
   }
 
 
+  public AWSComputeClusterConfigurationRequest kubeApiAuthorizedIpRanges(String kubeApiAuthorizedIpRanges) {
+    this.kubeApiAuthorizedIpRanges = kubeApiAuthorizedIpRanges;
+    return this;
+  }
+
+   /**
+   * Kubernetes API authorized IP ranges in CIDR notation. Mutually exclusive with privateCluster. Default value is 0.0.0.0/0.
+   * @return kubeApiAuthorizedIpRanges
+  **/
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_KUBE_API_AUTHORIZED_IP_RANGES)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+
+  public String getKubeApiAuthorizedIpRanges() {
+    return kubeApiAuthorizedIpRanges;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_KUBE_API_AUTHORIZED_IP_RANGES)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setKubeApiAuthorizedIpRanges(String kubeApiAuthorizedIpRanges) {
+    this.kubeApiAuthorizedIpRanges = kubeApiAuthorizedIpRanges;
+  }
+
+
   /**
-   * Return true if this ComputeClusterConfigurationRequest object is equal to o.
+   * Return true if this AWSComputeClusterConfigurationRequest object is equal to o.
    */
   @Override
   public boolean equals(Object o) {
@@ -78,20 +107,22 @@ public class ComputeClusterConfigurationRequest {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ComputeClusterConfigurationRequest computeClusterConfigurationRequest = (ComputeClusterConfigurationRequest) o;
-    return Objects.equals(this.privateCluster, computeClusterConfigurationRequest.privateCluster);
+    AWSComputeClusterConfigurationRequest awSComputeClusterConfigurationRequest = (AWSComputeClusterConfigurationRequest) o;
+    return Objects.equals(this.privateCluster, awSComputeClusterConfigurationRequest.privateCluster) &&
+        Objects.equals(this.kubeApiAuthorizedIpRanges, awSComputeClusterConfigurationRequest.kubeApiAuthorizedIpRanges);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(privateCluster);
+    return Objects.hash(privateCluster, kubeApiAuthorizedIpRanges);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ComputeClusterConfigurationRequest {\n");
+    sb.append("class AWSComputeClusterConfigurationRequest {\n");
     sb.append("    privateCluster: ").append(toIndentedString(privateCluster)).append("\n");
+    sb.append("    kubeApiAuthorizedIpRanges: ").append(toIndentedString(kubeApiAuthorizedIpRanges)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -142,6 +173,11 @@ public class ComputeClusterConfigurationRequest {
     // add `privateCluster` to the URL query string
     if (getPrivateCluster() != null) {
       joiner.add(String.format("%sprivateCluster%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getPrivateCluster()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
+    }
+
+    // add `kubeApiAuthorizedIpRanges` to the URL query string
+    if (getKubeApiAuthorizedIpRanges() != null) {
+      joiner.add(String.format("%skubeApiAuthorizedIpRanges%s=%s", prefix, suffix, URLEncoder.encode(String.valueOf(getKubeApiAuthorizedIpRanges()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
     }
 
     return joiner.toString();

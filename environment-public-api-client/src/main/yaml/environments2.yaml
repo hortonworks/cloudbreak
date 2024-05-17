@@ -251,6 +251,27 @@ paths:
           description: The default response on an error.
           schema:
             $ref: '#/definitions/Error'
+  /api/v1/environments2/updateAwsCredential:
+    post:
+      summary: Updates an AWS credential that can be attached to an environment. The credential is used for authorization to provision resources such as compute instances within your cloud provider account.
+      description: Updates an AWS credential.
+      operationId: updateAwsCredential
+      x-mutating: true
+      parameters:
+        - name: input
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateAwsCredentialRequest'
+      responses:
+        200:
+          description: Expected response to a valid request.
+          schema:
+            $ref: '#/definitions/UpdateAwsCredentialResponse'
+        default:
+          description: The default response on an error.
+          schema:
+            $ref: '#/definitions/Error'
   /api/v1/environments2/createGCPCredential:
     post:
       summary: Creates a new GCP credential that can be attatched to an environment. The credential is used for authorization to provision resources such as compute instances within your cloud provider account.
@@ -2201,9 +2222,6 @@ paths:
       description: Updates FreeIPA AWS cluster to use IMDSv2.
       operationId: updateFreeipaToAwsImdsV2
       x-mutating: true
-      x-hidden: true
-      x-hidden-reason: IN_DEVELOPMENT
-      x-hidden-retention: BETA
       parameters:
         - name: input
           in: body
@@ -2225,9 +2243,6 @@ paths:
       description: Updates FreeIPA AWS cluster to use IMDSv1.
       operationId: updateFreeipaToAwsImdsV1
       x-mutating: true
-      x-hidden: true
-      x-hidden-reason: IN_DEVELOPMENT
-      x-hidden-retention: BETA
       parameters:
         - name: input
           in: body
@@ -2554,6 +2569,37 @@ definitions:
       description:
         type: string
         description: A description for the credential.
+  UpdateAwsCredentialRequest:
+    type: object
+    description: Request object for an update AWS credential request.
+    required:
+      - credentialName
+      - roleArn
+    properties:
+      credentialName:
+        type: string
+        description: The name of the credential.
+      roleArn:
+        type: string
+        description: The ARN of the delegated access role.
+      description:
+        type: string
+        description: A description for the credential.
+      skipOrgPolicyDecisions:
+        type: boolean
+        default: false
+        description: Whether to skip organizational policy decision checks or not.
+      verifyPermissions:
+        type: boolean
+        default: false
+        description: Whether to verify permissions upon saving or not.
+  UpdateAwsCredentialResponse:
+    type: object
+    properties:
+      credential:
+        description: The credential object.
+        $ref: '#/definitions/Credential'
+    description: Response object for an update AWS credential request.
   CreateGCPCredentialResponse:
     type: object
     description: Response object for a create GCP credential request.
@@ -2901,7 +2947,7 @@ definitions:
         description: The Externalized k8s configuration create request for the environment
         x-hidden: true
         x-hidden-reason: IN_DEVELOPMENT
-        $ref: '#/definitions/ComputeClusterConfigurationRequest'
+        $ref: '#/definitions/AWSComputeClusterConfigurationRequest'
       image:
         $ref: '#/definitions/FreeIpaImageRequest'
         description: The FreeIPA image request for the environment
@@ -3525,6 +3571,16 @@ definitions:
       freeIpa:
         $ref: '#/definitions/AzureFreeIpaCreationRequest'
         description: The FreeIPA creation request for the environment
+      environmentVersion:
+        description: The environment version can be defined in this parameter. Valid values are v1,v2. Default is v1 at the moment.
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        type: string
+      computeClusterConfiguration:
+        description: The Externalized k8s configuration create request for the environment.
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+        $ref: '#/definitions/AzureComputeClusterConfigurationRequest'
       image:
         $ref: '#/definitions/FreeIpaImageRequest'
         description: The FreeIPA image request for the environment
@@ -3562,6 +3618,10 @@ definitions:
         type: boolean
         description: When this is enabled, we will provision resources with host encrypted true flag.
       userManagedIdentity:
+        type: string
+        description: User managed identity for encryption. (deprecated)
+        x-deprecated: true
+      encryptionUserManagedIdentity:
         type: string
         description: User managed identity for encryption.
       encryptionKeyUrl:
@@ -3808,6 +3868,10 @@ definitions:
         description: Name of the existing Azure resource group hosting the Azure Key Vault containing customer managed key which will be used to encrypt the Azure Managed Disks. It is required only when the entitlement is granted and the resource group of the key vault is different from the resource group in which the environment is to be created. Omitting it implies that, the key vault containing the encryption key is present in the same resource group where the environment would be created.
       userManagedIdentity:
         type: string
+        description: User managed identity for encryption. (deprecated)
+        x-deprecated: true
+      encryptionUserManagedIdentity:
+        type: string
         description: User managed identity for encryption.
   UpdateAzureEncryptionResourcesResponse:
     type: object
@@ -3925,6 +3989,10 @@ definitions:
         description: ID of the Disk Encryption Set created in Azure which is used to encrypt Managed Disks of FreeIPA, Data Lake, Data Hub and PostgreSQL.
       userManagedIdentity:
         type: string
+        description: User managed identity for encryption. (deprecated)
+        x-deprecated: true
+      encryptionUserManagedIdentity:
+        type: string
         description: User managed identity for encryption.
   AzureDatabaseResources:
     type: object
@@ -3969,10 +4037,12 @@ definitions:
     properties:
       environmentName:
         type: string
-        description: The names or CRN of the environment.
+        description: The names or CRN of the environment. In case of hybrid environments this can be only CRN.
       outputView:
         type: string
-        description: The level of output to be returned.
+        description: The level of output to be returned. 'FULL' is only applicable in Private Cloud and does not affect Public Cloud. If left empty, it defaults to 'SUMMARY'.
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
         enum:
           - SUMMARY
           - FULL
@@ -4030,8 +4100,20 @@ definitions:
         x-hidden: true
         x-hidden-reason: IN_DEVELOPMENT
       cdpRuntimeVersion:
-        description: The version of CDP runtime.
         type: string
+        description: The version of CDP runtime.
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+      clouderaManagerVersion:
+        type: string
+        description: The version of Cloudera Manager that the environment is registered with.
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+      cdpPvcVersion:
+        type: string
+        description: The version of CDP PVC.
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
   Environment:
     type: object
     description: The environment.
@@ -4183,16 +4265,31 @@ definitions:
       customDockerRegistry:
         description: The configured custom docker registry for data services on the environment.
         $ref: '#/definitions/CustomDockerRegistryResponse'
-      privateEnvironmentDetails:
-        description: Private environment specific configuration.
-        x-form-factors: private
-        $ref: '#/definitions/PrivateEnvironmentDetails'
+      pvcEnvironmentDetails:
+        description: Configuration details specific to the Private Cloud environment. Only returned when the output view is set to 'FULL'.
+        $ref: '#/definitions/PvcEnvironmentDetails'
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
       cdpRuntimeVersion:
-        description: The version of CDP runtime.
         type: string
-  PrivateEnvironmentDetails:
+        description: The version of CDP runtime.
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+      clouderaManagerVersion:
+        type: string
+        description: The version of Cloudera Manager that the environment is registered with.
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+      cdpPvcVersion:
+        type: string
+        description: The version of CDP PVC.
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
+  PvcEnvironmentDetails:
     type: object
-    description: Private environment specific configuration.
+    description: Configuration details specific to the Private Cloud environment. Only returned when the output view is set to 'FULL'.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
     properties:
       cmHost:
         type: string
@@ -4203,18 +4300,26 @@ definitions:
       cdwSummary:
         $ref: '#/definitions/CdwSummary'
         description: The CDW summary.
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
       cdeSummary:
         $ref: '#/definitions/CdeSummary'
         description: The CDE summary.
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
       applications:
         type: object
         description: A map of applications that provide services for the Service Discovery
+        x-hidden: true
+        x-hidden-reason: IN_DEVELOPMENT
         additionalProperties:
           $ref: '#/definitions/Application'
           description: The application details.
   ServiceEndPoint:
     type: object
     description: Endpoint of an Service Discovery Service
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
     properties:
       host:
         type: string
@@ -4229,6 +4334,8 @@ definitions:
   Service:
     type: object
     description: A Service Discovery Service definition
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
     properties:
       type:
         type: string
@@ -4248,6 +4355,8 @@ definitions:
   Application:
     type: object
     description: A Service Discovery Application grouping
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
     properties:
       name:
         type: string
@@ -4268,6 +4377,8 @@ definitions:
   CmlSummary:
     type: object
     description: The CML summary.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
     properties:
       cmlWorkspaces:
         type: array
@@ -4277,6 +4388,8 @@ definitions:
   CmlWorkspace:
     type: object
     description: The CML workspace.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
     properties:
       instanceName:
         type: string
@@ -4299,20 +4412,20 @@ definitions:
   CdwSummary:
     type: object
     description: The CDW summary.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
     properties:
       cdwCluster:
-        type: object
         description: The CDW Cluster.
-        items:
-          $ref: '#/definitions/CdwCluster'
+        $ref: '#/definitions/CdwCluster'
       cdwDbc:
-        type: object
         description: The CDW Database Catalog.
-        items:
-          $ref: '#/definitions/CdwDbc'
+        $ref: '#/definitions/CdwDbc'
   CdwCluster:
     type: object
     description: The CDW Cluster.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
     properties:
       crn:
         type: string
@@ -4332,6 +4445,8 @@ definitions:
   CdwDbc:
     type: object
     description: The CDW database catalog.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
     properties:
       crn:
         type: string
@@ -4353,6 +4468,8 @@ definitions:
   CdwVw:
     type: object
     description: The CDW virtual warehouse.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
     properties:
       crn:
         type: string
@@ -4372,6 +4489,8 @@ definitions:
   CdeSummary:
     type: object
     description: The CDE summary.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
     properties:
       cdeServices:
         type: array
@@ -4381,6 +4500,8 @@ definitions:
   CdeService:
     type: object
     description: The CDE service.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
     properties:
       name:
         type: string
@@ -4402,6 +4523,8 @@ definitions:
   CdeVc:
     type: object
     description: The CML virtual cluster.
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
     properties:
       vcId:
         type: string
@@ -6047,7 +6170,19 @@ definitions:
         description: List of volumes attached to this instance.
         items:
           $ref: '#/definitions/AttachedVolumeDetail'
-  ComputeClusterConfigurationRequest:
+  AWSComputeClusterConfigurationRequest:
+    description: Request object for creating Externalized compute cluster for the environment.
+    type: object
+    x-hidden: true
+    x-hidden-reason: IN_DEVELOPMENT
+    properties:
+      privateCluster:
+        type: boolean
+        description: If true, creates private cluster.
+      kubeApiAuthorizedIpRanges:
+        type: string
+        description: Kubernetes API authorized IP ranges in CIDR notation. Mutually exclusive with privateCluster. Default value is 0.0.0.0/0.
+  AzureComputeClusterConfigurationRequest:
     description: Request object for creating Externalized compute cluster for the environment.
     type: object
     x-hidden: true
@@ -6056,6 +6191,14 @@ definitions:
       privateCluster:
         type: boolean
         description: If true, creates private cluster
+      kubeApiAuthorizedIpRanges:
+        type: string
+        description: Kubernetes API authorized IP ranges in CIDR notation. Mutually exclusive with privateCluster. Default value is 0.0.0.0/0.
+      outboundType:
+        type: string
+        enum:
+          - udr
+        description: Customize cluster egress with defined outbound type in Azure Kubernetes Service.
   AttachedVolumeDetail:
     type: object
     description: The attached volume configuration.
@@ -7503,9 +7646,6 @@ definitions:
         $ref: '#/definitions/Environment'
         description: The environment.
   UpdateFreeipaToAwsImdsV2Request:
-    x-hidden: true
-    x-hidden-reason: IN_DEVELOPMENT
-    x-hidden-retention: BETA
     description: The related environment where we update the corresponding FreeIPA to use AWS IMDSv2.
     type: object
     required:
@@ -7515,15 +7655,9 @@ definitions:
         type: string
         description: The CRN of the environment.
   UpdateFreeipaToAwsImdsV2Response:
-    x-hidden: true
-    x-hidden-reason: IN_DEVELOPMENT
-    x-hidden-retention: BETA
     type: object
     description: Response object for updating corresponding FreeIPA of the given environment to AWS IMDSv2.
   UpdateFreeipaToAwsImdsV1Request:
-    x-hidden: true
-    x-hidden-reason: IN_DEVELOPMENT
-    x-hidden-retention: BETA
     description: The related environment where we update the corresponding FreeIPA to use AWS IMDSv1.
     type: object
     required:
@@ -7533,8 +7667,5 @@ definitions:
         type: string
         description: The CRN of the environment.
   UpdateFreeipaToAwsImdsV1Response:
-    x-hidden: true
-    x-hidden-reason: IN_DEVELOPMENT
-    x-hidden-retention: BETA
     type: object
     description: Response object for updating corresponding FreeIPA of the given environment to AWS IMDSv1.
