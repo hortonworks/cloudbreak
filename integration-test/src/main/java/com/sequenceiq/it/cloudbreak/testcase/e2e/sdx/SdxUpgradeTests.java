@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.doNotWaitForFlow;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,13 +23,12 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
-import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
-public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageValidatorE2ETest {
+public class SdxUpgradeTests extends PreconditionSdxE2ETest {
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxUpgradeTests.class);
 
     @Inject
@@ -55,16 +54,18 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
             then = "SDX upgrade should be successful, the cluster should be up and running"
     )
     public void testSDXUpgrade(TestContext testContext) {
+        String sdx = resourcePropertyProvider().getName();
+
         List<String> actualVolumeIds = new ArrayList<>();
         List<String> expectedVolumeIds = new ArrayList<>();
 
         testContext
-                .given(SdxTestDto.class)
-                    .withCloudStorage()
-                    .withRuntimeVersion(commonClusterManagerProperties.getUpgrade().getCurrentRuntimeVersion())
-                    .withExternalDatabase(sdxDbRequest(testContext.getCloudProvider()))
-                .when(sdxTestClient.create())
-                .await(SdxClusterStatusResponse.RUNNING)
+                .given(sdx, SdxTestDto.class)
+                .withCloudStorage()
+                .withRuntimeVersion(commonClusterManagerProperties.getUpgrade().getCurrentRuntimeVersion())
+                .withExternalDatabase(sdxDbRequest(testContext.getCloudProvider()))
+                .when(sdxTestClient.create(), key(sdx))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
                     List<String> instances = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
@@ -72,9 +73,9 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
                     expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instances));
                     return testDto;
                 })
-                .when(sdxTestClient.upgrade())
-                .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, doNotWaitForFlow())
-                .await(SdxClusterStatusResponse.RUNNING)
+                .when(sdxTestClient.upgrade(), key(sdx))
+                .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
                     List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
@@ -105,16 +106,18 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
             then = "HA SDX upgrade should be successful, the cluster should be up and running"
     )
     public void testSDXHAUpgrade(TestContext testContext) {
+        String sdx = resourcePropertyProvider().getName();
+
         List<String> actualVolumeIds = new ArrayList<>();
         List<String> expectedVolumeIds = new ArrayList<>();
 
         testContext
-                .given(SdxTestDto.class)
-                    .withClusterShape(SdxClusterShape.MEDIUM_DUTY_HA)
-                    .withCloudStorage()
-                    .withRuntimeVersion(commonClusterManagerProperties.getUpgrade().getCurrentHARuntimeVersion())
-                .when(sdxTestClient.create())
-                .await(SdxClusterStatusResponse.RUNNING)
+                .given(sdx, SdxTestDto.class)
+                .withClusterShape(SdxClusterShape.MEDIUM_DUTY_HA)
+                .withCloudStorage()
+                .withRuntimeVersion(commonClusterManagerProperties.getUpgrade().getCurrentHARuntimeVersion())
+                .when(sdxTestClient.create(), key(sdx))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
                     List<String> instances = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
@@ -122,8 +125,8 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
                     expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instances));
                     return testDto;
                 })
-                .when(sdxTestClient.upgrade())
-                .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, doNotWaitForFlow())
+                .when(sdxTestClient.upgrade(), key(sdx))
+                .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
@@ -136,10 +139,5 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
                 // This assertion is disabled until the Audit Service is not configured.
                 //.then(datalakeAuditGrpcServiceAssertion::upgradeClusterByNameInternal)
                 .validate();
-    }
-
-    @Override
-    public String getCbImageId(TestContext testContext) {
-        return testContext.get(SdxTestDto.class).getResponse().getStackV4Response().getImage().getId();
     }
 }
