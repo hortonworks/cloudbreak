@@ -128,7 +128,7 @@ public class RdsUpgradeOrchestratorService {
     }
 
     public void upgradeEmbeddedDatabase(StackDto stackDto) throws CloudbreakOrchestratorException {
-        OrchestratorStateParams stateParams = createStateParams(stackDto, UPGRADE_EMBEDDED_DATABASE, false);
+        OrchestratorStateParams stateParams = createStateParams(stackDto, UPGRADE_EMBEDDED_DATABASE, true);
         stateParams.setStateParams(upgradeEmbeddedDBStateParamsProvider.createParamsForEmbeddedDBUpgrade(stackDto));
         LOGGER.debug("Calling upgradeEmbeddedDatabase with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);
@@ -159,7 +159,7 @@ public class RdsUpgradeOrchestratorService {
 
     public void prepareUpgradeEmbeddedDatabase(Long stackId) throws CloudbreakOrchestratorException {
         StackDto stackDto = stackDtoService.getById(stackId);
-        OrchestratorStateParams stateParams = createStateParams(stackDto, PREPARE_UPGRADE_EMBEDDED_DATABASE, false);
+        OrchestratorStateParams stateParams = createStateParams(stackDto, PREPARE_UPGRADE_EMBEDDED_DATABASE, true);
         stateParams.setStateParams(upgradeEmbeddedDBPreparationStateParamsProvider.createParamsForEmbeddedDBUpgradePreparation(stackDto));
         LOGGER.debug("Calling prepareUpgradeOfEmbeddedDatabase with state params '{}'", stateParams);
         hostOrchestrator.runOrchestratorState(stateParams);

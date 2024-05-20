@@ -155,6 +155,18 @@ class RdsUpgradeOrchestratorServiceTest {
     }
 
     @Test
+    void testUpgradeEmbeddedDatabase() throws CloudbreakOrchestratorException {
+        mockCreateStateParams();
+        underTest.upgradeEmbeddedDatabase(stack);
+        verify(hostOrchestrator).runOrchestratorState(paramCaptor.capture());
+        OrchestratorStateParams params = paramCaptor.getValue();
+        assertThat(params.getState()).isEqualTo("postgresql/upgrade/embedded");
+        assertThat(params.getTargetHostNames()).hasSameElementsAs(Set.of("fqdn1"));
+        assertOtherStateParams(params);
+        verify(saltStateParamsService).createStateParams(any(), any(), eq(true), anyInt(), anyInt());
+    }
+
+    @Test
     void testValidateDbDirectorySpace() throws CloudbreakOrchestratorException {
         mockCreateStateParams();
         when(hostOrchestrator.runCommandOnHosts(anyList(), anySet(), eq("df -k /dbfs | tail -1 | awk '{print $4}'"))).thenReturn(Map.of("fqdn1", "100000"));
@@ -163,6 +175,18 @@ class RdsUpgradeOrchestratorServiceTest {
         underTest.validateDbDirectorySpace(STACK_ID);
         verify(hostOrchestrator).runCommandOnHosts(anyList(), eq(Set.of("fqdn1")), eq("df -k /dbfs | tail -1 | awk '{print $4}'"));
         verify(hostOrchestrator).runCommandOnHosts(anyList(), eq(Set.of("fqdn1")), eq("du -sk /dbfs/pgsql | awk '{print $1}'"));
+    }
+
+    @Test
+    void testPrepareUpgradeEmbeddedDatabase() throws CloudbreakOrchestratorException {
+        mockCreateStateParams();
+        underTest.prepareUpgradeEmbeddedDatabase(STACK_ID);
+        verify(hostOrchestrator).runOrchestratorState(paramCaptor.capture());
+        OrchestratorStateParams params = paramCaptor.getValue();
+        assertThat(params.getState()).isEqualTo("postgresql/upgrade/prepare-embedded");
+        assertThat(params.getTargetHostNames()).hasSameElementsAs(Set.of("fqdn1"));
+        assertOtherStateParams(params);
+        verify(saltStateParamsService).createStateParams(any(), any(), eq(true), anyInt(), anyInt());
     }
 
     @Test

@@ -50,12 +50,14 @@ public class UpgradeEmbeddedDBPreparationService {
         if (Objects.nonNull(clusterId)) {
             InMemoryStateStore.deleteCluster(clusterId);
         }
-        setStatusAndNotify(stackId, UPDATE_FAILED, DetailedStackStatus.PREPARE_EMBEDDED_UPGRADE_FAILED, statusReason, ResourceEvent.CLUSTER_RDS_UPGRADE_FAILED);
+        setStatusAndNotify(stackId, UPDATE_FAILED, DetailedStackStatus.PREPARE_EMBEDDED_UPGRADE_FAILED, statusReason, ResourceEvent.CLUSTER_RDS_UPGRADE_FAILED,
+                statusReason);
     }
 
-    private void setStatusAndNotify(Long stackId, Status status, DetailedStackStatus detailedStackStatus, String statusReason, ResourceEvent resourceEvent) {
+    private void setStatusAndNotify(Long stackId, Status status, DetailedStackStatus detailedStackStatus, String statusReason, ResourceEvent resourceEvent,
+            String... args) {
         LOGGER.debug(statusReason);
         stackUpdater.updateStackStatus(stackId, detailedStackStatus, statusReason);
-        flowMessageService.fireEventAndLog(stackId, status.name(), resourceEvent);
+        flowMessageService.fireEventAndLog(stackId, status.name(), resourceEvent, args);
     }
 }
