@@ -29,6 +29,8 @@ public class CommonCloudProperties {
 
     private Integer gatewayPort;
 
+    private String defaultPrivateKeyFile;
+
     private ImageValidation imageValidation = new ImageValidation();
 
     private Ums ums = new Ums();
@@ -38,6 +40,14 @@ public class CommonCloudProperties {
     private Telemetry telemetry = new Telemetry();
 
     private BaseImageTest baseImageTest = new BaseImageTest();
+
+    public String getDefaultPrivateKeyFile() {
+        return defaultPrivateKeyFile;
+    }
+
+    public void setDefaultPrivateKeyFile(String defaultPrivateKeyFile) {
+        this.defaultPrivateKeyFile = defaultPrivateKeyFile;
+    }
 
     public String getCloudProvider() {
         return cloudProvider;

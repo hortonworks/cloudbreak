@@ -6,6 +6,7 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
@@ -102,5 +103,10 @@ public class SshJUtil {
     public FreeIpaTestDto checkSystemctlServiceStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient,
             Map<String, Boolean> serviceStatusesByName) {
         return sshJClientActions.checkSystemctlServiceStatus(testDto, environmentCrn, freeipaClient, serviceStatusesByName);
+    }
+
+    public Map<String, Pair<Integer, String>> getSSLModeForExternalDBByIp(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames,
+            String privateKeyFilePath) {
+        return sshJClientActions.getSSLModeForExternalDBByIp(instanceGroups, hostGroupNames, privateKeyFilePath);
     }
 }
