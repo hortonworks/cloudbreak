@@ -6,18 +6,14 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.freeipa.flow.stack.termination.event.ccm.CcmKeyDeregistrationFinished;
 import com.sequenceiq.freeipa.flow.stack.termination.event.clusterproxy.ClusterProxyDeregistrationFinished;
 import com.sequenceiq.freeipa.flow.stack.termination.event.recipes.ExecutePreTerminationRecipesFinished;
-import com.sequenceiq.freeipa.flow.stack.termination.event.secret.DeleteUserdataSecretsFailed;
-import com.sequenceiq.freeipa.flow.stack.termination.event.secret.DeleteUserdataSecretsFinished;
 import com.sequenceiq.freeipa.flow.stack.termination.event.telemetry.StopTelemetryAgentFinished;
 import com.sequenceiq.freeipa.flow.stack.termination.event.ums.RemoveMachineUserFinished;
 
 public enum StackTerminationEvent implements FlowEvent {
     TERMINATION_EVENT("STACK_TERMINATE_TRIGGER_EVENT"),
-    EXECUTE_PRE_TERMINATION_RECIPES_FINISHED_EVENT(EventSelectorUtil.selector(ExecutePreTerminationRecipesFinished.class)),
-    DELETE_USERDATA_SECRETS_FINISHED_EVENT(EventSelectorUtil.selector(DeleteUserdataSecretsFinished.class)),
-    DELETE_USERDATA_SECRETS_FAILED_EVENT(EventSelectorUtil.selector(DeleteUserdataSecretsFailed.class)),
     CLUSTER_PROXY_DEREGISTRATION_FINISHED_EVENT(EventSelectorUtil.selector(ClusterProxyDeregistrationFinished.class)),
     CCM_KEY_DEREGISTRATION_FINISHED_EVENT(EventSelectorUtil.selector(CcmKeyDeregistrationFinished.class)),
+    EXECUTE_PRE_TERMINATION_RECIPES_FINISHED_EVENT(EventSelectorUtil.selector(ExecutePreTerminationRecipesFinished.class)),
     STOP_TELEMETRY_AGENT_FINISHED_EVENT(EventSelectorUtil.selector(StopTelemetryAgentFinished.class)),
     REMOVE_MACHINE_USER_FINISHED_EVENT(EventSelectorUtil.selector(RemoveMachineUserFinished.class)),
     TERMINATION_FINISHED_EVENT(EventSelectorUtil.selector(TerminateStackResult.class)),

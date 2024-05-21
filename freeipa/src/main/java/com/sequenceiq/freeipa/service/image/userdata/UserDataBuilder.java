@@ -29,12 +29,15 @@ import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2Parameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeySource;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.encryption.EncryptionUtil;
 import com.sequenceiq.freeipa.entity.StackEncryption;
 import com.sequenceiq.freeipa.service.StackEncryptionService;
 
@@ -62,20 +65,23 @@ public class UserDataBuilder {
     private CcmV2TlsTypeDecider ccmV2TlsTypeDecider;
 
     @Inject
+    private EncryptionUtil encryptionUtil;
+
+    @Inject
     private StackEncryptionService stackEncryptionService;
 
-    public String buildUserData(Stack stack, DetailedEnvironmentResponse environment, Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
+    public String buildUserData(String accountId, DetailedEnvironmentResponse environment, Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
             PlatformParameters parameters, String saltBootPassword, String cbCert,
-            CcmConnectivityParameters ccmConnectivityParameters, ProxyConfig proxyConfig) {
-        String userData = build(stack, environment, cloudPlatform, cbSshKeyDer, sshUser, parameters, saltBootPassword,
-                cbCert, ccmConnectivityParameters, proxyConfig);
+            CcmConnectivityParameters ccmConnectivityParameters, ProxyConfig proxyConfig, Long stackId) {
+        String userData = build(accountId, environment, cloudPlatform, cbSshKeyDer, sshUser, parameters, saltBootPassword,
+                cbCert, ccmConnectivityParameters, proxyConfig, stackId);
         LOGGER.debug("User data content: {}", userData);
         return userData;
     }
 
-    private String build(Stack stack, DetailedEnvironmentResponse environment, Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
+    private String build(String accountId, DetailedEnvironmentResponse environment, Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
             PlatformParameters params, String saltBootPassword, String cbCert, CcmConnectivityParameters ccmConnectivityParameters,
-            ProxyConfig proxyConfig) {
+            ProxyConfig proxyConfig, Long stackId) {
         Map<String, Object> model = new HashMap<>();
         model.put("environmentCrn", environment.getCrn());
         model.put("cloudPlatform", cloudPlatform.value());
@@ -88,9 +94,9 @@ public class UserDataBuilder {
         model.put("saltBootPassword", saltBootPassword);
         model.put("cbCert", cbCert);
         model.put("cdpApiEndpointUrl", Strings.nullToEmpty(cdpApiEndpointUrl));
-        extendModelWithCcmConnectivity(InstanceGroupType.GATEWAY, ccmConnectivityParameters, stack.getAccountId(), environment, model);
+        extendModelWithCcmConnectivity(InstanceGroupType.GATEWAY, ccmConnectivityParameters, accountId, environment, model);
         extendModelWithProxyParams(proxyConfig, model);
-        extendModelWithSecretEncryptionParams(environment, stack.getId(), model);
+        extendModelAndEncryptSecretsIfSecretEncryptionEnabled(environment, model, stackId);
         return build(model);
     }
 
@@ -140,12 +146,45 @@ public class UserDataBuilder {
         }
     }
 
-    private void extendModelWithSecretEncryptionParams(DetailedEnvironmentResponse environment, Long stackId, Map<String, Object> model) {
+    private void extendModelAndEncryptSecretsIfSecretEncryptionEnabled(DetailedEnvironmentResponse environment, Map<String, Object> model, Long stackId) {
         if (environment.isEnableSecretEncryption()) {
+            Map<String, String> secretKeysAndNames = validateAndReturnSecretKeysAndNames();
+            CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
             StackEncryption stackEncryption = stackEncryptionService.getStackEncryption(stackId);
+            EncryptionKeySource secretEncryptionKeySource = encryptionUtil.getEncryptionKeySource(cloudPlatform, stackEncryption.getEncryptionKeyLuks());
+
             model.put("secretEncryptionEnabled", Boolean.TRUE);
-            model.put("secretEncryptionKeySource", stackEncryption.getEncryptionKeyLuks());
+            model.put("secretEncryptionKeySource", secretEncryptionKeySource.keyValue());
+
+            for (Map.Entry<String, Object> entry : model.entrySet()) {
+                String key = entry.getKey();
+                if (secretKeysAndNames.containsKey(key)) {
+                    String secretName = secretKeysAndNames.get(key);
+                    String secretValue = (String) entry.getValue();
+                    LOGGER.debug("Encrypting secret {}...", key);
+
+                    if (!secretValue.isEmpty()) {
+                        entry.setValue(encryptionUtil.encrypt(cloudPlatform, secretValue, environment, secretName, secretEncryptionKeySource));
+                        LOGGER.debug("Succesfully encrypted secret {}.", key);
+                    } else {
+                        LOGGER.debug("Secret {} is an empty String, therefore skipping encryption for it.", key);
+                    }
+                }
+            }
         }
+    }
+
+    public Map<String, String> validateAndReturnSecretKeysAndNames() {
+        Map<String, String> secretKeysAndNames = userDataBuilderParams.getUserDataSecrets();
+        if (secretKeysAndNames == null) {
+            throw new CloudbreakServiceException("Secret encryption is enabled, but secret keys and names couldn't be loaded for user data secret encryption!");
+        }
+        if (secretKeysAndNames.isEmpty()) {
+            throw new CloudbreakServiceException("Secret encryption is enabled, but secret keys and names map is empty, " +
+                    "which means no secrets will be encrypted in the user data!");
+        }
+        LOGGER.debug("Using the following secret keys and names for user data secret encryption: {}.", secretKeysAndNames);
+        return secretKeysAndNames;
     }
 
     private String build(Map<String, Object> model) {

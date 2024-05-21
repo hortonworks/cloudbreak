@@ -38,6 +38,7 @@ ext {
 
   // Cloud SDKs
   awsSdkVersion = '2.22.12'
+  awsEncryptionSdkVersion = '3.0.0'
   azureSdkOkHttpVersion = '1.11.4'
   azureSdkCoreVersion = '1.34.0'
   azureSdkIdentityVersion = '1.11.1'

@@ -34,8 +34,6 @@ public class CloudInstance extends DynamicModel {
 
     public static final String ID = "ID";
 
-    public static final String USERDATA_SECRET_ID = "UserdataSecretId";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudInstance.class);
 
     private final String instanceId;

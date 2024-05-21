@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.ConsumptionCalculator;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
+import com.sequenceiq.cloudbreak.cloud.CryptoConnector;
 import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.IdentityService;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
@@ -43,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsSecretsManagerConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsResourceVolumeConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.common.encryption.AwsEncryptionSdkCryptoConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.validator.AwsStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -108,6 +110,9 @@ public class AwsConnector implements CloudConnector {
 
     @Inject
     private List<ConsumptionCalculator> consumptionCalculators;
+
+    @Inject
+    private AwsEncryptionSdkCryptoConnector awsEncryptionSdkCryptoConnector;
 
     @Inject
     private AwsSecretsManagerConnector awsSecretsManagerConnector;
@@ -218,6 +223,11 @@ public class AwsConnector implements CloudConnector {
     @Override
     public EncryptionResources encryptionResources() {
         return awsEncryptionResources;
+    }
+
+    @Override
+    public CryptoConnector cryptoConnector() {
+        return awsEncryptionSdkCryptoConnector;
     }
 
     @Override

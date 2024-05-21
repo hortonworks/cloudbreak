@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsSecretsManagerConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
+import com.sequenceiq.cloudbreak.cloud.aws.common.encryption.AwsEncryptionSdkCryptoConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.validator.AwsStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.metadata.AwsNativeMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.validator.AwsGatewaySubnetMultiAzValidator;
@@ -80,6 +81,9 @@ class AwsNativeConnectorTest {
     private AwsStorageValidator awsStorageValidator;
 
     @Mock
+    private AwsEncryptionSdkCryptoConnector awsEncryptionSdkCryptoConnector;
+
+    @Mock
     private AwsSecretsManagerConnector awsSecretsManagerConnector;
 
     @Mock
@@ -91,6 +95,11 @@ class AwsNativeConnectorTest {
     @Test
     void encryptionResourcesTest() {
         assertThat(underTest.encryptionResources()).isSameAs(awsEncryptionResources);
+    }
+
+    @Test
+    void cryptoConnectorTest() {
+        assertThat(underTest.cryptoConnector()).isSameAs(awsEncryptionSdkCryptoConnector);
     }
 
     @Test

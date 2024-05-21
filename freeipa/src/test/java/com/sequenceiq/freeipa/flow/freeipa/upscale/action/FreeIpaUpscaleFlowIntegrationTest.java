@@ -109,7 +109,6 @@ import com.sequenceiq.freeipa.service.BootstrapService;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.TlsSetupService;
-import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.config.KerberosConfigUpdateService;
 import com.sequenceiq.freeipa.service.encryption.EncryptionKeyService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaCloudStorageValidationService;
@@ -122,7 +121,6 @@ import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.image.userdata.UserDataService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
-import com.sequenceiq.freeipa.service.secret.UserdataSecretsService;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaSafeInstanceHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -415,11 +413,5 @@ class FreeIpaUpscaleFlowIntegrationTest {
 
         @MockBean
         private InstanceValidationService instanceValidationService;
-
-        @MockBean
-        private CachedEnvironmentClientService cachedEnvironmentClientService;
-
-        @MockBean
-        private UserdataSecretsService userdataSecretsService;
     }
 }

@@ -58,10 +58,6 @@ public class AwsSecretsManagerConnector implements SecretConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsSecretsManagerConnector.class);
 
-    private static final EncryptionKeySource DEFAULT_AWS_MANAGED_KEY_SOURCE = EncryptionKeySource.builder()
-            .withKeyType(EncryptionKeyType.AWS_MANAGED_KEY)
-            .build();
-
     @Inject
     private CommonAwsClient awsClient;
 
@@ -160,11 +156,6 @@ public class AwsSecretsManagerConnector implements SecretConnector {
         } else {
             LOGGER.info("Secret CloudResource with name [{}] already deleted.", request.secretName());
         }
-    }
-
-    @Override
-    public EncryptionKeySource getDefaultEncryptionKeySource() {
-        return DEFAULT_AWS_MANAGED_KEY_SOURCE;
     }
 
     @Override
@@ -280,14 +271,7 @@ public class AwsSecretsManagerConnector implements SecretConnector {
                 .secretString(request.secretValue())
                 .description(request.description())
                 .tags(awsTaggingService.prepareSecretsManagerTags(request.tags()));
-        request.encryptionKeySource().ifPresent(value -> {
-            if (value.keyType().equals(EncryptionKeyType.AWS_KMS_KEY_ARN)) {
-                requestBuilder.kmsKeyId(value.keyValue());
-            } else {
-                LOGGER.warn("Only EncryptionKeyType of {} is allowed when creating AWS Secrets Manager secrets! " +
-                                "Using the default AWS managed encryption key instead...", EncryptionKeyType.AWS_KMS_KEY_ARN);
-            }
-        });
+        request.encryptionKeySource().ifPresent(value -> requestBuilder.kmsKeyId(value.keyValue()));
         return requestBuilder.build();
     }
 

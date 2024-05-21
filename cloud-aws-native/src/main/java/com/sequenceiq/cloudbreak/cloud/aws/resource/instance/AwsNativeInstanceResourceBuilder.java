@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.resource.AwsNativeResourceBuilderOrderConstants.NATIVE_INSTANCE_RESOURCE_BUILDER_ORDER;
-import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.USERDATA_SECRET_ID;
 import static com.sequenceiq.cloudbreak.constant.ImdsConstants.AWS_IMDS_VERSION_V2;
 import static java.util.Collections.singletonList;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -47,7 +46,6 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
-import com.sequenceiq.cloudbreak.cloud.util.UserdataSecretsUtil;
 import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -152,7 +150,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                     .ebsOptimized(isEbsOptimized(instanceTemplate))
                     .tagSpecifications(tagSpecificationOfInstance, tagSpecificationOfVolume)
                     .iamInstanceProfile(getIamInstanceProfile(group))
-                    .userData(getUserData(cloudStack, group, cloudInstance))
+                    .userData(getUserData(cloudStack, group))
                     .minCount(1)
                     .maxCount(1)
                     .blockDeviceMappings(blocks(group, cloudStack, ac))
@@ -321,12 +319,8 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         return instance.state().code() == AWS_INSTANCE_RUNNING_CODE;
     }
 
-    private String getUserData(CloudStack cloudStack, Group group, CloudInstance cloudInstance) {
+    private String getUserData(CloudStack cloudStack, Group group) {
         String userdata = cloudStack.getUserDataByType(group.getType());
-        if (cloudInstance.hasParameter(USERDATA_SECRET_ID)) {
-            String secretArn = cloudInstance.getStringParameter(USERDATA_SECRET_ID);
-            userdata = UserdataSecretsUtil.replaceSecretsWithSecretId(userdata, secretArn);
-        }
         String base64EncodedUserData = "";
         if (StringUtils.isNotEmpty(userdata)) {
             base64EncodedUserData = Base64Util.encode(userdata);

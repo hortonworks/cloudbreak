@@ -1,12 +1,7 @@
 package com.sequenceiq.freeipa.converter.cloud;
 
-import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
-import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
-import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -17,11 +12,13 @@ import java.util.Set;
 
 import jakarta.ws.rs.BadRequestException;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -40,41 +37,24 @@ import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
-import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
-import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.VolumeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
+import com.sequenceiq.freeipa.converter.image.ImageConverter;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
-import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackAuthentication;
 import com.sequenceiq.freeipa.entity.Template;
+import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.image.ImageService;
-import com.sequenceiq.freeipa.service.resource.ResourceService;
 
-@ExtendWith(MockitoExtension.class)
 public class StackToCloudStackConverterTest {
 
-    private static final String TEST_SUBNET_ID = "subnetId";
-
     private static final Long TEST_STACK_ID = 1L;
-
-    private static final String TEST_INSTANCE_NAME = "instanceName";
-
-    private static final String TEST_HOST_NAME = "hostName";
-
-    private static final Long TEST_RESOURCE_ID = 1L;
-
-    private static final String TEST_RESOURCE_REFERENCE = "resourceReference";
-
-    private static final String TEST_AZURE_RG_NAME = "azureRgName";
 
     private static final Integer VOLUME_COUNT = 0;
 
@@ -86,6 +66,9 @@ public class StackToCloudStackConverterTest {
 
     private static final String ENV_CRN = "env-crn";
 
+    @Rule
+    public final ExpectedException expectedException = ExpectedException.none();
+
     @InjectMocks
     private StackToCloudStackConverter underTest;
 
@@ -96,19 +79,26 @@ public class StackToCloudStackConverterTest {
     private StackAuthentication stackAuthentication;
 
     @Mock
+    private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
+
+    @Mock
     private ImageService imageService;
+
+    @Mock
+    private ImageConverter imageConverter;
 
     @Mock
     private CachedEnvironmentClientService cachedEnvironmentClientService;
 
-    @Mock
-    private InstanceMetaData instanceMetaData;
-
-    @Mock
-    private ResourceService resourceService;
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
+    }
 
     @Test
-    void testBuildInstance() {
+    public void testBuildInstance() throws Exception {
+        InstanceMetaData instanceMetaData = mock(InstanceMetaData.class);
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         ImageEntity imageEntity = mock(ImageEntity.class);
         when(imageService.getByStack(any())).thenReturn(imageEntity);
@@ -118,46 +108,12 @@ public class StackToCloudStackConverterTest {
         Template template = mock(Template.class);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(template.getVolumeCount()).thenReturn(VOLUME_COUNT);
-        Resource resource = mock(Resource.class);
-        when(resourceService.findResourceById(anyLong())).thenReturn(Optional.of(resource));
         CloudInstance cloudInstance = underTest.buildInstance(stack, instanceMetaData, instanceGroup, stackAuthentication, 0L, InstanceStatus.CREATED);
         assertEquals(INSTANCE_ID, cloudInstance.getInstanceId());
     }
 
     @Test
-    void testBuildCloudInstanceParameters() {
-        Resource resource = new Resource();
-        resource.setId(TEST_RESOURCE_ID);
-        resource.setResourceReference(TEST_RESOURCE_REFERENCE);
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
-                .withAzure(AzureEnvironmentParameters.builder()
-                        .withAzureResourceGroup(AzureResourceGroup.builder()
-                                .withName(TEST_AZURE_RG_NAME)
-                                .withResourceGroupUsage(ResourceGroupUsage.SINGLE)
-                                .build())
-                        .build())
-                .build();
-        when(instanceMetaData.getSubnetId()).thenReturn(TEST_SUBNET_ID);
-        when(instanceMetaData.getId()).thenReturn(TEST_STACK_ID);
-        when(instanceMetaData.getInstanceName()).thenReturn(TEST_INSTANCE_NAME);
-        when(instanceMetaData.getDiscoveryFQDN()).thenReturn(TEST_HOST_NAME);
-        when(instanceMetaData.getUserdataSecretResourceId()).thenReturn(TEST_RESOURCE_ID);
-        when(resourceService.findResourceById(TEST_RESOURCE_ID)).thenReturn(Optional.of(resource));
-        when(cachedEnvironmentClientService.getByCrn(ENV_CRN)).thenReturn(environment);
-
-        Map<String, Object> result = underTest.buildCloudInstanceParameters(ENV_CRN, instanceMetaData);
-
-        assertEquals(TEST_SUBNET_ID, result.get(SUBNET_ID));
-        assertEquals(TEST_STACK_ID, result.get(CloudInstance.ID));
-        assertEquals(TEST_INSTANCE_NAME, result.get(CloudInstance.INSTANCE_NAME));
-        assertEquals(TEST_HOST_NAME, result.get(CloudInstance.DISCOVERY_NAME));
-        assertEquals(TEST_RESOURCE_REFERENCE, result.get(CloudInstance.USERDATA_SECRET_ID));
-        assertEquals(TEST_AZURE_RG_NAME, result.get(RESOURCE_GROUP_NAME_PARAMETER));
-        assertEquals(ResourceGroupUsage.SINGLE.name(), result.get(RESOURCE_GROUP_USAGE_PARAMETER));
-    }
-
-    @Test
-    void testUpdateWithVerticalScaleRequest() {
+    public void testUpdateWithVerticalScaleRequest() throws Exception {
         InstanceTemplate instanceTemplate = new InstanceTemplate(
                 null,
                 GROUP_NAME,
@@ -233,7 +189,7 @@ public class StackToCloudStackConverterTest {
     }
 
     @Test
-    void testBuildFileSystemViewDifferentAWSInstanceProfile() {
+    public void testBuildFileSystemViewDifferentAWSInstanceProfile() throws Exception {
         Telemetry telemetry = mock(Telemetry.class);
         Backup backup = mock(Backup.class);
         Logging logging = mock(Logging.class);
@@ -247,11 +203,12 @@ public class StackToCloudStackConverterTest {
         when(backup.getS3()).thenReturn(s3Backup);
         when(logging.getS3()).thenReturn(s3Logging);
 
-        assertThrows(BadRequestException.class, () -> underTest.buildFileSystemView(stack));
+        expectedException.expect(BadRequestException.class);
+        underTest.buildFileSystemView(stack);
     }
 
     @Test
-    void testBuildFileSystemViewDifferentAzureManagedIdentity() {
+    public void testBuildFileSystemViewDifferentAzureManagedIdentity() throws Exception {
         Telemetry telemetry = mock(Telemetry.class);
         Backup backup = mock(Backup.class);
         Logging logging = mock(Logging.class);
@@ -265,11 +222,12 @@ public class StackToCloudStackConverterTest {
         when(backup.getAdlsGen2()).thenReturn(adlsGen2Logging);
         when(logging.getAdlsGen2()).thenReturn(adlsGen2Backup);
 
-        assertThrows(BadRequestException.class, () -> underTest.buildFileSystemView(stack));
+        expectedException.expect(BadRequestException.class);
+        underTest.buildFileSystemView(stack);
     }
 
     @Test
-    void testBuildFileSystemViewDifferentGCPEmail() {
+    public void testBuildFileSystemViewDifferentGCPEmail() throws Exception {
         Telemetry telemetry = mock(Telemetry.class);
         Backup backup = mock(Backup.class);
         Logging logging = mock(Logging.class);
@@ -283,11 +241,12 @@ public class StackToCloudStackConverterTest {
         when(backup.getGcs()).thenReturn(gcsBackup);
         when(logging.getGcs()).thenReturn(gcsLogging);
 
-        assertThrows(BadRequestException.class, () -> underTest.buildFileSystemView(stack));
+        expectedException.expect(BadRequestException.class);
+        underTest.buildFileSystemView(stack);
     }
 
     @Test
-    void testBuildFileSystemViewSameAWSInstanceProfile() {
+    public void testBuildFileSystemViewSameAWSInstanceProfile() throws Exception {
         Telemetry telemetry = mock(Telemetry.class);
         Backup backup = mock(Backup.class);
         Logging logging = mock(Logging.class);
@@ -306,7 +265,7 @@ public class StackToCloudStackConverterTest {
     }
 
     @Test
-    void testBuildFileSystemViewSameAzureManagedIdentity() {
+    public void testBuildFileSystemViewSameAzureManagedIdentity() throws Exception {
         Telemetry telemetry = mock(Telemetry.class);
         Backup backup = mock(Backup.class);
         Logging logging = mock(Logging.class);
@@ -325,7 +284,7 @@ public class StackToCloudStackConverterTest {
     }
 
     @Test
-    void testBuildFileSystemViewSameGCPEmail() {
+    public void testBuildFileSystemViewSameGCPEmail() throws Exception {
         Telemetry telemetry = mock(Telemetry.class);
         Backup backup = mock(Backup.class);
         Logging logging = mock(Logging.class);

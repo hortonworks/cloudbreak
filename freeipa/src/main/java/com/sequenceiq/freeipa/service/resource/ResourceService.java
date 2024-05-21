@@ -39,14 +39,6 @@ public class ResourceService {
         return list;
     }
 
-    public Optional<Resource> findResourceById(Long resourceId) {
-        return repository.findById(resourceId);
-    }
-
-    public Iterable<Resource> findAllByResourceId(Iterable<Long> resourceIds) {
-        return repository.findAllById(resourceIds);
-    }
-
     public List<Resource> findAllByStackId(Long id) {
         return repository.findAllByStackId(id);
     }
