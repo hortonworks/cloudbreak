@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.controller.sdx;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.BackupOperationType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -49,6 +51,7 @@ import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.model.SdxBackupLocationValidationRequest;
 import com.sequenceiq.sdx.api.model.SdxChangeImageCatalogRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -126,6 +129,14 @@ class SdxControllerTest {
         assertEquals("crn:sdxcluster", sdxClusterResponse.getCrn());
         assertEquals(SdxClusterStatusResponse.REQUESTED, sdxClusterResponse.getStatus());
         assertEquals("statusreason", sdxClusterResponse.getStatusReason());
+    }
+
+    @Test
+    void createTestWithInvalidClusterShape() {
+        SdxClusterRequest createSdxClusterRequest = new SdxClusterRequest();
+        createSdxClusterRequest.setClusterShape(SdxClusterShape.CONTAINERIZED);
+        createSdxClusterRequest.setEnvironment("test-env");
+        assertThrows(BadRequestException.class, () -> sdxController.create(SDX_CLUSTER_NAME, createSdxClusterRequest));
     }
 
     @Test
@@ -343,6 +354,31 @@ class SdxControllerTest {
         verify(verticalScaleService, times(1)).addVolumesDatalake(sdxCluster, stackAddVolumesRequest, USER_CRN);
         assertEquals(FlowType.FLOW, flowIdentifier.getType());
         assertEquals("FLOW_ID", flowIdentifier.getPollableId());
+    }
+
+    @Test
+    void resizeWithInvalidClusterShape() {
+        SdxClusterResizeRequest request = new SdxClusterResizeRequest();
+        request.setClusterShape(SdxClusterShape.CONTAINERIZED);
+        request.setEnvironment("env-name");
+        assertThrows(BadRequestException.class, () -> sdxController.resize(SDX_CLUSTER_NAME, request));
+    }
+
+    @Test
+    void getInstanceGroupNamesBySdxDetailsWithInvalidClusterShape() {
+        assertThrows(BadRequestException.class, () -> sdxController.getInstanceGroupNamesBySdxDetails(SdxClusterShape.CONTAINERIZED, "7.2.17", "AWS"));
+    }
+
+    @Test
+    void getDefaultTemplateWithInvalidClusterShape() {
+        assertThrows(BadRequestException.class, () -> sdxController.getDefaultTemplate(SdxClusterShape.CONTAINERIZED, "7.2.18", "aws"));
+    }
+
+    @Test
+    void getRecommendationWithInvalidClusterShape() {
+        assertThrows(BadRequestException.class,
+            () -> sdxController.getRecommendation("cred-crn", SdxClusterShape.CONTAINERIZED, "7.2.18", "aws", "us-west-1",
+                "az1"));
     }
 
     private SdxCluster getValidSdxCluster() {

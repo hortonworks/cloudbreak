@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
@@ -162,6 +163,7 @@ public class SdxController implements SdxEndpoint {
     public SdxClusterResponse create(@ValidStackNameFormat @ValidStackNameLength String name,
             @Valid SdxClusterRequest createSdxClusterRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        validateSdxClusterShape(createSdxClusterRequest.getClusterShape());
         Pair<SdxCluster, FlowIdentifier> result = sdxService.createSdx(userCrn, name, createSdxClusterRequest, null);
         SdxCluster sdxCluster = result.getLeft();
         MetricType metricType = createSdxClusterRequest.getImage() != null
@@ -178,6 +180,7 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.RESIZE_DATALAKE)
     public SdxClusterResponse resize(@ResourceName String name, SdxClusterResizeRequest resizeSdxClusterRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        validateSdxClusterShape(resizeSdxClusterRequest.getClusterShape());
         Pair<SdxCluster, FlowIdentifier> result = sdxService.resizeSdx(userCrn, name, resizeSdxClusterRequest);
         SdxCluster sdxCluster = result.getLeft();
         metricService.incrementMetricCounter(MetricType.EXTERNAL_SDX_REQUESTED, sdxCluster);
@@ -448,6 +451,7 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
     public Set<String> getInstanceGroupNamesBySdxDetails(SdxClusterShape clusterShape, String runtimeVersion,
             String cloudPlatform) {
+        validateSdxClusterShape(clusterShape);
         return sdxService.getInstanceGroupNamesBySdxDetails(clusterShape, runtimeVersion, cloudPlatform);
     }
 
@@ -461,6 +465,7 @@ public class SdxController implements SdxEndpoint {
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
     public SdxDefaultTemplateResponse getDefaultTemplate(SdxClusterShape clusterShape, String runtimeVersion, String cloudPlatform) {
+        validateSdxClusterShape(clusterShape);
         return sdxRecommendationService.getDefaultTemplateResponse(clusterShape, runtimeVersion, cloudPlatform);
     }
 
@@ -469,6 +474,7 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByResourceCrn(action = DESCRIBE_CREDENTIAL)
     public SdxRecommendationResponse getRecommendation(@ResourceCrn String credentialCrn, SdxClusterShape clusterShape, String runtimeVersion,
             String cloudPlatform, String region, String availabilityZone) {
+        validateSdxClusterShape(clusterShape);
         return sdxRecommendationService.getRecommendation(credentialCrn, clusterShape, runtimeVersion, cloudPlatform, region, availabilityZone);
     }
 
@@ -573,6 +579,13 @@ public class SdxController implements SdxEndpoint {
         return sdxClusters.stream()
                 .map(sdx -> sdxClusterConverter.sdxClusterToResponse(sdx))
                 .collect(Collectors.toList());
+    }
+
+    private void validateSdxClusterShape(SdxClusterShape shape) {
+        if (SdxClusterShape.CONTAINERIZED == shape) {
+            throw new BadRequestException("CONTAINERIZED shape is not acceptable for this request. The CONTAINERIZED shape is not supported." +
+                " Please confirm, your cluster shape and retry the operation.");
+        }
     }
 
 }

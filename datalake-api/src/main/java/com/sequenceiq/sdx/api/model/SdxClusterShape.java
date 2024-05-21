@@ -5,7 +5,8 @@ public enum SdxClusterShape {
     LIGHT_DUTY(Boolean.FALSE),
     MEDIUM_DUTY_HA(Boolean.TRUE),
     ENTERPRISE(Boolean.TRUE),
-    MICRO_DUTY(Boolean.FALSE);
+    MICRO_DUTY(Boolean.FALSE),
+    CONTAINERIZED(Boolean.FALSE);
 
     private final boolean multiAzEnabledByDefault;
 
