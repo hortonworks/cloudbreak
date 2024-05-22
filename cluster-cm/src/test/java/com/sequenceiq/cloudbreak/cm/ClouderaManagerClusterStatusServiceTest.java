@@ -268,6 +268,22 @@ public class ClouderaManagerClusterStatusServiceTest {
     }
 
     @Test
+    public void collectsHostHealthIfDuplicated() throws ApiException {
+        hostsAre(
+                new ApiHost().hostname("host1").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD)),
+                new ApiHost().hostname("host1").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD)),
+                new ApiHost().hostname("host2").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
+        );
+
+        ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses(Optional.of("7.2.12"));
+        assertFalse(extendedHostStatuses.isHostHealthy(hostName("host1")));
+        Optional<String> reason = extendedHostStatuses.getHostsHealth().get(hostName("host1")).iterator().next().getReason();
+        assertTrue(reason.isPresent());
+        assertTrue(reason.get().contains("This host is duplicated"));
+        assertTrue(extendedHostStatuses.isHostHealthy(hostName("host2")));
+    }
+
+    @Test
     public void collectsHostHealthIfAvailable() throws ApiException {
         hostsAre(
                 new ApiHost().hostname("host1").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD)),

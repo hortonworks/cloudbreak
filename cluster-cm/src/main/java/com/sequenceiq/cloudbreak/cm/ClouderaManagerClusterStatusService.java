@@ -54,6 +54,7 @@ import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiServiceState;
 import com.cloudera.api.swagger.model.ApiVersionInfo;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.api.client.util.Maps;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
@@ -107,6 +108,8 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     private static final String DEFAULT_STATUS_REASON = "Cloudera Manager reported bad health for this host.";
 
     private static final String MAINTENANCE_MODE = "This host is in maintenance mode.";
+
+    private static final String DUPLICATED_HOST = "This host is duplicated in Cloudera Manager, please check it in Cloudera Manager.";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClusterStatusService.class);
 
@@ -295,8 +298,9 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     public ExtendedHostStatuses getExtendedHostStatuses(Optional<String> runtimeVersion) {
         List<ApiHost> apiHostList = getHostsFromCM();
         boolean cmServicesHealthCheckAllowed = CMRepositoryVersionUtil.isCmServicesHealthCheckAllowed(runtimeVersion);
-        Map<HostName, Set<HealthCheck>> hostStates = apiHostList.stream().collect(Collectors.toMap(
-                apiHost -> hostName(apiHost.getHostname()), apiHost -> getHealthChecks(apiHost, cmServicesHealthCheckAllowed)));
+        Map<HostName, Set<HealthCheck>> hostStates = Maps.newHashMap();
+        apiHostList.forEach(apiHost -> hostStates.merge(hostName(apiHost.getHostname()), getHealthChecks(apiHost, cmServicesHealthCheckAllowed),
+                (k, v) -> Set.of(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.UNHEALTHY, Optional.of(DUPLICATED_HOST)))));
         hostStates.entrySet().removeIf(entry -> entry.getValue().isEmpty());
         LOGGER.debug("Creating 'ExtendedHostStatuses' with {}", hostStates);
         return new ExtendedHostStatuses(hostStates);
