@@ -160,9 +160,9 @@ public class CentralCmTemplateUpdaterTest {
         doNothing().when(s3ConfigProvider).getServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class));
         doNothing().when(adlsConfigProvider).populateServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class), anyString());
         RdsConfigWithoutCluster rdsConfigHive = TestUtil.rdsConfigWithoutCluster(DatabaseType.HIVE, RdsSslMode.DISABLED);
-        RdsView rdsViewHive = TemplateCoreTestUtil.rdsViewProvider().getRdsView(rdsConfigHive, "AWS", false);
+        RdsView rdsViewHive = TemplateCoreTestUtil.rdsViewProvider().getRdsView(rdsConfigHive, "AWS");
         RdsConfigWithoutCluster rdsConfigHueSsl = TestUtil.rdsConfigWithoutCluster(DatabaseType.HUE, RdsSslMode.ENABLED);
-        RdsView rdsViewHueSsl = TemplateCoreTestUtil.rdsViewProvider().getRdsView(rdsConfigHueSsl, SSL_CERTIFICATE_FILE_PATH, "AWS", true);
+        RdsView rdsViewHueSsl = TemplateCoreTestUtil.rdsViewProvider().getRdsView(rdsConfigHueSsl, SSL_CERTIFICATE_FILE_PATH, "AWS");
         when(templatePreparationObject.getRdsViews()).thenReturn(Set.of(rdsViewHive, rdsViewHueSsl));
         when(templatePreparationObject.getRdsView(DatabaseType.HIVE)).thenReturn(rdsViewHive);
         when(templatePreparationObject.getRdsView(DatabaseType.HUE)).thenReturn(rdsViewHueSsl);

@@ -35,7 +35,6 @@ import jakarta.annotation.Nonnull;
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.conn.util.InetAddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -661,7 +660,7 @@ public class ClusterHostServiceRunner {
         if (clouderaManagerRdsConfig == null) {
             throw new CloudbreakOrchestratorFailedException("Cloudera Manager RDSConfig is missing for stackDto");
         }
-        RdsView rdsView = rdsViewProvider.getRdsView(clouderaManagerRdsConfig, cloudPlatform, StringUtils.isNotEmpty(databaseServerCrn));
+        RdsView rdsView = rdsViewProvider.getRdsView(clouderaManagerRdsConfig, cloudPlatform);
         SaltPillarProperties saltPillarProperties = new SaltPillarProperties("/cloudera-manager/database.sls",
                 singletonMap("cloudera-manager", singletonMap("database", rdsView)));
         return saltPillarProperties;

@@ -111,7 +111,7 @@ public class ProfilerAdminRoleConfigProviderTest {
                         .withVersion("7.2.2"), new ArrayList<>())
                 .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.PROFILER_AGENT, rdsSslMode))
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS"))
                         .collect(Collectors.toSet()))
                 .build();
     }
@@ -130,7 +130,7 @@ public class ProfilerAdminRoleConfigProviderTest {
                         .withVersion("7.2.2"), new ArrayList<>())
                 .withRdsViews(Set.of(rdsConfigWithoutCluster)
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS"))
                         .collect(Collectors.toSet()))
                 .build();
 
@@ -171,7 +171,7 @@ public class ProfilerAdminRoleConfigProviderTest {
                         .withVersion("7.2.2"), new ArrayList<>())
                 .withRdsViews(Set.of(rdsConfigWithoutCluster)
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS"))
                         .collect(Collectors.toSet()))
                 .build();
 

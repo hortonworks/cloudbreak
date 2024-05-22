@@ -62,7 +62,7 @@ public class DasConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withRdsViews(Set.of(rdsConfig)
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", false))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS"))
                         .collect(Collectors.toSet()))
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
@@ -105,7 +105,7 @@ public class DasConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withRdsViews(Set.of(rdsConfig)
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", false))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS"))
                         .collect(Collectors.toSet()))
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_9_2), null)
                 .build();
@@ -127,7 +127,7 @@ public class DasConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withRdsViews(Set.of(rdsConfig)
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "/foo/cert.pem", "AWS", true))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "/foo/cert.pem", "AWS"))
                         .collect(Collectors.toSet()))
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_9_2), null)
                 .build();
@@ -159,7 +159,7 @@ public class DasConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withRdsViews(Set.of(rdsConfig)
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "/foo/cert.pem", "GCP", true))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "/foo/cert.pem", "GCP"))
                         .collect(Collectors.toSet()))
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_9_2), null)
                 .build();
@@ -219,7 +219,7 @@ public class DasConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withRdsViews(Set.of(rdsConfig)
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", false))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS"))
                         .collect(Collectors.toSet())
                 ).build();
 
@@ -242,7 +242,7 @@ public class DasConfigProviderTest {
         TemplatePreparationObject tpo = new Builder()
                 .withRdsViews(Set.of(rdsConfig)
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", false))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS"))
                         .collect(Collectors.toSet())
                 ).build();
 

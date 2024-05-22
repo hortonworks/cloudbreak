@@ -154,13 +154,12 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
             User user = userService.getOrCreate(cloudbreakUser);
             Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
-            boolean externalDatabaseRequested = StringUtils.isNotEmpty(source.getCluster().getDatabaseServerCrn());
             Credential credential = getCredential(source, environment);
             LdapView ldapConfig = getLdapConfig(source, environment);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential.getAttributes());
             Set<RdsView> rdsConfigs = getRdsConfigs(source, workspace)
                     .stream()
-                    .map(e -> rdsViewProvider.getRdsView(e, environment.getCloudPlatform(), externalDatabaseRequested))
+                    .map(e -> rdsViewProvider.getRdsView(e, environment.getCloudPlatform()))
                     .collect(Collectors.toSet());
             Blueprint blueprint = getBlueprint(source, workspace);
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);

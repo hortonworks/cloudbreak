@@ -312,8 +312,8 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         for (String rdsConfigName : rdsConfigNames) {
             RdsConfigWithoutCluster rdsConfig = TestUtil.rdsConfigWithoutCluster(DatabaseType.values()[i++], RdsSslMode.DISABLED);
             rdsConfigs.add(rdsConfig);
-            RdsView rdsView = realRdsViewProvider.getRdsView(rdsConfig, "AWS", false);
-            when(rdsViewProvider.getRdsView(rdsConfig, "AWS", false)).thenReturn(rdsView);
+            RdsView rdsView = realRdsViewProvider.getRdsView(rdsConfig, "AWS");
+            when(rdsViewProvider.getRdsView(rdsConfig, "AWS")).thenReturn(rdsView);
             when(rdsConfig.getName()).thenReturn(rdsConfigName);
         }
         when(rdsConfigWithoutClusterService.findAllByNamesAndWorkspaceId(rdsConfigNames, workspace)).thenReturn(rdsConfigs);

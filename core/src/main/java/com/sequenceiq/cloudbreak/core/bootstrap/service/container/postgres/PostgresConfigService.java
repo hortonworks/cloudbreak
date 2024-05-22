@@ -81,8 +81,7 @@ public class PostgresConfigService {
             sslSaltConfig = getSslSaltConfigWhenRootCertAlreadyInitialized(stackDto);
         }
         if (StringUtils.isNotBlank(sslSaltConfig.getRootCertsBundle())) {
-            boolean externalDatabaseRequested = StringUtils.isNotEmpty(stackDto.getCluster().getDatabaseServerCrn());
-            generateDatabaseSSLConfiguration(servicePillar, sslSaltConfig, stackDto.getCloudPlatform(), externalDatabaseRequested);
+            generateDatabaseSSLConfiguration(servicePillar, sslSaltConfig, stackDto.getCloudPlatform());
         }
 
         if (!postgresConfig.isEmpty()) {
@@ -156,11 +155,10 @@ public class PostgresConfigService {
         return available;
     }
 
-    private void generateDatabaseSSLConfiguration(Map<String, SaltPillarProperties> servicePillar, SSLSaltConfig sslSaltConfig, String cloudPlatform,
-            boolean externalDatabaseRequested) {
+    private void generateDatabaseSSLConfiguration(Map<String, SaltPillarProperties> servicePillar, SSLSaltConfig sslSaltConfig, String cloudPlatform) {
         Map<String, Object> rootSslCertsMap = new HashMap<>(sslSaltConfig.toMap());
         rootSslCertsMap.put("ssl_certs_file_path", databaseSslService.getSslCertsFilePath());
-        if (cloudPlatform.equalsIgnoreCase(CloudPlatform.GCP.name()) && externalDatabaseRequested) {
+        if (cloudPlatform.equalsIgnoreCase(CloudPlatform.GCP.name())) {
             rootSslCertsMap.put("ssl_verification_mode", "verify-ca");
         } else {
             rootSslCertsMap.put("ssl_verification_mode", "verify-full");

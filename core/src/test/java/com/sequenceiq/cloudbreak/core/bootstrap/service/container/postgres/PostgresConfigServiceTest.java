@@ -40,8 +40,6 @@ import com.sequenceiq.cloudbreak.service.upgrade.rds.UpgradeRdsBackupRestoreStat
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 
-import io.micrometer.common.util.StringUtils;
-
 @ExtendWith(MockitoExtension.class)
 class PostgresConfigServiceTest {
 
@@ -219,7 +217,7 @@ class PostgresConfigServiceTest {
         assertThat(properties).hasSize(1);
 
         Map<String, Object> rootSslCertsMap = (Map<String, Object>) properties.get("postgres_root_certs");
-        String sslVerificationMode = "GCP".equals(cloudProvider) && StringUtils.isNotEmpty(externalDbServerCrn) ? "verify-ca" : "verify-full";
+        String sslVerificationMode = "GCP".equals(cloudProvider) ? "verify-ca" : "verify-full";
         assertThat(rootSslCertsMap).isNotNull();
         assertThat(rootSslCertsMap).containsOnly(
                 entry("ssl_certs", "cert1\ncert2"),

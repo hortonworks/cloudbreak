@@ -237,9 +237,8 @@ public class StackToTemplatePreparationObjectConverter {
             Optional<String> version = Optional.ofNullable(blueprintView.getVersion());
             String sslCertsFilePath = databaseSslService.getSslCertsFilePath();
             Set<RdsConfigWithoutCluster> rdsConfigWithoutClusters = postgresConfigService.createRdsConfigIfNeeded(source);
-            boolean externalDatabaseRequested = StringUtils.isNotEmpty(cluster.getDatabaseServerCrn());
             Set<RdsView> rdsViews = rdsConfigWithoutClusters.stream()
-                    .map(e -> rdsViewProvider.getRdsView(e, sslCertsFilePath, environment.getCloudPlatform(), externalDatabaseRequested))
+                    .map(e -> rdsViewProvider.getRdsView(e, sslCertsFilePath, environment.getCloudPlatform()))
                     .collect(Collectors.toSet());
 
             Builder builder = Builder.builder()
