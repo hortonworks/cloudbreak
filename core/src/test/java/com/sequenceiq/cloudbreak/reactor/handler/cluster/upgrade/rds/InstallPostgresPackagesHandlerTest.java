@@ -19,8 +19,8 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.UpgradeRdsService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsInstallPostgresPackagesRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.rds.UpgradeRdsInstallPostgresPackagesResult;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,8 +63,8 @@ class InstallPostgresPackagesHandlerTest {
 
         Selectable result = underTest.doAccept(event);
         verify(upgradeRdsService).installPostgresPackages(STACK_ID, MajorVersion.VERSION_11);
-        assertThat(result.selector()).isEqualTo("UPGRADERDSINSTALLPOSTGRESPACKAGESRESULT");
-        assertThat(result).isInstanceOf(UpgradeRdsInstallPostgresPackagesResult.class);
+        assertThat(result.selector()).isEqualTo("UPGRADERDSFAILEDEVENT");
+        assertThat(result).isInstanceOf(UpgradeRdsFailedEvent.class);
         verify(upgradeRdsService).handleInstallPostgresPackagesError(eq(STACK_ID), eq("11"), eq("salt error"));
     }
 

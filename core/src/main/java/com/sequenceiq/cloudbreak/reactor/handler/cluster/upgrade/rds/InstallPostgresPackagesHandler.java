@@ -49,10 +49,11 @@ public class InstallPostgresPackagesHandler extends ExceptionCatcherEventHandler
         LOGGER.info("Installing Postgres [{}] packages for RDS upgrade...", targetVersion);
         try {
             upgradeRdsService.installPostgresPackages(stackId, targetVersion);
+            return new UpgradeRdsInstallPostgresPackagesResult(stackId, request.getVersion());
         } catch (CloudbreakOrchestratorException e) {
             upgradeRdsService.handleInstallPostgresPackagesError(stackId, request.getVersion().getMajorVersion(), e.getMessage());
             LOGGER.warn("Installing Postgres packages failed due to {}", e.getMessage());
+            return new UpgradeRdsFailedEvent(stackId, e, DetailedStackStatus.DATABASE_UPGRADE_FAILED);
         }
-        return new UpgradeRdsInstallPostgresPackagesResult(stackId, request.getVersion());
     }
 }
