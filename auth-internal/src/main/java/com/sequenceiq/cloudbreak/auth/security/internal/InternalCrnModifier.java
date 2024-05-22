@@ -97,10 +97,13 @@ public class InternalCrnModifier {
         return Optional.of(newUserCrn);
     }
 
+    public Crn changeAccountIdInCrnString(String userCrnString, String accountId) {
+        return Crn.copyWithDifferentAccountId(Crn.fromString(userCrnString), accountId);
+    }
+
     private String getAccountIdModifiedCrn(String userCrnString, String accountId) {
         MDCBuilder.addTenant(accountId);
-        Crn userCrn = Crn.fromString(userCrnString);
-        Crn newUserCrn = Crn.copyWithDifferentAccountId(userCrn, accountId);
+        Crn newUserCrn = changeAccountIdInCrnString(userCrnString, accountId);
         LOGGER.trace("Changing internal CRN to {}", newUserCrn);
         createNewUser(newUserCrn);
         return newUserCrn.toString();

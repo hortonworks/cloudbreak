@@ -279,8 +279,9 @@ public class DatabaseService {
                     databaseServerParameterSetter.getDatabaseType(sdxCluster.getSdxDatabase()).orElse(null)));
 
             if (previousDatabase != null && previousDatabaseConfig != null
-                    && (!previousDatabaseConfig.getInstanceType().equals(previousDatabase.getInstanceType())
-                    || previousDatabaseConfig.getVolumeSize() != previousDatabase.getStorageSize())) {
+                    && ((StringUtils.isNotEmpty(previousDatabaseConfig.getInstanceType())
+                    && !previousDatabaseConfig.getInstanceType().equals(previousDatabase.getInstanceType()))
+                    || (previousDatabaseConfig.getVolumeSize() != previousDatabase.getStorageSize()))) {
                 return Optional.of(previousDatabase);
             }
         }

@@ -1,9 +1,5 @@
 package com.sequenceiq.freeipa.sync.dynamicentitlement;
 
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETED_ON_PROVIDER_SIDE;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STOPPED;
-
-import java.util.EnumSet;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -16,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -46,6 +43,9 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    @Inject
+    private InternalCrnModifier internalCrnModifier;
+
     @Override
     protected Optional<Object> getMdcContextObject() {
         return Optional.ofNullable(stackService.getStackById(getStackId()));
@@ -58,15 +58,18 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
         Status status = stack.getStackStatus().getStatus();
         if (flowLogService.isOtherFlowRunning(stackId)) {
             LOGGER.debug("DynamicEntitlementRefreshJob cannot run, because flow is running for freeipa stack: {}", stackId);
-        } else if (!status.isUnschedulableState() && !EnumSet.of(STOPPED, DELETED_ON_PROVIDER_SIDE).contains(status) &&
-                config.isDynamicEntitlementEnabled()) {
+        } else if (status.isAvailable() && config.isDynamicEntitlementEnabled()) {
             LOGGER.debug("DynamicEntitlementRefreshJob will apply watched entitlement changes for stack: {}", stackId);
-            ThreadBasedUserCrnProvider.doAsInternalActor(
-                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+            ThreadBasedUserCrnProvider.doAs(
+                    internalCrnModifier.changeAccountIdInCrnString(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                            stack.getAccountId()).toString(),
                     () -> dynamicEntitlementRefreshService.changeClusterConfigurationIfEntitlementsChanged(stack));
         } else if (status.isUnschedulableState()) {
-            LOGGER.info("DynamicEntitlementRefreshJob will be unscheduled, stack state is {}", stack.getStackStatus().getStatus());
+            LOGGER.info("DynamicEntitlementRefreshJob job will be unscheduled, stack state is {}", stack.getStackStatus().getStatus());
             jobService.unschedule(context.getJobDetail().getKey());
+        } else {
+            LOGGER.info("DynamicEntitlementRefreshJob cannot run, stack state is {} for stack {}, is DynamicEntitlementRefreshJob enabled: {}.",
+                    status, stack.getResourceCrn(), config.isDynamicEntitlementEnabled());
         }
     }
 
