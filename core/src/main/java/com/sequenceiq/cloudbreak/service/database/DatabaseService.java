@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.DatabaseRepository;
@@ -42,6 +44,9 @@ public class DatabaseService {
     @Inject
     private DatabaseRepository databaseRepository;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public StackDatabaseServerResponse getDatabaseServer(NameOrCrn nameOrCrn) {
         Stack stack = stackOperations.getStackByNameOrCrn(nameOrCrn);
         if (stack.getCluster() == null) {
@@ -50,7 +55,9 @@ public class DatabaseService {
         if (stack.getCluster().getDatabaseServerCrn() == null) {
             throw notFound("Database for Data Hub with Data Hub id:", nameOrCrn.getNameOrCrn()).get();
         }
-        DatabaseServerV4Response databaseServerV4Response = databaseServerV4Endpoint.getByCrn(stack.getCluster().getDatabaseServerCrn());
+        DatabaseServerV4Response databaseServerV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> databaseServerV4Endpoint.getByCrn(stack.getCluster().getDatabaseServerCrn()));
 
         return databaseServerConverter.convert(databaseServerV4Response);
     }

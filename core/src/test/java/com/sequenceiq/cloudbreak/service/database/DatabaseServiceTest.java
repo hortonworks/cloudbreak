@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.database;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.util.Date;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -22,6 +24,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -50,8 +54,20 @@ class DatabaseServiceTest {
     @Spy
     private DatabaseServerConverter databaseServerConverter;
 
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
     @InjectMocks
     private DatabaseService underTest;
+
+    @BeforeEach
+    void setup() {
+        lenient().when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        lenient().when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+    }
 
     @ParameterizedTest
     @MethodSource("nameOrCrnProvider")
