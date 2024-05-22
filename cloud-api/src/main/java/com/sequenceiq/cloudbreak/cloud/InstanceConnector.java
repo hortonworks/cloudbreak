@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
 /**
  * This interface includes operations that can be executed on individual instances.
@@ -84,6 +85,20 @@ public interface InstanceConnector {
      * @return status of instances
      */
     List<CloudVmInstanceStatus> reboot(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> instanceIds);
+
+    /**
+     * A version of instance reboot which limits the retries that operation may normally perform
+     * and will try to reboot on all selected non-terminated instances.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param instanceIds          a VM instances that need to be rebooted.
+     * @param timeboundInMs        A timebound in ms for this call.
+     * @return status of instances
+     */
+    default List<CloudVmInstanceStatus> restartWithLimitedRetry(AuthenticatedContext authenticatedContext, List<CloudResource> resources,
+            List<CloudInstance> instanceIds, Long timeboundInMs, List<InstanceStatus> excludedStatuses) {
+        return reboot(authenticatedContext, resources, instanceIds);
+    }
 
     /**
      * Invoked to check whether the instances have already reached a StatusGroup.PERMANENT state.

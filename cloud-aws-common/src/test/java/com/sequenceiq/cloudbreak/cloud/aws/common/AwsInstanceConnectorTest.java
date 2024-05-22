@@ -284,6 +284,29 @@ class AwsInstanceConnectorTest {
     }
 
     @Test
+    void testReStartEveryInstancesStarted() {
+        mockDescribeInstancesAllisRebooted(8);
+        List<CloudVmInstanceStatus> result = underTest.restartWithLimitedRetry(authenticatedContext, new ArrayList<>(),
+                inputList, 600_000L, List.of(InstanceStatus.STOPPED, InstanceStatus.ZOMBIE, InstanceStatus.TERMINATED,
+                        InstanceStatus.TERMINATED_BY_PROVIDER, InstanceStatus.DELETE_REQUESTED));
+
+        verify(amazonEC2Client, times(1)).stopInstances(any(StopInstancesRequest.class));
+        verify(amazonEC2Client, times(1)).startInstances(any(StartInstancesRequest.class));
+        assertThat(result, hasItem(allOf(hasProperty("status", is(InstanceStatus.STARTED)))));
+    }
+
+    @Test
+    void testReStartWithEveryInstanceTerminated() {
+        mockDescribeInstancesNoneRestarted(8);
+        List<CloudVmInstanceStatus> result = underTest.restartWithLimitedRetry(authenticatedContext, new ArrayList<>(),
+                inputList, 600_000L, List.of(InstanceStatus.STOPPED, InstanceStatus.ZOMBIE, InstanceStatus.TERMINATED,
+                        InstanceStatus.TERMINATED_BY_PROVIDER, InstanceStatus.DELETE_REQUESTED));
+
+        verify(amazonEC2Client, times(0)).stopInstances(any(StopInstancesRequest.class));
+        verify(amazonEC2Client, times(0)).startInstances(any(StartInstancesRequest.class));
+    }
+
+    @Test
     void testStartEveryInstancesStartedAlready() {
         mockDescribeInstancesAllIsRunning(POLLING_LIMIT - 2);
         List<CloudVmInstanceStatus> result = underTest.start(authenticatedContext, List.of(), inputList);
@@ -399,6 +422,10 @@ class AwsInstanceConnectorTest {
                 getDescribeInstancesResult("stopped", 16));
     }
 
+    private void mockDescribeInstancesNoneRestarted(int pollResponses) {
+        mockListOfDescribeInstancesTerminated(getDescribeInstanceResultBothTerminated(), pollResponses, getDescribeInstanceResultBothTerminated());
+    }
+
     private void mockListOfDescribeInstancesRunningThenStoppedThenRunning(DescribeInstancesResponse cons, int repeatNo, DescribeInstancesResponse stopped) {
         DescribeInstancesResponse[] describeInstancesResults = new DescribeInstancesResponse[repeatNo];
         Arrays.fill(describeInstancesResults, cons);
@@ -407,6 +434,17 @@ class AwsInstanceConnectorTest {
         describeInstancesResults[5] = stopped;
         describeInstancesResults[6] = stopped;
         when(amazonEC2Client.describeInstances(any(DescribeInstancesRequest.class))).thenReturn(cons,
+                describeInstancesResults);
+    }
+
+    private void mockListOfDescribeInstancesTerminated(DescribeInstancesResponse initial, int repeatNo, DescribeInstancesResponse after) {
+        DescribeInstancesResponse[] describeInstancesResults = new DescribeInstancesResponse[repeatNo];
+        Arrays.fill(describeInstancesResults, initial);
+        describeInstancesResults[3] = after;
+        describeInstancesResults[4] = after;
+        describeInstancesResults[5] = after;
+        describeInstancesResults[6] = after;
+        when(amazonEC2Client.describeInstances(any(DescribeInstancesRequest.class))).thenReturn(initial,
                 describeInstancesResults);
     }
 
@@ -449,6 +487,15 @@ class AwsInstanceConnectorTest {
     private DescribeInstancesResponse getDescribeInstancesResultOneRunning(String state, int code) {
         Instance instances1 = getAwsInstance("i-1", state, code);
         Instance instances2 = getAwsInstance("i-2", "running", 16);
+        Reservation reservation1 = getReservation(instances1, "1");
+        Reservation reservation2 = getReservation(instances2, "2");
+
+        return DescribeInstancesResponse.builder().reservations(reservation1, reservation2).build();
+    }
+
+    private DescribeInstancesResponse getDescribeInstanceResultBothTerminated() {
+        Instance instances1 = getAwsInstance("i-1", "terminated", 48);
+        Instance instances2 = getAwsInstance("i-2", "terminated", 48);
         Reservation reservation1 = getReservation(instances1, "1");
         Reservation reservation2 = getReservation(instances2, "2");
 

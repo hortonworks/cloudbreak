@@ -123,6 +123,31 @@ public class AzureInstanceConnector implements InstanceConnector {
         return statuses;
     }
 
+    @Override
+    public List<CloudVmInstanceStatus> restartWithLimitedRetry(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms,
+            Long timeboundInMs, List<InstanceStatus> excludedStatuses) {
+        LOGGER.info("Restarting vms on Azure: {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
+        List<CloudVmInstanceStatus> statuses = new CopyOnWriteArrayList<>();
+        List<Mono<Void>> completables = new ArrayList<>();
+        List<CloudVmInstanceStatus> currentStatuses = check(ac, vms);
+        AzureClient azureClient = ac.getParameter(AzureClient.class);
+        for (CloudVmInstanceStatus vm : currentStatuses) {
+            String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), vm.getCloudInstance());
+            if (!excludedStatuses.contains(vm.getStatus())) {
+                completables.add(doReboot(vm, statuses, azureClient.stopVirtualMachineAsync(resourceGroupName, vm.getCloudInstance().getInstanceId())
+                        .then(azureClient.startVirtualMachineAsync(resourceGroupName, vm.getCloudInstance().getInstanceId(), timeboundInMs))));
+            } else if (vm.getStatus() == InstanceStatus.STOPPED) {
+                completables.add(doReboot(vm, statuses, azureClient.startVirtualMachineAsync(resourceGroupName, vm.getCloudInstance().getInstanceId(),
+                        timeboundInMs)));
+            } else {
+                LOGGER.error(String.format("Unable to restart instance %s because of invalid status %s.",
+                        vm.getCloudInstance().getInstanceId(), vm.getStatus().toString()));
+            }
+        }
+        ReactiveUtils.waitAll(completables);
+        return statuses;
+    }
+
     private Mono<Void> doReboot(CloudVmInstanceStatus vm, List<CloudVmInstanceStatus> statuses,
                                 Mono<Void> asyncCall) {
         return asyncCall.doOnError(throwable -> {

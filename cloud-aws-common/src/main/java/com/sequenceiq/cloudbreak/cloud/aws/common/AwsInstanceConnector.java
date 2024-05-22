@@ -213,6 +213,32 @@ public class AwsInstanceConnector implements InstanceConnector {
         return rebootedVmsStatus;
     }
 
+    @Retryable(
+            value = SdkClientException.class,
+            maxAttempts = 15,
+            backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000)
+    )
+    @Override
+    public List<CloudVmInstanceStatus> restartWithLimitedRetry(AuthenticatedContext ac, List<CloudResource> resources,
+            List<CloudInstance> vms, Long timeboundInMs, List<InstanceStatus> excludedStatuses) {
+        LOGGER.info("Restarting vms on Aws: {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
+        List<CloudVmInstanceStatus> rebootedVmsStatus = new ArrayList<>();
+        try {
+            if (!vms.isEmpty()) {
+                List<CloudVmInstanceStatus> statuses = check(ac, vms);
+                stopWithLimitedRetry(ac, null, getNotExcludedStatusInstances(statuses, excludedStatuses), timeboundInMs);
+                statuses = check(ac, vms);
+                logInvalidStatuses(getNotStopped(statuses), InstanceStatus.STOPPED);
+                rebootedVmsStatus = startWithLimitedRetry(ac, null, getStopped(statuses), timeboundInMs);
+                logInvalidStatuses(getNotStarted(statuses), InstanceStatus.STARTED);
+            }
+        } catch (SdkClientException e) {
+            LOGGER.warn("Failed to send restart request to AWS: ", e);
+            throw e;
+        }
+        return rebootedVmsStatus;
+    }
+
     private List<CloudVmInstanceStatus> getNotStarted(List<CloudVmInstanceStatus> statuses) {
         return statuses.stream().filter(status -> status.getStatus() != InstanceStatus.STARTED)
                 .collect(Collectors.toList());
@@ -230,6 +256,11 @@ public class AwsInstanceConnector implements InstanceConnector {
 
     private List<CloudInstance> getStarted(List<CloudVmInstanceStatus> statuses) {
         return statuses.stream().filter(status -> status.getStatus() == InstanceStatus.STARTED)
+                .map(CloudVmInstanceStatus::getCloudInstance).collect(Collectors.toList());
+    }
+
+    private List<CloudInstance> getNotExcludedStatusInstances(List<CloudVmInstanceStatus> statuses, List<InstanceStatus> excludedStatuses) {
+        return statuses.stream().filter(status -> !excludedStatuses.contains(status.getStatus()))
                 .map(CloudVmInstanceStatus::getCloudInstance).collect(Collectors.toList());
     }
 
