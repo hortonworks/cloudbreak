@@ -27,4 +27,5 @@ public abstract class StatusCheckerJob extends MdcQuartzJob {
     protected Long getLocalIdAsLong() {
         return Long.valueOf(getLocalId());
     }
+
 }

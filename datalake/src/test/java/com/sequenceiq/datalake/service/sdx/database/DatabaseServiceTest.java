@@ -54,6 +54,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure.AzureDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.client.RedbeamsServiceCrnClient;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -329,8 +330,62 @@ public class DatabaseServiceTest {
         assertThat(databaseServerV4StackRequest.getStorageSize()).isEqualTo(1024L);
     }
 
+    @Test
+    public void testGetDatabaseServerRequestWithPreviousDatabaseModifiedForAzureFlexibleDb() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setClusterName("CLUSTER_NAME");
+        cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
+        cluster.setCrn(CLUSTER_CRN);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("previousDatabaseCrn", DATABASE_CRN);
+        attributes.put("previousClusterShape", SdxClusterShape.LIGHT_DUTY.toString());
+        sdxDatabase.setAttributes(new Json(attributes));
+        cluster.setSdxDatabase(sdxDatabase);
+        DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
+        env.setName("ENV");
+        env.setCloudPlatform("azure");
+        env.setCrn(ENV_CRN);
+        DatabaseConfig databaseConfig = getFlexibleDatabaseConfig();
+        DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
+        databaseServerV4Response.setStorageSize(1024L);
+        databaseServerV4Response.setInstanceType("m5.8xlarge");
+
+        DatabaseConfigKey dbConfigKeyLight = new DatabaseConfigKey(CloudPlatform.AZURE, SdxClusterShape.LIGHT_DUTY);
+        when(dbConfigs.get(dbConfigKeyLight)).thenReturn(databaseConfig);
+        when(databaseParameterSetterMap.get(CloudPlatform.AZURE)).thenReturn(getAzureDatabaseParameterSetter());
+        when(databaseServerV4Endpoint.getByCrn(DATABASE_CRN)).thenReturn(databaseServerV4Response);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+
+        DatabaseServerV4StackRequest databaseServerV4StackRequest = underTest.getDatabaseServerRequest(CloudPlatform.AZURE, cluster, env,
+                "initiatorUserCrn");
+
+        assertThat(databaseServerV4StackRequest).isNotNull();
+        assertThat(databaseServerV4StackRequest.getInstanceType()).isEqualTo("m5.8xlarge");
+        assertThat(databaseServerV4StackRequest.getStorageSize()).isEqualTo(1024L);
+    }
+
     private DatabaseConfig getDatabaseConfig() {
         return new DatabaseConfig("instanceType", "vendor", 100);
+    }
+
+    private DatabaseConfig getFlexibleDatabaseConfig() {
+        return new DatabaseConfig(null, "vendor", 100);
+    }
+
+    private DatabaseServerParameterSetter getAzureDatabaseParameterSetter() {
+        return new DatabaseServerParameterSetter() {
+            @Override
+            public void setParameters(DatabaseServerV4StackRequest request, SdxCluster sdxCluster,
+                    DetailedEnvironmentResponse environmentResponse, String userCrn) {
+                request.setAzure(new AzureDatabaseServerV4Parameters());
+            }
+
+            @Override
+            public CloudPlatform getCloudPlatform() {
+                return CloudPlatform.AZURE;
+            }
+        };
     }
 
     private DatabaseServerParameterSetter getDatabaseParameterSetter() {
