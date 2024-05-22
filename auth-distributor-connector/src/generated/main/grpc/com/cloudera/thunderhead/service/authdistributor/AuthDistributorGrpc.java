@@ -5,14 +5,14 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
 /**
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.53.0)",
+    value = "by gRPC proto compiler (version 1.64.0)",
     comments = "Source: authdistributor.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class AuthDistributorGrpc {
 
   private AuthDistributorGrpc() {}
 
-  public static final String SERVICE_NAME = "authdistributor.AuthDistributor";
+  public static final java.lang.String SERVICE_NAME = "authdistributor.AuthDistributor";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
@@ -185,76 +185,56 @@ public final class AuthDistributorGrpc {
 
   /**
    */
-  public static abstract class AuthDistributorImplBase implements io.grpc.BindableService {
+  public interface AsyncService {
 
     /**
      * <pre>
      * Get the service version.
      * </pre>
      */
-    public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
+    default void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetVersionMethod(), responseObserver);
     }
 
     /**
      */
-    public void fetchAuthViewForEnvironment(com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.FetchAuthViewForEnvironmentRequest request,
+    default void fetchAuthViewForEnvironment(com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.FetchAuthViewForEnvironmentRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.FetchAuthViewForEnvironmentResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getFetchAuthViewForEnvironmentMethod(), responseObserver);
     }
 
     /**
      */
-    public void removeAuthViewForEnvironment(com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.RemoveAuthViewForEnvironmentRequest request,
+    default void removeAuthViewForEnvironment(com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.RemoveAuthViewForEnvironmentRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.RemoveAuthViewForEnvironmentResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRemoveAuthViewForEnvironmentMethod(), responseObserver);
     }
 
     /**
      */
-    public void updateAuthViewForEnvironment(com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UpdateAuthViewForEnvironmentRequest request,
+    default void updateAuthViewForEnvironment(com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UpdateAuthViewForEnvironmentRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UpdateAuthViewForEnvironmentResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUpdateAuthViewForEnvironmentMethod(), responseObserver);
-    }
-
-    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
-      return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
-          .addMethod(
-            getGetVersionMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-                com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
-                  this, METHODID_GET_VERSION)))
-          .addMethod(
-            getFetchAuthViewForEnvironmentMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.FetchAuthViewForEnvironmentRequest,
-                com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.FetchAuthViewForEnvironmentResponse>(
-                  this, METHODID_FETCH_AUTH_VIEW_FOR_ENVIRONMENT)))
-          .addMethod(
-            getRemoveAuthViewForEnvironmentMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.RemoveAuthViewForEnvironmentRequest,
-                com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.RemoveAuthViewForEnvironmentResponse>(
-                  this, METHODID_REMOVE_AUTH_VIEW_FOR_ENVIRONMENT)))
-          .addMethod(
-            getUpdateAuthViewForEnvironmentMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UpdateAuthViewForEnvironmentRequest,
-                com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UpdateAuthViewForEnvironmentResponse>(
-                  this, METHODID_UPDATE_AUTH_VIEW_FOR_ENVIRONMENT)))
-          .build();
     }
   }
 
   /**
+   * Base class for the server implementation of the service AuthDistributor.
    */
-  public static final class AuthDistributorStub extends io.grpc.stub.AbstractAsyncStub<AuthDistributorStub> {
+  public static abstract class AuthDistributorImplBase
+      implements io.grpc.BindableService, AsyncService {
+
+    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+      return AuthDistributorGrpc.bindService(this);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do asynchronous rpc calls to service AuthDistributor.
+   */
+  public static final class AuthDistributorStub
+      extends io.grpc.stub.AbstractAsyncStub<AuthDistributorStub> {
     private AuthDistributorStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -303,8 +283,10 @@ public final class AuthDistributorGrpc {
   }
 
   /**
+   * A stub to allow clients to do synchronous rpc calls to service AuthDistributor.
    */
-  public static final class AuthDistributorBlockingStub extends io.grpc.stub.AbstractBlockingStub<AuthDistributorBlockingStub> {
+  public static final class AuthDistributorBlockingStub
+      extends io.grpc.stub.AbstractBlockingStub<AuthDistributorBlockingStub> {
     private AuthDistributorBlockingStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -349,8 +331,10 @@ public final class AuthDistributorGrpc {
   }
 
   /**
+   * A stub to allow clients to do ListenableFuture-style rpc calls to service AuthDistributor.
    */
-  public static final class AuthDistributorFutureStub extends io.grpc.stub.AbstractFutureStub<AuthDistributorFutureStub> {
+  public static final class AuthDistributorFutureStub
+      extends io.grpc.stub.AbstractFutureStub<AuthDistributorFutureStub> {
     private AuthDistributorFutureStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -408,10 +392,10 @@ public final class AuthDistributorGrpc {
       io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-    private final AuthDistributorImplBase serviceImpl;
+    private final AsyncService serviceImpl;
     private final int methodId;
 
-    MethodHandlers(AuthDistributorImplBase serviceImpl, int methodId) {
+    MethodHandlers(AsyncService serviceImpl, int methodId) {
       this.serviceImpl = serviceImpl;
       this.methodId = methodId;
     }
@@ -452,6 +436,39 @@ public final class AuthDistributorGrpc {
     }
   }
 
+  public static final io.grpc.ServerServiceDefinition bindService(AsyncService service) {
+    return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+        .addMethod(
+          getGetVersionMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
+              com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
+                service, METHODID_GET_VERSION)))
+        .addMethod(
+          getFetchAuthViewForEnvironmentMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.FetchAuthViewForEnvironmentRequest,
+              com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.FetchAuthViewForEnvironmentResponse>(
+                service, METHODID_FETCH_AUTH_VIEW_FOR_ENVIRONMENT)))
+        .addMethod(
+          getRemoveAuthViewForEnvironmentMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.RemoveAuthViewForEnvironmentRequest,
+              com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.RemoveAuthViewForEnvironmentResponse>(
+                service, METHODID_REMOVE_AUTH_VIEW_FOR_ENVIRONMENT)))
+        .addMethod(
+          getUpdateAuthViewForEnvironmentMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UpdateAuthViewForEnvironmentRequest,
+              com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UpdateAuthViewForEnvironmentResponse>(
+                service, METHODID_UPDATE_AUTH_VIEW_FOR_ENVIRONMENT)))
+        .build();
+  }
+
   private static abstract class AuthDistributorBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
     AuthDistributorBaseDescriptorSupplier() {}
@@ -475,9 +492,9 @@ public final class AuthDistributorGrpc {
   private static final class AuthDistributorMethodDescriptorSupplier
       extends AuthDistributorBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
-    private final String methodName;
+    private final java.lang.String methodName;
 
-    AuthDistributorMethodDescriptorSupplier(String methodName) {
+    AuthDistributorMethodDescriptorSupplier(java.lang.String methodName) {
       this.methodName = methodName;
     }
 

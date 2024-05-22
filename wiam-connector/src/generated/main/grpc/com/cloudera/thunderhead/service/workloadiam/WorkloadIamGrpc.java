@@ -9,14 +9,14 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.53.0)",
+    value = "by gRPC proto compiler (version 1.64.0)",
     comments = "Source: workloadiam.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class WorkloadIamGrpc {
 
   private WorkloadIamGrpc() {}
 
-  public static final String SERVICE_NAME = "workloadiam.WorkloadIam";
+  public static final java.lang.String SERVICE_NAME = "workloadiam.WorkloadIam";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
@@ -379,14 +379,14 @@ public final class WorkloadIamGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static abstract class WorkloadIamImplBase implements io.grpc.BindableService {
+  public interface AsyncService {
 
     /**
      * <pre>
      * Get the service version.
      * </pre>
      */
-    public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
+    default void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetVersionMethod(), responseObserver);
     }
@@ -400,7 +400,7 @@ public final class WorkloadIamGrpc {
      * event. To allow processing an event earlier, the CommitSyncEvent rpc should be called.
      * </pre>
      */
-    public void createSyncEvent(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.CreateSyncEventRequest request,
+    default void createSyncEvent(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.CreateSyncEventRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.CreateSyncEventResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateSyncEventMethod(), responseObserver);
     }
@@ -410,7 +410,7 @@ public final class WorkloadIamGrpc {
      * Update an existing sync event to indicate that it's ready for processing.
      * </pre>
      */
-    public void commitSyncEvent(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.CommitSyncEventRequest request,
+    default void commitSyncEvent(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.CommitSyncEventRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.CommitSyncEventResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCommitSyncEventMethod(), responseObserver);
     }
@@ -420,7 +420,7 @@ public final class WorkloadIamGrpc {
      * Get the sync event state for an environment.
      * </pre>
      */
-    public void getAutomatedSyncEnvironmentStatus(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetAutomatedSyncEnvironmentStatusRequest request,
+    default void getAutomatedSyncEnvironmentStatus(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetAutomatedSyncEnvironmentStatusRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetAutomatedSyncEnvironmentStatusResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetAutomatedSyncEnvironmentStatusMethod(), responseObserver);
     }
@@ -430,7 +430,7 @@ public final class WorkloadIamGrpc {
      * Get the status of a sync event.
      * </pre>
      */
-    public void getSyncEventStatus(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncEventStatusRequest request,
+    default void getSyncEventStatus(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncEventStatusRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncEventStatusResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetSyncEventStatusMethod(), responseObserver);
     }
@@ -442,7 +442,7 @@ public final class WorkloadIamGrpc {
      * and new use cases should not use this RPC. Deprecated.
      * </pre>
      */
-    public void legacySyncUsers(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacySyncUsersRequest request,
+    default void legacySyncUsers(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacySyncUsersRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacySyncUsersResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getLegacySyncUsersMethod(), responseObserver);
     }
@@ -454,7 +454,7 @@ public final class WorkloadIamGrpc {
      * and new use cases should not use this RPC. Deprecated.
      * </pre>
      */
-    public void legacyGetSyncUsersStatus(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetSyncUsersStatusRequest request,
+    default void legacyGetSyncUsersStatus(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetSyncUsersStatusRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetSyncUsersStatusResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getLegacyGetSyncUsersStatusMethod(), responseObserver);
     }
@@ -466,7 +466,7 @@ public final class WorkloadIamGrpc {
      * and new use cases should not use this RPC. Deprecated.
      * </pre>
      */
-    public void legacyGetEnvironmentUsersyncState(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest request,
+    default void legacyGetEnvironmentUsersyncState(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getLegacyGetEnvironmentUsersyncStateMethod(), responseObserver);
     }
@@ -476,7 +476,7 @@ public final class WorkloadIamGrpc {
      * Request a manual usersync. Specifying exactly one environment is required.
      * </pre>
      */
-    public void syncUsers(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.SyncUsersRequest request,
+    default void syncUsers(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.SyncUsersRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.SyncUsersResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSyncUsersMethod(), responseObserver);
     }
@@ -486,94 +486,36 @@ public final class WorkloadIamGrpc {
      * Get the status of a SyncUsers request.
      * </pre>
      */
-    public void getSyncUsersStatus(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncUsersStatusRequest request,
+    default void getSyncUsersStatus(com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncUsersStatusRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncUsersStatusResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetSyncUsersStatusMethod(), responseObserver);
-    }
-
-    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
-      return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
-          .addMethod(
-            getGetVersionMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-                com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
-                  this, METHODID_GET_VERSION)))
-          .addMethod(
-            getCreateSyncEventMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.CreateSyncEventRequest,
-                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.CreateSyncEventResponse>(
-                  this, METHODID_CREATE_SYNC_EVENT)))
-          .addMethod(
-            getCommitSyncEventMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.CommitSyncEventRequest,
-                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.CommitSyncEventResponse>(
-                  this, METHODID_COMMIT_SYNC_EVENT)))
-          .addMethod(
-            getGetAutomatedSyncEnvironmentStatusMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetAutomatedSyncEnvironmentStatusRequest,
-                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetAutomatedSyncEnvironmentStatusResponse>(
-                  this, METHODID_GET_AUTOMATED_SYNC_ENVIRONMENT_STATUS)))
-          .addMethod(
-            getGetSyncEventStatusMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncEventStatusRequest,
-                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncEventStatusResponse>(
-                  this, METHODID_GET_SYNC_EVENT_STATUS)))
-          .addMethod(
-            getLegacySyncUsersMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacySyncUsersRequest,
-                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacySyncUsersResponse>(
-                  this, METHODID_LEGACY_SYNC_USERS)))
-          .addMethod(
-            getLegacyGetSyncUsersStatusMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetSyncUsersStatusRequest,
-                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetSyncUsersStatusResponse>(
-                  this, METHODID_LEGACY_GET_SYNC_USERS_STATUS)))
-          .addMethod(
-            getLegacyGetEnvironmentUsersyncStateMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest,
-                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse>(
-                  this, METHODID_LEGACY_GET_ENVIRONMENT_USERSYNC_STATE)))
-          .addMethod(
-            getSyncUsersMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.SyncUsersRequest,
-                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.SyncUsersResponse>(
-                  this, METHODID_SYNC_USERS)))
-          .addMethod(
-            getGetSyncUsersStatusMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncUsersStatusRequest,
-                com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncUsersStatusResponse>(
-                  this, METHODID_GET_SYNC_USERS_STATUS)))
-          .build();
     }
   }
 
   /**
+   * Base class for the server implementation of the service WorkloadIam.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class WorkloadIamStub extends io.grpc.stub.AbstractAsyncStub<WorkloadIamStub> {
+  public static abstract class WorkloadIamImplBase
+      implements io.grpc.BindableService, AsyncService {
+
+    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+      return WorkloadIamGrpc.bindService(this);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do asynchronous rpc calls to service WorkloadIam.
+   * <pre>
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class WorkloadIamStub
+      extends io.grpc.stub.AbstractAsyncStub<WorkloadIamStub> {
     private WorkloadIamStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -707,12 +649,14 @@ public final class WorkloadIamGrpc {
   }
 
   /**
+   * A stub to allow clients to do synchronous rpc calls to service WorkloadIam.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class WorkloadIamBlockingStub extends io.grpc.stub.AbstractBlockingStub<WorkloadIamBlockingStub> {
+  public static final class WorkloadIamBlockingStub
+      extends io.grpc.stub.AbstractBlockingStub<WorkloadIamBlockingStub> {
     private WorkloadIamBlockingStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -836,12 +780,14 @@ public final class WorkloadIamGrpc {
   }
 
   /**
+   * A stub to allow clients to do ListenableFuture-style rpc calls to service WorkloadIam.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class WorkloadIamFutureStub extends io.grpc.stub.AbstractFutureStub<WorkloadIamFutureStub> {
+  public static final class WorkloadIamFutureStub
+      extends io.grpc.stub.AbstractFutureStub<WorkloadIamFutureStub> {
     private WorkloadIamFutureStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -990,10 +936,10 @@ public final class WorkloadIamGrpc {
       io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-    private final WorkloadIamImplBase serviceImpl;
+    private final AsyncService serviceImpl;
     private final int methodId;
 
-    MethodHandlers(WorkloadIamImplBase serviceImpl, int methodId) {
+    MethodHandlers(AsyncService serviceImpl, int methodId) {
       this.serviceImpl = serviceImpl;
       this.methodId = methodId;
     }
@@ -1058,6 +1004,81 @@ public final class WorkloadIamGrpc {
     }
   }
 
+  public static final io.grpc.ServerServiceDefinition bindService(AsyncService service) {
+    return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+        .addMethod(
+          getGetVersionMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
+              com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
+                service, METHODID_GET_VERSION)))
+        .addMethod(
+          getCreateSyncEventMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.CreateSyncEventRequest,
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.CreateSyncEventResponse>(
+                service, METHODID_CREATE_SYNC_EVENT)))
+        .addMethod(
+          getCommitSyncEventMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.CommitSyncEventRequest,
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.CommitSyncEventResponse>(
+                service, METHODID_COMMIT_SYNC_EVENT)))
+        .addMethod(
+          getGetAutomatedSyncEnvironmentStatusMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetAutomatedSyncEnvironmentStatusRequest,
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetAutomatedSyncEnvironmentStatusResponse>(
+                service, METHODID_GET_AUTOMATED_SYNC_ENVIRONMENT_STATUS)))
+        .addMethod(
+          getGetSyncEventStatusMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncEventStatusRequest,
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncEventStatusResponse>(
+                service, METHODID_GET_SYNC_EVENT_STATUS)))
+        .addMethod(
+          getLegacySyncUsersMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacySyncUsersRequest,
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacySyncUsersResponse>(
+                service, METHODID_LEGACY_SYNC_USERS)))
+        .addMethod(
+          getLegacyGetSyncUsersStatusMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetSyncUsersStatusRequest,
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetSyncUsersStatusResponse>(
+                service, METHODID_LEGACY_GET_SYNC_USERS_STATUS)))
+        .addMethod(
+          getLegacyGetEnvironmentUsersyncStateMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateRequest,
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.LegacyGetEnvironmentUsersyncStateResponse>(
+                service, METHODID_LEGACY_GET_ENVIRONMENT_USERSYNC_STATE)))
+        .addMethod(
+          getSyncUsersMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.SyncUsersRequest,
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.SyncUsersResponse>(
+                service, METHODID_SYNC_USERS)))
+        .addMethod(
+          getGetSyncUsersStatusMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncUsersStatusRequest,
+              com.cloudera.thunderhead.service.workloadiam.WorkloadIamProto.GetSyncUsersStatusResponse>(
+                service, METHODID_GET_SYNC_USERS_STATUS)))
+        .build();
+  }
+
   private static abstract class WorkloadIamBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
     WorkloadIamBaseDescriptorSupplier() {}
@@ -1081,9 +1102,9 @@ public final class WorkloadIamGrpc {
   private static final class WorkloadIamMethodDescriptorSupplier
       extends WorkloadIamBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
-    private final String methodName;
+    private final java.lang.String methodName;
 
-    WorkloadIamMethodDescriptorSupplier(String methodName) {
+    WorkloadIamMethodDescriptorSupplier(java.lang.String methodName) {
       this.methodName = methodName;
     }
 

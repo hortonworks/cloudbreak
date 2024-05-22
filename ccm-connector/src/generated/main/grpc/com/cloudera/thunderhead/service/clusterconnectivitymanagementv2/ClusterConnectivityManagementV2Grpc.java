@@ -8,14 +8,14 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.53.0)",
+    value = "by gRPC proto compiler (version 1.64.0)",
     comments = "Source: clusterconnectivitymanagementv2.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class ClusterConnectivityManagementV2Grpc {
 
   private ClusterConnectivityManagementV2Grpc() {}
 
-  public static final String SERVICE_NAME = "clusterconnectivitymanagementv2.ClusterConnectivityManagementV2";
+  public static final java.lang.String SERVICE_NAME = "clusterconnectivitymanagementv2.ClusterConnectivityManagementV2";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
@@ -377,14 +377,14 @@ public final class ClusterConnectivityManagementV2Grpc {
    * ClusterConnectivityManagementV2 service for provisioning and managing inverting-proxy.
    * </pre>
    */
-  public static abstract class ClusterConnectivityManagementV2ImplBase implements io.grpc.BindableService {
+  public interface AsyncService {
 
     /**
      * <pre>
      * Get the service version.
      * </pre>
      */
-    public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
+    default void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetVersionMethod(), responseObserver);
     }
@@ -395,7 +395,7 @@ public final class ClusterConnectivityManagementV2Grpc {
      * It also polls for the status and updates the status accordingly.
      * </pre>
      */
-    public void createOrGetInvertingProxy(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateOrGetInvertingProxyRequest request,
+    default void createOrGetInvertingProxy(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateOrGetInvertingProxyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateOrGetInvertingProxyResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateOrGetInvertingProxyMethod(), responseObserver);
     }
@@ -406,7 +406,7 @@ public final class ClusterConnectivityManagementV2Grpc {
      * Mainly used for reaper process.
      * </pre>
      */
-    public void removeInvertingProxy(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RemoveInvertingProxyRequest request,
+    default void removeInvertingProxy(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RemoveInvertingProxyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RemoveInvertingProxyResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRemoveInvertingProxyMethod(), responseObserver);
     }
@@ -416,7 +416,7 @@ public final class ClusterConnectivityManagementV2Grpc {
      * RegisterAgent for generating and registering agent key-cert pair.
      * </pre>
      */
-    public void registerAgent(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RegisterAgentRequest request,
+    default void registerAgent(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RegisterAgentRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RegisterAgentResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRegisterAgentMethod(), responseObserver);
     }
@@ -426,7 +426,7 @@ public final class ClusterConnectivityManagementV2Grpc {
      * UnregisterAgent for removing agent key-cert pair while environment deletion.
      * </pre>
      */
-    public void unregisterAgent(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.UnregisterAgentRequest request,
+    default void unregisterAgent(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.UnregisterAgentRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.UnregisterAgentResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUnregisterAgentMethod(), responseObserver);
     }
@@ -436,7 +436,7 @@ public final class ClusterConnectivityManagementV2Grpc {
      * Lists all registered agents matching a supplied query
      * </pre>
      */
-    public void listAgents(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest request,
+    default void listAgents(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListAgentsMethod(), responseObserver);
     }
@@ -446,7 +446,7 @@ public final class ClusterConnectivityManagementV2Grpc {
      * GetAllAgentsCertificates for getting certificates of all the agents for an account.
      * </pre>
      */
-    public void getAllAgentsCertificates(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest request,
+    default void getAllAgentsCertificates(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetAllAgentsCertificatesMethod(), responseObserver);
     }
@@ -456,7 +456,7 @@ public final class ClusterConnectivityManagementV2Grpc {
      * RotateAgentAccessKey for rotating workload machine user key pair
      * </pre>
      */
-    public void rotateAgentAccessKey(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest request,
+    default void rotateAgentAccessKey(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRotateAgentAccessKeyMethod(), responseObserver);
     }
@@ -466,7 +466,7 @@ public final class ClusterConnectivityManagementV2Grpc {
      * DeactivateAgentAccessKeyPair for deleting an existing pair of access key and key id for an agent.
      * </pre>
      */
-    public void deactivateAgentAccessKeyPair(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairRequest request,
+    default void deactivateAgentAccessKeyPair(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeactivateAgentAccessKeyPairMethod(), responseObserver);
     }
@@ -476,93 +476,34 @@ public final class ClusterConnectivityManagementV2Grpc {
      * CreateAgentAccessKeyPair for creating a new pair of access key and key id for an agent.
      * </pre>
      */
-    public void createAgentAccessKeyPair(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest request,
+    default void createAgentAccessKeyPair(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateAgentAccessKeyPairMethod(), responseObserver);
-    }
-
-    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
-      return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
-          .addMethod(
-            getGetVersionMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-                com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
-                  this, METHODID_GET_VERSION)))
-          .addMethod(
-            getCreateOrGetInvertingProxyMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateOrGetInvertingProxyRequest,
-                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateOrGetInvertingProxyResponse>(
-                  this, METHODID_CREATE_OR_GET_INVERTING_PROXY)))
-          .addMethod(
-            getRemoveInvertingProxyMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RemoveInvertingProxyRequest,
-                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RemoveInvertingProxyResponse>(
-                  this, METHODID_REMOVE_INVERTING_PROXY)))
-          .addMethod(
-            getRegisterAgentMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RegisterAgentRequest,
-                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RegisterAgentResponse>(
-                  this, METHODID_REGISTER_AGENT)))
-          .addMethod(
-            getUnregisterAgentMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.UnregisterAgentRequest,
-                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.UnregisterAgentResponse>(
-                  this, METHODID_UNREGISTER_AGENT)))
-          .addMethod(
-            getListAgentsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest,
-                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse>(
-                  this, METHODID_LIST_AGENTS)))
-          .addMethod(
-            getGetAllAgentsCertificatesMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest,
-                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse>(
-                  this, METHODID_GET_ALL_AGENTS_CERTIFICATES)))
-          .addMethod(
-            getRotateAgentAccessKeyMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest,
-                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse>(
-                  this, METHODID_ROTATE_AGENT_ACCESS_KEY)))
-          .addMethod(
-            getDeactivateAgentAccessKeyPairMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairRequest,
-                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairResponse>(
-                  this, METHODID_DEACTIVATE_AGENT_ACCESS_KEY_PAIR)))
-          .addMethod(
-            getCreateAgentAccessKeyPairMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest,
-                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairResponse>(
-                  this, METHODID_CREATE_AGENT_ACCESS_KEY_PAIR)))
-          .build();
     }
   }
 
   /**
+   * Base class for the server implementation of the service ClusterConnectivityManagementV2.
    * <pre>
    * ClusterConnectivityManagementV2 service for provisioning and managing inverting-proxy.
    * </pre>
    */
-  public static final class ClusterConnectivityManagementV2Stub extends io.grpc.stub.AbstractAsyncStub<ClusterConnectivityManagementV2Stub> {
+  public static abstract class ClusterConnectivityManagementV2ImplBase
+      implements io.grpc.BindableService, AsyncService {
+
+    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+      return ClusterConnectivityManagementV2Grpc.bindService(this);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do asynchronous rpc calls to service ClusterConnectivityManagementV2.
+   * <pre>
+   * ClusterConnectivityManagementV2 service for provisioning and managing inverting-proxy.
+   * </pre>
+   */
+  public static final class ClusterConnectivityManagementV2Stub
+      extends io.grpc.stub.AbstractAsyncStub<ClusterConnectivityManagementV2Stub> {
     private ClusterConnectivityManagementV2Stub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -688,11 +629,13 @@ public final class ClusterConnectivityManagementV2Grpc {
   }
 
   /**
+   * A stub to allow clients to do synchronous rpc calls to service ClusterConnectivityManagementV2.
    * <pre>
    * ClusterConnectivityManagementV2 service for provisioning and managing inverting-proxy.
    * </pre>
    */
-  public static final class ClusterConnectivityManagementV2BlockingStub extends io.grpc.stub.AbstractBlockingStub<ClusterConnectivityManagementV2BlockingStub> {
+  public static final class ClusterConnectivityManagementV2BlockingStub
+      extends io.grpc.stub.AbstractBlockingStub<ClusterConnectivityManagementV2BlockingStub> {
     private ClusterConnectivityManagementV2BlockingStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -808,11 +751,13 @@ public final class ClusterConnectivityManagementV2Grpc {
   }
 
   /**
+   * A stub to allow clients to do ListenableFuture-style rpc calls to service ClusterConnectivityManagementV2.
    * <pre>
    * ClusterConnectivityManagementV2 service for provisioning and managing inverting-proxy.
    * </pre>
    */
-  public static final class ClusterConnectivityManagementV2FutureStub extends io.grpc.stub.AbstractFutureStub<ClusterConnectivityManagementV2FutureStub> {
+  public static final class ClusterConnectivityManagementV2FutureStub
+      extends io.grpc.stub.AbstractFutureStub<ClusterConnectivityManagementV2FutureStub> {
     private ClusterConnectivityManagementV2FutureStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -953,10 +898,10 @@ public final class ClusterConnectivityManagementV2Grpc {
       io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-    private final ClusterConnectivityManagementV2ImplBase serviceImpl;
+    private final AsyncService serviceImpl;
     private final int methodId;
 
-    MethodHandlers(ClusterConnectivityManagementV2ImplBase serviceImpl, int methodId) {
+    MethodHandlers(AsyncService serviceImpl, int methodId) {
       this.serviceImpl = serviceImpl;
       this.methodId = methodId;
     }
@@ -1021,6 +966,81 @@ public final class ClusterConnectivityManagementV2Grpc {
     }
   }
 
+  public static final io.grpc.ServerServiceDefinition bindService(AsyncService service) {
+    return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+        .addMethod(
+          getGetVersionMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
+              com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
+                service, METHODID_GET_VERSION)))
+        .addMethod(
+          getCreateOrGetInvertingProxyMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateOrGetInvertingProxyRequest,
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateOrGetInvertingProxyResponse>(
+                service, METHODID_CREATE_OR_GET_INVERTING_PROXY)))
+        .addMethod(
+          getRemoveInvertingProxyMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RemoveInvertingProxyRequest,
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RemoveInvertingProxyResponse>(
+                service, METHODID_REMOVE_INVERTING_PROXY)))
+        .addMethod(
+          getRegisterAgentMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RegisterAgentRequest,
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RegisterAgentResponse>(
+                service, METHODID_REGISTER_AGENT)))
+        .addMethod(
+          getUnregisterAgentMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.UnregisterAgentRequest,
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.UnregisterAgentResponse>(
+                service, METHODID_UNREGISTER_AGENT)))
+        .addMethod(
+          getListAgentsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest,
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse>(
+                service, METHODID_LIST_AGENTS)))
+        .addMethod(
+          getGetAllAgentsCertificatesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest,
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse>(
+                service, METHODID_GET_ALL_AGENTS_CERTIFICATES)))
+        .addMethod(
+          getRotateAgentAccessKeyMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest,
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse>(
+                service, METHODID_ROTATE_AGENT_ACCESS_KEY)))
+        .addMethod(
+          getDeactivateAgentAccessKeyPairMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairRequest,
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.DeactivateAgentAccessKeyPairResponse>(
+                service, METHODID_DEACTIVATE_AGENT_ACCESS_KEY_PAIR)))
+        .addMethod(
+          getCreateAgentAccessKeyPairMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairRequest,
+              com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateAgentAccessKeyPairResponse>(
+                service, METHODID_CREATE_AGENT_ACCESS_KEY_PAIR)))
+        .build();
+  }
+
   private static abstract class ClusterConnectivityManagementV2BaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
     ClusterConnectivityManagementV2BaseDescriptorSupplier() {}
@@ -1044,9 +1064,9 @@ public final class ClusterConnectivityManagementV2Grpc {
   private static final class ClusterConnectivityManagementV2MethodDescriptorSupplier
       extends ClusterConnectivityManagementV2BaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
-    private final String methodName;
+    private final java.lang.String methodName;
 
-    ClusterConnectivityManagementV2MethodDescriptorSupplier(String methodName) {
+    ClusterConnectivityManagementV2MethodDescriptorSupplier(java.lang.String methodName) {
       this.methodName = methodName;
     }
 

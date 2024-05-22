@@ -9,14 +9,14 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.53.0)",
+    value = "by gRPC proto compiler (version 1.64.0)",
     comments = "Source: authorization.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class AuthorizationGrpc {
 
   private AuthorizationGrpc() {}
 
-  public static final String SERVICE_NAME = "authorization.Authorization";
+  public static final java.lang.String SERVICE_NAME = "authorization.Authorization";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
@@ -162,14 +162,14 @@ public final class AuthorizationGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static abstract class AuthorizationImplBase implements io.grpc.BindableService {
+  public interface AsyncService {
 
     /**
      * <pre>
      * Get the service version.
      * </pre>
      */
-    public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
+    default void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetVersionMethod(), responseObserver);
     }
@@ -180,7 +180,7 @@ public final class AuthorizationGrpc {
      * error with a user-appropriate message if the check fails.
      * </pre>
      */
-    public void checkRight(com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightRequest request,
+    default void checkRight(com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCheckRightMethod(), responseObserver);
     }
@@ -194,45 +194,36 @@ public final class AuthorizationGrpc {
      * Scrutinizer.java for examples of user-appropriate errors.
      * </pre>
      */
-    public void hasRights(com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest request,
+    default void hasRights(com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getHasRightsMethod(), responseObserver);
-    }
-
-    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
-      return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
-          .addMethod(
-            getGetVersionMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-                com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
-                  this, METHODID_GET_VERSION)))
-          .addMethod(
-            getCheckRightMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightRequest,
-                com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightResponse>(
-                  this, METHODID_CHECK_RIGHT)))
-          .addMethod(
-            getHasRightsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest,
-                com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse>(
-                  this, METHODID_HAS_RIGHTS)))
-          .build();
     }
   }
 
   /**
+   * Base class for the server implementation of the service Authorization.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class AuthorizationStub extends io.grpc.stub.AbstractAsyncStub<AuthorizationStub> {
+  public static abstract class AuthorizationImplBase
+      implements io.grpc.BindableService, AsyncService {
+
+    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+      return AuthorizationGrpc.bindService(this);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do asynchronous rpc calls to service Authorization.
+   * <pre>
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class AuthorizationStub
+      extends io.grpc.stub.AbstractAsyncStub<AuthorizationStub> {
     private AuthorizationStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -284,12 +275,14 @@ public final class AuthorizationGrpc {
   }
 
   /**
+   * A stub to allow clients to do synchronous rpc calls to service Authorization.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class AuthorizationBlockingStub extends io.grpc.stub.AbstractBlockingStub<AuthorizationBlockingStub> {
+  public static final class AuthorizationBlockingStub
+      extends io.grpc.stub.AbstractBlockingStub<AuthorizationBlockingStub> {
     private AuthorizationBlockingStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -338,12 +331,14 @@ public final class AuthorizationGrpc {
   }
 
   /**
+   * A stub to allow clients to do ListenableFuture-style rpc calls to service Authorization.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class AuthorizationFutureStub extends io.grpc.stub.AbstractFutureStub<AuthorizationFutureStub> {
+  public static final class AuthorizationFutureStub
+      extends io.grpc.stub.AbstractFutureStub<AuthorizationFutureStub> {
     private AuthorizationFutureStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -403,10 +398,10 @@ public final class AuthorizationGrpc {
       io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-    private final AuthorizationImplBase serviceImpl;
+    private final AsyncService serviceImpl;
     private final int methodId;
 
-    MethodHandlers(AuthorizationImplBase serviceImpl, int methodId) {
+    MethodHandlers(AsyncService serviceImpl, int methodId) {
       this.serviceImpl = serviceImpl;
       this.methodId = methodId;
     }
@@ -443,6 +438,32 @@ public final class AuthorizationGrpc {
     }
   }
 
+  public static final io.grpc.ServerServiceDefinition bindService(AsyncService service) {
+    return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+        .addMethod(
+          getGetVersionMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
+              com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
+                service, METHODID_GET_VERSION)))
+        .addMethod(
+          getCheckRightMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightRequest,
+              com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightResponse>(
+                service, METHODID_CHECK_RIGHT)))
+        .addMethod(
+          getHasRightsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest,
+              com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse>(
+                service, METHODID_HAS_RIGHTS)))
+        .build();
+  }
+
   private static abstract class AuthorizationBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
     AuthorizationBaseDescriptorSupplier() {}
@@ -466,9 +487,9 @@ public final class AuthorizationGrpc {
   private static final class AuthorizationMethodDescriptorSupplier
       extends AuthorizationBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
-    private final String methodName;
+    private final java.lang.String methodName;
 
-    AuthorizationMethodDescriptorSupplier(String methodName) {
+    AuthorizationMethodDescriptorSupplier(java.lang.String methodName) {
       this.methodName = methodName;
     }
 

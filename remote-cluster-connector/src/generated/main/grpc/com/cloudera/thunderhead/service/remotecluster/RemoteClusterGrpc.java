@@ -8,14 +8,14 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.53.0)",
+    value = "by gRPC proto compiler (version 1.64.0)",
     comments = "Source: remotecluster.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class RemoteClusterGrpc {
 
   private RemoteClusterGrpc() {}
 
-  public static final String SERVICE_NAME = "remotecluster.RemoteCluster";
+  public static final java.lang.String SERVICE_NAME = "remotecluster.RemoteCluster";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RegisterPvcControlPlaneRequest,
@@ -222,14 +222,14 @@ public final class RemoteClusterGrpc {
    * RemoteCluster Service :: RemoteCluster Service is a web service to manage the on-prem clusters.
    * </pre>
    */
-  public static abstract class RemoteClusterImplBase implements io.grpc.BindableService {
+  public interface AsyncService {
 
     /**
      * <pre>
      * Register a Private Cloud control plane. :: Register a Private Cloud control plane in Public Cloud.
      * </pre>
      */
-    public void registerPvcControlPlane(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RegisterPvcControlPlaneRequest request,
+    default void registerPvcControlPlane(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RegisterPvcControlPlaneRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RegisterPvcControlPlaneResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRegisterPvcControlPlaneMethod(), responseObserver);
     }
@@ -239,7 +239,7 @@ public final class RemoteClusterGrpc {
      * Unregister a Private Cloud control plane. :: Unregister a Private Cloud control plane from the Public Cloud.
      * </pre>
      */
-    public void unregisterPvcControlPlane(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UnregisterPvcControlPlaneRequest request,
+    default void unregisterPvcControlPlane(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UnregisterPvcControlPlaneRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UnregisterPvcControlPlaneResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUnregisterPvcControlPlaneMethod(), responseObserver);
     }
@@ -249,7 +249,7 @@ public final class RemoteClusterGrpc {
      * Describe a registered Private Cloud control plane configuration. :: Describe a registered Private Cloud control plane configuration.
      * </pre>
      */
-    public void describePvcControlPlane(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneRequest request,
+    default void describePvcControlPlane(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribePvcControlPlaneMethod(), responseObserver);
     }
@@ -259,7 +259,7 @@ public final class RemoteClusterGrpc {
      * List registered Private Cloud control plane configurations. :: List registered Private Cloud control plane configurations.
      * </pre>
      */
-    public void listPvcControlPlanes(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListPvcControlPlanesRequest request,
+    default void listPvcControlPlanes(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListPvcControlPlanesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListPvcControlPlanesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListPvcControlPlanesMethod(), responseObserver);
     }
@@ -269,58 +269,34 @@ public final class RemoteClusterGrpc {
      * Test the connectivity to the Private Cloud control plane. :: Test the connectivity from Public Cloud control plane to the registered Private Cloud control plane.
      * </pre>
      */
-    public void testPvcControlPlaneConnectivity(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.TestPvcControlPlaneConnectivityRequest request,
+    default void testPvcControlPlaneConnectivity(com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.TestPvcControlPlaneConnectivityRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.TestPvcControlPlaneConnectivityResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getTestPvcControlPlaneConnectivityMethod(), responseObserver);
-    }
-
-    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
-      return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
-          .addMethod(
-            getRegisterPvcControlPlaneMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RegisterPvcControlPlaneRequest,
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RegisterPvcControlPlaneResponse>(
-                  this, METHODID_REGISTER_PVC_CONTROL_PLANE)))
-          .addMethod(
-            getUnregisterPvcControlPlaneMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UnregisterPvcControlPlaneRequest,
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UnregisterPvcControlPlaneResponse>(
-                  this, METHODID_UNREGISTER_PVC_CONTROL_PLANE)))
-          .addMethod(
-            getDescribePvcControlPlaneMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneRequest,
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneResponse>(
-                  this, METHODID_DESCRIBE_PVC_CONTROL_PLANE)))
-          .addMethod(
-            getListPvcControlPlanesMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListPvcControlPlanesRequest,
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListPvcControlPlanesResponse>(
-                  this, METHODID_LIST_PVC_CONTROL_PLANES)))
-          .addMethod(
-            getTestPvcControlPlaneConnectivityMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.TestPvcControlPlaneConnectivityRequest,
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.TestPvcControlPlaneConnectivityResponse>(
-                  this, METHODID_TEST_PVC_CONTROL_PLANE_CONNECTIVITY)))
-          .build();
     }
   }
 
   /**
+   * Base class for the server implementation of the service RemoteCluster.
    * <pre>
    * RemoteCluster Service :: RemoteCluster Service is a web service to manage the on-prem clusters.
    * </pre>
    */
-  public static final class RemoteClusterStub extends io.grpc.stub.AbstractAsyncStub<RemoteClusterStub> {
+  public static abstract class RemoteClusterImplBase
+      implements io.grpc.BindableService, AsyncService {
+
+    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+      return RemoteClusterGrpc.bindService(this);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do asynchronous rpc calls to service RemoteCluster.
+   * <pre>
+   * RemoteCluster Service :: RemoteCluster Service is a web service to manage the on-prem clusters.
+   * </pre>
+   */
+  public static final class RemoteClusterStub
+      extends io.grpc.stub.AbstractAsyncStub<RemoteClusterStub> {
     private RemoteClusterStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -389,11 +365,13 @@ public final class RemoteClusterGrpc {
   }
 
   /**
+   * A stub to allow clients to do synchronous rpc calls to service RemoteCluster.
    * <pre>
    * RemoteCluster Service :: RemoteCluster Service is a web service to manage the on-prem clusters.
    * </pre>
    */
-  public static final class RemoteClusterBlockingStub extends io.grpc.stub.AbstractBlockingStub<RemoteClusterBlockingStub> {
+  public static final class RemoteClusterBlockingStub
+      extends io.grpc.stub.AbstractBlockingStub<RemoteClusterBlockingStub> {
     private RemoteClusterBlockingStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -457,11 +435,13 @@ public final class RemoteClusterGrpc {
   }
 
   /**
+   * A stub to allow clients to do ListenableFuture-style rpc calls to service RemoteCluster.
    * <pre>
    * RemoteCluster Service :: RemoteCluster Service is a web service to manage the on-prem clusters.
    * </pre>
    */
-  public static final class RemoteClusterFutureStub extends io.grpc.stub.AbstractFutureStub<RemoteClusterFutureStub> {
+  public static final class RemoteClusterFutureStub
+      extends io.grpc.stub.AbstractFutureStub<RemoteClusterFutureStub> {
     private RemoteClusterFutureStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -540,10 +520,10 @@ public final class RemoteClusterGrpc {
       io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-    private final RemoteClusterImplBase serviceImpl;
+    private final AsyncService serviceImpl;
     private final int methodId;
 
-    MethodHandlers(RemoteClusterImplBase serviceImpl, int methodId) {
+    MethodHandlers(AsyncService serviceImpl, int methodId) {
       this.serviceImpl = serviceImpl;
       this.methodId = methodId;
     }
@@ -588,6 +568,46 @@ public final class RemoteClusterGrpc {
     }
   }
 
+  public static final io.grpc.ServerServiceDefinition bindService(AsyncService service) {
+    return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+        .addMethod(
+          getRegisterPvcControlPlaneMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RegisterPvcControlPlaneRequest,
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.RegisterPvcControlPlaneResponse>(
+                service, METHODID_REGISTER_PVC_CONTROL_PLANE)))
+        .addMethod(
+          getUnregisterPvcControlPlaneMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UnregisterPvcControlPlaneRequest,
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.UnregisterPvcControlPlaneResponse>(
+                service, METHODID_UNREGISTER_PVC_CONTROL_PLANE)))
+        .addMethod(
+          getDescribePvcControlPlaneMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneRequest,
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.DescribePvcControlPlaneResponse>(
+                service, METHODID_DESCRIBE_PVC_CONTROL_PLANE)))
+        .addMethod(
+          getListPvcControlPlanesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListPvcControlPlanesRequest,
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.ListPvcControlPlanesResponse>(
+                service, METHODID_LIST_PVC_CONTROL_PLANES)))
+        .addMethod(
+          getTestPvcControlPlaneConnectivityMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.TestPvcControlPlaneConnectivityRequest,
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterProto.TestPvcControlPlaneConnectivityResponse>(
+                service, METHODID_TEST_PVC_CONTROL_PLANE_CONNECTIVITY)))
+        .build();
+  }
+
   private static abstract class RemoteClusterBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
     RemoteClusterBaseDescriptorSupplier() {}
@@ -611,9 +631,9 @@ public final class RemoteClusterGrpc {
   private static final class RemoteClusterMethodDescriptorSupplier
       extends RemoteClusterBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
-    private final String methodName;
+    private final java.lang.String methodName;
 
-    RemoteClusterMethodDescriptorSupplier(String methodName) {
+    RemoteClusterMethodDescriptorSupplier(java.lang.String methodName) {
       this.methodName = methodName;
     }
 

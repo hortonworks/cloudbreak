@@ -13,14 +13,14 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.53.0)",
+    value = "by gRPC proto compiler (version 1.64.0)",
     comments = "Source: idbrokermappingmanagement.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class IdBrokerMappingManagementGrpc {
 
   private IdBrokerMappingManagementGrpc() {}
 
-  public static final String SERVICE_NAME = "idbrokermappingmanagement.IdBrokerMappingManagement";
+  public static final java.lang.String SERVICE_NAME = "idbrokermappingmanagement.IdBrokerMappingManagement";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
@@ -294,14 +294,14 @@ public final class IdBrokerMappingManagementGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static abstract class IdBrokerMappingManagementImplBase implements io.grpc.BindableService {
+  public interface AsyncService {
 
     /**
      * <pre>
      * Get the service version.
      * </pre>
      */
-    public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
+    default void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetVersionMethod(), responseObserver);
     }
@@ -311,7 +311,7 @@ public final class IdBrokerMappingManagementGrpc {
      * Get all ID Broker mappings for an environment.
      * </pre>
      */
-    public void getMappings(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsRequest request,
+    default void getMappings(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetMappingsMethod(), responseObserver);
     }
@@ -323,7 +323,7 @@ public final class IdBrokerMappingManagementGrpc {
      * and the rangerCloudAccessAuthorizerRole.
      * </pre>
      */
-    public void setMappings(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsRequest request,
+    default void setMappings(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetMappingsMethod(), responseObserver);
     }
@@ -333,7 +333,7 @@ public final class IdBrokerMappingManagementGrpc {
      * Deletes all ID Broker mappings for an environment.
      * </pre>
      */
-    public void deleteMappings(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsRequest request,
+    default void deleteMappings(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteMappingsMethod(), responseObserver);
     }
@@ -343,7 +343,7 @@ public final class IdBrokerMappingManagementGrpc {
      * Sync ID Broker mappings for an environment to all associated datalake clusters.
      * </pre>
      */
-    public void syncMappings(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsRequest request,
+    default void syncMappings(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSyncMappingsMethod(), responseObserver);
     }
@@ -353,7 +353,7 @@ public final class IdBrokerMappingManagementGrpc {
      * Get the status of an ID Broker mapping sync attempt.
      * </pre>
      */
-    public void getMappingsSyncStatus(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusRequest request,
+    default void getMappingsSyncStatus(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetMappingsSyncStatusMethod(), responseObserver);
     }
@@ -364,67 +364,14 @@ public final class IdBrokerMappingManagementGrpc {
      * ID Broker's configuration model.
      * </pre>
      */
-    public void getMappingsConfig(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsConfigRequest request,
+    default void getMappingsConfig(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsConfigRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsConfigResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetMappingsConfigMethod(), responseObserver);
-    }
-
-    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
-      return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
-          .addMethod(
-            getGetVersionMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-                com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
-                  this, METHODID_GET_VERSION)))
-          .addMethod(
-            getGetMappingsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsRequest,
-                com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsResponse>(
-                  this, METHODID_GET_MAPPINGS)))
-          .addMethod(
-            getSetMappingsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsRequest,
-                com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsResponse>(
-                  this, METHODID_SET_MAPPINGS)))
-          .addMethod(
-            getDeleteMappingsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsRequest,
-                com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsResponse>(
-                  this, METHODID_DELETE_MAPPINGS)))
-          .addMethod(
-            getSyncMappingsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsRequest,
-                com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsResponse>(
-                  this, METHODID_SYNC_MAPPINGS)))
-          .addMethod(
-            getGetMappingsSyncStatusMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusRequest,
-                com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusResponse>(
-                  this, METHODID_GET_MAPPINGS_SYNC_STATUS)))
-          .addMethod(
-            getGetMappingsConfigMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsConfigRequest,
-                com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsConfigResponse>(
-                  this, METHODID_GET_MAPPINGS_CONFIG)))
-          .build();
     }
   }
 
   /**
+   * Base class for the server implementation of the service IdBrokerMappingManagement.
    * <pre>
    * Protocol for ID Broker Mapping Management Service. This service runs in the
    * CDP control plane. It receives requests to get and set ID Broker mappings
@@ -434,7 +381,27 @@ public final class IdBrokerMappingManagementGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class IdBrokerMappingManagementStub extends io.grpc.stub.AbstractAsyncStub<IdBrokerMappingManagementStub> {
+  public static abstract class IdBrokerMappingManagementImplBase
+      implements io.grpc.BindableService, AsyncService {
+
+    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+      return IdBrokerMappingManagementGrpc.bindService(this);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do asynchronous rpc calls to service IdBrokerMappingManagement.
+   * <pre>
+   * Protocol for ID Broker Mapping Management Service. This service runs in the
+   * CDP control plane. It receives requests to get and set ID Broker mappings
+   * from the CDP Environments API Service, and from backend services that need
+   * access to the mappings (for example, the Datalake Management Service).
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class IdBrokerMappingManagementStub
+      extends io.grpc.stub.AbstractAsyncStub<IdBrokerMappingManagementStub> {
     private IdBrokerMappingManagementStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -528,6 +495,7 @@ public final class IdBrokerMappingManagementGrpc {
   }
 
   /**
+   * A stub to allow clients to do synchronous rpc calls to service IdBrokerMappingManagement.
    * <pre>
    * Protocol for ID Broker Mapping Management Service. This service runs in the
    * CDP control plane. It receives requests to get and set ID Broker mappings
@@ -537,7 +505,8 @@ public final class IdBrokerMappingManagementGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class IdBrokerMappingManagementBlockingStub extends io.grpc.stub.AbstractBlockingStub<IdBrokerMappingManagementBlockingStub> {
+  public static final class IdBrokerMappingManagementBlockingStub
+      extends io.grpc.stub.AbstractBlockingStub<IdBrokerMappingManagementBlockingStub> {
     private IdBrokerMappingManagementBlockingStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -624,6 +593,7 @@ public final class IdBrokerMappingManagementGrpc {
   }
 
   /**
+   * A stub to allow clients to do ListenableFuture-style rpc calls to service IdBrokerMappingManagement.
    * <pre>
    * Protocol for ID Broker Mapping Management Service. This service runs in the
    * CDP control plane. It receives requests to get and set ID Broker mappings
@@ -633,7 +603,8 @@ public final class IdBrokerMappingManagementGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class IdBrokerMappingManagementFutureStub extends io.grpc.stub.AbstractFutureStub<IdBrokerMappingManagementFutureStub> {
+  public static final class IdBrokerMappingManagementFutureStub
+      extends io.grpc.stub.AbstractFutureStub<IdBrokerMappingManagementFutureStub> {
     private IdBrokerMappingManagementFutureStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -739,10 +710,10 @@ public final class IdBrokerMappingManagementGrpc {
       io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-    private final IdBrokerMappingManagementImplBase serviceImpl;
+    private final AsyncService serviceImpl;
     private final int methodId;
 
-    MethodHandlers(IdBrokerMappingManagementImplBase serviceImpl, int methodId) {
+    MethodHandlers(AsyncService serviceImpl, int methodId) {
       this.serviceImpl = serviceImpl;
       this.methodId = methodId;
     }
@@ -795,6 +766,60 @@ public final class IdBrokerMappingManagementGrpc {
     }
   }
 
+  public static final io.grpc.ServerServiceDefinition bindService(AsyncService service) {
+    return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+        .addMethod(
+          getGetVersionMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
+              com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
+                service, METHODID_GET_VERSION)))
+        .addMethod(
+          getGetMappingsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsRequest,
+              com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsResponse>(
+                service, METHODID_GET_MAPPINGS)))
+        .addMethod(
+          getSetMappingsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsRequest,
+              com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsResponse>(
+                service, METHODID_SET_MAPPINGS)))
+        .addMethod(
+          getDeleteMappingsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsRequest,
+              com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsResponse>(
+                service, METHODID_DELETE_MAPPINGS)))
+        .addMethod(
+          getSyncMappingsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsRequest,
+              com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsResponse>(
+                service, METHODID_SYNC_MAPPINGS)))
+        .addMethod(
+          getGetMappingsSyncStatusMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusRequest,
+              com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusResponse>(
+                service, METHODID_GET_MAPPINGS_SYNC_STATUS)))
+        .addMethod(
+          getGetMappingsConfigMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsConfigRequest,
+              com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsConfigResponse>(
+                service, METHODID_GET_MAPPINGS_CONFIG)))
+        .build();
+  }
+
   private static abstract class IdBrokerMappingManagementBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
     IdBrokerMappingManagementBaseDescriptorSupplier() {}
@@ -818,9 +843,9 @@ public final class IdBrokerMappingManagementGrpc {
   private static final class IdBrokerMappingManagementMethodDescriptorSupplier
       extends IdBrokerMappingManagementBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
-    private final String methodName;
+    private final java.lang.String methodName;
 
-    IdBrokerMappingManagementMethodDescriptorSupplier(String methodName) {
+    IdBrokerMappingManagementMethodDescriptorSupplier(java.lang.String methodName) {
       this.methodName = methodName;
     }
 

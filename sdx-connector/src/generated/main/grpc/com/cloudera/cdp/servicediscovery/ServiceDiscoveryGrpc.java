@@ -9,14 +9,14 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.53.0)",
+    value = "by gRPC proto compiler (version 1.64.0)",
     comments = "Source: servicediscovery.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class ServiceDiscoveryGrpc {
 
   private ServiceDiscoveryGrpc() {}
 
-  public static final String SERVICE_NAME = "servicediscovery.ServiceDiscovery";
+  public static final java.lang.String SERVICE_NAME = "servicediscovery.ServiceDiscovery";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
@@ -410,14 +410,14 @@ public final class ServiceDiscoveryGrpc {
    * Basic functions of the SDX Service Discovery
    * </pre>
    */
-  public static abstract class ServiceDiscoveryImplBase implements io.grpc.BindableService {
+  public interface AsyncService {
 
     /**
      * <pre>
      * Get the service version.
      * </pre>
      */
-    public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
+    default void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetVersionMethod(), responseObserver);
     }
@@ -429,7 +429,7 @@ public final class ServiceDiscoveryGrpc {
      * Get the Services for a specific Datalake cluster
      * </pre>
      */
-    public void describeDatalakeServices(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeDatalakeServicesRequest request,
+    default void describeDatalakeServices(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeDatalakeServicesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeDatalakeServicesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeDatalakeServicesMethod(), responseObserver);
     }
@@ -440,7 +440,7 @@ public final class ServiceDiscoveryGrpc {
      * Get the services for an Environment
      * </pre>
      */
-    public void describeEnvironmentServices(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeEnvironmentServicesRequest request,
+    default void describeEnvironmentServices(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeEnvironmentServicesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeEnvironmentServicesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeEnvironmentServicesMethod(), responseObserver);
     }
@@ -451,7 +451,7 @@ public final class ServiceDiscoveryGrpc {
      * Get the list of Datalakes available for an Environment
      * </pre>
      */
-    public void listDatalakesForEnv(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListDatalakesForEnvRequest request,
+    default void listDatalakesForEnv(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListDatalakesForEnvRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListDatalakesForEnvResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListDatalakesForEnvMethod(), responseObserver);
     }
@@ -461,7 +461,7 @@ public final class ServiceDiscoveryGrpc {
      * Deprecated - Please use ListVirtualWarehousesForEnv as replacement.
      * </pre>
      */
-    public void describeWarehouse(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeWarehouseRequest request,
+    default void describeWarehouse(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeWarehouseRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeWarehouseResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeWarehouseMethod(), responseObserver);
     }
@@ -471,7 +471,7 @@ public final class ServiceDiscoveryGrpc {
      * Deprecated - Please use ListVirtualWarehousesForEnv as replacement.
      * </pre>
      */
-    public void listWarehousesForEnv(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListWarehousesForEnvRequest request,
+    default void listWarehousesForEnv(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListWarehousesForEnvRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListWarehousesForEnvResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListWarehousesForEnvMethod(), responseObserver);
     }
@@ -482,7 +482,7 @@ public final class ServiceDiscoveryGrpc {
      * List the Virtual Warehouses for a specific Environment.
      * </pre>
      */
-    public void listVirtualWarehousesForEnv(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListVirtualWarehousesForEnvRequest request,
+    default void listVirtualWarehousesForEnv(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListVirtualWarehousesForEnvRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListVirtualWarehousesForEnvResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListVirtualWarehousesForEnvMethod(), responseObserver);
     }
@@ -493,7 +493,7 @@ public final class ServiceDiscoveryGrpc {
      * Describe services for a specific Virtual Warehouse.
      * </pre>
      */
-    public void describeVirtualWarehouseServices(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeVirtualWarehouseServicesRequest request,
+    default void describeVirtualWarehouseServices(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeVirtualWarehouseServicesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeVirtualWarehouseServicesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeVirtualWarehouseServicesMethod(), responseObserver);
     }
@@ -504,7 +504,7 @@ public final class ServiceDiscoveryGrpc {
      * List the Operational Databases (OpDBs) for a specific environment.
      * </pre>
      */
-    public void listOpdbsForEnv(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListOpdbsForEnvRequest request,
+    default void listOpdbsForEnv(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListOpdbsForEnvRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListOpdbsForEnvResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListOpdbsForEnvMethod(), responseObserver);
     }
@@ -515,7 +515,7 @@ public final class ServiceDiscoveryGrpc {
      * Describe the services for an Operational Database (OpDBs) in a specific environment.
      * </pre>
      */
-    public void describeOpdbServices(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeOpdbServicesRequest request,
+    default void describeOpdbServices(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeOpdbServicesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeOpdbServicesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeOpdbServicesMethod(), responseObserver);
     }
@@ -526,101 +526,36 @@ public final class ServiceDiscoveryGrpc {
      * Describe a specific datalake as ApiRemoteDataContext.
      * </pre>
      */
-    public void describeDatalakeAsApiRemoteDataContext(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeDatalakeAsApiRemoteDataContextRequest request,
+    default void describeDatalakeAsApiRemoteDataContext(com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeDatalakeAsApiRemoteDataContextRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeDatalakeAsApiRemoteDataContextResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeDatalakeAsApiRemoteDataContextMethod(), responseObserver);
-    }
-
-    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
-      return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
-          .addMethod(
-            getGetVersionMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-                com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
-                  this, METHODID_GET_VERSION)))
-          .addMethod(
-            getDescribeDatalakeServicesMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeDatalakeServicesRequest,
-                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeDatalakeServicesResponse>(
-                  this, METHODID_DESCRIBE_DATALAKE_SERVICES)))
-          .addMethod(
-            getDescribeEnvironmentServicesMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeEnvironmentServicesRequest,
-                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeEnvironmentServicesResponse>(
-                  this, METHODID_DESCRIBE_ENVIRONMENT_SERVICES)))
-          .addMethod(
-            getListDatalakesForEnvMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListDatalakesForEnvRequest,
-                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListDatalakesForEnvResponse>(
-                  this, METHODID_LIST_DATALAKES_FOR_ENV)))
-          .addMethod(
-            getDescribeWarehouseMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeWarehouseRequest,
-                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeWarehouseResponse>(
-                  this, METHODID_DESCRIBE_WAREHOUSE)))
-          .addMethod(
-            getListWarehousesForEnvMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListWarehousesForEnvRequest,
-                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListWarehousesForEnvResponse>(
-                  this, METHODID_LIST_WAREHOUSES_FOR_ENV)))
-          .addMethod(
-            getListVirtualWarehousesForEnvMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListVirtualWarehousesForEnvRequest,
-                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListVirtualWarehousesForEnvResponse>(
-                  this, METHODID_LIST_VIRTUAL_WAREHOUSES_FOR_ENV)))
-          .addMethod(
-            getDescribeVirtualWarehouseServicesMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeVirtualWarehouseServicesRequest,
-                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeVirtualWarehouseServicesResponse>(
-                  this, METHODID_DESCRIBE_VIRTUAL_WAREHOUSE_SERVICES)))
-          .addMethod(
-            getListOpdbsForEnvMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListOpdbsForEnvRequest,
-                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListOpdbsForEnvResponse>(
-                  this, METHODID_LIST_OPDBS_FOR_ENV)))
-          .addMethod(
-            getDescribeOpdbServicesMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeOpdbServicesRequest,
-                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeOpdbServicesResponse>(
-                  this, METHODID_DESCRIBE_OPDB_SERVICES)))
-          .addMethod(
-            getDescribeDatalakeAsApiRemoteDataContextMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeDatalakeAsApiRemoteDataContextRequest,
-                com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeDatalakeAsApiRemoteDataContextResponse>(
-                  this, METHODID_DESCRIBE_DATALAKE_AS_API_REMOTE_DATA_CONTEXT)))
-          .build();
     }
   }
 
   /**
+   * Base class for the server implementation of the service ServiceDiscovery.
    * <pre>
    **
    * Basic functions of the SDX Service Discovery
    * </pre>
    */
-  public static final class ServiceDiscoveryStub extends io.grpc.stub.AbstractAsyncStub<ServiceDiscoveryStub> {
+  public static abstract class ServiceDiscoveryImplBase
+      implements io.grpc.BindableService, AsyncService {
+
+    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+      return ServiceDiscoveryGrpc.bindService(this);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do asynchronous rpc calls to service ServiceDiscovery.
+   * <pre>
+   **
+   * Basic functions of the SDX Service Discovery
+   * </pre>
+   */
+  public static final class ServiceDiscoveryStub
+      extends io.grpc.stub.AbstractAsyncStub<ServiceDiscoveryStub> {
     private ServiceDiscoveryStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -764,12 +699,14 @@ public final class ServiceDiscoveryGrpc {
   }
 
   /**
+   * A stub to allow clients to do synchronous rpc calls to service ServiceDiscovery.
    * <pre>
    **
    * Basic functions of the SDX Service Discovery
    * </pre>
    */
-  public static final class ServiceDiscoveryBlockingStub extends io.grpc.stub.AbstractBlockingStub<ServiceDiscoveryBlockingStub> {
+  public static final class ServiceDiscoveryBlockingStub
+      extends io.grpc.stub.AbstractBlockingStub<ServiceDiscoveryBlockingStub> {
     private ServiceDiscoveryBlockingStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -902,12 +839,14 @@ public final class ServiceDiscoveryGrpc {
   }
 
   /**
+   * A stub to allow clients to do ListenableFuture-style rpc calls to service ServiceDiscovery.
    * <pre>
    **
    * Basic functions of the SDX Service Discovery
    * </pre>
    */
-  public static final class ServiceDiscoveryFutureStub extends io.grpc.stub.AbstractFutureStub<ServiceDiscoveryFutureStub> {
+  public static final class ServiceDiscoveryFutureStub
+      extends io.grpc.stub.AbstractFutureStub<ServiceDiscoveryFutureStub> {
     private ServiceDiscoveryFutureStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -1067,10 +1006,10 @@ public final class ServiceDiscoveryGrpc {
       io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-    private final ServiceDiscoveryImplBase serviceImpl;
+    private final AsyncService serviceImpl;
     private final int methodId;
 
-    MethodHandlers(ServiceDiscoveryImplBase serviceImpl, int methodId) {
+    MethodHandlers(AsyncService serviceImpl, int methodId) {
       this.serviceImpl = serviceImpl;
       this.methodId = methodId;
     }
@@ -1139,6 +1078,88 @@ public final class ServiceDiscoveryGrpc {
     }
   }
 
+  public static final io.grpc.ServerServiceDefinition bindService(AsyncService service) {
+    return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+        .addMethod(
+          getGetVersionMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
+              com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
+                service, METHODID_GET_VERSION)))
+        .addMethod(
+          getDescribeDatalakeServicesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeDatalakeServicesRequest,
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeDatalakeServicesResponse>(
+                service, METHODID_DESCRIBE_DATALAKE_SERVICES)))
+        .addMethod(
+          getDescribeEnvironmentServicesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeEnvironmentServicesRequest,
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeEnvironmentServicesResponse>(
+                service, METHODID_DESCRIBE_ENVIRONMENT_SERVICES)))
+        .addMethod(
+          getListDatalakesForEnvMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListDatalakesForEnvRequest,
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListDatalakesForEnvResponse>(
+                service, METHODID_LIST_DATALAKES_FOR_ENV)))
+        .addMethod(
+          getDescribeWarehouseMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeWarehouseRequest,
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeWarehouseResponse>(
+                service, METHODID_DESCRIBE_WAREHOUSE)))
+        .addMethod(
+          getListWarehousesForEnvMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListWarehousesForEnvRequest,
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListWarehousesForEnvResponse>(
+                service, METHODID_LIST_WAREHOUSES_FOR_ENV)))
+        .addMethod(
+          getListVirtualWarehousesForEnvMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListVirtualWarehousesForEnvRequest,
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListVirtualWarehousesForEnvResponse>(
+                service, METHODID_LIST_VIRTUAL_WAREHOUSES_FOR_ENV)))
+        .addMethod(
+          getDescribeVirtualWarehouseServicesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeVirtualWarehouseServicesRequest,
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeVirtualWarehouseServicesResponse>(
+                service, METHODID_DESCRIBE_VIRTUAL_WAREHOUSE_SERVICES)))
+        .addMethod(
+          getListOpdbsForEnvMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListOpdbsForEnvRequest,
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.ListOpdbsForEnvResponse>(
+                service, METHODID_LIST_OPDBS_FOR_ENV)))
+        .addMethod(
+          getDescribeOpdbServicesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeOpdbServicesRequest,
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeOpdbServicesResponse>(
+                service, METHODID_DESCRIBE_OPDB_SERVICES)))
+        .addMethod(
+          getDescribeDatalakeAsApiRemoteDataContextMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeDatalakeAsApiRemoteDataContextRequest,
+              com.cloudera.cdp.servicediscovery.ServiceDiscoveryProto.DescribeDatalakeAsApiRemoteDataContextResponse>(
+                service, METHODID_DESCRIBE_DATALAKE_AS_API_REMOTE_DATA_CONTEXT)))
+        .build();
+  }
+
   private static abstract class ServiceDiscoveryBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
     ServiceDiscoveryBaseDescriptorSupplier() {}
@@ -1162,9 +1183,9 @@ public final class ServiceDiscoveryGrpc {
   private static final class ServiceDiscoveryMethodDescriptorSupplier
       extends ServiceDiscoveryBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
-    private final String methodName;
+    private final java.lang.String methodName;
 
-    ServiceDiscoveryMethodDescriptorSupplier(String methodName) {
+    ServiceDiscoveryMethodDescriptorSupplier(java.lang.String methodName) {
       this.methodName = methodName;
     }
 

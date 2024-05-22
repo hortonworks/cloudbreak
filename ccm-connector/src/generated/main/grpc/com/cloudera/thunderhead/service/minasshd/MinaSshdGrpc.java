@@ -9,14 +9,14 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.53.0)",
+    value = "by gRPC proto compiler (version 1.64.0)",
     comments = "Source: minasshd.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class MinaSshdGrpc {
 
   private MinaSshdGrpc() {}
 
-  public static final String SERVICE_NAME = "minasshd.MinaSshd";
+  public static final java.lang.String SERVICE_NAME = "minasshd.MinaSshd";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
@@ -131,14 +131,14 @@ public final class MinaSshdGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static abstract class MinaSshdImplBase implements io.grpc.BindableService {
+  public interface AsyncService {
 
     /**
      * <pre>
      * Get the service version.
      * </pre>
      */
-    public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
+    default void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetVersionMethod(), responseObserver);
     }
@@ -148,38 +148,36 @@ public final class MinaSshdGrpc {
      * Get service endpoints.
      * </pre>
      */
-    public void getServiceEndpoint(com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointRequest request,
+    default void getServiceEndpoint(com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetServiceEndpointMethod(), responseObserver);
-    }
-
-    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
-      return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
-          .addMethod(
-            getGetVersionMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-                com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
-                  this, METHODID_GET_VERSION)))
-          .addMethod(
-            getGetServiceEndpointMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointRequest,
-                com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointResponse>(
-                  this, METHODID_GET_SERVICE_ENDPOINT)))
-          .build();
     }
   }
 
   /**
+   * Base class for the server implementation of the service MinaSshd.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class MinaSshdStub extends io.grpc.stub.AbstractAsyncStub<MinaSshdStub> {
+  public static abstract class MinaSshdImplBase
+      implements io.grpc.BindableService, AsyncService {
+
+    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+      return MinaSshdGrpc.bindService(this);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do asynchronous rpc calls to service MinaSshd.
+   * <pre>
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class MinaSshdStub
+      extends io.grpc.stub.AbstractAsyncStub<MinaSshdStub> {
     private MinaSshdStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -215,12 +213,14 @@ public final class MinaSshdGrpc {
   }
 
   /**
+   * A stub to allow clients to do synchronous rpc calls to service MinaSshd.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class MinaSshdBlockingStub extends io.grpc.stub.AbstractBlockingStub<MinaSshdBlockingStub> {
+  public static final class MinaSshdBlockingStub
+      extends io.grpc.stub.AbstractBlockingStub<MinaSshdBlockingStub> {
     private MinaSshdBlockingStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -254,12 +254,14 @@ public final class MinaSshdGrpc {
   }
 
   /**
+   * A stub to allow clients to do ListenableFuture-style rpc calls to service MinaSshd.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class MinaSshdFutureStub extends io.grpc.stub.AbstractFutureStub<MinaSshdFutureStub> {
+  public static final class MinaSshdFutureStub
+      extends io.grpc.stub.AbstractFutureStub<MinaSshdFutureStub> {
     private MinaSshdFutureStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -302,10 +304,10 @@ public final class MinaSshdGrpc {
       io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-    private final MinaSshdImplBase serviceImpl;
+    private final AsyncService serviceImpl;
     private final int methodId;
 
-    MethodHandlers(MinaSshdImplBase serviceImpl, int methodId) {
+    MethodHandlers(AsyncService serviceImpl, int methodId) {
       this.serviceImpl = serviceImpl;
       this.methodId = methodId;
     }
@@ -338,6 +340,25 @@ public final class MinaSshdGrpc {
     }
   }
 
+  public static final io.grpc.ServerServiceDefinition bindService(AsyncService service) {
+    return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+        .addMethod(
+          getGetVersionMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
+              com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
+                service, METHODID_GET_VERSION)))
+        .addMethod(
+          getGetServiceEndpointMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointRequest,
+              com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointResponse>(
+                service, METHODID_GET_SERVICE_ENDPOINT)))
+        .build();
+  }
+
   private static abstract class MinaSshdBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
     MinaSshdBaseDescriptorSupplier() {}
@@ -361,9 +382,9 @@ public final class MinaSshdGrpc {
   private static final class MinaSshdMethodDescriptorSupplier
       extends MinaSshdBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
-    private final String methodName;
+    private final java.lang.String methodName;
 
-    MinaSshdMethodDescriptorSupplier(String methodName) {
+    MinaSshdMethodDescriptorSupplier(java.lang.String methodName) {
       this.methodName = methodName;
     }
 

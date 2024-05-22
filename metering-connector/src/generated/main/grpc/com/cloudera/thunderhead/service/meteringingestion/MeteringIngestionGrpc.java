@@ -9,14 +9,14 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.53.0)",
+    value = "by gRPC proto compiler (version 1.64.0)",
     comments = "Source: meteringingestion.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class MeteringIngestionGrpc {
 
   private MeteringIngestionGrpc() {}
 
-  public static final String SERVICE_NAME = "meteringingestion.MeteringIngestion";
+  public static final java.lang.String SERVICE_NAME = "meteringingestion.MeteringIngestion";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.meteringingestion.MeteringIngestionProto.SubmitEventRequest,
@@ -131,14 +131,14 @@ public final class MeteringIngestionGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static abstract class MeteringIngestionImplBase implements io.grpc.BindableService {
+  public interface AsyncService {
 
     /**
      * <pre>
      * Submit a new metering event
      * </pre>
      */
-    public void submitEvent(com.cloudera.thunderhead.service.meteringingestion.MeteringIngestionProto.SubmitEventRequest request,
+    default void submitEvent(com.cloudera.thunderhead.service.meteringingestion.MeteringIngestionProto.SubmitEventRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.meteringingestion.MeteringIngestionProto.SubmitEventResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSubmitEventMethod(), responseObserver);
     }
@@ -148,38 +148,36 @@ public final class MeteringIngestionGrpc {
      * Get the service version.
      * </pre>
      */
-    public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
+    default void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetVersionMethod(), responseObserver);
-    }
-
-    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
-      return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
-          .addMethod(
-            getSubmitEventMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.meteringingestion.MeteringIngestionProto.SubmitEventRequest,
-                com.cloudera.thunderhead.service.meteringingestion.MeteringIngestionProto.SubmitEventResponse>(
-                  this, METHODID_SUBMIT_EVENT)))
-          .addMethod(
-            getGetVersionMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-                com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
-                  this, METHODID_GET_VERSION)))
-          .build();
     }
   }
 
   /**
+   * Base class for the server implementation of the service MeteringIngestion.
    * <pre>
    * For future compatibility, all RPCs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class MeteringIngestionStub extends io.grpc.stub.AbstractAsyncStub<MeteringIngestionStub> {
+  public static abstract class MeteringIngestionImplBase
+      implements io.grpc.BindableService, AsyncService {
+
+    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+      return MeteringIngestionGrpc.bindService(this);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do asynchronous rpc calls to service MeteringIngestion.
+   * <pre>
+   * For future compatibility, all RPCs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class MeteringIngestionStub
+      extends io.grpc.stub.AbstractAsyncStub<MeteringIngestionStub> {
     private MeteringIngestionStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -215,12 +213,14 @@ public final class MeteringIngestionGrpc {
   }
 
   /**
+   * A stub to allow clients to do synchronous rpc calls to service MeteringIngestion.
    * <pre>
    * For future compatibility, all RPCs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class MeteringIngestionBlockingStub extends io.grpc.stub.AbstractBlockingStub<MeteringIngestionBlockingStub> {
+  public static final class MeteringIngestionBlockingStub
+      extends io.grpc.stub.AbstractBlockingStub<MeteringIngestionBlockingStub> {
     private MeteringIngestionBlockingStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -254,12 +254,14 @@ public final class MeteringIngestionGrpc {
   }
 
   /**
+   * A stub to allow clients to do ListenableFuture-style rpc calls to service MeteringIngestion.
    * <pre>
    * For future compatibility, all RPCs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class MeteringIngestionFutureStub extends io.grpc.stub.AbstractFutureStub<MeteringIngestionFutureStub> {
+  public static final class MeteringIngestionFutureStub
+      extends io.grpc.stub.AbstractFutureStub<MeteringIngestionFutureStub> {
     private MeteringIngestionFutureStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -302,10 +304,10 @@ public final class MeteringIngestionGrpc {
       io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-    private final MeteringIngestionImplBase serviceImpl;
+    private final AsyncService serviceImpl;
     private final int methodId;
 
-    MethodHandlers(MeteringIngestionImplBase serviceImpl, int methodId) {
+    MethodHandlers(AsyncService serviceImpl, int methodId) {
       this.serviceImpl = serviceImpl;
       this.methodId = methodId;
     }
@@ -338,6 +340,25 @@ public final class MeteringIngestionGrpc {
     }
   }
 
+  public static final io.grpc.ServerServiceDefinition bindService(AsyncService service) {
+    return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+        .addMethod(
+          getSubmitEventMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.meteringingestion.MeteringIngestionProto.SubmitEventRequest,
+              com.cloudera.thunderhead.service.meteringingestion.MeteringIngestionProto.SubmitEventResponse>(
+                service, METHODID_SUBMIT_EVENT)))
+        .addMethod(
+          getGetVersionMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
+              com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
+                service, METHODID_GET_VERSION)))
+        .build();
+  }
+
   private static abstract class MeteringIngestionBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
     MeteringIngestionBaseDescriptorSupplier() {}
@@ -361,9 +382,9 @@ public final class MeteringIngestionGrpc {
   private static final class MeteringIngestionMethodDescriptorSupplier
       extends MeteringIngestionBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
-    private final String methodName;
+    private final java.lang.String methodName;
 
-    MeteringIngestionMethodDescriptorSupplier(String methodName) {
+    MeteringIngestionMethodDescriptorSupplier(java.lang.String methodName) {
       this.methodName = methodName;
     }
 

@@ -8,14 +8,14 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.53.0)",
+    value = "by gRPC proto compiler (version 1.64.0)",
     comments = "Source: remoteclusterinternal.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class RemoteClusterInternalGrpc {
 
   private RemoteClusterInternalGrpc() {}
 
-  public static final String SERVICE_NAME = "remotecluster.RemoteClusterInternal";
+  public static final java.lang.String SERVICE_NAME = "remotecluster.RemoteClusterInternal";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.ListAllPvcControlPlanesRequest,
@@ -129,14 +129,14 @@ public final class RemoteClusterInternalGrpc {
    * RemoteCluster endpoints for internal use only.
    * </pre>
    */
-  public static abstract class RemoteClusterInternalImplBase implements io.grpc.BindableService {
+  public interface AsyncService {
 
     /**
      * <pre>
      * List all registered Private Cloud control plane configurations across all accounts.
      * </pre>
      */
-    public void listAllPvcControlPlanes(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.ListAllPvcControlPlanesRequest request,
+    default void listAllPvcControlPlanes(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.ListAllPvcControlPlanesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.ListAllPvcControlPlanesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListAllPvcControlPlanesMethod(), responseObserver);
     }
@@ -146,37 +146,34 @@ public final class RemoteClusterInternalGrpc {
      * Generate an auth token for the requests sent to Private Cloud control plane.
      * </pre>
      */
-    public void generatePvcControlPlaneAuthToken(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcControlPlaneAuthTokenRequest request,
+    default void generatePvcControlPlaneAuthToken(com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcControlPlaneAuthTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcControlPlaneAuthTokenResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGeneratePvcControlPlaneAuthTokenMethod(), responseObserver);
-    }
-
-    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
-      return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
-          .addMethod(
-            getListAllPvcControlPlanesMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.ListAllPvcControlPlanesRequest,
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.ListAllPvcControlPlanesResponse>(
-                  this, METHODID_LIST_ALL_PVC_CONTROL_PLANES)))
-          .addMethod(
-            getGeneratePvcControlPlaneAuthTokenMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcControlPlaneAuthTokenRequest,
-                com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcControlPlaneAuthTokenResponse>(
-                  this, METHODID_GENERATE_PVC_CONTROL_PLANE_AUTH_TOKEN)))
-          .build();
     }
   }
 
   /**
+   * Base class for the server implementation of the service RemoteClusterInternal.
    * <pre>
    * RemoteCluster endpoints for internal use only.
    * </pre>
    */
-  public static final class RemoteClusterInternalStub extends io.grpc.stub.AbstractAsyncStub<RemoteClusterInternalStub> {
+  public static abstract class RemoteClusterInternalImplBase
+      implements io.grpc.BindableService, AsyncService {
+
+    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+      return RemoteClusterInternalGrpc.bindService(this);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do asynchronous rpc calls to service RemoteClusterInternal.
+   * <pre>
+   * RemoteCluster endpoints for internal use only.
+   * </pre>
+   */
+  public static final class RemoteClusterInternalStub
+      extends io.grpc.stub.AbstractAsyncStub<RemoteClusterInternalStub> {
     private RemoteClusterInternalStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -212,11 +209,13 @@ public final class RemoteClusterInternalGrpc {
   }
 
   /**
+   * A stub to allow clients to do synchronous rpc calls to service RemoteClusterInternal.
    * <pre>
    * RemoteCluster endpoints for internal use only.
    * </pre>
    */
-  public static final class RemoteClusterInternalBlockingStub extends io.grpc.stub.AbstractBlockingStub<RemoteClusterInternalBlockingStub> {
+  public static final class RemoteClusterInternalBlockingStub
+      extends io.grpc.stub.AbstractBlockingStub<RemoteClusterInternalBlockingStub> {
     private RemoteClusterInternalBlockingStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -250,11 +249,13 @@ public final class RemoteClusterInternalGrpc {
   }
 
   /**
+   * A stub to allow clients to do ListenableFuture-style rpc calls to service RemoteClusterInternal.
    * <pre>
    * RemoteCluster endpoints for internal use only.
    * </pre>
    */
-  public static final class RemoteClusterInternalFutureStub extends io.grpc.stub.AbstractFutureStub<RemoteClusterInternalFutureStub> {
+  public static final class RemoteClusterInternalFutureStub
+      extends io.grpc.stub.AbstractFutureStub<RemoteClusterInternalFutureStub> {
     private RemoteClusterInternalFutureStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -297,10 +298,10 @@ public final class RemoteClusterInternalGrpc {
       io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-    private final RemoteClusterInternalImplBase serviceImpl;
+    private final AsyncService serviceImpl;
     private final int methodId;
 
-    MethodHandlers(RemoteClusterInternalImplBase serviceImpl, int methodId) {
+    MethodHandlers(AsyncService serviceImpl, int methodId) {
       this.serviceImpl = serviceImpl;
       this.methodId = methodId;
     }
@@ -333,6 +334,25 @@ public final class RemoteClusterInternalGrpc {
     }
   }
 
+  public static final io.grpc.ServerServiceDefinition bindService(AsyncService service) {
+    return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+        .addMethod(
+          getListAllPvcControlPlanesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.ListAllPvcControlPlanesRequest,
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.ListAllPvcControlPlanesResponse>(
+                service, METHODID_LIST_ALL_PVC_CONTROL_PLANES)))
+        .addMethod(
+          getGeneratePvcControlPlaneAuthTokenMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcControlPlaneAuthTokenRequest,
+              com.cloudera.thunderhead.service.remotecluster.RemoteClusterInternalProto.GeneratePvcControlPlaneAuthTokenResponse>(
+                service, METHODID_GENERATE_PVC_CONTROL_PLANE_AUTH_TOKEN)))
+        .build();
+  }
+
   private static abstract class RemoteClusterInternalBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
     RemoteClusterInternalBaseDescriptorSupplier() {}
@@ -356,9 +376,9 @@ public final class RemoteClusterInternalGrpc {
   private static final class RemoteClusterInternalMethodDescriptorSupplier
       extends RemoteClusterInternalBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
-    private final String methodName;
+    private final java.lang.String methodName;
 
-    RemoteClusterInternalMethodDescriptorSupplier(String methodName) {
+    RemoteClusterInternalMethodDescriptorSupplier(java.lang.String methodName) {
       this.methodName = methodName;
     }
 

@@ -9,14 +9,14 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.53.0)",
+    value = "by gRPC proto compiler (version 1.64.0)",
     comments = "Source: publicendpointmanagement.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class PublicEndpointManagementGrpc {
 
   private PublicEndpointManagementGrpc() {}
 
-  public static final String SERVICE_NAME = "publicendpointmanagement.PublicEndpointManagement";
+  public static final java.lang.String SERVICE_NAME = "publicendpointmanagement.PublicEndpointManagement";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
@@ -348,14 +348,14 @@ public final class PublicEndpointManagementGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static abstract class PublicEndpointManagementImplBase implements io.grpc.BindableService {
+  public interface AsyncService {
 
     /**
      * <pre>
      * Get the service version.
      * </pre>
      */
-    public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
+    default void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetVersionMethod(), responseObserver);
     }
@@ -365,7 +365,7 @@ public final class PublicEndpointManagementGrpc {
      * Create or update a DNS entry. :: Create or update a DNS entry.
      * </pre>
      */
-    public void createDnsEntry(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateDnsEntryRequest request,
+    default void createDnsEntry(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateDnsEntryRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateDnsEntryResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateDnsEntryMethod(), responseObserver);
     }
@@ -375,7 +375,7 @@ public final class PublicEndpointManagementGrpc {
      * Delete a DNS entry. :: Delete a DNS entry.
      * </pre>
      */
-    public void deleteDnsEntry(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryRequest request,
+    default void deleteDnsEntry(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteDnsEntryMethod(), responseObserver);
     }
@@ -385,14 +385,14 @@ public final class PublicEndpointManagementGrpc {
      * Get a TLS certificate. :: Get a TLS certificate
      * </pre>
      */
-    public void createCertificate(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateCertificateRequest request,
+    default void createCertificate(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateCertificateRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateCertificateResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateCertificateMethod(), responseObserver);
     }
 
     /**
      */
-    public void pollCertificateCreation(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationRequest request,
+    default void pollCertificateCreation(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getPollCertificateCreationMethod(), responseObserver);
     }
@@ -411,7 +411,7 @@ public final class PublicEndpointManagementGrpc {
      *  }
      * </pre>
      */
-    public void generateManagedDomainNames(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest request,
+    default void generateManagedDomainNames(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGenerateManagedDomainNamesMethod(), responseObserver);
     }
@@ -423,7 +423,7 @@ public final class PublicEndpointManagementGrpc {
      * using which a client can poll the workflow's progress and finally get the signed certificate
      * </pre>
      */
-    public void signCertificate(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest request,
+    default void signCertificate(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSignCertificateMethod(), responseObserver);
     }
@@ -436,7 +436,7 @@ public final class PublicEndpointManagementGrpc {
      * If the workflow is not yet complete, it returns the status as SigningStatus.IN_PROGRESS
      * </pre>
      */
-    public void pollCertificateSigning(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest request,
+    default void pollCertificateSigning(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getPollCertificateSigningMethod(), responseObserver);
     }
@@ -446,87 +446,36 @@ public final class PublicEndpointManagementGrpc {
      *Revoke a TLS certificate
      * </pre>
      */
-    public void revokeCertificate(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest request,
+    default void revokeCertificate(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRevokeCertificateMethod(), responseObserver);
-    }
-
-    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
-      return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
-          .addMethod(
-            getGetVersionMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-                com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
-                  this, METHODID_GET_VERSION)))
-          .addMethod(
-            getCreateDnsEntryMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateDnsEntryRequest,
-                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateDnsEntryResponse>(
-                  this, METHODID_CREATE_DNS_ENTRY)))
-          .addMethod(
-            getDeleteDnsEntryMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryRequest,
-                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryResponse>(
-                  this, METHODID_DELETE_DNS_ENTRY)))
-          .addMethod(
-            getCreateCertificateMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateCertificateRequest,
-                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateCertificateResponse>(
-                  this, METHODID_CREATE_CERTIFICATE)))
-          .addMethod(
-            getPollCertificateCreationMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationRequest,
-                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationResponse>(
-                  this, METHODID_POLL_CERTIFICATE_CREATION)))
-          .addMethod(
-            getGenerateManagedDomainNamesMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest,
-                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse>(
-                  this, METHODID_GENERATE_MANAGED_DOMAIN_NAMES)))
-          .addMethod(
-            getSignCertificateMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest,
-                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse>(
-                  this, METHODID_SIGN_CERTIFICATE)))
-          .addMethod(
-            getPollCertificateSigningMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest,
-                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse>(
-                  this, METHODID_POLL_CERTIFICATE_SIGNING)))
-          .addMethod(
-            getRevokeCertificateMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest,
-                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse>(
-                  this, METHODID_REVOKE_CERTIFICATE)))
-          .build();
     }
   }
 
   /**
+   * Base class for the server implementation of the service PublicEndpointManagement.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class PublicEndpointManagementStub extends io.grpc.stub.AbstractAsyncStub<PublicEndpointManagementStub> {
+  public static abstract class PublicEndpointManagementImplBase
+      implements io.grpc.BindableService, AsyncService {
+
+    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+      return PublicEndpointManagementGrpc.bindService(this);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do asynchronous rpc calls to service PublicEndpointManagement.
+   * <pre>
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class PublicEndpointManagementStub
+      extends io.grpc.stub.AbstractAsyncStub<PublicEndpointManagementStub> {
     private PublicEndpointManagementStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -650,12 +599,14 @@ public final class PublicEndpointManagementGrpc {
   }
 
   /**
+   * A stub to allow clients to do synchronous rpc calls to service PublicEndpointManagement.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class PublicEndpointManagementBlockingStub extends io.grpc.stub.AbstractBlockingStub<PublicEndpointManagementBlockingStub> {
+  public static final class PublicEndpointManagementBlockingStub
+      extends io.grpc.stub.AbstractBlockingStub<PublicEndpointManagementBlockingStub> {
     private PublicEndpointManagementBlockingStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -770,12 +721,14 @@ public final class PublicEndpointManagementGrpc {
   }
 
   /**
+   * A stub to allow clients to do ListenableFuture-style rpc calls to service PublicEndpointManagement.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class PublicEndpointManagementFutureStub extends io.grpc.stub.AbstractFutureStub<PublicEndpointManagementFutureStub> {
+  public static final class PublicEndpointManagementFutureStub
+      extends io.grpc.stub.AbstractFutureStub<PublicEndpointManagementFutureStub> {
     private PublicEndpointManagementFutureStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -913,10 +866,10 @@ public final class PublicEndpointManagementGrpc {
       io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-    private final PublicEndpointManagementImplBase serviceImpl;
+    private final AsyncService serviceImpl;
     private final int methodId;
 
-    MethodHandlers(PublicEndpointManagementImplBase serviceImpl, int methodId) {
+    MethodHandlers(AsyncService serviceImpl, int methodId) {
       this.serviceImpl = serviceImpl;
       this.methodId = methodId;
     }
@@ -977,6 +930,74 @@ public final class PublicEndpointManagementGrpc {
     }
   }
 
+  public static final io.grpc.ServerServiceDefinition bindService(AsyncService service) {
+    return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+        .addMethod(
+          getGetVersionMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
+              com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
+                service, METHODID_GET_VERSION)))
+        .addMethod(
+          getCreateDnsEntryMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateDnsEntryRequest,
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateDnsEntryResponse>(
+                service, METHODID_CREATE_DNS_ENTRY)))
+        .addMethod(
+          getDeleteDnsEntryMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryRequest,
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryResponse>(
+                service, METHODID_DELETE_DNS_ENTRY)))
+        .addMethod(
+          getCreateCertificateMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateCertificateRequest,
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateCertificateResponse>(
+                service, METHODID_CREATE_CERTIFICATE)))
+        .addMethod(
+          getPollCertificateCreationMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationRequest,
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationResponse>(
+                service, METHODID_POLL_CERTIFICATE_CREATION)))
+        .addMethod(
+          getGenerateManagedDomainNamesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest,
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse>(
+                service, METHODID_GENERATE_MANAGED_DOMAIN_NAMES)))
+        .addMethod(
+          getSignCertificateMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest,
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse>(
+                service, METHODID_SIGN_CERTIFICATE)))
+        .addMethod(
+          getPollCertificateSigningMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest,
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse>(
+                service, METHODID_POLL_CERTIFICATE_SIGNING)))
+        .addMethod(
+          getRevokeCertificateMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest,
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse>(
+                service, METHODID_REVOKE_CERTIFICATE)))
+        .build();
+  }
+
   private static abstract class PublicEndpointManagementBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
     PublicEndpointManagementBaseDescriptorSupplier() {}
@@ -1000,9 +1021,9 @@ public final class PublicEndpointManagementGrpc {
   private static final class PublicEndpointManagementMethodDescriptorSupplier
       extends PublicEndpointManagementBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
-    private final String methodName;
+    private final java.lang.String methodName;
 
-    PublicEndpointManagementMethodDescriptorSupplier(String methodName) {
+    PublicEndpointManagementMethodDescriptorSupplier(java.lang.String methodName) {
       this.methodName = methodName;
     }
 

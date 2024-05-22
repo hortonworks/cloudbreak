@@ -9,14 +9,14 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.53.0)",
+    value = "by gRPC proto compiler (version 1.64.0)",
     comments = "Source: cdlcrud.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class CdlCrudGrpc {
 
   private CdlCrudGrpc() {}
 
-  public static final String SERVICE_NAME = "cdlcrud.CdlCrud";
+  public static final java.lang.String SERVICE_NAME = "cdlcrud.CdlCrud";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CreateDatalakeRequest,
@@ -348,14 +348,14 @@ public final class CdlCrudGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static abstract class CdlCrudImplBase implements io.grpc.BindableService {
+  public interface AsyncService {
 
     /**
      * <pre>
      * Create a Datalake
      * </pre>
      */
-    public void createDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CreateDatalakeRequest request,
+    default void createDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CreateDatalakeRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CreateDatalakeResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateDatalakeMethod(), responseObserver);
     }
@@ -365,7 +365,7 @@ public final class CdlCrudGrpc {
      * Delete a Datalake
      * </pre>
      */
-    public void deleteDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DeleteDatalakeRequest request,
+    default void deleteDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DeleteDatalakeRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DeleteDatalakeResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteDatalakeMethod(), responseObserver);
     }
@@ -375,7 +375,7 @@ public final class CdlCrudGrpc {
      * Describe a Datalake
      * </pre>
      */
-    public void describeDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeDatalakeRequest request,
+    default void describeDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeDatalakeRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeDatalakeResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeDatalakeMethod(), responseObserver);
     }
@@ -385,7 +385,7 @@ public final class CdlCrudGrpc {
      * Describe a Datalake
      * </pre>
      */
-    public void findDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.FindDatalakeRequest request,
+    default void findDatalake(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.FindDatalakeRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getFindDatalakeMethod(), responseObserver);
     }
@@ -395,7 +395,7 @@ public final class CdlCrudGrpc {
      * Describe Datalake Services
      * </pre>
      */
-    public void describeServices(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeServicesRequest request,
+    default void describeServices(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeServicesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeServicesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeServicesMethod(), responseObserver);
     }
@@ -405,7 +405,7 @@ public final class CdlCrudGrpc {
      * Start DataLake diagnostics collection
      * </pre>
      */
-    public void collectDatalakeDiagnostics(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest request,
+    default void collectDatalakeDiagnostics(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCollectDatalakeDiagnosticsMethod(), responseObserver);
     }
@@ -415,7 +415,7 @@ public final class CdlCrudGrpc {
      * List recent Datalake diagnostics collections
      * </pre>
      */
-    public void listDatalakeDiagnostics(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest request,
+    default void listDatalakeDiagnostics(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListDatalakeDiagnosticsMethod(), responseObserver);
     }
@@ -425,7 +425,7 @@ public final class CdlCrudGrpc {
      * Cancel running Datalake diagnostics collections
      * </pre>
      */
-    public void cancelDatalakeDiagnostics(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest request,
+    default void cancelDatalakeDiagnostics(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCancelDatalakeDiagnosticsMethod(), responseObserver);
     }
@@ -435,87 +435,36 @@ public final class CdlCrudGrpc {
      * List all Datalakes of an environment or datalake
      * </pre>
      */
-    public void listDatalakes(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest request,
+    default void listDatalakes(com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListDatalakesMethod(), responseObserver);
-    }
-
-    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
-      return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
-          .addMethod(
-            getCreateDatalakeMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CreateDatalakeRequest,
-                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CreateDatalakeResponse>(
-                  this, METHODID_CREATE_DATALAKE)))
-          .addMethod(
-            getDeleteDatalakeMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DeleteDatalakeRequest,
-                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DeleteDatalakeResponse>(
-                  this, METHODID_DELETE_DATALAKE)))
-          .addMethod(
-            getDescribeDatalakeMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeDatalakeRequest,
-                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeDatalakeResponse>(
-                  this, METHODID_DESCRIBE_DATALAKE)))
-          .addMethod(
-            getFindDatalakeMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.FindDatalakeRequest,
-                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse>(
-                  this, METHODID_FIND_DATALAKE)))
-          .addMethod(
-            getDescribeServicesMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeServicesRequest,
-                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeServicesResponse>(
-                  this, METHODID_DESCRIBE_SERVICES)))
-          .addMethod(
-            getCollectDatalakeDiagnosticsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest,
-                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse>(
-                  this, METHODID_COLLECT_DATALAKE_DIAGNOSTICS)))
-          .addMethod(
-            getListDatalakeDiagnosticsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest,
-                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse>(
-                  this, METHODID_LIST_DATALAKE_DIAGNOSTICS)))
-          .addMethod(
-            getCancelDatalakeDiagnosticsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest,
-                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse>(
-                  this, METHODID_CANCEL_DATALAKE_DIAGNOSTICS)))
-          .addMethod(
-            getListDatalakesMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest,
-                com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse>(
-                  this, METHODID_LIST_DATALAKES)))
-          .build();
     }
   }
 
   /**
+   * Base class for the server implementation of the service CdlCrud.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class CdlCrudStub extends io.grpc.stub.AbstractAsyncStub<CdlCrudStub> {
+  public static abstract class CdlCrudImplBase
+      implements io.grpc.BindableService, AsyncService {
+
+    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+      return CdlCrudGrpc.bindService(this);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do asynchronous rpc calls to service CdlCrud.
+   * <pre>
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class CdlCrudStub
+      extends io.grpc.stub.AbstractAsyncStub<CdlCrudStub> {
     private CdlCrudStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -628,12 +577,14 @@ public final class CdlCrudGrpc {
   }
 
   /**
+   * A stub to allow clients to do synchronous rpc calls to service CdlCrud.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class CdlCrudBlockingStub extends io.grpc.stub.AbstractBlockingStub<CdlCrudBlockingStub> {
+  public static final class CdlCrudBlockingStub
+      extends io.grpc.stub.AbstractBlockingStub<CdlCrudBlockingStub> {
     private CdlCrudBlockingStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -737,12 +688,14 @@ public final class CdlCrudGrpc {
   }
 
   /**
+   * A stub to allow clients to do ListenableFuture-style rpc calls to service CdlCrud.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class CdlCrudFutureStub extends io.grpc.stub.AbstractFutureStub<CdlCrudFutureStub> {
+  public static final class CdlCrudFutureStub
+      extends io.grpc.stub.AbstractFutureStub<CdlCrudFutureStub> {
     private CdlCrudFutureStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -869,10 +822,10 @@ public final class CdlCrudGrpc {
       io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-    private final CdlCrudImplBase serviceImpl;
+    private final AsyncService serviceImpl;
     private final int methodId;
 
-    MethodHandlers(CdlCrudImplBase serviceImpl, int methodId) {
+    MethodHandlers(AsyncService serviceImpl, int methodId) {
       this.serviceImpl = serviceImpl;
       this.methodId = methodId;
     }
@@ -933,6 +886,74 @@ public final class CdlCrudGrpc {
     }
   }
 
+  public static final io.grpc.ServerServiceDefinition bindService(AsyncService service) {
+    return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+        .addMethod(
+          getCreateDatalakeMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CreateDatalakeRequest,
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CreateDatalakeResponse>(
+                service, METHODID_CREATE_DATALAKE)))
+        .addMethod(
+          getDeleteDatalakeMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DeleteDatalakeRequest,
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DeleteDatalakeResponse>(
+                service, METHODID_DELETE_DATALAKE)))
+        .addMethod(
+          getDescribeDatalakeMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeDatalakeRequest,
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeDatalakeResponse>(
+                service, METHODID_DESCRIBE_DATALAKE)))
+        .addMethod(
+          getFindDatalakeMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.FindDatalakeRequest,
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DatalakeResponse>(
+                service, METHODID_FIND_DATALAKE)))
+        .addMethod(
+          getDescribeServicesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeServicesRequest,
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.DescribeServicesResponse>(
+                service, METHODID_DESCRIBE_SERVICES)))
+        .addMethod(
+          getCollectDatalakeDiagnosticsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsRequest,
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CollectDatalakeDiagnosticsResponse>(
+                service, METHODID_COLLECT_DATALAKE_DIAGNOSTICS)))
+        .addMethod(
+          getListDatalakeDiagnosticsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsRequest,
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakeDiagnosticsResponse>(
+                service, METHODID_LIST_DATALAKE_DIAGNOSTICS)))
+        .addMethod(
+          getCancelDatalakeDiagnosticsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsRequest,
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.CancelDatalakeDiagnosticsResponse>(
+                service, METHODID_CANCEL_DATALAKE_DIAGNOSTICS)))
+        .addMethod(
+          getListDatalakesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesRequest,
+              com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto.ListDatalakesResponse>(
+                service, METHODID_LIST_DATALAKES)))
+        .build();
+  }
+
   private static abstract class CdlCrudBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
     CdlCrudBaseDescriptorSupplier() {}
@@ -956,9 +977,9 @@ public final class CdlCrudGrpc {
   private static final class CdlCrudMethodDescriptorSupplier
       extends CdlCrudBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
-    private final String methodName;
+    private final java.lang.String methodName;
 
-    CdlCrudMethodDescriptorSupplier(String methodName) {
+    CdlCrudMethodDescriptorSupplier(java.lang.String methodName) {
       this.methodName = methodName;
     }
 

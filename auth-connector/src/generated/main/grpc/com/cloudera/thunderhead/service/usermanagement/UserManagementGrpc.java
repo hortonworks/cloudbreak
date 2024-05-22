@@ -9,14 +9,14 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.53.0)",
+    value = "by gRPC proto compiler (version 1.64.0)",
     comments = "Source: usermanagement.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class UserManagementGrpc {
 
   private UserManagementGrpc() {}
 
-  public static final String SERVICE_NAME = "usermanagement.UserManagement";
+  public static final java.lang.String SERVICE_NAME = "usermanagement.UserManagement";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest,
@@ -3913,7 +3913,7 @@ public final class UserManagementGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static abstract class UserManagementImplBase implements io.grpc.BindableService {
+  public interface AsyncService {
 
     /**
      * <pre>
@@ -3922,7 +3922,7 @@ public final class UserManagementGrpc {
      * The account record must already exist.
      * </pre>
      */
-    public void interactiveLogin(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest request,
+    default void interactiveLogin(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getInteractiveLoginMethod(), responseObserver);
     }
@@ -3934,7 +3934,7 @@ public final class UserManagementGrpc {
      * be created and their group membership synchronized with their Altus state.
      * </pre>
      */
-    public void interactiveLogin3rdParty(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest request,
+    default void interactiveLogin3rdParty(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getInteractiveLogin3rdPartyMethod(), responseObserver);
     }
@@ -3945,7 +3945,7 @@ public final class UserManagementGrpc {
      * identity provider. We assume that the account had been created.
      * </pre>
      */
-    public void interactiveLoginLocal(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest request,
+    default void interactiveLoginLocal(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getInteractiveLoginLocalMethod(), responseObserver);
     }
@@ -3955,7 +3955,7 @@ public final class UserManagementGrpc {
      * Deletes the account from Altus tests only.
      * </pre>
      */
-    public void deleteAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountRequest request,
+    default void deleteAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteAccountMethod(), responseObserver);
     }
@@ -3965,7 +3965,7 @@ public final class UserManagementGrpc {
      * Delete an actor from Altus.
      * </pre>
      */
-    public void deleteActor(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorRequest request,
+    default void deleteActor(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteActorMethod(), responseObserver);
     }
@@ -3975,7 +3975,7 @@ public final class UserManagementGrpc {
      * Delete trial user from Altus for tests only.
      * </pre>
      */
-    public void deleteTrialUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserRequest request,
+    default void deleteTrialUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteTrialUserMethod(), responseObserver);
     }
@@ -3986,7 +3986,7 @@ public final class UserManagementGrpc {
      * request signature produced that key.
      * </pre>
      */
-    public void getAccessKeyVerificationData(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataRequest request,
+    default void getAccessKeyVerificationData(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetAccessKeyVerificationDataMethod(), responseObserver);
     }
@@ -3998,7 +3998,7 @@ public final class UserManagementGrpc {
      * information about the user and their account is returned.
      * </pre>
      */
-    public void verifyInteractiveUserSessionToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest request,
+    default void verifyInteractiveUserSessionToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getVerifyInteractiveUserSessionTokenMethod(), responseObserver);
     }
@@ -4010,7 +4010,7 @@ public final class UserManagementGrpc {
      * account is returned.
      * </pre>
      */
-    public void verifyAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest request,
+    default void verifyAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getVerifyAccessTokenMethod(), responseObserver);
     }
@@ -4021,7 +4021,7 @@ public final class UserManagementGrpc {
      * access key authentication.
      * </pre>
      */
-    public void authenticate(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest request,
+    default void authenticate(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAuthenticateMethod(), responseObserver);
     }
@@ -4032,7 +4032,7 @@ public final class UserManagementGrpc {
      * service on which it was used.
      * </pre>
      */
-    public void accessKeyUsage(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest request,
+    default void accessKeyUsage(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAccessKeyUsageMethod(), responseObserver);
     }
@@ -4043,7 +4043,7 @@ public final class UserManagementGrpc {
      * identity provider connector.
      * </pre>
      */
-    public void createUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest request,
+    default void createUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateUserMethod(), responseObserver);
     }
@@ -4053,7 +4053,7 @@ public final class UserManagementGrpc {
      * Get user.
      * </pre>
      */
-    public void getUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest request,
+    default void getUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetUserMethod(), responseObserver);
     }
@@ -4063,7 +4063,7 @@ public final class UserManagementGrpc {
      * List users.
      * </pre>
      */
-    public void listUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest request,
+    default void listUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListUsersMethod(), responseObserver);
     }
@@ -4073,7 +4073,7 @@ public final class UserManagementGrpc {
      * Find users by Email.
      * </pre>
      */
-    public void findUsersByEmail(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest request,
+    default void findUsersByEmail(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getFindUsersByEmailMethod(), responseObserver);
     }
@@ -4083,7 +4083,7 @@ public final class UserManagementGrpc {
      * Find users.
      * </pre>
      */
-    public void findUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest request,
+    default void findUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getFindUsersMethod(), responseObserver);
     }
@@ -4093,7 +4093,7 @@ public final class UserManagementGrpc {
      * Creates a new access key.
      * </pre>
      */
-    public void createAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest request,
+    default void createAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateAccessKeyMethod(), responseObserver);
     }
@@ -4103,7 +4103,7 @@ public final class UserManagementGrpc {
      * Updates an access key.
      * </pre>
      */
-    public void updateAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyRequest request,
+    default void updateAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUpdateAccessKeyMethod(), responseObserver);
     }
@@ -4113,7 +4113,7 @@ public final class UserManagementGrpc {
      * Deletes an access key.
      * </pre>
      */
-    public void deleteAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyRequest request,
+    default void deleteAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteAccessKeyMethod(), responseObserver);
     }
@@ -4123,7 +4123,7 @@ public final class UserManagementGrpc {
      * Get access key.
      * </pre>
      */
-    public void getAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyRequest request,
+    default void getAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetAccessKeyMethod(), responseObserver);
     }
@@ -4133,7 +4133,7 @@ public final class UserManagementGrpc {
      * List access keys.
      * </pre>
      */
-    public void listAccessKeys(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest request,
+    default void listAccessKeys(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListAccessKeysMethod(), responseObserver);
     }
@@ -4143,7 +4143,7 @@ public final class UserManagementGrpc {
      * Creates a new access token.
      * </pre>
      */
-    public void createAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest request,
+    default void createAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateAccessTokenMethod(), responseObserver);
     }
@@ -4153,7 +4153,7 @@ public final class UserManagementGrpc {
      * Deletes an access token.
      * </pre>
      */
-    public void deleteAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest request,
+    default void deleteAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteAccessTokenMethod(), responseObserver);
     }
@@ -4163,7 +4163,7 @@ public final class UserManagementGrpc {
      * Get an access token.
      * </pre>
      */
-    public void getAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest request,
+    default void getAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetAccessTokenMethod(), responseObserver);
     }
@@ -4173,7 +4173,7 @@ public final class UserManagementGrpc {
      * List access tokens.
      * </pre>
      */
-    public void listAccessTokens(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest request,
+    default void listAccessTokens(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListAccessTokensMethod(), responseObserver);
     }
@@ -4183,7 +4183,7 @@ public final class UserManagementGrpc {
      * Creates a new SCIM access token.
      * </pre>
      */
-    public void createScimAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest request,
+    default void createScimAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateScimAccessTokenMethod(), responseObserver);
     }
@@ -4193,7 +4193,7 @@ public final class UserManagementGrpc {
      * Deletes a SCIM access token.
      * </pre>
      */
-    public void deleteScimAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest request,
+    default void deleteScimAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteScimAccessTokenMethod(), responseObserver);
     }
@@ -4203,7 +4203,7 @@ public final class UserManagementGrpc {
      * List SCIM access tokens.
      * </pre>
      */
-    public void listScimAccessTokens(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest request,
+    default void listScimAccessTokens(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListScimAccessTokensMethod(), responseObserver);
     }
@@ -4213,7 +4213,7 @@ public final class UserManagementGrpc {
      * Get the service version.
      * </pre>
      */
-    public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
+    default void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetVersionMethod(), responseObserver);
     }
@@ -4223,7 +4223,7 @@ public final class UserManagementGrpc {
      * Get account.
      * </pre>
      */
-    public void getAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest request,
+    default void getAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetAccountMethod(), responseObserver);
     }
@@ -4233,7 +4233,7 @@ public final class UserManagementGrpc {
      * Get account.
      * </pre>
      */
-    public void listAccounts(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsRequest request,
+    default void listAccounts(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListAccountsMethod(), responseObserver);
     }
@@ -4245,7 +4245,7 @@ public final class UserManagementGrpc {
      * i.e., the rights of the actor are returned regardless of whether the actor is disabled.
      * </pre>
      */
-    public void getRights(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest request,
+    default void getRights(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetRightsMethod(), responseObserver);
     }
@@ -4257,7 +4257,7 @@ public final class UserManagementGrpc {
      * i.e., the rights of the actor are checked regardless of whether the actor is disabled.
      * </pre>
      */
-    public void checkRights(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest request,
+    default void checkRights(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCheckRightsMethod(), responseObserver);
     }
@@ -4267,7 +4267,7 @@ public final class UserManagementGrpc {
      * Create a regular account.
      * </pre>
      */
-    public void createAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest request,
+    default void createAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateAccountMethod(), responseObserver);
     }
@@ -4277,7 +4277,7 @@ public final class UserManagementGrpc {
      * Create a trial account.
      * </pre>
      */
-    public void createTrialAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest request,
+    default void createTrialAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateTrialAccountMethod(), responseObserver);
     }
@@ -4287,7 +4287,7 @@ public final class UserManagementGrpc {
      * Create an email based account.
      * </pre>
      */
-    public void createC1CAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest request,
+    default void createC1CAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateC1CAccountMethod(), responseObserver);
     }
@@ -4298,7 +4298,7 @@ public final class UserManagementGrpc {
      * them.
      * </pre>
      */
-    public void verifyC1CEmail(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest request,
+    default void verifyC1CEmail(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getVerifyC1CEmailMethod(), responseObserver);
     }
@@ -4308,7 +4308,7 @@ public final class UserManagementGrpc {
      * Grant Entitlement to an Account
      * </pre>
      */
-    public void grantEntitlement(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest request,
+    default void grantEntitlement(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGrantEntitlementMethod(), responseObserver);
     }
@@ -4318,7 +4318,7 @@ public final class UserManagementGrpc {
      * Revoke Entitlement from an Account
      * </pre>
      */
-    public void revokeEntitlement(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest request,
+    default void revokeEntitlement(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRevokeEntitlementMethod(), responseObserver);
     }
@@ -4328,7 +4328,7 @@ public final class UserManagementGrpc {
      * Ensure default entitlements are granted to an Account
      * </pre>
      */
-    public void ensureDefaultEntitlementsGranted(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest request,
+    default void ensureDefaultEntitlementsGranted(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getEnsureDefaultEntitlementsGrantedMethod(), responseObserver);
     }
@@ -4338,7 +4338,7 @@ public final class UserManagementGrpc {
      * Assign a role to an assignee
      * </pre>
      */
-    public void assignRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleRequest request,
+    default void assignRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAssignRoleMethod(), responseObserver);
     }
@@ -4348,7 +4348,7 @@ public final class UserManagementGrpc {
      * Unassign a role from an assignee
      * </pre>
      */
-    public void unassignRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleRequest request,
+    default void unassignRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUnassignRoleMethod(), responseObserver);
     }
@@ -4358,7 +4358,7 @@ public final class UserManagementGrpc {
      * List the assigned roles for an assignee:
      * </pre>
      */
-    public void listAssignedRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesRequest request,
+    default void listAssignedRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListAssignedRolesMethod(), responseObserver);
     }
@@ -4368,7 +4368,7 @@ public final class UserManagementGrpc {
      * Assign a resource role to an assignee
      * </pre>
      */
-    public void assignResourceRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleRequest request,
+    default void assignResourceRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAssignResourceRoleMethod(), responseObserver);
     }
@@ -4378,7 +4378,7 @@ public final class UserManagementGrpc {
      * Unassign a resource role from an assignee
      * </pre>
      */
-    public void unassignResourceRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleRequest request,
+    default void unassignResourceRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUnassignResourceRoleMethod(), responseObserver);
     }
@@ -4388,7 +4388,7 @@ public final class UserManagementGrpc {
      * List the assigned resource roles for an assignee:
      * </pre>
      */
-    public void listAssignedResourceRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesRequest request,
+    default void listAssignedResourceRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListAssignedResourceRolesMethod(), responseObserver);
     }
@@ -4398,7 +4398,7 @@ public final class UserManagementGrpc {
      * List roles.
      * </pre>
      */
-    public void listRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest request,
+    default void listRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListRolesMethod(), responseObserver);
     }
@@ -4408,7 +4408,7 @@ public final class UserManagementGrpc {
      * List resource roles.
      * </pre>
      */
-    public void listResourceRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesRequest request,
+    default void listResourceRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListResourceRolesMethod(), responseObserver);
     }
@@ -4418,7 +4418,7 @@ public final class UserManagementGrpc {
      * List resource assignees.
      * </pre>
      */
-    public void listResourceAssignees(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest request,
+    default void listResourceAssignees(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListResourceAssigneesMethod(), responseObserver);
     }
@@ -4428,7 +4428,7 @@ public final class UserManagementGrpc {
      * Update Cloudera Manager License Key
      * </pre>
      */
-    public void updateClouderaManagerLicenseKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyRequest request,
+    default void updateClouderaManagerLicenseKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUpdateClouderaManagerLicenseKeyMethod(), responseObserver);
     }
@@ -4438,7 +4438,7 @@ public final class UserManagementGrpc {
      * Initiates a support case creation pipeline.
      * </pre>
      */
-    public void initiateSupportCase(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseRequest request,
+    default void initiateSupportCase(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getInitiateSupportCaseMethod(), responseObserver);
     }
@@ -4449,7 +4449,7 @@ public final class UserManagementGrpc {
      * associated with this resource will be deleted.
      * </pre>
      */
-    public void notifyResourceDeleted(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedRequest request,
+    default void notifyResourceDeleted(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getNotifyResourceDeletedMethod(), responseObserver);
     }
@@ -4459,7 +4459,7 @@ public final class UserManagementGrpc {
      * Create a machine user
      * </pre>
      */
-    public void createMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest request,
+    default void createMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateMachineUserMethod(), responseObserver);
     }
@@ -4469,7 +4469,7 @@ public final class UserManagementGrpc {
      * list machine users
      * </pre>
      */
-    public void listMachineUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest request,
+    default void listMachineUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListMachineUsersMethod(), responseObserver);
     }
@@ -4479,14 +4479,14 @@ public final class UserManagementGrpc {
      * Delete a machine user
      * </pre>
      */
-    public void deleteMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserRequest request,
+    default void deleteMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteMachineUserMethod(), responseObserver);
     }
 
     /**
      */
-    public void listResourceRoleAssignments(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsRequest request,
+    default void listResourceRoleAssignments(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListResourceRoleAssignmentsMethod(), responseObserver);
     }
@@ -4496,7 +4496,7 @@ public final class UserManagementGrpc {
      * Sets the account messages.
      * </pre>
      */
-    public void setAccountMessages(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesRequest request,
+    default void setAccountMessages(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetAccountMessagesMethod(), responseObserver);
     }
@@ -4506,7 +4506,7 @@ public final class UserManagementGrpc {
      * Terms acceptance
      * </pre>
      */
-    public void acceptTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsRequest request,
+    default void acceptTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAcceptTermsMethod(), responseObserver);
     }
@@ -4517,7 +4517,7 @@ public final class UserManagementGrpc {
      * same version as the current Terms found in the TermsProvider.
      * </pre>
      */
-    public void clearAcceptedTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsRequest request,
+    default void clearAcceptedTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getClearAcceptedTermsMethod(), responseObserver);
     }
@@ -4527,7 +4527,7 @@ public final class UserManagementGrpc {
      * Terms description
      * </pre>
      */
-    public void describeTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsRequest request,
+    default void describeTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeTermsMethod(), responseObserver);
     }
@@ -4537,7 +4537,7 @@ public final class UserManagementGrpc {
      * Terms listing
      * </pre>
      */
-    public void listTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest request,
+    default void listTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListTermsMethod(), responseObserver);
     }
@@ -4547,7 +4547,7 @@ public final class UserManagementGrpc {
      * Entitlements listing
      * </pre>
      */
-    public void listEntitlements(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsRequest request,
+    default void listEntitlements(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListEntitlementsMethod(), responseObserver);
     }
@@ -4557,7 +4557,7 @@ public final class UserManagementGrpc {
      * Set terms acceptance expiry
      * </pre>
      */
-    public void setTermsAcceptanceExpiry(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryRequest request,
+    default void setTermsAcceptanceExpiry(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetTermsAcceptanceExpiryMethod(), responseObserver);
     }
@@ -4567,7 +4567,7 @@ public final class UserManagementGrpc {
      * Confirm whether Altus account and Azure Subscription Id
      * </pre>
      */
-    public void confirmAzureSubscriptionVerified(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedRequest request,
+    default void confirmAzureSubscriptionVerified(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getConfirmAzureSubscriptionVerifiedMethod(), responseObserver);
     }
@@ -4577,7 +4577,7 @@ public final class UserManagementGrpc {
      * Insert Azure Subscriptions
      * </pre>
      */
-    public void insertAzureSubscription(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationRequest request,
+    default void insertAzureSubscription(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getInsertAzureSubscriptionMethod(), responseObserver);
     }
@@ -4587,7 +4587,7 @@ public final class UserManagementGrpc {
      * Create group
      * </pre>
      */
-    public void createGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupRequest request,
+    default void createGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateGroupMethod(), responseObserver);
     }
@@ -4597,7 +4597,7 @@ public final class UserManagementGrpc {
      * Delete group
      * </pre>
      */
-    public void deleteGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupRequest request,
+    default void deleteGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteGroupMethod(), responseObserver);
     }
@@ -4607,7 +4607,7 @@ public final class UserManagementGrpc {
      * Get groups
      * </pre>
      */
-    public void getGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest request,
+    default void getGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetGroupMethod(), responseObserver);
     }
@@ -4617,7 +4617,7 @@ public final class UserManagementGrpc {
      * List groups
      * </pre>
      */
-    public void listGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest request,
+    default void listGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListGroupsMethod(), responseObserver);
     }
@@ -4627,7 +4627,7 @@ public final class UserManagementGrpc {
      * Update group
      * </pre>
      */
-    public void updateGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest request,
+    default void updateGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUpdateGroupMethod(), responseObserver);
     }
@@ -4637,7 +4637,7 @@ public final class UserManagementGrpc {
      * Add member to group
      * </pre>
      */
-    public void addMemberToGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest request,
+    default void addMemberToGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAddMemberToGroupMethod(), responseObserver);
     }
@@ -4647,7 +4647,7 @@ public final class UserManagementGrpc {
      * Remove member from group
      * </pre>
      */
-    public void removeMemberFromGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest request,
+    default void removeMemberFromGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRemoveMemberFromGroupMethod(), responseObserver);
     }
@@ -4657,7 +4657,7 @@ public final class UserManagementGrpc {
      * List group members
      * </pre>
      */
-    public void listGroupMembers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest request,
+    default void listGroupMembers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListGroupMembersMethod(), responseObserver);
     }
@@ -4667,7 +4667,7 @@ public final class UserManagementGrpc {
      * List of groupCRNs corresponding to the member
      * </pre>
      */
-    public void listGroupsForMember(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest request,
+    default void listGroupsForMember(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListGroupsForMemberMethod(), responseObserver);
     }
@@ -4677,7 +4677,7 @@ public final class UserManagementGrpc {
      * List workload administration group names corresponding to the member
      * </pre>
      */
-    public void listWorkloadAdministrationGroupsForMember(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest request,
+    default void listWorkloadAdministrationGroupsForMember(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListWorkloadAdministrationGroupsForMemberMethod(), responseObserver);
     }
@@ -4687,7 +4687,7 @@ public final class UserManagementGrpc {
      * Creates a new cluster ssh private key.
      * </pre>
      */
-    public void createClusterSshPrivateKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyRequest request,
+    default void createClusterSshPrivateKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateClusterSshPrivateKeyMethod(), responseObserver);
     }
@@ -4697,7 +4697,7 @@ public final class UserManagementGrpc {
      * Get cluster ssh private key.
      * </pre>
      */
-    public void getClusterSshPrivateKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyRequest request,
+    default void getClusterSshPrivateKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetClusterSshPrivateKeyMethod(), responseObserver);
     }
@@ -4707,7 +4707,7 @@ public final class UserManagementGrpc {
      * Get the authorization information about an assignee.
      * </pre>
      */
-    public void getAssigneeAuthorizationInformation(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationRequest request,
+    default void getAssigneeAuthorizationInformation(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetAssigneeAuthorizationInformationMethod(), responseObserver);
     }
@@ -4717,7 +4717,7 @@ public final class UserManagementGrpc {
      * Creates the identity provider connector
      * </pre>
      */
-    public void createIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorRequest request,
+    default void createIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateIdentityProviderConnectorMethod(), responseObserver);
     }
@@ -4727,7 +4727,7 @@ public final class UserManagementGrpc {
      * Lists identity provider connectors
      * </pre>
      */
-    public void listIdentityProviderConnectors(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsRequest request,
+    default void listIdentityProviderConnectors(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListIdentityProviderConnectorsMethod(), responseObserver);
     }
@@ -4737,7 +4737,7 @@ public final class UserManagementGrpc {
      * Deletes identity provider connector
      * </pre>
      */
-    public void deleteIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorRequest request,
+    default void deleteIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteIdentityProviderConnectorMethod(), responseObserver);
     }
@@ -4747,7 +4747,7 @@ public final class UserManagementGrpc {
      * Describes an identity provider connector
      * </pre>
      */
-    public void describeIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorRequest request,
+    default void describeIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeIdentityProviderConnectorMethod(), responseObserver);
     }
@@ -4757,7 +4757,7 @@ public final class UserManagementGrpc {
      * Update an identity provider connector
      * </pre>
      */
-    public void updateIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorRequest request,
+    default void updateIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUpdateIdentityProviderConnectorMethod(), responseObserver);
     }
@@ -4767,7 +4767,7 @@ public final class UserManagementGrpc {
      * Set whether login using Cloudera SSO is enabled.
      * </pre>
      */
-    public void setClouderaSSOLoginEnabled(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest request,
+    default void setClouderaSSOLoginEnabled(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetClouderaSSOLoginEnabledMethod(), responseObserver);
     }
@@ -4778,7 +4778,7 @@ public final class UserManagementGrpc {
      * SSO service.
      * </pre>
      */
-    public void getIdPMetadataForWorkloadSSO(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest request,
+    default void getIdPMetadataForWorkloadSSO(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetIdPMetadataForWorkloadSSOMethod(), responseObserver);
     }
@@ -4791,7 +4791,7 @@ public final class UserManagementGrpc {
      * to one of the customer defined identity providers.
      * </pre>
      */
-    public void processWorkloadSSOAuthnReq(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest request,
+    default void processWorkloadSSOAuthnReq(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getProcessWorkloadSSOAuthnReqMethod(), responseObserver);
     }
@@ -4801,7 +4801,7 @@ public final class UserManagementGrpc {
      * Generate a SSO AuthNRequest for control plane SP-initiated login.
      * </pre>
      */
-    public void generateControlPlaneSSOAuthnReq(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest request,
+    default void generateControlPlaneSSOAuthnReq(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGenerateControlPlaneSSOAuthnReqMethod(), responseObserver);
     }
@@ -4812,7 +4812,7 @@ public final class UserManagementGrpc {
      * been set for a different account before.
      * </pre>
      */
-    public void setWorkloadSubdomain(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest request,
+    default void setWorkloadSubdomain(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetWorkloadSubdomainMethod(), responseObserver);
     }
@@ -4826,7 +4826,7 @@ public final class UserManagementGrpc {
      * interface should be deleted by called DeleteWorkloadMachineUser.
      * </pre>
      */
-    public void createWorkloadMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest request,
+    default void createWorkloadMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateWorkloadMachineUserMethod(), responseObserver);
     }
@@ -4838,7 +4838,7 @@ public final class UserManagementGrpc {
      * created a machine user using CreateWorkloadMachineUser.
      * </pre>
      */
-    public void deleteWorkloadMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest request,
+    default void deleteWorkloadMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteWorkloadMachineUserMethod(), responseObserver);
     }
@@ -4850,7 +4850,7 @@ public final class UserManagementGrpc {
      * for the workload administration group has been set yet.
      * </pre>
      */
-    public void getWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest request,
+    default void getWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetWorkloadAdministrationGroupNameMethod(), responseObserver);
     }
@@ -4863,7 +4863,7 @@ public final class UserManagementGrpc {
      * will be returned.
      * </pre>
      */
-    public void setWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest request,
+    default void setWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetWorkloadAdministrationGroupNameMethod(), responseObserver);
     }
@@ -4875,7 +4875,7 @@ public final class UserManagementGrpc {
      * can be found.
      * </pre>
      */
-    public void deleteWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest request,
+    default void deleteWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteWorkloadAdministrationGroupNameMethod(), responseObserver);
     }
@@ -4885,7 +4885,7 @@ public final class UserManagementGrpc {
      * Lists the workload administration groups in an account.
      * </pre>
      */
-    public void listWorkloadAdministrationGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest request,
+    default void listWorkloadAdministrationGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListWorkloadAdministrationGroupsMethod(), responseObserver);
     }
@@ -4896,7 +4896,7 @@ public final class UserManagementGrpc {
      * existing actor credentials.
      * </pre>
      */
-    public void setActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest request,
+    default void setActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetActorWorkloadCredentialsMethod(), responseObserver);
     }
@@ -4906,7 +4906,7 @@ public final class UserManagementGrpc {
      * Validates the actor workloads credentials based on the password policy for the account.
      * </pre>
      */
-    public void validateActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest request,
+    default void validateActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getValidateActorWorkloadCredentialsMethod(), responseObserver);
     }
@@ -4916,7 +4916,7 @@ public final class UserManagementGrpc {
      * Retrieves the actor workload credentials.
      * </pre>
      */
-    public void getActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request,
+    default void getActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetActorWorkloadCredentialsMethod(), responseObserver);
     }
@@ -4926,7 +4926,7 @@ public final class UserManagementGrpc {
      * Removes workload password minimum lifetime date for an actor.
      * </pre>
      */
-    public void unsetWorkloadPasswordMinLifetime(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeRequest request,
+    default void unsetWorkloadPasswordMinLifetime(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUnsetWorkloadPasswordMinLifetimeMethod(), responseObserver);
     }
@@ -4944,7 +4944,7 @@ public final class UserManagementGrpc {
      * since tracking started an empty string will be returned instead of an ID.
      * </pre>
      */
-    public void getEventGenerationIds(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest request,
+    default void getEventGenerationIds(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetEventGenerationIdsMethod(), responseObserver);
     }
@@ -4954,7 +4954,7 @@ public final class UserManagementGrpc {
      * Adds an SSH public key for an actor.
      * </pre>
      */
-    public void addActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest request,
+    default void addActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAddActorSshPublicKeyMethod(), responseObserver);
     }
@@ -4964,7 +4964,7 @@ public final class UserManagementGrpc {
      * Lists the SSH public keys for an actor.
      * </pre>
      */
-    public void listActorSshPublicKeys(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest request,
+    default void listActorSshPublicKeys(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListActorSshPublicKeysMethod(), responseObserver);
     }
@@ -4974,7 +4974,7 @@ public final class UserManagementGrpc {
      * Describes an SSH public key.
      * </pre>
      */
-    public void describeActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest request,
+    default void describeActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeActorSshPublicKeyMethod(), responseObserver);
     }
@@ -4984,7 +4984,7 @@ public final class UserManagementGrpc {
      * Deletes an SSH public key for an actor.
      * </pre>
      */
-    public void deleteActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest request,
+    default void deleteActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteActorSshPublicKeyMethod(), responseObserver);
     }
@@ -4994,7 +4994,7 @@ public final class UserManagementGrpc {
      * Sets the workload password policy for an account.
      * </pre>
      */
-    public void setWorkloadPasswordPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest request,
+    default void setWorkloadPasswordPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetWorkloadPasswordPolicyMethod(), responseObserver);
     }
@@ -5004,7 +5004,7 @@ public final class UserManagementGrpc {
      * Unsets the workload password policy for an account.
      * </pre>
      */
-    public void unsetWorkloadPasswordPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest request,
+    default void unsetWorkloadPasswordPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUnsetWorkloadPasswordPolicyMethod(), responseObserver);
     }
@@ -5014,7 +5014,7 @@ public final class UserManagementGrpc {
      * Sets the authentication policy for an account.
      * </pre>
      */
-    public void setAuthenticationPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest request,
+    default void setAuthenticationPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetAuthenticationPolicyMethod(), responseObserver);
     }
@@ -5024,7 +5024,7 @@ public final class UserManagementGrpc {
      * Assign a cloud identity to an actor or group.
      * </pre>
      */
-    public void assignCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest request,
+    default void assignCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAssignCloudIdentityMethod(), responseObserver);
     }
@@ -5034,7 +5034,7 @@ public final class UserManagementGrpc {
      * Unassign a cloud identity from an actor or group.
      * </pre>
      */
-    public void unassignCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest request,
+    default void unassignCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUnassignCloudIdentityMethod(), responseObserver);
     }
@@ -5044,7 +5044,7 @@ public final class UserManagementGrpc {
      * Assign a cloud identity to a service principal.
      * </pre>
      */
-    public void assignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest request,
+    default void assignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAssignServicePrincipalCloudIdentityMethod(), responseObserver);
     }
@@ -5054,7 +5054,7 @@ public final class UserManagementGrpc {
      * Unassign a cloud identity from a service principal.
      * </pre>
      */
-    public void unassignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest request,
+    default void unassignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUnassignServicePrincipalCloudIdentityMethod(), responseObserver);
     }
@@ -5064,7 +5064,7 @@ public final class UserManagementGrpc {
      * List cloud identity mappings for service principals.
      * </pre>
      */
-    public void listServicePrincipalCloudIdentities(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest request,
+    default void listServicePrincipalCloudIdentities(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListServicePrincipalCloudIdentitiesMethod(), responseObserver);
     }
@@ -5074,7 +5074,7 @@ public final class UserManagementGrpc {
      * Retrieves the CRN of the default identity provider connector used for CDP initiated logins.
      * </pre>
      */
-    public void getDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest request,
+    default void getDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetDefaultIdentityProviderConnectorMethod(), responseObserver);
     }
@@ -5084,7 +5084,7 @@ public final class UserManagementGrpc {
      * Sets the CRN of the default identity provider connector used for CDP initiated logins.
      * </pre>
      */
-    public void setDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest request,
+    default void setDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetDefaultIdentityProviderConnectorMethod(), responseObserver);
     }
@@ -5094,7 +5094,7 @@ public final class UserManagementGrpc {
      * Get user sync state model, including actors, groups, workload administration groups, etc
      * </pre>
      */
-    public void getUserSyncStateModel(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest request,
+    default void getUserSyncStateModel(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetUserSyncStateModelMethod(), responseObserver);
     }
@@ -5104,7 +5104,7 @@ public final class UserManagementGrpc {
      * List all role assignments in an account.
      * </pre>
      */
-    public void listRoleAssignments(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest request,
+    default void listRoleAssignments(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListRoleAssignmentsMethod(), responseObserver);
     }
@@ -5114,7 +5114,7 @@ public final class UserManagementGrpc {
      * Generate authentication token for workload API.
      * </pre>
      */
-    public void generateWorkloadAuthToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest request,
+    default void generateWorkloadAuthToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGenerateWorkloadAuthTokenMethod(), responseObserver);
     }
@@ -5124,7 +5124,7 @@ public final class UserManagementGrpc {
      * Get authentication configuration for workload API.
      * </pre>
      */
-    public void getWorkloadAuthConfiguration(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest request,
+    default void getWorkloadAuthConfiguration(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetWorkloadAuthConfigurationMethod(), responseObserver);
     }
@@ -5134,7 +5134,7 @@ public final class UserManagementGrpc {
      * Update user.
      * </pre>
      */
-    public void updateUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest request,
+    default void updateUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUpdateUserMethod(), responseObserver);
     }
@@ -5144,7 +5144,7 @@ public final class UserManagementGrpc {
      * Set Cloudera SSO strict mode for the account.
      * </pre>
      */
-    public void setCssoStrictMode(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeRequest request,
+    default void setCssoStrictMode(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetCssoStrictModeMethod(), responseObserver);
     }
@@ -5154,7 +5154,7 @@ public final class UserManagementGrpc {
      * Handles interactive logout requests from console.
      * </pre>
      */
-    public void interactiveLogout(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutRequest request,
+    default void interactiveLogout(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getInteractiveLogoutMethod(), responseObserver);
     }
@@ -5164,7 +5164,7 @@ public final class UserManagementGrpc {
      * Lists users for SCIM client. It's not a shared backend method for other services to call.
      * </pre>
      */
-    public void scimListUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersRequest request,
+    default void scimListUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getScimListUsersMethod(), responseObserver);
     }
@@ -5175,7 +5175,7 @@ public final class UserManagementGrpc {
      * services to call.
      * </pre>
      */
-    public void scimRemoveAllMembersFromGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupRequest request,
+    default void scimRemoveAllMembersFromGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getScimRemoveAllMembersFromGroupMethod(), responseObserver);
     }
@@ -5186,7 +5186,7 @@ public final class UserManagementGrpc {
      * services to call.
      * </pre>
      */
-    public void scimReplaceAllMembersOfGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupRequest request,
+    default void scimReplaceAllMembersOfGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getScimReplaceAllMembersOfGroupMethod(), responseObserver);
     }
@@ -5196,892 +5196,36 @@ public final class UserManagementGrpc {
      * SCIM call. Lists all groups. It's not a shared backend method for other services to call.
      * </pre>
      */
-    public void scimListGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsRequest request,
+    default void scimListGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getScimListGroupsMethod(), responseObserver);
-    }
-
-    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
-      return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
-          .addMethod(
-            getInteractiveLoginMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse>(
-                  this, METHODID_INTERACTIVE_LOGIN)))
-          .addMethod(
-            getInteractiveLogin3rdPartyMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse>(
-                  this, METHODID_INTERACTIVE_LOGIN3RD_PARTY)))
-          .addMethod(
-            getInteractiveLoginLocalMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse>(
-                  this, METHODID_INTERACTIVE_LOGIN_LOCAL)))
-          .addMethod(
-            getDeleteAccountMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountResponse>(
-                  this, METHODID_DELETE_ACCOUNT)))
-          .addMethod(
-            getDeleteActorMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorResponse>(
-                  this, METHODID_DELETE_ACTOR)))
-          .addMethod(
-            getDeleteTrialUserMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserResponse>(
-                  this, METHODID_DELETE_TRIAL_USER)))
-          .addMethod(
-            getGetAccessKeyVerificationDataMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataResponse>(
-                  this, METHODID_GET_ACCESS_KEY_VERIFICATION_DATA)))
-          .addMethod(
-            getVerifyInteractiveUserSessionTokenMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse>(
-                  this, METHODID_VERIFY_INTERACTIVE_USER_SESSION_TOKEN)))
-          .addMethod(
-            getVerifyAccessTokenMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse>(
-                  this, METHODID_VERIFY_ACCESS_TOKEN)))
-          .addMethod(
-            getAuthenticateMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse>(
-                  this, METHODID_AUTHENTICATE)))
-          .addMethod(
-            getAccessKeyUsageMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse>(
-                  this, METHODID_ACCESS_KEY_USAGE)))
-          .addMethod(
-            getCreateUserMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse>(
-                  this, METHODID_CREATE_USER)))
-          .addMethod(
-            getGetUserMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse>(
-                  this, METHODID_GET_USER)))
-          .addMethod(
-            getListUsersMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse>(
-                  this, METHODID_LIST_USERS)))
-          .addMethod(
-            getFindUsersByEmailMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse>(
-                  this, METHODID_FIND_USERS_BY_EMAIL)))
-          .addMethod(
-            getFindUsersMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse>(
-                  this, METHODID_FIND_USERS)))
-          .addMethod(
-            getCreateAccessKeyMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse>(
-                  this, METHODID_CREATE_ACCESS_KEY)))
-          .addMethod(
-            getUpdateAccessKeyMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyResponse>(
-                  this, METHODID_UPDATE_ACCESS_KEY)))
-          .addMethod(
-            getDeleteAccessKeyMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyResponse>(
-                  this, METHODID_DELETE_ACCESS_KEY)))
-          .addMethod(
-            getGetAccessKeyMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyResponse>(
-                  this, METHODID_GET_ACCESS_KEY)))
-          .addMethod(
-            getListAccessKeysMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse>(
-                  this, METHODID_LIST_ACCESS_KEYS)))
-          .addMethod(
-            getCreateAccessTokenMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse>(
-                  this, METHODID_CREATE_ACCESS_TOKEN)))
-          .addMethod(
-            getDeleteAccessTokenMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse>(
-                  this, METHODID_DELETE_ACCESS_TOKEN)))
-          .addMethod(
-            getGetAccessTokenMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse>(
-                  this, METHODID_GET_ACCESS_TOKEN)))
-          .addMethod(
-            getListAccessTokensMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse>(
-                  this, METHODID_LIST_ACCESS_TOKENS)))
-          .addMethod(
-            getCreateScimAccessTokenMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse>(
-                  this, METHODID_CREATE_SCIM_ACCESS_TOKEN)))
-          .addMethod(
-            getDeleteScimAccessTokenMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse>(
-                  this, METHODID_DELETE_SCIM_ACCESS_TOKEN)))
-          .addMethod(
-            getListScimAccessTokensMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse>(
-                  this, METHODID_LIST_SCIM_ACCESS_TOKENS)))
-          .addMethod(
-            getGetVersionMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-                com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
-                  this, METHODID_GET_VERSION)))
-          .addMethod(
-            getGetAccountMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse>(
-                  this, METHODID_GET_ACCOUNT)))
-          .addMethod(
-            getListAccountsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsResponse>(
-                  this, METHODID_LIST_ACCOUNTS)))
-          .addMethod(
-            getGetRightsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse>(
-                  this, METHODID_GET_RIGHTS)))
-          .addMethod(
-            getCheckRightsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsResponse>(
-                  this, METHODID_CHECK_RIGHTS)))
-          .addMethod(
-            getCreateAccountMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse>(
-                  this, METHODID_CREATE_ACCOUNT)))
-          .addMethod(
-            getCreateTrialAccountMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse>(
-                  this, METHODID_CREATE_TRIAL_ACCOUNT)))
-          .addMethod(
-            getCreateC1CAccountMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse>(
-                  this, METHODID_CREATE_C1CACCOUNT)))
-          .addMethod(
-            getVerifyC1CEmailMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse>(
-                  this, METHODID_VERIFY_C1CEMAIL)))
-          .addMethod(
-            getGrantEntitlementMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse>(
-                  this, METHODID_GRANT_ENTITLEMENT)))
-          .addMethod(
-            getRevokeEntitlementMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse>(
-                  this, METHODID_REVOKE_ENTITLEMENT)))
-          .addMethod(
-            getEnsureDefaultEntitlementsGrantedMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse>(
-                  this, METHODID_ENSURE_DEFAULT_ENTITLEMENTS_GRANTED)))
-          .addMethod(
-            getAssignRoleMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleResponse>(
-                  this, METHODID_ASSIGN_ROLE)))
-          .addMethod(
-            getUnassignRoleMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleResponse>(
-                  this, METHODID_UNASSIGN_ROLE)))
-          .addMethod(
-            getListAssignedRolesMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesResponse>(
-                  this, METHODID_LIST_ASSIGNED_ROLES)))
-          .addMethod(
-            getAssignResourceRoleMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleResponse>(
-                  this, METHODID_ASSIGN_RESOURCE_ROLE)))
-          .addMethod(
-            getUnassignResourceRoleMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleResponse>(
-                  this, METHODID_UNASSIGN_RESOURCE_ROLE)))
-          .addMethod(
-            getListAssignedResourceRolesMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesResponse>(
-                  this, METHODID_LIST_ASSIGNED_RESOURCE_ROLES)))
-          .addMethod(
-            getListRolesMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse>(
-                  this, METHODID_LIST_ROLES)))
-          .addMethod(
-            getListResourceRolesMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesResponse>(
-                  this, METHODID_LIST_RESOURCE_ROLES)))
-          .addMethod(
-            getListResourceAssigneesMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse>(
-                  this, METHODID_LIST_RESOURCE_ASSIGNEES)))
-          .addMethod(
-            getUpdateClouderaManagerLicenseKeyMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyResponse>(
-                  this, METHODID_UPDATE_CLOUDERA_MANAGER_LICENSE_KEY)))
-          .addMethod(
-            getInitiateSupportCaseMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseResponse>(
-                  this, METHODID_INITIATE_SUPPORT_CASE)))
-          .addMethod(
-            getNotifyResourceDeletedMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedResponse>(
-                  this, METHODID_NOTIFY_RESOURCE_DELETED)))
-          .addMethod(
-            getCreateMachineUserMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserResponse>(
-                  this, METHODID_CREATE_MACHINE_USER)))
-          .addMethod(
-            getListMachineUsersMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse>(
-                  this, METHODID_LIST_MACHINE_USERS)))
-          .addMethod(
-            getDeleteMachineUserMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserResponse>(
-                  this, METHODID_DELETE_MACHINE_USER)))
-          .addMethod(
-            getListResourceRoleAssignmentsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsResponse>(
-                  this, METHODID_LIST_RESOURCE_ROLE_ASSIGNMENTS)))
-          .addMethod(
-            getSetAccountMessagesMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesResponse>(
-                  this, METHODID_SET_ACCOUNT_MESSAGES)))
-          .addMethod(
-            getAcceptTermsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsResponse>(
-                  this, METHODID_ACCEPT_TERMS)))
-          .addMethod(
-            getClearAcceptedTermsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsResponse>(
-                  this, METHODID_CLEAR_ACCEPTED_TERMS)))
-          .addMethod(
-            getDescribeTermsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsResponse>(
-                  this, METHODID_DESCRIBE_TERMS)))
-          .addMethod(
-            getListTermsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse>(
-                  this, METHODID_LIST_TERMS)))
-          .addMethod(
-            getListEntitlementsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsResponse>(
-                  this, METHODID_LIST_ENTITLEMENTS)))
-          .addMethod(
-            getSetTermsAcceptanceExpiryMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryResponse>(
-                  this, METHODID_SET_TERMS_ACCEPTANCE_EXPIRY)))
-          .addMethod(
-            getConfirmAzureSubscriptionVerifiedMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedResponse>(
-                  this, METHODID_CONFIRM_AZURE_SUBSCRIPTION_VERIFIED)))
-          .addMethod(
-            getInsertAzureSubscriptionMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationResponse>(
-                  this, METHODID_INSERT_AZURE_SUBSCRIPTION)))
-          .addMethod(
-            getCreateGroupMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupResponse>(
-                  this, METHODID_CREATE_GROUP)))
-          .addMethod(
-            getDeleteGroupMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupResponse>(
-                  this, METHODID_DELETE_GROUP)))
-          .addMethod(
-            getGetGroupMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse>(
-                  this, METHODID_GET_GROUP)))
-          .addMethod(
-            getListGroupsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse>(
-                  this, METHODID_LIST_GROUPS)))
-          .addMethod(
-            getUpdateGroupMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse>(
-                  this, METHODID_UPDATE_GROUP)))
-          .addMethod(
-            getAddMemberToGroupMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupResponse>(
-                  this, METHODID_ADD_MEMBER_TO_GROUP)))
-          .addMethod(
-            getRemoveMemberFromGroupMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse>(
-                  this, METHODID_REMOVE_MEMBER_FROM_GROUP)))
-          .addMethod(
-            getListGroupMembersMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse>(
-                  this, METHODID_LIST_GROUP_MEMBERS)))
-          .addMethod(
-            getListGroupsForMemberMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse>(
-                  this, METHODID_LIST_GROUPS_FOR_MEMBER)))
-          .addMethod(
-            getListWorkloadAdministrationGroupsForMemberMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse>(
-                  this, METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS_FOR_MEMBER)))
-          .addMethod(
-            getCreateClusterSshPrivateKeyMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyResponse>(
-                  this, METHODID_CREATE_CLUSTER_SSH_PRIVATE_KEY)))
-          .addMethod(
-            getGetClusterSshPrivateKeyMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyResponse>(
-                  this, METHODID_GET_CLUSTER_SSH_PRIVATE_KEY)))
-          .addMethod(
-            getGetAssigneeAuthorizationInformationMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationResponse>(
-                  this, METHODID_GET_ASSIGNEE_AUTHORIZATION_INFORMATION)))
-          .addMethod(
-            getCreateIdentityProviderConnectorMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorResponse>(
-                  this, METHODID_CREATE_IDENTITY_PROVIDER_CONNECTOR)))
-          .addMethod(
-            getListIdentityProviderConnectorsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsResponse>(
-                  this, METHODID_LIST_IDENTITY_PROVIDER_CONNECTORS)))
-          .addMethod(
-            getDeleteIdentityProviderConnectorMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorResponse>(
-                  this, METHODID_DELETE_IDENTITY_PROVIDER_CONNECTOR)))
-          .addMethod(
-            getDescribeIdentityProviderConnectorMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorResponse>(
-                  this, METHODID_DESCRIBE_IDENTITY_PROVIDER_CONNECTOR)))
-          .addMethod(
-            getUpdateIdentityProviderConnectorMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorResponse>(
-                  this, METHODID_UPDATE_IDENTITY_PROVIDER_CONNECTOR)))
-          .addMethod(
-            getSetClouderaSSOLoginEnabledMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledResponse>(
-                  this, METHODID_SET_CLOUDERA_SSOLOGIN_ENABLED)))
-          .addMethod(
-            getGetIdPMetadataForWorkloadSSOMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse>(
-                  this, METHODID_GET_ID_PMETADATA_FOR_WORKLOAD_SSO)))
-          .addMethod(
-            getProcessWorkloadSSOAuthnReqMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse>(
-                  this, METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ)))
-          .addMethod(
-            getGenerateControlPlaneSSOAuthnReqMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse>(
-                  this, METHODID_GENERATE_CONTROL_PLANE_SSOAUTHN_REQ)))
-          .addMethod(
-            getSetWorkloadSubdomainMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse>(
-                  this, METHODID_SET_WORKLOAD_SUBDOMAIN)))
-          .addMethod(
-            getCreateWorkloadMachineUserMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse>(
-                  this, METHODID_CREATE_WORKLOAD_MACHINE_USER)))
-          .addMethod(
-            getDeleteWorkloadMachineUserMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse>(
-                  this, METHODID_DELETE_WORKLOAD_MACHINE_USER)))
-          .addMethod(
-            getGetWorkloadAdministrationGroupNameMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse>(
-                  this, METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME)))
-          .addMethod(
-            getSetWorkloadAdministrationGroupNameMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse>(
-                  this, METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME)))
-          .addMethod(
-            getDeleteWorkloadAdministrationGroupNameMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse>(
-                  this, METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME)))
-          .addMethod(
-            getListWorkloadAdministrationGroupsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse>(
-                  this, METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS)))
-          .addMethod(
-            getSetActorWorkloadCredentialsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse>(
-                  this, METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS)))
-          .addMethod(
-            getValidateActorWorkloadCredentialsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse>(
-                  this, METHODID_VALIDATE_ACTOR_WORKLOAD_CREDENTIALS)))
-          .addMethod(
-            getGetActorWorkloadCredentialsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse>(
-                  this, METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS)))
-          .addMethod(
-            getUnsetWorkloadPasswordMinLifetimeMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeResponse>(
-                  this, METHODID_UNSET_WORKLOAD_PASSWORD_MIN_LIFETIME)))
-          .addMethod(
-            getGetEventGenerationIdsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse>(
-                  this, METHODID_GET_EVENT_GENERATION_IDS)))
-          .addMethod(
-            getAddActorSshPublicKeyMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse>(
-                  this, METHODID_ADD_ACTOR_SSH_PUBLIC_KEY)))
-          .addMethod(
-            getListActorSshPublicKeysMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse>(
-                  this, METHODID_LIST_ACTOR_SSH_PUBLIC_KEYS)))
-          .addMethod(
-            getDescribeActorSshPublicKeyMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse>(
-                  this, METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY)))
-          .addMethod(
-            getDeleteActorSshPublicKeyMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse>(
-                  this, METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY)))
-          .addMethod(
-            getSetWorkloadPasswordPolicyMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse>(
-                  this, METHODID_SET_WORKLOAD_PASSWORD_POLICY)))
-          .addMethod(
-            getUnsetWorkloadPasswordPolicyMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse>(
-                  this, METHODID_UNSET_WORKLOAD_PASSWORD_POLICY)))
-          .addMethod(
-            getSetAuthenticationPolicyMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse>(
-                  this, METHODID_SET_AUTHENTICATION_POLICY)))
-          .addMethod(
-            getAssignCloudIdentityMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse>(
-                  this, METHODID_ASSIGN_CLOUD_IDENTITY)))
-          .addMethod(
-            getUnassignCloudIdentityMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse>(
-                  this, METHODID_UNASSIGN_CLOUD_IDENTITY)))
-          .addMethod(
-            getAssignServicePrincipalCloudIdentityMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse>(
-                  this, METHODID_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY)))
-          .addMethod(
-            getUnassignServicePrincipalCloudIdentityMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse>(
-                  this, METHODID_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY)))
-          .addMethod(
-            getListServicePrincipalCloudIdentitiesMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse>(
-                  this, METHODID_LIST_SERVICE_PRINCIPAL_CLOUD_IDENTITIES)))
-          .addMethod(
-            getGetDefaultIdentityProviderConnectorMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse>(
-                  this, METHODID_GET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR)))
-          .addMethod(
-            getSetDefaultIdentityProviderConnectorMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse>(
-                  this, METHODID_SET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR)))
-          .addMethod(
-            getGetUserSyncStateModelMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse>(
-                  this, METHODID_GET_USER_SYNC_STATE_MODEL)))
-          .addMethod(
-            getListRoleAssignmentsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse>(
-                  this, METHODID_LIST_ROLE_ASSIGNMENTS)))
-          .addMethod(
-            getGenerateWorkloadAuthTokenMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse>(
-                  this, METHODID_GENERATE_WORKLOAD_AUTH_TOKEN)))
-          .addMethod(
-            getGetWorkloadAuthConfigurationMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse>(
-                  this, METHODID_GET_WORKLOAD_AUTH_CONFIGURATION)))
-          .addMethod(
-            getUpdateUserMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse>(
-                  this, METHODID_UPDATE_USER)))
-          .addMethod(
-            getSetCssoStrictModeMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeResponse>(
-                  this, METHODID_SET_CSSO_STRICT_MODE)))
-          .addMethod(
-            getInteractiveLogoutMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutResponse>(
-                  this, METHODID_INTERACTIVE_LOGOUT)))
-          .addMethod(
-            getScimListUsersMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersResponse>(
-                  this, METHODID_SCIM_LIST_USERS)))
-          .addMethod(
-            getScimRemoveAllMembersFromGroupMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupResponse>(
-                  this, METHODID_SCIM_REMOVE_ALL_MEMBERS_FROM_GROUP)))
-          .addMethod(
-            getScimReplaceAllMembersOfGroupMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupResponse>(
-                  this, METHODID_SCIM_REPLACE_ALL_MEMBERS_OF_GROUP)))
-          .addMethod(
-            getScimListGroupsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsRequest,
-                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsResponse>(
-                  this, METHODID_SCIM_LIST_GROUPS)))
-          .build();
     }
   }
 
   /**
+   * Base class for the server implementation of the service UserManagement.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class UserManagementStub extends io.grpc.stub.AbstractAsyncStub<UserManagementStub> {
+  public static abstract class UserManagementImplBase
+      implements io.grpc.BindableService, AsyncService {
+
+    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+      return UserManagementGrpc.bindService(this);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do asynchronous rpc calls to service UserManagement.
+   * <pre>
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class UserManagementStub
+      extends io.grpc.stub.AbstractAsyncStub<UserManagementStub> {
     private UserManagementStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -7505,12 +6649,14 @@ public final class UserManagementGrpc {
   }
 
   /**
+   * A stub to allow clients to do synchronous rpc calls to service UserManagement.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class UserManagementBlockingStub extends io.grpc.stub.AbstractBlockingStub<UserManagementBlockingStub> {
+  public static final class UserManagementBlockingStub
+      extends io.grpc.stub.AbstractBlockingStub<UserManagementBlockingStub> {
     private UserManagementBlockingStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -8810,12 +7956,14 @@ public final class UserManagementGrpc {
   }
 
   /**
+   * A stub to allow clients to do ListenableFuture-style rpc calls to service UserManagement.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class UserManagementFutureStub extends io.grpc.stub.AbstractFutureStub<UserManagementFutureStub> {
+  public static final class UserManagementFutureStub
+      extends io.grpc.stub.AbstractFutureStub<UserManagementFutureStub> {
     private UserManagementFutureStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -10368,10 +9516,10 @@ public final class UserManagementGrpc {
       io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-    private final UserManagementImplBase serviceImpl;
+    private final AsyncService serviceImpl;
     private final int methodId;
 
-    MethodHandlers(UserManagementImplBase serviceImpl, int methodId) {
+    MethodHandlers(AsyncService serviceImpl, int methodId) {
       this.serviceImpl = serviceImpl;
       this.methodId = methodId;
     }
@@ -10892,6 +10040,879 @@ public final class UserManagementGrpc {
     }
   }
 
+  public static final io.grpc.ServerServiceDefinition bindService(AsyncService service) {
+    return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+        .addMethod(
+          getInteractiveLoginMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse>(
+                service, METHODID_INTERACTIVE_LOGIN)))
+        .addMethod(
+          getInteractiveLogin3rdPartyMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse>(
+                service, METHODID_INTERACTIVE_LOGIN3RD_PARTY)))
+        .addMethod(
+          getInteractiveLoginLocalMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse>(
+                service, METHODID_INTERACTIVE_LOGIN_LOCAL)))
+        .addMethod(
+          getDeleteAccountMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountResponse>(
+                service, METHODID_DELETE_ACCOUNT)))
+        .addMethod(
+          getDeleteActorMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorResponse>(
+                service, METHODID_DELETE_ACTOR)))
+        .addMethod(
+          getDeleteTrialUserMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserResponse>(
+                service, METHODID_DELETE_TRIAL_USER)))
+        .addMethod(
+          getGetAccessKeyVerificationDataMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataResponse>(
+                service, METHODID_GET_ACCESS_KEY_VERIFICATION_DATA)))
+        .addMethod(
+          getVerifyInteractiveUserSessionTokenMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse>(
+                service, METHODID_VERIFY_INTERACTIVE_USER_SESSION_TOKEN)))
+        .addMethod(
+          getVerifyAccessTokenMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse>(
+                service, METHODID_VERIFY_ACCESS_TOKEN)))
+        .addMethod(
+          getAuthenticateMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse>(
+                service, METHODID_AUTHENTICATE)))
+        .addMethod(
+          getAccessKeyUsageMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse>(
+                service, METHODID_ACCESS_KEY_USAGE)))
+        .addMethod(
+          getCreateUserMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse>(
+                service, METHODID_CREATE_USER)))
+        .addMethod(
+          getGetUserMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse>(
+                service, METHODID_GET_USER)))
+        .addMethod(
+          getListUsersMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse>(
+                service, METHODID_LIST_USERS)))
+        .addMethod(
+          getFindUsersByEmailMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse>(
+                service, METHODID_FIND_USERS_BY_EMAIL)))
+        .addMethod(
+          getFindUsersMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse>(
+                service, METHODID_FIND_USERS)))
+        .addMethod(
+          getCreateAccessKeyMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse>(
+                service, METHODID_CREATE_ACCESS_KEY)))
+        .addMethod(
+          getUpdateAccessKeyMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyResponse>(
+                service, METHODID_UPDATE_ACCESS_KEY)))
+        .addMethod(
+          getDeleteAccessKeyMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyResponse>(
+                service, METHODID_DELETE_ACCESS_KEY)))
+        .addMethod(
+          getGetAccessKeyMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyResponse>(
+                service, METHODID_GET_ACCESS_KEY)))
+        .addMethod(
+          getListAccessKeysMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse>(
+                service, METHODID_LIST_ACCESS_KEYS)))
+        .addMethod(
+          getCreateAccessTokenMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse>(
+                service, METHODID_CREATE_ACCESS_TOKEN)))
+        .addMethod(
+          getDeleteAccessTokenMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse>(
+                service, METHODID_DELETE_ACCESS_TOKEN)))
+        .addMethod(
+          getGetAccessTokenMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse>(
+                service, METHODID_GET_ACCESS_TOKEN)))
+        .addMethod(
+          getListAccessTokensMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse>(
+                service, METHODID_LIST_ACCESS_TOKENS)))
+        .addMethod(
+          getCreateScimAccessTokenMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse>(
+                service, METHODID_CREATE_SCIM_ACCESS_TOKEN)))
+        .addMethod(
+          getDeleteScimAccessTokenMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse>(
+                service, METHODID_DELETE_SCIM_ACCESS_TOKEN)))
+        .addMethod(
+          getListScimAccessTokensMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse>(
+                service, METHODID_LIST_SCIM_ACCESS_TOKENS)))
+        .addMethod(
+          getGetVersionMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
+              com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
+                service, METHODID_GET_VERSION)))
+        .addMethod(
+          getGetAccountMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse>(
+                service, METHODID_GET_ACCOUNT)))
+        .addMethod(
+          getListAccountsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsResponse>(
+                service, METHODID_LIST_ACCOUNTS)))
+        .addMethod(
+          getGetRightsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse>(
+                service, METHODID_GET_RIGHTS)))
+        .addMethod(
+          getCheckRightsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsResponse>(
+                service, METHODID_CHECK_RIGHTS)))
+        .addMethod(
+          getCreateAccountMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse>(
+                service, METHODID_CREATE_ACCOUNT)))
+        .addMethod(
+          getCreateTrialAccountMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse>(
+                service, METHODID_CREATE_TRIAL_ACCOUNT)))
+        .addMethod(
+          getCreateC1CAccountMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse>(
+                service, METHODID_CREATE_C1CACCOUNT)))
+        .addMethod(
+          getVerifyC1CEmailMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse>(
+                service, METHODID_VERIFY_C1CEMAIL)))
+        .addMethod(
+          getGrantEntitlementMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse>(
+                service, METHODID_GRANT_ENTITLEMENT)))
+        .addMethod(
+          getRevokeEntitlementMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse>(
+                service, METHODID_REVOKE_ENTITLEMENT)))
+        .addMethod(
+          getEnsureDefaultEntitlementsGrantedMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse>(
+                service, METHODID_ENSURE_DEFAULT_ENTITLEMENTS_GRANTED)))
+        .addMethod(
+          getAssignRoleMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleResponse>(
+                service, METHODID_ASSIGN_ROLE)))
+        .addMethod(
+          getUnassignRoleMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleResponse>(
+                service, METHODID_UNASSIGN_ROLE)))
+        .addMethod(
+          getListAssignedRolesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesResponse>(
+                service, METHODID_LIST_ASSIGNED_ROLES)))
+        .addMethod(
+          getAssignResourceRoleMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleResponse>(
+                service, METHODID_ASSIGN_RESOURCE_ROLE)))
+        .addMethod(
+          getUnassignResourceRoleMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleResponse>(
+                service, METHODID_UNASSIGN_RESOURCE_ROLE)))
+        .addMethod(
+          getListAssignedResourceRolesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesResponse>(
+                service, METHODID_LIST_ASSIGNED_RESOURCE_ROLES)))
+        .addMethod(
+          getListRolesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse>(
+                service, METHODID_LIST_ROLES)))
+        .addMethod(
+          getListResourceRolesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesResponse>(
+                service, METHODID_LIST_RESOURCE_ROLES)))
+        .addMethod(
+          getListResourceAssigneesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse>(
+                service, METHODID_LIST_RESOURCE_ASSIGNEES)))
+        .addMethod(
+          getUpdateClouderaManagerLicenseKeyMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyResponse>(
+                service, METHODID_UPDATE_CLOUDERA_MANAGER_LICENSE_KEY)))
+        .addMethod(
+          getInitiateSupportCaseMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseResponse>(
+                service, METHODID_INITIATE_SUPPORT_CASE)))
+        .addMethod(
+          getNotifyResourceDeletedMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedResponse>(
+                service, METHODID_NOTIFY_RESOURCE_DELETED)))
+        .addMethod(
+          getCreateMachineUserMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserResponse>(
+                service, METHODID_CREATE_MACHINE_USER)))
+        .addMethod(
+          getListMachineUsersMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse>(
+                service, METHODID_LIST_MACHINE_USERS)))
+        .addMethod(
+          getDeleteMachineUserMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserResponse>(
+                service, METHODID_DELETE_MACHINE_USER)))
+        .addMethod(
+          getListResourceRoleAssignmentsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsResponse>(
+                service, METHODID_LIST_RESOURCE_ROLE_ASSIGNMENTS)))
+        .addMethod(
+          getSetAccountMessagesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesResponse>(
+                service, METHODID_SET_ACCOUNT_MESSAGES)))
+        .addMethod(
+          getAcceptTermsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsResponse>(
+                service, METHODID_ACCEPT_TERMS)))
+        .addMethod(
+          getClearAcceptedTermsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsResponse>(
+                service, METHODID_CLEAR_ACCEPTED_TERMS)))
+        .addMethod(
+          getDescribeTermsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsResponse>(
+                service, METHODID_DESCRIBE_TERMS)))
+        .addMethod(
+          getListTermsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse>(
+                service, METHODID_LIST_TERMS)))
+        .addMethod(
+          getListEntitlementsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsResponse>(
+                service, METHODID_LIST_ENTITLEMENTS)))
+        .addMethod(
+          getSetTermsAcceptanceExpiryMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryResponse>(
+                service, METHODID_SET_TERMS_ACCEPTANCE_EXPIRY)))
+        .addMethod(
+          getConfirmAzureSubscriptionVerifiedMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedResponse>(
+                service, METHODID_CONFIRM_AZURE_SUBSCRIPTION_VERIFIED)))
+        .addMethod(
+          getInsertAzureSubscriptionMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationResponse>(
+                service, METHODID_INSERT_AZURE_SUBSCRIPTION)))
+        .addMethod(
+          getCreateGroupMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupResponse>(
+                service, METHODID_CREATE_GROUP)))
+        .addMethod(
+          getDeleteGroupMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupResponse>(
+                service, METHODID_DELETE_GROUP)))
+        .addMethod(
+          getGetGroupMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse>(
+                service, METHODID_GET_GROUP)))
+        .addMethod(
+          getListGroupsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse>(
+                service, METHODID_LIST_GROUPS)))
+        .addMethod(
+          getUpdateGroupMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse>(
+                service, METHODID_UPDATE_GROUP)))
+        .addMethod(
+          getAddMemberToGroupMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupResponse>(
+                service, METHODID_ADD_MEMBER_TO_GROUP)))
+        .addMethod(
+          getRemoveMemberFromGroupMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse>(
+                service, METHODID_REMOVE_MEMBER_FROM_GROUP)))
+        .addMethod(
+          getListGroupMembersMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse>(
+                service, METHODID_LIST_GROUP_MEMBERS)))
+        .addMethod(
+          getListGroupsForMemberMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse>(
+                service, METHODID_LIST_GROUPS_FOR_MEMBER)))
+        .addMethod(
+          getListWorkloadAdministrationGroupsForMemberMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse>(
+                service, METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS_FOR_MEMBER)))
+        .addMethod(
+          getCreateClusterSshPrivateKeyMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyResponse>(
+                service, METHODID_CREATE_CLUSTER_SSH_PRIVATE_KEY)))
+        .addMethod(
+          getGetClusterSshPrivateKeyMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyResponse>(
+                service, METHODID_GET_CLUSTER_SSH_PRIVATE_KEY)))
+        .addMethod(
+          getGetAssigneeAuthorizationInformationMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationResponse>(
+                service, METHODID_GET_ASSIGNEE_AUTHORIZATION_INFORMATION)))
+        .addMethod(
+          getCreateIdentityProviderConnectorMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorResponse>(
+                service, METHODID_CREATE_IDENTITY_PROVIDER_CONNECTOR)))
+        .addMethod(
+          getListIdentityProviderConnectorsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsResponse>(
+                service, METHODID_LIST_IDENTITY_PROVIDER_CONNECTORS)))
+        .addMethod(
+          getDeleteIdentityProviderConnectorMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorResponse>(
+                service, METHODID_DELETE_IDENTITY_PROVIDER_CONNECTOR)))
+        .addMethod(
+          getDescribeIdentityProviderConnectorMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorResponse>(
+                service, METHODID_DESCRIBE_IDENTITY_PROVIDER_CONNECTOR)))
+        .addMethod(
+          getUpdateIdentityProviderConnectorMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorResponse>(
+                service, METHODID_UPDATE_IDENTITY_PROVIDER_CONNECTOR)))
+        .addMethod(
+          getSetClouderaSSOLoginEnabledMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledResponse>(
+                service, METHODID_SET_CLOUDERA_SSOLOGIN_ENABLED)))
+        .addMethod(
+          getGetIdPMetadataForWorkloadSSOMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse>(
+                service, METHODID_GET_ID_PMETADATA_FOR_WORKLOAD_SSO)))
+        .addMethod(
+          getProcessWorkloadSSOAuthnReqMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse>(
+                service, METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ)))
+        .addMethod(
+          getGenerateControlPlaneSSOAuthnReqMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse>(
+                service, METHODID_GENERATE_CONTROL_PLANE_SSOAUTHN_REQ)))
+        .addMethod(
+          getSetWorkloadSubdomainMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse>(
+                service, METHODID_SET_WORKLOAD_SUBDOMAIN)))
+        .addMethod(
+          getCreateWorkloadMachineUserMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse>(
+                service, METHODID_CREATE_WORKLOAD_MACHINE_USER)))
+        .addMethod(
+          getDeleteWorkloadMachineUserMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse>(
+                service, METHODID_DELETE_WORKLOAD_MACHINE_USER)))
+        .addMethod(
+          getGetWorkloadAdministrationGroupNameMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse>(
+                service, METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME)))
+        .addMethod(
+          getSetWorkloadAdministrationGroupNameMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse>(
+                service, METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME)))
+        .addMethod(
+          getDeleteWorkloadAdministrationGroupNameMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse>(
+                service, METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME)))
+        .addMethod(
+          getListWorkloadAdministrationGroupsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse>(
+                service, METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS)))
+        .addMethod(
+          getSetActorWorkloadCredentialsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse>(
+                service, METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS)))
+        .addMethod(
+          getValidateActorWorkloadCredentialsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse>(
+                service, METHODID_VALIDATE_ACTOR_WORKLOAD_CREDENTIALS)))
+        .addMethod(
+          getGetActorWorkloadCredentialsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse>(
+                service, METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS)))
+        .addMethod(
+          getUnsetWorkloadPasswordMinLifetimeMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeResponse>(
+                service, METHODID_UNSET_WORKLOAD_PASSWORD_MIN_LIFETIME)))
+        .addMethod(
+          getGetEventGenerationIdsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse>(
+                service, METHODID_GET_EVENT_GENERATION_IDS)))
+        .addMethod(
+          getAddActorSshPublicKeyMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse>(
+                service, METHODID_ADD_ACTOR_SSH_PUBLIC_KEY)))
+        .addMethod(
+          getListActorSshPublicKeysMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse>(
+                service, METHODID_LIST_ACTOR_SSH_PUBLIC_KEYS)))
+        .addMethod(
+          getDescribeActorSshPublicKeyMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse>(
+                service, METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY)))
+        .addMethod(
+          getDeleteActorSshPublicKeyMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse>(
+                service, METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY)))
+        .addMethod(
+          getSetWorkloadPasswordPolicyMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse>(
+                service, METHODID_SET_WORKLOAD_PASSWORD_POLICY)))
+        .addMethod(
+          getUnsetWorkloadPasswordPolicyMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse>(
+                service, METHODID_UNSET_WORKLOAD_PASSWORD_POLICY)))
+        .addMethod(
+          getSetAuthenticationPolicyMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse>(
+                service, METHODID_SET_AUTHENTICATION_POLICY)))
+        .addMethod(
+          getAssignCloudIdentityMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse>(
+                service, METHODID_ASSIGN_CLOUD_IDENTITY)))
+        .addMethod(
+          getUnassignCloudIdentityMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse>(
+                service, METHODID_UNASSIGN_CLOUD_IDENTITY)))
+        .addMethod(
+          getAssignServicePrincipalCloudIdentityMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse>(
+                service, METHODID_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY)))
+        .addMethod(
+          getUnassignServicePrincipalCloudIdentityMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse>(
+                service, METHODID_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY)))
+        .addMethod(
+          getListServicePrincipalCloudIdentitiesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse>(
+                service, METHODID_LIST_SERVICE_PRINCIPAL_CLOUD_IDENTITIES)))
+        .addMethod(
+          getGetDefaultIdentityProviderConnectorMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse>(
+                service, METHODID_GET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR)))
+        .addMethod(
+          getSetDefaultIdentityProviderConnectorMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse>(
+                service, METHODID_SET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR)))
+        .addMethod(
+          getGetUserSyncStateModelMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse>(
+                service, METHODID_GET_USER_SYNC_STATE_MODEL)))
+        .addMethod(
+          getListRoleAssignmentsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse>(
+                service, METHODID_LIST_ROLE_ASSIGNMENTS)))
+        .addMethod(
+          getGenerateWorkloadAuthTokenMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse>(
+                service, METHODID_GENERATE_WORKLOAD_AUTH_TOKEN)))
+        .addMethod(
+          getGetWorkloadAuthConfigurationMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse>(
+                service, METHODID_GET_WORKLOAD_AUTH_CONFIGURATION)))
+        .addMethod(
+          getUpdateUserMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse>(
+                service, METHODID_UPDATE_USER)))
+        .addMethod(
+          getSetCssoStrictModeMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeResponse>(
+                service, METHODID_SET_CSSO_STRICT_MODE)))
+        .addMethod(
+          getInteractiveLogoutMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutResponse>(
+                service, METHODID_INTERACTIVE_LOGOUT)))
+        .addMethod(
+          getScimListUsersMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersResponse>(
+                service, METHODID_SCIM_LIST_USERS)))
+        .addMethod(
+          getScimRemoveAllMembersFromGroupMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupResponse>(
+                service, METHODID_SCIM_REMOVE_ALL_MEMBERS_FROM_GROUP)))
+        .addMethod(
+          getScimReplaceAllMembersOfGroupMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupResponse>(
+                service, METHODID_SCIM_REPLACE_ALL_MEMBERS_OF_GROUP)))
+        .addMethod(
+          getScimListGroupsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsRequest,
+              com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsResponse>(
+                service, METHODID_SCIM_LIST_GROUPS)))
+        .build();
+  }
+
   private static abstract class UserManagementBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
     UserManagementBaseDescriptorSupplier() {}
@@ -10915,9 +10936,9 @@ public final class UserManagementGrpc {
   private static final class UserManagementMethodDescriptorSupplier
       extends UserManagementBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
-    private final String methodName;
+    private final java.lang.String methodName;
 
-    UserManagementMethodDescriptorSupplier(String methodName) {
+    UserManagementMethodDescriptorSupplier(java.lang.String methodName) {
       this.methodName = methodName;
     }
 

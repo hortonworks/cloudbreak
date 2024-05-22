@@ -9,14 +9,14 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.53.0)",
+    value = "by gRPC proto compiler (version 1.64.0)",
     comments = "Source: minasshdmanagement.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class MinaSshdManagementGrpc {
 
   private MinaSshdManagementGrpc() {}
 
-  public static final String SERVICE_NAME = "minasshdmanagement.MinaSshdManagement";
+  public static final java.lang.String SERVICE_NAME = "minasshdmanagement.MinaSshdManagement";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
@@ -286,14 +286,14 @@ public final class MinaSshdManagementGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static abstract class MinaSshdManagementImplBase implements io.grpc.BindableService {
+  public interface AsyncService {
 
     /**
      * <pre>
      * Get the service version.
      * </pre>
      */
-    public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
+    default void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetVersionMethod(), responseObserver);
     }
@@ -308,7 +308,7 @@ public final class MinaSshdManagementGrpc {
      * initializing workflows may not have completed yet.
      * </pre>
      */
-    public void acquireMinaSshdService(com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.AcquireMinaSshdServiceRequest request,
+    default void acquireMinaSshdService(com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.AcquireMinaSshdServiceRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.AcquireMinaSshdServiceResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAcquireMinaSshdServiceMethod(), responseObserver);
     }
@@ -320,7 +320,7 @@ public final class MinaSshdManagementGrpc {
      * the public key for the server.
      * </pre>
      */
-    public void listMinaSshdServices(com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListMinaSshdServicesRequest request,
+    default void listMinaSshdServices(com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListMinaSshdServicesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListMinaSshdServicesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListMinaSshdServicesMethod(), responseObserver);
     }
@@ -332,7 +332,7 @@ public final class MinaSshdManagementGrpc {
      * MinaSshdService must be ready or this will fail.
      * </pre>
      */
-    public void generateAndRegisterSshTunnelingKeyPair(com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.GenerateAndRegisterSshTunnelingKeyPairRequest request,
+    default void generateAndRegisterSshTunnelingKeyPair(com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.GenerateAndRegisterSshTunnelingKeyPairRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.GenerateAndRegisterSshTunnelingKeyPairResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGenerateAndRegisterSshTunnelingKeyPairMethod(), responseObserver);
     }
@@ -346,7 +346,7 @@ public final class MinaSshdManagementGrpc {
      * MinaSshdService must be ready or this will fail.
      * </pre>
      */
-    public void registerSshTunnelingKey(com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.RegisterSshTunnelingKeyRequest request,
+    default void registerSshTunnelingKey(com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.RegisterSshTunnelingKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.RegisterSshTunnelingKeyResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRegisterSshTunnelingKeyMethod(), responseObserver);
     }
@@ -356,7 +356,7 @@ public final class MinaSshdManagementGrpc {
      * Unregister Ssh Tunneling Key
      * </pre>
      */
-    public void unregisterSshTunnelingKey(com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.UnregisterSshTunnelingKeyRequest request,
+    default void unregisterSshTunnelingKey(com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.UnregisterSshTunnelingKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.UnregisterSshTunnelingKeyResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUnregisterSshTunnelingKeyMethod(), responseObserver);
     }
@@ -366,73 +366,36 @@ public final class MinaSshdManagementGrpc {
      * For minaSshdService
      * </pre>
      */
-    public void listSshTunnelingKeys(com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListSshTunnelingKeysRequest request,
+    default void listSshTunnelingKeys(com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListSshTunnelingKeysRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListSshTunnelingKeysResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListSshTunnelingKeysMethod(), responseObserver);
-    }
-
-    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
-      return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
-          .addMethod(
-            getGetVersionMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-                com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
-                  this, METHODID_GET_VERSION)))
-          .addMethod(
-            getAcquireMinaSshdServiceMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.AcquireMinaSshdServiceRequest,
-                com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.AcquireMinaSshdServiceResponse>(
-                  this, METHODID_ACQUIRE_MINA_SSHD_SERVICE)))
-          .addMethod(
-            getListMinaSshdServicesMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListMinaSshdServicesRequest,
-                com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListMinaSshdServicesResponse>(
-                  this, METHODID_LIST_MINA_SSHD_SERVICES)))
-          .addMethod(
-            getGenerateAndRegisterSshTunnelingKeyPairMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.GenerateAndRegisterSshTunnelingKeyPairRequest,
-                com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.GenerateAndRegisterSshTunnelingKeyPairResponse>(
-                  this, METHODID_GENERATE_AND_REGISTER_SSH_TUNNELING_KEY_PAIR)))
-          .addMethod(
-            getRegisterSshTunnelingKeyMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.RegisterSshTunnelingKeyRequest,
-                com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.RegisterSshTunnelingKeyResponse>(
-                  this, METHODID_REGISTER_SSH_TUNNELING_KEY)))
-          .addMethod(
-            getUnregisterSshTunnelingKeyMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.UnregisterSshTunnelingKeyRequest,
-                com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.UnregisterSshTunnelingKeyResponse>(
-                  this, METHODID_UNREGISTER_SSH_TUNNELING_KEY)))
-          .addMethod(
-            getListSshTunnelingKeysMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListSshTunnelingKeysRequest,
-                com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListSshTunnelingKeysResponse>(
-                  this, METHODID_LIST_SSH_TUNNELING_KEYS)))
-          .build();
     }
   }
 
   /**
+   * Base class for the server implementation of the service MinaSshdManagement.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class MinaSshdManagementStub extends io.grpc.stub.AbstractAsyncStub<MinaSshdManagementStub> {
+  public static abstract class MinaSshdManagementImplBase
+      implements io.grpc.BindableService, AsyncService {
+
+    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+      return MinaSshdManagementGrpc.bindService(this);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do asynchronous rpc calls to service MinaSshdManagement.
+   * <pre>
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class MinaSshdManagementStub
+      extends io.grpc.stub.AbstractAsyncStub<MinaSshdManagementStub> {
     private MinaSshdManagementStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -536,12 +499,14 @@ public final class MinaSshdManagementGrpc {
   }
 
   /**
+   * A stub to allow clients to do synchronous rpc calls to service MinaSshdManagement.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class MinaSshdManagementBlockingStub extends io.grpc.stub.AbstractBlockingStub<MinaSshdManagementBlockingStub> {
+  public static final class MinaSshdManagementBlockingStub
+      extends io.grpc.stub.AbstractBlockingStub<MinaSshdManagementBlockingStub> {
     private MinaSshdManagementBlockingStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -638,12 +603,14 @@ public final class MinaSshdManagementGrpc {
   }
 
   /**
+   * A stub to allow clients to do ListenableFuture-style rpc calls to service MinaSshdManagement.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class MinaSshdManagementFutureStub extends io.grpc.stub.AbstractFutureStub<MinaSshdManagementFutureStub> {
+  public static final class MinaSshdManagementFutureStub
+      extends io.grpc.stub.AbstractFutureStub<MinaSshdManagementFutureStub> {
     private MinaSshdManagementFutureStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -759,10 +726,10 @@ public final class MinaSshdManagementGrpc {
       io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-    private final MinaSshdManagementImplBase serviceImpl;
+    private final AsyncService serviceImpl;
     private final int methodId;
 
-    MethodHandlers(MinaSshdManagementImplBase serviceImpl, int methodId) {
+    MethodHandlers(AsyncService serviceImpl, int methodId) {
       this.serviceImpl = serviceImpl;
       this.methodId = methodId;
     }
@@ -815,6 +782,60 @@ public final class MinaSshdManagementGrpc {
     }
   }
 
+  public static final io.grpc.ServerServiceDefinition bindService(AsyncService service) {
+    return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+        .addMethod(
+          getGetVersionMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
+              com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
+                service, METHODID_GET_VERSION)))
+        .addMethod(
+          getAcquireMinaSshdServiceMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.AcquireMinaSshdServiceRequest,
+              com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.AcquireMinaSshdServiceResponse>(
+                service, METHODID_ACQUIRE_MINA_SSHD_SERVICE)))
+        .addMethod(
+          getListMinaSshdServicesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListMinaSshdServicesRequest,
+              com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListMinaSshdServicesResponse>(
+                service, METHODID_LIST_MINA_SSHD_SERVICES)))
+        .addMethod(
+          getGenerateAndRegisterSshTunnelingKeyPairMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.GenerateAndRegisterSshTunnelingKeyPairRequest,
+              com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.GenerateAndRegisterSshTunnelingKeyPairResponse>(
+                service, METHODID_GENERATE_AND_REGISTER_SSH_TUNNELING_KEY_PAIR)))
+        .addMethod(
+          getRegisterSshTunnelingKeyMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.RegisterSshTunnelingKeyRequest,
+              com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.RegisterSshTunnelingKeyResponse>(
+                service, METHODID_REGISTER_SSH_TUNNELING_KEY)))
+        .addMethod(
+          getUnregisterSshTunnelingKeyMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.UnregisterSshTunnelingKeyRequest,
+              com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.UnregisterSshTunnelingKeyResponse>(
+                service, METHODID_UNREGISTER_SSH_TUNNELING_KEY)))
+        .addMethod(
+          getListSshTunnelingKeysMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListSshTunnelingKeysRequest,
+              com.cloudera.thunderhead.service.minasshdmanagement.MinaSshdManagementProto.ListSshTunnelingKeysResponse>(
+                service, METHODID_LIST_SSH_TUNNELING_KEYS)))
+        .build();
+  }
+
   private static abstract class MinaSshdManagementBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
     MinaSshdManagementBaseDescriptorSupplier() {}
@@ -838,9 +859,9 @@ public final class MinaSshdManagementGrpc {
   private static final class MinaSshdManagementMethodDescriptorSupplier
       extends MinaSshdManagementBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
-    private final String methodName;
+    private final java.lang.String methodName;
 
-    MinaSshdManagementMethodDescriptorSupplier(String methodName) {
+    MinaSshdManagementMethodDescriptorSupplier(java.lang.String methodName) {
       this.methodName = methodName;
     }
 

@@ -9,14 +9,14 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.53.0)",
+    value = "by gRPC proto compiler (version 1.64.0)",
     comments = "Source: personalresourceview.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class PersonalResourceViewGrpc {
 
   private PersonalResourceViewGrpc() {}
 
-  public static final String SERVICE_NAME = "authorization.PersonalResourceView";
+  public static final java.lang.String SERVICE_NAME = "authorization.PersonalResourceView";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
@@ -131,14 +131,14 @@ public final class PersonalResourceViewGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static abstract class PersonalResourceViewImplBase implements io.grpc.BindableService {
+  public interface AsyncService {
 
     /**
      * <pre>
      * Get the service version.
      * </pre>
      */
-    public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
+    default void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetVersionMethod(), responseObserver);
     }
@@ -149,38 +149,36 @@ public final class PersonalResourceViewGrpc {
      * personal view requested.
      * </pre>
      */
-    public void hasResourcesByRight(com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightRequest request,
+    default void hasResourcesByRight(com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getHasResourcesByRightMethod(), responseObserver);
-    }
-
-    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
-      return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
-          .addMethod(
-            getGetVersionMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-                com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
-                  this, METHODID_GET_VERSION)))
-          .addMethod(
-            getHasResourcesByRightMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightRequest,
-                com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightResponse>(
-                  this, METHODID_HAS_RESOURCES_BY_RIGHT)))
-          .build();
     }
   }
 
   /**
+   * Base class for the server implementation of the service PersonalResourceView.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class PersonalResourceViewStub extends io.grpc.stub.AbstractAsyncStub<PersonalResourceViewStub> {
+  public static abstract class PersonalResourceViewImplBase
+      implements io.grpc.BindableService, AsyncService {
+
+    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+      return PersonalResourceViewGrpc.bindService(this);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do asynchronous rpc calls to service PersonalResourceView.
+   * <pre>
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class PersonalResourceViewStub
+      extends io.grpc.stub.AbstractAsyncStub<PersonalResourceViewStub> {
     private PersonalResourceViewStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -217,12 +215,14 @@ public final class PersonalResourceViewGrpc {
   }
 
   /**
+   * A stub to allow clients to do synchronous rpc calls to service PersonalResourceView.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class PersonalResourceViewBlockingStub extends io.grpc.stub.AbstractBlockingStub<PersonalResourceViewBlockingStub> {
+  public static final class PersonalResourceViewBlockingStub
+      extends io.grpc.stub.AbstractBlockingStub<PersonalResourceViewBlockingStub> {
     private PersonalResourceViewBlockingStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -257,12 +257,14 @@ public final class PersonalResourceViewGrpc {
   }
 
   /**
+   * A stub to allow clients to do ListenableFuture-style rpc calls to service PersonalResourceView.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class PersonalResourceViewFutureStub extends io.grpc.stub.AbstractFutureStub<PersonalResourceViewFutureStub> {
+  public static final class PersonalResourceViewFutureStub
+      extends io.grpc.stub.AbstractFutureStub<PersonalResourceViewFutureStub> {
     private PersonalResourceViewFutureStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -306,10 +308,10 @@ public final class PersonalResourceViewGrpc {
       io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-    private final PersonalResourceViewImplBase serviceImpl;
+    private final AsyncService serviceImpl;
     private final int methodId;
 
-    MethodHandlers(PersonalResourceViewImplBase serviceImpl, int methodId) {
+    MethodHandlers(AsyncService serviceImpl, int methodId) {
       this.serviceImpl = serviceImpl;
       this.methodId = methodId;
     }
@@ -342,6 +344,25 @@ public final class PersonalResourceViewGrpc {
     }
   }
 
+  public static final io.grpc.ServerServiceDefinition bindService(AsyncService service) {
+    return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+        .addMethod(
+          getGetVersionMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
+              com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
+                service, METHODID_GET_VERSION)))
+        .addMethod(
+          getHasResourcesByRightMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightRequest,
+              com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightResponse>(
+                service, METHODID_HAS_RESOURCES_BY_RIGHT)))
+        .build();
+  }
+
   private static abstract class PersonalResourceViewBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
     PersonalResourceViewBaseDescriptorSupplier() {}
@@ -365,9 +386,9 @@ public final class PersonalResourceViewGrpc {
   private static final class PersonalResourceViewMethodDescriptorSupplier
       extends PersonalResourceViewBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
-    private final String methodName;
+    private final java.lang.String methodName;
 
-    PersonalResourceViewMethodDescriptorSupplier(String methodName) {
+    PersonalResourceViewMethodDescriptorSupplier(java.lang.String methodName) {
       this.methodName = methodName;
     }
 

@@ -9,14 +9,14 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.53.0)",
+    value = "by gRPC proto compiler (version 1.64.0)",
     comments = "Source: sigmadbus.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class SigmaDbusGrpc {
 
   private SigmaDbusGrpc() {}
 
-  public static final String SERVICE_NAME = "sigmadbus.SigmaDbus";
+  public static final java.lang.String SERVICE_NAME = "sigmadbus.SigmaDbus";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest,
@@ -193,14 +193,14 @@ public final class SigmaDbusGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static abstract class SigmaDbusImplBase implements io.grpc.BindableService {
+  public interface AsyncService {
 
     /**
      * <pre>
      * Put a new record.
      * </pre>
      */
-    public void putRecord(com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest request,
+    default void putRecord(com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.sigma.service.dbus.DbusProto.PutRecordResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getPutRecordMethod(), responseObserver);
     }
@@ -210,14 +210,14 @@ public final class SigmaDbusGrpc {
      * Get the service version
      * </pre>
      */
-    public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
+    default void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetVersionMethod(), responseObserver);
     }
 
     /**
      */
-    public void validateUuid(com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidRequest request,
+    default void validateUuid(com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getValidateUuidMethod(), responseObserver);
     }
@@ -227,52 +227,36 @@ public final class SigmaDbusGrpc {
      * notify about the file arrival (on prem)
      * </pre>
      */
-    public void notifyFileUpload(com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadRequest request,
+    default void notifyFileUpload(com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getNotifyFileUploadMethod(), responseObserver);
-    }
-
-    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
-      return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
-          .addMethod(
-            getPutRecordMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest,
-                com.cloudera.sigma.service.dbus.DbusProto.PutRecordResponse>(
-                  this, METHODID_PUT_RECORD)))
-          .addMethod(
-            getGetVersionMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-                com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
-                  this, METHODID_GET_VERSION)))
-          .addMethod(
-            getValidateUuidMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidRequest,
-                com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidResponse>(
-                  this, METHODID_VALIDATE_UUID)))
-          .addMethod(
-            getNotifyFileUploadMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadRequest,
-                com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadResponse>(
-                  this, METHODID_NOTIFY_FILE_UPLOAD)))
-          .build();
     }
   }
 
   /**
+   * Base class for the server implementation of the service SigmaDbus.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class SigmaDbusStub extends io.grpc.stub.AbstractAsyncStub<SigmaDbusStub> {
+  public static abstract class SigmaDbusImplBase
+      implements io.grpc.BindableService, AsyncService {
+
+    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+      return SigmaDbusGrpc.bindService(this);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do asynchronous rpc calls to service SigmaDbus.
+   * <pre>
+   * For future compatibility, all rpcs must take a request and return a response
+   * even if there is initially no content for these messages.
+   * </pre>
+   */
+  public static final class SigmaDbusStub
+      extends io.grpc.stub.AbstractAsyncStub<SigmaDbusStub> {
     private SigmaDbusStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -327,12 +311,14 @@ public final class SigmaDbusGrpc {
   }
 
   /**
+   * A stub to allow clients to do synchronous rpc calls to service SigmaDbus.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class SigmaDbusBlockingStub extends io.grpc.stub.AbstractBlockingStub<SigmaDbusBlockingStub> {
+  public static final class SigmaDbusBlockingStub
+      extends io.grpc.stub.AbstractBlockingStub<SigmaDbusBlockingStub> {
     private SigmaDbusBlockingStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -383,12 +369,14 @@ public final class SigmaDbusGrpc {
   }
 
   /**
+   * A stub to allow clients to do ListenableFuture-style rpc calls to service SigmaDbus.
    * <pre>
    * For future compatibility, all rpcs must take a request and return a response
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class SigmaDbusFutureStub extends io.grpc.stub.AbstractFutureStub<SigmaDbusFutureStub> {
+  public static final class SigmaDbusFutureStub
+      extends io.grpc.stub.AbstractFutureStub<SigmaDbusFutureStub> {
     private SigmaDbusFutureStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -452,10 +440,10 @@ public final class SigmaDbusGrpc {
       io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-    private final SigmaDbusImplBase serviceImpl;
+    private final AsyncService serviceImpl;
     private final int methodId;
 
-    MethodHandlers(SigmaDbusImplBase serviceImpl, int methodId) {
+    MethodHandlers(AsyncService serviceImpl, int methodId) {
       this.serviceImpl = serviceImpl;
       this.methodId = methodId;
     }
@@ -496,6 +484,39 @@ public final class SigmaDbusGrpc {
     }
   }
 
+  public static final io.grpc.ServerServiceDefinition bindService(AsyncService service) {
+    return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+        .addMethod(
+          getPutRecordMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest,
+              com.cloudera.sigma.service.dbus.DbusProto.PutRecordResponse>(
+                service, METHODID_PUT_RECORD)))
+        .addMethod(
+          getGetVersionMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
+              com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
+                service, METHODID_GET_VERSION)))
+        .addMethod(
+          getValidateUuidMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidRequest,
+              com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidResponse>(
+                service, METHODID_VALIDATE_UUID)))
+        .addMethod(
+          getNotifyFileUploadMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadRequest,
+              com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadResponse>(
+                service, METHODID_NOTIFY_FILE_UPLOAD)))
+        .build();
+  }
+
   private static abstract class SigmaDbusBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
     SigmaDbusBaseDescriptorSupplier() {}
@@ -519,9 +540,9 @@ public final class SigmaDbusGrpc {
   private static final class SigmaDbusMethodDescriptorSupplier
       extends SigmaDbusBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
-    private final String methodName;
+    private final java.lang.String methodName;
 
-    SigmaDbusMethodDescriptorSupplier(String methodName) {
+    SigmaDbusMethodDescriptorSupplier(java.lang.String methodName) {
       this.methodName = methodName;
     }
 

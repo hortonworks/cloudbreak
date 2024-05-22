@@ -8,14 +8,14 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.53.0)",
+    value = "by gRPC proto compiler (version 1.64.0)",
     comments = "Source: sdxsvcadmin.proto")
 @io.grpc.stub.annotations.GrpcGenerated
 public final class SDXSvcAdminGrpc {
 
   private SDXSvcAdminGrpc() {}
 
-  public static final String SERVICE_NAME = "sdxsvcadmin.SDXSvcAdmin";
+  public static final java.lang.String SERVICE_NAME = "sdxsvcadmin.SDXSvcAdmin";
 
   // Static method descriptors that strictly reflect the proto.
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudRegionsRequest,
@@ -1679,14 +1679,14 @@ public final class SDXSvcAdminGrpc {
    * Cloudera :: Defining sdxsvcAdmin API service
    * </pre>
    */
-  public static abstract class SDXSvcAdminImplBase implements io.grpc.BindableService {
+  public interface AsyncService {
 
     /**
      * <pre>
      * List the currently supported Cloud Regions. :: List the currently supported Cloud Regions.
      * </pre>
      */
-    public void listSupportedCloudRegions(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudRegionsRequest request,
+    default void listSupportedCloudRegions(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudRegionsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudRegionsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListSupportedCloudRegionsMethod(), responseObserver);
     }
@@ -1696,7 +1696,7 @@ public final class SDXSvcAdminGrpc {
      * List the currently supported Cloud Platforms. :: List the currently supported Cloud Platforms.
      * </pre>
      */
-    public void listSupportedCloudPlatforms(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudPlatformsRequest request,
+    default void listSupportedCloudPlatforms(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudPlatformsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudPlatformsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListSupportedCloudPlatformsMethod(), responseObserver);
     }
@@ -1706,7 +1706,7 @@ public final class SDXSvcAdminGrpc {
      * Add an SDX Service instance to a running SDX Instance. :: Add an SDX Service instance to a running SDX Instance.
      * </pre>
      */
-    public void addService(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.AddServiceRequest request,
+    default void addService(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.AddServiceRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.AddServiceResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAddServiceMethod(), responseObserver);
     }
@@ -1716,7 +1716,7 @@ public final class SDXSvcAdminGrpc {
      * Remove an SDX Service instance from an SDX Instance. :: Remove an SDX Service instance from an SDX Instance.
      * </pre>
      */
-    public void removeService(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RemoveServiceRequest request,
+    default void removeService(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RemoveServiceRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RemoveServiceResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRemoveServiceMethod(), responseObserver);
     }
@@ -1726,7 +1726,7 @@ public final class SDXSvcAdminGrpc {
      * Describe an SDX Service instance in an SDX Instance. :: Describe an SDX Service instance in an SDX Instance.
      * </pre>
      */
-    public void describeService(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeServiceRequest request,
+    default void describeService(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeServiceRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeServiceResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeServiceMethod(), responseObserver);
     }
@@ -1736,7 +1736,7 @@ public final class SDXSvcAdminGrpc {
      * Restart an SDX Service instance in an SDX Instance. :: Restart an SDX Service instance in an SDX Instance.
      * </pre>
      */
-    public void requestServiceRestart(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceRestartRequest request,
+    default void requestServiceRestart(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceRestartRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceRestartResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRequestServiceRestartMethod(), responseObserver);
     }
@@ -1746,7 +1746,7 @@ public final class SDXSvcAdminGrpc {
      * Suspend an SDX Service instance in an SDX Instance. :: Suspend an SDX Service instance in an SDX Instance.
      * </pre>
      */
-    public void requestServiceSuspend(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceSuspendRequest request,
+    default void requestServiceSuspend(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceSuspendRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceSuspendResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRequestServiceSuspendMethod(), responseObserver);
     }
@@ -1756,7 +1756,7 @@ public final class SDXSvcAdminGrpc {
      * Start an SDX Service instance in an SDX Instance. :: Start an SDX Service instance in an SDX Instance.
      * </pre>
      */
-    public void requestServiceStart(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceStartRequest request,
+    default void requestServiceStart(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceStartRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceStartResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRequestServiceStartMethod(), responseObserver);
     }
@@ -1766,7 +1766,7 @@ public final class SDXSvcAdminGrpc {
      * Upgrade an SDX Service instance in an SDX Instance. :: Upgrade an SDX Service instance in an SDX Instance.
      * </pre>
      */
-    public void requestServiceUpgrade(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceUpgradeRequest request,
+    default void requestServiceUpgrade(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceUpgradeRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceUpgradeResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRequestServiceUpgradeMethod(), responseObserver);
     }
@@ -1776,7 +1776,7 @@ public final class SDXSvcAdminGrpc {
      * Check a request on an SDX Service instance. :: Check a request on an SDX Service instance.
      * </pre>
      */
-    public void checkServiceRequest(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckServiceRequestRequest request,
+    default void checkServiceRequest(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckServiceRequestRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckServiceRequestResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCheckServiceRequestMethod(), responseObserver);
     }
@@ -1786,7 +1786,7 @@ public final class SDXSvcAdminGrpc {
      * List all available versions of an SDX Service. :: List all available versions of an SDX Service.
      * </pre>
      */
-    public void listServiceVersions(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListServiceVersionsRequest request,
+    default void listServiceVersions(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListServiceVersionsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListServiceVersionsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListServiceVersionsMethod(), responseObserver);
     }
@@ -1796,7 +1796,7 @@ public final class SDXSvcAdminGrpc {
      * Create an SDX Instance. :: Create an SDX Instance.
      * </pre>
      */
-    public void createInstance(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateInstanceRequest request,
+    default void createInstance(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateInstanceRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateInstanceResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateInstanceMethod(), responseObserver);
     }
@@ -1806,7 +1806,7 @@ public final class SDXSvcAdminGrpc {
      * Request to move the SDX Instance to a different Operational Environment. :: Request to move the SDX Instance to a different Operational Environment.
      * </pre>
      */
-    public void requestMoveInstanceToOperationalEnvironment(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestMoveInstanceToOperationalEnvironmentRequest request,
+    default void requestMoveInstanceToOperationalEnvironment(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestMoveInstanceToOperationalEnvironmentRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestMoveInstanceToOperationalEnvironmentResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRequestMoveInstanceToOperationalEnvironmentMethod(), responseObserver);
     }
@@ -1816,7 +1816,7 @@ public final class SDXSvcAdminGrpc {
      * Pair a CDP Environment to an SDX Instance. :: Pair a CDP Environment to an SDX Instance.
      * </pre>
      */
-    public void pairEnvironmentToInstance(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.PairEnvironmentToInstanceRequest request,
+    default void pairEnvironmentToInstance(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.PairEnvironmentToInstanceRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.PairEnvironmentToInstanceResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getPairEnvironmentToInstanceMethod(), responseObserver);
     }
@@ -1826,7 +1826,7 @@ public final class SDXSvcAdminGrpc {
      * Unpair a CDP Environment from an SDX Instance. :: Unpair a CDP Environment from an SDX Instance.
      * </pre>
      */
-    public void unpairEnvironmentFromInstance(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnpairEnvironmentFromInstanceRequest request,
+    default void unpairEnvironmentFromInstance(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnpairEnvironmentFromInstanceRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnpairEnvironmentFromInstanceResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUnpairEnvironmentFromInstanceMethod(), responseObserver);
     }
@@ -1836,7 +1836,7 @@ public final class SDXSvcAdminGrpc {
      * Delete an SDX Instance. :: Delete an SDX Instance.
      * </pre>
      */
-    public void deleteInstance(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteInstanceRequest request,
+    default void deleteInstance(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteInstanceRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteInstanceResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteInstanceMethod(), responseObserver);
     }
@@ -1846,7 +1846,7 @@ public final class SDXSvcAdminGrpc {
      * Describe an SDX Instance. :: Describe an SDX Instance.
      * </pre>
      */
-    public void describeInstance(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeInstanceRequest request,
+    default void describeInstance(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeInstanceRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeInstanceResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeInstanceMethod(), responseObserver);
     }
@@ -1856,7 +1856,7 @@ public final class SDXSvcAdminGrpc {
      * List all SDX Instances. :: List all SDX Instances.
      * </pre>
      */
-    public void listInstances(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListInstancesRequest request,
+    default void listInstances(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListInstancesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListInstancesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListInstancesMethod(), responseObserver);
     }
@@ -1866,7 +1866,7 @@ public final class SDXSvcAdminGrpc {
      * Find SDX Instances based on criteria. :: Find SDX Instances based on criteria.
      * </pre>
      */
-    public void findInstances(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindInstancesRequest request,
+    default void findInstances(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindInstancesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindInstancesResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getFindInstancesMethod(), responseObserver);
     }
@@ -1876,7 +1876,7 @@ public final class SDXSvcAdminGrpc {
      * Request the stop of all SDX Services in an SDX Instance. :: Request the stop of all SDX Services in an SDX Instance.
      * </pre>
      */
-    public void requestInstanceStop(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStopRequest request,
+    default void requestInstanceStop(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStopRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStopResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRequestInstanceStopMethod(), responseObserver);
     }
@@ -1886,7 +1886,7 @@ public final class SDXSvcAdminGrpc {
      * Request the start of all SDX Services in an SDX Instance. :: Request the start of all SDX Services in an SDX Instance.
      * </pre>
      */
-    public void requestInstanceStart(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStartRequest request,
+    default void requestInstanceStart(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStartRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStartResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRequestInstanceStartMethod(), responseObserver);
     }
@@ -1896,7 +1896,7 @@ public final class SDXSvcAdminGrpc {
      * Request the restart of all SDX Services in an SDX Instance. :: Request the restart of all SDX Services in an SDX Instance.
      * </pre>
      */
-    public void requestInstanceRestart(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceRestartRequest request,
+    default void requestInstanceRestart(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceRestartRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceRestartResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRequestInstanceRestartMethod(), responseObserver);
     }
@@ -1906,7 +1906,7 @@ public final class SDXSvcAdminGrpc {
      * Check a request on an SDX Instance.  :: Check a request on an SDX Instance.
      * </pre>
      */
-    public void checkInstanceRequest(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckInstanceRequestRequest request,
+    default void checkInstanceRequest(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckInstanceRequestRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckInstanceRequestResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCheckInstanceRequestMethod(), responseObserver);
     }
@@ -1916,7 +1916,7 @@ public final class SDXSvcAdminGrpc {
      * Create an AWS PrivateLink Connection. :: Create a connection to SDX as a Service via AWS PrivateLink.
      * </pre>
      */
-    public void createAwsPrivatelinkConnection(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionRequest request,
+    default void createAwsPrivatelinkConnection(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateAwsPrivatelinkConnectionMethod(), responseObserver);
     }
@@ -1926,7 +1926,7 @@ public final class SDXSvcAdminGrpc {
      * Create an AWS PrivateLink Connection for the Hms Database. :: Create a connection to SDX as a Service via AWS PrivateLink.  This is a CDPaaS feature only and will not be used for PaaS.
      * </pre>
      */
-    public void createAwsPrivatelinkConnectionForHmsDatabase(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionForHmsDatabaseRequest request,
+    default void createAwsPrivatelinkConnectionForHmsDatabase(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionForHmsDatabaseRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionForHmsDatabaseResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateAwsPrivatelinkConnectionForHmsDatabaseMethod(), responseObserver);
     }
@@ -1936,7 +1936,7 @@ public final class SDXSvcAdminGrpc {
      * Delete an SDX Connection. :: Delete an SDX Connection.
      * </pre>
      */
-    public void deleteConnection(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteConnectionRequest request,
+    default void deleteConnection(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteConnectionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteConnectionResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteConnectionMethod(), responseObserver);
     }
@@ -1946,7 +1946,7 @@ public final class SDXSvcAdminGrpc {
      * Describe an SDX Connection. :: Describe an SDX Connection.
      * </pre>
      */
-    public void describeConnection(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeConnectionRequest request,
+    default void describeConnection(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeConnectionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeConnectionResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeConnectionMethod(), responseObserver);
     }
@@ -1956,7 +1956,7 @@ public final class SDXSvcAdminGrpc {
      * Lists all SDX Connections. :: Lists all SDX Connections.
      * </pre>
      */
-    public void listConnections(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListConnectionsRequest request,
+    default void listConnections(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListConnectionsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListConnectionsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListConnectionsMethod(), responseObserver);
     }
@@ -1966,7 +1966,7 @@ public final class SDXSvcAdminGrpc {
      * Register an Operational Environment with the SDX Resource Manager. :: Register an Operational Environment with the SDX Resource Manager.
      * </pre>
      */
-    public void registerOperationalEnvironment(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterOperationalEnvironmentRequest request,
+    default void registerOperationalEnvironment(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterOperationalEnvironmentRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterOperationalEnvironmentResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRegisterOperationalEnvironmentMethod(), responseObserver);
     }
@@ -1976,7 +1976,7 @@ public final class SDXSvcAdminGrpc {
      * Unregister an Operational Environment from the SDX Resource Manager. :: Unregister an Operational Environment from the SDX Resource Manager.
      * </pre>
      */
-    public void unregisterOperationalEnvironment(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterOperationalEnvironmentRequest request,
+    default void unregisterOperationalEnvironment(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterOperationalEnvironmentRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterOperationalEnvironmentResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUnregisterOperationalEnvironmentMethod(), responseObserver);
     }
@@ -1986,7 +1986,7 @@ public final class SDXSvcAdminGrpc {
      * Describe an Operational Environment. :: Describe an Operational Environment.
      * </pre>
      */
-    public void describeOperationalEnvironment(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeOperationalEnvironmentRequest request,
+    default void describeOperationalEnvironment(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeOperationalEnvironmentRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeOperationalEnvironmentResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeOperationalEnvironmentMethod(), responseObserver);
     }
@@ -1996,7 +1996,7 @@ public final class SDXSvcAdminGrpc {
      * Lists the registered Operational Environments. :: Lists the registered Operation Environments.
      * </pre>
      */
-    public void listOperationalEnvironments(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListOperationalEnvironmentsRequest request,
+    default void listOperationalEnvironments(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListOperationalEnvironmentsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListOperationalEnvironmentsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListOperationalEnvironmentsMethod(), responseObserver);
     }
@@ -2006,7 +2006,7 @@ public final class SDXSvcAdminGrpc {
      * Find the registered Operational Environments based on criteria. :: Find the registered Operational Environments based on criteria.
      * </pre>
      */
-    public void findOperationalEnvironments(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindOperationalEnvironmentsRequest request,
+    default void findOperationalEnvironments(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindOperationalEnvironmentsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindOperationalEnvironmentsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getFindOperationalEnvironmentsMethod(), responseObserver);
     }
@@ -2016,7 +2016,7 @@ public final class SDXSvcAdminGrpc {
      * Set the assignability flag of an Operational Environment. :: Set the assignability flag of an Operational Environment.
      * </pre>
      */
-    public void setOperationalEnvironmentAssignability(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetOperationalEnvironmentAssignabilityRequest request,
+    default void setOperationalEnvironmentAssignability(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetOperationalEnvironmentAssignabilityRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetOperationalEnvironmentAssignabilityResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetOperationalEnvironmentAssignabilityMethod(), responseObserver);
     }
@@ -2026,7 +2026,7 @@ public final class SDXSvcAdminGrpc {
      * Register an AWS OpenSearch instance as a shared indexer. :: Register an AWS OpenSearch instance as a shared indexer.
      * </pre>
      */
-    public void registerAwsOpenSearchIndexer(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsOpenSearchIndexerRequest request,
+    default void registerAwsOpenSearchIndexer(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsOpenSearchIndexerRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsOpenSearchIndexerResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRegisterAwsOpenSearchIndexerMethod(), responseObserver);
     }
@@ -2036,7 +2036,7 @@ public final class SDXSvcAdminGrpc {
      * Unregister an Indexer instance as a shared indexer. :: Unregister an Indexer instance as a shared indexer.
      * </pre>
      */
-    public void unregisterIndexer(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterIndexerRequest request,
+    default void unregisterIndexer(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterIndexerRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterIndexerResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUnregisterIndexerMethod(), responseObserver);
     }
@@ -2046,7 +2046,7 @@ public final class SDXSvcAdminGrpc {
      * Describe an Indexer instance. :: Describe an Indexer instance.
      * </pre>
      */
-    public void describeIndexer(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeIndexerRequest request,
+    default void describeIndexer(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeIndexerRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeIndexerResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeIndexerMethod(), responseObserver);
     }
@@ -2056,7 +2056,7 @@ public final class SDXSvcAdminGrpc {
      * List Indexer instances.  :: List Indexer instances.
      * </pre>
      */
-    public void listIndexers(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListIndexersRequest request,
+    default void listIndexers(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListIndexersRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListIndexersResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListIndexersMethod(), responseObserver);
     }
@@ -2066,7 +2066,7 @@ public final class SDXSvcAdminGrpc {
      * Find Indexer instances based on criteria. :: Find Indexer instances based on criteria.
      * </pre>
      */
-    public void findIndexers(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindIndexersRequest request,
+    default void findIndexers(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindIndexersRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindIndexersResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getFindIndexersMethod(), responseObserver);
     }
@@ -2076,7 +2076,7 @@ public final class SDXSvcAdminGrpc {
      * Set the assignability flag of a shared Indexer. :: Set the assignability flag of a shared Indexer.
      * </pre>
      */
-    public void setIndexerAssignability(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetIndexerAssignabilityRequest request,
+    default void setIndexerAssignability(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetIndexerAssignabilityRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetIndexerAssignabilityResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetIndexerAssignabilityMethod(), responseObserver);
     }
@@ -2086,7 +2086,7 @@ public final class SDXSvcAdminGrpc {
      * Register an AWS Object Storage root. :: Register an AWS Object Storage root.
      * </pre>
      */
-    public void registerAwsObjectStorageRoot(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsObjectStorageRootRequest request,
+    default void registerAwsObjectStorageRoot(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsObjectStorageRootRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsObjectStorageRootResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRegisterAwsObjectStorageRootMethod(), responseObserver);
     }
@@ -2096,7 +2096,7 @@ public final class SDXSvcAdminGrpc {
      * Unregister a Storage Root. :: Unregister a Storage Root.
      * </pre>
      */
-    public void unregisterStorageRoot(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterStorageRootRequest request,
+    default void unregisterStorageRoot(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterStorageRootRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterStorageRootResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUnregisterStorageRootMethod(), responseObserver);
     }
@@ -2106,7 +2106,7 @@ public final class SDXSvcAdminGrpc {
      * Describe a Storage Root instance. :: Describe a Storage Root instance.
      * </pre>
      */
-    public void describeStorageRoot(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeStorageRootRequest request,
+    default void describeStorageRoot(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeStorageRootRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeStorageRootResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeStorageRootMethod(), responseObserver);
     }
@@ -2116,7 +2116,7 @@ public final class SDXSvcAdminGrpc {
      * List Storage Root instances.  :: List Storage Root instances.
      * </pre>
      */
-    public void listStorageRoots(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListStorageRootsRequest request,
+    default void listStorageRoots(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListStorageRootsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListStorageRootsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListStorageRootsMethod(), responseObserver);
     }
@@ -2126,7 +2126,7 @@ public final class SDXSvcAdminGrpc {
      * Find Storage Root instances based on criteria. :: Find Storage Root instances based on criteria.
      * </pre>
      */
-    public void findStorageRoots(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindStorageRootsRequest request,
+    default void findStorageRoots(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindStorageRootsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindStorageRootsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getFindStorageRootsMethod(), responseObserver);
     }
@@ -2136,7 +2136,7 @@ public final class SDXSvcAdminGrpc {
      * Set the assignability flag of a Storage Root. :: Set the assignability flag of a Storage Root.
      * </pre>
      */
-    public void setStorageRootAssignability(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetStorageRootAssignabilityRequest request,
+    default void setStorageRootAssignability(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetStorageRootAssignabilityRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetStorageRootAssignabilityResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetStorageRootAssignabilityMethod(), responseObserver);
     }
@@ -2146,7 +2146,7 @@ public final class SDXSvcAdminGrpc {
      * Register an AWS RDBMS as a shared Database Storage Provider. :: Register an AWS RDBMS as a shared Database Storage Provider.
      * </pre>
      */
-    public void registerAwsRdbms(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsRdbmsRequest request,
+    default void registerAwsRdbms(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsRdbmsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsRdbmsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRegisterAwsRdbmsMethod(), responseObserver);
     }
@@ -2156,7 +2156,7 @@ public final class SDXSvcAdminGrpc {
      * Unregister a RDBMS as a shared Database Storage Provider. :: Unregister a RDBMS as a shared Database Storage Provider.
      * </pre>
      */
-    public void unregisterRdbms(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterRdbmsRequest request,
+    default void unregisterRdbms(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterRdbmsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterRdbmsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUnregisterRdbmsMethod(), responseObserver);
     }
@@ -2166,7 +2166,7 @@ public final class SDXSvcAdminGrpc {
      * Describe a registered RDBMS instance. :: Describe a registered RDBMS instance.
      * </pre>
      */
-    public void describeRdbms(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeRdbmsRequest request,
+    default void describeRdbms(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeRdbmsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeRdbmsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeRdbmsMethod(), responseObserver);
     }
@@ -2176,7 +2176,7 @@ public final class SDXSvcAdminGrpc {
      * Find the registered RDBMS instances based on criteria. :: Find the registered RDBMS instances based on criteria.
      * </pre>
      */
-    public void findRdbms(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindRdbmsRequest request,
+    default void findRdbms(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindRdbmsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindRdbmsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getFindRdbmsMethod(), responseObserver);
     }
@@ -2186,7 +2186,7 @@ public final class SDXSvcAdminGrpc {
      * List the registered RDBMS instances. :: List the registered RDBMS instances.
      * </pre>
      */
-    public void listRdbms(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListRdbmsRequest request,
+    default void listRdbms(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListRdbmsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListRdbmsResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListRdbmsMethod(), responseObserver);
     }
@@ -2196,387 +2196,34 @@ public final class SDXSvcAdminGrpc {
      * Set the assignability flag of a shared RDBMS instance. :: Set the assignability flag of a shared RDBMS instance.
      * </pre>
      */
-    public void setRdbmsAssignability(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetRdbmsAssignabilityRequest request,
+    default void setRdbmsAssignability(com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetRdbmsAssignabilityRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetRdbmsAssignabilityResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetRdbmsAssignabilityMethod(), responseObserver);
-    }
-
-    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
-      return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
-          .addMethod(
-            getListSupportedCloudRegionsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudRegionsRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudRegionsResponse>(
-                  this, METHODID_LIST_SUPPORTED_CLOUD_REGIONS)))
-          .addMethod(
-            getListSupportedCloudPlatformsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudPlatformsRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudPlatformsResponse>(
-                  this, METHODID_LIST_SUPPORTED_CLOUD_PLATFORMS)))
-          .addMethod(
-            getAddServiceMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.AddServiceRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.AddServiceResponse>(
-                  this, METHODID_ADD_SERVICE)))
-          .addMethod(
-            getRemoveServiceMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RemoveServiceRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RemoveServiceResponse>(
-                  this, METHODID_REMOVE_SERVICE)))
-          .addMethod(
-            getDescribeServiceMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeServiceRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeServiceResponse>(
-                  this, METHODID_DESCRIBE_SERVICE)))
-          .addMethod(
-            getRequestServiceRestartMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceRestartRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceRestartResponse>(
-                  this, METHODID_REQUEST_SERVICE_RESTART)))
-          .addMethod(
-            getRequestServiceSuspendMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceSuspendRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceSuspendResponse>(
-                  this, METHODID_REQUEST_SERVICE_SUSPEND)))
-          .addMethod(
-            getRequestServiceStartMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceStartRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceStartResponse>(
-                  this, METHODID_REQUEST_SERVICE_START)))
-          .addMethod(
-            getRequestServiceUpgradeMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceUpgradeRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceUpgradeResponse>(
-                  this, METHODID_REQUEST_SERVICE_UPGRADE)))
-          .addMethod(
-            getCheckServiceRequestMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckServiceRequestRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckServiceRequestResponse>(
-                  this, METHODID_CHECK_SERVICE_REQUEST)))
-          .addMethod(
-            getListServiceVersionsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListServiceVersionsRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListServiceVersionsResponse>(
-                  this, METHODID_LIST_SERVICE_VERSIONS)))
-          .addMethod(
-            getCreateInstanceMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateInstanceRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateInstanceResponse>(
-                  this, METHODID_CREATE_INSTANCE)))
-          .addMethod(
-            getRequestMoveInstanceToOperationalEnvironmentMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestMoveInstanceToOperationalEnvironmentRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestMoveInstanceToOperationalEnvironmentResponse>(
-                  this, METHODID_REQUEST_MOVE_INSTANCE_TO_OPERATIONAL_ENVIRONMENT)))
-          .addMethod(
-            getPairEnvironmentToInstanceMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.PairEnvironmentToInstanceRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.PairEnvironmentToInstanceResponse>(
-                  this, METHODID_PAIR_ENVIRONMENT_TO_INSTANCE)))
-          .addMethod(
-            getUnpairEnvironmentFromInstanceMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnpairEnvironmentFromInstanceRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnpairEnvironmentFromInstanceResponse>(
-                  this, METHODID_UNPAIR_ENVIRONMENT_FROM_INSTANCE)))
-          .addMethod(
-            getDeleteInstanceMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteInstanceRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteInstanceResponse>(
-                  this, METHODID_DELETE_INSTANCE)))
-          .addMethod(
-            getDescribeInstanceMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeInstanceRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeInstanceResponse>(
-                  this, METHODID_DESCRIBE_INSTANCE)))
-          .addMethod(
-            getListInstancesMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListInstancesRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListInstancesResponse>(
-                  this, METHODID_LIST_INSTANCES)))
-          .addMethod(
-            getFindInstancesMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindInstancesRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindInstancesResponse>(
-                  this, METHODID_FIND_INSTANCES)))
-          .addMethod(
-            getRequestInstanceStopMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStopRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStopResponse>(
-                  this, METHODID_REQUEST_INSTANCE_STOP)))
-          .addMethod(
-            getRequestInstanceStartMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStartRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStartResponse>(
-                  this, METHODID_REQUEST_INSTANCE_START)))
-          .addMethod(
-            getRequestInstanceRestartMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceRestartRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceRestartResponse>(
-                  this, METHODID_REQUEST_INSTANCE_RESTART)))
-          .addMethod(
-            getCheckInstanceRequestMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckInstanceRequestRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckInstanceRequestResponse>(
-                  this, METHODID_CHECK_INSTANCE_REQUEST)))
-          .addMethod(
-            getCreateAwsPrivatelinkConnectionMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionResponse>(
-                  this, METHODID_CREATE_AWS_PRIVATELINK_CONNECTION)))
-          .addMethod(
-            getCreateAwsPrivatelinkConnectionForHmsDatabaseMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionForHmsDatabaseRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionForHmsDatabaseResponse>(
-                  this, METHODID_CREATE_AWS_PRIVATELINK_CONNECTION_FOR_HMS_DATABASE)))
-          .addMethod(
-            getDeleteConnectionMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteConnectionRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteConnectionResponse>(
-                  this, METHODID_DELETE_CONNECTION)))
-          .addMethod(
-            getDescribeConnectionMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeConnectionRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeConnectionResponse>(
-                  this, METHODID_DESCRIBE_CONNECTION)))
-          .addMethod(
-            getListConnectionsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListConnectionsRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListConnectionsResponse>(
-                  this, METHODID_LIST_CONNECTIONS)))
-          .addMethod(
-            getRegisterOperationalEnvironmentMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterOperationalEnvironmentRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterOperationalEnvironmentResponse>(
-                  this, METHODID_REGISTER_OPERATIONAL_ENVIRONMENT)))
-          .addMethod(
-            getUnregisterOperationalEnvironmentMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterOperationalEnvironmentRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterOperationalEnvironmentResponse>(
-                  this, METHODID_UNREGISTER_OPERATIONAL_ENVIRONMENT)))
-          .addMethod(
-            getDescribeOperationalEnvironmentMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeOperationalEnvironmentRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeOperationalEnvironmentResponse>(
-                  this, METHODID_DESCRIBE_OPERATIONAL_ENVIRONMENT)))
-          .addMethod(
-            getListOperationalEnvironmentsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListOperationalEnvironmentsRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListOperationalEnvironmentsResponse>(
-                  this, METHODID_LIST_OPERATIONAL_ENVIRONMENTS)))
-          .addMethod(
-            getFindOperationalEnvironmentsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindOperationalEnvironmentsRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindOperationalEnvironmentsResponse>(
-                  this, METHODID_FIND_OPERATIONAL_ENVIRONMENTS)))
-          .addMethod(
-            getSetOperationalEnvironmentAssignabilityMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetOperationalEnvironmentAssignabilityRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetOperationalEnvironmentAssignabilityResponse>(
-                  this, METHODID_SET_OPERATIONAL_ENVIRONMENT_ASSIGNABILITY)))
-          .addMethod(
-            getRegisterAwsOpenSearchIndexerMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsOpenSearchIndexerRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsOpenSearchIndexerResponse>(
-                  this, METHODID_REGISTER_AWS_OPEN_SEARCH_INDEXER)))
-          .addMethod(
-            getUnregisterIndexerMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterIndexerRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterIndexerResponse>(
-                  this, METHODID_UNREGISTER_INDEXER)))
-          .addMethod(
-            getDescribeIndexerMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeIndexerRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeIndexerResponse>(
-                  this, METHODID_DESCRIBE_INDEXER)))
-          .addMethod(
-            getListIndexersMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListIndexersRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListIndexersResponse>(
-                  this, METHODID_LIST_INDEXERS)))
-          .addMethod(
-            getFindIndexersMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindIndexersRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindIndexersResponse>(
-                  this, METHODID_FIND_INDEXERS)))
-          .addMethod(
-            getSetIndexerAssignabilityMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetIndexerAssignabilityRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetIndexerAssignabilityResponse>(
-                  this, METHODID_SET_INDEXER_ASSIGNABILITY)))
-          .addMethod(
-            getRegisterAwsObjectStorageRootMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsObjectStorageRootRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsObjectStorageRootResponse>(
-                  this, METHODID_REGISTER_AWS_OBJECT_STORAGE_ROOT)))
-          .addMethod(
-            getUnregisterStorageRootMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterStorageRootRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterStorageRootResponse>(
-                  this, METHODID_UNREGISTER_STORAGE_ROOT)))
-          .addMethod(
-            getDescribeStorageRootMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeStorageRootRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeStorageRootResponse>(
-                  this, METHODID_DESCRIBE_STORAGE_ROOT)))
-          .addMethod(
-            getListStorageRootsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListStorageRootsRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListStorageRootsResponse>(
-                  this, METHODID_LIST_STORAGE_ROOTS)))
-          .addMethod(
-            getFindStorageRootsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindStorageRootsRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindStorageRootsResponse>(
-                  this, METHODID_FIND_STORAGE_ROOTS)))
-          .addMethod(
-            getSetStorageRootAssignabilityMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetStorageRootAssignabilityRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetStorageRootAssignabilityResponse>(
-                  this, METHODID_SET_STORAGE_ROOT_ASSIGNABILITY)))
-          .addMethod(
-            getRegisterAwsRdbmsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsRdbmsRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsRdbmsResponse>(
-                  this, METHODID_REGISTER_AWS_RDBMS)))
-          .addMethod(
-            getUnregisterRdbmsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterRdbmsRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterRdbmsResponse>(
-                  this, METHODID_UNREGISTER_RDBMS)))
-          .addMethod(
-            getDescribeRdbmsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeRdbmsRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeRdbmsResponse>(
-                  this, METHODID_DESCRIBE_RDBMS)))
-          .addMethod(
-            getFindRdbmsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindRdbmsRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindRdbmsResponse>(
-                  this, METHODID_FIND_RDBMS)))
-          .addMethod(
-            getListRdbmsMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListRdbmsRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListRdbmsResponse>(
-                  this, METHODID_LIST_RDBMS)))
-          .addMethod(
-            getSetRdbmsAssignabilityMethod(),
-            io.grpc.stub.ServerCalls.asyncUnaryCall(
-              new MethodHandlers<
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetRdbmsAssignabilityRequest,
-                com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetRdbmsAssignabilityResponse>(
-                  this, METHODID_SET_RDBMS_ASSIGNABILITY)))
-          .build();
     }
   }
 
   /**
+   * Base class for the server implementation of the service SDXSvcAdmin.
    * <pre>
    * Cloudera :: Defining sdxsvcAdmin API service
    * </pre>
    */
-  public static final class SDXSvcAdminStub extends io.grpc.stub.AbstractAsyncStub<SDXSvcAdminStub> {
+  public static abstract class SDXSvcAdminImplBase
+      implements io.grpc.BindableService, AsyncService {
+
+    @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+      return SDXSvcAdminGrpc.bindService(this);
+    }
+  }
+
+  /**
+   * A stub to allow clients to do asynchronous rpc calls to service SDXSvcAdmin.
+   * <pre>
+   * Cloudera :: Defining sdxsvcAdmin API service
+   * </pre>
+   */
+  public static final class SDXSvcAdminStub
+      extends io.grpc.stub.AbstractAsyncStub<SDXSvcAdminStub> {
     private SDXSvcAdminStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -3162,11 +2809,13 @@ public final class SDXSvcAdminGrpc {
   }
 
   /**
+   * A stub to allow clients to do synchronous rpc calls to service SDXSvcAdmin.
    * <pre>
    * Cloudera :: Defining sdxsvcAdmin API service
    * </pre>
    */
-  public static final class SDXSvcAdminBlockingStub extends io.grpc.stub.AbstractBlockingStub<SDXSvcAdminBlockingStub> {
+  public static final class SDXSvcAdminBlockingStub
+      extends io.grpc.stub.AbstractBlockingStub<SDXSvcAdminBlockingStub> {
     private SDXSvcAdminBlockingStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -3700,11 +3349,13 @@ public final class SDXSvcAdminGrpc {
   }
 
   /**
+   * A stub to allow clients to do ListenableFuture-style rpc calls to service SDXSvcAdmin.
    * <pre>
    * Cloudera :: Defining sdxsvcAdmin API service
    * </pre>
    */
-  public static final class SDXSvcAdminFutureStub extends io.grpc.stub.AbstractFutureStub<SDXSvcAdminFutureStub> {
+  public static final class SDXSvcAdminFutureStub
+      extends io.grpc.stub.AbstractFutureStub<SDXSvcAdminFutureStub> {
     private SDXSvcAdminFutureStub(
         io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
@@ -4347,10 +3998,10 @@ public final class SDXSvcAdminGrpc {
       io.grpc.stub.ServerCalls.ServerStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.ClientStreamingMethod<Req, Resp>,
       io.grpc.stub.ServerCalls.BidiStreamingMethod<Req, Resp> {
-    private final SDXSvcAdminImplBase serviceImpl;
+    private final AsyncService serviceImpl;
     private final int methodId;
 
-    MethodHandlers(SDXSvcAdminImplBase serviceImpl, int methodId) {
+    MethodHandlers(AsyncService serviceImpl, int methodId) {
       this.serviceImpl = serviceImpl;
       this.methodId = methodId;
     }
@@ -4583,6 +4234,375 @@ public final class SDXSvcAdminGrpc {
     }
   }
 
+  public static final io.grpc.ServerServiceDefinition bindService(AsyncService service) {
+    return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
+        .addMethod(
+          getListSupportedCloudRegionsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudRegionsRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudRegionsResponse>(
+                service, METHODID_LIST_SUPPORTED_CLOUD_REGIONS)))
+        .addMethod(
+          getListSupportedCloudPlatformsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudPlatformsRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListSupportedCloudPlatformsResponse>(
+                service, METHODID_LIST_SUPPORTED_CLOUD_PLATFORMS)))
+        .addMethod(
+          getAddServiceMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.AddServiceRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.AddServiceResponse>(
+                service, METHODID_ADD_SERVICE)))
+        .addMethod(
+          getRemoveServiceMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RemoveServiceRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RemoveServiceResponse>(
+                service, METHODID_REMOVE_SERVICE)))
+        .addMethod(
+          getDescribeServiceMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeServiceRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeServiceResponse>(
+                service, METHODID_DESCRIBE_SERVICE)))
+        .addMethod(
+          getRequestServiceRestartMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceRestartRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceRestartResponse>(
+                service, METHODID_REQUEST_SERVICE_RESTART)))
+        .addMethod(
+          getRequestServiceSuspendMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceSuspendRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceSuspendResponse>(
+                service, METHODID_REQUEST_SERVICE_SUSPEND)))
+        .addMethod(
+          getRequestServiceStartMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceStartRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceStartResponse>(
+                service, METHODID_REQUEST_SERVICE_START)))
+        .addMethod(
+          getRequestServiceUpgradeMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceUpgradeRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestServiceUpgradeResponse>(
+                service, METHODID_REQUEST_SERVICE_UPGRADE)))
+        .addMethod(
+          getCheckServiceRequestMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckServiceRequestRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckServiceRequestResponse>(
+                service, METHODID_CHECK_SERVICE_REQUEST)))
+        .addMethod(
+          getListServiceVersionsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListServiceVersionsRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListServiceVersionsResponse>(
+                service, METHODID_LIST_SERVICE_VERSIONS)))
+        .addMethod(
+          getCreateInstanceMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateInstanceRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateInstanceResponse>(
+                service, METHODID_CREATE_INSTANCE)))
+        .addMethod(
+          getRequestMoveInstanceToOperationalEnvironmentMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestMoveInstanceToOperationalEnvironmentRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestMoveInstanceToOperationalEnvironmentResponse>(
+                service, METHODID_REQUEST_MOVE_INSTANCE_TO_OPERATIONAL_ENVIRONMENT)))
+        .addMethod(
+          getPairEnvironmentToInstanceMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.PairEnvironmentToInstanceRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.PairEnvironmentToInstanceResponse>(
+                service, METHODID_PAIR_ENVIRONMENT_TO_INSTANCE)))
+        .addMethod(
+          getUnpairEnvironmentFromInstanceMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnpairEnvironmentFromInstanceRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnpairEnvironmentFromInstanceResponse>(
+                service, METHODID_UNPAIR_ENVIRONMENT_FROM_INSTANCE)))
+        .addMethod(
+          getDeleteInstanceMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteInstanceRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteInstanceResponse>(
+                service, METHODID_DELETE_INSTANCE)))
+        .addMethod(
+          getDescribeInstanceMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeInstanceRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeInstanceResponse>(
+                service, METHODID_DESCRIBE_INSTANCE)))
+        .addMethod(
+          getListInstancesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListInstancesRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListInstancesResponse>(
+                service, METHODID_LIST_INSTANCES)))
+        .addMethod(
+          getFindInstancesMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindInstancesRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindInstancesResponse>(
+                service, METHODID_FIND_INSTANCES)))
+        .addMethod(
+          getRequestInstanceStopMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStopRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStopResponse>(
+                service, METHODID_REQUEST_INSTANCE_STOP)))
+        .addMethod(
+          getRequestInstanceStartMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStartRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceStartResponse>(
+                service, METHODID_REQUEST_INSTANCE_START)))
+        .addMethod(
+          getRequestInstanceRestartMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceRestartRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RequestInstanceRestartResponse>(
+                service, METHODID_REQUEST_INSTANCE_RESTART)))
+        .addMethod(
+          getCheckInstanceRequestMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckInstanceRequestRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CheckInstanceRequestResponse>(
+                service, METHODID_CHECK_INSTANCE_REQUEST)))
+        .addMethod(
+          getCreateAwsPrivatelinkConnectionMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionResponse>(
+                service, METHODID_CREATE_AWS_PRIVATELINK_CONNECTION)))
+        .addMethod(
+          getCreateAwsPrivatelinkConnectionForHmsDatabaseMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionForHmsDatabaseRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.CreateAwsPrivatelinkConnectionForHmsDatabaseResponse>(
+                service, METHODID_CREATE_AWS_PRIVATELINK_CONNECTION_FOR_HMS_DATABASE)))
+        .addMethod(
+          getDeleteConnectionMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteConnectionRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DeleteConnectionResponse>(
+                service, METHODID_DELETE_CONNECTION)))
+        .addMethod(
+          getDescribeConnectionMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeConnectionRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeConnectionResponse>(
+                service, METHODID_DESCRIBE_CONNECTION)))
+        .addMethod(
+          getListConnectionsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListConnectionsRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListConnectionsResponse>(
+                service, METHODID_LIST_CONNECTIONS)))
+        .addMethod(
+          getRegisterOperationalEnvironmentMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterOperationalEnvironmentRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterOperationalEnvironmentResponse>(
+                service, METHODID_REGISTER_OPERATIONAL_ENVIRONMENT)))
+        .addMethod(
+          getUnregisterOperationalEnvironmentMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterOperationalEnvironmentRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterOperationalEnvironmentResponse>(
+                service, METHODID_UNREGISTER_OPERATIONAL_ENVIRONMENT)))
+        .addMethod(
+          getDescribeOperationalEnvironmentMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeOperationalEnvironmentRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeOperationalEnvironmentResponse>(
+                service, METHODID_DESCRIBE_OPERATIONAL_ENVIRONMENT)))
+        .addMethod(
+          getListOperationalEnvironmentsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListOperationalEnvironmentsRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListOperationalEnvironmentsResponse>(
+                service, METHODID_LIST_OPERATIONAL_ENVIRONMENTS)))
+        .addMethod(
+          getFindOperationalEnvironmentsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindOperationalEnvironmentsRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindOperationalEnvironmentsResponse>(
+                service, METHODID_FIND_OPERATIONAL_ENVIRONMENTS)))
+        .addMethod(
+          getSetOperationalEnvironmentAssignabilityMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetOperationalEnvironmentAssignabilityRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetOperationalEnvironmentAssignabilityResponse>(
+                service, METHODID_SET_OPERATIONAL_ENVIRONMENT_ASSIGNABILITY)))
+        .addMethod(
+          getRegisterAwsOpenSearchIndexerMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsOpenSearchIndexerRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsOpenSearchIndexerResponse>(
+                service, METHODID_REGISTER_AWS_OPEN_SEARCH_INDEXER)))
+        .addMethod(
+          getUnregisterIndexerMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterIndexerRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterIndexerResponse>(
+                service, METHODID_UNREGISTER_INDEXER)))
+        .addMethod(
+          getDescribeIndexerMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeIndexerRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeIndexerResponse>(
+                service, METHODID_DESCRIBE_INDEXER)))
+        .addMethod(
+          getListIndexersMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListIndexersRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListIndexersResponse>(
+                service, METHODID_LIST_INDEXERS)))
+        .addMethod(
+          getFindIndexersMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindIndexersRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindIndexersResponse>(
+                service, METHODID_FIND_INDEXERS)))
+        .addMethod(
+          getSetIndexerAssignabilityMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetIndexerAssignabilityRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetIndexerAssignabilityResponse>(
+                service, METHODID_SET_INDEXER_ASSIGNABILITY)))
+        .addMethod(
+          getRegisterAwsObjectStorageRootMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsObjectStorageRootRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsObjectStorageRootResponse>(
+                service, METHODID_REGISTER_AWS_OBJECT_STORAGE_ROOT)))
+        .addMethod(
+          getUnregisterStorageRootMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterStorageRootRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterStorageRootResponse>(
+                service, METHODID_UNREGISTER_STORAGE_ROOT)))
+        .addMethod(
+          getDescribeStorageRootMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeStorageRootRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeStorageRootResponse>(
+                service, METHODID_DESCRIBE_STORAGE_ROOT)))
+        .addMethod(
+          getListStorageRootsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListStorageRootsRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListStorageRootsResponse>(
+                service, METHODID_LIST_STORAGE_ROOTS)))
+        .addMethod(
+          getFindStorageRootsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindStorageRootsRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindStorageRootsResponse>(
+                service, METHODID_FIND_STORAGE_ROOTS)))
+        .addMethod(
+          getSetStorageRootAssignabilityMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetStorageRootAssignabilityRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetStorageRootAssignabilityResponse>(
+                service, METHODID_SET_STORAGE_ROOT_ASSIGNABILITY)))
+        .addMethod(
+          getRegisterAwsRdbmsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsRdbmsRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.RegisterAwsRdbmsResponse>(
+                service, METHODID_REGISTER_AWS_RDBMS)))
+        .addMethod(
+          getUnregisterRdbmsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterRdbmsRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.UnregisterRdbmsResponse>(
+                service, METHODID_UNREGISTER_RDBMS)))
+        .addMethod(
+          getDescribeRdbmsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeRdbmsRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.DescribeRdbmsResponse>(
+                service, METHODID_DESCRIBE_RDBMS)))
+        .addMethod(
+          getFindRdbmsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindRdbmsRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.FindRdbmsResponse>(
+                service, METHODID_FIND_RDBMS)))
+        .addMethod(
+          getListRdbmsMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListRdbmsRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.ListRdbmsResponse>(
+                service, METHODID_LIST_RDBMS)))
+        .addMethod(
+          getSetRdbmsAssignabilityMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetRdbmsAssignabilityRequest,
+              com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto.SetRdbmsAssignabilityResponse>(
+                service, METHODID_SET_RDBMS_ASSIGNABILITY)))
+        .build();
+  }
+
   private static abstract class SDXSvcAdminBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoFileDescriptorSupplier, io.grpc.protobuf.ProtoServiceDescriptorSupplier {
     SDXSvcAdminBaseDescriptorSupplier() {}
@@ -4606,9 +4626,9 @@ public final class SDXSvcAdminGrpc {
   private static final class SDXSvcAdminMethodDescriptorSupplier
       extends SDXSvcAdminBaseDescriptorSupplier
       implements io.grpc.protobuf.ProtoMethodDescriptorSupplier {
-    private final String methodName;
+    private final java.lang.String methodName;
 
-    SDXSvcAdminMethodDescriptorSupplier(String methodName) {
+    SDXSvcAdminMethodDescriptorSupplier(java.lang.String methodName) {
       this.methodName = methodName;
     }
 
