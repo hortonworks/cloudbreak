@@ -64,6 +64,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -1184,25 +1185,32 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
                 cleanupCluster(stack, stackId);
                 cleanupInstanceGroups(stack);
 
-                LOGGER.debug("Cleanup security config for stack {}", stackId);
+                LOGGER.debug("Cleanup security config for stack {}", crn);
                 securityConfigService.deleteByStackId(stackId);
 
-                LOGGER.debug("Cleanup userData for stack {}", stackId);
+                LOGGER.debug("Cleanup userData for stack {}", crn);
                 userDataService.deleteByStackId(stackId);
 
-                LOGGER.debug("Cleanup resources for stack {}", stackId);
+                LOGGER.debug("Cleanup resources for stack {}", crn);
                 resourceService.deleteByStackId(stackId);
 
-                LOGGER.debug("Cleanup loadBalancer for stack {}", stackId);
+                LOGGER.debug("Cleanup loadBalancer for stack {}", crn);
                 loadBalancerPersistenceService.deleteByStackId(stackId);
 
-                LOGGER.debug("Cleanup stackPatch for stack {}", stackId);
+                LOGGER.debug("Cleanup stackPatch for stack {}", crn);
                 stackPatchService.deleteByStackId(stackId);
+
+                LOGGER.debug("Cleanup components for stack {}", crn);
+                componentConfigProviderService.deleteComponentsForStack(stackId);
+
+                LOGGER.debug("Deleting stack with crn: {}", crn);
+                stackRepository.deleteByResourceCrn(crn);
             } catch (Exception e) {
-                LOGGER.error("Could not delete archived {} stack from database.", stack.getResourceCrn(), e.getMessage());
+                String msg = String.format("Could not delete archived stack '%s' from database.", stack.getResourceCrn());
+                LOGGER.error(msg, e);
+                throw new CloudbreakServiceException(msg, e);
             }
         }
-        stackRepository.deleteByResourceCrn(crn);
     }
 
     private void cleanupCluster(Stack stack, Long stackId) {

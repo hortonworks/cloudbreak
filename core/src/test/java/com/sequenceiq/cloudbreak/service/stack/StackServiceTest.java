@@ -24,6 +24,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
@@ -67,6 +68,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -847,22 +849,98 @@ class StackServiceTest {
         instanceGroup.setTargetGroups(Set.of(targetGroup));
         stackForTest.setInstanceGroups(Set.of(instanceGroup));
 
-        when(instanceGroupService.save(any())).thenReturn(instanceGroup);
+        doReturn(instanceGroup).when(instanceGroupService).save(any());
         doNothing().when(instanceGroupService).delete(anyLong());
-        when(targetGroupPersistenceService.findByInstanceGroupId(anyLong())).thenReturn(Set.of(targetGroup));
-        doNothing().when(targetGroupPersistenceService).delete(anyLong());
+        doReturn(Set.of(targetGroup)).when(targetGroupPersistenceService).findByInstanceGroupId(anyLong());
+        doNothing().when(targetGroupPersistenceService).delete(any());
         when(stackRepository.findByResourceCrnArchivedIsTrue(anyString())).thenReturn(Optional.of(stackForTest));
         when(clusterService.findOneByStackId(anyLong())).thenReturn(Optional.of(cluster));
         doNothing().when(idBrokerService).deleteByClusterId(any());
         doNothing().when(clusterCommandService).deleteByClusterId(any());
         doNothing().when(clusterService).pureDelete(any());
-        doNothing().when(securityConfigService).deleteByStackId(anyLong());
-        doNothing().when(userDataService).deleteByStackId(anyLong());
-        doNothing().when(resourceService).deleteByStackId(anyLong());
-        doNothing().when(loadBalancerPersistenceService).deleteByStackId(anyLong());
-        doNothing().when(stackPatchService).deleteByStackId(anyLong());
-        doNothing().when(stackRepository).deleteByResourceCrn(anyString());
 
         underTest.deleteArchivedByResourceCrn(crn);
+
+        verify(securityConfigService, times(1)).deleteByStackId(1L);
+        verify(userDataService, times(1)).deleteByStackId(1L);
+        verify(resourceService, times(1)).deleteByStackId(1L);
+        verify(loadBalancerPersistenceService, times(1)).deleteByStackId(1L);
+        verify(stackPatchService, times(1)).deleteByStackId(1L);
+        verify(componentConfigProviderService, times(1)).deleteComponentsForStack(1L);
+        verify(stackRepository, times(1)).deleteByResourceCrn(anyString());
+    }
+
+    @Test
+    void testDeleteArchivedByResourceCrnWhenSecurityConfigServiceDeleteCallFails() {
+        String crn = "crn";
+
+        Stack stackForTest = new Stack();
+        Cluster cluster = new Cluster();
+        stackForTest.setCluster(cluster);
+        stackForTest.setId(1L);
+        stackForTest.setResourceCrn(crn);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setId(1L);
+        TargetGroup targetGroup = new TargetGroup();
+        instanceGroup.setTargetGroups(Set.of(targetGroup));
+        stackForTest.setInstanceGroups(Set.of(instanceGroup));
+
+        doReturn(instanceGroup).when(instanceGroupService).save(any());
+        doNothing().when(instanceGroupService).delete(anyLong());
+        doReturn(Set.of(targetGroup)).when(targetGroupPersistenceService).findByInstanceGroupId(anyLong());
+        doNothing().when(targetGroupPersistenceService).delete(any());
+        when(stackRepository.findByResourceCrnArchivedIsTrue(anyString())).thenReturn(Optional.of(stackForTest));
+        when(clusterService.findOneByStackId(anyLong())).thenReturn(Optional.of(cluster));
+        doNothing().when(idBrokerService).deleteByClusterId(any());
+        doNothing().when(clusterCommandService).deleteByClusterId(any());
+        doNothing().when(clusterService).pureDelete(any());
+        doThrow(new RuntimeException("uh-oh")).when(securityConfigService).deleteByStackId(anyLong());
+
+        CloudbreakServiceException ex = assertThrows(CloudbreakServiceException.class, () -> underTest.deleteArchivedByResourceCrn(crn));
+
+        assertEquals("Could not delete archived stack 'crn' from database.", ex.getMessage());
+        verify(securityConfigService, times(1)).deleteByStackId(anyLong());
+        verifyNoInteractions(userDataService);
+        verifyNoInteractions(resourceService);
+        verifyNoInteractions(loadBalancerPersistenceService);
+        verifyNoInteractions(stackPatchService);
+        verifyNoInteractions(componentConfigProviderService);
+    }
+
+    @Test
+    void testDeleteArchivedByResourceCrnWhenStackRepoDeleteCallFails() {
+        String crn = "crn";
+
+        Stack stackForTest = new Stack();
+        Cluster cluster = new Cluster();
+        stackForTest.setCluster(cluster);
+        stackForTest.setId(1L);
+        stackForTest.setResourceCrn(crn);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setId(1L);
+        TargetGroup targetGroup = new TargetGroup();
+        instanceGroup.setTargetGroups(Set.of(targetGroup));
+        stackForTest.setInstanceGroups(Set.of(instanceGroup));
+
+        doReturn(instanceGroup).when(instanceGroupService).save(any());
+        doNothing().when(instanceGroupService).delete(anyLong());
+        doReturn(Set.of(targetGroup)).when(targetGroupPersistenceService).findByInstanceGroupId(anyLong());
+        doNothing().when(targetGroupPersistenceService).delete(any());
+        when(stackRepository.findByResourceCrnArchivedIsTrue(anyString())).thenReturn(Optional.of(stackForTest));
+        when(clusterService.findOneByStackId(anyLong())).thenReturn(Optional.of(cluster));
+        doNothing().when(idBrokerService).deleteByClusterId(any());
+        doNothing().when(clusterCommandService).deleteByClusterId(any());
+        doNothing().when(clusterService).pureDelete(any());
+        doThrow(new RuntimeException("uh-oh")).when(stackRepository).deleteByResourceCrn(anyString());
+
+        CloudbreakServiceException ex = assertThrows(CloudbreakServiceException.class, () -> underTest.deleteArchivedByResourceCrn(crn));
+
+        assertEquals("Could not delete archived stack 'crn' from database.", ex.getMessage());
+        verify(securityConfigService, times(1)).deleteByStackId(anyLong());
+        verify(userDataService, times(1)).deleteByStackId(anyLong());
+        verify(resourceService, times(1)).deleteByStackId(anyLong());
+        verify(loadBalancerPersistenceService, times(1)).deleteByStackId(anyLong());
+        verify(stackPatchService, times(1)).deleteByStackId(anyLong());
+        verify(componentConfigProviderService, times(1)).deleteComponentsForStack(anyLong());
     }
 }

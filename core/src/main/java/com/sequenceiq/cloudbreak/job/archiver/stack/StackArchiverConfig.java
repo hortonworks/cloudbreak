@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class StackArchiverConfig {
 
-    @Value("${archivestack.intervalhours:8}")
+    @Value("${archivestack.intervalhours:4}")
     private int intervalInHours;
 
     @Value("${archivestack.retention.period.days:14}")
