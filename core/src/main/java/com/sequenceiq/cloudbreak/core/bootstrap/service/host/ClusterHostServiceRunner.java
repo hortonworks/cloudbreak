@@ -494,7 +494,7 @@ public class ClusterHostServiceRunner {
         Optional<ClouderaManagerProduct> cdhProduct = clusterComponentConfigProvider.getCdhProduct(cluster.getId());
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
-        nameserverPillarDecorator.decorateServicePillarWithNameservers(stackDto, kerberosConfig, servicePillar);
+        nameserverPillarDecorator.decorateServicePillarWithNameservers(kerberosConfig, servicePillar);
         servicePillar.putAll(createUnboundEliminationPillar(stack.getDomainDnsResolver()));
         addKerberosConfig(servicePillar, kerberosConfig);
         servicePillar.putAll(hostAttributeDecorator.createHostAttributePillars(stackDto));
