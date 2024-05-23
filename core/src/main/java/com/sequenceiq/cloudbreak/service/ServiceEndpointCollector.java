@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
+import com.google.common.base.Supplier;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
@@ -513,15 +514,26 @@ public class ServiceEndpointCollector {
         if (!privateIps.containsKey(serviceName)) {
             LOGGER.info("Cannot find private ip for the {} exposed service", serviceName);
         } else {
-            Optional<String> coordinatorUrl = privateIps.get(serviceName)
-                    .stream()
-                    .map(coordinator -> getImpalaCoordinatorUrl(gateway, managerIp, coordinator, autoTlsEnabled, version))
-                    .flatMap(Optional::stream)
-                    .findFirst();
-            if (coordinatorUrl.isPresent()) {
-                urls.add(coordinatorUrl.get());
+            String impalaDebugUIServiceName = exposedServiceCollector.getImpalaDebugUIService().getServiceName();
+            String impalaServiceName = exposedServiceCollector.getImpalaService().getServiceName();
+
+            Optional<String> coordinatorUrl = getServiceUrl(managerIp, gateway, privateIps, autoTlsEnabled, version, impalaDebugUIServiceName);
+            Supplier<String> impalaUrlSupplier = () -> getServiceUrl(managerIp, gateway, privateIps, autoTlsEnabled, version, impalaServiceName).get();
+
+            String url = coordinatorUrl.orElseGet(impalaUrlSupplier);
+            if (!Strings.isNullOrEmpty(url)) {
+                urls.add(url);
             }
         }
+    }
+
+    private Optional<String> getServiceUrl(String managerIp, GatewayView gateway, Map<String, List<String>> privateIps, boolean autoTlsEnabled,
+            Optional<String> version, String serviceName) {
+        return privateIps.get(serviceName)
+                .stream()
+                .map(coordinator -> getImpalaCoordinatorUrl(gateway, managerIp, coordinator, autoTlsEnabled, version))
+                .flatMap(Optional::stream)
+                .findFirst();
     }
 
     private void addKuduUrl(
