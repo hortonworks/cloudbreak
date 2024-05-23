@@ -31,6 +31,10 @@
     "zoneid": "ca-central-1",
     "defaultvm": "m4.4xlarge"
   },
+  "Canada (Calgary)": {
+    "zoneid": "ca-west-1",
+    "defaultvm": "m4.4xlarge"
+  },
   "EU (Frankfurt)": {
     "zoneid": "eu-central-1",
     "defaultvm": "i2.4xlarge"

@@ -134,6 +134,13 @@
       "k8sSupported": true
     },
     {
+      "name": "ca-west-1",
+      "displayName": "Canada (Calgary)",
+      "latitude": "51.049999",
+      "longitude": "-114.066666",
+      "k8sSupported": true
+    },
+    {
       "name": "us-east-2",
       "displayName": "US East (Ohio)",
       "latitude": "39.94028688",

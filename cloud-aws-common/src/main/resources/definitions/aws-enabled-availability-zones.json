@@ -149,6 +149,14 @@
       ]
     },
     {
+      "name": "ca-west-1",
+      "zones": [
+        "ca-west-1a",
+        "ca-west-1b",
+        "ca-west-1c"
+      ]
+    },
+    {
       "name": "us-east-2",
       "zones": [
         "us-east-2a",
