@@ -91,12 +91,6 @@ class EntitlementServiceTest {
                 {"CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT",
                         (EntitlementCheckFunction) EntitlementService::azureSingleResourceGroupDedicatedStorageAccountEnabled, true},
 
-                {"DATAHUB_AWS_AUTOSCALING", (EntitlementCheckFunction) EntitlementService::awsAutoScalingEnabled, false},
-                {"DATAHUB_AWS_AUTOSCALING", (EntitlementCheckFunction) EntitlementService::awsAutoScalingEnabled, true},
-
-                {"DATAHUB_AZURE_AUTOSCALING", (EntitlementCheckFunction) EntitlementService::azureAutoScalingEnabled, false},
-                {"DATAHUB_AZURE_AUTOSCALING", (EntitlementCheckFunction) EntitlementService::azureAutoScalingEnabled, true},
-
                 {"DATAHUB_GCP_AUTOSCALING", (EntitlementCheckFunction) EntitlementService::gcpAutoScalingEnabled, false},
                 {"DATAHUB_GCP_AUTOSCALING", (EntitlementCheckFunction) EntitlementService::gcpAutoScalingEnabled, true},
 

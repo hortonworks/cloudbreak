@@ -162,8 +162,6 @@ class DistroXAutoScaleClusterV1EndpointTest {
         UserManagementProto.User user = UserManagementProto.User.newBuilder()
                 .setCrn(TEST_USER_CRN).setEmail("dummyuser@cloudera.com").setUserId(TEST_USER_ID.toString()).build();
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder()
-                .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_AWS_AUTOSCALING").build())
-                .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_AZURE_AUTOSCALING").build())
                 .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_GCP_AUTOSCALING").build())
                 .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_AWS_STOP_START_SCALING").build())
                 .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_AZURE_STOP_START_SCALING").build())
@@ -183,8 +181,6 @@ class DistroXAutoScaleClusterV1EndpointTest {
                 TEST_USER_ID_2.toString(), TEST_USER_CRN_2, "cluster2");
 
         UserManagementProto.Account account2 = UserManagementProto.Account.newBuilder()
-                .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_AWS_AUTOSCALING").build())
-                .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_AZURE_AUTOSCALING").build())
                 .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_GCP_AUTOSCALING").build())
                 .build();
         when(grpcUmsClient.getUserDetails(eq(TEST_USER_CRN_2))).thenReturn(user2);

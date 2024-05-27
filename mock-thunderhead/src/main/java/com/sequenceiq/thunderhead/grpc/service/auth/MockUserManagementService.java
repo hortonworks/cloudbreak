@@ -75,9 +75,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USER_SY
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_SYNC_COMMAND_POLLER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_VM_DIAGNOSTICS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CLOUDERA_INTERNAL_ACCOUNT;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_STOP_START_SCALING;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_STOP_START_SCALING;
@@ -1021,10 +1019,8 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .setWorkloadSubdomain(ACCOUNT_SUBDOMAIN)
                                 .addEntitlements(createEntitlement(CDP_CB_AWS_NATIVE))
                                 .addEntitlements(createEntitlement(CLOUDERA_INTERNAL_ACCOUNT))
-                                .addEntitlements(createEntitlement(DATAHUB_AZURE_AUTOSCALING))
                                 .addEntitlements(createEntitlement(CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED))
                                 .addEntitlements(createEntitlement(CDP_AZURE_UAE_CENTRAL))
-                                .addEntitlements(createEntitlement(DATAHUB_AWS_AUTOSCALING))
                                 .addEntitlements(createEntitlement(DATAHUB_IMPALA_SCHEDULE_BASED_SCALING))
                                 .addEntitlements(createEntitlement(DATAHUB_GCP_AUTOSCALING))
                                 .addEntitlements(createEntitlement(DATAHUB_AWS_STOP_START_SCALING))
