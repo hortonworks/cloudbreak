@@ -48,6 +48,12 @@ public class EnvironmentApiClientConfig {
 
     @Bean
     @ConditionalOnBean(name = "environmentApiClientWebTarget")
+    EnvironmentEndpoint environmentEndpoint(WebTarget environmentApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(environmentApiClientWebTarget, EnvironmentEndpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "environmentApiClientWebTarget")
     ProxyEndpoint proxyEndpoint(WebTarget environmentApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(environmentApiClientWebTarget, ProxyEndpoint.class);
     }

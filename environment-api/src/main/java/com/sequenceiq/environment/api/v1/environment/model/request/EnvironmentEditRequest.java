@@ -75,6 +75,9 @@ public class EnvironmentEditRequest implements Serializable {
     @Schema(description = EnvironmentModelDescription.DATA_SERVICES)
     private DataServicesRequest dataServices;
 
+    @Schema(description = EnvironmentModelDescription.FREEIPA_NODE_COUNT)
+    private Integer freeIpaNodeCount;
+
     public String getDescription() {
         return description;
     }
@@ -195,6 +198,14 @@ public class EnvironmentEditRequest implements Serializable {
         this.dataServices = dataServices;
     }
 
+    public Integer getFreeIpaNodeCount() {
+        return freeIpaNodeCount;
+    }
+
+    public void setFreeIpaNodeCount(Integer freeIpaNodeCount) {
+        this.freeIpaNodeCount = freeIpaNodeCount;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentEditRequest{" +
@@ -213,6 +224,7 @@ public class EnvironmentEditRequest implements Serializable {
                 ", gcp=" + gcp +
                 ", tags=" + tags +
                 ", dataServices=" + dataServices +
+                ", freeipaNodeCount=" + freeIpaNodeCount +
                 '}';
     }
 }

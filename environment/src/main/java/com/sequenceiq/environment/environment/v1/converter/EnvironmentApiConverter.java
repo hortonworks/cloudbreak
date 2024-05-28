@@ -429,7 +429,8 @@ public class EnvironmentApiConverter {
                 .withCrn(currentEnvironmentFromDatabase.getResourceCrn())
                 .withIdBrokerMappingSource(request.getIdBrokerMappingSource())
                 .withCloudStorageValidation(request.getCloudStorageValidation())
-                .withAdminGroupName(request.getAdminGroupName());
+                .withAdminGroupName(request.getAdminGroupName())
+                .withFreeipaNodeCount(request.getFreeIpaNodeCount());
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         NullUtil.doIfNotNull(request.getAuthentication(), authentication -> builder.withAuthentication(authenticationRequestToDto(authentication)));
         NullUtil.doIfNotNull(request.getTelemetry(), telemetryRequest -> builder.withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),

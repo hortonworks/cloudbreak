@@ -79,6 +79,7 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterP
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.termination.action.TerminationService;
+import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.config.KerberosConfigUpdateService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -408,10 +409,16 @@ public class FreeIpaDownscaleActions {
             @Inject
             private OperationService operationService;
 
+            @Inject
+            private EnvironmentService environmentService;
+
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack.getId(), getDownscaleCompleteStatus(variables), "Downscale complete");
+                if (!isChainedAction(variables)) {
+                    environmentService.setFreeIpaNodeCount(stack.getEnvironmentCrn(),  stack.getAllInstanceMetaDataList().size());
+                }
                 if (shouldCompleteOperation(variables)) {
                     SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());
                     successDetails.getAdditionalDetails().put("Hosts", getDownscaleHosts(variables));

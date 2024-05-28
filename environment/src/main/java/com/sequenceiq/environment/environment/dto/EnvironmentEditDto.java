@@ -49,6 +49,8 @@ public class EnvironmentEditDto {
 
     private final EnvironmentDataServices dataServices;
 
+    private final Integer freeipaNodeCount;
+
     public EnvironmentEditDto(Builder builder) {
         this.description = builder.description;
         this.accountId = builder.accountId;
@@ -68,6 +70,7 @@ public class EnvironmentEditDto {
         this.crn = builder.crn;
         this.cloudPlatform = builder.cloudPlatform;
         this.dataServices = builder.dataServices;
+        this.freeipaNodeCount = builder.freeipaNodeCount;
     }
 
     public String getDescription() {
@@ -142,6 +145,10 @@ public class EnvironmentEditDto {
         return dataServices;
     }
 
+    public Integer getFreeipaNodeCount() {
+        return freeipaNodeCount;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -167,6 +174,7 @@ public class EnvironmentEditDto {
                 ", crn=" + crn +
                 ", cloudPlatform=" + cloudPlatform +
                 ", dataServices=" + dataServices +
+                ", freeipaNodeCount=" + freeipaNodeCount +
                 '}';
     }
 
@@ -206,6 +214,8 @@ public class EnvironmentEditDto {
         private String cloudPlatform;
 
         private EnvironmentDataServices dataServices;
+
+        private Integer freeipaNodeCount;
 
         private Builder() {
         }
@@ -297,6 +307,11 @@ public class EnvironmentEditDto {
 
         public Builder withDataServices(EnvironmentDataServices dataServices) {
             this.dataServices = dataServices;
+            return this;
+        }
+
+        public Builder withFreeipaNodeCount(Integer freeipaNodeCount) {
+            this.freeipaNodeCount = freeipaNodeCount;
             return this;
         }
 

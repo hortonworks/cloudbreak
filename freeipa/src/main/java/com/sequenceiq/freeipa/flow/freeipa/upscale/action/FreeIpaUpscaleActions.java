@@ -101,6 +101,7 @@ import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterPro
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationSuccess;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackFailed;
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFallbackRequest;
+import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.TlsSetupService;
 import com.sequenceiq.freeipa.service.config.KerberosConfigUpdateService;
 import com.sequenceiq.freeipa.service.image.ImageFallbackService;
@@ -616,10 +617,16 @@ public class FreeIpaUpscaleActions {
             @Inject
             private OperationService operationService;
 
+            @Inject
+            private EnvironmentService environmentService;
+
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack.getId(), getUpscaleCompleteStatus(variables), "Upscale complete");
+                if (!isChainedAction(variables)) {
+                    environmentService.setFreeIpaNodeCount(stack.getEnvironmentCrn(), stack.getAllInstanceMetaDataList().size());
+                }
                 if (shouldCompleteOperation(variables)) {
                     SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());
                     successDetails.getAdditionalDetails().put("Hosts", getUpscaleHosts(variables));

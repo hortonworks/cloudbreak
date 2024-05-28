@@ -112,6 +112,7 @@ import com.sequenceiq.freeipa.flow.stack.provision.handler.CreateUserDataHandler
 import com.sequenceiq.freeipa.flow.stack.provision.handler.ImageFallbackHandler;
 import com.sequenceiq.freeipa.service.BootstrapService;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.TlsSetupService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
@@ -223,6 +224,9 @@ class FreeIpaUpscaleFlowIntegrationTest {
 
     @MockBean
     private EnvironmentEndpoint environmentEndpoint;
+
+    @MockBean
+    private EnvironmentService environmentService;
 
     @MockBean
     private RegionAwareInternalCrnGeneratorFactory crnGeneratorFactory;

@@ -294,7 +294,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
-    public DetailedEnvironmentResponse editByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn,
+    public DetailedEnvironmentResponse editByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @TenantAwareParam @ResourceCrn String crn,
             @NotNull @Valid EnvironmentEditRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Environment environment = environmentModificationService.getEnvironment(accountId, NameOrCrn.ofCrn(crn));

@@ -173,6 +173,8 @@ public class EnvironmentModelDescription {
 
     public static final String DATA_SERVICES = "Data Services parameters of the environment";
 
+    public static final String FREEIPA_NODE_COUNT = "FreeIPA node count of the environment";
+
     public static final String ENVIRONMENT_ENABLE_SECRET_ENCRYPTION = "True if the secret encryption feature is enabled for the environment.";
 
     private EnvironmentModelDescription() {

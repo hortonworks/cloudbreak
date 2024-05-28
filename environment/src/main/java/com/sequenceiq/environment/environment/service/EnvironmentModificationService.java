@@ -150,6 +150,7 @@ public class EnvironmentModificationService {
         editEnvironmentParameters(editDto, environment);
         editFreeIPA(editDto, environment);
         editDataServices(editDto, environment);
+        editFreeIpaNodeCount(editDto, environment);
         editTags(editDto, environment);
         Environment saved = environmentService.save(environment);
         triggerEditProxyIfChanged(editDto, saved);
@@ -513,6 +514,18 @@ public class EnvironmentModificationService {
         EnvironmentDataServices dataServices = editDto.getDataServices();
         if (dataServices != null) {
             environment.setDataServices(dataServices);
+            EnvironmentValidationDto environmentValidationDto = getEnvironmentValidationDto(environment);
+            ValidationResult validationResult = environmentFlowValidatorService.validateEnvironmentDataServices(environmentValidationDto);
+            if (validationResult.hasError()) {
+                throw new BadRequestException(validationResult.getFormattedErrors());
+            }
+        }
+    }
+
+    private void editFreeIpaNodeCount(EnvironmentEditDto editDto, Environment environment) {
+        Integer freeipaNodeCount = editDto.getFreeipaNodeCount();
+        if (freeipaNodeCount != null) {
+            environment.setFreeIpaInstanceCountByGroup(freeipaNodeCount);
             EnvironmentValidationDto environmentValidationDto = getEnvironmentValidationDto(environment);
             ValidationResult validationResult = environmentFlowValidatorService.validateEnvironmentDataServices(environmentValidationDto);
             if (validationResult.hasError()) {
