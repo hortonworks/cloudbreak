@@ -35,6 +35,7 @@ ext {
   nettyVersion = '4.1.110.Final'
   reactorNettyHttp = '1.1.19'
   okhttpVersion = '4.12.0'
+  tomcatVersion = '10.1.24'
 
   // Cloud SDKs
   awsSdkVersion = '2.22.12'

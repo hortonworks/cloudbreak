@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 
 import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
+import com.sequenceiq.cloudbreak.concurrent.ConcurrencyLimitDecorator;
 import com.sequenceiq.cloudbreak.concurrent.MDCCleanerDecorator;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
@@ -112,7 +113,7 @@ public class EventBusConfig {
     public ExecutorService getPoolExecutor() {
         if (virtualThreadsAvailable) {
             return commonExecutorServiceFactory.newVirtualThreadExecutorService("reactorDispatcher", "eventBusThreadPoolExecutor",
-                    List.of(new MDCCleanerDecorator()));
+                    List.of(new MDCCleanerDecorator(), new ConcurrencyLimitDecorator(eventBusThreadPoolMaxSize)));
         } else {
             return commonExecutorServiceFactory.newThreadPoolExecutorService("reactorDispatcher", "eventBusThreadPoolExecutor", eventBusThreadPoolCoreSize,
                     eventBusThreadPoolMaxSize, 0, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(eventBusThreadPoolBacklogSize),

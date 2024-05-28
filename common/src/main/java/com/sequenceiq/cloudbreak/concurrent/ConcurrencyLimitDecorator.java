@@ -6,10 +6,12 @@ import java.util.function.Function;
 
 public class ConcurrencyLimitDecorator implements Function<Callable, Callable> {
 
+    private static final boolean FAIR = true;
+
     private final Semaphore runningSemaphore;
 
     public ConcurrencyLimitDecorator(int runningLimit) {
-        this.runningSemaphore = new Semaphore(runningLimit, true);
+        this.runningSemaphore = new Semaphore(runningLimit, FAIR);
     }
 
     @Override
