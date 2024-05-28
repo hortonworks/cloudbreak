@@ -20,6 +20,15 @@ public record UpdateCloudSecretRequest(CloudContext cloudContext, CloudCredentia
         );
     }
 
+    public Builder toBuilder() {
+        return builder()
+                .withCloudContext(cloudContext)
+                .withCloudCredential(cloudCredential)
+                .withCloudResource(cloudResource)
+                .withNewSecretValue(newSecretValue)
+                .withNewEncryptionKeySource(newEncryptionKeySource);
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -42,9 +51,9 @@ public record UpdateCloudSecretRequest(CloudContext cloudContext, CloudCredentia
 
         private CloudResource cloudResource;
 
-        private Optional<String> newSecretValue;
+        private Optional<String> newSecretValue = Optional.empty();
 
-        private Optional<EncryptionKeySource> newEncryptionKeySource;
+        private Optional<EncryptionKeySource> newEncryptionKeySource = Optional.empty();
 
         private Builder() {
         }

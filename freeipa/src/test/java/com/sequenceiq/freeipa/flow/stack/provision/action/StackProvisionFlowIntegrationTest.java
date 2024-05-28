@@ -66,6 +66,7 @@ import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsPersister;
@@ -87,15 +88,18 @@ import com.sequenceiq.freeipa.flow.stack.provision.handler.ClusterProxyRegistrat
 import com.sequenceiq.freeipa.flow.stack.provision.handler.CreateUserDataHandler;
 import com.sequenceiq.freeipa.flow.stack.provision.handler.GenerateEncryptionKeysHandler;
 import com.sequenceiq.freeipa.flow.stack.provision.handler.ImageFallbackHandler;
+import com.sequenceiq.freeipa.flow.stack.provision.handler.UpdateUserdataSecretsHandler;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
 import com.sequenceiq.freeipa.service.TlsSetupService;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.encryption.EncryptionKeyService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.image.ImageFallbackService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.image.userdata.UserDataService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
+import com.sequenceiq.freeipa.service.secret.UserdataSecretsService;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -179,6 +183,9 @@ class StackProvisionFlowIntegrationTest {
     private MeterRegistry meterRegistry;
 
     @MockBean
+    private CachedEnvironmentClientService cachedEnvironmentClientService;
+
+    @MockBean
     private EncryptionKeyService encryptionKeyService;
 
     private ResourceConnector resourceConnector = mock(ResourceConnector.class);
@@ -212,6 +219,7 @@ class StackProvisionFlowIntegrationTest {
         when(cloudConnector.metadata()).thenReturn(mock(MetadataCollector.class));
         when(resourceConnector.getTlsInfo(any(), any())).thenReturn(new TlsInfo(false));
         when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(Set.of(new InstanceMetaData()));
+        when(cachedEnvironmentClientService.getByCrn(any())).thenReturn(new DetailedEnvironmentResponse());
     }
 
     @Test
@@ -314,7 +322,8 @@ class StackProvisionFlowIntegrationTest {
             CreateCredentialHandler.class,
             LaunchStackHandler.class,
             CollectMetadataHandler.class,
-            GetTlsInfoHandler.class
+            GetTlsInfoHandler.class,
+            UpdateUserdataSecretsHandler.class
     })
     static class Config {
         @MockBean
@@ -328,6 +337,8 @@ class StackProvisionFlowIntegrationTest {
 
         @MockBean
         private ResourceNotifier resourceNotifier;
-    }
 
+        @MockBean
+        private UserdataSecretsService userdataSecretsService;
+    }
 }

@@ -6,6 +6,8 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIP
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UNSET;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.CCM_KEY_DEREGISTRATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.CLUSTER_PROXY_DEREGISTRATION_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.DELETE_USERDATA_SECRETS_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.DELETE_USERDATA_SECRETS_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.EXECUTE_PRE_TERMINATION_RECIPES_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.REMOVE_MACHINE_USER_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.STACK_TERMINATION_FAIL_HANDLED_EVENT;
@@ -14,6 +16,7 @@ import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEven
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.TERMINATION_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.TERMINATION_FINALIZED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.TERMINATION_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState.DELETE_USERDATA_SECRETS_STATE;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState.DEREGISTER_CCMKEY_STATE;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState.DEREGISTER_CLUSTERPROXY_STATE;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState.EXECUTE_PRE_TERMINATION_RECIPES;
@@ -42,8 +45,10 @@ public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackT
             new Builder<StackTerminationState, StackTerminationEvent>()
                     .defaultFailureEvent(TERMINATION_FAILED_EVENT)
                     .from(INIT_STATE).to(EXECUTE_PRE_TERMINATION_RECIPES).event(TERMINATION_EVENT).defaultFailureEvent()
-                    .from(EXECUTE_PRE_TERMINATION_RECIPES).to(STOP_TELEMETRY_AGENT_STATE).event(EXECUTE_PRE_TERMINATION_RECIPES_FINISHED_EVENT)
+                    .from(EXECUTE_PRE_TERMINATION_RECIPES).to(DELETE_USERDATA_SECRETS_STATE).event(EXECUTE_PRE_TERMINATION_RECIPES_FINISHED_EVENT)
                     .defaultFailureEvent()
+                    .from(DELETE_USERDATA_SECRETS_STATE).to(STOP_TELEMETRY_AGENT_STATE).event(DELETE_USERDATA_SECRETS_FINISHED_EVENT)
+                    .failureEvent(DELETE_USERDATA_SECRETS_FAILED_EVENT)
                     .from(STOP_TELEMETRY_AGENT_STATE).to(DEREGISTER_CLUSTERPROXY_STATE).event(STOP_TELEMETRY_AGENT_FINISHED_EVENT).defaultFailureEvent()
                     .from(DEREGISTER_CLUSTERPROXY_STATE).to(DEREGISTER_CCMKEY_STATE).event(CLUSTER_PROXY_DEREGISTRATION_FINISHED_EVENT).defaultFailureEvent()
                     .from(DEREGISTER_CCMKEY_STATE).to(REMOVE_MACHINE_USER_STATE).event(CCM_KEY_DEREGISTRATION_FINISHED_EVENT).defaultFailureEvent()

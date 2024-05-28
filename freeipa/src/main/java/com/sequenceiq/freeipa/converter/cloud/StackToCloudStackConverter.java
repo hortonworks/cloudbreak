@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUES
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.putIfPresent;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.REQUESTED;
@@ -37,6 +38,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.cloud.exception.UserdataSecretsException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
@@ -79,6 +81,7 @@ import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceGroupNetwork;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
+import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackAuthentication;
 import com.sequenceiq.freeipa.entity.Template;
@@ -86,6 +89,7 @@ import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.freeipa.service.client.AzureMarketplaceTermsClientService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.image.ImageService;
+import com.sequenceiq.freeipa.service.resource.ResourceService;
 
 @Component
 public class StackToCloudStackConverter implements Converter<Stack, CloudStack> {
@@ -106,6 +110,9 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
 
     @Inject
     private AzureMarketplaceTermsClientService azureMarketplaceTermsClientService;
+
+    @Inject
+    private ResourceService resourceService;
 
     @Override
     public CloudStack convert(Stack stack) {
@@ -455,22 +462,29 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     }
 
     public Map<String, Object> buildCloudInstanceParameters(String environmentCrn, InstanceMetaData instanceMetaData) {
-        String hostName = instanceMetaData == null ? null : instanceMetaData.getDiscoveryFQDN();
-        String subnetId = instanceMetaData == null ? null : instanceMetaData.getSubnetId();
-        String instanceName = instanceMetaData == null ? null : instanceMetaData.getInstanceName();
         Map<String, Object> params = new HashMap<>();
+        putIfPresent(params, SUBNET_ID, getIfNotNull(instanceMetaData, InstanceMetaData::getSubnetId));
         putIfPresent(params, CloudInstance.ID, getIfNotNull(instanceMetaData, InstanceMetaData::getId));
-        if (hostName != null) {
+        putIfPresent(params, CloudInstance.INSTANCE_NAME, getIfNotNull(instanceMetaData, InstanceMetaData::getInstanceName));
+        doIfNotNull(getIfNotNull(instanceMetaData, InstanceMetaData::getDiscoveryFQDN), hostName -> {
             hostName = getFreeIpaHostname(instanceMetaData, hostName);
             LOGGER.debug("Setting FreeIPA hostname to {}", hostName);
             params.put(CloudInstance.DISCOVERY_NAME, hostName);
-        }
-        if (subnetId != null) {
-            params.put(SUBNET_ID, subnetId);
-        }
-        if (instanceName != null) {
-            params.put(CloudInstance.INSTANCE_NAME, instanceName);
-        }
+        });
+        doIfNotNull(getIfNotNull(instanceMetaData, InstanceMetaData::getUserdataSecretResourceId), resourceId -> {
+            Optional<Resource> userdataSecretResource = resourceService.findResourceById(resourceId);
+            if (userdataSecretResource.isPresent()) {
+                params.put(CloudInstance.USERDATA_SECRET_ID, userdataSecretResource.get().getResourceReference());
+            } else {
+                throw new UserdataSecretsException(String.format("The secret resource with id '%s', associated with instance '%s'," +
+                        " does not exist in the database!", resourceId, instanceMetaData.getInstanceId()));
+            }
+        });
+        extendWithAzureResourceGroupParameters(environmentCrn, params);
+        return params;
+    }
+
+    private void extendWithAzureResourceGroupParameters(String environmentCrn, Map<String, Object> params) {
         Optional<AzureResourceGroup> resourceGroupOptional = getAzureResourceGroup(environmentCrn);
         if (resourceGroupOptional.isPresent() && !ResourceGroupUsage.MULTIPLE.equals(resourceGroupOptional.get().getResourceGroupUsage())) {
             AzureResourceGroup resourceGroup = resourceGroupOptional.get();
@@ -479,7 +493,6 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
             params.put(RESOURCE_GROUP_NAME_PARAMETER, resourceGroupName);
             params.put(RESOURCE_GROUP_USAGE_PARAMETER, resourceGroupUsage.name());
         }
-        return params;
     }
 
     private String getFreeIpaHostname(InstanceMetaData instanceMetaData, String hostName) {

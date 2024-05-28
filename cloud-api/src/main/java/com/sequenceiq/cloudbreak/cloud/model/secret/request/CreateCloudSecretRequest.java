@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model.secret.request;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -11,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.model.encryption.EncryptionKeySource;
 
 public record CreateCloudSecretRequest(CloudContext cloudContext, CloudCredential cloudCredential, List<CloudResource> cloudResources, String secretName,
         String description, String secretValue, Optional<EncryptionKeySource> encryptionKeySource, Map<String, String> tags) {
+
     public CreateCloudSecretRequest(Builder builder) {
         this(
                 builder.cloudContext,
@@ -22,6 +24,18 @@ public record CreateCloudSecretRequest(CloudContext cloudContext, CloudCredentia
                 builder.encryptionKeySource,
                 builder.tags
         );
+    }
+
+    public Builder toBuilder() {
+        return builder()
+                .withCloudContext(cloudContext)
+                .withCloudCredential(cloudCredential)
+                .withCloudResources(cloudResources)
+                .withSecretName(secretName)
+                .withDescription(description)
+                .withSecretValue(secretValue)
+                .withEncryptionKeySource(encryptionKeySource)
+                .withTags(tags);
     }
 
     public static Builder builder() {
@@ -47,7 +61,7 @@ public record CreateCloudSecretRequest(CloudContext cloudContext, CloudCredentia
 
         private CloudCredential cloudCredential;
 
-        private List<CloudResource> cloudResources;
+        private List<CloudResource> cloudResources = Collections.emptyList();
 
         private String secretName;
 
@@ -55,9 +69,9 @@ public record CreateCloudSecretRequest(CloudContext cloudContext, CloudCredentia
 
         private String secretValue;
 
-        private Optional<EncryptionKeySource> encryptionKeySource;
+        private Optional<EncryptionKeySource> encryptionKeySource = Optional.empty();
 
-        private Map<String, String> tags;
+        private Map<String, String> tags = Collections.emptyMap();
 
         private Builder() {
         }

@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsSecretsManagerConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.AwsResourceVolumeConnector;
-import com.sequenceiq.cloudbreak.cloud.aws.common.encryption.AwsEncryptionSdkCryptoConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.validator.AwsStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConnector;
 
@@ -90,9 +89,6 @@ class AwsConnectorTest {
     private List<ConsumptionCalculator> consumptionCalculators;
 
     @Mock
-    private AwsEncryptionSdkCryptoConnector awsEncryptionSdkCryptoConnector;
-
-    @Mock
     private AwsSecretsManagerConnector awsSecretsManagerConnector;
 
     @Mock
@@ -104,11 +100,6 @@ class AwsConnectorTest {
     @Test
     void encryptionResourcesTest() {
         assertThat(underTest.encryptionResources()).isSameAs(awsEncryptionResources);
-    }
-
-    @Test
-    void cryptoConnectorTest() {
-        assertThat(underTest.cryptoConnector()).isSameAs(awsEncryptionSdkCryptoConnector);
     }
 
     @Test

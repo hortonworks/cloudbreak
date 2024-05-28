@@ -31,6 +31,8 @@ import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.ST
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.STACK_CREATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.START_CREATION_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.TLS_SETUP_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.UPDATE_USERDATA_SECRETS_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.UPDATE_USERDATA_SECRETS_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.VALIDATION_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.VALIDATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.CLUSTERPROXY_REGISTRATION_STATE;
@@ -51,6 +53,7 @@ import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.ST
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.STACK_CREATION_FINISHED_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.START_PROVISIONING_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.TLS_SETUP_STATE;
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.UPDATE_USERDATA_SECRETS_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.VALIDATION_STATE;
 
 import java.util.List;
@@ -81,7 +84,9 @@ public class StackProvisionFlowConfig extends AbstractFlowConfiguration<StackPro
             .from(IMAGE_FALLBACK_STATE).to(IMAGE_FALLBACK_START_STATE).event(IMAGE_FALLBACK_START_EVENT).failureEvent(IMAGE_FALLBACK_FAILED_EVENT)
             .from(IMAGE_FALLBACK_START_STATE).to(IMAGESETUP_STATE).event(IMAGE_FALLBACK_FINISHED_EVENT).failureEvent(IMAGE_FALLBACK_FAILED_EVENT)
             .from(PROVISIONING_FINISHED_STATE).to(COLLECTMETADATA_STATE).event(COLLECT_METADATA_FINISHED_EVENT).failureEvent(COLLECT_METADATA_FAILED_EVENT)
-            .from(COLLECTMETADATA_STATE).to(GET_TLS_INFO_STATE).event(GET_TLS_INFO_FINISHED_EVENT).failureEvent(GET_TLS_INFO_FAILED_EVENT)
+            .from(COLLECTMETADATA_STATE).to(UPDATE_USERDATA_SECRETS_STATE)
+            .event(UPDATE_USERDATA_SECRETS_FINISHED_EVENT).failureEvent(UPDATE_USERDATA_SECRETS_FAILED_EVENT)
+            .from(UPDATE_USERDATA_SECRETS_STATE).to(GET_TLS_INFO_STATE).event(GET_TLS_INFO_FINISHED_EVENT).failureEvent(GET_TLS_INFO_FAILED_EVENT)
             .from(GET_TLS_INFO_STATE).to(TLS_SETUP_STATE).event(SETUP_TLS_EVENT).defaultFailureEvent()
             .from(TLS_SETUP_STATE).to(CLUSTERPROXY_REGISTRATION_STATE).event(TLS_SETUP_FINISHED_EVENT).defaultFailureEvent()
             .from(CLUSTERPROXY_REGISTRATION_STATE).to(STACK_CREATION_FINISHED_STATE)

@@ -10,7 +10,6 @@ import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
-import com.sequenceiq.cloudbreak.cloud.CryptoConnector;
 import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.IdentityService;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
@@ -40,7 +39,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsSecretsManagerConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
-import com.sequenceiq.cloudbreak.cloud.aws.common.encryption.AwsEncryptionSdkCryptoConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.validator.AwsStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.metadata.AwsNativeMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.validator.AwsGatewaySubnetMultiAzValidator;
@@ -100,9 +98,6 @@ public class AwsNativeConnector implements CloudConnector {
 
     @Inject
     private AwsStorageValidator awsStorageValidator;
-
-    @Inject
-    private AwsEncryptionSdkCryptoConnector awsEncryptionSdkCryptoConnector;
 
     @Inject
     private AwsSecretsManagerConnector awsSecretsManagerConnector;
@@ -196,11 +191,6 @@ public class AwsNativeConnector implements CloudConnector {
     @Override
     public ResourceVolumeConnector volumeConnector() {
         return resourceVolumeConnector;
-    }
-
-    @Override
-    public CryptoConnector cryptoConnector() {
-        return awsEncryptionSdkCryptoConnector;
     }
 
     @Override

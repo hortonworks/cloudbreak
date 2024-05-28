@@ -64,6 +64,8 @@ import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.ImageFall
 import com.sequenceiq.freeipa.flow.stack.provision.event.imagefallback.LaunchStackResultToStackEventConverter;
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserDataRequest;
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserDataSuccess;
+import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.UpdateUserdataSecretsRequest;
+import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.UpdateUserdataSecretsSuccess;
 import com.sequenceiq.freeipa.service.image.ImageFallbackService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
@@ -138,7 +140,7 @@ public class StackProvisionActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                return new CreateUserDataRequest(context.getStack().getId());
+                return new CreateUserDataRequest(context.getStack().getId(), context.getCloudContext(), context.getCloudCredential());
             }
         };
     }
@@ -294,11 +296,26 @@ public class StackProvisionActions {
                 Stack stack = stackProvisionService.setupMetadata(context, payload);
                 StackContext newContext = new StackContext(context.getFlowParameters(), stack, context.getCloudContext(),
                         context.getCloudCredential(), context.getCloudStack());
-                if (newContext.getStack().getTunnel().useCcm()) {
+                sendEvent(newContext);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new UpdateUserdataSecretsRequest(context.getStack().getId(), context.getCloudContext(), context.getCloudCredential());
+            }
+        };
+    }
+
+    @Bean(name = "UPDATE_USERDATA_SECRETS_STATE")
+    public Action<?, ?> updateUserDataSecretsAction() {
+        return new AbstractStackProvisionAction<>(UpdateUserdataSecretsSuccess.class) {
+            @Override
+            protected void doExecute(StackContext context, UpdateUserdataSecretsSuccess payload, Map<Object, Object> variables) {
+                if (context.getStack().getTunnel().useCcm()) {
                     GetTlsInfoResult getTlsInfoResult = new GetTlsInfoResult(context.getCloudContext().getId(), new TlsInfo(true));
-                    sendEvent(newContext, getTlsInfoResult.selector(), getTlsInfoResult);
+                    sendEvent(context, getTlsInfoResult.selector(), getTlsInfoResult);
                 } else {
-                    sendEvent(newContext);
+                    sendEvent(context);
                 }
             }
 

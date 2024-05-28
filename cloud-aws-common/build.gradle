@@ -29,8 +29,6 @@ dependencies {
 
   implementation group: 'com.dyngr', name: 'polling', version: dyngrPollingVersion
 
-  implementation group: 'com.amazonaws', name: 'aws-encryption-sdk-java', version: awsEncryptionSdkVersion
-
   api(group: 'software.amazon.awssdk', name: 'core', version: awsSdkVersion) {
     exclude group: 'commons-logging'
   }
