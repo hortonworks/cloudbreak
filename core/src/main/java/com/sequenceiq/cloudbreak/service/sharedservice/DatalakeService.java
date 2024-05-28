@@ -2,13 +2,8 @@ package com.sequenceiq.cloudbreak.service.sharedservice;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import java.util.Collection;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -17,8 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.service.HierarchyAuthResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -26,23 +19,18 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedse
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
-import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Service
-public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
+public class DatalakeService {
 
     public static final String RANGER = "RANGER";
 
@@ -59,9 +47,6 @@ public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
 
     @Inject
     private TransactionService transactionService;
-
-    @Inject
-    private StackDtoService stackDtoService;
 
     public void prepareDatalakeRequest(Stack source, StackV4Request stackRequest) {
         if (!Strings.isNullOrEmpty(source.getDatalakeCrn())) {
@@ -192,62 +177,5 @@ public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
             fqdn = datalakeStack.getClusterManagerIp();
         }
         return fqdn;
-    }
-
-    @Override
-    public AuthorizationResourceType getSupportedAuthorizationResourceType() {
-        return AuthorizationResourceType.DATALAKE;
-    }
-
-    @Override
-    public String getResourceCrnByResourceName(String resourceName) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        return getNotTerminatedDatalakeStackViewSafely(() -> stackDtoService.findNotTerminatedByNameAndAccountId(resourceName, accountId),
-                "%s stack not found", "%s stack is not a Data Lake.", resourceName)
-                .getResourceCrn();
-    }
-
-    @Override
-    public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        return stackDtoService.findNotTerminatedByNamesAndAccountId(resourceNames, accountId)
-                .stream()
-                .filter(stackView -> StackType.DATALAKE.equals(stackView.getType()))
-                .map(StackView::getResourceCrn)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public Optional<String> getEnvironmentCrnByResourceCrn(String resourceCrn) {
-        try {
-            return Optional.of(getNotTerminatedDatalakeStackViewSafely(() -> stackDtoService.findNotTerminatedByCrn(resourceCrn),
-                    "Stack by CRN %s not found", "Stack with CRN %s is not a Data Lake.", resourceCrn)
-                    .getEnvironmentCrn());
-        } catch (NotFoundException e) {
-            LOGGER.error(String.format("Getting environment crn by resource crn %s failed, ", resourceCrn), e);
-            return Optional.empty();
-        }
-    }
-
-    @Override
-    public Map<String, Optional<String>> getEnvironmentCrnsByResourceCrns(Collection<String> resourceCrns) {
-        return stackDtoService.findNotTerminatedByCrns(resourceCrns)
-                .stream()
-                .filter(stackView -> StackType.DATALAKE.equals(stackView.getType()))
-                .collect(Collectors.toMap(StackView::getResourceCrn, stackView -> Optional.ofNullable(stackView.getEnvironmentCrn())));
-    }
-
-    private StackView getNotTerminatedDatalakeStackViewSafely(Supplier<Optional<? extends StackView>> optionalStackView, String notFoundMessageTemplate,
-            String notDatalakeMessageTemplate, String input) {
-        StackView stackView = optionalStackView.get().orElseThrow(() -> new NotFoundException(String.format(notFoundMessageTemplate, input)));
-        if (!StackType.DATALAKE.equals(stackView.getType())) {
-            throw new BadRequestException(String.format(notDatalakeMessageTemplate, input));
-        }
-        return stackView;
-    }
-
-    @Override
-    public EnumSet<Crn.ResourceType> getSupportedCrnResourceTypes() {
-        return EnumSet.of(Crn.ResourceType.DATALAKE);
     }
 }
