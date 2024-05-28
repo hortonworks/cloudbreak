@@ -8,26 +8,74 @@
     "pvcEnvironmentDetails": {
       "cmHost": "https://testcloud-1.test-hybrid.root.comops.site:7183",
       "cmlSummary": {
-        "cmlWorkspaces": []
+        "cmlWorkspaces": [
+          {
+            "instanceName": "test-ml",
+            "environmentName": "zhe-rhl9-3",
+            "instanceStatus": "installation:failed",
+            "instanceUrl": "http://ml-29c86d80-133.apps.zhe-rhl9-3.vpc.cloudera.com",
+            "environmentCrn": "crn:altus:environments:us-west-1:07f2a6a3-2a37-4903-a7ff-786279d247f1:environment:zhe-rhl9-3/8f92a8a6-b37b-4b36-92e6-fd9daf32160a",
+            "namespace": "",
+            "crn": "crn:cdp:ml:us-west-1:07f2a6a3-2a37-4903-a7ff-786279d247f1:workspace:cb596fc0-7a5c-422a-8576-c05ec72b33e5"
+          }
+        ]
       },
       "cdwSummary": {
         "cdwCluster": {
-          "crn": "",
-          "id": "",
-          "environmentCrn": "",
-          "name": "",
-          "status": ""
+          "crn": "crn:altus:cdw:us-west-1:07f2a6a3-2a37-4903-a7ff-786279d247f1:environment:zhe-rhl9-3/8f92a8a6-b37b-4b36-92e6-fd9daf32160a",
+          "id": "env-zhe-rhl9-3",
+          "environmentCrn": "crn:altus:environments:us-west-1:07f2a6a3-2a37-4903-a7ff-786279d247f1:environment:zhe-rhl9-3/8f92a8a6-b37b-4b36-92e6-fd9daf32160a",
+          "name": "zhe-rhl9-3",
+          "status": "Running"
         },
         "cdwDbc": {
-          "crn": "",
-          "id": "",
-          "name": "",
-          "status": "",
-          "cdwVws": []
+          "cdwVws": [
+            {
+              "crn": "crn:cdp:dw:us-west-1:07f2a6a3-2a37-4903-a7ff-786279d247f1:cluster:env-zhe-rhl9-3.compute-fsfsfdfsffsdf",
+              "id": "compute-fsfsfdfsffsdf",
+              "name": "fsfsfdfsffsdf",
+              "vwType": "hive",
+              "dbcId": "warehouse-zhe-rhl9-3"
+            },
+            {
+              "crn": "crn:cdp:dw:us-west-1:07f2a6a3-2a37-4903-a7ff-786279d247f1:cluster:env-zhe-rhl9-3.compute-test-cdw-vw",
+              "id": "compute-test-cdw-vw",
+              "name": "test-cdw-vw",
+              "vwType": "hive",
+              "dbcId": "warehouse-zhe-rhl9-3"
+            }
+          ],
+          "crn": "crn:cdp:dw:us-west-1:07f2a6a3-2a37-4903-a7ff-786279d247f1:cluster:env-zhe-rhl9-3.warehouse-zhe-rhl9-3",
+          "id": "warehouse-zhe-rhl9-3",
+          "name": "zhe-rhl9-3",
+          "status": "Running"
         }
       },
       "cdeSummary": {
-        "cdeServices": []
+        "cdeServices": [
+          {
+            "cdeVcs": [
+              {
+                "vcId": "dex-app-55ngk24b",
+                "vcName": "Default-VC-7jnwrslh",
+                "clusterId": "cluster-7jnwrslh",
+                "status": "AppInstalled",
+                "vcUiUrl": "https://55ngk24b.cde-7jnwrslh.apps.zhe-rhl9-3.vpc.cloudera.com/dex/ui/"
+              }
+            ],
+            "name": "cde-test1",
+            "clusterId": "cluster-7jnwrslh",
+            "environmentName": "zhe-rhl9-3",
+            "status": "ClusterCreationCompleted"
+          },
+          {
+            "cdeVcs": [],
+            "name": "hhh8888",
+            "clusterId": "cluster-mrnb5sq2",
+            "environmentName": "zhe-rhl9-3",
+            "status": "ClusterChartInstallationFailed"
+          }
+        ]
       },
       "applications": {
         "ATLAS": {
