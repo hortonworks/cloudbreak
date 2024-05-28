@@ -92,7 +92,7 @@ public class StackSyncActions {
         return new AbstractStackSyncAction<>(GetInstancesStateResult.class) {
             @Override
             protected void doExecute(StackSyncContext context, GetInstancesStateResult payload, Map<Object, Object> variables) {
-                SyncConfig syncConfig = new SyncConfig(context.isStatusUpdateEnabled(), true);
+                SyncConfig syncConfig = new SyncConfig(context.isStatusUpdateEnabled(), true, false);
                 stackSyncService.updateInstances(context.getStack(), context.getInstanceMetaData(), payload.getStatuses(), syncConfig);
                 sendEvent(context);
             }

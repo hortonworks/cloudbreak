@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.CLUSTER_MANAGER_NOT_RESPONDING;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.PROVIDER_NOT_RESPONDING;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.NODE_FAILURE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
@@ -74,6 +75,9 @@ class StackSyncServiceTest {
             if (expectedStatus == CLUSTER_MANAGER_NOT_RESPONDING) {
                 statusReason = "Cloudera Manager server not responding.";
             }
+            if (expectedStatus == PROVIDER_NOT_RESPONDING) {
+                statusReason = "Cloud provider didn't respond. Please check the privileges of the credential.";
+            }
             if (!currentStatus.equals(expectedStatus.getStatus())) {
                 verify(stackUpdater).updateStackStatus(1L, expectedStatus, statusReason);
                 if (running > 0) {
@@ -96,9 +100,9 @@ class StackSyncServiceTest {
                         4,
                         1,
                         0,
-                        new SyncConfig(true, true),
+                        new SyncConfig(true, true, false),
                         null
-                        ),
+                ),
                 Arguments.of(
                         "Stack was available and now all stopped",
                         AVAILABLE,
@@ -106,9 +110,9 @@ class StackSyncServiceTest {
                         0,
                         5,
                         0,
-                        new SyncConfig(true, true),
+                        new SyncConfig(true, true, false),
                         DetailedStackStatus.STOPPED
-                        ),
+                ),
                 Arguments.of(
                         "Stack was available and now all deleted",
                         AVAILABLE,
@@ -116,9 +120,9 @@ class StackSyncServiceTest {
                         0,
                         0,
                         5,
-                        new SyncConfig(true, true),
+                        new SyncConfig(true, true, false),
                         DetailedStackStatus.DELETED_ON_PROVIDER_SIDE
-                        ),
+                ),
                 Arguments.of(
                         "Stack was node failure and now 1 node stopped",
                         NODE_FAILURE,
@@ -126,9 +130,9 @@ class StackSyncServiceTest {
                         3,
                         1,
                         1,
-                        new SyncConfig(true, true),
+                        new SyncConfig(true, true, false),
                         null
-                        ),
+                ),
                 Arguments.of(
                         "Stack was running with 1 node stopped and now available",
                         AVAILABLE,
@@ -136,7 +140,7 @@ class StackSyncServiceTest {
                         5,
                         0,
                         0,
-                        new SyncConfig(true, true),
+                        new SyncConfig(true, true, false),
                         DetailedStackStatus.AVAILABLE
                 ),
                 Arguments.of(
@@ -146,7 +150,7 @@ class StackSyncServiceTest {
                         4,
                         1,
                         0,
-                        new SyncConfig(true, true),
+                        new SyncConfig(true, true, false),
                         null
                 ),
                 Arguments.of(
@@ -156,7 +160,7 @@ class StackSyncServiceTest {
                         4,
                         1,
                         0,
-                        new SyncConfig(true, false),
+                        new SyncConfig(true, false, false),
                         CLUSTER_MANAGER_NOT_RESPONDING
                 ),
                 Arguments.of(
@@ -166,8 +170,18 @@ class StackSyncServiceTest {
                         5,
                         0,
                         0,
-                        new SyncConfig(true, true),
+                        new SyncConfig(true, true, false),
                         DetailedStackStatus.AVAILABLE
+                ),
+                Arguments.of(
+                        "Stack status cannot be checked, cm and provider unreachable",
+                        STOPPED,
+                        5,
+                        5,
+                        0,
+                        0,
+                        new SyncConfig(true, false, true),
+                        DetailedStackStatus.PROVIDER_NOT_RESPONDING
                 )
         );
     }

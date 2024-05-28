@@ -53,6 +53,8 @@ public class StackSyncService {
 
     private static final String CM_SERVER_NOT_RESPONDING = "Cloudera Manager server not responding.";
 
+    private static final String PROVIDER_NOT_RESPONDING = "Cloud provider didn't respond. Please check the privileges of the credential.";
+
     @Inject
     private StackUpdater stackUpdater;
 
@@ -219,18 +221,32 @@ public class StackSyncService {
             List<InstanceMetadataView> instances) {
         Status status = stack.getStatus();
         if (instanceStateCounts.get(InstanceSyncState.RUNNING) > 0) {
-            if (syncConfig.isCmServerRunning()) {
-                if (status != AVAILABLE && status != NODE_FAILURE) {
-                    updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, SYNC_STATUS_REASON);
-                }
-            } else if (status != UNREACHABLE) {
-                updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_MANAGER_NOT_RESPONDING, CM_SERVER_NOT_RESPONDING);
-            }
-            meteringService.scheduleSyncIfNotScheduled(stack.getId());
+            handleSyncResultIfSomeNodesRunning(stack, syncConfig, status);
         } else if (isAllStopped(instanceStateCounts, instances.size()) && status != STOPPED) {
             updateStackStatus(stack.getId(), DetailedStackStatus.STOPPED, SYNC_STATUS_REASON);
         } else if (isAllDeletedOnProvider(instanceStateCounts, instances.size()) && status != DELETE_FAILED) {
             updateStackStatus(stack.getId(), DetailedStackStatus.DELETED_ON_PROVIDER_SIDE, SYNC_STATUS_REASON);
+        } else if (status != UNREACHABLE && syncConfig.isProviderResponseError()) {
+            handleUnreachable(stack, syncConfig);
+        }
+    }
+
+    private void handleSyncResultIfSomeNodesRunning(StackView stack, SyncConfig syncConfig, Status status) {
+        if (syncConfig.isCmServerRunning()) {
+            if (status != AVAILABLE && status != NODE_FAILURE) {
+                updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, SYNC_STATUS_REASON);
+            }
+        } else if (status != UNREACHABLE) {
+            handleUnreachable(stack, syncConfig);
+        }
+        meteringService.scheduleSyncIfNotScheduled(stack.getId());
+    }
+
+    private void handleUnreachable(StackView stack, SyncConfig syncConfig) {
+        if (syncConfig.isProviderResponseError()) {
+            updateStackStatus(stack.getId(), DetailedStackStatus.PROVIDER_NOT_RESPONDING, PROVIDER_NOT_RESPONDING);
+        } else {
+            updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_MANAGER_NOT_RESPONDING, CM_SERVER_NOT_RESPONDING);
         }
     }
 

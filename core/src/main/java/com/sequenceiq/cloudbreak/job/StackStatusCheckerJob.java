@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.STOPPED;
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
+import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.UNKNOWN;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.util.stream.Collectors.toSet;
 
@@ -369,8 +370,17 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(instanceMetaData, stack.getStack());
         List<CloudVmInstanceStatus> instanceStatuses = stackInstanceStatusChecker.queryInstanceStatuses(stack, cloudInstances);
         LOGGER.debug("Cluster '{}' state check on provider, instances: {}", stack.getId(), instanceStatuses);
-        SyncConfig syncConfig = new SyncConfig(true, cmServerRunning);
+        SyncConfig syncConfig = new SyncConfig(true, cmServerRunning, isProviderUnreachable(instanceStatuses));
         runIfFlowNotRunning(() -> syncService.autoSync(stack.getStack(), runningInstances, instanceStatuses, defaultState, syncConfig));
+    }
+
+    private boolean isProviderUnreachable(List<CloudVmInstanceStatus> instanceStatuses) {
+        if (!instanceStatuses.isEmpty()) {
+            return instanceStatuses.stream()
+                    .map(CloudVmInstanceStatus::getStatus)
+                    .allMatch(UNKNOWN::equals);
+        }
+        return false;
     }
 
     private boolean isCMRunning(ClusterApi connector) {

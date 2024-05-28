@@ -6,9 +6,12 @@ public class SyncConfig {
 
     private final boolean cmServerRunning;
 
-    public SyncConfig(boolean stackStatusUpdateEnabled, boolean cmServerRunning) {
+    private final boolean providerResponseError;
+
+    public SyncConfig(boolean stackStatusUpdateEnabled, boolean cmServerRunning, boolean providerResponseError) {
         this.stackStatusUpdateEnabled = stackStatusUpdateEnabled;
         this.cmServerRunning = cmServerRunning;
+        this.providerResponseError = providerResponseError;
     }
 
     public boolean isStackStatusUpdateEnabled() {
@@ -19,4 +22,7 @@ public class SyncConfig {
         return cmServerRunning;
     }
 
+    public boolean isProviderResponseError() {
+        return providerResponseError;
+    }
 }
