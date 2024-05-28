@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRole
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SETTINGS_REF_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SETTINGS_SERVICE_REF_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SITE_SAFETY_VALVE;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.HADOOP_RPC_PROTECTION;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.HADOOP_SECURITY_GROUPS_CACHE_BACKGROUND_RELOAD;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.STORAGEOPERATIONS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles.HDFS;
@@ -31,16 +30,12 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.adls.AdlsGen2ConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3.S3ConfigProvider;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -55,9 +50,6 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
     @Inject
     private AdlsGen2ConfigProvider adlsConfigProvider;
 
-    @Inject
-    private EntitlementService entitlementService;
-
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         return List.of();
@@ -66,41 +58,29 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> apiClusterTemplateConfigs = new ArrayList<>();
-        if (isCoreSettingsNeededForHdfsNameNode(templateProcessor, source)) {
-            Optional<ApiClusterTemplateConfig> roleConfig = templateProcessor.getRoleConfig(CORE_SETTINGS, STORAGEOPERATIONS, CORE_DEFAULTFS);
-            if (roleConfig.isEmpty()) {
-                ConfigUtils.getStorageLocationForServiceProperty(source, CORE_DEFAULTFS)
-                        .ifPresent(location -> apiClusterTemplateConfigs.add(config(CORE_DEFAULTFS, location.getValue())));
-            }
-
-            StringBuilder hdfsCoreSiteSafetyValveValue = new StringBuilder();
-            s3ConfigProvider.getServiceConfigs(source, hdfsCoreSiteSafetyValveValue);
-            adlsConfigProvider.populateServiceConfigs(source, hdfsCoreSiteSafetyValveValue, templateProcessor.getStackVersion());
-
-            hdfsCoreSiteSafetyValveValue.append(ConfigUtils.getSafetyValveProperty(HADOOP_SECURITY_GROUPS_CACHE_BACKGROUND_RELOAD, "true"));
-
-            if (!hdfsCoreSiteSafetyValveValue.toString().isEmpty()) {
-                LOGGER.info("Adding '{}' to the cluster template config.", CORE_SITE_SAFETY_VALVE);
-                apiClusterTemplateConfigs.add(config(CORE_SITE_SAFETY_VALVE, hdfsCoreSiteSafetyValveValue.toString()));
-            }
+        Optional<ApiClusterTemplateConfig> roleConfig = templateProcessor.getRoleConfig(CORE_SETTINGS, STORAGEOPERATIONS, CORE_DEFAULTFS);
+        if (roleConfig.isEmpty()) {
+            ConfigUtils.getStorageLocationForServiceProperty(source, CORE_DEFAULTFS)
+                    .ifPresent(location -> apiClusterTemplateConfigs.add(config(CORE_DEFAULTFS, location.getValue())));
         }
-        if (isWireEncryptionEnabled(source) || source.getGeneralClusterConfigs().isGovCloud()) {
-            apiClusterTemplateConfigs.add(config(HADOOP_RPC_PROTECTION, "privacy"));
+
+        StringBuilder hdfsCoreSiteSafetyValveValue = new StringBuilder();
+        s3ConfigProvider.getServiceConfigs(source, hdfsCoreSiteSafetyValveValue);
+        adlsConfigProvider.populateServiceConfigs(source, hdfsCoreSiteSafetyValveValue, templateProcessor.getStackVersion());
+
+        hdfsCoreSiteSafetyValveValue.append(ConfigUtils.getSafetyValveProperty(HADOOP_SECURITY_GROUPS_CACHE_BACKGROUND_RELOAD, "true"));
+
+        if (!hdfsCoreSiteSafetyValveValue.toString().isEmpty()) {
+            LOGGER.info("Adding '{}' to the cluster template config.", CORE_SITE_SAFETY_VALVE);
+            apiClusterTemplateConfigs.add(config(CORE_SITE_SAFETY_VALVE, hdfsCoreSiteSafetyValveValue.toString()));
         }
 
         return apiClusterTemplateConfigs;
     }
 
-    private boolean isWireEncryptionEnabled(TemplatePreparationObject source) {
-        return entitlementService.isWireEncryptionEnabled(ThreadBasedUserCrnProvider.getAccountId())
-                && !CloudPlatform.YARN.equals(source.getCloudPlatform())
-                && StackType.DATALAKE.equals(source.getStackType());
-    }
-
     @Override
     public Map<String, ApiClusterTemplateService> getAdditionalServices(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        if (isCoreSettingsNeededForHdfsNameNode(cmTemplateProcessor, source)
-                && cmTemplateProcessor.getServiceByType(CORE_SETTINGS).isEmpty()) {
+        if (cmTemplateProcessor.getServiceByType(CORE_SETTINGS).isEmpty()) {
             LOGGER.info("Adding '{}' as additional service.", CORE_SETTINGS);
             ApiClusterTemplateService coreSettings = createBaseCoreSettingsService(cmTemplateProcessor);
             Set<HostgroupView> hostgroupViews = source.getHostgroupViews();
@@ -145,13 +125,8 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
-        return isCoreSettingsNeededForHdfsNameNode(cmTemplateProcessor, source) || isWireEncryptionEnabled(source);
-    }
-
-    private boolean isCoreSettingsNeededForHdfsNameNode(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return !cmTemplateProcessor.isRoleTypePresentInService(HDFS, Lists.newArrayList(NAMENODE))
                 && source.getFileSystemConfigurationView().isPresent()
                 && ConfigUtils.getStorageLocationForServiceProperty(source, CORE_DEFAULTFS).isPresent();
     }
-
 }
