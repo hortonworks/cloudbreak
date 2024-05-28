@@ -252,6 +252,7 @@ cb:
       nonha:
         retentionperiod: 0
     credential.cache.ttl: 60
+    kms.delete.pendingWindowInDays: 7
 
   azure:
     host.name.prefix.length: 255

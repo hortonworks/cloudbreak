@@ -192,6 +192,12 @@ public abstract class AwsClient {
         return new AmazonKmsClient(proxy(kmsClient, awsCredential, regionName));
     }
 
+    public AmazonKmsClient createAWSKMS(AuthenticatedContext authenticatedContext) {
+        AwsCredentialView credentialView = new AwsCredentialView(authenticatedContext.getCloudCredential());
+        String regionName = authenticatedContext.getCloudContext().getLocation().getRegion().value();
+        return createAWSKMS(credentialView, regionName);
+    }
+
     public KmsClient createKmsClient(AwsCredentialView awsCredential, String regionName) {
         KmsClient kmsClient = getAwsKmsClient(awsCredential, regionName);
         return proxy(kmsClient, awsCredential, regionName);

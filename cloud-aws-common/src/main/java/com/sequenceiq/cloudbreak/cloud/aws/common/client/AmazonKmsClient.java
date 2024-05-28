@@ -15,6 +15,8 @@ import software.amazon.awssdk.services.kms.model.ListResourceTagsRequest;
 import software.amazon.awssdk.services.kms.model.ListResourceTagsResponse;
 import software.amazon.awssdk.services.kms.model.PutKeyPolicyRequest;
 import software.amazon.awssdk.services.kms.model.PutKeyPolicyResponse;
+import software.amazon.awssdk.services.kms.model.ScheduleKeyDeletionRequest;
+import software.amazon.awssdk.services.kms.model.ScheduleKeyDeletionResponse;
 
 public class AmazonKmsClient extends AmazonClient {
 
@@ -50,6 +52,10 @@ public class AmazonKmsClient extends AmazonClient {
 
     public PutKeyPolicyResponse putKeyPolicy(PutKeyPolicyRequest putKeyPolicyRequest) {
         return client.putKeyPolicy(putKeyPolicyRequest);
+    }
+
+    public ScheduleKeyDeletionResponse scheduleKeyDeletion(ScheduleKeyDeletionRequest scheduleKeyDeletionRequest) {
+        return client.scheduleKeyDeletion(scheduleKeyDeletionRequest);
     }
 
 }

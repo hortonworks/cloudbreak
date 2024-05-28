@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
@@ -24,6 +27,8 @@ import software.amazon.awssdk.services.kms.model.ListResourceTagsRequest;
 import software.amazon.awssdk.services.kms.model.ListResourceTagsResponse;
 import software.amazon.awssdk.services.kms.model.PutKeyPolicyRequest;
 import software.amazon.awssdk.services.kms.model.PutKeyPolicyResponse;
+import software.amazon.awssdk.services.kms.model.ScheduleKeyDeletionRequest;
+import software.amazon.awssdk.services.kms.model.ScheduleKeyDeletionResponse;
 
 @ExtendWith(MockitoExtension.class)
 class AmazonKmsClientTest {
@@ -109,6 +114,16 @@ class AmazonKmsClientTest {
         PutKeyPolicyResponse response = underTest.putKeyPolicy(putKeyPolicyRequest);
 
         assertThat(response).isSameAs(putKeyPolicyResponse);
+    }
+
+    @Test
+    void testScheduleKeyDeletion() {
+        ScheduleKeyDeletionRequest scheduleKeyDeletionRequest = mock(ScheduleKeyDeletionRequest.class);
+        ScheduleKeyDeletionResponse expectedResponse = mock(ScheduleKeyDeletionResponse.class);
+        when(client.scheduleKeyDeletion(scheduleKeyDeletionRequest)).thenReturn(expectedResponse);
+        ScheduleKeyDeletionResponse response = underTest.scheduleKeyDeletion(scheduleKeyDeletionRequest);
+        verify(client).scheduleKeyDeletion(scheduleKeyDeletionRequest);
+        assertEquals(expectedResponse, response);
     }
 
 }
