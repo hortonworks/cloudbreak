@@ -632,7 +632,7 @@ public class GrpcUmsClient {
             return resourceCrns.stream().map(r -> true).collect(Collectors.toList());
         }
         LOGGER.trace("Check if {} has rights on resources {}", memberCrn, resourceCrns);
-        List<Boolean> retVal = makePersonalResourceViewClient(memberCrn).hasRightOnResources(memberCrn, right, resourceCrns);
+        List<Boolean> retVal = makePersonalResourceViewClient().hasRightOnResources(memberCrn, right, resourceCrns);
         LOGGER.info("member {} has rights {}", memberCrn, retVal);
         return retVal;
     }
@@ -791,8 +791,8 @@ public class GrpcUmsClient {
         return new AuthorizationClient(channelWrapper.getChannel(), umsClientConfig, regionAwareInternalCrnGeneratorFactory);
     }
 
-    private PersonalResourceViewClient makePersonalResourceViewClient(String memberCrn) {
-        return new PersonalResourceViewClient(channelWrapper.getChannel(), memberCrn, umsClientConfig);
+    private GrpcPersonalResourceViewClient makePersonalResourceViewClient() {
+        return new GrpcPersonalResourceViewClient(channelWrapper.getChannel(), umsClientConfig, regionAwareInternalCrnGeneratorFactory);
     }
 
     /**
