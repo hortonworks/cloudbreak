@@ -22,7 +22,8 @@ public enum CloudStorageCdpService {
     FLINK_JOBMANAGER_ARCHIVE,
     FLINK_CHECKPOINTS,
     FLINK_SAVEPOINTS,
-    FLINK_HIGH_AVAILABILITY;
+    FLINK_HIGH_AVAILABILITY,
+    ICEBERG_REPLICATION_CLOUD_ROOT;
 
     @JsonIgnore
     public static String typeListing() {
