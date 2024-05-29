@@ -639,7 +639,7 @@ main() {
   init_temporary_directory
   validate_resources_certs_aws_directory
 
-  local CB_BROKEN_REGIONS='eu-south-2 il-central-1'
+  local CB_BROKEN_REGIONS='ap-south-2 ca-west-1 eu-south-2 il-central-1'
   log "Broken regions: $CB_BROKEN_REGIONS"
   local CB_ACTIVE_REGIONS
   CB_ACTIVE_REGIONS=$(determine_regions)
