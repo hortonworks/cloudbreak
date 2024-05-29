@@ -295,10 +295,22 @@ message Event {
     CDPCMLResourceRequested cdpCMLResourceRequested = 142;
     // A CDP DataFlow Project lifecycle event was triggered.
     CDPDFProjectLifecycle cdpDFProjectLifecycle = 143;
-    // A CDP DataFlow Proeject Resource was reassigned to another project.
+    // A CDP DataFlow Project Resource was reassigned to another project.
     CDPDFProjectResourceAssigned cdpDFProjectResourceAssigned = 144;
     // A Replication Manager policy creation event was detected
     RMPolicyCreationEvent rmPolicyCreationEvent = 145;
+    // A Diagnostic collection request was started or finished.
+    CDPDFDiagnosticRequestCollection cdpDFDiagnosticRequestCollection = 146;
+    // A CDP DataEngineering service upgrade status changed event
+    CDPCDEServiceUpgradeStatusChanged cdpCDEServiceUpgradeStatusChanged = 147;
+    // A CDP CDE backup restore event
+    CDPCDEBackupRestoreComplete cdpCDEBackupRestoreComplete = 148;
+    // A CDP Operational Database CreateDatabase Event
+    CDPCODCreateDatabaseRequest cdpCODCreateDatabaseRequest = 149;
+    // A CDP DataFlow Deployment NiFi runtime version update has been requested. Status changes for these events leverage CDPDFDeploymentStatusChanged.
+    CDPDFDeploymentFlowVersionChangeRequested cdpDFDeploymentFlowVersionChangeRequested = 150;
+    // A CDP Operational Database AutoScalingConfig Event
+    CDPCODAutoScalingConfig cdpCODAutoScalingConfig = 151;
   }
 }
 
@@ -1494,6 +1506,20 @@ message CDPLiftieClusterStatus {
     VALIDATION_FINISHED = 20;
     // The status when liftie failed to validate the request.
     VALIDATION_FAILED = 21;
+
+    // The status when liftie is trying to resume a kubernetes cluster
+    RESUME_STARTED = 22;
+    // The status when liftie is done resuming the kubernetes cluster
+    RESUME_FINISHED = 23;
+    // The status when liftie failed to resume the kubernetes cluster
+    RESUME_FAILED = 24;
+
+    // The status when liftie is trying to suspend a kubernetes cluster
+    SUSPEND_STARTED = 25;
+    // The status when liftie is done suspending the kubernetes cluster
+    SUSPEND_FINISHED = 26;
+    // The status when liftie failed to suspend the kubernetes cluster
+    SUSPEND_FAILED = 27;
   }
 }
 
@@ -1999,6 +2025,13 @@ message CDPFreeIPAStatus {
     INSTANCE_METADATA_UPDATE_FINISHED = 29;
     // The status when instance metadata update for CDP FreeIPA is failed.
     INSTANCE_METADATA_UPDATE_FAILED = 30;
+
+    // The status when a dynamic entitlement sync operation is started.
+    ENTITLEMENT_SYNC_STARTED = 31;
+    // The status when a dynamic entitlement sync operation is finished.
+    ENTITLEMENT_SYNC_FINISHED = 32;
+    // The status when a dynamic entitlement sync operation is failed.
+    ENTITLEMENT_SYNC_FAILED = 33;
   }
 }
 
@@ -2167,6 +2200,13 @@ message CDPClusterStatus {
     ROTATE_RDS_CERTIFICATE_FINISHED = 68;
     // The status when a Rotate RDS Certificate operation is failed.
     ROTATE_RDS_CERTIFICATE_FAILED = 69;
+
+    // The status when a dynamic entitlement sync operation is started.
+    ENTITLEMENT_SYNC_STARTED = 70;
+    // The status when a dynamic entitlement sync operation is finished.
+    ENTITLEMENT_SYNC_FINISHED = 71;
+    // The status when a dynamic entitlement sync operation is failed.
+    ENTITLEMENT_SYNC_FAILED = 72;
   }
 }
 
@@ -2427,6 +2467,8 @@ message CDPDatalakeShapeType {
     MICRO_DUTY = 3;
     // CUSTOM
     CUSTOM = 4;
+    // CONTAINERIZED
+    CONTAINERIZED = 5;
   }
 }
 
@@ -3055,6 +3097,24 @@ message CDPDFDeploymentStatus {
     RESUME_COMPLETED = 47;
     // The status of a deployment that failed to resume NiFi cluster.
     RESUME_FAILED = 48;
+    // The status of a deployment that has requested to change the flow version.
+    FLOW_VERSION_CHANGE_REQUESTED = 49;
+    // The status of a deployment that is changing the flow version.
+    FLOW_VERSION_CHANGE_IN_PROGRESS = 50;
+    // The status of a deployment that has changed the flow version successfully.
+    FLOW_VERSION_CHANGE_COMPLETED = 51;
+    // The status of a deployment that has failed to change the flow version.
+    FLOW_VERSION_CHANGE_FAILED = 52;
+    // The status of a deployment that has failed to prepare changing the flow version.
+    FLOW_VERSION_CHANGE_PREPARATION_FAILED = 53;
+    // The status of a deployment that has requested to cancel a change of the flow version.
+    CANCEL_FLOW_VERSION_CHANGE_REQUESTED = 54;
+    // The status of a deployment that is cancelling a change of the flow version.
+    CANCEL_FLOW_VERSION_CHANGE_IN_PROGRESS = 55;
+    // The status of a deployment that has cancelled the change of a flow version.
+    CANCEL_FLOW_VERSION_CHANGE_COMPLETED = 56;
+    // The status of a deployment that has failed to cancel the change to a flow version.
+    CANCEL_FLOW_VERSION_CHANGE_FAILED = 57;
   }
 }
 
@@ -3105,6 +3165,12 @@ message CDPDFDeploymentRequested {
   string nodeStorageProfile = 22;
   // Is flow metrics autoscaling enabled?
   bool flowMetricsAutoscalingEnabled = 23;
+  // Does the deployment have custom python configuration?
+  bool customPythonConfiguration = 24;
+  // Requested limit of CPU cores per NiFi node
+  double cores = 25;
+  // Requested limit of memory per NiFi node
+  double memory = 26;
 }
 
 message CDPDFDeploymentStatusChanged {
@@ -3354,6 +3420,43 @@ message CDPDFDeploymentNifiVersionUpdateRequested {
   string deploymentName = 9;
 }
 
+message CDPDFDeploymentFlowVersionChangeRequested {
+  // Operation metadata. Identifiers refer to the NiFi deployment within the environment.
+  CDPDFOperationDetails operationDetails = 1;
+  // The crn of the CDP environment of the deployment.
+  string environmentCrn = 2;
+  // The id of the DataFlow Service. This is the internal id used by dfx to refer to a dataflow-enabled cdp environment.
+  string dataFlowServiceId = 3;
+  // The crn of the DataFlow Service. This is the crn used by dfx to refer to a dataflow-enabled cdp environment.
+  string dataFlowServiceCrn = 4;
+  // The CRN of the version of the deployment's flow prior to the update.
+  string oldFlowVersionCrn = 5;
+  // The CRN of the version of the flow requested to update to.
+  string newFlowVersionCrn = 6;
+  // The initial status of the Deployment. Should only be FLOW_VERSION_CHANGE_REQUESTED or CANCEL_FLOW_VERSION_CHANGE_REQUESTED.
+  CDPDFDeploymentStatus.Value status = 7;
+  // Deployment name
+  string deploymentName = 8;
+  // The strategy to use during change flow version.
+  CDPDFDeploymentFlowVersionChangeStrategy.Value strategy = 9;
+  // The max time in minutes to wait for the flow to process data.
+  uint32 waitForFlowToStopInMinutes = 10;
+}
+
+// The strategies that can be used for change flow version.
+message CDPDFDeploymentFlowVersionChangeStrategy {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // Stop source processors and wait until data is processed.
+    STOP_AND_PROCESS_DATA = 1;
+    // Stop everything and clear the queues.
+    STOP_AND_EMPTY_QUEUES = 2;
+    // Do not explicitly stop anything, just execute change flow version.
+    ONLY_RESTART_AFFECTED_COMPONENTS = 3;
+  }
+}
+
 // The various lifecycle actions that can be taken on data flow projects.
 message CDPDFProjectAction {
   enum Value {
@@ -3390,6 +3493,54 @@ message CDPDFProjectLifecycle {
   CDPDFEventSource.Value eventSource = 9;
 }
 
+// Events generated when a diagnostic collection request has started
+message CDPDFDiagnosticRequestCollection {
+  // Unique Id assigned to each diagnostic bundle collection request.
+  string uuid = 1;
+  // The scope of logs that are being collected ( all, environment or deployment ).
+  CDPDFDiagnosticCollectionScope.Value cdpDFDiagnosticCollectionScope = 2;
+  // The list of deployment crns that we need
+  repeated string deploymentCrns = 3;
+  // The destination of the diagnostic bundle that is being sent ( cloud storage or support ).
+  CDPDFDiagnosticDestination.Value cdpDFDiagnosticDestination = 4;
+  // The start time of the diagnostic bundle being sent.
+  uint64 startTime= 5;
+  // The end time of the diagnostic bundle being sent.
+  uint64 endTime = 6;
+  // Flag to check if logs from nifi cluster are needed or not.
+  bool includeNifiDiagnostics = 7;
+  // Case number for the particular diagnostic collection.
+  string caseNumber = 8;
+  // Status of the diagnostic collection ( If It's start or finish ).
+  string status = 9;
+  // The Environment CRN for which the diagnostic bundle is being collected
+  string environmentCrn = 10;
+}
+
+message CDPDFDiagnosticDestination {
+ enum Value {
+      // A value indicating the enum is unset.
+      UNSET =0;
+      // A value indicating that the diagnostic bundle being sent is to a cloud storage.
+      CLOUD_STORAGE = 1;
+      // A value indicating that the diagnostic bundle being sent is to a support.
+      SUPPORT = 2;
+ }
+}
+
+message CDPDFDiagnosticCollectionScope {
+ enum Value {
+      // A value indicating the enum is unset.
+      UNSET = 0;
+      // A value indicating that the logs must be collected from both the deployment and environment.
+      ALL = 1;
+      // A value indicating that the logs must be collected from just the environment.
+      ENVIRONMENT = 2;
+      // A value indicating that the logs must be collected from just the deployment.
+      DEPLOYMENT = 3;
+ }
+}
+
 message CDPDFProjectResourceType {
   enum Value {
     // A value indicating the enum is unset.
@@ -3406,6 +3557,8 @@ message CDPDFProjectResourceType {
     TEST_SESSION = 5;
     // A value indicating a test session configuration resource.
     TEST_SESSION_CONFIGURATION = 6;
+    // A value indicating a custom python configuration resource.
+    CUSTOM_PYTHON_CONFIGURATION = 7;
   }
 }
 
@@ -4029,6 +4182,27 @@ message CDPCDEServiceUpgradeRequested {
   string currentKubernetesVersion = 7;
   // Target kubernetes version of the CDE cluster.
   string targetKubernetesVersion = 8;
+  // Workflow Id of the CDE CP workflow
+  string workflowId = 9;
+  // Step name of the multi-step upgrade process (prepare/backup/upgrade/resume)
+  string step = 10;
+  // Whether the attempt is a retry
+  bool isRetry = 11;
+  // Number of times it is attempted. For first attempt it's 1 and for each subsequent retry it's incremented by 1
+  int32 attemptNumber = 12;
+}
+
+message CDPCDEServiceUpgradeStatusChanged {
+  // The ID of the CDP CDE service.
+  string id = 1;
+  // The CRN of the CDP CDE service.
+  string clusterCrn = 2;
+  // Workflow Id of the CDE CP workflow
+  string workflowId = 3;
+  // Any details (text)
+  string details = 4;
+  // Status of the upgrade (running/success/failed)
+  string status = 5;
 }
 
 // Heartbeat that reports all the active CDE services.
@@ -5349,4 +5523,252 @@ message CDPSecretRotationEvent {
 message RMPolicyCreationEvent {
   string type = 1;
   string direction = 2;
+}
+
+// Generated when a valid CDP CDE backup restore operation completed.
+message CDPCDEBackupRestoreComplete {
+  // Id of the backup set
+  string id = 1;
+  // Full version of cde.
+  string cdeVersion = 2;
+  // Backup type, cluster definition or vc content
+  CDPCDEBackupType.Value backupType = 3;
+  // The ID of the CDP CDE cluster(service)
+  string clusterId = 4;
+  // The CRN of the CDP CDE cluster(service)
+  string clusterCrn = 5;
+  // Backup type specific metadata
+  oneof metadata {
+    // Cluster definition specific metadata
+    CDPCDEClusterDefinitionMetadata clusterMeta = 6;
+    // VC Content specific metadata
+    CDPCDEVCContentMetadata vcContentMeta = 7;
+  }
+  // User who performed this operation (hashed)
+  string user = 8;
+  // The environment type.
+  CDPEnvironmentsEnvironmentType.Value environmentType = 9;
+  // The CRN of the cluster's environment.
+  string environmentCrn = 10;
+  // Operation type: backup or restore
+  CDPCDEArchiveOperationType.Value operationType = 11;
+  // Archive location type: local, remote, remote-local
+  CDEArchiveLocationType.Value archiveLocationType = 12;
+
+  // The status of the operation
+  CDPCDEBackupRestoreStatus.Value status = 13;
+  // A failure message for the operation. This will only be set if status is *_FAILED.
+  string failureReason = 14;
+
+  // The duration of the operation.
+  int64 totalDurationMS = 15;
+  // Details for each entity
+  repeated CDPCDEBackupRestoreEntity entities = 16;
+
+  // The size in bytes of the archive
+  int64 sizeBytes = 17;
+
+  // The number of jobs
+  int32 numJobs = 18;
+  // The number of job runs
+  int32 numJobRuns = 19;
+  // The number of resources
+  int32 numResources = 20;
+}
+
+// Metadata of CDP CDE Virtual Cluster
+message CDPCDEVCContentMetadata {
+  // The ID of the CDP CDE virtual cluster.
+  string vcId = 1;
+}
+
+// Metadata of CDP CDE cluster definition
+message CDPCDEClusterDefinitionMetadata {
+  // Full version of cde cp.
+  string cdeCpVersion = 1;
+}
+
+// Details for each backup restore entity
+message CDPCDEBackupRestoreEntity {
+  enum Type {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // Job
+    JOB = 1;
+    // Resource
+    RESOURCE = 2;
+    // Credential
+    CREDENTIAL = 3;
+  }
+  // Type of the entity
+  Type entityType = 1;
+  // Extra type of the entity
+  string extraType = 2;
+  // Status of the entity
+  CDEEntityStatusType.Value status = 3;
+  // A failure message for the operation. This will only be set if status is failed.
+  string failureReason = 4;
+  // Time taken by the entity
+  int64 durationMS = 5;
+  // Size for the item in bytes. This will only be set if it is resource.
+  int64 sizeBytes = 6;
+}
+
+// Type of CDE backup restore entity status
+message CDEEntityStatusType {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // error
+    ERROR = 1;
+    // reused
+    REUSED = 2;
+    // renamed
+    RENAMED= 3;
+    // created
+    CREATED = 4;
+    // exported
+    EXPORTED = 5;
+  }
+}
+
+// Type of CDE backup restore archive Location
+message CDEArchiveLocationType{
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // Local
+    LOCAL = 1;
+    // Remote
+    REMOTE = 2;
+    // Remote local, currently reserved for example job
+    REMOTE_LOCAL = 3;
+  }
+}
+
+// Type of CDE backup
+message CDPCDEBackupType{
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // Cluster definition
+    CLUSTER_DEFINITION = 1;
+    // VC content
+    VC_CONTENT = 2;
+  }
+}
+
+// Type of CDE archive operation
+message CDPCDEArchiveOperationType{
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // Backup
+    BACKUP = 1;
+    // Restore
+    RESTORE = 2;
+  }
+}
+
+// The status of a CDE archive operation
+message CDPCDEBackupRestoreStatus {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // Successful result for a backup/restore operation.
+    SUCCESSFUL = 1;
+    // Failed result for a backup/restore operation.
+    FAILED = 2;
+    // Partially failed result for a backup/restore operation.
+    PARTIALLY_FAILED = 3;
+  }
+}
+
+message CDPCODCreateDatabaseRequest {
+  // Database name
+  string databaseName = 1;
+  // Database crn
+  string crn = 2;
+  // Environment crn
+  string environmentCrn = 3;
+  // Environment name
+  string environmentName = 4;
+  // Crn of the creator
+  string creatorCrn = 5;
+  // The creation time of the database
+  int64 creationDate = 6;
+  // Status of the database creation
+  string status = 7;
+  //Database version
+  string dbVersion = 8;
+  //Scaling policy
+  string scalingPolicy = 9;
+  //Features enabled on this database
+  string features = 10;
+  // The number of edge nodes for this database.
+  int32 dbEdgeNodeCount = 11;
+  // The predetermined size of the cluster.
+  string scaleType = 12;
+  // The type of the cluster. Values can be "COD" or "K8S".
+  string clusterType = 13;
+  // Number of active compute nodes in the database (does not include the stopped nodes).
+  int32 computeNodesCount = 14;
+  // Total number of compute nodes in the database (including stopped nodes).
+  int32 totalComputeNodesCount = 15;
+  // Specifies a custom Cloudera Runtime version, e.g. 7.2.6-1.cdh7.2.6.p4.9893045
+  string clouderaRuntimeVersion = 16;
+  // Specifies a custom Cloudera major version and global build number, e.g. 7.2.6-9667216
+  string clouderaManagerVersion = 17;
+  // Number of edge nodes to be created for the database. A positive, non-zero number is required. The default value is 0.
+  int32 numEdgeNodes = 18;
+  // Storage types.
+  string storageType = 19;
+  // Storage details for the worker node for AWS, Azure, and GCP cloud providers.
+  repeated StorageDetailsForWorker storageDetailsForWorkers = 20;
+  // Cloud Platform
+  string cloudPlatform = 21;
+}
+
+// Storage details for the worker node for AWS, Azure, and GCP cloud providers.
+message StorageDetailsForWorker {
+  // The number of volumes.
+  int32 volumeCount = 1;
+  // The target size of the volume, in GiB.
+  int32 volumeSize = 2;
+  // The volume type.
+  string volumeType = 3;
+}
+
+// CDPCODAutoScalingConfig event
+message CDPCODAutoScalingConfig {
+  // Database name
+  string databaseName = 1;
+  // Database crn
+  string crn = 2;
+  // The target value of the metric a user expect to maintain for the cluster
+  int64 targetedValueForMetric = 3;
+  // The name of the CM metric
+  string metricName = 4;
+  // Maximum number of worker nodes as per this metrics can be scaled up to.
+  int32 maxWorkersForDatabase = 5;
+  // Maximum number of worker nodes as per this metrics can be scaled up to in one batch.
+  int32 maxWorkersPerBatch = 6;
+  // Minimum number of worker nodes as per this metrics can be scaled down to.
+  int32 minWorkersForDatabase = 7;
+  // Period of metrics(in seconds) needs to be considered.
+  int64 evaluationPeriod = 8;
+  // Minimum no. of metric values required to make a decision for scaling
+  int32 minimumValues = 9;
+  // The amount of block cache, in Gigabytes, which the database should have.
+  int32 minimumBlockCacheGb = 10;
+  // The maximum percentage of HDFS utilization for the database before we trigger the scaling.
+  int32 maxHdfsUsagePercentage = 11;
+  // The maximum number of regions per region server.
+  int32 maxRegionsPerRegionServer = 12;
+  // The maximum percentage threshold for the CPU utilization of the worker nodes. The CPU utilization is obtained from the Cloudera Manager metric 'cpu_percent' across worker nodes. Set 100 or more to disable the CPU metrics.
+  int32 maxCpuUtilization = 13;
+  // The maximum number of compute nodes, as per these metrics, that can be scaled up to.
+  int32 maxComputeNodesForDatabase = 14;
+  // The minimum number of compute nodes, as per these metrics, that can be scaled down to.
+  int32 minComputeNodesForDatabase = 15;
 }
