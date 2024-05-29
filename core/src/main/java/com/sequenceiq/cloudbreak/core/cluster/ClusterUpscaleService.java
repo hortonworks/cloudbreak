@@ -135,12 +135,8 @@ public class ClusterUpscaleService {
 
     private void restartServicesIfNecessary(Boolean restartServices, StackDto stackDto, ClusterApi connector, boolean rollingRestartEnabled) {
         if (shouldRestartServices(restartServices, stackDto)) {
-            try {
-                LOGGER.info("Trying to restart services, rolling restart enabled: {}", rollingRestartEnabled);
-                callProperRestartCommand(connector, rollingRestartEnabled);
-            } catch (RuntimeException e) {
-                LOGGER.info("Restart services failed", e);
-            }
+            LOGGER.info("Trying to restart services, rolling restart enabled: {}", rollingRestartEnabled);
+            callProperRestartCommand(connector, rollingRestartEnabled);
         }
     }
 
