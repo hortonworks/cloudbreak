@@ -47,6 +47,9 @@ import com.sequenceiq.datalake.service.sdx.SdxNotificationService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
+import com.sequenceiq.environment.api.v1.platformresource.EnvironmentPlatformResourceEndpoint;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDatabaseCapabilitiesResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslConfigV4Request;
@@ -115,6 +118,9 @@ public class DatabaseServiceTest {
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
+    @Mock
+    private EnvironmentPlatformResourceEndpoint environmentPlatformResourceEndpoint;
+
     @InjectMocks
     private DatabaseService underTest;
 
@@ -145,9 +151,14 @@ public class DatabaseServiceTest {
         DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
         env.setName("ENV");
         env.setCloudPlatform("aws");
+        LocationResponse locationResponse = new LocationResponse();
+        locationResponse.setName("test");
+        env.setLocation(locationResponse);
         env.setCrn(ENV_CRN);
         DatabaseConfig databaseConfig = getDatabaseConfig();
 
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType")));
         when(databaseServerV4Endpoint.createInternal(any(), any())).thenThrow(BadRequestException.class);
         DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
         when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
@@ -279,12 +290,17 @@ public class DatabaseServiceTest {
         DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
         env.setName("ENV");
         env.setCloudPlatform("aws");
+        LocationResponse locationResponse = new LocationResponse();
+        locationResponse.setName("test");
+        env.setLocation(locationResponse);
         env.setCrn(ENV_CRN);
         DatabaseConfig databaseConfig = getDatabaseConfig();
 
         DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
         when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
         when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), anyString(), anyString(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType")));
 
         DatabaseServerV4StackRequest databaseServerV4StackRequest = underTest.getDatabaseServerRequest(CloudPlatform.AWS, cluster, env,
                 "initiatorUserCrn");

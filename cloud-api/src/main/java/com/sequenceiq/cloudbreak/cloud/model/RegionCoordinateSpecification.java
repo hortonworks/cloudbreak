@@ -23,6 +23,9 @@ public class RegionCoordinateSpecification {
     @JsonProperty("entitlements")
     private List<String> entitlements;
 
+    @JsonProperty("defaultDbVmtype")
+    private String defaultDbVmtype;
+
     public String getName() {
         return name;
     }
@@ -69,5 +72,13 @@ public class RegionCoordinateSpecification {
 
     public void setEntitlements(List<String> entitlements) {
         this.entitlements = entitlements;
+    }
+
+    public String getDefaultDbVmtype() {
+        return defaultDbVmtype;
+    }
+
+    public void setDefaultDbVmtype(String defaultDbVmtype) {
+        this.defaultDbVmtype = defaultDbVmtype;
     }
 }

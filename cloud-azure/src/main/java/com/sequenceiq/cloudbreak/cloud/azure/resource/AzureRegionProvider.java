@@ -141,6 +141,7 @@ public class AzureRegionProvider {
                                 .key(RegionUtil.findByLabelOrName(regionCoordinateSpecification.getName()).name())
                                 .k8sSupported(regionCoordinateSpecification.isK8sSupported())
                                 .entitlements(regionCoordinateSpecification.getEntitlements())
+                                .defaultDbVmType(regionCoordinateSpecification.getDefaultDbVmtype())
                                 .build());
             }
         } catch (IOException ignored) {

@@ -31,6 +31,11 @@ public class DatabaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter
                         .map(e -> e.getRegionName())
                         .collect(Collectors.toList()));
         }
-        return new PlatformDatabaseCapabilitiesResponse(includedRegions);
+        Map<String, String> defaultTypes = new HashMap<>();
+        for (Map.Entry<Region, String> typeEntry : source.getRegionDefaultInstanceTypeMap().entrySet()) {
+            String region = typeEntry.getKey().getValue();
+            defaultTypes.put(region, typeEntry.getValue());
+        }
+        return new PlatformDatabaseCapabilitiesResponse(includedRegions, defaultTypes);
     }
 }

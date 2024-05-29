@@ -138,7 +138,8 @@
       "displayName": "Canada (Calgary)",
       "latitude": "51.049999",
       "longitude": "-114.066666",
-      "k8sSupported": true
+      "k8sSupported": true,
+      "defaultDbVmtype": "db.m6i.large"
     },
     {
       "name": "us-east-2",

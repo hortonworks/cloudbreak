@@ -26,6 +26,7 @@ import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -58,6 +59,8 @@ import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.DatabaseType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.platformresource.EnvironmentPlatformResourceEndpoint;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDatabaseCapabilitiesResponse;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
@@ -106,6 +109,9 @@ public class ExternalDatabaseService {
 
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
+    @Inject
+    private EnvironmentPlatformResourceEndpoint environmentPlatformResourceEndpoint;
 
     @Inject
     private SdxClientService sdxClientService;
@@ -377,11 +383,12 @@ public class ExternalDatabaseService {
         DatabaseServerParameterDecorator databaseServerParameterDecorator = parameterDecoratorMap.get(cloudPlatform);
         DatabaseType databaseType = databaseServerParameterDecorator.getDatabaseType(attributes).orElse(null);
         DatabaseStackConfig databaseStackConfig = dbConfigs.get(new DatabaseStackConfigKey(cloudPlatform, databaseType));
+        PlatformDatabaseCapabilitiesResponse databaseCapabilities = getDatabaseCapabilities(environment);
         if (databaseStackConfig == null) {
             throw new BadRequestException("Database config for cloud platform " + cloudPlatform + " not found");
         } else {
             DatabaseServerV4StackRequest request = new DatabaseServerV4StackRequest();
-            request.setInstanceType(databaseStackConfig.getInstanceType());
+            request.setInstanceType(databaseCapabilities.getRegionDefaultInstances().get(environment.getLocation().getName()));
             request.setDatabaseVendor(databaseStackConfig.getVendor());
             request.setStorageSize(databaseStackConfig.getVolumeSize());
             DatabaseServerParameter serverParameter = DatabaseServerParameter.builder()
@@ -396,6 +403,17 @@ public class ExternalDatabaseService {
             }
             return request;
         }
+    }
+
+    private PlatformDatabaseCapabilitiesResponse getDatabaseCapabilities(DetailedEnvironmentResponse env) {
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        return ThreadBasedUserCrnProvider.doAs(initiatorUserCrn, () ->
+                environmentPlatformResourceEndpoint.getDatabaseCapabilities(
+                        env.getCrn(),
+                        env.getLocation().getName(),
+                        env.getCloudPlatform(),
+                        null)
+        );
     }
 
     private void waitAndGetDatabase(ClusterView cluster, String databaseCrn,

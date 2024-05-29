@@ -16,15 +16,19 @@ public class Coordinate {
 
     private final boolean k8sSupported;
 
+    private final String defaultDbVmType;
+
     private final List<String> entitlements;
 
-    protected Coordinate(Double longitude, Double latitude, String displayName, String key, boolean k8sSupported, List<String> entitlements) {
+    protected Coordinate(Double longitude, Double latitude, String displayName, String key, boolean k8sSupported,
+        List<String> entitlements, String defaultDbVmType) {
         this.longitude = longitude;
         this.latitude = latitude;
         this.displayName = displayName;
         this.key = key;
         this.k8sSupported = k8sSupported;
         this.entitlements = entitlements;
+        this.defaultDbVmType = defaultDbVmType;
     }
 
     public Double getLongitude() {
@@ -51,12 +55,22 @@ public class Coordinate {
         return entitlements;
     }
 
+    public boolean isK8sSupported() {
+        return k8sSupported;
+    }
+
+    public String getDefaultDbVmType() {
+        return defaultDbVmType;
+    }
+
     public boolean isMatchedRegion(Region region) {
         return Objects.equals(key, region.getRegionName()) || Objects.equals(displayName, region.getRegionName());
     }
 
-    public static Coordinate coordinate(String longitude, String latitude, String  displayName, String key, boolean k8sSupported, List<String> entitlements) {
-        return new Coordinate(Double.parseDouble(longitude), Double.parseDouble(latitude), displayName, key, k8sSupported, entitlements);
+    public static Coordinate coordinate(String longitude, String latitude, String  displayName, String key, boolean k8sSupported,
+        List<String> entitlements, String defaultDbVmType) {
+        return new Coordinate(Double.parseDouble(longitude), Double.parseDouble(latitude), displayName, key, k8sSupported, entitlements,
+                defaultDbVmType);
     }
 
     public static Coordinate defaultCoordinate() {
@@ -66,6 +80,7 @@ public class Coordinate {
                 "California (West US)",
                 "us-west-1",
                 false,
-                new ArrayList<>());
+                new ArrayList<>(),
+                null);
     }
 }

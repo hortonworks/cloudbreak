@@ -69,6 +69,9 @@ public class MockPlatformResources implements PlatformResources {
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
 
+    @Value("${cb.mock.default.database.vmtype:db.m5.large}")
+    private String mockDatabaseVmDefault;
+
     private String defaultRegion;
 
     private VmType defaultVmType;
@@ -162,7 +165,8 @@ public class MockPlatformResources implements PlatformResources {
                                 regionCoordinateSpecification.getDisplayName(),
                                 regionCoordinateSpecification.getName(),
                                 regionCoordinateSpecification.isK8sSupported(),
-                                regionCoordinateSpecification.getEntitlements()));
+                                regionCoordinateSpecification.getEntitlements(),
+                                regionCoordinateSpecification.getDefaultDbVmtype()));
             }
         } catch (IOException ignored) {
             return regionCoordinates;
@@ -326,6 +330,16 @@ public class MockPlatformResources implements PlatformResources {
 
     @Override
     public PlatformDatabaseCapabilities databaseCapabilities(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        return new PlatformDatabaseCapabilities(Map.of(), Map.of());
+        try {
+            CloudRegions regions = regions((ExtendedCloudCredential) cloudCredential, region, filters, false);
+            Map<Region, String> regionDefaultInstanceTypeMap = new HashMap<>();
+            for (Region actualRegion : regions.getCloudRegions().keySet()) {
+                String defaultDbVmType = regionCoordinates.get(actualRegion).getDefaultDbVmType();
+                regionDefaultInstanceTypeMap.put(actualRegion, defaultDbVmType == null ? mockDatabaseVmDefault : defaultDbVmType);
+            }
+            return new PlatformDatabaseCapabilities(new HashMap<>(), regionDefaultInstanceTypeMap);
+        } catch (Exception e) {
+            return new PlatformDatabaseCapabilities(new HashMap<>(), new HashMap<>());
+        }
     }
 }

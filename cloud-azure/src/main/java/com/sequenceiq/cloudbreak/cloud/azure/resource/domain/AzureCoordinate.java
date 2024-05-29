@@ -8,7 +8,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 public class AzureCoordinate extends Coordinate {
 
     public AzureCoordinate(AzureCoordinateBuilder builder) {
-        super(builder.longitude, builder.latitude, builder.displayName, builder.key, builder.k8sSupported, builder.entitlements);
+        super(builder.longitude, builder.latitude, builder.displayName, builder.key, builder.k8sSupported,
+                builder.entitlements, builder.defaultDbVmType);
     }
 
     public static AzureCoordinate coordinate(AzureCoordinateBuilder builder) {
@@ -28,6 +29,8 @@ public class AzureCoordinate extends Coordinate {
         private boolean k8sSupported;
 
         private List<String> entitlements = new ArrayList<>();
+
+        private String defaultDbVmType;
 
         public AzureCoordinateBuilder longitude(Double longitude) {
             this.longitude = longitude;
@@ -69,6 +72,11 @@ public class AzureCoordinate extends Coordinate {
             return this;
         }
 
+        public AzureCoordinateBuilder defaultDbVmType(String defaultDbVmType) {
+            this.defaultDbVmType = defaultDbVmType;
+            return this;
+        }
+
         public static AzureCoordinateBuilder builder() {
             return new AzureCoordinateBuilder();
         }
@@ -84,6 +92,7 @@ public class AzureCoordinate extends Coordinate {
                     .displayName("California (West US)")
                     .key("us-west-1")
                     .k8sSupported(false)
+                    .defaultDbVmType(null)
                     .entitlements(new ArrayList<>());
         }
     }

@@ -45,6 +45,8 @@ import com.sequenceiq.datalake.service.sdx.SdxDatabaseOperation;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.platformresource.EnvironmentPlatformResourceEndpoint;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDatabaseCapabilitiesResponse;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
@@ -115,6 +117,9 @@ public class DatabaseService {
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
+    private EnvironmentPlatformResourceEndpoint environmentPlatformResourceEndpoint;
 
     public DatabaseServerStatusV4Response create(SdxCluster sdxCluster, DetailedEnvironmentResponse env) {
         LOGGER.info("Create databaseServer in environment {} for SDX {}", env.getName(), sdxCluster.getClusterName());
@@ -253,7 +258,8 @@ public class DatabaseService {
             instanceType = previousDatabase.getInstanceType();
             storageSize =  previousDatabase.getStorageSize();
         } else {
-            instanceType = databaseConfig.getInstanceType();
+            PlatformDatabaseCapabilitiesResponse databaseCapabilities = getDatabaseCapabilities(env, initiatorUserCrn);
+            instanceType = databaseCapabilities.getRegionDefaultInstances().get(env.getLocation().getName());
             storageSize =  databaseConfig.getVolumeSize();
         }
 
@@ -267,6 +273,16 @@ public class DatabaseService {
         LOGGER.info("Database requested parameters {}", req);
 
         return req;
+    }
+
+    private PlatformDatabaseCapabilitiesResponse getDatabaseCapabilities(DetailedEnvironmentResponse env, String initiatorUserCrn) {
+        return ThreadBasedUserCrnProvider.doAs(initiatorUserCrn, () ->
+                environmentPlatformResourceEndpoint.getDatabaseCapabilities(
+                        env.getCrn(),
+                        env.getLocation().getName(),
+                        env.getCloudPlatform(),
+                        null)
+        );
     }
 
     private Optional<DatabaseServerV4Response> getPreviousDatabaseIfPropertiesWereModified(Map<String, Object> attributes, CloudPlatform cloudPlatform,

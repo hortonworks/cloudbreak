@@ -15,6 +15,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -293,7 +294,8 @@ class AzureDatabaseServerParameterDecoratorTest {
     @Test
     void testSetParametersHaFlexibleServerMultiAzNotSupportedRegion() {
         Map<String, List<String>> includedRegions = Map.ofEntries(entry(AzureHighAvailabiltyMode.ZONE_REDUNDANT.name(), List.of(OTHER_REGION)));
-        PlatformDatabaseCapabilitiesResponse databaseCapabilities = new PlatformDatabaseCapabilitiesResponse(includedRegions);
+        PlatformDatabaseCapabilitiesResponse databaseCapabilities
+                = new PlatformDatabaseCapabilitiesResponse(includedRegions, new HashMap<>());
         testSetParametersHaFlexibleServerMultiAzSameZoneInternal(databaseCapabilities);
     }
 
@@ -312,7 +314,7 @@ class AzureDatabaseServerParameterDecoratorTest {
 
         DetailedEnvironmentResponse env = createEnvironment();
         Map<String, List<String>> includedRegions = Map.ofEntries(entry(AzureHighAvailabiltyMode.ZONE_REDUNDANT.name(), List.of(OTHER_REGION, LOCATION)));
-        PlatformDatabaseCapabilitiesResponse databaseCapabilities = new PlatformDatabaseCapabilitiesResponse(includedRegions);
+        PlatformDatabaseCapabilitiesResponse databaseCapabilities = new PlatformDatabaseCapabilitiesResponse(includedRegions, new HashMap<>());
         when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(ENVIRONMENT_CRN, LOCATION, CloudPlatform.AZURE.name(), null))
                 .thenReturn(databaseCapabilities);
 

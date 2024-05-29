@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
@@ -75,6 +76,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
@@ -106,6 +108,9 @@ public class GcpPlatformResources implements PlatformResources {
 
     @Value("${cb.gcp.default.vmtype:n2-highcpu-8}")
     private String gcpVmDefault;
+
+    @Value("${cb.gcp.default.database.vmtype:db-custom-2-13312}")
+    private String gcpDatabaseVmDefault;
 
     @Value("${cb.gcp.zone.parameter.default:europe-west1}")
     private String gcpZoneParameterDefault;
@@ -158,7 +163,8 @@ public class GcpPlatformResources implements PlatformResources {
                                 regionCoordinateSpecification.getDisplayName(),
                                 regionCoordinateSpecification.getName(),
                                 regionCoordinateSpecification.isK8sSupported(),
-                                regionCoordinateSpecification.getEntitlements()));
+                                regionCoordinateSpecification.getEntitlements(),
+                                regionCoordinateSpecification.getDefaultDbVmtype()));
             }
         } catch (IOException ignored) {
             return regionCoordinates;
@@ -564,6 +570,21 @@ public class GcpPlatformResources implements PlatformResources {
     @Override
     public CloudPrivateDnsZones privateDnsZones(ExtendedCloudCredential cloudCredential, Map<String, String> filters) {
         return new CloudPrivateDnsZones();
+    }
+
+    @Override
+    public PlatformDatabaseCapabilities databaseCapabilities(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        try {
+            CloudRegions regions = regions((ExtendedCloudCredential) cloudCredential, region, filters, false);
+            Map<Region, String> regionDefaultInstanceTypeMap = new HashMap<>();
+            for (Region actualRegion : regions.getCloudRegions().keySet()) {
+                String defaultDbVmType = regionCoordinates.get(actualRegion).getDefaultDbVmType();
+                regionDefaultInstanceTypeMap.put(actualRegion, defaultDbVmType == null ? gcpDatabaseVmDefault : defaultDbVmType);
+            }
+            return new PlatformDatabaseCapabilities(new HashMap<>(), regionDefaultInstanceTypeMap);
+        } catch (Exception e) {
+            return new PlatformDatabaseCapabilities(new HashMap<>(), new HashMap<>());
+        }
     }
 
     private List<KeyRing> getKeyRingList(CloudKMS cloudKMS, String projectId, String regionName) {

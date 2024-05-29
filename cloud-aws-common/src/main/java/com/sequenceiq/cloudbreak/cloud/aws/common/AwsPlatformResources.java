@@ -83,6 +83,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
@@ -223,6 +224,9 @@ public class AwsPlatformResources implements PlatformResources {
     @Value("${cb.aws.disabled.instance.types:}")
     private List<String> disabledInstanceTypes;
 
+    @Value("${cb.aws.default.database.vmtype:db.m5.large}")
+    private String awsDatabaseVmDefault;
+
     @Value("${cb.aws.fetch.max.items:500}")
     private Integer fetchMaxItems;
 
@@ -321,7 +325,8 @@ public class AwsPlatformResources implements PlatformResources {
                                 regionCoordinateSpecification.getDisplayName(),
                                 regionEntry.isPresent() ? regionEntry.get().getKey().value() : regionCoordinateSpecification.getDisplayName(),
                                 regionCoordinateSpecification.isK8sSupported(),
-                                regionCoordinateSpecification.getEntitlements()));
+                                regionCoordinateSpecification.getEntitlements(),
+                                regionCoordinateSpecification.getDefaultDbVmtype()));
             }
         } catch (IOException ignored) {
             return regionCoordinates;
@@ -655,6 +660,21 @@ public class AwsPlatformResources implements PlatformResources {
             return getCloudVmTypes(cloudCredential, region, filters, enabledDistroxInstanceTypeFilter, true);
         } else {
             return getCloudVmTypes(cloudCredential, region, filters, enabledInstanceTypeFilter, true);
+        }
+    }
+
+    @Override
+    public PlatformDatabaseCapabilities databaseCapabilities(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        try {
+            CloudRegions regions = regions((ExtendedCloudCredential) cloudCredential, region, filters, false);
+            Map<Region, String> regionDefaultInstanceTypeMap = new HashMap<>();
+            for (Region actualRegion : regions.getCloudRegions().keySet()) {
+                String defaultDbVmType = regionCoordinates.get(actualRegion).getDefaultDbVmType();
+                regionDefaultInstanceTypeMap.put(actualRegion, defaultDbVmType == null ? awsDatabaseVmDefault : defaultDbVmType);
+            }
+            return new PlatformDatabaseCapabilities(new HashMap<>(), regionDefaultInstanceTypeMap);
+        } catch (Exception e) {
+            return new PlatformDatabaseCapabilities(new HashMap<>(), new HashMap<>());
         }
     }
 

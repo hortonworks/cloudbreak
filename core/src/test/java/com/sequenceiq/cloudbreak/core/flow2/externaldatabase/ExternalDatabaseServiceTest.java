@@ -22,6 +22,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -73,6 +74,9 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
+import com.sequenceiq.environment.api.v1.platformresource.EnvironmentPlatformResourceEndpoint;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDatabaseCapabilitiesResponse;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
@@ -160,6 +164,9 @@ class ExternalDatabaseServiceTest {
     @Mock
     private SdxClientService sdxClientService;
 
+    @Mock
+    private EnvironmentPlatformResourceEndpoint environmentPlatformResourceEndpoint;
+
     @InjectMocks
     private ExternalDatabaseService underTest;
 
@@ -176,6 +183,9 @@ class ExternalDatabaseServiceTest {
         environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCloudPlatform(CLOUD_PLATFORM.name());
         environmentResponse.setCrn(ENV_CRN);
+        LocationResponse locationResponse = new LocationResponse();
+        locationResponse.setName("test");
+        environmentResponse.setLocation(locationResponse);
         lenient().when(dbConfigs.get(new DatabaseStackConfigKey(CLOUD_PLATFORM, null)))
                 .thenReturn(new DatabaseStackConfig(INSTANCE_TYPE, VENDOR, VOLUME_SIZE));
         lenient().when(parameterDecoratorMap.get(CLOUD_PLATFORM)).thenReturn(dbServerParameterDecorator);
@@ -188,6 +198,8 @@ class ExternalDatabaseServiceTest {
         stack.setDatabase(createDatabase(DatabaseAvailabilityType.HA));
         stack.setCluster(new Cluster());
         when(redbeamsClient.create(any())).thenThrow(BadRequestException.class);
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType")));
 
         assertThatThrownBy(() -> underTest.provisionDatabase(stack, environmentResponse))
                 .isInstanceOf(BadRequestException.class);
@@ -210,6 +222,8 @@ class ExternalDatabaseServiceTest {
         when(redbeamsClient.create(any())).thenReturn(createResponse);
         when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
                 .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType")));
         underTest.provisionDatabase(stack, environmentResponse);
 
         ArgumentCaptor<DatabaseServerParameter> serverParameterCaptor = ArgumentCaptor.forClass(DatabaseServerParameter.class);
@@ -240,6 +254,8 @@ class ExternalDatabaseServiceTest {
         when(redbeamsClient.create(any())).thenReturn(createResponse);
         when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
                 .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType")));
         underTest.provisionDatabase(stack, environmentResponse);
 
         ArgumentCaptor<DatabaseServerParameter> serverParameterCaptor = ArgumentCaptor.forClass(DatabaseServerParameter.class);
@@ -294,6 +310,8 @@ class ExternalDatabaseServiceTest {
     @Test
     void provisionDatabaseTestSslWhenUnsupportedCloudPlatform() throws JsonProcessingException {
         when(externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(CLOUD_PLATFORM)).thenReturn(false);
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instance")));
 
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText(BLUEPRINT_TEXT);
@@ -365,6 +383,8 @@ class ExternalDatabaseServiceTest {
     @Test
     void provisionDatabaseTestSslWhenNoBlueprint() throws JsonProcessingException {
         when(externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(CLOUD_PLATFORM)).thenReturn(true);
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instance")));
 
         provisionDatabaseTestSslInternal(null, false);
 
@@ -375,6 +395,8 @@ class ExternalDatabaseServiceTest {
     @Test
     void provisionDatabaseTestSslWhenNoBlueprintText() throws JsonProcessingException {
         when(externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(CLOUD_PLATFORM)).thenReturn(true);
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instance")));
 
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText(null);
@@ -390,7 +412,8 @@ class ExternalDatabaseServiceTest {
     @NullSource
     void provisionDatabaseTestSslWhenBadRuntime(String runtime) throws JsonProcessingException {
         when(externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(CLOUD_PLATFORM)).thenReturn(true);
-
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instance")));
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText(BLUEPRINT_TEXT);
         when(cmTemplateProcessorFactory.get(BLUEPRINT_TEXT)).thenReturn(cmTemplateProcessor);
@@ -403,6 +426,8 @@ class ExternalDatabaseServiceTest {
     @ValueSource(strings = {STACK_VERSION_GOOD_MINIMAL, STACK_VERSION_GOOD})
     void provisionDatabaseTestSslWhenSslEnabled(String runtime) throws JsonProcessingException {
         when(externalDatabaseConfig.isExternalDatabaseSslEnforcementSupportedFor(CLOUD_PLATFORM)).thenReturn(true);
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any()))
+                .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instance")));
 
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText(BLUEPRINT_TEXT);
@@ -594,6 +619,8 @@ class ExternalDatabaseServiceTest {
             databaseResponse.setAvailabilityType(SdxDatabaseAvailabilityType.HA);
             sdxClusterResponse.setSdxDatabaseResponse(databaseResponse);
             lenient().when(sdxClientService.getByCrnInternal(any())).thenReturn(sdxClusterResponse);
+            when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(anyString(), anyString(), anyString(), any()))
+                    .thenReturn(new PlatformDatabaseCapabilitiesResponse(new HashMap<>(), Map.of("test", "instanceType")));
         }
 
         DatabaseServerV4StackRequest result = underTest.migrateDatabaseSettingsIfNeeded(stack, majorVersion, environmentResponse);
