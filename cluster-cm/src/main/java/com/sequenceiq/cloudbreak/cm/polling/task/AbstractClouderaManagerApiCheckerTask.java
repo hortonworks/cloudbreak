@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
@@ -31,9 +32,9 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
     //CHECKSTYLE:OFF
     protected final ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory;
 
-    protected int toleratedErrorCounter = 0;
-
     private final ClusterEventService clusterEventService;
+
+    protected int toleratedErrorCounter = 0;
 
     private boolean connectExceptionOccurred = false;
     //CHECKSTYLE:ON
@@ -59,6 +60,9 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
             return false;
         } else if (e.getCause() instanceof ConnectException) {
             return handleConnectException(pollerObject, e);
+        } else if (e.getCause() instanceof InterruptedIOException && e.getMessage() != null && e.getMessage().contains("interrupted")) {
+            throw new ClouderaManagerOperationFailedException(String.format("Cloudera Manager [%s] operation failed. Reason: %s",
+                    getPollingName(), e.getMessage()), e);
         } else if (isToleratedError(e)) {
             return handleToleratedError(pollerObject, e);
         } else {

@@ -117,7 +117,8 @@ public class EventBusConfig {
         } else {
             return commonExecutorServiceFactory.newThreadPoolExecutorService("reactorDispatcher", "eventBusThreadPoolExecutor", eventBusThreadPoolCoreSize,
                     eventBusThreadPoolMaxSize, 0, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(eventBusThreadPoolBacklogSize),
-                    (r, executor) -> LOGGER.error("Task has been rejected from 'reactorDispatcher' threadpool. Executor state: " + executor),
+                    (runnable, executor) ->
+                            LOGGER.error("Task has been rejected from 'reactorDispatcher' threadpool. Executor state: {}, task: {}", executor, runnable),
                     List.of(new MDCCleanerDecorator()));
         }
     }

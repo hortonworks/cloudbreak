@@ -72,7 +72,18 @@ public class PollingService<T> {
                         .success()
                         .build();
             }
-            sleep(interval);
+            try {
+                Thread.sleep(interval);
+            } catch (InterruptedException e) {
+                LOGGER.error("Interrupted exception occurred during polling.", e);
+                Thread.currentThread().interrupt();
+                statusCheckerTask.sendFailureEvent(t);
+                statusCheckerTask.handleException(e);
+                return new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                        .failure()
+                        .withException(e)
+                        .build();
+            }
             attempts++;
             timeout = timeoutChecker.checkTimeout();
             exit = statusCheckerTask.exitPolling(t);
@@ -103,12 +114,4 @@ public class PollingService<T> {
         return pollWithTimeout(statusCheckerTask, t, interval, maxAttempts, DEFAULT_MAX_CONSECUTIVE_FAILURES);
     }
 
-    private void sleep(long duration) {
-        try {
-            Thread.sleep(duration);
-        } catch (InterruptedException e) {
-            LOGGER.error("Interrupted exception occurred during polling.", e);
-            Thread.currentThread().interrupt();
-        }
-    }
 }

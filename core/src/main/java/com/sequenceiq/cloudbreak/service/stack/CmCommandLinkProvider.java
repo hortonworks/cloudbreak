@@ -51,7 +51,7 @@ public class CmCommandLinkProvider {
                 }
             }
         } catch (Exception e) {
-            LOGGER.warn("Couldn't generate link for command {}, because: {}", commandId, e.getMessage());
+            LOGGER.warn("Couldn't generate link for command {}", commandId, e);
         }
         return Optional.empty();
     }
