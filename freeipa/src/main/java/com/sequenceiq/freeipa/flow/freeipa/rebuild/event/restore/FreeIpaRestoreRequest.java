@@ -6,42 +6,13 @@ import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 public class FreeIpaRestoreRequest extends StackEvent {
 
-    private final String instanceToRestoreFqdn;
-
-    private final String fullBackupStorageLocation;
-
-    private final String dataBackupStorageLocation;
-
     @JsonCreator
-    public FreeIpaRestoreRequest(
-            @JsonProperty("resourceId") Long stackId,
-            @JsonProperty("instanceToRestoreFqdn") String instanceToRestoreFqdn,
-            @JsonProperty("fullBackupStorageLocation") String fullBackupStorageLocation,
-            @JsonProperty("dataBackupStorageLocation") String dataBackupStorageLocation) {
+    public FreeIpaRestoreRequest(@JsonProperty("resourceId") Long stackId) {
         super(stackId);
-        this.instanceToRestoreFqdn = instanceToRestoreFqdn;
-        this.fullBackupStorageLocation = fullBackupStorageLocation;
-        this.dataBackupStorageLocation = dataBackupStorageLocation;
-    }
-
-    public String getInstanceToRestoreFqdn() {
-        return instanceToRestoreFqdn;
-    }
-
-    public String getFullBackupStorageLocation() {
-        return fullBackupStorageLocation;
-    }
-
-    public String getDataBackupStorageLocation() {
-        return dataBackupStorageLocation;
     }
 
     @Override
     public String toString() {
-        return "ValidateBackupRequest{" +
-                "instanceToRestoreFqdn='" + instanceToRestoreFqdn + '\'' +
-                ", fullBackupStorageLocation='" + fullBackupStorageLocation + '\'' +
-                ", dataBackupStorageLocation='" + dataBackupStorageLocation + '\'' +
-                "} " + super.toString();
+        return "FreeIpaRestoreRequest{} " + super.toString();
     }
 }
