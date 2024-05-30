@@ -676,7 +676,7 @@ public class SshJClientActions {
     public Map<String, Pair<Integer, String>> getSSLModeForExternalDBByIp(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames,
             String privateKeyFilePath) {
         String dbSslConnectionUrlCmd = "sudo cat /srv/pillar/cloudera-manager/database.sls | grep -E 'connectionURL\":'";
-        return getInstanceGroupIps(instanceGroups, hostGroupNames, true).stream()
+        return getInstanceGroupIps(instanceGroups, hostGroupNames, false).stream()
                 .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, "cloudbreak", null, privateKeyFilePath, dbSslConnectionUrlCmd)));
     }
 }
