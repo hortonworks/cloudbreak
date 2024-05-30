@@ -32,22 +32,22 @@ public class ClusterProxyHybridClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyHybridClient.class);
 
-    private RestTemplate restTemplate;
+    private RestTemplate hybridRestTemplate;
 
     @Inject
     private ClusterProxyConfiguration clusterProxyConfiguration;
 
     @Autowired
-    ClusterProxyHybridClient(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    ClusterProxyHybridClient(RestTemplate hybridRestTemplate) {
+        this.hybridRestTemplate = hybridRestTemplate;
     }
 
-    public ListEnvironmentsResponse listEnvironments(String clusterIdentifier) {
+    public ListEnvironmentsResponse listEnvironments(String clusterIdentifier, String userCrn) {
         String readConfigUrl = String.format(clusterProxyConfiguration.getClusterProxyUrl() + REMOTE_CLUSTER_LIST_ENVIRONMENT_CONFIG_PATH, clusterIdentifier);
         try {
             LOGGER.info("Reading remote cluster with cluster proxy configuration for cluster identifer: {}", clusterIdentifier);
             Optional<ResponseEntity<ListEnvironmentsResponse>> response = measure(() ->
-                            listEnvironmentsFromUrl(readConfigUrl),
+                            listEnvironmentsFromUrl(readConfigUrl, userCrn),
                     LOGGER,
                     "Query environments from {} ms took {}.", clusterIdentifier);
             LOGGER.info("Cluster proxy with remote cluster read configuration response: {}", response);
@@ -65,13 +65,13 @@ public class ClusterProxyHybridClient {
         }
     }
 
-    public DescribeEnvironmentResponse getEnvironment(String clusterIdentifier, String pvcAccountId, String environmentCrn) {
+    public DescribeEnvironmentResponse getEnvironment(String clusterIdentifier, String userCrn, String environmentCrn) {
         String getConfigUrl = String.format(clusterProxyConfiguration.getClusterProxyUrl() + REMOTE_CLUSTER_GET_ENVIRONMENT_CONFIG_PATH,
                 clusterIdentifier);
         try {
             LOGGER.info("Reading remote cluster with cluster proxy configuration for cluster identifer: {}", clusterIdentifier);
             Optional<ResponseEntity<DescribeEnvironmentResponse>> response = measure(() ->
-                            getEnvironmentsFromUrl(getConfigUrl, pvcAccountId, environmentCrn),
+                            getEnvironmentsFromUrl(getConfigUrl, userCrn, environmentCrn),
                     LOGGER,
                     "Query environment from {} with crn {} ms took {}.", clusterIdentifier, environmentCrn);
             LOGGER.info("Cluster proxy with remote cluster get environment configuration response: {}", response);
@@ -89,35 +89,36 @@ public class ClusterProxyHybridClient {
         }
     }
 
-    private Optional<ResponseEntity<DescribeEnvironmentResponse>> getEnvironmentsFromUrl(String readConfigUrl, String accountId, String environment) {
+    private Optional<ResponseEntity<DescribeEnvironmentResponse>> getEnvironmentsFromUrl(String readConfigUrl, String userCrn, String environment) {
         try {
             DescribeEnvironmentRequest postRequest = new DescribeEnvironmentRequest();
             postRequest.setEnvironmentName(environment);
             postRequest.setOutputView(DescribeEnvironmentRequest.OutputViewEnum.FULL);
 
             return Optional.of(
-                    restTemplate.postForEntity(readConfigUrl,
-                            requestEntity(postRequest), DescribeEnvironmentResponse.class));
+                    hybridRestTemplate.postForEntity(readConfigUrl, requestEntity(postRequest, userCrn), DescribeEnvironmentResponse.class));
         } catch (JsonProcessingException e) {
             LOGGER.warn("Error occurred when tried to parse the response json.", e);
             return Optional.empty();
         }
     }
 
-    private Optional<ResponseEntity<ListEnvironmentsResponse>> listEnvironmentsFromUrl(String readConfigUrl) {
+    private Optional<ResponseEntity<ListEnvironmentsResponse>> listEnvironmentsFromUrl(String readConfigUrl, String userCrn) {
         try {
             return Optional.of(
-                    restTemplate.postForEntity(readConfigUrl,
-                            requestEntity(new Object()), ListEnvironmentsResponse.class));
+                    hybridRestTemplate.postForEntity(readConfigUrl,
+                            requestEntity(new Object(), userCrn), ListEnvironmentsResponse.class));
         } catch (JsonProcessingException e) {
             LOGGER.warn("Error occurred when tried to parse the response json.", e);
             return Optional.empty();
         }
     }
 
-    private HttpEntity<String> requestEntity(Object o) throws JsonProcessingException {
+    private HttpEntity<String> requestEntity(Object o, String userCrn) throws JsonProcessingException {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add("x-cdp-actor-crn", userCrn);
         return new HttpEntity<>(JsonUtil.writeValueAsString(o), headers);
     }
+
 }

@@ -3,6 +3,7 @@ package com.sequenceiq.remoteenvironment.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -82,8 +83,8 @@ class RemoteEnvironmentServiceTest {
         ListEnvironmentsResponse environmentResponses2 = new ListEnvironmentsResponse();
         environmentResponses2.setEnvironments(List.of(environment2));
 
-        when(clusterProxyHybridClientMock.listEnvironments(eq("CRN1"))).thenReturn(environmentResponses1);
-        when(clusterProxyHybridClientMock.listEnvironments(eq("CRN2"))).thenReturn(environmentResponses2);
+        when(clusterProxyHybridClientMock.listEnvironments(eq("CRN1"), any())).thenReturn(environmentResponses1);
+        when(clusterProxyHybridClientMock.listEnvironments(eq("CRN2"), any())).thenReturn(environmentResponses2);
 
         when(entitlementService.hybridCloudEnabled(anyString())).thenReturn(true);
 
@@ -144,7 +145,7 @@ class RemoteEnvironmentServiceTest {
         when(entitlementService.hybridCloudEnabled(anyString())).thenReturn(true);
         when(privateControlPlaneServiceMock.getByPrivateCloudAccountIdAndPublicCloudAccountId(anyString(), anyString()))
                 .thenReturn(Optional.of(privateControlPlane));
-        when(clusterProxyHybridClientMock.getEnvironment(anyString(), anyString(), anyString()))
+        when(clusterProxyHybridClientMock.getEnvironment(anyString(), any(), anyString()))
                 .thenReturn(describeEnvironmentResponse);
 
         DescribeEnvironmentResponse result = remoteEnvironmentService

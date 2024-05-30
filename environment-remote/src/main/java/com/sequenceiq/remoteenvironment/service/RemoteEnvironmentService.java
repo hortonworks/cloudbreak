@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyHybridClient;
@@ -72,7 +73,8 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
         LOGGER.debug("The processing of private control plane('{}') is executed by thread: {}", controlPlane.getName(), Thread.currentThread().getName());
         List<SimpleRemoteEnvironmentResponse> responses = new ArrayList<>();
         try {
-            responses = measure(() -> clusterProxyHybridClient.listEnvironments(controlPlane.getResourceCrn())
+            String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+            responses = measure(() -> clusterProxyHybridClient.listEnvironments(controlPlane.getResourceCrn(), userCrn)
                     .getEnvironments()
                     .stream()
                     .parallel()
@@ -91,11 +93,12 @@ public class RemoteEnvironmentService implements PayloadContextProvider {
     private DescribeEnvironmentResponse describeRemoteEnvironment(PrivateControlPlane controlPlane, String environmentCrn) {
         LOGGER.debug("The processing of remote environment('{}') is executed by thread: {}", environmentCrn, Thread.currentThread().getName());
         DescribeEnvironmentResponse response = null;
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         try {
             response = measure(() ->
                             clusterProxyHybridClient.getEnvironment(
                                     controlPlane.getResourceCrn(),
-                                    controlPlane.getPrivateCloudAccountId(),
+                                    userCrn,
                                     environmentCrn),
                     LOGGER,
                     "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
