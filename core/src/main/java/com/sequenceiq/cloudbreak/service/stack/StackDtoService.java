@@ -45,6 +45,8 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.repository.ClusterDtoRepository;
 import com.sequenceiq.cloudbreak.repository.StackDtoRepository;
 import com.sequenceiq.cloudbreak.repository.StackParametersRepository;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
+import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasSdxService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
@@ -60,7 +62,7 @@ import com.sequenceiq.cloudbreak.view.delegate.StackViewDelegate;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
-public class StackDtoService {
+public class StackDtoService implements LocalPaasSdxService {
 
     private static final Logger LOGGER = getLogger(StackDtoService.class);
 
@@ -101,6 +103,9 @@ public class StackDtoService {
 
     @Inject
     private StackParametersRepository stackParametersRepository;
+
+    @Inject
+    private RuntimeVersionService runtimeVersionService;
 
     public StackDto getByNameOrCrn(NameOrCrn nameOrCrn, String accountId, StackType stackType,
             ShowTerminatedClusterConfigService.ShowTerminatedClustersAfterConfig config, boolean withResources) {
@@ -356,5 +361,21 @@ public class StackDtoService {
         return stackDtoRepository.findAllByEnvironmentCrnAndStackType(environmentCrn, stackTypes).stream()
                 .map(stackViewDelegate -> getStackProxy(stackViewDelegate, false))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<SdxBasicView> getSdxBasicView(String environmentCrn) {
+        return findAllByEnvironmentCrnAndStackType(environmentCrn, List.of(StackType.DATALAKE))
+                .stream()
+                .findFirst()
+                .map(stackDto -> new SdxBasicView(
+                        stackDto.getResourceName(),
+                        stackDto.getResourceCrn(),
+                        runtimeVersionService.getRuntimeVersion(stackDto.getCluster().getId()).orElse(null),
+                        stackDto.getEnvironmentCrn(),
+                        stackDto.getCluster().isRangerRazEnabled(),
+                        stackDto.getCluster().getCreationFinished(),
+                        stackDto.getCluster().getDatabaseServerCrn()));
+
     }
 }

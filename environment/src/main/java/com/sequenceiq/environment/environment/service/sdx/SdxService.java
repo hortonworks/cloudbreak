@@ -1,7 +1,6 @@
 package com.sequenceiq.environment.environment.service.sdx;
 
 import java.util.List;
-import java.util.Optional;
 
 import jakarta.ws.rs.WebApplicationException;
 
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.cloudbreak.sdx.paas.PaasRemoteDataContextSupplier;
 import com.sequenceiq.environment.exception.SdxOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.operation.OperationView;
@@ -25,7 +23,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxStopValidationResponse;
 
 @Service
-public class SdxService implements PaasRemoteDataContextSupplier {
+public class SdxService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxService.class);
 
@@ -143,10 +141,5 @@ public class SdxService implements PaasRemoteDataContextSupplier {
             LOGGER.error(String.format("Failed to modify proxy config of SDX cluster by crn '%s' due to '%s'.", datalakeCrn, errorMessage), e);
             throw new SdxOperationFailedException(errorMessage, e);
         }
-    }
-
-    @Override
-    public Optional<String> getPaasSdxRemoteDataContext(String sdxCrn) {
-        throw new IllegalStateException("Environment should not query remote data context for SDX.");
     }
 }

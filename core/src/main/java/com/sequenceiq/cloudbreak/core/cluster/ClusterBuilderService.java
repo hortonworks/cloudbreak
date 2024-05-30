@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.paas.PaasRemoteDataContextSupplier;
 import com.sequenceiq.cloudbreak.sdx.paas.PaasSdxService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -151,7 +152,7 @@ public class ClusterBuilderService implements PaasRemoteDataContextSupplier {
                 return stackDto.getDatalakeCrn();
             } else {
                 LOGGER.info("Datalake CRN not found in Stack. Fetching the CRN SDX services.");
-                return platformAwareSdxConnector.getSdxCrnByEnvironmentCrn(stackDto.getEnvironmentCrn()).orElse(null);
+                return platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stackDto.getEnvironmentCrn()).map(SdxBasicView::crn).orElse(null);
             }
         }
         return stackDto.getDatalakeCrn();

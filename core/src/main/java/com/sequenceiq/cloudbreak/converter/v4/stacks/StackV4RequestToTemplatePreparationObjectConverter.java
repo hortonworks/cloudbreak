@@ -47,9 +47,10 @@ import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
-import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
@@ -78,7 +79,6 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Component
 public class StackV4RequestToTemplatePreparationObjectConverter {
@@ -137,7 +137,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
     private ExposedServiceCollector exposedServiceCollector;
 
     @Inject
-    private SdxClientService sdxClientService;
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Inject
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
@@ -374,10 +374,9 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
     private void decorateDatalakeView(StackV4Request source, TemplatePreparationObject.Builder builder) {
         DatalakeView datalakeView = null;
         if (StringUtils.isNotEmpty(source.getEnvironmentCrn()) && StackType.WORKLOAD.equals(source.getType())) {
-            List<SdxClusterResponse> datalakes = sdxClientService.getByEnvironmentCrn(source.getEnvironmentCrn());
-            if (!datalakes.isEmpty()) {
-                SdxClusterResponse datalake = datalakes.get(0);
-                datalakeView = new DatalakeView(datalake.getRangerRazEnabled(), datalake.getCrn());
+            Optional<SdxBasicView> datalake = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(source.getEnvironmentCrn());
+            if (datalake.isPresent()) {
+                datalakeView = new DatalakeView(datalake.get().razEnabled(), datalake.get().crn());
             }
         }
         builder.withDataLakeView(datalakeView);

@@ -104,7 +104,7 @@ class AbstractRdsConfigProviderTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(underTest, "db", "clouderamanager");
-        when(platformAwareSdxConnector.getSdxCrnByEnvironmentCrn(any())).thenReturn(Optional.empty());
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(Optional.empty());
     }
 
     static Object[][] sslDataProvider() {

@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
 import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 
@@ -22,21 +23,21 @@ public interface SdxService<S> {
 
     void deleteSdx(String sdxCrn, Boolean force);
 
-    Set<String> listSdxCrns(String environmentName, String environmentCrn);
+    Set<String> listSdxCrns(String environmentCrn);
 
-    Optional<String> getSdxCrnByEnvironmentCrn(String environmentCrn);
+    Optional<SdxBasicView> getSdxByEnvironmentCrn(String environmentCrn);
 
-    Set<Pair<String, S>> listSdxCrnStatusPair(String environmentCrn, String environmentName, Set<String> sdxCrns);
+    Set<Pair<String, S>> listSdxCrnStatusPair(String environmentCrn, Set<String> sdxCrns);
 
-    default Set<Pair<String, StatusCheckResult>> listSdxCrnStatusCheckPair(String environmentCrn, String environmentName, Set<String> sdxCrns) {
-        return listSdxCrnStatusPair(environmentCrn, environmentName, sdxCrns).stream()
+    default Set<Pair<String, StatusCheckResult>> listSdxCrnStatusCheckPair(String environmentCrn, Set<String> sdxCrns) {
+        return listSdxCrnStatusPair(environmentCrn, sdxCrns).stream()
                 .map(statusPair -> Pair.of(statusPair.getKey(), getAvailabilityStatusCheckResult(statusPair.getValue())))
                 .collect(Collectors.toSet());
     }
 
-    default Map<String, PollingResult> getPollingResultForDeletion(String environmentCrn, String environmentName, Set<String> sdxCrns) {
+    default Map<String, PollingResult> getPollingResultForDeletion(String environmentCrn, Set<String> sdxCrns) {
         if (isPlatformEntitled(Crn.safeFromString(environmentCrn).getAccountId())) {
-            return listSdxCrnStatusPair(environmentCrn, environmentName, sdxCrns).stream()
+            return listSdxCrnStatusPair(environmentCrn, sdxCrns).stream()
                     .collect(Collectors.toMap(Pair::getLeft, pair -> getDeletePollingResultByStatus(pair.getRight())));
         }
         return Map.of();

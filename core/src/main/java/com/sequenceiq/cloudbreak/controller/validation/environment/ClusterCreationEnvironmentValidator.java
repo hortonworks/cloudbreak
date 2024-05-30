@@ -135,7 +135,7 @@ public class ClusterCreationEnvironmentValidator {
         if (CloudPlatform.MOCK.name().equalsIgnoreCase(stack.cloudPlatform())) {
             LOGGER.info("No Data Lake validation for MOCK provider");
         } else if (validateDatalakeAvailability && distroxRequest) {
-            Set<String> crns = platformAwareSdxConnector.listSdxCrns(environment.getName(), environment.getCrn());
+            Set<String> crns = platformAwareSdxConnector.listSdxCrns(environment.getCrn());
             if (crns.isEmpty()) {
                 resultBuilder.error("Data Lake is not available in your environment!");
             }

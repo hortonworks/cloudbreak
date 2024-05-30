@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
@@ -247,7 +248,7 @@ public abstract class AbstractRdsConfigProvider {
     protected abstract boolean isRdsConfigNeeded(Blueprint blueprint, boolean knoxGateway, boolean cdl);
 
     private boolean isContainerizedDatalake(String environmentCrn) {
-        Optional<String> sdxCrnOptional = platformAwareSdxConnector.getSdxCrnByEnvironmentCrn(environmentCrn);
+        Optional<String> sdxCrnOptional = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(environmentCrn).map(SdxBasicView::crn);
         if (sdxCrnOptional.isEmpty()) {
             return false;
         }

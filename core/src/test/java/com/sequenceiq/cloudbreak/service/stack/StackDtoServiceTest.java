@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.repository.ClusterDtoRepository;
 import com.sequenceiq.cloudbreak.repository.StackDtoRepository;
 import com.sequenceiq.cloudbreak.repository.StackParametersRepository;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
@@ -81,6 +83,9 @@ class StackDtoServiceTest {
 
     @Mock
     private StackParametersRepository stackParametersRepository;
+
+    @Mock
+    private RuntimeVersionService runtimeVersionService;
 
     @InjectMocks
     private StackDtoService underTest;
@@ -162,5 +167,18 @@ class StackDtoServiceTest {
         assertEquals(List.of(instance1), result.get(0).getInstanceMetadataViews());
         assertEquals(group2, result.get(1).getInstanceGroup());
         assertEquals(List.of(instance2), result.get(1).getInstanceMetadataViews());
+    }
+
+    @Test
+    public void testGetSdxBasicView() {
+        when(stackDtoRepository.findAllByEnvironmentCrnAndStackType(any(), any())).thenReturn(List.of(stackViewDelegate));
+        when(clusterDtoRepository.findByStackId(anyLong())).thenReturn(Optional.of(clusterViewDelegate));
+        when(runtimeVersionService.getRuntimeVersion(anyLong())).thenReturn(Optional.of("7.2.18"));
+        when(workspaceService.getByIdWithoutAuth(any())).thenReturn(new Workspace());
+
+        Optional<SdxBasicView> sdx = underTest.getSdxBasicView("env");
+
+        assertTrue(sdx.isPresent());
+        assertEquals(sdx.get().runtime(), "7.2.18");
     }
 }

@@ -176,7 +176,7 @@ public class StackToStackV4ResponseConverter {
                 .convert(stack.getExternalDatabaseCreationType(), stack.getExternalDatabaseEngineVersion()));
         response.setJavaVersion(source.getJavaVersion());
         response.setEnableMultiAz(source.isMultiAz());
-        datalakeService.addSharedServiceResponse(source.getDatalakeCrn(), response);
+        datalakeService.addSharedServiceResponse(response);
         filterExposedServicesByType(source.getType(), response.getCluster());
         response.setLoadBalancers(convertLoadBalancers(source.getId()));
         if (!CollectionUtils.isEmpty(response.getLoadBalancers())) {

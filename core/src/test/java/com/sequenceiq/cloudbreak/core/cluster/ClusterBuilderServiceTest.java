@@ -223,7 +223,7 @@ class ClusterBuilderServiceTest {
         when(mockStack.getEnvironmentCrn()).thenReturn("envcrn");
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
         underTest.configureManagementServices(STACK_ID);
-        verify(platformAwareSdxConnector, times(1)).getSdxCrnByEnvironmentCrn(anyString());
+        verify(platformAwareSdxConnector, times(1)).getSdxBasicViewByEnvironmentCrn(anyString());
     }
 
     @Test
@@ -236,7 +236,7 @@ class ClusterBuilderServiceTest {
         underTest.configureManagementServices(STACK_ID);
         ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
         verify(platformAwareSdxConnector, times(1)).getRemoteDataContext(any());
-        verify(platformAwareSdxConnector, times(0)).getSdxCrnByEnvironmentCrn(anyString());
+        verify(platformAwareSdxConnector, times(0)).getSdxBasicViewByEnvironmentCrn(anyString());
         verify(mockClusterSetupService, times(1)).configureManagementServices(any(), any(), captor.capture(), any(), any());
         assertEquals("dlCrn", captor.getValue());
     }
@@ -250,7 +250,7 @@ class ClusterBuilderServiceTest {
         when(stackView.getType()).thenReturn(StackType.DATALAKE);
         underTest.configureManagementServices(STACK_ID);
         verify(platformAwareSdxConnector, times(1)).getRemoteDataContext(any());
-        verify(platformAwareSdxConnector, times(0)).getSdxCrnByEnvironmentCrn(anyString());
+        verify(platformAwareSdxConnector, times(0)).getSdxBasicViewByEnvironmentCrn(anyString());
     }
 
     @Test
@@ -262,7 +262,7 @@ class ClusterBuilderServiceTest {
         when(stackView.getType()).thenReturn(StackType.DATALAKE);
         underTest.configureManagementServices(STACK_ID);
         verify(platformAwareSdxConnector, times(0)).getRemoteDataContext(any());
-        verify(platformAwareSdxConnector, times(0)).getSdxCrnByEnvironmentCrn(anyString());
+        verify(platformAwareSdxConnector, times(0)).getSdxBasicViewByEnvironmentCrn(anyString());
     }
 
 }

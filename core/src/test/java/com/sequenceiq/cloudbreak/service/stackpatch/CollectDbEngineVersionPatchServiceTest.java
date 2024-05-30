@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -11,7 +12,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.Optional;
 
 import jakarta.ws.rs.NotFoundException;
@@ -30,11 +30,12 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.database.EmbeddedDbVersionCollector;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.externaldatabase.ExternalDbVersionCollector;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @ExtendWith(MockitoExtension.class)
 class CollectDbEngineVersionPatchServiceTest {
@@ -64,6 +65,9 @@ class CollectDbEngineVersionPatchServiceTest {
 
     @Mock
     private SdxClientService sdxClientService;
+
+    @Mock
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @InjectMocks
     private CollectDbEngineVersionPatchService underTest;
@@ -148,7 +152,6 @@ class CollectDbEngineVersionPatchServiceTest {
         when(stack.getResourceCrn()).thenReturn(STACK_CRN);
         when(stack.getId()).thenReturn(STACK_ID);
         when(stack.isDatalake()).thenReturn(true);
-        when(stack.getName()).thenReturn(STACK_NAME);
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
         Cluster cluster = new Cluster();
         cluster.setDatabaseServerCrn(DB_CRN);
@@ -156,10 +159,8 @@ class CollectDbEngineVersionPatchServiceTest {
         Optional<String> dbVersionResult = Optional.of(DB_VERSION);
         when(externalDbVersionCollector.collectDbVersion(DB_CRN)).thenReturn(dbVersionResult);
         doThrow(new NotFoundException("nope")).when(sdxClientService).updateDatabaseEngineVersion(STACK_CRN, DB_VERSION);
-        SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
-        sdxClusterResponse.setCrn(STACK_CRN_2);
-        sdxClusterResponse.setName(STACK_NAME);
-        when(sdxClientService.getByEnvironmentCrnInernal(ENV_CRN)).thenReturn(List.of(sdxClusterResponse));
+        lenient().when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
+                Optional.of(new SdxBasicView(null, STACK_CRN_2, null, null, false, 1L, null)));
 
         boolean result = underTest.doApply(stack);
 
@@ -174,7 +175,6 @@ class CollectDbEngineVersionPatchServiceTest {
         when(stack.isAvailable()).thenReturn(true);
         when(stack.getResourceCrn()).thenReturn(STACK_CRN);
         when(stack.isDatalake()).thenReturn(true);
-        when(stack.getName()).thenReturn(STACK_NAME);
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
         Cluster cluster = new Cluster();
         cluster.setDatabaseServerCrn(DB_CRN);
@@ -182,7 +182,7 @@ class CollectDbEngineVersionPatchServiceTest {
         Optional<String> dbVersionResult = Optional.of(DB_VERSION);
         when(externalDbVersionCollector.collectDbVersion(DB_CRN)).thenReturn(dbVersionResult);
         doThrow(new NotFoundException("nope")).when(sdxClientService).updateDatabaseEngineVersion(STACK_CRN, DB_VERSION);
-        when(sdxClientService.getByEnvironmentCrnInernal(ENV_CRN)).thenReturn(List.of());
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(Optional.empty());
 
         assertThrows(com.sequenceiq.cloudbreak.common.exception.NotFoundException.class, () -> underTest.doApply(stack));
 

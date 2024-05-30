@@ -17,11 +17,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -35,7 +35,7 @@ class RedbeamsDbCertificateProviderTest {
     private RedbeamsDbServerConfigurer dbServerConfigurer;
 
     @Mock
-    private DatalakeService datalakeService;
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @InjectMocks
     private RedbeamsDbCertificateProvider underTest;
@@ -116,7 +116,7 @@ class RedbeamsDbCertificateProviderTest {
         IllegalStateException illegalStateException = Assertions.assertThrows(IllegalStateException.class, () -> underTest.getRelatedSslCerts(stack));
 
         assertThat(illegalStateException)
-                .hasMessage("External DB SSL enforcement is enabled for cluster(crn:'stackCrn', name: 'dummyCluster') and remote database('adbservercrn')," +
+                .hasMessage("External DB SSL enforcement is enabled for cluster(crn:'stackCrn') and remote database('adbservercrn')," +
                 "but no certificates have been returned!");
     }
 
@@ -174,14 +174,6 @@ class RedbeamsDbCertificateProviderTest {
         String dbServerCrn = "adbservercrn";
         String certificateA = "certificate-A";
 
-        Cluster sdxCluster = TestUtil.cluster();
-        sdxCluster.setId(2L);
-        sdxCluster.setDatabaseServerCrn(null);
-        Stack sdxStack = sdxCluster.getStack();
-        sdxStack.setCluster(sdxCluster);
-        sdxStack.setType(StackType.DATALAKE);
-        sdxStack.setId(2L);
-
         Cluster cluster = TestUtil.cluster();
         cluster.setDatabaseServerCrn(dbServerCrn);
         StackDto stack = mock(StackDto.class);
@@ -190,7 +182,8 @@ class RedbeamsDbCertificateProviderTest {
         when(stack.getStack()).thenReturn(stackView);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
 
-        when(datalakeService.getDatalakeStackByDatahubStack(any())).thenReturn(Optional.of(sdxStack));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
+                Optional.of(new SdxBasicView(null, null, null, null, false, 1L, null)));
         when(dbServerConfigurer.isRemoteDatabaseRequested(null)).thenReturn(Boolean.FALSE);
         when(dbServerConfigurer.isRemoteDatabaseRequested(dbServerCrn)).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
@@ -210,14 +203,6 @@ class RedbeamsDbCertificateProviderTest {
         String dbServerCrnB = "dbservercrn-B";
         String certificateB = "certificate-B";
 
-        Cluster sdxCluster = TestUtil.cluster();
-        sdxCluster.setId(2L);
-        sdxCluster.setDatabaseServerCrn(dbServerCrnB);
-        Stack sdxStack = sdxCluster.getStack();
-        sdxStack.setCluster(sdxCluster);
-        sdxStack.setType(StackType.DATALAKE);
-        sdxStack.setId(2L);
-
         Cluster cluster = TestUtil.cluster();
         cluster.setDatabaseServerCrn(null);
         StackDto stack = mock(StackDto.class);
@@ -226,7 +211,8 @@ class RedbeamsDbCertificateProviderTest {
         when(stack.getStack()).thenReturn(stackView);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
 
-        when(datalakeService.getDatalakeStackByDatahubStack(any())).thenReturn(Optional.of(sdxStack));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
+                Optional.of(new SdxBasicView(null, null, null, null, false, 1L, dbServerCrnB)));
         when(dbServerConfigurer.isRemoteDatabaseRequested(null)).thenReturn(Boolean.FALSE);
         when(dbServerConfigurer.isRemoteDatabaseRequested(dbServerCrnB)).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4ResponseB = new DatabaseServerV4Response();
@@ -247,14 +233,6 @@ class RedbeamsDbCertificateProviderTest {
         String dbServerCrnB = "dbservercrn-B";
         String certificateA = "certificate-A";
 
-        Cluster sdxCluster = TestUtil.cluster();
-        sdxCluster.setId(2L);
-        sdxCluster.setDatabaseServerCrn(dbServerCrnB);
-        Stack sdxStack = sdxCluster.getStack();
-        sdxStack.setCluster(sdxCluster);
-        sdxStack.setType(StackType.DATALAKE);
-        sdxStack.setId(2L);
-
         Cluster cluster = TestUtil.cluster();
         cluster.setDatabaseServerCrn(dbServerCrn);
         StackDto stack = mock(StackDto.class);
@@ -263,7 +241,8 @@ class RedbeamsDbCertificateProviderTest {
         when(stack.getStack()).thenReturn(stackView);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
 
-        when(datalakeService.getDatalakeStackByDatahubStack(any())).thenReturn(Optional.of(sdxStack));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
+                Optional.of(new SdxBasicView(null, null, null, null, false, 1L, dbServerCrnB)));
         when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateA)));
@@ -289,14 +268,6 @@ class RedbeamsDbCertificateProviderTest {
         String certificateA = "certificate-A";
         String certificateB = "certificate-B";
 
-        Cluster sdxCluster = TestUtil.cluster();
-        sdxCluster.setId(2L);
-        sdxCluster.setDatabaseServerCrn(dbServerCrnB);
-        Stack sdxStack = sdxCluster.getStack();
-        sdxStack.setCluster(sdxCluster);
-        sdxStack.setType(StackType.DATALAKE);
-        sdxStack.setId(2L);
-
         Cluster cluster = TestUtil.cluster();
         cluster.setDatabaseServerCrn(dbServerCrn);
         StackDto stack = mock(StackDto.class);
@@ -305,7 +276,8 @@ class RedbeamsDbCertificateProviderTest {
         when(stack.getStack()).thenReturn(stackView);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
 
-        when(datalakeService.getDatalakeStackByDatahubStack(any())).thenReturn(Optional.of(sdxStack));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
+                Optional.of(new SdxBasicView(null, null, null, null, false, 1L, dbServerCrnB)));
         when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateA)));

@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -171,10 +170,10 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         lenient().when(componentConfigProviderService.getStackTemplate(anyLong())).thenReturn(new StackTemplate("{}", "version"));
         lenient().when(componentConfigProviderService.getTelemetry(anyLong())).thenReturn(new Telemetry());
         lenient().doAnswer(answer  -> {
-            StackV4Response result = answer.getArgument(1, StackV4Response.class);
+            StackV4Response result = answer.getArgument(0, StackV4Response.class);
             result.setSharedService(new SharedServiceV4Response());
             return null;
-        }).when(datalakeService).addSharedServiceResponse(anyString(), any(StackV4Response.class));
+        }).when(datalakeService).addSharedServiceResponse(any(StackV4Response.class));
         lenient().when(serviceEndpointCollector.filterByStackType(any(StackType.class), any(List.class))).thenReturn(Collections.emptyList());
         lenient().when(loadBalancerService.findByStackId(any())).thenReturn(Set.of());
     }

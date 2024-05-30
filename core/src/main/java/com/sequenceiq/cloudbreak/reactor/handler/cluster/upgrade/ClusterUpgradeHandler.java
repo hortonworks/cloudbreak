@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgrad
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeSuccess;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -109,7 +110,7 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
             if (StringUtils.isNotEmpty(stack.getDatalakeCrn())) {
                 datalakeCrn = stack.getDatalakeCrn();
             } else {
-                datalakeCrn = platformAwareSdxConnector.getSdxCrnByEnvironmentCrn(stack.getEnvironmentCrn()).orElse(null);
+                datalakeCrn = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stack.getEnvironmentCrn()).map(SdxBasicView::crn).orElse(null);
             }
             if (StringUtils.isNotEmpty(datalakeCrn)) {
                 LOGGER.info("Fetch the Remote Data Context from {} to update the Data Hub", stack.getName());

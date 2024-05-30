@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.service.sharedservice;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.List;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -13,21 +10,19 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
-import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Service
 public class DatalakeService {
@@ -40,54 +35,51 @@ public class DatalakeService {
 
     private static final String DEFAULT_RANGER_PORT = "6080";
 
-    private static final int FIRST = 0;
-
     @Inject
     private StackService stackService;
+
+    @Inject
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Inject
     private TransactionService transactionService;
 
     public void prepareDatalakeRequest(Stack source, StackV4Request stackRequest) {
-        if (!Strings.isNullOrEmpty(source.getDatalakeCrn())) {
-            LOGGER.debug("Prepare datalake request by datalakecrn");
+        if (!Strings.isNullOrEmpty(source.getEnvironmentCrn())) {
+            LOGGER.debug("Prepare datalake request by environmentCrn");
             SharedServiceV4Request sharedServiceRequest = new SharedServiceV4Request();
-            Optional<ResourceBasicView> datalakeStack = stackService.getResourceBasicViewByResourceCrn(source.getDatalakeCrn());
-            datalakeStack.ifPresent(s -> {
-                sharedServiceRequest.setDatalakeName(s.getName());
-            });
+            Optional<SdxBasicView> datalakeStack = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(source.getEnvironmentCrn());
+            datalakeStack.ifPresent(s -> sharedServiceRequest.setDatalakeName(s.name()));
             stackRequest.setSharedService(sharedServiceRequest);
         }
     }
 
     public void addSharedServiceResponse(ClusterApiView cluster, ClusterViewV4Response clusterResponse) {
         SharedServiceV4Response sharedServiceResponse = new SharedServiceV4Response();
-        if (cluster.getStack().getDatalakeCrn() != null) {
-            LOGGER.debug("Add shared service response by datalakeCrn");
-            Optional<ResourceBasicView> datalakeStack = stackService.getResourceBasicViewByResourceCrn(cluster.getStack().getDatalakeCrn());
+        if (cluster.getEnvironmentCrn() != null) {
+            LOGGER.debug("Add shared service response by environmentCrn");
+            Optional<SdxBasicView> datalakeStack = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(cluster.getEnvironmentCrn());
             datalakeStack.ifPresent(datalake -> {
-                sharedServiceResponse.setSharedClusterId(datalake.getId());
-                sharedServiceResponse.setSharedClusterName(datalake.getName());
-                sharedServiceResponse.setSdxCrn(datalake.getResourceCrn());
-                sharedServiceResponse.setSdxName(datalake.getName());
+                sharedServiceResponse.setSharedClusterName(datalake.name());
+                sharedServiceResponse.setSdxCrn(datalake.crn());
+                sharedServiceResponse.setSdxName(datalake.name());
             });
         }
         clusterResponse.setSharedServiceResponse(sharedServiceResponse);
     }
 
-    public void addSharedServiceResponse(String datalakeCrn, StackV4Response stackResponse) {
+    public void addSharedServiceResponse(StackV4Response stackResponse) {
         SharedServiceV4Response sharedServiceResponse = new SharedServiceV4Response();
-        if (!Strings.isNullOrEmpty(datalakeCrn)) {
-            LOGGER.debug("Checking datalake through the datalakeCrn.");
-            Optional<ResourceBasicView> resourceBasicView = stackService.getResourceBasicViewByResourceCrn(datalakeCrn);
-            if (resourceBasicView.isPresent()) {
-                ResourceBasicView datalake = resourceBasicView.get();
-                sharedServiceResponse.setSharedClusterId(datalake.getId());
-                sharedServiceResponse.setSharedClusterName(datalake.getName());
-                sharedServiceResponse.setSdxCrn(datalake.getResourceCrn());
-                sharedServiceResponse.setSdxName(datalake.getName());
+        if (!Strings.isNullOrEmpty(stackResponse.getEnvironmentCrn())) {
+            LOGGER.debug("Checking datalake through the environmentCrn.");
+            Optional<SdxBasicView> datalakeStack = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stackResponse.getEnvironmentCrn());
+            if (datalakeStack.isPresent()) {
+                SdxBasicView datalake = datalakeStack.get();
+                sharedServiceResponse.setSharedClusterName(datalake.name());
+                sharedServiceResponse.setSdxCrn(datalake.crn());
+                sharedServiceResponse.setSdxName(datalake.name());
             } else {
-                LOGGER.debug("Unable to find datalake with CRN {}", datalakeCrn);
+                LOGGER.debug("Unable to find datalake by environment CRN {}", stackResponse.getEnvironmentCrn());
             }
         }
         stackResponse.setSharedService(sharedServiceResponse);
@@ -99,32 +91,6 @@ public class DatalakeService {
         }
         LOGGER.info("There is no datalake has been set for the cluster.");
         return Optional.empty();
-    }
-
-    public Optional<Stack> getDatalakeStackByStackEnvironmentCrn(StackView stackView) {
-        if (StackType.DATALAKE.equals(stackView.getType())) {
-            return Optional.empty();
-        }
-        List<StackIdView> res = stackService.getByEnvironmentCrnAndStackType(stackView.getEnvironmentCrn(), StackType.DATALAKE);
-        if (res.isEmpty()) {
-            return Optional.empty();
-        } else {
-            // it has the assumption that environment and datalake has 1:1 connection
-            return Optional.of(stackService.getByIdWithListsInTransaction(res.get(FIRST).getId()));
-        }
-    }
-
-    public String getDatalakeCrn(StackV4Request source, Workspace workspace) {
-        if (source.getSharedService() != null && isNotBlank(source.getSharedService().getDatalakeName())) {
-            Optional<Stack> result = stackService
-                    .findStackByNameOrCrnAndWorkspaceId(NameOrCrn.ofName(source.getSharedService().getDatalakeName()), workspace.getId());
-            if (result.isPresent()) {
-                return result.get().getResourceCrn();
-            } else {
-                LOGGER.debug("No datalake resource found for data lake: {}", source.getSharedService().getDatalakeName());
-            }
-        }
-        return null;
     }
 
     public SharedServiceConfigsView createSharedServiceConfigsView(String password, StackType stackType, String datalakeCrn) {

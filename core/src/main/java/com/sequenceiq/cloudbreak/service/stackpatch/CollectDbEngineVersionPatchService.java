@@ -13,11 +13,12 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.database.EmbeddedDbVersionCollector;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.externaldatabase.ExternalDbVersionCollector;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Service
 public class CollectDbEngineVersionPatchService extends ExistingStackPatchService {
@@ -35,6 +36,9 @@ public class CollectDbEngineVersionPatchService extends ExistingStackPatchServic
 
     @Inject
     private SdxClientService sdxClientService;
+
+    @Inject
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Override
     public StackPatchType getStackPatchType() {
@@ -77,16 +81,12 @@ public class CollectDbEngineVersionPatchService extends ExistingStackPatchServic
     }
 
     private void tryToFindAndUpdateDatalakeByNameIfCrnIsDifferent(Stack stack, String dbEngineVersion) {
-        LOGGER.info("Datalake not found by crn [{}], try to find by name [{}]", stack.getResourceCrn(), stack.getName());
-        Optional<SdxClusterResponse> dlByEnvCrn = sdxClientService.getByEnvironmentCrnInernal(stack.getEnvironmentCrn()).stream()
-                .filter(dl -> stack.getName().equals(dl.getName()))
-                .findFirst();
-        if (dlByEnvCrn.isPresent()) {
-            LOGGER.info("Datalake found by name with crn: [{}]", dlByEnvCrn.get().getCrn());
-            sdxClientService.updateDatabaseEngineVersion(dlByEnvCrn.get().getCrn(), dbEngineVersion);
+        LOGGER.info("Datalake not found by crn [{}], try to find by env crn [{}]", stack.getResourceCrn(), stack.getEnvironmentCrn());
+        Optional<String> dlCrnByEnvCrn = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stack.getEnvironmentCrn()).map(SdxBasicView::crn);
+        if (dlCrnByEnvCrn.isPresent()) {
+            sdxClientService.updateDatabaseEngineVersion(dlCrnByEnvCrn.get(), dbEngineVersion);
         } else {
-            throw new com.sequenceiq.cloudbreak.common.exception.NotFoundException(String.format("Cannot found datalake with name %s in env %s",
-                    stack.getName(), stack.getEnvironmentCrn()));
+            throw new com.sequenceiq.cloudbreak.common.exception.NotFoundException(String.format("Cannot found datalake by env %s", stack.getEnvironmentCrn()));
         }
     }
 

@@ -40,32 +40,9 @@ public class SdxClientService {
         }
     }
 
-    public List<SdxClusterResponse> getByEnvironmentCrnInernal(String environmentCrn) {
-        try {
-            return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    () -> sdxEndpoint.getByEnvCrn(environmentCrn));
-        } catch (WebApplicationException | ProcessingException | IllegalStateException e) {
-            LOGGER.error(String.format("Failed to get datalake clusters for environment %s", environmentCrn), e);
-            return new ArrayList<>();
-        }
-    }
-
-    public SdxClusterResponse getByCrn(String crn) {
-        return sdxEndpoint.getByCrn(crn);
-    }
-
     public SdxClusterResponse getByCrnInternal(String crn) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> sdxEndpoint.getByCrn(crn));
-    }
-
-    public List<SdxClusterResponse> list() {
-        try {
-            return sdxEndpoint.list(null, false);
-        } catch (WebApplicationException | ProcessingException | IllegalStateException e) {
-            LOGGER.error("Failed to list datalake clusters.", e);
-            return new ArrayList<>();
-        }
     }
 
     public void updateDatabaseEngineVersion(String crn, String databaseEngineVersion) {

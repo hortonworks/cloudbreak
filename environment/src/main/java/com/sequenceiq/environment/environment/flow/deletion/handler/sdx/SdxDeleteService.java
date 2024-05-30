@@ -75,8 +75,7 @@ public class SdxDeleteService {
         sdxCrns.forEach(crn -> platformAwareSdxConnector.delete(crn, force));
 
         LOGGER.debug("Starting poller to check all Data Lake stacks for environment {} is deleted", environment.getName());
-        pollingDeletion(pollingConfig, () -> platformAwareSdxConnector.getAttemptResultForDeletion(environment.getResourceCrn(),
-                environment.getName(), sdxCrns));
+        pollingDeletion(pollingConfig, () -> platformAwareSdxConnector.getAttemptResultForDeletion(environment.getResourceCrn(), sdxCrns));
     }
 
     private void waitLegacySdxClustersDeletion(PollingConfig pollingConfig, EnvironmentView environment, Set<String> legacySdxNames, boolean force) {

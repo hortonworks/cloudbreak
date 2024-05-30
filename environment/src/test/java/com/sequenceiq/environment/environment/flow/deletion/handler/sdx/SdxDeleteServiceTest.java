@@ -69,7 +69,7 @@ class SdxDeleteServiceTest {
         String sdxCrn1 = "crn:cdp:datalake:us-west-1:tenant:datalake:crn1";
         String sdxCrn2 = "crn:cdp:sdxsvc:us-west-1:tenant:instance:crn2";
         when(environmentResourceDeletionService.getAttachedSdxClusterCrns(environment)).thenReturn(Set.of(sdxCrn1, sdxCrn2));
-        when(platformAwareSdxConnector.getAttemptResultForDeletion(any(), any(), any())).thenReturn(AttemptResults.finishWith(null));
+        when(platformAwareSdxConnector.getAttemptResultForDeletion(any(), any())).thenReturn(AttemptResults.finishWith(null));
         underTest.deleteSdxClustersForEnvironment(pollingConfig, environment, true);
         verify(platformAwareSdxConnector).delete(eq(sdxCrn1), eq(true));
         verify(platformAwareSdxConnector).delete(eq(sdxCrn2), eq(true));
@@ -83,7 +83,7 @@ class SdxDeleteServiceTest {
         String sdxCrn1 = "crn:cdp:datalake:us-west-1:tenant:datalake:crn1";
         String sdxCrn2 = "crn:cdp:sdxsvc:us-west-1:tenant:instance:crn2";
         when(environmentResourceDeletionService.getAttachedSdxClusterCrns(environment)).thenReturn(Set.of(sdxCrn1, sdxCrn2));
-        when(platformAwareSdxConnector.getAttemptResultForDeletion(any(), any(), any())).thenReturn(AttemptResults.breakFor(new IllegalStateException()));
+        when(platformAwareSdxConnector.getAttemptResultForDeletion(any(), any())).thenReturn(AttemptResults.breakFor(new IllegalStateException()));
         assertThatThrownBy(() -> underTest.deleteSdxClustersForEnvironment(pollingConfig, environment, true))
                 .isInstanceOf(UserBreakException.class)
                 .hasCauseInstanceOf(IllegalStateException.class);

@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.sdx.cdl.GrpcServiceDiscoveryClient;
 import com.sequenceiq.cloudbreak.sdx.cdl.ServiceDiscoveryClient;
 import com.sequenceiq.cloudbreak.sdx.cdl.config.ServiceDiscoveryChannelConfig;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 
@@ -103,7 +104,8 @@ class HiveCdlRdsConfigProviderTest {
 
     @Test
     void testRetrieveCdlRdsConfigs() {
-        when(platformAwareSdxConnector.getSdxCrnByEnvironmentCrn(any())).thenReturn(Optional.of(CDL_CRN.toString()));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
+                Optional.of(new SdxBasicView(null, CDL_CRN.toString(), null, null, false, 1L, null)));
         when(cdlSdxService.getServiceConfiguration(any(), any())).thenReturn(getCastedRdc());
         ArgumentCaptor<RDSConfig> rdsConfigCaptor = ArgumentCaptor.forClass(RDSConfig.class);
         StackDtoDelegate stack = getStack();
@@ -124,10 +126,11 @@ class HiveCdlRdsConfigProviderTest {
 
     @Test
     void testCreationWhenRdcNotFoundCdl() {
-        when(platformAwareSdxConnector.getSdxCrnByEnvironmentCrn(eq(ENVIRONMENT_CRN.toString()))).thenReturn(Optional.of(CDL_CRN.toString()));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
+                Optional.of(new SdxBasicView(null, CDL_CRN.toString(), null, null, false, 1L, null)));
         assertThrows(IllegalArgumentException.class,  () -> underTest.createPostgresRdsConfigIfNeeded(getStack()));
         verify(platformAwareSdxConnector, times(0)).getRemoteDataContext(eq(CDL_CRN.toString()));
-        verify(platformAwareSdxConnector, times(2)).getSdxCrnByEnvironmentCrn(eq(ENVIRONMENT_CRN.toString()));
+        verify(platformAwareSdxConnector, times(2)).getSdxBasicViewByEnvironmentCrn(eq(ENVIRONMENT_CRN.toString()));
         verify(clusterService, times(0)).saveRdsConfig(any(RDSConfig.class));
         verify(clusterService, times(0)).addRdsConfigToCluster(any(), eq(CLUSTER_ID));
     }
@@ -143,7 +146,7 @@ class HiveCdlRdsConfigProviderTest {
         when(stackDto.getBlueprint()).thenReturn(blueprint);
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
-        when(platformAwareSdxConnector.getSdxCrnByEnvironmentCrn(any())).thenReturn(Optional.empty());
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(Optional.empty());
         underTest.createPostgresRdsConfigIfNeeded(stackDto);
         verify(platformAwareSdxConnector, times(0)).getRemoteDataContext(any());
         verify(cdlSdxService, times(0)).getServiceConfiguration(any(), any());

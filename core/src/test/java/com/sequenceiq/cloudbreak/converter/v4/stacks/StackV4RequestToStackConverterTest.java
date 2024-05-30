@@ -62,9 +62,10 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
-import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.GatewaySecurityGroupDecorator;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -151,7 +152,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     private LoadBalancerConfigService loadBalancerConfigService;
 
     @Mock
-    private DatalakeService datalakeService;
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Mock
     private ClusterV4RequestToClusterConverter clusterV4RequestToClusterConverter;
@@ -193,7 +194,8 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         lenient().when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         lenient().when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.empty());
         lenient().when(costTagging.mergeTags(any(CDPTagMergeRequest.class))).thenReturn(new HashMap<>());
-        lenient().when(datalakeService.getDatalakeCrn(any(), any())).thenReturn("crn");
+        lenient().when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
+                Optional.of(new SdxBasicView(null, "crn", null, null, false, 1L, null)));
         lenient().when(targetedUpscaleSupportService.isUnboundEliminationSupported(anyString())).thenReturn(Boolean.FALSE);
         lenient().when(databaseRequestToDatabaseConverter.convert(any(DetailedEnvironmentResponse.class), any(CloudPlatform.class), isNull()))
                 .thenReturn(new Database());

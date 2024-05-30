@@ -21,10 +21,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
-import com.sequenceiq.cloudbreak.domain.view.ClusterView;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
-import com.sequenceiq.cloudbreak.service.stack.StackViewService;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.upgrade.ImageComponentVersionsComparator;
 import com.sequenceiq.common.model.OsType;
 
@@ -39,15 +37,10 @@ class DistroXUpgradeResponseFilterServiceTest {
     private DistroXUpgradeResponseFilterService underTest;
 
     @Mock
-    private StackViewService stackViewService;
-
-    @Mock
-    private RuntimeVersionService runtimeVersionService;
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Spy
     private ImageComponentVersionsComparator imageComponentVersionsComparator;
-
-    private final StackView stackView = createStackView();
 
     @Test
     void testFilterForLatestImagePerRuntimeAndOs() {
@@ -130,8 +123,8 @@ class DistroXUpgradeResponseFilterServiceTest {
         ImageInfoV4Response candidate2 = createImage(2L, "7.2.16", CENTOS7);
         ImageInfoV4Response candidate3 = createImage(2L, "7.2.17", CENTOS7);
         List<ImageInfoV4Response> candidates = List.of(candidate1, candidate2, candidate3);
-        when(stackViewService.findDatalakeViewByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(stackView));
-        when(runtimeVersionService.getRuntimeVersion(CLUSTER_ID)).thenReturn(Optional.of("7.2.16"));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(
+                new SdxBasicView(null, null, "7.2.16", null, false, 1L, null)));
 
         List<ImageInfoV4Response> actual = underTest.filterForDatalakeVersion(ENVIRONMENT_CRN, createUpgradeV4Response("7.2.16", candidates));
 
@@ -146,8 +139,8 @@ class DistroXUpgradeResponseFilterServiceTest {
         ImageInfoV4Response candidate2 = createImage(2L, "7.2.16", CENTOS7);
         ImageInfoV4Response candidate3 = createImage(2L, "7.2.17", CENTOS7);
         List<ImageInfoV4Response> candidates = List.of(candidate1, candidate2, candidate3);
-        when(stackViewService.findDatalakeViewByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(stackView));
-        when(runtimeVersionService.getRuntimeVersion(CLUSTER_ID)).thenReturn(Optional.of("7.2.15"));
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(
+                new SdxBasicView(null, null, "7.2.15", null, false, 1L, null)));
 
         List<ImageInfoV4Response> actual = underTest.filterForDatalakeVersion(ENVIRONMENT_CRN, createUpgradeV4Response("7.2.15", candidates));
 
@@ -159,7 +152,7 @@ class DistroXUpgradeResponseFilterServiceTest {
         List<ImageInfoV4Response> actual = underTest.filterForDatalakeVersion(ENVIRONMENT_CRN, createUpgradeV4Response("7.2.15", Collections.emptyList()));
 
         assertTrue(actual.isEmpty());
-        verifyNoInteractions(stackViewService, runtimeVersionService);
+        verifyNoInteractions(platformAwareSdxConnector);
     }
 
     @Test
@@ -168,7 +161,7 @@ class DistroXUpgradeResponseFilterServiceTest {
         ImageInfoV4Response candidate2 = createImage(2L, "7.2.16", CENTOS7);
         ImageInfoV4Response candidate3 = createImage(2L, "7.2.17", CENTOS7);
         List<ImageInfoV4Response> candidates = List.of(candidate1, candidate2, candidate3);
-        when(stackViewService.findDatalakeViewByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
 
         List<ImageInfoV4Response> actual = underTest.filterForDatalakeVersion(ENVIRONMENT_CRN, createUpgradeV4Response("7.2.15", candidates));
 
@@ -176,7 +169,6 @@ class DistroXUpgradeResponseFilterServiceTest {
         assertTrue(actual.contains(candidate1));
         assertTrue(actual.contains(candidate2));
         assertTrue(actual.contains(candidate3));
-        verifyNoInteractions(runtimeVersionService);
     }
 
     @Test
@@ -185,8 +177,7 @@ class DistroXUpgradeResponseFilterServiceTest {
         ImageInfoV4Response candidate2 = createImage(2L, "7.2.16", CENTOS7);
         ImageInfoV4Response candidate3 = createImage(2L, "7.2.17", CENTOS7);
         List<ImageInfoV4Response> candidates = List.of(candidate1, candidate2, candidate3);
-        when(stackViewService.findDatalakeViewByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(stackView));
-        when(runtimeVersionService.getRuntimeVersion(CLUSTER_ID)).thenReturn(Optional.empty());
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
 
         List<ImageInfoV4Response> actual = underTest.filterForDatalakeVersion(ENVIRONMENT_CRN, createUpgradeV4Response("7.2.15", candidates));
 
@@ -212,13 +203,5 @@ class DistroXUpgradeResponseFilterServiceTest {
         imageInfoV4Response.setComponentVersions(imageComponentVersions);
         imageInfoV4Response.setCreated(created);
         return imageInfoV4Response;
-    }
-
-    private StackView createStackView() {
-        ClusterView clusterView = new ClusterView();
-        clusterView.setId(CLUSTER_ID);
-        StackView stackView = new StackView();
-        stackView.setClusterView(clusterView);
-        return stackView;
     }
 }

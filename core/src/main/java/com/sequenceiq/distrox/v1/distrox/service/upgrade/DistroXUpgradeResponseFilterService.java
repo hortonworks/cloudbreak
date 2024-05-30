@@ -10,17 +10,16 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
-import com.sequenceiq.cloudbreak.service.stack.StackViewService;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.upgrade.ImageComponentVersionsComparator;
 
 @Component
@@ -29,11 +28,7 @@ public class DistroXUpgradeResponseFilterService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXUpgradeResponseFilterService.class);
 
     @Inject
-    @Qualifier("stackViewServiceDeprecated")
-    private StackViewService stackViewService;
-
-    @Inject
-    private RuntimeVersionService runtimeVersionService;
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Inject
     private ImageComponentVersionsComparator imageComponentVersionsComparator;
@@ -87,12 +82,10 @@ public class DistroXUpgradeResponseFilterService {
         List<ImageInfoV4Response> candidates = upgradeV4Response.getUpgradeCandidates();
         List<ImageInfoV4Response> result = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(candidates)) {
-            Optional<StackView> datalakeViewOpt = stackViewService.findDatalakeViewByEnvironmentCrn(environmentCrn);
-            if (datalakeViewOpt.isPresent()) {
-                Optional<String> datalakeVersionOpt = runtimeVersionService.getRuntimeVersion(datalakeViewOpt.get().getClusterView().getId());
-                datalakeVersionOpt.ifPresentOrElse(datalakeVersion ->
-                        result.addAll(filterForDatalakeVersion(datalakeVersion, upgradeV4Response.getCurrent().getComponentVersions().getCdp(), candidates)),
-                        () -> result.addAll(candidates));
+            Optional<SdxBasicView> datalakeViewOpt = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(environmentCrn);
+            if (datalakeViewOpt.isPresent() && StringUtils.isNotBlank(datalakeViewOpt.get().runtime())) {
+                result.addAll(filterForDatalakeVersion(datalakeViewOpt.get().runtime(),
+                        upgradeV4Response.getCurrent().getComponentVersions().getCdp(), candidates));
             } else {
                 LOGGER.debug("DataLake stack not found for environment {}", environmentCrn);
                 return candidates;

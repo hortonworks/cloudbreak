@@ -61,32 +61,6 @@ public class SdxClientServiceTest {
     }
 
     @Test
-    public void testGetByEnvironmentCrnInternal() {
-        String environmentCrn = "testEnvironmentCrn";
-        List<SdxClusterResponse> clusters = new ArrayList<>();
-
-        when(sdxEndpoint.getByEnvCrn(any())).thenReturn(clusters);
-
-        List<SdxClusterResponse> result = sdxClientService.getByEnvironmentCrnInernal(environmentCrn);
-
-        assertEquals(clusters, result);
-        verify(sdxEndpoint, times(1)).getByEnvCrn(environmentCrn);
-        verify(regionAwareInternalCrnGeneratorFactory.iam(), times(1)).getInternalCrnForServiceAsString();
-    }
-
-    @Test
-    public void testGetByCrn() {
-        SdxClusterResponse cluster = new SdxClusterResponse();
-
-        when(sdxEndpoint.getByCrn(CRN)).thenReturn(cluster);
-
-        SdxClusterResponse result = sdxClientService.getByCrn(CRN);
-
-        assertEquals(cluster, result);
-        verify(sdxEndpoint, times(1)).getByCrn(CRN);
-    }
-
-    @Test
     public void testGetByCrnInternal() {
         SdxClusterResponse cluster = new SdxClusterResponse();
 
@@ -97,17 +71,6 @@ public class SdxClientServiceTest {
         assertEquals(cluster, result);
         verify(sdxEndpoint, times(1)).getByCrn(CRN);
         verify(regionAwareInternalCrnGeneratorFactory.iam(), times(1)).getInternalCrnForServiceAsString();
-    }
-
-    @Test
-    public void testList() {
-        List<SdxClusterResponse> clusters = new ArrayList<>();
-        when(sdxEndpoint.list(null, false)).thenReturn(clusters);
-
-        List<SdxClusterResponse> result = sdxClientService.list();
-
-        assertEquals(clusters, result);
-        verify(sdxEndpoint, times(1)).list(null, false);
     }
 
     @Test

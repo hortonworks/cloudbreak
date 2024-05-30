@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.sdx.cdl.CdlSdxService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.AbstractRdsConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -65,7 +66,7 @@ public abstract class AbstractCdlRdsConfigProvider extends AbstractRdsConfigProv
     }
 
     protected boolean isRdsConfigNeeded(StackDtoDelegate stack) {
-        Optional<String> sdxCrnOptional = platformAwareSdxConnector.getSdxCrnByEnvironmentCrn(stack.getEnvironmentCrn());
+        Optional<String> sdxCrnOptional = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stack.getEnvironmentCrn()).map(SdxBasicView::crn);
         return sdxCrnOptional.filter(s -> Crn.safeFromString(s).getResourceType().equals(Crn.ResourceType.INSTANCE)).isPresent();
     }
 
@@ -99,7 +100,7 @@ public abstract class AbstractCdlRdsConfigProvider extends AbstractRdsConfigProv
     }
 
     private Map<String, String> getConfiguration(String environmentCrn) {
-        Optional<String> sdxCrnOptional = platformAwareSdxConnector.getSdxCrnByEnvironmentCrn(environmentCrn);
+        Optional<String> sdxCrnOptional = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(environmentCrn).map(SdxBasicView::crn);
         if (sdxCrnOptional.isEmpty()) {
             return Collections.emptyMap();
         }

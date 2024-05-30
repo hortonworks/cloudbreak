@@ -133,11 +133,11 @@ class DistroXServiceTest {
         doNothing().when(fedRampModificationService).prepare(any(), any());
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
-        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of(DATALAKE_CRN));
+        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
 
         underTest.post(request);
 
-        verify(platformAwareSdxConnector).listSdxCrns(any(), any());
+        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
     }
 
     @ParameterizedTest
@@ -195,7 +195,7 @@ class DistroXServiceTest {
         StackV4Request converted = new StackV4Request();
         CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
         lenient().when(stackRequestConverter.convert(r)).thenReturn(converted);
-        lenient().when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of(DATALAKE_CRN));
+        lenient().when(platformAwareSdxConnector.listSdxCrns(any())).thenReturn(Set.of(DATALAKE_CRN));
         lenient().when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
 
         BadRequestException err = assertThrows(BadRequestException.class, () -> underTest.post(r));
@@ -224,7 +224,7 @@ class DistroXServiceTest {
         StackV4Request converted = new StackV4Request();
         CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
         when(stackRequestConverter.convert(r)).thenReturn(converted);
-        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of(DATALAKE_CRN));
+        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
 
         underTest.post(r);
@@ -252,13 +252,12 @@ class DistroXServiceTest {
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
-        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of());
+        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any())).thenReturn(Set.of());
 
         assertThatThrownBy(() -> underTest.post(request))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Data Lake stack cannot be found for environment CRN: %s (%s)", envName, envResponse.getCrn());
+                .hasMessage("Data Lake stack cannot be found for environment: %s (%s)", envName, envResponse.getCrn());
 
-        verify(platformAwareSdxConnector).listSdxCrns(any(), any());
         verifyNoMoreInteractions(platformAwareSdxConnector);
     }
 
@@ -275,16 +274,14 @@ class DistroXServiceTest {
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
-        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of(DATALAKE_CRN));
-        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any(), any(), any()))
+        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.NOT_AVAILABLE)));
 
         assertThatThrownBy(() -> underTest.post(request))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Data Lake stacks of environment should be available.");
 
-        verify(platformAwareSdxConnector).listSdxCrns(any(), any());
-        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any(), any(), any());
+        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
     }
 
     @Test
@@ -306,14 +303,12 @@ class DistroXServiceTest {
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
-        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of(DATALAKE_CRN));
-        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any(), any(), any()))
+        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
 
         underTest.post(request);
 
-        verify(platformAwareSdxConnector).listSdxCrns(any(), any());
-        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any(), any(), any());
+        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
     }
 
     @Test
@@ -335,14 +330,12 @@ class DistroXServiceTest {
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
-        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of(DATALAKE_CRN));
-        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any(), any(), any()))
+        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.ROLLING_UPGRADE_IN_PROGRESS)));
 
         underTest.post(request);
 
-        verify(platformAwareSdxConnector).listSdxCrns(any(), any());
-        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any(), any(), any());
+        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
     }
 
     @Test
@@ -367,16 +360,14 @@ class DistroXServiceTest {
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
-        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of(DATALAKE_CRN));
-        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any(), any(), any()))
+        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
 
         assertThatThrownBy(() -> underTest.post(request))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Image request can not have both image id and os parameters set.");
 
-        verify(platformAwareSdxConnector).listSdxCrns(any(), any());
-        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any(), any(), any());
+        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
     }
 
     @Test
@@ -400,8 +391,7 @@ class DistroXServiceTest {
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
-        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of(DATALAKE_CRN));
-        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any(), any(), any()))
+        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any()))
                 .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
         when(imageOsService.isSupported(any())).thenReturn(false);
 
@@ -409,8 +399,7 @@ class DistroXServiceTest {
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Image os 'os' is not supported in your account.");
 
-        verify(platformAwareSdxConnector).listSdxCrns(any(), any());
-        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any(), any(), any());
+        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any());
     }
 
     private static VerificationMode calledOnce() {

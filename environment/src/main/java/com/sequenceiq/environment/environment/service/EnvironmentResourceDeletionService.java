@@ -71,7 +71,7 @@ public class EnvironmentResourceDeletionService {
         Set<String> clusterCrns = new HashSet<>();
         LOGGER.debug("Get SDX clusters of the environment: '{}'", environment.getName());
         try {
-            clusterCrns = platformAwareSdxConnector.listSdxCrns(environment.getName(), environment.getResourceCrn());
+            clusterCrns = platformAwareSdxConnector.listSdxCrns(environment.getResourceCrn());
         } catch (WebApplicationException e) {
             propagateException("Failed to get SDX clusters from SDX service due to:", e);
         } catch (ProcessingException e) {

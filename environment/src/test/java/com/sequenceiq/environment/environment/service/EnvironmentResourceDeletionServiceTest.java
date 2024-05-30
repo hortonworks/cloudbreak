@@ -104,7 +104,7 @@ class EnvironmentResourceDeletionServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         environmentResourceDeletionServiceUnderTest.getAttachedSdxClusterCrns(environment);
-        verify(platformAwareSdxConnector).listSdxCrns(eq(ENVIRONMENT_NAME), eq(ENVIRONMENT_CRN));
+        verify(platformAwareSdxConnector).listSdxCrns(eq(ENVIRONMENT_CRN));
     }
 
     @Test

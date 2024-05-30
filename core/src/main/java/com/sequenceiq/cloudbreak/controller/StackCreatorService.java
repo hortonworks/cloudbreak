@@ -72,7 +72,6 @@ import com.sequenceiq.cloudbreak.service.JavaVersionValidator;
 import com.sequenceiq.cloudbreak.service.NodeCountLimitValidator;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -173,9 +172,6 @@ public class StackCreatorService {
 
     @Inject
     private JavaVersionValidator javaVersionValidator;
-
-    @Inject
-    private SdxClientService sdxClientService;
 
     @Inject
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
@@ -313,13 +309,7 @@ public class StackCreatorService {
 
     private String getCrnForCreation(Optional<String> externalCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        if (externalCrn.isPresent()) {
-            // it means it is a DL cluster, double check it in sdx service
-            sdxClientService.getByCrn(externalCrn.get());
-            return externalCrn.get();
-        } else {
-            return createCRN(accountId);
-        }
+        return externalCrn.orElseGet(() -> createCRN(accountId));
     }
 
     private String createCRN(String accountId) {

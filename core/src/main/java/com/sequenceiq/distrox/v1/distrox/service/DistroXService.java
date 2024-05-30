@@ -82,13 +82,11 @@ public class DistroXService {
             throw new BadRequestException(format("If you want to provision a Data Hub then the FreeIPA instance must be running in the '%s' Environment.",
                     environment.getName()));
         }
-        Set<String> sdxCrns = platformAwareSdxConnector.listSdxCrns(environment.getName(), environment.getCrn());
-        if (sdxCrns.isEmpty()) {
-            throw new BadRequestException(format("Data Lake stack cannot be found for environment CRN: %s (%s)",
+        Set<Pair<String, StatusCheckResult>> sdxCrnsWithAvailability = platformAwareSdxConnector.listSdxCrnsWithAvailability(environment.getCrn());
+        if (sdxCrnsWithAvailability.isEmpty()) {
+            throw new BadRequestException(format("Data Lake stack cannot be found for environment: %s (%s)",
                     environment.getName(), environment.getCrn()));
         }
-        Set<Pair<String, StatusCheckResult>> sdxCrnsWithAvailability = platformAwareSdxConnector.listSdxCrnsWithAvailability(environment.getName(),
-                environment.getCrn(), sdxCrns);
         if (!sdxCrnsWithAvailability.stream().map(Pair::getValue).allMatch(isSdxAvailable())) {
             throw new BadRequestException("Data Lake stacks of environment should be available.");
         }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.sdx.cdl.GrpcServiceDiscoveryClient;
 import com.sequenceiq.cloudbreak.sdx.cdl.ServiceDiscoveryClient;
 import com.sequenceiq.cloudbreak.sdx.cdl.config.ServiceDiscoveryChannelConfig;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -94,7 +96,8 @@ public class HiveRdsConfigProviderTest {
 
     @Test
     void testCreateRdsConfigIfNeededCdlCrn() {
-        when(platformAwareSdxConnector.getSdxCrnByEnvironmentCrn(any())).thenReturn(Optional.of(CDL_CRN.toString()));
+        lenient().when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
+                Optional.of(new SdxBasicView(null, CDL_CRN.toString(), null, null, false, 1L, null)));
         StackDto stackDto = mock(StackDto.class);
         ClusterView clusterView = mock(ClusterView.class);
         when(clusterView.getId()).thenReturn(1L);
@@ -110,7 +113,7 @@ public class HiveRdsConfigProviderTest {
 
     @Test
     void testCreateRdsConfigIfNeededPaasCrn() {
-        when(platformAwareSdxConnector.getSdxCrnByEnvironmentCrn(any())).thenReturn(Optional.empty());
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(Optional.empty());
         when(rdsConfigService.createIfNotExists(any(), any(), any())).thenAnswer(i -> {
             RDSConfig rdsConfig = i.getArgument(1, RDSConfig.class);
             rdsConfig.setId(1L);

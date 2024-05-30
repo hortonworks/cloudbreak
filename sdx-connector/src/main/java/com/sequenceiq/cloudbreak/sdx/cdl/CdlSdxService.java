@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.sdx.cdl;
 
 
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_CONTAINERIZED_DATALKE;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,6 +25,7 @@ import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.AbstractSdxService;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
 import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 
@@ -74,14 +74,14 @@ public class CdlSdxService extends AbstractSdxService<CdlCrudProto.StatusType.Va
     }
 
     @Override
-    public Set<String> listSdxCrns(String environmentName, String environmentCrn) {
+    public Set<String> listSdxCrns(String environmentCrn) {
         if (isEnabled(environmentCrn)) {
             try {
-                CdlCrudProto.DatalakeResponse datalake = grpcClient.findDatalake(isBlank(environmentCrn) ? environmentName : environmentCrn, "");
+                CdlCrudProto.DatalakeResponse datalake = grpcClient.findDatalake(environmentCrn, "");
                 return Set.of(datalake.getCrn());
             } catch (RuntimeException exception) {
-                LOGGER.info("CDL not found for environment. CRN: {}. Name: {}. Exception: {}",
-                        environmentCrn, environmentName, exception.getMessage());
+                LOGGER.info("CDL not found for environment. CRN: {}. Exception: {}",
+                        environmentCrn, exception.getMessage());
                 return Collections.emptySet();
             }
         }
@@ -89,11 +89,20 @@ public class CdlSdxService extends AbstractSdxService<CdlCrudProto.StatusType.Va
     }
 
     @Override
-    public Optional<String> getSdxCrnByEnvironmentCrn(String environmentCrn) {
+    public Optional<SdxBasicView> getSdxByEnvironmentCrn(String environmentCrn) {
         if  (isEnabled(environmentCrn)) {
             try {
                 CdlCrudProto.DatalakeResponse datalake = grpcClient.findDatalake(environmentCrn, "");
-                return Optional.of(datalake.getCrn());
+                CdlCrudProto.DescribeDatalakeResponse detailedCdl = grpcClient.describeDatalake(datalake.getCrn());
+                SdxBasicView sdxBasicView = new SdxBasicView(
+                        detailedCdl.getName(),
+                        detailedCdl.getCrn(),
+                        detailedCdl.getShape(),
+                        detailedCdl.getEnvironmentCrn(),
+                        detailedCdl.getRangerRazEnabled(),
+                        detailedCdl.getCreated(),
+                        detailedCdl.getDatabaseDetails().getCrn());
+                return Optional.of(sdxBasicView);
             } catch (RuntimeException exception) {
                 LOGGER.info("Exception while fetching CRN for containerized datalake with Environment:{} {}",
                     environmentCrn, exception.getMessage());
@@ -104,23 +113,22 @@ public class CdlSdxService extends AbstractSdxService<CdlCrudProto.StatusType.Va
     }
 
     @Override
-    public Set<Pair<String, CdlCrudProto.StatusType.Value>> listSdxCrnStatusPair(String environmentCrn, String environmentName, Set<String> sdxCrns) {
+    public Set<Pair<String, CdlCrudProto.StatusType.Value>> listSdxCrnStatusPair(String environmentCrn, Set<String> sdxCrns) {
         Set<Pair<String, CdlCrudProto.StatusType.Value>> result = new HashSet<>();
         if (isEnabled(environmentCrn)) {
             try {
                 if (CollectionUtils.isNotEmpty(sdxCrns)) {
                     sdxCrns.forEach(crn -> {
-                                CdlCrudProto.DatalakeResponse response = grpcClient.findDatalake(
-                                        isBlank(environmentCrn) ? environmentName : environmentCrn, crn);
+                                CdlCrudProto.DatalakeResponse response = grpcClient.findDatalake(environmentCrn, crn);
                                 result.add(Pair.of(crn, CdlCrudProto.StatusType.Value.valueOf(response.getStatus())));
                             }
                     );
                 } else {
-                    CdlCrudProto.DatalakeResponse response = grpcClient.findDatalake(isBlank(environmentCrn) ? environmentName : environmentCrn, "");
+                    CdlCrudProto.DatalakeResponse response = grpcClient.findDatalake(environmentCrn, "");
                     result.add(Pair.of(response.getCrn(), CdlCrudProto.StatusType.Value.valueOf(response.getStatus())));
                 }
             } catch (RuntimeException exception) {
-                LOGGER.info("CDL not found for environment. CRN: {}. Name: {}", environmentCrn, environmentName);
+                LOGGER.info("CDL not found for environment. CRN: {}.", environmentCrn);
                 return Collections.emptySet();
             }
         }

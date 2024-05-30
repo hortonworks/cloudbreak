@@ -25,8 +25,8 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -47,7 +47,7 @@ public class DistroXUpgradeAvailabilityService {
     private StackService stackService;
 
     @Inject
-    private ClusterService clusterService;
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Inject
     private CurrentImageUsageCondition currentImageUsageCondition;
@@ -80,8 +80,8 @@ public class DistroXUpgradeAvailabilityService {
     }
 
     private List<ImageInfoV4Response> validateRangerRazCandidates(Stack stack, List<ImageInfoV4Response> filteredCandidates) {
-        Cluster datalakeCluster = clusterService.getClusterByStackResourceCrn(stack.getDatalakeCrn());
-        boolean rangerRazEnabled = datalakeCluster.isRangerRazEnabled();
+        SdxBasicView sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stack.getEnvironmentCrn()).orElseThrow();
+        boolean rangerRazEnabled = sdxBasicView.razEnabled();
         if (!rangerRazEnabled) {
             LOGGER.debug("Not a RAZ enabled cluster. Nothing to validate.");
             return filteredCandidates;
@@ -104,7 +104,7 @@ public class DistroXUpgradeAvailabilityService {
 
         String message = String.format(
                 "Data Hub Upgrade is not allowed as Ranger RAZ is enabled for [%s] cluster, because runtime version is [%s].",
-                datalakeCluster.getName(),
+                sdxBasicView.name(),
                 runtimeVersion);
         LOGGER.debug(message);
         throw new BadRequestException(message);

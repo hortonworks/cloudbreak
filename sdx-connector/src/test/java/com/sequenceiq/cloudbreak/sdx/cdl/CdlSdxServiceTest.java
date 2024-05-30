@@ -59,11 +59,11 @@ public class CdlSdxServiceTest {
         CdlCrudProto.DatalakeResponse datalake = getDatalake();
         when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.TRUE);
         when(sdxClient.findDatalake(anyString(), anyString())).thenReturn(datalake);
-        assertTrue(underTest.listSdxCrns("envName", ENV_CRN).contains(CDL_CRN));
+        assertTrue(underTest.listSdxCrns(ENV_CRN).contains(CDL_CRN));
         verify(sdxClient).findDatalake(eq(ENV_CRN), any());
 
         when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.FALSE);
-        assertTrue(underTest.listSdxCrns("envName", ENV_CRN).isEmpty());
+        assertTrue(underTest.listSdxCrns(ENV_CRN).isEmpty());
         verifyNoMoreInteractions(sdxClient);
     }
 
@@ -73,12 +73,12 @@ public class CdlSdxServiceTest {
         CdlCrudProto.DatalakeResponse datalake = getDatalake();
         when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.TRUE);
         when(sdxClient.findDatalake(anyString(), anyString())).thenReturn(datalake);
-        assertTrue(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.listSdxCrnStatusPair(ENV_CRN, "env", Set.of(CDL_CRN))
+        assertTrue(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.listSdxCrnStatusPair(ENV_CRN, Set.of(CDL_CRN))
                 .contains(Pair.of(CDL_CRN, CdlCrudProto.StatusType.Value.RUNNING))));
         verify(sdxClient).findDatalake(anyString(), anyString());
 
         when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.FALSE);
-        assertTrue(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.listSdxCrnStatusPair(ENV_CRN, "env", Set.of(CDL_CRN)).isEmpty()));
+        assertTrue(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.listSdxCrnStatusPair(ENV_CRN, Set.of(CDL_CRN)).isEmpty()));
         verifyNoMoreInteractions(sdxClient);
     }
 

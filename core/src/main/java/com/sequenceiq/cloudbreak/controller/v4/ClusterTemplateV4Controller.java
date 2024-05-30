@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.controller.v4;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.util.stream.Collectors.toSet;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -47,15 +46,15 @@ import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.ClusterTemplateV4R
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.ClusterTemplateViewToClusterTemplateViewV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateViewService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
-import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -83,7 +82,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     private ClusterTemplateViewService clusterTemplateViewService;
 
     @Inject
-    private SdxClientService sdxClientService;
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Inject
     private EnvironmentClientService environmentClientService;
@@ -132,10 +131,10 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
                 LOGGER, "Blueprints fetched in {}ms");
         measure(() -> clusterTemplateService.updateDefaultClusterTemplates(threadLocalService.getRequestedWorkspaceId()),
                 LOGGER, "Cluster definitions fetched in {}ms");
-        List<SdxClusterResponse> sdxClusters = sdxClientService.getByEnvironmentCrn(environmentCrn);
+        Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(environmentCrn);
         Optional<String> cloudPlatformByCrn = environmentClientService.getCloudPlatformByCrn(environmentCrn);
-        Optional<String> runtimeVersion = sdxClusters.stream()
-                .map(SdxClusterResponse::getRuntime)
+        Optional<String> runtimeVersion = sdxBasicView.stream()
+                .map(SdxBasicView::runtime)
                 .filter(e -> !Strings.isNullOrEmpty(e))
                 .findFirst();
         Set<ClusterTemplateView> clusterTemplateViews = clusterTemplateViewService.findAllUserManagedAndDefaultByEnvironmentCrn(

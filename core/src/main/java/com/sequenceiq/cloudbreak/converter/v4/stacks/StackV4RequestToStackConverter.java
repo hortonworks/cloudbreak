@@ -76,9 +76,9 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
-import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.GatewaySecurityGroupDecorator;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -145,7 +145,7 @@ public class StackV4RequestToStackConverter {
     private LoadBalancerConfigService loadBalancerConfigService;
 
     @Inject
-    private DatalakeService datalakeService;
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Inject
     private ClusterV4RequestToClusterConverter clusterV4RequestToClusterConverter;
@@ -205,7 +205,9 @@ public class StackV4RequestToStackConverter {
         setTimeToLive(source, stack);
         stack.setWorkspace(workspace);
         stack.setDisplayName(source.getName());
-        stack.setDatalakeCrn(datalakeService.getDatalakeCrn(source, workspace));
+        if (source.getSharedService() != null) {
+            platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(environment.getCrn()).ifPresent(sdx -> stack.setDatalakeCrn(sdx.crn()));
+        }
         stack.setStackAuthentication(stackAuthenticationV4RequestToStackAuthenticationConverter
                 .convert(source.getAuthentication()));
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));

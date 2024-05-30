@@ -91,7 +91,7 @@ class ClusterCreationEnvironmentValidatorTest {
         // GIVEN
         Stack stack = getStack();
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
-        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of("crn"));
+        when(platformAwareSdxConnector.listSdxCrns(any())).thenReturn(Set.of("crn"));
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validate(stack, environment, true, validationBuilder);
@@ -105,7 +105,7 @@ class ClusterCreationEnvironmentValidatorTest {
         // GIVEN
         Stack stack = getStack();
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
-        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of());
+        when(platformAwareSdxConnector.listSdxCrns(any())).thenReturn(Set.of());
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validate(stack, environment, true, validationBuilder);
@@ -144,7 +144,7 @@ class ClusterCreationEnvironmentValidatorTest {
         environment.setRegions(regions);
         when(connector.displayNameToRegion(any())).thenReturn(westUs2RegionName);
         when(connector.regionToDisplayName(any())).thenReturn(westUs2RegionDisplayName);
-        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of("crn"));
+        when(platformAwareSdxConnector.listSdxCrns(any())).thenReturn(Set.of("crn"));
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validate(stack, environment, true, validationBuilder);
@@ -167,7 +167,7 @@ class ClusterCreationEnvironmentValidatorTest {
         environment.setRegions(regions);
         when(connector.displayNameToRegion(any())).thenReturn(westUs2RegionName);
         when(connector.regionToDisplayName(any())).thenReturn(westUs2RegionDisplayName);
-        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of("crn"));
+        when(platformAwareSdxConnector.listSdxCrns(any())).thenReturn(Set.of("crn"));
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validate(stack, environment, true, validationBuilder);
@@ -190,7 +190,7 @@ class ClusterCreationEnvironmentValidatorTest {
         environment.setRegions(regions);
         when(connector.displayNameToRegion(any())).thenReturn(westUs2RegionName);
         when(connector.regionToDisplayName(any())).thenReturn(westUs2RegionDisplayName);
-        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of("crn"));
+        when(platformAwareSdxConnector.listSdxCrns(any())).thenReturn(Set.of("crn"));
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validate(stack, environment, true, validationBuilder);
@@ -213,7 +213,7 @@ class ClusterCreationEnvironmentValidatorTest {
         environment.setRegions(regions);
         when(connector.displayNameToRegion(any())).thenReturn(westUs2RegionName);
         when(connector.regionToDisplayName(any())).thenReturn(westUs2RegionDisplayName);
-        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of("crn"));
+        when(platformAwareSdxConnector.listSdxCrns(any())).thenReturn(Set.of("crn"));
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validate(stack, environment, true, validationBuilder);
@@ -228,7 +228,7 @@ class ClusterCreationEnvironmentValidatorTest {
         Stack stack = getStack();
         stack.setEnvironmentCrn(null);
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
-        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of("crn"));
+        when(platformAwareSdxConnector.listSdxCrns(any())).thenReturn(Set.of("crn"));
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validate(stack, environment, true, validationBuilder);
@@ -242,7 +242,7 @@ class ClusterCreationEnvironmentValidatorTest {
         // GIVEN
         Stack stack = getStack();
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
-        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of("crn"));
+        when(platformAwareSdxConnector.listSdxCrns(any())).thenReturn(Set.of("crn"));
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validate(stack, environment, true, validationBuilder);
@@ -260,7 +260,7 @@ class ClusterCreationEnvironmentValidatorTest {
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
         environment.getRegions().setNames(Lists.newArrayList("region1", "region2"));
         environment.setName("env1");
-        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of("crn"));
+        when(platformAwareSdxConnector.listSdxCrns(any())).thenReturn(Set.of("crn"));
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validate(stack, environment, true, validationBuilder);
@@ -278,7 +278,7 @@ class ClusterCreationEnvironmentValidatorTest {
         Stack stack = getStack();
         stack.setEnvironmentCrn(null);
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
-        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of("crn"));
+        when(platformAwareSdxConnector.listSdxCrns(any())).thenReturn(Set.of("crn"));
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validate(stack, environment, true, validationBuilder);
@@ -330,7 +330,7 @@ class ClusterCreationEnvironmentValidatorTest {
         clusterRequest.setCm(cmRequest);
         DetailedEnvironmentResponse environment = getEnvironmentResponse();
         when(platformParameters.isAutoTlsSupported()).thenReturn(providerAutoTls);
-        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of("crn"));
+        when(platformAwareSdxConnector.listSdxCrns(any())).thenReturn(Set.of("crn"));
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
         // WHEN
         underTest.validateAutoTls(clusterRequest, stack, validationBuilder, environment.getParentEnvironmentCloudPlatform());

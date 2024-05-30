@@ -18,6 +18,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
 import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 
@@ -38,28 +39,29 @@ public class PlatformAwareSdxConnector {
         platformDependentServiceMap.get(TargetPlatform.getByCrn(sdxCrn)).deleteSdx(sdxCrn, force);
     }
 
-    public AttemptResult<Object> getAttemptResultForDeletion(String environmentCrn, String environmentName, Set<String> sdxCrns) {
+    public AttemptResult<Object> getAttemptResultForDeletion(String environmentCrn, Set<String> sdxCrns) {
         return getAttemptResultForPolling(platformDependentServiceMap.get(calculatePlatform(sdxCrns))
-                .getPollingResultForDeletion(environmentCrn, environmentName, sdxCrns), "SDX deletion is failed for these: %s");
+                .getPollingResultForDeletion(environmentCrn, sdxCrns), "SDX deletion is failed for these: %s");
     }
 
-    public Set<String> listSdxCrns(String environmentName, String environmentCrn) {
-        LOGGER.info("Getting SDX CRN'S for the datalakes in the environment {}", environmentName);
-        Set<String> paasSdxCrns = platformDependentServiceMap.get(TargetPlatform.PAAS).listSdxCrns(environmentName, environmentCrn);
-        Set<String> saasSdxCrns = platformDependentServiceMap.get(TargetPlatform.CDL).listSdxCrns(environmentName, environmentCrn);
+    public Set<String> listSdxCrns(String environmentCrn) {
+        LOGGER.info("Getting SDX CRN'S for the datalakes in the environment {}", environmentCrn);
+        Set<String> paasSdxCrns = platformDependentServiceMap.get(TargetPlatform.PAAS).listSdxCrns(environmentCrn);
+        Set<String> saasSdxCrns = platformDependentServiceMap.get(TargetPlatform.CDL).listSdxCrns(environmentCrn);
         if (!paasSdxCrns.isEmpty() && !saasSdxCrns.isEmpty()) {
             throw new IllegalStateException(String.format("Environment %s should not have SDX from both PaaS and SaaS platform", environmentCrn));
         }
         return Sets.union(saasSdxCrns, paasSdxCrns);
     }
 
-    public Optional<String> getSdxCrnByEnvironmentCrn(String environmentCrn) {
-        return platformDependentServiceMap.get(TargetPlatform.PAAS).getSdxCrnByEnvironmentCrn(environmentCrn)
-            .or(() -> platformDependentServiceMap.get(TargetPlatform.CDL).getSdxCrnByEnvironmentCrn(environmentCrn));
+    public Optional<SdxBasicView> getSdxBasicViewByEnvironmentCrn(String environmentCrn) {
+        return platformDependentServiceMap.get(TargetPlatform.PAAS).getSdxByEnvironmentCrn(environmentCrn)
+            .or(() -> platformDependentServiceMap.get(TargetPlatform.CDL).getSdxByEnvironmentCrn(environmentCrn));
     }
 
-    public Set<Pair<String, StatusCheckResult>> listSdxCrnsWithAvailability(String environmentName, String environmentCrn, Set<String> sdxCrns) {
-        return platformDependentServiceMap.get(calculatePlatform(sdxCrns)).listSdxCrnStatusCheckPair(environmentCrn, environmentName, sdxCrns);
+    public Set<Pair<String, StatusCheckResult>> listSdxCrnsWithAvailability(String environmentCrn) {
+        Set<String> sdxCrns = listSdxCrns(environmentCrn);
+        return platformDependentServiceMap.get(calculatePlatform(sdxCrns)).listSdxCrnStatusCheckPair(environmentCrn, sdxCrns);
     }
 
     private TargetPlatform calculatePlatform(Set<String> sdxCrns) {
