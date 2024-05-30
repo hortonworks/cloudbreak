@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -213,6 +214,9 @@ class SdxServiceTest {
 
     @Mock
     private OwnerAssignmentService ownerAssignmentService;
+
+    @Mock
+    private SdxRecommendationService sdxRecommendationService;
 
     @InjectMocks
     private SdxService underTest;
@@ -1544,6 +1548,48 @@ class SdxServiceTest {
         assertEquals("t3.medium", idbrokerInstGroup.getTemplate().getInstanceType());
         assertEquals("m5.xlarge", masterInstGroup.getTemplate().getInstanceType());
         assertEquals(128, masterInstGroup.getTemplate().getAttachedVolumes().stream().findAny().get().getSize());
+    }
+
+    @Test
+    void testSdxResizeCustomInstancesInvalidInstanceType() throws IOException {
+        SdxClusterResizeRequest resizeRequest = new SdxClusterResizeRequest();
+        resizeRequest.setEnvironment("environment");
+        resizeRequest.setClusterShape(ENTERPRISE);
+        SdxInstanceGroupRequest sdxInstanceGroupRequest = new SdxInstanceGroupRequest();
+        sdxInstanceGroupRequest.setName("master");
+        sdxInstanceGroupRequest.setInstanceType("r5.large");
+        resizeRequest.setCustomInstanceGroups(List.of(sdxInstanceGroupRequest));
+
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setId(1L);
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.getSdxDatabase().setDatabaseCrn(null);
+        sdxCluster.setRuntime("7.2.17");
+        sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString()))
+                .thenReturn(Optional.of(sdxCluster));
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
+        when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
+        when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
+        mockEnvironmentCall(resizeRequest, AWS);
+        String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        StackV4Response stackV4Response = new StackV4Response();
+        stackV4Response.setStatus(Status.STOPPED);
+        when(stackV4Endpoint.get(anyLong(), anyString(), anySet(), anyString())).thenReturn(stackV4Response);
+        doThrow(new BadRequestException("Invalid custom instance type for instance group: master - r5.large"))
+                .when(sdxRecommendationService).validateVmTypeOverride(any(), any());
+
+        BadRequestException exception = assertThrows(
+                BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                        underTest.resizeSdx(USER_CRN, sdxCluster.getClusterName(), resizeRequest)));
+
+        assertEquals("Invalid custom instance type for instance group: master - r5.large", exception.getMessage());
     }
 
     private DetailedEnvironmentResponse getDetailedEnvironmentResponse() {

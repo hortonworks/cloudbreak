@@ -270,6 +270,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
 
+    @Inject
+    private SdxRecommendationService sdxRecommendationService;
+
     public List<ResourceWithId> findAsAuthorizationResorces(String accountId) {
         return sdxClusterRepository.findAuthorizationResourcesByAccountId(accountId);
     }
@@ -696,6 +699,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         overrideDefaultDatabaseProperties(newSdxCluster.getSdxDatabase(), sdxClusterResizeRequest.getCustomSdxDatabaseComputeStorage(),
                 sdxCluster.getSdxDatabase().getDatabaseCrn(), sdxCluster.getClusterShape());
         newSdxCluster.setStackRequest(stackRequest);
+        sdxRecommendationService.validateVmTypeOverride(environment, newSdxCluster);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxResize(sdxCluster.getId(), newSdxCluster,
                 new DatalakeDrSkipOptions(sdxClusterResizeRequest.isSkipValidation(), sdxClusterResizeRequest.isSkipAtlasMetadata(),
                         sdxClusterResizeRequest.isSkipRangerAudits(), sdxClusterResizeRequest.isSkipRangerMetadata()),
