@@ -1,7 +1,23 @@
 #!/bin/bash -e
 set -x
 
-./gradlew -Penv=jenkins -Phttps.socketTimeout=720000 -Phttps.connectionTimeout=720000 -b build.gradle buildInfo build publishBootJavaPublicationToMavenRepository :freeipa-client:publishMavenJavaPublicationToMavenRepository -Pversion=$VERSION --parallel --stacktrace -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest
+./gradlew -Penv=jenkins -Phttps.socketTimeout=720000 -Phttps.connectionTimeout=720000 -b build.gradle buildInfo build \
+  publishBootJavaPublicationToMavenRepository \
+  :freeipa-client:publishMavenJavaPublicationToMavenRepository \
+  -Pversion=$VERSION --parallel --stacktrace \
+  core:test --tests=com.sequenceiq.*.openapi.OpenApiGenerator \
+  environment:test --tests=com.sequenceiq.*.openapi.OpenApiGenerator \
+  freeipa:test --tests=com.sequenceiq.*.openapi.OpenApiGenerator \
+  redbeams:test --tests=com.sequenceiq.*.openapi.OpenApiGenerator \
+  datalake:test --tests=com.sequenceiq.*.openapi.OpenApiGenerator \
+  autoscale:test --tests=com.sequenceiq.*.openapi.OpenApiGenerator \
+  externalized-compute:test --tests=com.sequenceiq.*.openapi.OpenApiGenerator \
+  environment-remote:test --tests=com.sequenceiq.*.openapi.OpenApiGenerator \
+  -x test \
+  -x checkstyleMain \
+  -x checkstyleTest \
+  -x spotbugsMain \
+  -x spotbugsTest
 
 if [[ "${RUN_SONARQUBE}" == "true" ]]; then
     # removing core modul because that is instable
