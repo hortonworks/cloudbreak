@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.job.dynamicentitlement;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.WORKLOAD;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -34,7 +33,6 @@ import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.telemetry.DynamicEntitlementRefreshService;
-import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
@@ -67,9 +65,6 @@ class DynamicEntitlementRefreshJobTest {
     private JobDetail jobDetail;
 
     @Mock
-    private StackUtil stackUtil;
-
-    @Mock
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Mock
@@ -88,6 +83,8 @@ class DynamicEntitlementRefreshJobTest {
         lenient().when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         lenient().when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
                 .thenReturn(INTERNAL_CRN);
+        lenient().when(internalCrnModifier.changeAccountIdInCrnString(eq(INTERNAL_CRN), eq(ACCOUNT_ID)))
+                .thenReturn(Crn.fromString(MODIFIED_INTERNAL_CRN));
     }
 
     @Test
@@ -95,8 +92,6 @@ class DynamicEntitlementRefreshJobTest {
         StackDto stack = stack(Status.AVAILABLE);
         JobKey jobKey = new JobKey(LOCAL_ID.toString(), "dynamic-entitlement-jobs");
         when(stackDtoService.getById(eq(LOCAL_ID))).thenReturn(stack);
-        when(stackUtil.stopStartScalingEntitlementEnabled(any())).thenReturn(Boolean.FALSE);
-        when(internalCrnModifier.changeAccountIdInCrnString(eq(INTERNAL_CRN), eq(ACCOUNT_ID))).thenReturn(Crn.fromString(MODIFIED_INTERNAL_CRN));
         underTest.executeTracedJob(jobExecutionContext);
         verify(dynamicEntitlementRefreshJobService, never()).unschedule(eq(jobKey));
         verify(dynamicEntitlementRefreshService, times(1)).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
@@ -109,23 +104,21 @@ class DynamicEntitlementRefreshJobTest {
         when(stackDtoService.getById(eq(LOCAL_ID))).thenReturn(stack);
         when(jobExecutionContext.getJobDetail()).thenReturn(jobDetail);
         when(jobDetail.getKey()).thenReturn(jobKey);
-        when(stackUtil.stopStartScalingEntitlementEnabled(any())).thenReturn(Boolean.FALSE);
         underTest.executeTracedJob(jobExecutionContext);
         verify(dynamicEntitlementRefreshJobService, times(1)).unschedule(eq(jobKey));
         verify(dynamicEntitlementRefreshService, never()).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
+        verify(dynamicEntitlementRefreshService, never()).getChangedWatchedEntitlements(eq(stack));
     }
 
     @Test
-    void testExecuteWhenStopStartScalingEnabled() throws JobExecutionException {
-        StackDto stack = stack(Status.AVAILABLE);
+    void testExecuteWhenClusterNotAvailable() throws JobExecutionException {
+        StackDto stack = stack(Status.NODE_FAILURE);
         JobKey jobKey = new JobKey(LOCAL_ID.toString(), "dynamic-entitlement-jobs");
         when(stackDtoService.getById(eq(LOCAL_ID))).thenReturn(stack);
-        when(jobExecutionContext.getJobDetail()).thenReturn(jobDetail);
-        when(jobDetail.getKey()).thenReturn(jobKey);
-        when(stackUtil.stopStartScalingEntitlementEnabled(any())).thenReturn(Boolean.TRUE);
         underTest.executeTracedJob(jobExecutionContext);
-        verify(dynamicEntitlementRefreshJobService, times(1)).unschedule(eq(jobKey));
+        verify(dynamicEntitlementRefreshJobService, never()).unschedule(eq(jobKey));
         verify(dynamicEntitlementRefreshService, never()).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
+        verify(dynamicEntitlementRefreshService, times(1)).getChangedWatchedEntitlements(eq(stack));
     }
 
     @Test
@@ -135,7 +128,6 @@ class DynamicEntitlementRefreshJobTest {
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroupDtos);
         JobKey jobKey = new JobKey(LOCAL_ID.toString(), "dynamic-entitlement-jobs");
         when(stackDtoService.getById(eq(LOCAL_ID))).thenReturn(stack);
-        when(stackUtil.stopStartScalingEntitlementEnabled(any())).thenReturn(Boolean.FALSE);
         underTest.executeTracedJob(jobExecutionContext);
         verify(dynamicEntitlementRefreshJobService, never()).unschedule(eq(jobKey));
         verify(dynamicEntitlementRefreshService, never()).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
