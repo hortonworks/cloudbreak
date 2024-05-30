@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.DATALAKE;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getCmVersion;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getSafetyValveProperty;
+import static com.sequenceiq.cloudbreak.template.views.DatabaseType.EXTERNAL_DATABASE;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +17,7 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -77,6 +80,9 @@ public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HiveMetastoreConfigProvider.class);
 
+    @Value("${cb.externaldatabase.gcp.sslmode:verify-ca}")
+    private String gcpExternalDatabaseSslVerificationMode;
+
     @Override
     public String dbUserKey() {
         return HIVE_METASTORE_DATABASE_USER;
@@ -100,7 +106,7 @@ public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
                 config(HIVE_METASTORE_DATABASE_USER, hiveRdsView.getConnectionUserName())
         );
         String cmVersion = getCmVersion(source);
-        addDbSslConfigsIfNeeded(templateProcessor, hiveRdsView, configs, cmVersion);
+        addDbSslConfigsIfNeeded(templateProcessor, hiveRdsView, configs, cmVersion, source);
 
         // For DataHub, don't start the compactor.Initiator thread which automatically queues ACID compaction.
         // The Initiator thread in the DataLake's HMS will take care of this.
@@ -114,13 +120,13 @@ public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
         if (kerberosConfigOpt.isPresent()) {
             safetyValveValue.append(getSafetyValveProperty("hive.hook.proto.file.per.event", Boolean.TRUE.toString()));
         }
-        if (source.getStackType() != null && source.getStackType().equals(StackType.DATALAKE)) {
+        if (source.getStackType() != null && source.getStackType().equals(DATALAKE)) {
             safetyValveValue.append(getSafetyValveProperty("hive.metastore.try.direct.sql.ddl", Boolean.TRUE.toString()));
             safetyValveValue.append(getSafetyValveProperty("hive.metastore.try.direct.sql", Boolean.TRUE.toString()));
         }
         configs.add(config(HIVE_SERVICE_CONFIG_SAFETY_VALVE, safetyValveValue.toString()));
 
-        if (source.getStackType() == StackType.DATALAKE) {
+        if (source.getStackType() == DATALAKE) {
             source.getLdapConfig().ifPresent(ldap -> {
                 configs.add(config(HIVE_METASTORE_ENABLE_LDAP_AUTH, Boolean.TRUE.toString()));
                 configs.add(config(HIVE_METASTORE_LDAP_URI, ldap.getConnectionURL()));
@@ -168,7 +174,7 @@ public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
     }
 
     private void addDbSslConfigsIfNeeded(CmTemplateProcessor templateProcessor, RdsView hiveRdsView, List<ApiClusterTemplateConfig> configList,
-            String cmVersion) {
+            String cmVersion, TemplatePreparationObject source) {
         if (hiveRdsView.isUseSsl()) {
             if (isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_2)) {
                 ArrayList<String> overriddenDbConfigKeys = new ArrayList<>(getExistingHiveServiceConfigKeys(templateProcessor));
@@ -176,7 +182,7 @@ public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
                 if (overriddenDbConfigKeys.isEmpty()) {
                     LOGGER.info("Injecting Hive Metastore DB SSL configs because the supplied DB requires SSL " +
                             "and DB settings are not overridden in the cluster template.");
-                    configList.add(config(JDBC_URL_OVERRIDE, hiveRdsView.getConnectionURL()));
+                    populateSslMode(hiveRdsView, configList, source);
                 } else {
                     // This is currently possible for Data Hub clusters using a custom cluster template
                     LOGGER.info("The supplied Hive Metastore DB would require SSL, but the following config keys are present in the cluster template: {}. " +
@@ -185,6 +191,24 @@ public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
             } else {
                 LOGGER.warn("The supplied Hive Metastore DB would require SSL, but this setting is not supported for the CM version {} used here.", cmVersion);
             }
+        }
+    }
+
+    private void populateSslMode(RdsView hiveRdsView, List<ApiClusterTemplateConfig> configList, TemplatePreparationObject source) {
+        if (null != source.getDatalakeView() && source.getDatalakeView().isPresent() && source.getCloudPlatform().equalsIgnoreCase("GCP")) {
+            com.sequenceiq.cloudbreak.template.views.DatabaseType databaseType = source.getDatalakeView().get().getDatabaseType();
+            String connectionUrl;
+            if (databaseType.equals(EXTERNAL_DATABASE)) {
+                connectionUrl = hiveRdsView.getConnectionURL().replace("verify-full", gcpExternalDatabaseSslVerificationMode);
+                configList.add(config(JDBC_URL_OVERRIDE, connectionUrl));
+            } else if (!source.getStackType().equals(DATALAKE)) {
+                connectionUrl = hiveRdsView.getConnectionURL().replace(gcpExternalDatabaseSslVerificationMode, "verify-full");
+                configList.add(config(JDBC_URL_OVERRIDE, connectionUrl));
+            } else {
+                configList.add(config(JDBC_URL_OVERRIDE, hiveRdsView.getConnectionURL()));
+            }
+        } else {
+            configList.add(config(JDBC_URL_OVERRIDE, hiveRdsView.getConnectionURL()));
         }
     }
 

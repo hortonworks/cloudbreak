@@ -55,9 +55,6 @@ public class StackToStackDetailsConverter {
     private CustomConfigurationsToCustomConfigurationsDetailsConverter customConfigurationsToCustomConfigurationsDetailsConverter;
 
     @Inject
-    private RedbeamsDbServerConfigurer dbServerConfigurer;
-
-    @Inject
     private EmbeddedDatabaseService embeddedDatabaseService;
 
     @Inject
@@ -110,7 +107,7 @@ public class StackToStackDetailsConverter {
                 databaseDetails.setAttributes(Optional.ofNullable(db.getAttributes()).map(Json::getValue).orElse(""));
                 if (source.isDatalake() && db.getDatalakeDatabaseAvailabilityType() != null) {
                     databaseDetails.setAvailabilityType(db.getDatalakeDatabaseAvailabilityType().name());
-                } else if (source.isDatalake() && dbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
+                } else if (source.isDatalake() && RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
                     databaseDetails.setAvailabilityType(EXTERNAL_DB);
                 } else {
                     databaseDetails.setAvailabilityType(Optional.ofNullable(db.getExternalDatabaseAvailabilityType()).map(Enum::name).orElse(UNKNONW));
@@ -150,7 +147,7 @@ public class StackToStackDetailsConverter {
 
     private String convertDatabaseType(ClusterView cluster, Optional<InstanceGroupView> gatewayGroup) {
         try {
-            if (dbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
+            if (RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
                 return EXTERNAL_DB;
             } else {
                 if (embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(cluster, gatewayGroup)) {

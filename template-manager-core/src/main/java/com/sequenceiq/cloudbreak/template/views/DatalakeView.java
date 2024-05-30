@@ -4,13 +4,16 @@ import java.util.Objects;
 
 public class DatalakeView {
 
-    private boolean razEnabled;
+    private final boolean razEnabled;
 
-    private String crn;
+    private final String crn;
 
-    public DatalakeView(boolean razEnabled, String crn) {
+    private final DatabaseType databaseType;
+
+    public DatalakeView(boolean razEnabled, String crn, boolean externalDb) {
         this.razEnabled = razEnabled;
         this.crn = crn;
+        this.databaseType = externalDb ? DatabaseType.EXTERNAL_DATABASE : DatabaseType.EMBEDDED_DATABASE;
     }
 
     @Override
@@ -37,5 +40,9 @@ public class DatalakeView {
 
     public String getCrn() {
         return crn;
+    }
+
+    public DatabaseType getDatabaseType() {
+        return databaseType;
     }
 }

@@ -44,12 +44,23 @@ public class ExternalDatabaseConfig {
     @Value("${cb.externaldatabase.sslenforcement.supported.platform:GCP,AWS,AZURE}")
     private Set<CloudPlatform> dbServiceSslEnforcementSupportedPlatforms;
 
+    @Value("${cb.externaldatabase.gcp.sslmode:verify-ca}")
+    private String gcpExternalDatabaseSslVerificationMode;
+
     private final Map<CloudPlatform, Set<? extends DatabaseType>> databaseTypeMap = Map.of(CloudPlatform.AZURE, EnumSet.allOf(AzureDatabaseType.class));
 
     @Inject
     private Set<DatabaseServerParameterDecorator> databaseServerParameterDecorators;
 
     private Set<CloudPlatform> allPossibleExternalDbPlatforms;
+
+    public String getGcpExternalDatabaseSslVerificationMode() {
+        return gcpExternalDatabaseSslVerificationMode;
+    }
+
+    public void setGcpExternalDatabaseSslVerificationMode(String gcpExternalDatabaseSslVerificationMode) {
+        this.gcpExternalDatabaseSslVerificationMode = gcpExternalDatabaseSslVerificationMode;
+    }
 
     public boolean isExternalDatabaseSupportedFor(CloudPlatform cloudPlatform) {
         return dbServiceSupportedPlatforms.contains(cloudPlatform);

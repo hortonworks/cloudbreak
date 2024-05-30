@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +30,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
+import com.sequenceiq.cloudbreak.conf.ExternalDatabaseConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
@@ -35,7 +38,6 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.cluster.DatabaseSslService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigProviderFactory;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.service.upgrade.rds.UpgradeRdsBackupRestoreStateParamsProvider;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -59,9 +61,6 @@ class PostgresConfigServiceTest {
     private RdsConfigProviderFactory rdsConfigProviderFactory;
 
     @Mock
-    private RedbeamsDbServerConfigurer dbServerConfigurer;
-
-    @Mock
     private EmbeddedDatabaseConfigProvider embeddedDatabaseConfigProvider;
 
     @Mock
@@ -73,6 +72,9 @@ class PostgresConfigServiceTest {
     @Mock
     private ClusterComponentConfigProvider clusterComponentProvider;
 
+    @Mock
+    private ExternalDatabaseConfig externalDatabaseConfig;
+
     @InjectMocks
     private PostgresConfigService underTest;
 
@@ -83,6 +85,7 @@ class PostgresConfigServiceTest {
     void setUp() {
         Cluster cluster = new Cluster();
         when(stack.getCluster()).thenReturn(cluster);
+        lenient().when(externalDatabaseConfig.getGcpExternalDatabaseSslVerificationMode()).thenReturn("verify-ca");
     }
 
     @Test
@@ -201,7 +204,6 @@ class PostgresConfigServiceTest {
         when(stack.getCluster()).thenReturn(cluster);
         when(stack.getExternalDatabaseEngineVersion()).thenReturn(DBVERSION);
         when(stack.getCloudPlatform()).thenReturn(cloudProvider);
-        when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(true);
         when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
         when(databaseSslService.getDbSslDetailsForCreationAndUpdateInCluster(stack)).thenReturn(new DatabaseSslDetails(rootCerts, sslEnabledForStack));
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(null);
@@ -217,7 +219,7 @@ class PostgresConfigServiceTest {
         assertThat(properties).hasSize(1);
 
         Map<String, Object> rootSslCertsMap = (Map<String, Object>) properties.get("postgres_root_certs");
-        String sslVerificationMode = "GCP".equals(cloudProvider) ? "verify-ca" : "verify-full";
+        String sslVerificationMode = "GCP".equals(cloudProvider) && StringUtils.isNotEmpty(externalDbServerCrn) ? "verify-ca" : "verify-full";
         assertThat(rootSslCertsMap).isNotNull();
         assertThat(rootSslCertsMap).containsOnly(
                 entry("ssl_certs", "cert1\ncert2"),
@@ -246,7 +248,6 @@ class PostgresConfigServiceTest {
         when(stack.getCluster()).thenReturn(cluster);
         when(stack.getCloudPlatform()).thenReturn(cloudProvider);
         when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
-        when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(true);
         when(databaseSslService.isDbSslEnabledByClusterView(stackView, cluster)).thenReturn(sslEnabledForStack);
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(null);
 
@@ -317,7 +318,6 @@ class PostgresConfigServiceTest {
         when(stack.getCluster()).thenReturn(cluster);
         when(stack.getCloudPlatform()).thenReturn(cloudProvider);
         cluster.setDatabaseServerCrn("crn");
-        when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(true);
         when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
         when(databaseSslService.getDbSslDetailsForCreationAndUpdateInCluster(stack)).thenReturn(new DatabaseSslDetails(rootCerts, true));
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(cmRepoDetailsAvailable ? generateCmRepo(() -> cmVersion) : null);
@@ -371,7 +371,6 @@ class PostgresConfigServiceTest {
         when(stack.getCloudPlatform()).thenReturn(cloudProvider);
         cluster.setDatabaseServerCrn("crn");
         when(databaseSslService.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
-        when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(true);
         when(databaseSslService.isDbSslEnabledByClusterView(stackView, cluster)).thenReturn(true);
         when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(cmRepoDetailsAvailable ? generateCmRepo(() -> cmVersion) : null);
 

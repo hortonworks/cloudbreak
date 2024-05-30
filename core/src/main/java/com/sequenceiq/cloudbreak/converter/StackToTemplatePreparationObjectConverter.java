@@ -72,6 +72,7 @@ import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingSe
 import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.identitymapping.GcpMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
@@ -237,8 +238,9 @@ public class StackToTemplatePreparationObjectConverter {
             Optional<String> version = Optional.ofNullable(blueprintView.getVersion());
             String sslCertsFilePath = databaseSslService.getSslCertsFilePath();
             Set<RdsConfigWithoutCluster> rdsConfigWithoutClusters = postgresConfigService.createRdsConfigIfNeeded(source);
+            boolean externalDatabaseRequested = RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn());
             Set<RdsView> rdsViews = rdsConfigWithoutClusters.stream()
-                    .map(e -> rdsViewProvider.getRdsView(e, sslCertsFilePath, environment.getCloudPlatform()))
+                    .map(e -> rdsViewProvider.getRdsView(e, sslCertsFilePath, environment.getCloudPlatform(), externalDatabaseRequested))
                     .collect(Collectors.toSet());
 
             Builder builder = Builder.builder()
@@ -386,7 +388,8 @@ public class StackToTemplatePreparationObjectConverter {
         if (StringUtils.isNotEmpty(source.getEnvironmentCrn()) && StackType.WORKLOAD.equals(source.getType())) {
             Optional<SdxBasicView> datalake = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(source.getEnvironmentCrn());
             if (datalake.isPresent()) {
-                datalakeView = new DatalakeView(datalake.get().razEnabled(), datalake.get().crn());
+                boolean externalDatabaseForDL = RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(datalake.get().dbServerCrn());
+                datalakeView = new DatalakeView(datalake.get().razEnabled(), datalake.get().crn(), externalDatabaseForDL);
             }
         }
         builder.withDataLakeView(datalakeView);

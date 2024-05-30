@@ -136,6 +136,7 @@ class AbstractRdsConfigProviderTest {
         when(stackDto.getPrimaryGatewayInstance()).thenReturn(metaData);
         Cluster testCluster = TestUtil.cluster();
         testCluster.setId(CLUSTER_ID);
+        testCluster.setDatabaseServerCrn("");
         when(stackDto.getCluster()).thenReturn(testCluster);
         when(stackDto.getStack()).thenReturn(testStack);
         when(rdsConfigWithoutClusterService.findByClusterId(anyLong())).thenReturn(Set.of(rdsConfigWithoutCluster));
@@ -174,7 +175,6 @@ class AbstractRdsConfigProviderTest {
         RDSConfig config = new RDSConfig();
         config.setType(DatabaseType.CLOUDERA_MANAGER.name());
         when(dbServerConfigurer.createNewRdsConfig(any(), any(), any(), any(), any(), any(), any())).thenReturn(config);
-        when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(true);
         DatabaseServerV4Response resp = new DatabaseServerV4Response();
         resp.setHost(DB_HOST);
         resp.setPort(DB_PORT);
@@ -189,6 +189,7 @@ class AbstractRdsConfigProviderTest {
         StackDto stackDto = mock(StackDto.class);
         Cluster testCluster = TestUtil.cluster();
         testCluster.setId(CLUSTER_ID);
+        testCluster.setDatabaseServerCrn("TEST_CRN");
         when(stackDto.getCluster()).thenReturn(testCluster);
         when(stackDto.getStack()).thenReturn(testStack);
         when(rdsConfigWithoutClusterService.findByClusterId(anyLong())).thenReturn(Set.of(rdsConfigWithoutCluster));

@@ -20,9 +20,6 @@ public class UpgradeRdsBackupRestoreStateParamsProvider {
     private static final String POSTGRESQL_UPGRADE = "postgresql-upgrade";
 
     @Inject
-    private RedbeamsDbServerConfigurer dbServerConfigurer;
-
-    @Inject
     private EmbeddedDatabaseService embeddedDatabaseService;
 
     public Map<String, SaltPillarProperties> createParamsForRdsBackupRestore(StackDto stackDto, String rdsBackupLocation) {
@@ -41,7 +38,7 @@ public class UpgradeRdsBackupRestoreStateParamsProvider {
 
     private String determineRdsBackupLocation(StackDto stackDto, String rdsBackupLocation) {
         String backupLocation;
-        if (dbServerConfigurer.isRemoteDatabaseRequested(stackDto.getCluster().getDatabaseServerCrn())
+        if (RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(stackDto.getCluster().getDatabaseServerCrn())
                 || !embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stackDto)) {
             backupLocation = StringUtils.isNotEmpty(rdsBackupLocation) ? rdsBackupLocation : "/var";
         } else {

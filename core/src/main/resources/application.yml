@@ -200,6 +200,7 @@ cb:
   externaldatabase:
     ssl.rootcerts.path: /hadoopfs/fs1/database-cacerts/certs.pem
     sslenforcement.supported.platform: GCP,AWS,AZURE
+    gcp.sslmode: verify-ca
   limit:
     primaryGatewayRecommendations:
       -

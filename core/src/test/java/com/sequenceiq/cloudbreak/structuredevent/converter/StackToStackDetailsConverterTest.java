@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.structuredevent.event.CustomConfigurationsDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -48,9 +47,6 @@ public class StackToStackDetailsConverterTest {
 
     @Mock
     private ImageToImageDetailsConverter imageToImageDetailsConverter;
-
-    @Mock
-    private RedbeamsDbServerConfigurer dbServerConfigurer;
 
     @Mock
     private EmbeddedDatabaseService embeddedDatabaseService;
@@ -83,7 +79,7 @@ public class StackToStackDetailsConverterTest {
     public void testConversionExternalDB() {
         // GIVEN
         Stack stack = createStack();
-        when(dbServerConfigurer.isRemoteDatabaseRequested(stack.getCluster().getDatabaseServerCrn())).thenReturn(true);
+        stack.getCluster().setDatabaseServerCrn("TEST_CRN");
         // WHEN
         StackDetails actual = underTest.convert(stack, stack.getCluster(), stack.getInstanceGroupDtos());
         // THEN
@@ -206,7 +202,6 @@ public class StackToStackDetailsConverterTest {
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NON_HA);
         database.setAttributes(Json.silent("test"));
         when(databaseService.findById(1L)).thenReturn(Optional.of(database));
-        when(dbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())).thenReturn(true);
 
         StackDetails result = underTest.convert(stack, cluster, List.of());
 
@@ -230,7 +225,6 @@ public class StackToStackDetailsConverterTest {
         database.setExternalDatabaseAvailabilityType(DatabaseAvailabilityType.NON_HA);
         database.setAttributes(Json.silent("test"));
         when(databaseService.findById(1L)).thenReturn(Optional.of(database));
-        when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(false);
 
         StackDetails result = underTest.convert(stack, cluster, List.of());
 
@@ -253,7 +247,6 @@ public class StackToStackDetailsConverterTest {
         database.setExternalDatabaseEngineVersion("14");
         database.setAttributes(Json.silent("test"));
         when(databaseService.findById(1L)).thenReturn(Optional.of(database));
-        when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(false);
 
         StackDetails result = underTest.convert(stack, cluster, List.of());
 

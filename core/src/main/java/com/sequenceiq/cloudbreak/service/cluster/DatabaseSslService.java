@@ -38,9 +38,6 @@ public class DatabaseSslService {
     private String certsPath;
 
     @Inject
-    private RedbeamsDbServerConfigurer dbServerConfigurer;
-
-    @Inject
     private RedbeamsDbCertificateProvider dbCertificateProvider;
 
     @Inject
@@ -139,7 +136,7 @@ public class DatabaseSslService {
     }
 
     private boolean isEmbeddedDatabase(ClusterView clusterView) {
-        return !dbServerConfigurer.isRemoteDatabaseRequested(clusterView.getDatabaseServerCrn());
+        return !RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(clusterView.getDatabaseServerCrn());
     }
 
     private boolean isSslEnforcementForEmbeddedDatabaseEnabled(StackView stackView, ClusterView clusterView, Database database, boolean creation) {

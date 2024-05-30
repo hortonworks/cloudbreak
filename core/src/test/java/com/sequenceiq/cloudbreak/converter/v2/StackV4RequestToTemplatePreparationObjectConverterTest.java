@@ -82,6 +82,7 @@ import com.sequenceiq.cloudbreak.template.model.BlueprintStackInfo;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 import com.sequenceiq.cloudbreak.template.views.ProductDetailsView;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
@@ -274,7 +275,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(awsMockAccountMappingService.getUserMappings(REGION, cloudCredential)).thenReturn(MOCK_USER_MAPPINGS);
         when(exposedServiceCollector.getAllKnoxExposed(any())).thenReturn(Set.of());
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(source.getEnvironmentCrn())).thenReturn(
-                Optional.of(new SdxBasicView(null, SAAS_DATALAKE_CRN, null, TEST_ENVIRONMENT_CRN, true, 1L, null)));
+                Optional.of(new SdxBasicView(null, SAAS_DATALAKE_CRN, null, TEST_ENVIRONMENT_CRN, true, 1L, "externaldbcrn")));
     }
 
     @Test
@@ -306,8 +307,8 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         for (String rdsConfigName : rdsConfigNames) {
             RdsConfigWithoutCluster rdsConfig = TestUtil.rdsConfigWithoutCluster(DatabaseType.values()[i++], RdsSslMode.DISABLED);
             rdsConfigs.add(rdsConfig);
-            RdsView rdsView = realRdsViewProvider.getRdsView(rdsConfig, "AWS");
-            when(rdsViewProvider.getRdsView(rdsConfig, "AWS")).thenReturn(rdsView);
+            RdsView rdsView = realRdsViewProvider.getRdsView(rdsConfig, "AWS", false);
+            when(rdsViewProvider.getRdsView(rdsConfig, "AWS", false)).thenReturn(rdsView);
             when(rdsConfig.getName()).thenReturn(rdsConfigName);
         }
         when(rdsConfigWithoutClusterService.findAllByNamesAndWorkspaceId(rdsConfigNames, workspace)).thenReturn(rdsConfigs);
@@ -444,6 +445,17 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         assertNotNull(accountMappingView);
         assertEquals(MOCK_GROUP_MAPPINGS, accountMappingView.getGroupMappings());
         assertEquals(MOCK_USER_MAPPINGS, accountMappingView.getUserMappings());
+    }
+
+    @Test
+    public void testMockDatalakeView() {
+        when(source.getType()).thenReturn(StackType.WORKLOAD);
+        TemplatePreparationObject result = underTest.convert(source);
+
+        DatalakeView datalakeView = result.getDatalakeView().get();
+        assertEquals(datalakeView.getCrn(), SAAS_DATALAKE_CRN);
+        assertEquals(datalakeView.isRazEnabled(), true);
+        assertEquals(datalakeView.getDatabaseType(), com.sequenceiq.cloudbreak.template.views.DatabaseType.EXTERNAL_DATABASE);
     }
 
     @Test

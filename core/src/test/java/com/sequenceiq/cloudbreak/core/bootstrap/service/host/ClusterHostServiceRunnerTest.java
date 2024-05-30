@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -904,7 +905,7 @@ class ClusterHostServiceRunnerTest {
         RdsConfigWithoutCluster rdsConfigWithoutCluster = mock(RdsConfigWithoutCluster.class);
         RdsView rdsView = mock(RdsView.class);
         when(rdsConfigWithoutClusterService.findByClusterIdAndType(any(), eq(DatabaseType.CLOUDERA_MANAGER))).thenReturn(rdsConfigWithoutCluster);
-        when(rdsViewProvider.getRdsView(any(RdsConfigWithoutCluster.class), anyString())).thenReturn(rdsView);
+        when(rdsViewProvider.getRdsView(any(RdsConfigWithoutCluster.class), anyString(), anyBoolean())).thenReturn(rdsView);
         when(loadBalancerSANProvider.getLoadBalancerSAN(anyLong(), any())).thenReturn(Optional.empty());
         ClusterPreCreationApi clusterPreCreationApi = mock(ClusterPreCreationApi.class);
         when(clusterApiConnectors.getConnector(cluster)).thenReturn(clusterPreCreationApi);

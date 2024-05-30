@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.springframework.test.util.ReflectionTestUtils;
+
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.template.filesystem.adls.AdlsFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.gcs.GcsFileSystemConfigurationsView;
@@ -112,6 +114,8 @@ public class TemplateCoreTestUtil {
     }
 
     public static RdsViewProvider rdsViewProvider() {
+        ReflectionTestUtils.setField(RDS_VIEW_PROVIDER, "gcpExternalDatabaseSslVerificationMode", "verify-ca");
+        ReflectionTestUtils.setField(RDS_VIEW_PROVIDER, "rootCertsPath", "");
         return RDS_VIEW_PROVIDER;
     }
 }

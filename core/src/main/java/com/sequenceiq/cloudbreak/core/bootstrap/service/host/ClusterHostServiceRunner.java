@@ -122,6 +122,7 @@ import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
 import com.sequenceiq.cloudbreak.service.paywall.PaywallConfigService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MountDisks;
@@ -660,7 +661,8 @@ public class ClusterHostServiceRunner {
         if (clouderaManagerRdsConfig == null) {
             throw new CloudbreakOrchestratorFailedException("Cloudera Manager RDSConfig is missing for stackDto");
         }
-        RdsView rdsView = rdsViewProvider.getRdsView(clouderaManagerRdsConfig, cloudPlatform);
+        RdsView rdsView = rdsViewProvider.getRdsView(clouderaManagerRdsConfig, cloudPlatform,
+                RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(databaseServerCrn));
         SaltPillarProperties saltPillarProperties = new SaltPillarProperties("/cloudera-manager/database.sls",
                 singletonMap("cloudera-manager", singletonMap("database", rdsView)));
         return saltPillarProperties;

@@ -89,9 +89,6 @@ public class HiveRdsConfigProviderTest {
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Mock
-    private RedbeamsDbServerConfigurer dbServerConfigurer;
-
-    @Mock
     private EmbeddedDatabaseService embeddedDatabaseService;
 
     @Test
@@ -108,7 +105,6 @@ public class HiveRdsConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
         ThreadBasedUserCrnProvider.doAs(ACTOR_CRN, () -> underTest.createPostgresRdsConfigIfNeeded(stackDto));
-        verify(dbServerConfigurer, times(0)).isRemoteDatabaseRequested(any());
     }
 
     @Test
@@ -135,7 +131,6 @@ public class HiveRdsConfigProviderTest {
         when(stackDto.getPrimaryGatewayInstance()).thenReturn(instanceMetadataView);
         when(instanceMetadataView.getDiscoveryFQDN()).thenReturn("fqdn");
         ThreadBasedUserCrnProvider.doAs(ACTOR_CRN, () -> underTest.createPostgresRdsConfigIfNeeded(stackDto));
-        verify(dbServerConfigurer, times(1)).isRemoteDatabaseRequested(any());
         verify(embeddedDatabaseService, times(1)).isSslEnforcementForEmbeddedDatabaseEnabled(any(), any(), any());
     }
 }

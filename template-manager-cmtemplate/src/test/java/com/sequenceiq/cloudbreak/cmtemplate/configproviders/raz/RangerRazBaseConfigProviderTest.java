@@ -46,7 +46,7 @@ public class RangerRazBaseConfigProviderTest {
                 .withCloudPlatform(CloudPlatform.AWS)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
-                .withDataLakeView(new DatalakeView(false, DATALAKE_CRN))
+                .withDataLakeView(new DatalakeView(false, DATALAKE_CRN, false))
                 .withAccountMappingView(getAccountMappingView())
                 .build();
         List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);
@@ -69,7 +69,7 @@ public class RangerRazBaseConfigProviderTest {
                 .withCloudPlatform(CloudPlatform.AZURE)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
-                .withDataLakeView(new DatalakeView(false, DATALAKE_CRN))
+                .withDataLakeView(new DatalakeView(false, DATALAKE_CRN, false))
                 .withAccountMappingView(getAccountMappingView())
                 .build();
         List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);
@@ -92,7 +92,7 @@ public class RangerRazBaseConfigProviderTest {
                 .withCloudPlatform(CloudPlatform.GCP)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
-                .withDataLakeView(new DatalakeView(false, DATALAKE_CRN))
+                .withDataLakeView(new DatalakeView(false, DATALAKE_CRN, false))
                 .withAccountMappingView(getAccountMappingView())
                 .build();
         List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);
@@ -117,7 +117,7 @@ public class RangerRazBaseConfigProviderTest {
                 .withCloudPlatform(CloudPlatform.GCP)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
-                .withDataLakeView(new DatalakeView(false, DATALAKE_CRN))
+                .withDataLakeView(new DatalakeView(false, DATALAKE_CRN, false))
                 .build();
         List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);
 
@@ -139,7 +139,7 @@ public class RangerRazBaseConfigProviderTest {
                 .withCloudPlatform(CloudPlatform.GCP)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
-                .withDataLakeView(new DatalakeView(false, DATALAKE_CRN))
+                .withDataLakeView(new DatalakeView(false, DATALAKE_CRN, false))
                 .withAccountMappingView(getAccountMappingView())
                 .build();
         List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);
@@ -160,7 +160,7 @@ public class RangerRazBaseConfigProviderTest {
                 .withCloudPlatform(CloudPlatform.AZURE)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
-                .withDataLakeView(new DatalakeView(false, DATALAKE_CRN))
+                .withDataLakeView(new DatalakeView(false, DATALAKE_CRN, false))
                 .withAccountMappingView(getAccountMappingView())
                 .build();
         List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);
@@ -181,7 +181,7 @@ public class RangerRazBaseConfigProviderTest {
                 .withCloudPlatform(CloudPlatform.AWS)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
-                .withDataLakeView(new DatalakeView(false, DATALAKE_CRN))
+                .withDataLakeView(new DatalakeView(false, DATALAKE_CRN, false))
                 .withAccountMappingView(getAccountMappingView())
                 .build();
         List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);
@@ -202,7 +202,7 @@ public class RangerRazBaseConfigProviderTest {
                 .withCloudPlatform(CloudPlatform.GCP)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
-                .withDataLakeView(new DatalakeView(false, DATALAKE_CRN))
+                .withDataLakeView(new DatalakeView(false, DATALAKE_CRN, false))
                 .withAccountMappingView(getAccountMappingView())
                 .build();
         List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);
@@ -223,7 +223,7 @@ public class RangerRazBaseConfigProviderTest {
                 .withCloudPlatform(CloudPlatform.YARN)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
-                .withDataLakeView(new DatalakeView(false, DATALAKE_CRN))
+                .withDataLakeView(new DatalakeView(false, DATALAKE_CRN, false))
                 .withAccountMappingView(getAccountMappingView())
                 .build();
         List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs("", preparationObject);

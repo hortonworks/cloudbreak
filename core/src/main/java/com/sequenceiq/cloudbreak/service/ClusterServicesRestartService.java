@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.DatabaseSslService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
 import com.sequenceiq.cloudbreak.validation.AllRoleTypes;
@@ -110,7 +111,9 @@ public class ClusterServicesRestartService {
         try {
             if (rdsConfig.isPresent()) {
                 LOGGER.info("Refreshing the database configuration.");
-                apiConnectors.getConnector(dataHubStack).updateServiceConfig(service, getRdsConfigMap(rdsConfig.get(), dataHubStack.getCloudPlatform()));
+                boolean externalDatabaseRequested = RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn());
+                apiConnectors.getConnector(dataHubStack).updateServiceConfig(service, getRdsConfigMap(rdsConfig.get(), dataHubStack.getCloudPlatform(),
+                        externalDatabaseRequested));
             } else {
                 LOGGER.error("Could not find RDS configuration for Hive");
             }
@@ -119,8 +122,8 @@ public class ClusterServicesRestartService {
         }
     }
 
-    private Map<String, String> getRdsConfigMap(RdsConfigWithoutCluster rdsConfig, String cloudPlatform) {
-        RdsView hiveRdsView = rdsViewProvider.getRdsView(rdsConfig, databaseSslService.getSslCertsFilePath(), cloudPlatform);
+    private Map<String, String> getRdsConfigMap(RdsConfigWithoutCluster rdsConfig, String cloudPlatform, boolean externalDatabaseRequested) {
+        RdsView hiveRdsView = rdsViewProvider.getRdsView(rdsConfig, databaseSslService.getSslCertsFilePath(), cloudPlatform, externalDatabaseRequested);
         Map<String, String> configs = new HashMap<>();
         configs.put(HIVE_METASTORE_DATABASE_HOST, hiveRdsView.getHost());
         configs.put(HIVE_METASTORE_DATABASE_NAME, hiveRdsView.getDatabaseName());

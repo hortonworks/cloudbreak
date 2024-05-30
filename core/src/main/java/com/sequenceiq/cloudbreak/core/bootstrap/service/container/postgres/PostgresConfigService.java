@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.conf.ExternalDatabaseConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
@@ -58,9 +59,6 @@ public class PostgresConfigService {
     private RdsConfigProviderFactory rdsConfigProviderFactory;
 
     @Inject
-    private RedbeamsDbServerConfigurer dbServerConfigurer;
-
-    @Inject
     private EmbeddedDatabaseConfigProvider embeddedDatabaseConfigProvider;
 
     @Inject
@@ -72,6 +70,9 @@ public class PostgresConfigService {
     @Inject
     private ClusterComponentConfigProvider clusterComponentProvider;
 
+    @Inject
+    private ExternalDatabaseConfig externalDatabaseConfig;
+
     public void decorateServicePillarWithPostgresIfNeeded(Map<String, SaltPillarProperties> servicePillar, StackDto stackDto) {
         Map<String, Object> postgresConfig = initPostgresConfig(stackDto);
         SSLSaltConfig sslSaltConfig;
@@ -81,7 +82,8 @@ public class PostgresConfigService {
             sslSaltConfig = getSslSaltConfigWhenRootCertAlreadyInitialized(stackDto);
         }
         if (StringUtils.isNotBlank(sslSaltConfig.getRootCertsBundle())) {
-            generateDatabaseSSLConfiguration(servicePillar, sslSaltConfig, stackDto.getCloudPlatform());
+            boolean externalDatabaseRequested = RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(stackDto.getCluster().getDatabaseServerCrn());
+            generateDatabaseSSLConfiguration(servicePillar, sslSaltConfig, stackDto.getCloudPlatform(), externalDatabaseRequested);
         }
 
         if (!postgresConfig.isEmpty()) {
@@ -155,11 +157,12 @@ public class PostgresConfigService {
         return available;
     }
 
-    private void generateDatabaseSSLConfiguration(Map<String, SaltPillarProperties> servicePillar, SSLSaltConfig sslSaltConfig, String cloudPlatform) {
+    private void generateDatabaseSSLConfiguration(Map<String, SaltPillarProperties> servicePillar, SSLSaltConfig sslSaltConfig, String cloudPlatform,
+            boolean externalDatabaseRequested) {
         Map<String, Object> rootSslCertsMap = new HashMap<>(sslSaltConfig.toMap());
         rootSslCertsMap.put("ssl_certs_file_path", databaseSslService.getSslCertsFilePath());
-        if (cloudPlatform.equalsIgnoreCase(CloudPlatform.GCP.name())) {
-            rootSslCertsMap.put("ssl_verification_mode", "verify-ca");
+        if (cloudPlatform.equalsIgnoreCase(CloudPlatform.GCP.name()) && externalDatabaseRequested) {
+            rootSslCertsMap.put("ssl_verification_mode", externalDatabaseConfig.getGcpExternalDatabaseSslVerificationMode());
         } else {
             rootSslCertsMap.put("ssl_verification_mode", "verify-full");
         }
@@ -182,7 +185,7 @@ public class PostgresConfigService {
 
     private Map<String, Object> initPostgresConfig(StackDto stackDto) {
         Map<String, Object> postgresConfig = new HashMap<>();
-        if (dbServerConfigurer.isRemoteDatabaseRequested(stackDto.getCluster().getDatabaseServerCrn())) {
+        if (RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(stackDto.getCluster().getDatabaseServerCrn())) {
             postgresConfig.put("configure_remote_db", "true");
         } else {
             postgresConfig.putAll(embeddedDatabaseConfigProvider.collectEmbeddedDatabaseConfigs(stackDto));

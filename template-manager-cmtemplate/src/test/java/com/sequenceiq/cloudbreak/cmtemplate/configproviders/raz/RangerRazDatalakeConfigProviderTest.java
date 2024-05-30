@@ -59,7 +59,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
-                .withDataLakeView(new DatalakeView(false, null))
+                .withDataLakeView(new DatalakeView(false, null, false))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
@@ -82,7 +82,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
-                .withDataLakeView(new DatalakeView(true, null))
+                .withDataLakeView(new DatalakeView(true, null, false))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
@@ -105,7 +105,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
-                .withDataLakeView(new DatalakeView(true, null))
+                .withDataLakeView(new DatalakeView(true, null, false))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
@@ -127,7 +127,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
-                .withDataLakeView(new DatalakeView(true, null))
+                .withDataLakeView(new DatalakeView(true, null, false))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
@@ -159,7 +159,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
-                .withDataLakeView(new DatalakeView(true, null))
+                .withDataLakeView(new DatalakeView(true, null, false))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
@@ -191,7 +191,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker, razHG))
-                .withDataLakeView(new DatalakeView(true, null))
+                .withDataLakeView(new DatalakeView(true, null, false))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
@@ -230,7 +230,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
-                .withDataLakeView(new DatalakeView(true, null))
+                .withDataLakeView(new DatalakeView(true, null, false))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 
@@ -250,7 +250,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withStackType(StackType.WORKLOAD)
                 .withCloudPlatform(cloudPlatform)
                 .withProductDetails(cmRepo, List.of())
-                .withDataLakeView(new DatalakeView(true, null))
+                .withDataLakeView(new DatalakeView(true, null, false))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, worker))
                 .build();
@@ -274,7 +274,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, idbroker))
-                .withDataLakeView(new DatalakeView(true, null))
+                .withDataLakeView(new DatalakeView(true, null, false))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 

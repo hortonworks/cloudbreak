@@ -123,7 +123,7 @@ public abstract class AbstractRdsConfigProvider {
 
     private void addRemoteDbToConfigIfNeeded(StackDto stackDto, Map<String, Object> postgres) {
         String databaseServerCrn = stackDto.getCluster().getDatabaseServerCrn();
-        if (dbServerConfigurer.isRemoteDatabaseRequested(databaseServerCrn)) {
+        if (RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(databaseServerCrn)) {
             DatabaseServerV4Response dbServerResponse = dbServerConfigurer.getDatabaseServer(databaseServerCrn);
             postgres.put("remote_db_url", dbServerResponse.getHost());
             postgres.put("remote_db_port", dbServerResponse.getPort());
@@ -150,7 +150,7 @@ public abstract class AbstractRdsConfigProvider {
         if (isRdsConfigNeeded(cluster.getBlueprint(), cluster.hasGateway(), isContainerizedDatalake(stack.getEnvironmentCrn()))
                 && !rdsConfigService.existsByClusterIdAndType(cluster.getId(), getRdsType())) {
             RDSConfig newRdsConfig;
-            if (dbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
+            if (RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
                 newRdsConfig = dbServerConfigurer.createNewRdsConfig(stack.getName(), stack.getId(), cluster.getDatabaseServerCrn(), cluster.getId(),
                         getDb(), getDbUser(), getRdsType());
             } else {
@@ -178,7 +178,7 @@ public abstract class AbstractRdsConfigProvider {
                 && !rdsConfigService.existsByClusterIdAndType(cluster.getId(), getRdsType())) {
             RDSConfig newRdsConfig;
             StackView stack = stackDto.getStack();
-            if (dbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
+            if (RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(cluster.getDatabaseServerCrn())) {
                 newRdsConfig = dbServerConfigurer.createNewRdsConfig(stack.getName(), stack.getId(), cluster.getDatabaseServerCrn(), cluster.getId(),
                         getDb(), getDbUser(), getRdsType());
             } else {

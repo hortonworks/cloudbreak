@@ -109,7 +109,7 @@ public class ProfilerMetricsRoleConfigProviderTest {
                         .withVersion("7.2.2"), new ArrayList<>())
                 .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.PROFILER_METRIC, rdsSslMode))
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS"))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                         .collect(Collectors.toSet()))
                 .build();
     }
@@ -125,7 +125,7 @@ public class ProfilerMetricsRoleConfigProviderTest {
                 .withHostgroupViews(Set.of(master, gateway))
                 .withRdsViews(Set.of(rdsConfigWithoutCluster(DatabaseType.PROFILER_METRIC, RdsSslMode.DISABLED))
                         .stream()
-                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS"))
+                        .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                         .collect(Collectors.toSet()))
                 .build();
 

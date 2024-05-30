@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 
 import jakarta.annotation.Nonnull;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
@@ -30,7 +32,9 @@ public class RdsViewProvider {
 
     private static final String VERIFY_FULL_SSL_OPTIONS_WITHOUT_CERTIFICATE_FILE_PATH = "sslmode=verify-full&sslrootcert=";
 
-    private static final String VERIFY_CA_SSL_OPTIONS_WITHOUT_CERTIFICATE_FILE_PATH = "sslmode=verify-ca&sslrootcert=";
+    private static final String SSL_MODE = "sslmode=";
+
+    private static final String ROOT_CERT_PATH = "&sslrootcert=";
 
     private static final int HOST_GROUP_INDEX = 1;
 
@@ -38,11 +42,18 @@ public class RdsViewProvider {
 
     private static final int DATABASE_GROUP_INDEX = 3;
 
-    public RdsView getRdsView(RdsConfigWithoutCluster rdsConfig, String cloudPlatform) {
-        return getRdsView(rdsConfig, "", cloudPlatform);
+    @Value("${cb.externaldatabase.gcp.sslmode:verify-ca}")
+    private String gcpExternalDatabaseSslVerificationMode;
+
+    @Value("${cb.externaldatabase.ssl.rootcerts.path:/hadoopfs/fs1/database-cacerts/certs.pem}")
+    private String rootCertsPath;
+
+    public RdsView getRdsView(RdsConfigWithoutCluster rdsConfig, String cloudPlatform, boolean externalDatabaseRequested) {
+        return getRdsView(rdsConfig, "", cloudPlatform, externalDatabaseRequested);
     }
 
-    public RdsView getRdsView(RdsConfigWithoutCluster rdsConfigWithoutCluster, String sslCertificateFilePath, String cloudPlatform) {
+    public RdsView getRdsView(RdsConfigWithoutCluster rdsConfigWithoutCluster, String sslCertificateFilePath, String cloudPlatform,
+            boolean externalDatabaseRequested) {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setArchived(rdsConfigWithoutCluster.isArchived());
         rdsConfig.setConnectionDriver(rdsConfigWithoutCluster.getConnectionDriver());
@@ -58,16 +69,17 @@ public class RdsViewProvider {
         rdsConfig.setName(rdsConfigWithoutCluster.getName());
         rdsConfig.setSslMode(rdsConfigWithoutCluster.getSslMode());
         rdsConfig.setType(rdsConfigWithoutCluster.getType());
-        return getRdsView(rdsConfig, Objects.requireNonNullElse(sslCertificateFilePath, ""), cloudPlatform);
+        return getRdsView(rdsConfig, Objects.requireNonNullElse(sslCertificateFilePath, rootCertsPath), cloudPlatform, externalDatabaseRequested);
     }
 
-    public RdsView getRdsView(RDSConfig rdsConfig, String cloudPlatform) {
-        return getRdsView(rdsConfig, "", cloudPlatform);
+    public RdsView getRdsView(RDSConfig rdsConfig, String cloudPlatform, boolean externalDatabaseRequested) {
+        return getRdsView(rdsConfig, "", cloudPlatform, externalDatabaseRequested);
     }
 
-    public RdsView getRdsView(@Nonnull RDSConfig rdsConfig, String sslCertificateFilePath, String cloudPlatform) {
+    public RdsView getRdsView(@Nonnull RDSConfig rdsConfig, String sslCertificateFilePath, String cloudPlatform, boolean externalDatabaseRequested) {
         RdsView rdsView = new RdsView();
-        rdsView.setSslCertificateFilePath(Objects.requireNonNullElse(sslCertificateFilePath, ""));
+        String sslPath = StringUtils.isNotEmpty(sslCertificateFilePath) ? sslCertificateFilePath : rootCertsPath;
+        rdsView.setSslCertificateFilePath(sslPath);
         // Note: any value is valid for sslCertificateFile for sake of backward compatibility.
         rdsView.setUseSsl(RdsSslMode.isEnabled(rdsConfig.getSslMode()));
         if (rdsView.isUseSsl()) {
@@ -79,7 +91,7 @@ public class RdsViewProvider {
             } else {
                 sb.append('?');
             }
-            populateSSLMode(cloudPlatform, sb);
+            populateSSLMode(cloudPlatform, externalDatabaseRequested, sb);
             sb.append(rdsView.getSslCertificateFilePath());
             rdsView.setConnectionURL(sb.toString());
         } else {
@@ -120,9 +132,11 @@ public class RdsViewProvider {
         return rdsView;
     }
 
-    private static void populateSSLMode(String cloudPlatform, StringBuilder sb) {
-        if (CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform)) {
-            sb.append(VERIFY_CA_SSL_OPTIONS_WITHOUT_CERTIFICATE_FILE_PATH);
+    private void populateSSLMode(String cloudPlatform, boolean externalDatabaseRequested, StringBuilder sb) {
+        if (CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform) && externalDatabaseRequested) {
+            sb.append(SSL_MODE);
+            sb.append(gcpExternalDatabaseSslVerificationMode);
+            sb.append(ROOT_CERT_PATH);
         } else {
             sb.append(VERIFY_FULL_SSL_OPTIONS_WITHOUT_CERTIFICATE_FILE_PATH);
         }

@@ -74,6 +74,7 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
@@ -101,6 +102,7 @@ import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.CustomConfigurationsView;
+import com.sequenceiq.cloudbreak.template.views.DatabaseType;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.util.TestConstants;
@@ -553,11 +555,19 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackMock.getType()).thenReturn(StackType.WORKLOAD);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
         when(stackMock.getStack()).thenReturn(stackMock);
+        SdxBasicView mockSdx = mock(SdxBasicView.class);
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(mockSdx));
+        when(mockSdx.crn()).thenReturn("sdxcrn");
+        when(mockSdx.dbServerCrn()).thenReturn("sdxdbcrn");
+        when(mockSdx.razEnabled()).thenReturn(false);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertThat(result.getCustomConfigurationsView()).isPresent();
         assertThat(result.getCustomConfigurationsView()).isEqualTo(Optional.of(expected));
+        assertEquals(result.getDatalakeView().get().getCrn(), "sdxcrn");
+        assertEquals(result.getDatalakeView().get().isRazEnabled(), false);
+        assertEquals(result.getDatalakeView().get().getDatabaseType(), DatabaseType.EXTERNAL_DATABASE);
         verify(customConfigurationsViewProvider, times(1)).getCustomConfigurationsView(customConfigurations);
     }
 

@@ -66,7 +66,6 @@ class RedbeamsDbCertificateProviderTest {
         StackView stackView = mock(StackView.class);
         when(stack.getStack()).thenReturn(stackView);
         when(stackView.getType()).thenReturn(StackType.DATALAKE);
-        when(dbServerConfigurer.isRemoteDatabaseRequested(dbServerCrn)).thenReturn(Boolean.TRUE);
         when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(new DatabaseServerV4Response());
 
         DatabaseSslDetails result = underTest.getRelatedSslCerts(stack);
@@ -85,7 +84,6 @@ class RedbeamsDbCertificateProviderTest {
         StackView stackView = mock(StackView.class);
         when(stack.getStack()).thenReturn(stackView);
         when(stackView.getType()).thenReturn(StackType.DATALAKE);
-        when(dbServerConfigurer.isRemoteDatabaseRequested(dbServerCrn)).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setSslConfig(new SslConfigV4Response());
         when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(databaseServerV4Response);
@@ -107,7 +105,6 @@ class RedbeamsDbCertificateProviderTest {
         when(stack.getStack()).thenReturn(stackView);
         when(stackView.getType()).thenReturn(StackType.DATALAKE);
         when(stackView.getResourceCrn()).thenReturn("stackCrn");
-        when(dbServerConfigurer.isRemoteDatabaseRequested(dbServerCrn)).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         SslConfigV4Response sslConfig = getSslConfigV4ResponseWithCertificate(Set.of());
         databaseServerV4Response.setSslConfig(sslConfig);
@@ -131,7 +128,6 @@ class RedbeamsDbCertificateProviderTest {
         StackView stackView = mock(StackView.class);
         when(stack.getStack()).thenReturn(stackView);
         when(stackView.getType()).thenReturn(StackType.DATALAKE);
-        when(dbServerConfigurer.isRemoteDatabaseRequested(dbServerCrn)).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         SslConfigV4Response sslConfig = getSslConfigV4ResponseWithCertificate(Set.of(certificateA));
         databaseServerV4Response.setSslConfig(sslConfig);
@@ -156,7 +152,6 @@ class RedbeamsDbCertificateProviderTest {
         StackView stackView = mock(StackView.class);
         when(stack.getStack()).thenReturn(stackView);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
-        when(dbServerConfigurer.isRemoteDatabaseRequested(dbServerCrn)).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateA)));
         when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(databaseServerV4Response);
@@ -184,8 +179,6 @@ class RedbeamsDbCertificateProviderTest {
 
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
                 Optional.of(new SdxBasicView(null, null, null, null, false, 1L, null)));
-        when(dbServerConfigurer.isRemoteDatabaseRequested(null)).thenReturn(Boolean.FALSE);
-        when(dbServerConfigurer.isRemoteDatabaseRequested(dbServerCrn)).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateA)));
         when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(databaseServerV4Response);
@@ -213,8 +206,6 @@ class RedbeamsDbCertificateProviderTest {
 
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
                 Optional.of(new SdxBasicView(null, null, null, null, false, 1L, dbServerCrnB)));
-        when(dbServerConfigurer.isRemoteDatabaseRequested(null)).thenReturn(Boolean.FALSE);
-        when(dbServerConfigurer.isRemoteDatabaseRequested(dbServerCrnB)).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4ResponseB = new DatabaseServerV4Response();
         databaseServerV4ResponseB.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateB)));
         when(dbServerConfigurer.getDatabaseServer(dbServerCrnB)).thenReturn(databaseServerV4ResponseB);
@@ -243,7 +234,6 @@ class RedbeamsDbCertificateProviderTest {
 
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
                 Optional.of(new SdxBasicView(null, null, null, null, false, 1L, dbServerCrnB)));
-        when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateA)));
         when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(databaseServerV4Response);
@@ -278,7 +268,6 @@ class RedbeamsDbCertificateProviderTest {
 
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
                 Optional.of(new SdxBasicView(null, null, null, null, false, 1L, dbServerCrnB)));
-        when(dbServerConfigurer.isRemoteDatabaseRequested(any())).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateA)));
         when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(databaseServerV4Response);
