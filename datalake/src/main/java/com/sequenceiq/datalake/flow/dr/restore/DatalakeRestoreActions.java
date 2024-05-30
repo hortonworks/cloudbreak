@@ -221,8 +221,8 @@ public class DatalakeRestoreActions {
                 int databaseMaxDurationInMin = variables.get(DATABASE_MAX_DURATION_IN_MIN) != null ? (Integer) variables.get(DATABASE_MAX_DURATION_IN_MIN) : 0;
                 sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.INPROGRESS, null);
                 if ((Boolean) variables.getOrDefault(VALIDATION_ONLY, Boolean.FALSE)) {
-                    SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_RESTORE_INPROGRESS,
-                        ResourceEvent.DATALAKE_RESTORE_IN_PROGRESS,
+                    SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_RESTORE_VALIDATION_INPROGRESS,
+                        ResourceEvent.DATALAKE_RESTORE_VALIDATION_IN_PROGRESS,
                         "Datalake restore validation in progress", payload.getResourceId());
                 } else {
                     SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_RESTORE_INPROGRESS,
@@ -292,7 +292,7 @@ public class DatalakeRestoreActions {
                 LOGGER.info("Sdx database restore is finalized with sdx id: {}", payload.getResourceId());
                 if (variables.containsKey(VALIDATION_ONLY) && (Boolean) variables.get(VALIDATION_ONLY)) {
                     SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
-                        ResourceEvent.DATALAKE_RESTORE_FINISHED,
+                        ResourceEvent.DATALAKE_RESTORE_VALIDATION_FINISHED,
                         "Datalake restore validation finished, Datalake is running", payload.getResourceId());
                 } else {
                     SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
@@ -341,7 +341,7 @@ public class DatalakeRestoreActions {
                 if ((Boolean) variables.getOrDefault(VALIDATION_ONLY, Boolean.FALSE)) {
                     String failureReason = getFailureReason(variables, exception);
                     SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
-                        ResourceEvent.DATALAKE_RESTORE_FAILED,
+                        ResourceEvent.DATALAKE_RESTORE_VALIDATION_FAILED,
                         List.of(failureReason), failureReason, payload.getResourceId());
                 } else {
                     SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
