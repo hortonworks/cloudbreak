@@ -47,6 +47,12 @@ build-environment-dockerhub:
 build-freeipa-dockerhub:
 	 make -C docker-freeipa dockerhub
 
+create-rc-version-tag:
+	 ./scripts/create-rc-version-tag.sh
+
+create-dev-version-tag:
+	 ./scripts/create-dev-version-tag.sh
+
 enable-gitconfig-local:
 	 git config --local include.path ../.gitconfig
 
