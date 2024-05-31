@@ -100,7 +100,7 @@ class EnvironmentApiConverterTest {
 
     private static final String ENCRYPTION_KEY_ARN = "dummy-key-arn";
 
-    private static final String AUTHORIZED_IP_RANGES = "0.0.0.0/0";
+    private static final String KUBE_API_AUTHORIZED_IP_RANGES = "0.0.0.0/0";
 
     private static final String OUTBOUND_TYPE = "udr";
 
@@ -194,8 +194,8 @@ class EnvironmentApiConverterTest {
         assertTrue(externalizedComputeCluster.isCreate());
         assertTrue(externalizedComputeCluster.isPrivateCluster());
         assertEquals(OUTBOUND_TYPE, externalizedComputeCluster.getOutboundType());
-        assertEquals(AUTHORIZED_IP_RANGES, externalizedComputeCluster.getKubeApiAuthorizedIpRanges());
-        assertEquals(SECURITY_ACCESS_CIDR, externalizedComputeCluster.getLoadBalancerAuthorizationIpRanges());
+        assertEquals(Set.of(KUBE_API_AUTHORIZED_IP_RANGES), externalizedComputeCluster.getKubeApiAuthorizedIpRanges());
+        assertEquals(Set.of(SECURITY_ACCESS_CIDR), externalizedComputeCluster.getLoadBalancerAuthorizationIpRanges());
 
         verify(credentialService).getCloudPlatformByCredential(anyString(), anyString(), any());
         verify(freeIpaConverter).convert(request.getFreeIpa(), "test-aws", cloudPlatform.name());
@@ -537,7 +537,7 @@ class EnvironmentApiConverterTest {
         extClusterCreateReq.setCreate(true);
         extClusterCreateReq.setPrivateCluster(true);
         extClusterCreateReq.setOutboundType(OUTBOUND_TYPE);
-        extClusterCreateReq.setKubeApiAuthorizedIpRanges(AUTHORIZED_IP_RANGES);
+        extClusterCreateReq.setKubeApiAuthorizedIpRanges(KUBE_API_AUTHORIZED_IP_RANGES);
         request.setExternalizedComputeCreateRequest(extClusterCreateReq);
         setParameters(request, cloudPlatform);
         return request;

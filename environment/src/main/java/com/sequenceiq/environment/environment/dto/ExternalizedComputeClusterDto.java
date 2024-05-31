@@ -1,5 +1,10 @@
 package com.sequenceiq.environment.environment.dto;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
@@ -10,11 +15,11 @@ public class ExternalizedComputeClusterDto {
 
     private boolean privateCluster;
 
-    private String kubeApiAuthorizedIpRanges;
+    private Set<String> kubeApiAuthorizedIpRanges;
 
     private String outboundType;
 
-    private String loadBalancerAuthorizationIpRanges;
+    private Set<String> loadBalancerAuthorizationIpRanges;
 
     private ExternalizedComputeClusterDto(ExternalizedComputeClusterDto.Builder builder) {
         create = builder.create;
@@ -44,11 +49,11 @@ public class ExternalizedComputeClusterDto {
         this.privateCluster = privateCluster;
     }
 
-    public String getKubeApiAuthorizedIpRanges() {
+    public Set<String> getKubeApiAuthorizedIpRanges() {
         return kubeApiAuthorizedIpRanges;
     }
 
-    public void setKubeApiAuthorizedIpRanges(String kubeApiAuthorizedIpRanges) {
+    public void setKubeApiAuthorizedIpRanges(Set<String> kubeApiAuthorizedIpRanges) {
         this.kubeApiAuthorizedIpRanges = kubeApiAuthorizedIpRanges;
     }
 
@@ -60,11 +65,11 @@ public class ExternalizedComputeClusterDto {
         this.outboundType = outboundType;
     }
 
-    public String getLoadBalancerAuthorizationIpRanges() {
+    public Set<String> getLoadBalancerAuthorizationIpRanges() {
         return loadBalancerAuthorizationIpRanges;
     }
 
-    public void setLoadBalancerAuthorizationIpRanges(String loadBalancerAuthorizationIpRanges) {
+    public void setLoadBalancerAuthorizationIpRanges(Set<String> loadBalancerAuthorizationIpRanges) {
         this.loadBalancerAuthorizationIpRanges = loadBalancerAuthorizationIpRanges;
     }
 
@@ -86,11 +91,11 @@ public class ExternalizedComputeClusterDto {
 
         private boolean privateCluster;
 
-        private String kubeApiAuthorizedIpRanges;
+        private Set<String> kubeApiAuthorizedIpRanges = new HashSet<>();
 
         private String outboundType;
 
-        private String loadBalancerAuthorizationIpRanges;
+        private Set<String> loadBalancerAuthorizationIpRanges = new HashSet<>();
 
         private Builder() {
         }
@@ -105,8 +110,10 @@ public class ExternalizedComputeClusterDto {
             return this;
         }
 
-        public ExternalizedComputeClusterDto.Builder withKubeApiAuthorizedIpRanges(String kubeApiAuthorizedIpRanges) {
-            this.kubeApiAuthorizedIpRanges = kubeApiAuthorizedIpRanges;
+        public ExternalizedComputeClusterDto.Builder withKubeApiAuthorizedIpRanges(Set<String> kubeApiAuthorizedIpRanges) {
+            if (CollectionUtils.isNotEmpty(kubeApiAuthorizedIpRanges)) {
+                this.kubeApiAuthorizedIpRanges = kubeApiAuthorizedIpRanges;
+            }
             return this;
         }
 
@@ -115,8 +122,10 @@ public class ExternalizedComputeClusterDto {
             return this;
         }
 
-        public ExternalizedComputeClusterDto.Builder withLoadBalancerAuthorizationIpRanges(String loadBalancerAuthorizationIpRanges) {
-            this.loadBalancerAuthorizationIpRanges = loadBalancerAuthorizationIpRanges;
+        public ExternalizedComputeClusterDto.Builder withLoadBalancerAuthorizationIpRanges(Set<String> loadBalancerAuthorizationIpRanges) {
+            if (CollectionUtils.isNotEmpty(loadBalancerAuthorizationIpRanges)) {
+                this.loadBalancerAuthorizationIpRanges = loadBalancerAuthorizationIpRanges;
+            }
             return this;
         }
 
