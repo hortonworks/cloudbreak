@@ -132,7 +132,9 @@ class EnvironmentDtoConverterTest {
 
     private static final String STORAGE_LOCATION = "storageLocation";
 
-    private static final String AUTHORIZED_IP_RANGES = "0.0.0.0/0";
+    private static final String KUBE_API_AUTHORIZED_IP_RANGES = "0.0.0.0/0";
+
+    private static final String LOAD_BALANCER_AUTHORIZED_IP_RANGES = "1.1.1.1/1";
 
     private static final String OUTBOUND_TYPE = "udr";
 
@@ -703,8 +705,8 @@ class EnvironmentDtoConverterTest {
                         .withCreate(true)
                         .withPrivateCluster(true)
                         .withOutboundType(OUTBOUND_TYPE)
-                        .withKubeApiAuthorizedIpRanges(AUTHORIZED_IP_RANGES)
-                        .withLoadBalancerAuthorizationIpRanges(AUTHORIZED_IP_RANGES)
+                        .withKubeApiAuthorizedIpRanges(Set.of(KUBE_API_AUTHORIZED_IP_RANGES))
+                        .withLoadBalancerAuthorizationIpRanges(Set.of(LOAD_BALANCER_AUTHORIZED_IP_RANGES))
                         .build())
                 .build();
 
@@ -740,8 +742,8 @@ class EnvironmentDtoConverterTest {
         assertThat(defaultComputeCluster.isCreate()).isTrue();
         assertThat(defaultComputeCluster.isPrivateCluster()).isTrue();
         assertThat(defaultComputeCluster.getOutboundType()).isEqualTo(OUTBOUND_TYPE);
-        assertThat(defaultComputeCluster.getKubeApiAuthorizedIpRanges()).isEqualTo(AUTHORIZED_IP_RANGES);
-        assertThat(defaultComputeCluster.getLoadBalancerAuthorizedIpRanges()).isEqualTo(AUTHORIZED_IP_RANGES);
+        assertThat(defaultComputeCluster.getKubeApiAuthorizedIpRanges()).isEqualTo(Set.of(KUBE_API_AUTHORIZED_IP_RANGES));
+        assertThat(defaultComputeCluster.getLoadBalancerAuthorizedIpRanges()).isEqualTo(Set.of(LOAD_BALANCER_AUTHORIZED_IP_RANGES));
 
         EnvironmentTelemetry resultTelemetry = result.getTelemetry();
         assertThat(resultTelemetry).isNotNull();
@@ -815,8 +817,8 @@ class EnvironmentDtoConverterTest {
         assertThat(defaultComputeCluster.isCreate()).isFalse();
         assertThat(defaultComputeCluster.isPrivateCluster()).isFalse();
         assertThat(defaultComputeCluster.getOutboundType()).isNull();
-        assertThat(defaultComputeCluster.getKubeApiAuthorizedIpRanges()).isNull();
-        assertThat(defaultComputeCluster.getLoadBalancerAuthorizedIpRanges()).isNull();
+        assertThat(defaultComputeCluster.getKubeApiAuthorizedIpRanges()).isEmpty();
+        assertThat(defaultComputeCluster.getLoadBalancerAuthorizedIpRanges()).isEmpty();
     }
 
     @Test

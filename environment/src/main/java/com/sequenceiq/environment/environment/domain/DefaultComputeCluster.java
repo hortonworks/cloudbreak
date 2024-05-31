@@ -1,9 +1,15 @@
 package com.sequenceiq.environment.environment.domain;
 
 import java.io.Serializable;
+import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import com.sequenceiq.cloudbreak.util.CidrUtil;
 
 @Embeddable
 public class DefaultComputeCluster implements Serializable {
@@ -42,12 +48,20 @@ public class DefaultComputeCluster implements Serializable {
         this.privateCluster = privateCluster;
     }
 
-    public String getKubeApiAuthorizedIpRanges() {
-        return kubeApiAuthorizedIpRanges;
+    public Set<String> getKubeApiAuthorizedIpRanges() {
+        if (StringUtils.isEmpty(kubeApiAuthorizedIpRanges)) {
+            return Set.of();
+        } else {
+            return CidrUtil.cidrSet(kubeApiAuthorizedIpRanges);
+        }
     }
 
-    public void setKubeApiAuthorizedIpRanges(String kubeApiAuthorizedIpRanges) {
-        this.kubeApiAuthorizedIpRanges = kubeApiAuthorizedIpRanges;
+    public void setKubeApiAuthorizedIpRanges(Set<String> kubeApiAuthorizedIpRanges) {
+        if (CollectionUtils.isEmpty(kubeApiAuthorizedIpRanges)) {
+            this.kubeApiAuthorizedIpRanges = null;
+        } else {
+            this.kubeApiAuthorizedIpRanges = StringUtils.join(kubeApiAuthorizedIpRanges, ",");
+        }
     }
 
     public String getOutboundType() {
@@ -58,12 +72,20 @@ public class DefaultComputeCluster implements Serializable {
         this.outboundType = outboundType;
     }
 
-    public String getLoadBalancerAuthorizedIpRanges() {
-        return loadBalancerAuthorizedIpRanges;
+    public Set<String> getLoadBalancerAuthorizedIpRanges() {
+        if (StringUtils.isEmpty(loadBalancerAuthorizedIpRanges)) {
+            return Set.of();
+        } else {
+            return CidrUtil.cidrSet(loadBalancerAuthorizedIpRanges);
+        }
     }
 
-    public void setLoadBalancerAuthorizedIpRanges(String loadBalancedAuthorizedIpRanges) {
-        this.loadBalancerAuthorizedIpRanges = loadBalancedAuthorizedIpRanges;
+    public void setLoadBalancerAuthorizedIpRanges(Set<String> loadBalancerAuthorizedIpRanges) {
+        if (CollectionUtils.isEmpty(loadBalancerAuthorizedIpRanges)) {
+            this.loadBalancerAuthorizedIpRanges = null;
+        } else {
+            this.loadBalancerAuthorizedIpRanges = StringUtils.join(loadBalancerAuthorizedIpRanges, ",");
+        }
     }
 
     @Override
@@ -73,7 +95,7 @@ public class DefaultComputeCluster implements Serializable {
                 ", privateCluster=" + privateCluster +
                 ", kubeApiAuthorizedIpRanges='" + kubeApiAuthorizedIpRanges + '\'' +
                 ", outboundType='" + outboundType + '\'' +
-                ", loadBalancedAuthorizedIpRanges='" + loadBalancerAuthorizedIpRanges + '\'' +
+                ", loadBalancerAuthorizedIpRanges='" + loadBalancerAuthorizedIpRanges + '\'' +
                 '}';
     }
 }
