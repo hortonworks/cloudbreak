@@ -103,6 +103,22 @@ class DynamicEntitlementRefreshJobTest {
         verify(dynamicEntitlementRefreshService, never()).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
     }
 
+    @Test
+    void testExecuteWhenClusterNotAvailable() {
+        Stack stack = stack(Status.STOPPED);
+        JobKey jobKey = new JobKey(LOCAL_ID.toString(), "dynamic-entitlement-jobs");
+        when(dynamicEntitlementRefreshConfig.isDynamicEntitlementEnabled()).thenReturn(Boolean.TRUE);
+        when(stackService.getByIdWithListsInTransaction(eq(LOCAL_ID))).thenReturn(stack);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(internalCrnModifier.changeAccountIdInCrnString(eq(INTERNAL_CRN), eq(ACCOUNT_ID))).thenReturn(Crn.fromString(MODIFIED_INTERNAL_CRN));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(INTERNAL_CRN);
+        when(flowLogService.isOtherFlowRunning(LOCAL_ID)).thenReturn(Boolean.FALSE);
+        underTest.executeTracedJob(jobExecutionContext);
+        verify(dynamicEntitlementRefreshJobService, never()).unschedule(eq(jobKey));
+        verify(dynamicEntitlementRefreshService, never()).changeClusterConfigurationIfEntitlementsChanged(eq(stack));
+        verify(dynamicEntitlementRefreshService, times(1)).getChangedWatchedEntitlements(eq(stack));
+    }
+
     private Stack stack(Status status) {
         Stack stack = mock(Stack.class);
         StackStatus stackStatus = mock(StackStatus.class);
