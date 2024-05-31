@@ -57,6 +57,7 @@ public class ClusterManagerUpgradeManagementService {
             LOGGER.debug("Skipping Cloudera Manager upgrade because the version {} is already installed.", clouderaManagerRepo.getFullVersion());
         }
         startClusterServices(stackDto);
+        reconfigureClusterManager(stackDto);
     }
 
     private boolean isClusterManagerUpgradeNecessary(String targetVersion, StackDto stackDto) {
@@ -97,5 +98,10 @@ public class ClusterManagerUpgradeManagementService {
     private void startClusterServices(StackDto stackDto) throws CloudbreakException {
         LOGGER.debug("Starting cluster manager services after CM upgrade.");
         clusterApiConnectors.getConnector(stackDto).startClusterManagerAndAgents();
+    }
+
+    private void reconfigureClusterManager(StackDto stackDto) {
+        LOGGER.debug("Reconfigure cluster manager after CM upgrade.");
+        clusterApiConnectors.getConnector(stackDto).clusterSetupService().updateConfig();
     }
 }

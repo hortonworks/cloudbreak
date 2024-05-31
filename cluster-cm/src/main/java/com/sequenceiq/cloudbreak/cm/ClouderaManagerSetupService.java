@@ -369,12 +369,13 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     private void updateClouderaManagerMonitoringConfig() throws ApiException {
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
-        ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
         if ((entitlementService.isObservabilitySaasPremiumEnabled(accountId) || entitlementService.isObservabilitySaasTrialEnabled(accountId)) &&
                 entitlementService.isObservabilityRealTimeJobsEnabled(accountId)) {
+            LOGGER.debug("Trying to set CM parameter 'enable_observability_real_time_jobs'.");
             updateCmConfigSilentlyIfNotSupportedByCm("enable_observability_real_time_jobs", "true");
         }
         if (entitlementService.isObservabilityDmpEnabled(accountId)) {
+            LOGGER.debug("Trying to set CM parameter 'enable_observability_metrics_dmp'.");
             updateCmConfigSilentlyIfNotSupportedByCm("enable_observability_metrics_dmp", "true");
         }
     }
