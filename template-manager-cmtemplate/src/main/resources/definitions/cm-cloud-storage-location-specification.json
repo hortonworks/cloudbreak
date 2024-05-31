@@ -153,6 +153,17 @@
       "relatedServices": ["FLINK_HISTORY_SERVER"],
       "requiredForAttachedCluster": true,
       "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2", "S3"]
+    },
+    {
+      "type": "ICEBERG_REPLICATION_CLOUD_ROOT",
+      "propertyName": "iceberg_replication_cloud_data_root_dir",
+      "propertyFile": "iceberg-conf",
+      "description": "Iceberg Replication Cloud Root",
+      "defaultPath": "{{{ defaultPath }}}",
+      "propertyDisplayName": "Iceberg Replication Cloud Root",
+      "relatedServices": ["ICEBERG_REPLICATION_ADMINSERVER"],
+      "requiredForAttachedCluster": true,
+      "supportedStorages": ["ADLS", "WASB", "GCS", "ADLS_GEN_2", "S3"]
     }
   ]
 }
