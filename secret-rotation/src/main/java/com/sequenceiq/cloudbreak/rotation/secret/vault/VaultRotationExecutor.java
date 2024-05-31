@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 
 @Component
 public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotationContext> {
@@ -21,16 +21,16 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
     private static final Logger LOGGER = LoggerFactory.getLogger(VaultRotationExecutor.class);
 
     @Inject
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Override
     protected void rotate(VaultRotationContext rotationContext) throws Exception {
         for (Map.Entry<String, String> entry : rotationContext.getVaultPathSecretMap().entrySet()) {
             String vaultPath = entry.getKey();
             String newSecret = entry.getValue();
-            if (!secretService.getRotation(vaultPath).isRotation()) {
+            if (!uncachedSecretServiceForRotation.getRotation(vaultPath).isRotation()) {
                 LOGGER.info("Adding new secret to vault path {}", vaultPath);
-                secretService.putRotation(vaultPath, newSecret);
+                uncachedSecretServiceForRotation.putRotation(vaultPath, newSecret);
             }
         }
     }
@@ -39,10 +39,10 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
     protected void rollback(VaultRotationContext rotationContext) throws Exception {
         for (Map.Entry<String, String> entry : rotationContext.getVaultPathSecretMap().entrySet()) {
             String vaultPath = entry.getKey();
-            RotationSecret rotationSecret = secretService.getRotation(vaultPath);
+            RotationSecret rotationSecret = uncachedSecretServiceForRotation.getRotation(vaultPath);
             if (rotationSecret.isRotation()) {
                 LOGGER.info("Removing new secret from vault path {}", vaultPath);
-                secretService.update(vaultPath, rotationSecret.getBackupSecret());
+                uncachedSecretServiceForRotation.update(vaultPath, rotationSecret.getBackupSecret());
             }
         }
     }
@@ -51,10 +51,10 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
     protected void finalize(VaultRotationContext rotationContext) throws Exception {
         for (Map.Entry<String, String> entry : rotationContext.getVaultPathSecretMap().entrySet()) {
             String vaultPath = entry.getKey();
-            RotationSecret rotationSecret = secretService.getRotation(vaultPath);
+            RotationSecret rotationSecret = uncachedSecretServiceForRotation.getRotation(vaultPath);
             if (rotationSecret.isRotation()) {
                 LOGGER.info("Removing old secret from vault path {}", vaultPath);
-                secretService.update(vaultPath, rotationSecret.getSecret());
+                uncachedSecretServiceForRotation.update(vaultPath, rotationSecret.getSecret());
             }
         }
     }
@@ -63,7 +63,7 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
     protected void preValidate(VaultRotationContext rotationContext) throws Exception {
         for (Map.Entry<String, String> entry : rotationContext.getVaultPathSecretMap().entrySet()) {
             String vaultPath = entry.getKey();
-            if (!secretService.isSecret(vaultPath)) {
+            if (!uncachedSecretServiceForRotation.isSecret(vaultPath)) {
                 throw new SecretRotationException(String.format("%s is not a vault path, thus rotation is not possible!", vaultPath));
             }
         }
@@ -73,7 +73,7 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
     protected void postValidate(VaultRotationContext rotationContext) throws Exception {
         for (Map.Entry<String, String> entry : rotationContext.getVaultPathSecretMap().entrySet()) {
             String vaultPath = entry.getKey();
-            if (!secretService.getRotation(vaultPath).isRotation()) {
+            if (!uncachedSecretServiceForRotation.getRotation(vaultPath).isRotation()) {
                 String message = String.format("%s vault path is not in rotation state, thus something went wrong during rotation!", vaultPath);
                 throw new SecretRotationException(message);
             }

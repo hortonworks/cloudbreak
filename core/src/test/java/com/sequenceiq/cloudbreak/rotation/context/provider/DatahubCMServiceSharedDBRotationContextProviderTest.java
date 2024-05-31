@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.AbstractRdsConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,7 +63,7 @@ public class DatahubCMServiceSharedDBRotationContextProviderTest {
     private AbstractRdsConfigProvider rdsConfigProvider;
 
     @Mock
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Mock
     private ExitCriteriaProvider exitCriteriaProvider;
@@ -84,7 +84,7 @@ public class DatahubCMServiceSharedDBRotationContextProviderTest {
         when(rdsRoleConfigProvider.dbPasswordKey()).thenReturn("passwordconfig");
         when(rdsRoleConfigProvider.getServiceType()).thenReturn(TEST_DB_TYPE.name());
         when(rdsConfigService.findByClusterId(any())).thenReturn(Set.of(rdsConfig));
-        when(secretService.getRotation(any())).thenReturn(new RotationSecret("new", "old"));
+        when(uncachedSecretServiceForRotation.getRotation(any())).thenReturn(new RotationSecret("new", "old"));
     }
 
     @Test

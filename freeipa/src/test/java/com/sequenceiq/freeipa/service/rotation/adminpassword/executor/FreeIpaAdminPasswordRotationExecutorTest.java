@@ -21,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -43,7 +43,7 @@ class FreeIpaAdminPasswordRotationExecutorTest {
     private StackService stackService;
 
     @Mock
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @InjectMocks
     private FreeIpaAdminPasswordRotationExecutor rotationExecutor;
@@ -64,7 +64,7 @@ class FreeIpaAdminPasswordRotationExecutorTest {
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
 
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(eq(resourceCrn), anyString())).thenReturn(stack);
-        when(secretService.getRotation(eq(adminPasswordSecret))).thenReturn(rotationSecret);
+        when(uncachedSecretServiceForRotation.getRotation(eq(adminPasswordSecret))).thenReturn(rotationSecret);
         when(freeIpaClientFactory.getFreeIpaClientForStack(eq(stack))).thenReturn(freeIpaClient);
         rotationExecutor.rotate(rotationContext);
         verify(adminUserService, times(1)).updateAdminUserPassword(eq(newPassword), eq(freeIpaClient));
@@ -85,7 +85,7 @@ class FreeIpaAdminPasswordRotationExecutorTest {
         Stack stack = mock(Stack.class);
 
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(eq(resourceCrn), anyString())).thenReturn(stack);
-        when(secretService.getRotation(eq(adminPasswordSecret))).thenReturn(rotationSecret);
+        when(uncachedSecretServiceForRotation.getRotation(eq(adminPasswordSecret))).thenReturn(rotationSecret);
 
         SecretRotationException e = assertThrows(SecretRotationException.class,
                 () -> rotationExecutor.rotate(rotationContext));
@@ -109,7 +109,7 @@ class FreeIpaAdminPasswordRotationExecutorTest {
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
 
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(eq(resourceCrn), anyString())).thenReturn(stack);
-        when(secretService.getRotation(eq(adminPasswordSecret))).thenReturn(rotationSecret);
+        when(uncachedSecretServiceForRotation.getRotation(eq(adminPasswordSecret))).thenReturn(rotationSecret);
         when(freeIpaClientFactory.getFreeIpaClientForStack(eq(stack))).thenReturn(freeIpaClient);
         doThrow(new CloudbreakRuntimeException("error")).when(adminUserService).updateAdminUserPassword(newPassword, freeIpaClient);
 
@@ -133,7 +133,7 @@ class FreeIpaAdminPasswordRotationExecutorTest {
         Stack stack = mock(Stack.class);
 
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(eq(resourceCrn), anyString())).thenReturn(stack);
-        when(secretService.getRotation(eq(adminPasswordSecret))).thenReturn(rotationSecret);
+        when(uncachedSecretServiceForRotation.getRotation(eq(adminPasswordSecret))).thenReturn(rotationSecret);
         when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(mock(FreeIpaClient.class));
         // Act
         rotationExecutor.rollback(rotationContext);
@@ -160,7 +160,7 @@ class FreeIpaAdminPasswordRotationExecutorTest {
         FreeIpaClientException exception = new FreeIpaClientException("Error");
 
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(eq(resourceCrn), anyString())).thenReturn(stack);
-        when(secretService.getRotation(eq(adminPasswordSecret))).thenReturn(rotationSecret);
+        when(uncachedSecretServiceForRotation.getRotation(eq(adminPasswordSecret))).thenReturn(rotationSecret);
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
         doThrow(exception).doReturn(freeIpaClient).when(freeIpaClientFactory).getFreeIpaClientForStack(eq(stack));
         rotationExecutor.rollback(rotationContext);
@@ -184,7 +184,7 @@ class FreeIpaAdminPasswordRotationExecutorTest {
         FreeIpaClientException exception = new FreeIpaClientException("Error");
 
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(eq(resourceCrn), anyString())).thenReturn(stack);
-        when(secretService.getRotation(eq(adminPasswordSecret))).thenReturn(rotationSecret);
+        when(uncachedSecretServiceForRotation.getRotation(eq(adminPasswordSecret))).thenReturn(rotationSecret);
         doThrow(exception).when(freeIpaClientFactory).getFreeIpaClientForStack(eq(stack));
 
         CloudbreakRuntimeException e = assertThrows(CloudbreakRuntimeException.class,

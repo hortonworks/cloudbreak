@@ -15,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.user.DirectoryManagerUserService;
 import com.sequenceiq.freeipa.service.rotation.adminpassword.context.FreeIpaAdminPasswordRotationContext;
@@ -31,7 +31,7 @@ class FreeIpaDirectoryManagerPasswordRotationExecutorTest {
     private StackService stackService;
 
     @Mock
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @InjectMocks
     private FreeIpaDirectoryManagerPasswordRotationExecutor rotationExecutor;
@@ -44,12 +44,12 @@ class FreeIpaDirectoryManagerPasswordRotationExecutorTest {
                 .build();
 
         RotationSecret rotationSecret = new RotationSecret("new-password", "old-password");
-        when(secretService.getRotation(eq(rotationContext.getAdminPasswordSecret()))).thenReturn(rotationSecret);
+        when(uncachedSecretServiceForRotation.getRotation(eq(rotationContext.getAdminPasswordSecret()))).thenReturn(rotationSecret);
 
         Stack stack = new Stack();
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(eq(rotationContext.getResourceCrn()), anyString())).thenReturn(stack);
         rotationExecutor.rotate(rotationContext);
-        verify(secretService).getRotation(eq(rotationContext.getAdminPasswordSecret()));
+        verify(uncachedSecretServiceForRotation).getRotation(eq(rotationContext.getAdminPasswordSecret()));
         verify(directoryManagerUserService).updateDirectoryManagerPassword(eq(stack), eq("new-password"));
     }
 
@@ -61,7 +61,7 @@ class FreeIpaDirectoryManagerPasswordRotationExecutorTest {
                 .build();
 
         RotationSecret rotationSecret = new RotationSecret("oldSecret", null);
-        when(secretService.getRotation(eq(rotationContext.getAdminPasswordSecret()))).thenReturn(rotationSecret);
+        when(uncachedSecretServiceForRotation.getRotation(eq(rotationContext.getAdminPasswordSecret()))).thenReturn(rotationSecret);
 
         SecretRotationException exception = assertThrows(SecretRotationException.class, () -> {
             rotationExecutor.rotate(rotationContext);
@@ -79,14 +79,14 @@ class FreeIpaDirectoryManagerPasswordRotationExecutorTest {
                 .build();
 
         RotationSecret rotationSecret = new RotationSecret("null", "backup-password");
-        when(secretService.getRotation(eq(rotationContext.getAdminPasswordSecret()))).thenReturn(rotationSecret);
+        when(uncachedSecretServiceForRotation.getRotation(eq(rotationContext.getAdminPasswordSecret()))).thenReturn(rotationSecret);
 
         Stack stack = new Stack();
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(eq(rotationContext.getResourceCrn()), anyString())).thenReturn(stack);
 
         rotationExecutor.rollback(rotationContext);
 
-        verify(secretService).getRotation(eq(rotationContext.getAdminPasswordSecret()));
+        verify(uncachedSecretServiceForRotation).getRotation(eq(rotationContext.getAdminPasswordSecret()));
         verify(directoryManagerUserService).checkDirectoryManagerPassword(eq(stack));
     }
 }

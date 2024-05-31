@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.rotation.context.CMUserRotationContext;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @Component
@@ -31,17 +31,17 @@ public class CMUserRotationExecutor extends AbstractRotationExecutor<CMUserRotat
     private StackDtoService stackService;
 
     @Inject
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Override
     protected void rotate(CMUserRotationContext rotationContext) throws Exception {
         LOGGER.info("Starting rotation of CM user by creating a new user.");
-        RotationSecret userRotationSecret = secretService.getRotation(rotationContext.getUserSecret());
-        RotationSecret passwordRotationSecret = secretService.getRotation(rotationContext.getPasswordSecret());
+        RotationSecret userRotationSecret = uncachedSecretServiceForRotation.getRotation(rotationContext.getUserSecret());
+        RotationSecret passwordRotationSecret = uncachedSecretServiceForRotation.getRotation(rotationContext.getPasswordSecret());
         if (userRotationSecret.isRotation() && passwordRotationSecret.isRotation()) {
             ClusterSecurityService clusterSecurityService = getClusterSecurityService(rotationContext);
-            String clientUser = secretService.get(rotationContext.getClientUserSecret());
-            String clientPassword = secretService.get(rotationContext.getClientPasswordSecret());
+            String clientUser = uncachedSecretServiceForRotation.get(rotationContext.getClientUserSecret());
+            String clientPassword = uncachedSecretServiceForRotation.get(rotationContext.getClientPasswordSecret());
             clusterSecurityService.createNewUser(
                     userRotationSecret.getBackupSecret(),
                     userRotationSecret.getSecret(),
@@ -56,7 +56,7 @@ public class CMUserRotationExecutor extends AbstractRotationExecutor<CMUserRotat
     @Override
     protected void rollback(CMUserRotationContext rotationContext) throws CloudbreakException {
         LOGGER.info("Starting to rollback rotation of CM user by deleting the new user");
-        RotationSecret userRotationSecret = secretService.getRotation(rotationContext.getUserSecret());
+        RotationSecret userRotationSecret = uncachedSecretServiceForRotation.getRotation(rotationContext.getUserSecret());
         if (userRotationSecret.isRotation()) {
             deleteUser(userRotationSecret.getSecret(), rotationContext);
         } else {
@@ -67,7 +67,7 @@ public class CMUserRotationExecutor extends AbstractRotationExecutor<CMUserRotat
     @Override
     protected void finalize(CMUserRotationContext rotationContext) throws Exception {
         LOGGER.info("Finalizing rotation of CM user by deleting the old user");
-        RotationSecret userRotationSecret = secretService.getRotation(rotationContext.getUserSecret());
+        RotationSecret userRotationSecret = uncachedSecretServiceForRotation.getRotation(rotationContext.getUserSecret());
         if (userRotationSecret.isRotation()) {
             deleteUser(userRotationSecret.getBackupSecret(), rotationContext);
         } else {
@@ -77,14 +77,14 @@ public class CMUserRotationExecutor extends AbstractRotationExecutor<CMUserRotat
 
     @Override
     protected void preValidate(CMUserRotationContext rotationContext) throws Exception {
-        String user = secretService.get(rotationContext.getUserSecret());
+        String user = uncachedSecretServiceForRotation.get(rotationContext.getUserSecret());
         checkUser(rotationContext, user);
     }
 
     @Override
     protected void postValidate(CMUserRotationContext rotationContext) throws Exception {
-        RotationSecret userRotationSecret = secretService.getRotation(rotationContext.getUserSecret());
-        RotationSecret passwordRotationSecret = secretService.getRotation(rotationContext.getPasswordSecret());
+        RotationSecret userRotationSecret = uncachedSecretServiceForRotation.getRotation(rotationContext.getUserSecret());
+        RotationSecret passwordRotationSecret = uncachedSecretServiceForRotation.getRotation(rotationContext.getPasswordSecret());
         if (userRotationSecret.isRotation() && passwordRotationSecret.isRotation()) {
             LOGGER.info("Checking if new user is present in CM!");
             checkUser(rotationContext, userRotationSecret.getSecret());
@@ -97,15 +97,15 @@ public class CMUserRotationExecutor extends AbstractRotationExecutor<CMUserRotat
 
     private void checkUser(CMUserRotationContext rotationContext, String user) throws Exception {
         ClusterSecurityService clusterSecurityService = getClusterSecurityService(rotationContext);
-        String clientUser = secretService.get(rotationContext.getClientUserSecret());
-        String clientPassword = secretService.get(rotationContext.getClientPasswordSecret());
+        String clientUser = uncachedSecretServiceForRotation.get(rotationContext.getClientUserSecret());
+        String clientPassword = uncachedSecretServiceForRotation.get(rotationContext.getClientPasswordSecret());
         clusterSecurityService.checkUser(user, clientUser, clientPassword);
     }
 
     private void deleteUser(String user, CMUserRotationContext rotationContext) throws CloudbreakException {
         ClusterSecurityService clusterSecurityService = getClusterSecurityService(rotationContext);
-        String clientUser = secretService.get(rotationContext.getClientUserSecret());
-        String clientPassword = secretService.get(rotationContext.getClientPasswordSecret());
+        String clientUser = uncachedSecretServiceForRotation.get(rotationContext.getClientUserSecret());
+        String clientPassword = uncachedSecretServiceForRotation.get(rotationContext.getClientPasswordSecret());
         clusterSecurityService.deleteUser(
                 user,
                 clientUser,

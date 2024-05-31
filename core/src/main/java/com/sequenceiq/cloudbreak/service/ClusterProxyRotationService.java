@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.clusterproxy.ReadConfigResponse;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
@@ -53,7 +53,7 @@ public class ClusterProxyRotationService {
     private static final String CRT_COEFFICIENT = "qi";
 
     @Inject
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Inject
     private ClusterProxyService clusterProxyService;
@@ -69,7 +69,7 @@ public class ClusterProxyRotationService {
         String[] pathAndField = knoxSecretRef.split(":", 2);
         try {
             checkPathAndField(pathAndField);
-            String jwkJson = secretService.getBySecretPath(pathAndField[0], pathAndField[1]);
+            String jwkJson = uncachedSecretServiceForRotation.getBySecretPath(pathAndField[0], pathAndField[1]);
             return convertJWKToPEMKeys(jwkJson);
         } catch (IllegalArgumentException | InvalidKeySpecException | NoSuchAlgorithmException e) {
             throw new CloudbreakServiceException("Cannot read JWK format token keys from cluster-proxy.", e);

@@ -13,7 +13,9 @@ public interface SecretEngine {
 
     String put(String secretPath, Map<String, String> value);
 
-    Map<String, String> get(String secretPath);
+    Map<String, String> getWithCache(String secretPath);
+
+    Map<String, String> getWithoutCache(String secretPath);
 
     void delete(String path);
 

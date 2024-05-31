@@ -20,13 +20,13 @@ import com.sequenceiq.cloudbreak.rotation.RotationMetadataTestUtil;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 
 @ExtendWith(MockitoExtension.class)
 public class VaultRotationExecutorTest {
 
     @Mock
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Mock
     private SecretRotationNotificationService notificationService;
@@ -36,92 +36,92 @@ public class VaultRotationExecutorTest {
 
     @Test
     public void testPreValidation() {
-        when(secretService.isSecret(any())).thenReturn(Boolean.TRUE);
+        when(uncachedSecretServiceForRotation.isSecret(any())).thenReturn(Boolean.TRUE);
 
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
         underTest.executePreValidation(rotationContext, null);
 
-        verify(secretService).isSecret(any());
+        verify(uncachedSecretServiceForRotation).isSecret(any());
     }
 
     @Test
     public void testPreValidationIfSecretInvalid() {
-        when(secretService.isSecret(any())).thenReturn(Boolean.FALSE);
+        when(uncachedSecretServiceForRotation.isSecret(any())).thenReturn(Boolean.FALSE);
 
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
         assertThrows(SecretRotationException.class, () -> underTest.executePreValidation(rotationContext, null));
 
-        verify(secretService).isSecret(any());
+        verify(uncachedSecretServiceForRotation).isSecret(any());
     }
 
     @Test
     public void testPostValidation() {
-        when(secretService.getRotation(anyString())).thenReturn(new RotationSecret("new", "old"));
+        when(uncachedSecretServiceForRotation.getRotation(anyString())).thenReturn(new RotationSecret("new", "old"));
 
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
         underTest.executePostValidation(rotationContext, null);
 
-        verify(secretService).getRotation(any());
+        verify(uncachedSecretServiceForRotation).getRotation(any());
     }
 
     @Test
     public void testPostValidationIfRotationCorrupted() {
-        when(secretService.getRotation(anyString())).thenReturn(new RotationSecret("new", null));
+        when(uncachedSecretServiceForRotation.getRotation(anyString())).thenReturn(new RotationSecret("new", null));
 
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
         assertThrows(SecretRotationException.class, () -> underTest.executePostValidation(rotationContext, null));
 
-        verify(secretService).getRotation(any());
+        verify(uncachedSecretServiceForRotation).getRotation(any());
     }
 
     @Test
     public void testVaultRotation() throws Exception {
-        when(secretService.putRotation(anyString(), anyString())).thenReturn("anything");
-        when(secretService.getRotation(anyString())).thenReturn(new RotationSecret("new", null));
+        when(uncachedSecretServiceForRotation.putRotation(anyString(), anyString())).thenReturn("anything");
+        when(uncachedSecretServiceForRotation.getRotation(anyString())).thenReturn(new RotationSecret("new", null));
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
         underTest.executeRotate(rotationContext, RotationMetadataTestUtil.metadataForRotation("resource", null));
 
-        verify(secretService, times(1)).putRotation(eq("secretPath"), eq("secret"));
+        verify(uncachedSecretServiceForRotation, times(1)).putRotation(eq("secretPath"), eq("secret"));
     }
 
     @Test
     public void testVaultRotationFinalization() throws Exception {
-        when(secretService.update(anyString(), anyString())).thenReturn("anything");
-        when(secretService.getRotation(anyString())).thenReturn(new RotationSecret("new", "old"));
+        when(uncachedSecretServiceForRotation.update(anyString(), anyString())).thenReturn("anything");
+        when(uncachedSecretServiceForRotation.getRotation(anyString())).thenReturn(new RotationSecret("new", "old"));
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
         underTest.executeFinalize(rotationContext, RotationMetadataTestUtil.metadataForFinalize("resource", null));
 
-        verify(secretService, times(1)).update(eq("secretPath"), eq("new"));
+        verify(uncachedSecretServiceForRotation, times(1)).update(eq("secretPath"), eq("new"));
     }
 
     @Test
     public void testVaultRotationRollback() throws Exception {
-        when(secretService.update(anyString(), anyString())).thenReturn("anything");
-        when(secretService.getRotation(anyString())).thenReturn(new RotationSecret("new", "old"));
+        when(uncachedSecretServiceForRotation.update(anyString(), anyString())).thenReturn("anything");
+        when(uncachedSecretServiceForRotation.getRotation(anyString())).thenReturn(new RotationSecret("new", "old"));
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();
         underTest.executeRollback(rotationContext, RotationMetadataTestUtil.metadataForRollback("resource", null));
 
-        verify(secretService, times(1)).update(eq("secretPath"), eq("old"));
+        verify(uncachedSecretServiceForRotation, times(1)).update(eq("secretPath"), eq("old"));
     }
 
     @Test
     public void testVaultRotationFailure() throws Exception {
-        when(secretService.putRotation(anyString(), anyString())).thenThrow(new Exception("anything"));
-        when(secretService.getRotation(anyString())).thenReturn(new RotationSecret("new", null));
+        when(uncachedSecretServiceForRotation.putRotation(anyString(), anyString())).thenThrow(new Exception("anything"));
+        when(uncachedSecretServiceForRotation.getRotation(anyString())).thenReturn(new RotationSecret("new", null));
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withVaultPathSecretMap(Map.of("secretPath", "secret"))
                 .build();

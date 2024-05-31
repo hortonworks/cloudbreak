@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -38,7 +38,7 @@ public class UmsDatabusCredentialRotationExecutorTest {
     private GrpcUmsClient grpcUmsClient;
 
     @Mock
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Mock
     private StackDtoService stackDtoService;
@@ -54,7 +54,7 @@ public class UmsDatabusCredentialRotationExecutorTest {
         mockStack();
         when(grpcUmsClient.generateAccessSecretKeyPair(any(), any(), any())).thenReturn(new AltusCredential("", "".toCharArray()));
         when(altusMachineUserService.getDataBusCredential(any(), any(), any())).thenReturn(new DataBusCredential());
-        when(secretService.putRotation(any(), any())).thenReturn("");
+        when(uncachedSecretServiceForRotation.putRotation(any(), any())).thenReturn("");
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             try {
@@ -81,7 +81,7 @@ public class UmsDatabusCredentialRotationExecutorTest {
         });
 
         verify(grpcUmsClient).deleteAccessKey(eq("oldAccessKey"), any());
-        verify(secretService).update(any(), contains("newAccessKey"));
+        verify(uncachedSecretServiceForRotation).update(any(), contains("newAccessKey"));
     }
 
     @Test
@@ -98,15 +98,15 @@ public class UmsDatabusCredentialRotationExecutorTest {
         });
 
         verify(grpcUmsClient).deleteAccessKey(eq("newAccessKey"), any());
-        verify(secretService).update(any(), contains("oldAccessKey"));
+        verify(uncachedSecretServiceForRotation).update(any(), contains("oldAccessKey"));
     }
 
     private void mockDeletion() throws Exception {
         String secret = "{\"machineUserName\":\"user\",\"accessKey\":\"newAccessKey\"}";
         String backup = "{\"machineUserName\":\"backup\",\"accessKey\":\"oldAccessKey\"}";
-        when(secretService.getRotation(any())).thenReturn(new RotationSecret(secret, backup));
+        when(uncachedSecretServiceForRotation.getRotation(any())).thenReturn(new RotationSecret(secret, backup));
         doNothing().when(grpcUmsClient).deleteAccessKey(any(), any());
-        when(secretService.update(any(), any())).thenReturn("");
+        when(uncachedSecretServiceForRotation.update(any(), any())).thenReturn("");
     }
 
     private void mockStack() {

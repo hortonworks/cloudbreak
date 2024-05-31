@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.CcmV2RetryingClient;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -87,7 +87,7 @@ class CcmV2JumpgateRotationExecutorTest {
     private CcmV2RetryingClient ccmV2Client;
 
     @Mock
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Mock
     private FreeIpaStackHealthDetailsService freeIpaStackHealthDetailsService;
@@ -123,7 +123,7 @@ class CcmV2JumpgateRotationExecutorTest {
         verify(imageService, times(1)).getByStack(eq(stack));
         verify(ccmUserDataService, times(1)).saveOrUpdateStackCcmParameters(eq(stack), eq(invertingProxyAgent), eq(NEW_USER_DATA),
                 eq(Optional.of(NEW_HMAC_KEY)));
-        verify(secretService, times(1)).putRotation(any(), eq(NEW_USER_DATA));
+        verify(uncachedSecretServiceForRotation, times(1)).putRotation(any(), eq(NEW_USER_DATA));
     }
 
     @Test
@@ -151,7 +151,7 @@ class CcmV2JumpgateRotationExecutorTest {
         verify(imageService, times(1)).getByStack(eq(stack));
         verify(ccmUserDataService, times(1)).saveOrUpdateStackCcmParameters(eq(stack), eq(invertingProxyAgent), eq(NEW_USER_DATA),
                 eq(Optional.of(NEW_HMAC_KEY)));
-        verify(secretService, times(1)).putRotation(any(), eq(NEW_USER_DATA));
+        verify(uncachedSecretServiceForRotation, times(1)).putRotation(any(), eq(NEW_USER_DATA));
     }
 
     @Test
@@ -162,10 +162,10 @@ class CcmV2JumpgateRotationExecutorTest {
         ImageEntity imageEntity = new ImageEntity();
         imageEntity.setGatewayUserdata(NEW_USER_DATA);
         when(imageService.getByStack(eq(stack))).thenReturn(imageEntity);
-        when(secretService.getRotation(any())).thenReturn(new RotationSecret(NEW_USER_DATA, OLD_USER_DATA));
+        when(uncachedSecretServiceForRotation.getRotation(any())).thenReturn(new RotationSecret(NEW_USER_DATA, OLD_USER_DATA));
         underTest.rollback(new RotationContext(ENVIRONMENT_CRN));
         verify(ccmV2Client, times(1)).deactivateAgentAccessKeyPair(anyString(), eq(NEW_ACCESS_KEY_ID));
-        verify(secretService, times(1)).update(any(), eq(OLD_USER_DATA));
+        verify(uncachedSecretServiceForRotation, times(1)).update(any(), eq(OLD_USER_DATA));
     }
 
     @Test
@@ -176,10 +176,10 @@ class CcmV2JumpgateRotationExecutorTest {
         ImageEntity imageEntity = new ImageEntity();
         imageEntity.setGatewayUserdata(NEW_USER_DATA);
         when(imageService.getByStack(eq(stack))).thenReturn(imageEntity);
-        when(secretService.getRotation(any())).thenReturn(new RotationSecret(OLD_USER_DATA, null));
+        when(uncachedSecretServiceForRotation.getRotation(any())).thenReturn(new RotationSecret(OLD_USER_DATA, null));
         underTest.rollback(new RotationContext(ENVIRONMENT_CRN));
         verify(ccmV2Client, never()).deactivateAgentAccessKeyPair(anyString(), anyString());
-        verify(secretService, never()).update(any(), anyString());
+        verify(uncachedSecretServiceForRotation, never()).update(any(), anyString());
     }
 
     @Test
@@ -190,10 +190,10 @@ class CcmV2JumpgateRotationExecutorTest {
         ImageEntity imageEntity = new ImageEntity();
         imageEntity.setGatewayUserdata(NEW_USER_DATA);
         when(imageService.getByStack(eq(stack))).thenReturn(imageEntity);
-        when(secretService.getRotation(any())).thenReturn(new RotationSecret(NEW_USER_DATA, OLD_USER_DATA));
+        when(uncachedSecretServiceForRotation.getRotation(any())).thenReturn(new RotationSecret(NEW_USER_DATA, OLD_USER_DATA));
         underTest.finalize(new RotationContext(ENVIRONMENT_CRN));
         verify(ccmV2Client, times(1)).deactivateAgentAccessKeyPair(anyString(), eq(OLD_ACCESS_KEY_ID));
-        verify(secretService, times(1)).update(any(), eq(NEW_USER_DATA));
+        verify(uncachedSecretServiceForRotation, times(1)).update(any(), eq(NEW_USER_DATA));
     }
 
     @Test
@@ -204,10 +204,10 @@ class CcmV2JumpgateRotationExecutorTest {
         ImageEntity imageEntity = new ImageEntity();
         imageEntity.setGatewayUserdata(NEW_USER_DATA);
         when(imageService.getByStack(eq(stack))).thenReturn(imageEntity);
-        when(secretService.getRotation(any())).thenReturn(new RotationSecret(OLD_USER_DATA, null));
+        when(uncachedSecretServiceForRotation.getRotation(any())).thenReturn(new RotationSecret(OLD_USER_DATA, null));
         underTest.finalize(new RotationContext(ENVIRONMENT_CRN));
         verify(ccmV2Client, never()).deactivateAgentAccessKeyPair(anyString(), anyString());
-        verify(secretService, never()).update(any(), anyString());
+        verify(uncachedSecretServiceForRotation, never()).update(any(), anyString());
     }
 
     @Test

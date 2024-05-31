@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataSecretModifier
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.util.UserDataReplacer;
@@ -53,7 +53,7 @@ public class UserDataRotationExecutor extends AbstractRotationExecutor<UserDataR
     private StackDtoService stackService;
 
     @Inject
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Inject
     private UserDataService userDataService;
@@ -136,7 +136,7 @@ public class UserDataRotationExecutor extends AbstractRotationExecutor<UserDataR
         return values
                 .stream()
                 .collect(Collectors.toMap(vaultPath -> vaultPath, vaultPath -> {
-                    RotationSecret rotationSecret = secretService.getRotation(vaultPath);
+                    RotationSecret rotationSecret = uncachedSecretServiceForRotation.getRotation(vaultPath);
                     if (!rotationSecret.isRotation()) {
                         LOGGER.error("Secret {} is not in a rotated state. User data modification failed.", vaultPath);
                         throw new SecretRotationException("Secret is not in a rotated state. User data modification failed.");

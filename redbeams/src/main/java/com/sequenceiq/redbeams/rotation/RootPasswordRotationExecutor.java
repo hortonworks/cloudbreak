@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
@@ -55,7 +55,7 @@ public class RootPasswordRotationExecutor extends AbstractRotationExecutor<Rotat
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Inject
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Inject
     private DatabaseServerConfigService databaseServerConfigService;
@@ -117,8 +117,9 @@ public class RootPasswordRotationExecutor extends AbstractRotationExecutor<Rotat
     private void updateRootPasswordOnProvider(RotationContext rotationContext, boolean rollback) {
         DBStack dbStack = dbStackService.getByCrn(rotationContext.getResourceCrn());
         DatabaseServerConfig databaseServerConfig = databaseServerConfigService.getByCrn(rotationContext.getResourceCrn());
-        RotationSecret databaseServerRootPasswordRotation = secretService.getRotation(dbStack.getDatabaseServer().getRootPasswordSecret());
-        RotationSecret databaseServerConfigRootPasswordRotation = secretService.getRotation(databaseServerConfig.getConnectionPasswordSecret());
+        RotationSecret databaseServerRootPasswordRotation = uncachedSecretServiceForRotation.getRotation(dbStack.getDatabaseServer().getRootPasswordSecret());
+        RotationSecret databaseServerConfigRootPasswordRotation = uncachedSecretServiceForRotation.getRotation(databaseServerConfig
+                .getConnectionPasswordSecret());
         if (databaseServerRootPasswordRotation.isRotation() && databaseServerConfigRootPasswordRotation.isRotation()) {
             CloudContext cloudContext = getCloudContext(dbStack);
             Credential credential = credentialService.getCredentialByEnvCrn(dbStack.getEnvironmentId());

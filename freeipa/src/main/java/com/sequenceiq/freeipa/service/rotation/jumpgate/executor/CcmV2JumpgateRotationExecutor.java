@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.util.UserDataReplacer;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
@@ -52,7 +52,7 @@ public class CcmV2JumpgateRotationExecutor extends AbstractRotationExecutor<Rota
     private CcmV2RetryingClient ccmV2Client;
 
     @Inject
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Inject
     private FreeIpaStackHealthDetailsService freeIpaStackHealthDetailsService;
@@ -82,7 +82,7 @@ public class CcmV2JumpgateRotationExecutor extends AbstractRotationExecutor<Rota
                 .getUserData();
 
         ccmUserDataService.saveOrUpdateStackCcmParameters(stack, updatedInvertingProxyAgent, modifiedUserData, hmacKey);
-        secretService.putRotation(image.getGatewayUserdataSecret().getSecret(), modifiedUserData);
+        uncachedSecretServiceForRotation.putRotation(image.getGatewayUserdataSecret().getSecret(), modifiedUserData);
     }
 
     @Override
@@ -91,11 +91,11 @@ public class CcmV2JumpgateRotationExecutor extends AbstractRotationExecutor<Rota
         Crn environmentCrn = Crn.safeFromString(resourceCrn);
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(resourceCrn, environmentCrn.getAccountId());
         ImageEntity image = imageService.getByStack(stack);
-        RotationSecret gatewayUserDataSecret = secretService.getRotation(image.getGatewayUserdataSecret().getSecret());
+        RotationSecret gatewayUserDataSecret = uncachedSecretServiceForRotation.getRotation(image.getGatewayUserdataSecret().getSecret());
         if (gatewayUserDataSecret.isRotation()) {
             String newAccessKeyId = new UserDataReplacer(gatewayUserDataSecret.getSecret()).extractValue(CCM_V2_AGENT_ACCESS_KEY_ID);
             ccmV2Client.deactivateAgentAccessKeyPair(environmentCrn.getAccountId(), newAccessKeyId);
-            secretService.update(image.getGatewayUserdataSecret().getSecret(), gatewayUserDataSecret.getBackupSecret());
+            uncachedSecretServiceForRotation.update(image.getGatewayUserdataSecret().getSecret(), gatewayUserDataSecret.getBackupSecret());
         } else {
             LOGGER.warn("Gateway user data is not in rotation state in Vault, rollback is not possible, return without errors.");
         }
@@ -107,11 +107,11 @@ public class CcmV2JumpgateRotationExecutor extends AbstractRotationExecutor<Rota
         Crn environmentCrn = Crn.safeFromString(resourceCrn);
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(resourceCrn, environmentCrn.getAccountId());
         ImageEntity image = imageService.getByStack(stack);
-        RotationSecret gatewayUserDataSecret = secretService.getRotation(image.getGatewayUserdataSecret().getSecret());
+        RotationSecret gatewayUserDataSecret = uncachedSecretServiceForRotation.getRotation(image.getGatewayUserdataSecret().getSecret());
         if (gatewayUserDataSecret.isRotation()) {
             String originalAccessKeyId = new UserDataReplacer(gatewayUserDataSecret.getBackupSecret()).extractValue(CCM_V2_AGENT_ACCESS_KEY_ID);
             ccmV2Client.deactivateAgentAccessKeyPair(environmentCrn.getAccountId(), originalAccessKeyId);
-            secretService.update(image.getGatewayUserdataSecret().getSecret(), gatewayUserDataSecret.getSecret());
+            uncachedSecretServiceForRotation.update(image.getGatewayUserdataSecret().getSecret(), gatewayUserDataSecret.getSecret());
         } else {
             LOGGER.warn("Gateway user data is not in rotation state in Vault, finalize is not possible, return without errors.");
         }

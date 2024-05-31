@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext
 import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
@@ -61,7 +61,7 @@ class SaltBootRotationContextProviderTest {
     private SecurityConfigService securityConfigService;
 
     @Mock
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Mock
     private GatewayConfigService gatewayConfigService;
@@ -99,8 +99,8 @@ class SaltBootRotationContextProviderTest {
 
     @Test
     public void testSaltBootContextProviderProvidesAllContextData() {
-        when(secretService.getRotation(SALT_BOOT_PASSWORD_VAULT_PATH)).thenReturn(new RotationSecret(NEW_PASSWORD, OLD_PASSWORD));
-        when(secretService.getRotation(SALT_BOOT_PRIVATE_KEY_VAULT_PATH))
+        when(uncachedSecretServiceForRotation.getRotation(SALT_BOOT_PASSWORD_VAULT_PATH)).thenReturn(new RotationSecret(NEW_PASSWORD, OLD_PASSWORD));
+        when(uncachedSecretServiceForRotation.getRotation(SALT_BOOT_PRIVATE_KEY_VAULT_PATH))
                 .thenReturn(new RotationSecret(NEW_PRIVATE_KEY, OLD_PRIVATE_KEY));
 
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);

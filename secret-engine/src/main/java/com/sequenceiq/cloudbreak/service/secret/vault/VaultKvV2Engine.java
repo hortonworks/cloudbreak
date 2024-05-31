@@ -75,7 +75,17 @@ public class VaultKvV2Engine implements SecretEngine {
 
     @Override
     @Cacheable(cacheNames = VaultConstants.CACHE_NAME, key = "#fullSecretPath")
-    public Map<String, String> get(@NotNull String fullSecretPath) {
+    public Map<String, String> getWithCache(@NotNull String fullSecretPath) {
+        return get(fullSecretPath);
+    }
+
+    @Override
+    @CacheEvict(cacheNames = VaultConstants.CACHE_NAME, key = "#fullSecretPath")
+    public Map<String, String> getWithoutCache(@NotNull String fullSecretPath) {
+        return get(fullSecretPath);
+    }
+
+    private Map<String, String> get(@NotNull String fullSecretPath) {
         validatePathPattern(fullSecretPath);
         long start = System.currentTimeMillis();
         Map<String, String> ret = null;

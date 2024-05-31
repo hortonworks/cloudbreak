@@ -45,7 +45,7 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.AbstractRdsConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,7 +72,7 @@ public class CMDBPasswordRotationContextProviderTest {
     private ExitCriteriaProvider exitCriteriaProvider;
 
     @Mock
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Mock
     private PostgresConfigService postgresConfigService;
@@ -107,7 +107,7 @@ public class CMDBPasswordRotationContextProviderTest {
         when(rdsConfigService.getClustersUsingResource(any())).thenReturn(Set.of(cluster));
         when(stackService.getByCrn(anyString())).thenReturn(stackDto);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
-        when(secretService.getRotation(any())).thenReturn(new RotationSecret("new", "old"));
+        when(uncachedSecretServiceForRotation.getRotation(any())).thenReturn(new RotationSecret("new", "old"));
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts("resource");
 
         assertEquals(4, contexts.size());

@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.vault.ThreadBasedVaultReadFieldProvider;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -40,7 +40,7 @@ public class FreeIpaAdminPasswordRotationExecutor extends AbstractRotationExecut
     private StackService stackService;
 
     @Inject
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Inject
     private FreeIpaAdminPasswordRotationUtil freeIpaAdminPasswordRotationUtil;
@@ -50,7 +50,7 @@ public class FreeIpaAdminPasswordRotationExecutor extends AbstractRotationExecut
         String environmentCrnAsString = rotationContext.getResourceCrn();
         Crn environmentCrn = Crn.safeFromString(environmentCrnAsString);
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrnAsString, environmentCrn.getAccountId());
-        RotationSecret adminPasswordRotationSecret = secretService.getRotation(rotationContext.getAdminPasswordSecret());
+        RotationSecret adminPasswordRotationSecret = uncachedSecretServiceForRotation.getRotation(rotationContext.getAdminPasswordSecret());
         if (adminPasswordRotationSecret.isRotation()) {
             try {
                 String newPassword = adminPasswordRotationSecret.getSecret();
@@ -79,7 +79,7 @@ public class FreeIpaAdminPasswordRotationExecutor extends AbstractRotationExecut
     public void rollback(FreeIpaAdminPasswordRotationContext rotationContext) {
         String environmentCrnAsString = rotationContext.getResourceCrn();
         Crn environmentCrn = Crn.safeFromString(environmentCrnAsString);
-        RotationSecret adminPasswordRotationSecret = secretService.getRotation(rotationContext.getAdminPasswordSecret());
+        RotationSecret adminPasswordRotationSecret = uncachedSecretServiceForRotation.getRotation(rotationContext.getAdminPasswordSecret());
         String backupPassword = adminPasswordRotationSecret.getBackupSecret();
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrnAsString, environmentCrn.getAccountId());
         try {

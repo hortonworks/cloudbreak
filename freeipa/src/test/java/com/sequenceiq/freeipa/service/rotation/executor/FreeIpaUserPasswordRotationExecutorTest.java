@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.User;
@@ -34,14 +34,14 @@ public class FreeIpaUserPasswordRotationExecutorTest {
     private StackService stackService;
 
     @Mock
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @InjectMocks
     private FreeIpaUserPasswordRotationExecutor underTest;
 
     @Test
     void testRotate() throws FreeIpaClientException {
-        when(secretService.getRotation(any())).thenReturn(new RotationSecret("secret", "backup"));
+        when(uncachedSecretServiceForRotation.getRotation(any())).thenReturn(new RotationSecret("secret", "backup"));
         Stack stack = mock(Stack.class);
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(any(), any())).thenReturn(stack);
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
@@ -57,7 +57,7 @@ public class FreeIpaUserPasswordRotationExecutorTest {
 
     @Test
     void testClientCreationDuringRotate() throws FreeIpaClientException {
-        when(secretService.getRotation(any())).thenReturn(new RotationSecret("secret", "backup"));
+        when(uncachedSecretServiceForRotation.getRotation(any())).thenReturn(new RotationSecret("secret", "backup"));
         Stack stack = mock(Stack.class);
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(any(), any())).thenReturn(stack);
         when(freeIpaClientFactory.getFreeIpaClientForStack(any())).thenThrow(new FreeIpaClientException("error"));
@@ -69,7 +69,7 @@ public class FreeIpaUserPasswordRotationExecutorTest {
 
     @Test
     void testVaultCorruptionDuringRotate() {
-        when(secretService.getRotation(any())).thenReturn(new RotationSecret("secret", null));
+        when(uncachedSecretServiceForRotation.getRotation(any())).thenReturn(new RotationSecret("secret", null));
         assertThrows(SecretRotationException.class, () -> underTest.rotate(FreeIpaUserPasswordRotationContext.builder()
                 .withPasswordSecret("passPath")
                 .build()));
@@ -77,7 +77,7 @@ public class FreeIpaUserPasswordRotationExecutorTest {
 
     @Test
     void testRollback() throws FreeIpaClientException {
-        when(secretService.getRotation(any())).thenReturn(new RotationSecret("secret", "backup"));
+        when(uncachedSecretServiceForRotation.getRotation(any())).thenReturn(new RotationSecret("secret", "backup"));
         Stack stack = mock(Stack.class);
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(any(), any())).thenReturn(stack);
         FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
@@ -93,7 +93,7 @@ public class FreeIpaUserPasswordRotationExecutorTest {
 
     @Test
     void testVaultCorruptionDuringRollback() {
-        when(secretService.getRotation(any())).thenReturn(new RotationSecret("secret", null));
+        when(uncachedSecretServiceForRotation.getRotation(any())).thenReturn(new RotationSecret("secret", null));
         assertThrows(SecretRotationException.class, () -> underTest.rollback(FreeIpaUserPasswordRotationContext.builder()
                 .withPasswordSecret("passPath")
                 .build()));

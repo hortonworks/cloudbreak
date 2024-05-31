@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -62,7 +62,7 @@ public abstract class AbstractRdsConfigProvider {
     private EmbeddedDatabaseService embeddedDatabaseService;
 
     @Inject
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Inject
     private DbUsernameConverterService dbUsernameConverterService;
@@ -98,8 +98,8 @@ public abstract class AbstractRdsConfigProvider {
     public Map<String, Object> createServicePillarConfigMapForRotation(StackDto stackDto) {
         if (isRdsConfigNeeded(stackDto.getBlueprint(), stackDto.hasGateway(), isContainerizedDatalake(stackDto.getEnvironmentCrn()))) {
             RdsConfigWithoutCluster rdsConfig = getRdsConfig(stackDto);
-            RotationSecret databaseUser = secretService.getRotation(rdsConfig.getConnectionUserNamePath());
-            RotationSecret databasePassword = secretService.getRotation(rdsConfig.getConnectionPasswordPath());
+            RotationSecret databaseUser = uncachedSecretServiceForRotation.getRotation(rdsConfig.getConnectionUserNamePath());
+            RotationSecret databasePassword = uncachedSecretServiceForRotation.getRotation(rdsConfig.getConnectionPasswordPath());
             if (rdsConfig.getStatus() == ResourceStatus.DEFAULT && rdsConfig.getDatabaseEngine() != DatabaseVendor.EMBEDDED &&
                     databaseUser.isRotation() && databasePassword.isRotation()) {
                 Map<String, Object> postgres = new HashMap<>();
@@ -127,8 +127,8 @@ public abstract class AbstractRdsConfigProvider {
             DatabaseServerV4Response dbServerResponse = dbServerConfigurer.getDatabaseServer(databaseServerCrn);
             postgres.put("remote_db_url", dbServerResponse.getHost());
             postgres.put("remote_db_port", dbServerResponse.getPort());
-            postgres.put("remote_admin", secretService.getByResponse(dbServerResponse.getConnectionUserName()));
-            postgres.put("remote_admin_pw", secretService.getByResponse(dbServerResponse.getConnectionPassword()));
+            postgres.put("remote_admin", uncachedSecretServiceForRotation.getByResponse(dbServerResponse.getConnectionUserName()));
+            postgres.put("remote_admin_pw", uncachedSecretServiceForRotation.getByResponse(dbServerResponse.getConnectionPassword()));
         }
     }
 

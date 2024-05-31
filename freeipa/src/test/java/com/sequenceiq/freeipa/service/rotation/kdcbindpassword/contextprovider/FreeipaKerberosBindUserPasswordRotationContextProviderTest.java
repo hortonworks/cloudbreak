@@ -16,7 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.kerberos.KerberosConfig;
 import com.sequenceiq.freeipa.kerberos.v1.KerberosConfigV1Service;
@@ -30,7 +30,7 @@ public class FreeipaKerberosBindUserPasswordRotationContextProviderTest {
     private KerberosConfigV1Service kerberosConfigV1Service;
 
     @Mock
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @InjectMocks
     private FreeipaKerberosBindUserPasswordRotationContextProvider underTest;
@@ -41,7 +41,7 @@ public class FreeipaKerberosBindUserPasswordRotationContextProviderTest {
         when(kerberosConfig.getPasswordSecret()).thenReturn("password");
         when(kerberosConfig.getClusterName()).thenReturn("clustername");
         when(kerberosConfigV1Service.getForCluster(any(), any(), any())).thenReturn(kerberosConfig);
-        when(secretService.get(any())).thenReturn("username");
+        when(uncachedSecretServiceForRotation.get(any())).thenReturn("username");
         Map<SecretRotationStep, ? extends RotationContext> contexts = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.getContextsWithProperties("crn", Map.of("CLUSTER_NAME", "clustername")));
         assertEquals(2, contexts.size());

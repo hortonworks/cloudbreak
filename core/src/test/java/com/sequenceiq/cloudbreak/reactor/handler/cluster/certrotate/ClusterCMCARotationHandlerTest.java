@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterCMC
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterCertificatesRotationFailed;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -44,7 +44,7 @@ public class ClusterCMCARotationHandlerTest {
     private StackDtoService stackDtoService;
 
     @Mock
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Mock
     private ClusterHostServiceRunner clusterHostServiceRunner;
@@ -59,7 +59,7 @@ public class ClusterCMCARotationHandlerTest {
     void testHandlerWhenCMCARotationNotNeeded() {
         underTest.doAccept(new HandlerEvent<>(new Event<>(new ClusterCMCARotationRequest(1L, CertificateRotationType.HOST_CERTS))));
 
-        verifyNoInteractions(stackDtoService, secretService, clusterHostServiceRunner, saltService);
+        verifyNoInteractions(stackDtoService, uncachedSecretServiceForRotation, clusterHostServiceRunner, saltService);
     }
 
     @Test
@@ -70,7 +70,7 @@ public class ClusterCMCARotationHandlerTest {
         Selectable selectable = underTest.doAccept(new HandlerEvent<>(new Event<>(new ClusterCMCARotationRequest(1L, CertificateRotationType.ALL))));
 
         assertEquals(selectable.getClass(), ClusterCMCARotationSuccess.class);
-        verify(secretService, times(2)).update(any(), any());
+        verify(uncachedSecretServiceForRotation, times(2)).update(any(), any());
         verify(saltService).updateSaltPillar(any(), any(), any());
         verify(saltService).executeSaltState(any(), any(), any());
     }
@@ -83,13 +83,13 @@ public class ClusterCMCARotationHandlerTest {
         Selectable selectable = underTest.doAccept(new HandlerEvent<>(new Event<>(new ClusterCMCARotationRequest(1L, CertificateRotationType.ALL))));
 
         assertEquals(selectable.getClass(), ClusterCertificatesRotationFailed.class);
-        verify(secretService, times(2)).update(any(), any());
+        verify(uncachedSecretServiceForRotation, times(2)).update(any(), any());
         verify(saltService).updateSaltPillar(any(), any(), any());
         verify(saltService).executeSaltState(any(), any(), eq(List.of("cloudera.manager.rotate.cmca-renewal")));
     }
 
     private void mockCmcaRotation() throws Exception {
-        when(secretService.update(any(), any())).thenReturn("secret");
+        when(uncachedSecretServiceForRotation.update(any(), any())).thenReturn("secret");
         doNothing().when(saltService).updateSaltPillar(any(), any(), any());
         when(clusterHostServiceRunner.getClouderaManagerAutoTlsPillarProperties(any())).thenReturn(new SaltPillarProperties(null, null));
         StackDto stackDto = mock(StackDto.class);

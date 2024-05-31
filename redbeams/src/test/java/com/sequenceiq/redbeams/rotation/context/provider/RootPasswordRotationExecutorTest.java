@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNotificationService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
@@ -75,7 +75,7 @@ class RootPasswordRotationExecutorTest {
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Mock
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Mock
     private DatabaseServerConfigService databaseServerConfigService;
@@ -132,15 +132,16 @@ class RootPasswordRotationExecutorTest {
         DatabaseServerConfig databaseServerConfig = mock(DatabaseServerConfig.class);
         when(databaseServerConfig.getConnectionPasswordSecret()).thenReturn(CONNECTION_PASSWORD);
         when(databaseServerConfigService.getByCrn(RESOURCE_CRN)).thenReturn(databaseServerConfig);
-        when(secretService.getRotation(eq(ROOT_PASSWORD))).thenReturn(new RotationSecret(ROOT_PASSWORD, ROOT_PASSWORD_BACKUP));
-        when(secretService.getRotation(eq(CONNECTION_PASSWORD))).thenReturn(new RotationSecret(CONNECTION_PASSWORD, CONNECTION_PASSWORD_BACKUP));
+        when(uncachedSecretServiceForRotation.getRotation(eq(ROOT_PASSWORD))).thenReturn(new RotationSecret(ROOT_PASSWORD, ROOT_PASSWORD_BACKUP));
+        when(uncachedSecretServiceForRotation.getRotation(eq(CONNECTION_PASSWORD)))
+                .thenReturn(new RotationSecret(CONNECTION_PASSWORD, CONNECTION_PASSWORD_BACKUP));
         ResourceConnector resourceConnector = mockResourceConnector(dbStack);
         underTest.executeRotate(new RotationContext(RESOURCE_CRN), null);
 
         verify(dbStackService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(databaseServerConfigService, times(1)).getByCrn(eq(RESOURCE_CRN));
-        verify(secretService, times(1)).getRotation(eq(ROOT_PASSWORD));
-        verify(secretService, times(1)).getRotation(eq(CONNECTION_PASSWORD));
+        verify(uncachedSecretServiceForRotation, times(1)).getRotation(eq(ROOT_PASSWORD));
+        verify(uncachedSecretServiceForRotation, times(1)).getRotation(eq(CONNECTION_PASSWORD));
         verify(credentialService, times(1)).getCredentialByEnvCrn(any());
         verify(credentialToCloudCredentialConverter, times(1)).convert(any());
         verify(cloudPlatformConnectors, times(1)).get(any());
@@ -154,8 +155,8 @@ class RootPasswordRotationExecutorTest {
         DatabaseServerConfig databaseServerConfig = mock(DatabaseServerConfig.class);
         when(databaseServerConfig.getConnectionPasswordSecret()).thenReturn(CONNECTION_PASSWORD);
         when(databaseServerConfigService.getByCrn(RESOURCE_CRN)).thenReturn(databaseServerConfig);
-        when(secretService.getRotation(eq(ROOT_PASSWORD))).thenReturn(new RotationSecret(ROOT_PASSWORD, null));
-        when(secretService.getRotation(eq(CONNECTION_PASSWORD))).thenReturn(new RotationSecret(CONNECTION_PASSWORD, null));
+        when(uncachedSecretServiceForRotation.getRotation(eq(ROOT_PASSWORD))).thenReturn(new RotationSecret(ROOT_PASSWORD, null));
+        when(uncachedSecretServiceForRotation.getRotation(eq(CONNECTION_PASSWORD))).thenReturn(new RotationSecret(CONNECTION_PASSWORD, null));
 
         SecretRotationException secretRotationException = assertThrows(SecretRotationException.class,
                 () -> underTest.executeRotate(new RotationContext(RESOURCE_CRN), RotationMetadataTestUtil.metadataForRotation("resource", null)));
@@ -164,8 +165,8 @@ class RootPasswordRotationExecutorTest {
                         "reason: Root password is not in rotation state in Vault, rotation is not possible.", secretRotationException.getMessage());
         verify(dbStackService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(databaseServerConfigService, times(1)).getByCrn(eq(RESOURCE_CRN));
-        verify(secretService, times(1)).getRotation(eq(ROOT_PASSWORD));
-        verify(secretService, times(1)).getRotation(eq(CONNECTION_PASSWORD));
+        verify(uncachedSecretServiceForRotation, times(1)).getRotation(eq(ROOT_PASSWORD));
+        verify(uncachedSecretServiceForRotation, times(1)).getRotation(eq(CONNECTION_PASSWORD));
         verify(credentialService, never()).getCredentialByEnvCrn(any());
         verify(credentialToCloudCredentialConverter, never()).convert(any());
         verify(cloudPlatformConnectors, never()).get(any());
@@ -178,15 +179,16 @@ class RootPasswordRotationExecutorTest {
         DatabaseServerConfig databaseServerConfig = mock(DatabaseServerConfig.class);
         when(databaseServerConfig.getConnectionPasswordSecret()).thenReturn(CONNECTION_PASSWORD);
         when(databaseServerConfigService.getByCrn(RESOURCE_CRN)).thenReturn(databaseServerConfig);
-        when(secretService.getRotation(eq(ROOT_PASSWORD))).thenReturn(new RotationSecret(ROOT_PASSWORD, ROOT_PASSWORD_BACKUP));
-        when(secretService.getRotation(eq(CONNECTION_PASSWORD))).thenReturn(new RotationSecret(CONNECTION_PASSWORD, CONNECTION_PASSWORD_BACKUP));
+        when(uncachedSecretServiceForRotation.getRotation(eq(ROOT_PASSWORD))).thenReturn(new RotationSecret(ROOT_PASSWORD, ROOT_PASSWORD_BACKUP));
+        when(uncachedSecretServiceForRotation.getRotation(eq(CONNECTION_PASSWORD)))
+                .thenReturn(new RotationSecret(CONNECTION_PASSWORD, CONNECTION_PASSWORD_BACKUP));
         ResourceConnector resourceConnector = mockResourceConnector(dbStack);
         underTest.executeRollback(new RotationContext(RESOURCE_CRN), null);
 
         verify(dbStackService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(databaseServerConfigService, times(1)).getByCrn(eq(RESOURCE_CRN));
-        verify(secretService, times(1)).getRotation(eq(ROOT_PASSWORD));
-        verify(secretService, times(1)).getRotation(eq(CONNECTION_PASSWORD));
+        verify(uncachedSecretServiceForRotation, times(1)).getRotation(eq(ROOT_PASSWORD));
+        verify(uncachedSecretServiceForRotation, times(1)).getRotation(eq(CONNECTION_PASSWORD));
         verify(credentialService, times(1)).getCredentialByEnvCrn(any());
         verify(credentialToCloudCredentialConverter, times(1)).convert(any());
         verify(cloudPlatformConnectors, times(1)).get(any());
@@ -206,14 +208,14 @@ class RootPasswordRotationExecutorTest {
         DatabaseServerConfig databaseServerConfig = mock(DatabaseServerConfig.class);
         when(databaseServerConfig.getConnectionPasswordSecret()).thenReturn(CONNECTION_PASSWORD);
         when(databaseServerConfigService.getByCrn(RESOURCE_CRN)).thenReturn(databaseServerConfig);
-        when(secretService.getRotation(eq(ROOT_PASSWORD))).thenReturn(new RotationSecret(ROOT_PASSWORD, null));
-        when(secretService.getRotation(eq(CONNECTION_PASSWORD))).thenReturn(new RotationSecret(CONNECTION_PASSWORD, null));
+        when(uncachedSecretServiceForRotation.getRotation(eq(ROOT_PASSWORD))).thenReturn(new RotationSecret(ROOT_PASSWORD, null));
+        when(uncachedSecretServiceForRotation.getRotation(eq(CONNECTION_PASSWORD))).thenReturn(new RotationSecret(CONNECTION_PASSWORD, null));
         underTest.executeRollback(new RotationContext(RESOURCE_CRN), null);
 
         verify(dbStackService, times(1)).getByCrn(eq(RESOURCE_CRN));
         verify(databaseServerConfigService, times(1)).getByCrn(eq(RESOURCE_CRN));
-        verify(secretService, times(1)).getRotation(eq(ROOT_PASSWORD));
-        verify(secretService, times(1)).getRotation(eq(CONNECTION_PASSWORD));
+        verify(uncachedSecretServiceForRotation, times(1)).getRotation(eq(ROOT_PASSWORD));
+        verify(uncachedSecretServiceForRotation, times(1)).getRotation(eq(CONNECTION_PASSWORD));
         verify(credentialService, never()).getCredentialByEnvCrn(any());
         verify(credentialToCloudCredentialConverter, never()).convert(any());
         verify(cloudPlatformConnectors, never()).get(any());
@@ -224,8 +226,8 @@ class RootPasswordRotationExecutorTest {
     void finalizeShouldDoNothing() {
         verify(dbStackService, never()).getByCrn(eq(RESOURCE_CRN));
         verify(databaseServerConfigService, never()).getByCrn(eq(RESOURCE_CRN));
-        verify(secretService, never()).getRotation(eq(ROOT_PASSWORD));
-        verify(secretService, never()).getRotation(eq(CONNECTION_PASSWORD));
+        verify(uncachedSecretServiceForRotation, never()).getRotation(eq(ROOT_PASSWORD));
+        verify(uncachedSecretServiceForRotation, never()).getRotation(eq(CONNECTION_PASSWORD));
         verify(credentialService, never()).getCredentialByEnvCrn(any());
         verify(credentialToCloudCredentialConverter, never()).convert(any());
         verify(cloudPlatformConnectors, never()).get(any());

@@ -44,7 +44,7 @@ import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataSecretModifier
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.util.UserDataReplacer;
@@ -69,7 +69,7 @@ class UserDataRotationExecutorTest {
     private StackDtoService stackService;
 
     @Mock
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Mock
     private UserDataService userDataService;
@@ -148,8 +148,8 @@ class UserDataRotationExecutorTest {
                                 export TEST_B=B1
                                 export TEST_C=C1
                                 """));
-        when(secretService.getRotation("path/secretA")).thenReturn(new RotationSecret("A2", "A1"));
-        when(secretService.getRotation("path/secretC")).thenReturn(new RotationSecret("C2", "C1"));
+        when(uncachedSecretServiceForRotation.getRotation("path/secretA")).thenReturn(new RotationSecret("A2", "A1"));
+        when(uncachedSecretServiceForRotation.getRotation("path/secretC")).thenReturn(new RotationSecret("C2", "C1"));
 
         underTest.rotate(new UserDataRotationContext(RESOURCE_CRN,
                 List.of(Pair.of(new TestAModifier(), "path/secretA"), Pair.of(new TestCModifier(), "path/secretC"))));
@@ -170,7 +170,7 @@ class UserDataRotationExecutorTest {
 
     @Test
     public void rotateThrowsExceptionIfSecretsAreNotRotated() {
-        when(secretService.getRotation("path/secretA")).thenReturn(new RotationSecret("A1", null));
+        when(uncachedSecretServiceForRotation.getRotation("path/secretA")).thenReturn(new RotationSecret("A1", null));
 
         SecretRotationException exception = assertThrows(SecretRotationException.class,
                 () -> underTest.rotate(new UserDataRotationContext(RESOURCE_CRN, List.of(Pair.of(new TestAModifier(), "path/secretA")))));
@@ -196,8 +196,8 @@ class UserDataRotationExecutorTest {
                                 export TEST_B=B1
                                 export TEST_C=C2
                                 """));
-        when(secretService.getRotation("path/secretA")).thenReturn(new RotationSecret("A2", "A1"));
-        when(secretService.getRotation("path/secretC")).thenReturn(new RotationSecret("C2", "C1"));
+        when(uncachedSecretServiceForRotation.getRotation("path/secretA")).thenReturn(new RotationSecret("A2", "A1"));
+        when(uncachedSecretServiceForRotation.getRotation("path/secretC")).thenReturn(new RotationSecret("C2", "C1"));
 
         underTest.rollback(new UserDataRotationContext(RESOURCE_CRN,
                 List.of(Pair.of(new TestAModifier(), "path/secretA"), Pair.of(new TestCModifier(), "path/secretC"))));
@@ -217,7 +217,7 @@ class UserDataRotationExecutorTest {
 
     @Test
     public void rollbackThrowsExceptionIfSecretsAreNotRotated() {
-        when(secretService.getRotation("path/secretA")).thenReturn(new RotationSecret("A1", null));
+        when(uncachedSecretServiceForRotation.getRotation("path/secretA")).thenReturn(new RotationSecret("A1", null));
 
         SecretRotationException exception = assertThrows(SecretRotationException.class,
                 () -> underTest.rotate(new UserDataRotationContext(RESOURCE_CRN, List.of(Pair.of(new TestAModifier(), "path/secretA")))));

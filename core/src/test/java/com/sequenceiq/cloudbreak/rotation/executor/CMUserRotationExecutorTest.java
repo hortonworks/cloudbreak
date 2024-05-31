@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.rotation.service.notification.SecretRotationNot
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @ExtendWith(MockitoExtension.class)
@@ -51,7 +51,7 @@ public class CMUserRotationExecutorTest {
     private StackDtoService stackService;
 
     @Mock
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Mock
     private SecretRotationNotificationService secretRotationNotificationService;
@@ -106,7 +106,7 @@ public class CMUserRotationExecutorTest {
     @Test
     public void testPostValidationIfVaultCorrupted() throws Exception {
         ClusterSecurityService clusterSecurityService = setup();
-        when(secretService.getRotation(anyString())).thenAnswer(i ->
+        when(uncachedSecretServiceForRotation.getRotation(anyString())).thenAnswer(i ->
                 new RotationSecret(String.valueOf(i.getArguments()[0]), null));
 
         CMUserRotationContext rotationContext = getRotationContext();
@@ -131,7 +131,7 @@ public class CMUserRotationExecutorTest {
 
     @Test
     public void testRotationIfVaultCompromised() {
-        when(secretService.getRotation(anyString())).thenAnswer(i ->
+        when(uncachedSecretServiceForRotation.getRotation(anyString())).thenAnswer(i ->
                 new RotationSecret(String.valueOf(i.getArguments()[0]), null));
         CMUserRotationContext rotationContext = getRotationContext();
 
@@ -141,7 +141,7 @@ public class CMUserRotationExecutorTest {
 
     @Test
     public void testRollbackIfVaultCompromised() {
-        when(secretService.getRotation(anyString())).thenAnswer(i ->
+        when(uncachedSecretServiceForRotation.getRotation(anyString())).thenAnswer(i ->
                 new RotationSecret(String.valueOf(i.getArguments()[0]), null));
         CMUserRotationContext rotationContext = getRotationContext();
 
@@ -151,7 +151,7 @@ public class CMUserRotationExecutorTest {
 
     @Test
     public void testFinalizeIfVaultCompromised() {
-        when(secretService.getRotation(anyString())).thenAnswer(i ->
+        when(uncachedSecretServiceForRotation.getRotation(anyString())).thenAnswer(i ->
                 new RotationSecret(String.valueOf(i.getArguments()[0]), null));
         CMUserRotationContext rotationContext = getRotationContext();
 
@@ -256,8 +256,8 @@ public class CMUserRotationExecutorTest {
         ClusterSecurityService clusterSecurityService = mock(ClusterSecurityService.class);
         lenient().when(clusterApi.clusterSecurityService()).thenReturn(clusterSecurityService);
         lenient().when(clusterApiConnectors.getConnector(any(StackDtoDelegate.class))).thenReturn(clusterApi);
-        lenient().when(secretService.get(anyString())).thenAnswer(i -> i.getArguments()[0]);
-        lenient().when(secretService.getRotation(anyString())).thenAnswer(i ->
+        lenient().when(uncachedSecretServiceForRotation.get(anyString())).thenAnswer(i -> i.getArguments()[0]);
+        lenient().when(uncachedSecretServiceForRotation.getRotation(anyString())).thenAnswer(i ->
                 new RotationSecret(String.valueOf(i.getArguments()[0]), "old" + i.getArguments()[0]));
         return clusterSecurityService;
     }

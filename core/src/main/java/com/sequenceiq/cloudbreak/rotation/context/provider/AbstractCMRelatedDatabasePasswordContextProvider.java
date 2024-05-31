@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.AbstractRdsConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 
@@ -44,7 +44,7 @@ public abstract class AbstractCMRelatedDatabasePasswordContextProvider {
     private RdsConfigService rdsConfigService;
 
     @Inject
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Inject
     private List<AbstractRdsConfigProvider> rdsConfigProviders;
@@ -142,8 +142,8 @@ public abstract class AbstractCMRelatedDatabasePasswordContextProvider {
     }
 
     private Pair<String, String> getUserPassPairs(RDSConfig rdsConfig) {
-        RotationSecret user = secretService.getRotation(rdsConfig.getConnectionUserNameSecret());
-        RotationSecret password = secretService.getRotation(rdsConfig.getConnectionPasswordSecret());
+        RotationSecret user = uncachedSecretServiceForRotation.getRotation(rdsConfig.getConnectionUserNameSecret());
+        RotationSecret password = uncachedSecretServiceForRotation.getRotation(rdsConfig.getConnectionPasswordSecret());
         if (user.isRotation() && password.isRotation()) {
             return Pair.of(user.getSecret(), password.getSecret());
         } else if (!user.isRotation() && !password.isRotation()) {

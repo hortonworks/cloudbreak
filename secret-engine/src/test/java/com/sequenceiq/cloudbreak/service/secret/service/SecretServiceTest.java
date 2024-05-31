@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +27,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
-import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecretConverter;
 import com.sequenceiq.cloudbreak.vault.VaultConstants;
@@ -63,6 +63,11 @@ public class SecretServiceTest {
         });
     }
 
+    @AfterEach
+    public void tearDown() {
+        verify(persistentEngine, times(0)).getWithoutCache(anyString());
+    }
+
     @Test
     public void testPutOk() throws Exception {
         Map<String, String> value = Collections.singletonMap(VaultConstants.FIELD_SECRET, "value");
@@ -82,7 +87,7 @@ public class SecretServiceTest {
 
     @Test
     public void testGetSecretStringNull() {
-        when(persistentEngine.get(anyString())).thenReturn(null);
+        when(persistentEngine.getWithCache(anyString())).thenReturn(null);
 
         String result = underTest.get(SECRET_JSON);
 
@@ -94,7 +99,7 @@ public class SecretServiceTest {
     @Test
     public void testGetSecretOk() {
 
-        when(persistentEngine.get("app/path")).thenReturn(Collections.singletonMap(VaultConstants.FIELD_SECRET, "value"));
+        when(persistentEngine.getWithCache("app/path")).thenReturn(Collections.singletonMap(VaultConstants.FIELD_SECRET, "value"));
 
         String result = underTest.get(SECRET_JSON);
 
@@ -116,82 +121,14 @@ public class SecretServiceTest {
     }
 
     @Test
-    void testGetLatestSecretByPathAndFieldPathNull() {
-        String result = underTest.getBySecretPath(null, "field");
-        assertNull(result);
-    }
-
-    @Test
-    void testGetLatestSecretWithoutCacheNull() {
-        String result = underTest.getBySecretPath("path", null);
-        assertNull(result);
-    }
-
-    @Test
-    void testGetLatestSecretByPathAndFieldPath() {
-        Map<String, String> value = Collections.singletonMap(VaultConstants.FIELD_SECRET, "hello");
-        when(persistentEngine.get("path")).thenReturn(value);
-
-        String result = underTest.getBySecretPath("path", "secret");
-
-        verify(persistentEngine, times(1)).get(eq("path"));
-        assertEquals("hello", result);
-    }
-
-    @Test
-    public void testPutRotation() throws Exception {
-        String vaultSecretJson = "{\"enginePath\":\"secret\",\"engineClass\":\"com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine\"," +
-                "\"path\":\"app/path\",\"version\":1}";
-        String newValue = "newSecretValue";
-        String oldSecretValue = "oldSecretValue";
-
-        when(persistentEngine.get("app/path")).thenReturn(Collections.singletonMap(VaultConstants.FIELD_SECRET, oldSecretValue));
-        when(persistentEngine.put(anyString(), any())).thenReturn("updatedSecret");
-
-        String result = underTest.putRotation(vaultSecretJson, newValue);
-
-        verify(persistentEngine, times(1)).get(anyString());
-        verify(persistentEngine, times(1)).put(anyString(), any());
-        assertEquals("updatedSecret", result);
-    }
-
-    @Test
-    public void testUpdate() throws Exception {
-        String vaultSecretJson = "{\"enginePath\":\"secret\",\"engineClass\":\"com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine\"," +
-                "\"path\":\"app/path\",\"version\":1}";
-        String newValue = "newSecretValue";
-
-        when(persistentEngine.put(anyString(), any())).thenReturn("updatedSecret");
-
-        String result = underTest.update(vaultSecretJson, newValue);
-
-        verify(persistentEngine, times(1)).put(anyString(), any());
-        assertEquals("updatedSecret", result);
-    }
-
-    @Test
-    public void testGetRotation() {
-        String vaultSecretJson = "{\"enginePath\":\"secret\",\"engineClass\":\"com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine\"," +
-                "\"path\":\"app/path\",\"version\":1}";
-
-        when(persistentEngine.get(anyString())).thenReturn(Map.of(VaultConstants.FIELD_SECRET, "secretValue", VaultConstants.FIELD_BACKUP, "backupValue"));
-
-        RotationSecret result = underTest.getRotation(vaultSecretJson);
-
-        verify(persistentEngine, times(1)).get(anyString());
-        assertEquals("secretValue", result.getSecret());
-        assertEquals("backupValue", result.getBackupSecret());
-    }
-
-    @Test
     public void testGetByResponse() {
         SecretResponse secretResponse = new SecretResponse("enginePath", "secretPath", 1);
 
-        when(persistentEngine.get(anyString())).thenReturn(Map.of(VaultConstants.FIELD_SECRET, "secretValue"));
+        when(persistentEngine.getWithCache(anyString())).thenReturn(Map.of(VaultConstants.FIELD_SECRET, "secretValue"));
 
         String result = underTest.getByResponse(secretResponse);
 
-        verify(persistentEngine, times(1)).get(anyString());
+        verify(persistentEngine, times(1)).getWithCache(anyString());
         assertEquals("secretValue", result);
     }
 
@@ -242,5 +179,4 @@ public class SecretServiceTest {
         assertEquals("app/path", result.getSecretPath());
         assertEquals(1, result.getSecretVersion());
     }
-
 }

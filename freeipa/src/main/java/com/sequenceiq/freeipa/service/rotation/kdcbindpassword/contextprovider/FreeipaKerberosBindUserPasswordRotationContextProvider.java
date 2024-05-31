@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.util.FreeIpaPasswordUtil;
 import com.sequenceiq.freeipa.kerberos.KerberosConfig;
 import com.sequenceiq.freeipa.kerberos.v1.KerberosConfigV1Service;
@@ -32,7 +32,7 @@ public class FreeipaKerberosBindUserPasswordRotationContextProvider implements R
     private KerberosConfigV1Service kerberosConfigV1Service;
 
     @Inject
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Override
     public Map<SecretRotationStep, ? extends RotationContext> getContextsWithProperties(String resourceCrn, Map<String, String> additionalProperties) {
@@ -50,7 +50,7 @@ public class FreeipaKerberosBindUserPasswordRotationContextProvider implements R
                     .withVaultPathSecretMap(Map.of(kerberosConfig.getPasswordSecret(), FreeIpaPasswordUtil.generatePassword()))
                     .build();
             FreeIpaUserPasswordRotationContext freeIpaUserPasswordRotationContext = FreeIpaUserPasswordRotationContext.builder()
-                    .withUserName(secretService.get(kerberosConfig.getPrincipalSecret()))
+                    .withUserName(uncachedSecretServiceForRotation.get(kerberosConfig.getPrincipalSecret()))
                     .withPasswordSecret(kerberosConfig.getPasswordSecret())
                     .withResourceCrn(resourceCrn)
                     .build();

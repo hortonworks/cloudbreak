@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 
@@ -29,7 +29,7 @@ public class UmsDatabusCredentialRotationExecutor extends AbstractRotationExecut
     private GrpcUmsClient grpcUmsClient;
 
     @Inject
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Inject
     private StackDtoService stackDtoService;
@@ -46,7 +46,7 @@ public class UmsDatabusCredentialRotationExecutor extends AbstractRotationExecut
                 UserManagementProto.AccessKeyType.Value.valueOf(currentDatabusCredential.getAccessKeyType().toUpperCase()));
         DataBusCredential newDataBusCredential = altusMachineUserService.getDataBusCredential(newAltusCredential, stackDto.getStack(),
                 CdpAccessKeyType.valueOf(currentDatabusCredential.getAccessKeyType().toUpperCase()));
-        secretService.putRotation(stackDto.getCluster().getDatabusCredentialSecret().getSecret(), new Json(newDataBusCredential).getValue());
+        uncachedSecretServiceForRotation.putRotation(stackDto.getCluster().getDatabusCredentialSecret().getSecret(), new Json(newDataBusCredential).getValue());
     }
 
     @Override
@@ -63,10 +63,10 @@ public class UmsDatabusCredentialRotationExecutor extends AbstractRotationExecut
             Function<RotationSecret, String> newVaultStringProviderFunction) throws Exception {
         StackDto stackDto = stackDtoService.getByCrn(crn);
         String vaultPath = stackDto.getCluster().getDatabusCredentialSecret().getSecret();
-        RotationSecret rotationSecret = secretService.getRotation(vaultPath);
+        RotationSecret rotationSecret = uncachedSecretServiceForRotation.getRotation(vaultPath);
         DataBusCredential dataBusCredential = new Json(removeableSecretStringProviderFunction.apply(rotationSecret)).get(DataBusCredential.class);
         grpcUmsClient.deleteAccessKey(dataBusCredential.getAccessKey(), ThreadBasedUserCrnProvider.getAccountId());
-        secretService.update(vaultPath, newVaultStringProviderFunction.apply(rotationSecret));
+        uncachedSecretServiceForRotation.update(vaultPath, newVaultStringProviderFunction.apply(rotationSecret));
     }
 
     @Override

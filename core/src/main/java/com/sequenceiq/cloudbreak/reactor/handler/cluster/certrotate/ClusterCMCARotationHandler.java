@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterCMC
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterCMCARotationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterCertificatesRotationFailed;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -36,7 +36,7 @@ public class ClusterCMCARotationHandler extends ExceptionCatcherEventHandler<Clu
     private StackDtoService stackDtoService;
 
     @Inject
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Inject
     private ClusterHostServiceRunner clusterHostServiceRunner;
@@ -60,8 +60,8 @@ public class ClusterCMCARotationHandler extends ExceptionCatcherEventHandler<Clu
         try {
             if (CertificateRotationType.ALL.equals(request.getCertificateRotationType())) {
                 StackDto stackDto = stackDtoService.getById(request.getResourceId());
-                secretService.update(stackDto.getCluster().getTrustStorePwdSecret().getSecret(), PasswordUtil.generatePassword());
-                secretService.update(stackDto.getCluster().getKeyStorePwdSecret().getSecret(), PasswordUtil.generatePassword());
+                uncachedSecretServiceForRotation.update(stackDto.getCluster().getTrustStorePwdSecret().getSecret(), PasswordUtil.generatePassword());
+                uncachedSecretServiceForRotation.update(stackDto.getCluster().getKeyStorePwdSecret().getSecret(), PasswordUtil.generatePassword());
                 Map<String, SaltPillarProperties> saltPillarPropertiesMap =
                         Map.of("cloudera-manager-autotls", clusterHostServiceRunner.getClouderaManagerAutoTlsPillarProperties(stackDto.getCluster()));
                 saltService.updateSaltPillar(stackDto, saltPillarPropertiesMap, "rotation");

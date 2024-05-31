@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.rotation.secret.saltboot.SaltBootSignKeyUserDat
 import com.sequenceiq.cloudbreak.rotation.secret.userdata.UserDataRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
@@ -64,7 +64,7 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
     private SecurityConfigService securityConfigService;
 
     @Inject
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -114,9 +114,9 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
             Function<RotationSecret, String> mapper) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(resourceCrn, accountId);
         SecurityConfig securityConfig = securityConfigService.findOneByStack(stack);
-        RotationSecret saltBootPassword = secretService.getRotation(saltBootPasswordSecret);
+        RotationSecret saltBootPassword = uncachedSecretServiceForRotation.getRotation(saltBootPasswordSecret);
         securityConfig.getSaltSecurityConfig().setSaltBootPassword(mapper.apply(saltBootPassword));
-        RotationSecret saltBootPrivateKey = secretService.getRotation(saltBootPrivateKeySecret);
+        RotationSecret saltBootPrivateKey = uncachedSecretServiceForRotation.getRotation(saltBootPrivateKeySecret);
         String privateKey = mapper.apply(saltBootPrivateKey);
         securityConfig.getSaltSecurityConfig().setSaltBootSignPrivateKey(privateKey);
         securityConfig.getSaltSecurityConfig().setSaltBootSignPublicKey(calcSaltBootPublicKey(privateKey));
@@ -139,8 +139,8 @@ public class SaltBootRotationContextProvider implements RotationContextProvider 
 
             @Override
             public SaltBootUpdateConfiguration getServiceUpdateConfiguration() {
-                RotationSecret saltBootPassword = secretService.getRotation(saltBootPasswordSecret);
-                RotationSecret saltBootPrivateKey = secretService.getRotation(saltBootPrivateKeySecret);
+                RotationSecret saltBootPassword = uncachedSecretServiceForRotation.getRotation(saltBootPasswordSecret);
+                RotationSecret saltBootPrivateKey = uncachedSecretServiceForRotation.getRotation(saltBootPrivateKeySecret);
                 String oldSaltBootPassword = saltBootPassword.isRotation() ? saltBootPassword.getBackupSecret() : saltBootPassword.getSecret();
                 String newSaltBootPassword = saltBootPassword.getSecret();
                 String oldSaltBootPrivateKey = saltBootPrivateKey.isRotation() ? saltBootPrivateKey.getBackupSecret() : saltBootPrivateKey.getSecret();

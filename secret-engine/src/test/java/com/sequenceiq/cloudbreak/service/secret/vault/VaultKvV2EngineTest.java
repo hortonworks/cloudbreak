@@ -131,26 +131,26 @@ public class VaultKvV2EngineTest {
     }
 
     @Test
-    public void testGet() {
+    public void testGetWithCache() {
         Map<String, Object> vaultData = Map.of(VaultConstants.FIELD_SECRET, "secretValue", VaultConstants.FIELD_BACKUP, "backupValue");
 
         Versioned<Map<String, Object>> versioned = Versioned.create(vaultData, versionedMetadata());
 
         when(vaultTemplate.opsForVersionedKeyValue(underTest.enginePath()).get(anyString())).thenReturn(versioned);
 
-        Map<String, String> result = underTest.get("testPath/" + UUID.randomUUID());
+        Map<String, String> result = underTest.getWithCache("testPath/" + UUID.randomUUID());
 
         assertEquals("secretValue", result.get(VaultConstants.FIELD_SECRET));
         assertEquals("backupValue", result.get(VaultConstants.FIELD_BACKUP));
     }
 
     @Test
-    public void testGetWithNullResponse() {
+    public void testGetWithCacheWithNullResponse() {
         Versioned<Map<String, Object>> versioned = Versioned.create(null, versionedMetadata());
 
         when(vaultTemplate.opsForVersionedKeyValue(underTest.enginePath()).get(anyString())).thenReturn(versioned);
 
-        assertNull(underTest.get("testPath"));
+        assertNull(underTest.getWithCache("testPath"));
     }
 
     @Test
@@ -187,7 +187,7 @@ public class VaultKvV2EngineTest {
 
     @Test
     public void testValidatePathPatternWithEmptyPath() {
-        assertThrows(VaultIllegalArgumentException.class, () -> underTest.get(""));
+        assertThrows(VaultIllegalArgumentException.class, () -> underTest.getWithCache(""));
     }
 
     @Test
@@ -195,12 +195,12 @@ public class VaultKvV2EngineTest {
         String secretPath = "{\"enginePath\":\"secret\",\"engineClass\":\"com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine\"," +
                 "\"path\":\"app/path\",\"version\":1}";
 
-        assertThrows(VaultIllegalArgumentException.class, () -> underTest.get(secretPath));
+        assertThrows(VaultIllegalArgumentException.class, () -> underTest.getWithCache(secretPath));
     }
 
     @Test
     public void testValidatePathPatternWithMultipleAppPathOccurrences() {
-        assertThrows(VaultIllegalArgumentException.class, () -> underTest.get("appPath/appPath/something"));
+        assertThrows(VaultIllegalArgumentException.class, () -> underTest.getWithCache("appPath/appPath/something"));
     }
 
     @Test

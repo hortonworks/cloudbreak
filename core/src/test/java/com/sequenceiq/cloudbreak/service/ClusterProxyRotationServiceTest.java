@@ -20,7 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.clusterproxy.ReadConfigResponse;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterProxyRotationServiceTest {
@@ -47,7 +47,7 @@ class ClusterProxyRotationServiceTest {
     private ReadConfigResponse readConfigResponse;
 
     @Mock
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Mock
     private ClusterProxyService clusterProxyService;
@@ -60,7 +60,7 @@ class ClusterProxyRotationServiceTest {
         when(readConfigResponse.getKnoxSecretRef()).thenReturn(SECRET_PATH + ":" + SECRET_FIELD);
         ArgumentCaptor<String> secretPathArgumentCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> secretFieldArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        when(secretService.getBySecretPath(secretPathArgumentCaptor.capture(), secretFieldArgumentCaptor.capture())).thenReturn(JWK);
+        when(uncachedSecretServiceForRotation.getBySecretPath(secretPathArgumentCaptor.capture(), secretFieldArgumentCaptor.capture())).thenReturn(JWK);
 
         KeyPair keyPair = underTest.readClusterProxyTokenKeys(readConfigResponse);
         String secretField = secretFieldArgumentCaptor.getValue();
@@ -94,7 +94,7 @@ class ClusterProxyRotationServiceTest {
     @Test
     void readClusterProxyTokenKeysShouldThrowExceptionBadJwk() {
         when(readConfigResponse.getKnoxSecretRef()).thenReturn(SECRET_PATH + ":" + SECRET_FIELD);
-        when(secretService.getBySecretPath(any(), any())).thenReturn("badjwk");
+        when(uncachedSecretServiceForRotation.getBySecretPath(any(), any())).thenReturn("badjwk");
         CloudbreakServiceException e = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.readClusterProxyTokenKeys(readConfigResponse));
         assertEquals("Cannot read JWK format token keys from cluster-proxy.", e.getMessage());

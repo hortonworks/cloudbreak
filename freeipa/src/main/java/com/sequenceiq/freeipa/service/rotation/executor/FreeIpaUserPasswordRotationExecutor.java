@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.User;
@@ -35,11 +35,11 @@ public class FreeIpaUserPasswordRotationExecutor extends AbstractRotationExecuto
     private StackService stackService;
 
     @Inject
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Override
     public void rotate(FreeIpaUserPasswordRotationContext rotationContext) {
-        RotationSecret passwordRotationSecret = secretService.getRotation(rotationContext.getPasswordSecret());
+        RotationSecret passwordRotationSecret = uncachedSecretServiceForRotation.getRotation(rotationContext.getPasswordSecret());
         if (passwordRotationSecret.isRotation()) {
             String newPassword = passwordRotationSecret.getSecret();
             changePassword(rotationContext, newPassword);
@@ -50,7 +50,7 @@ public class FreeIpaUserPasswordRotationExecutor extends AbstractRotationExecuto
 
     @Override
     public void rollback(FreeIpaUserPasswordRotationContext rotationContext) {
-        RotationSecret passwordRotationSecret = secretService.getRotation(rotationContext.getPasswordSecret());
+        RotationSecret passwordRotationSecret = uncachedSecretServiceForRotation.getRotation(rotationContext.getPasswordSecret());
         if (passwordRotationSecret.isRotation()) {
             String oldPassword = passwordRotationSecret.getBackupSecret();
             changePassword(rotationContext, oldPassword);

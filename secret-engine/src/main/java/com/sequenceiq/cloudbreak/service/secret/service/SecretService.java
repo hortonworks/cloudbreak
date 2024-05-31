@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.service.secret.SecretEngine;
 import com.sequenceiq.cloudbreak.service.secret.conf.VaultConfig;
-import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
@@ -40,67 +39,19 @@ public class SecretService {
     }
 
     public String put(String secretPath, String value) throws Exception {
-        return put(secretPath, Collections.singletonMap(VaultConstants.FIELD_SECRET, value));
-    }
-
-    public String put(String secretPath, Map<String, String> value) throws Exception {
-        return vaultRetryService.tryWritingVault(() -> persistentEngine.put(fullSecretPath(secretPath), value));
-    }
-
-    public String putRotation(String vaultSecretJson, String newValue) throws Exception {
-        String oldSecretRaw = get(vaultSecretJson);
-        return updateRotation(vaultSecretJson, oldSecretRaw, newValue);
-    }
-
-    public String update(String vaultSecretJson, String newValue) throws Exception {
-        VaultSecret vaultSecret = vaultSecretConverter.convert(vaultSecretJson);
-        String result =  vaultRetryService.tryWritingVault(() -> persistentEngine.put(vaultSecret.getPath(), Map.of(VaultConstants.FIELD_SECRET, newValue)));
-        LOGGER.info("Secret on path {} have been updated.", vaultSecret.getPath());
-        return result;
-    }
-
-    public String updateRotation(String vaultSecretJson, String oldValue, String newValue) throws Exception {
-        String fullPath = vaultSecretConverter.convert(vaultSecretJson).getPath();
-        Map<String, String> secretValue = Map.of(VaultConstants.FIELD_SECRET, newValue, VaultConstants.FIELD_BACKUP, oldValue);
-        String result =  vaultRetryService.tryWritingVault(() -> persistentEngine.put(fullPath, secretValue));
-        LOGGER.info("Secret on path {} have been updated. ", fullPath);
-        return result;
-    }
-
-    public RotationSecret getRotation(String vaultSecretJson) {
-        if (vaultSecretJson == null) {
-            return null;
-        }
-        String fullPath = vaultSecretConverter.convert(vaultSecretJson).getPath();
-        RotationSecret response = vaultRetryService.tryReadingVault(() -> {
-            Map<String, String> secretValue = persistentEngine.get(fullPath);
-            return secretValue != null ? new RotationSecret(String.valueOf(secretValue.get(VaultConstants.FIELD_SECRET)),
-                            String.valueOf(secretValue.get(VaultConstants.FIELD_BACKUP))) : null;
-        });
-        return response;
+        return vaultRetryService.tryWritingVault(() -> persistentEngine.put(fullSecretPath(secretPath),
+                Collections.singletonMap(VaultConstants.FIELD_SECRET, value)));
     }
 
     public String get(String vaultSecretJson) {
-        return get(vaultSecretJson, ThreadBasedVaultReadFieldProvider.getFieldName(vaultSecretJson));
-    }
+        String field =  ThreadBasedVaultReadFieldProvider.getFieldName(vaultSecretJson);
 
-    public String getBySecretPath(String secretPath, String field) {
-        if (secretPath == null || field == null) {
-            return null;
-        }
-        Map<String, String> response = vaultRetryService.tryReadingVault(() -> {
-            return persistentEngine.get(secretPath);
-        });
-        return response != null ? response.get(field) : null;
-    }
-
-    private String get(String vaultSecretJson, String field) {
         if (!isSecret(vaultSecretJson) || field == null) {
             return null;
         }
         VaultSecret vaultSecret = vaultSecretConverter.convert(vaultSecretJson);
         Map<String, String> response = vaultRetryService.tryReadingVault(() -> {
-            return persistentEngine.get(vaultSecret.getPath());
+            return persistentEngine.getWithCache(vaultSecret.getPath());
 
         });
         return response != null ? response.get(field) : null;

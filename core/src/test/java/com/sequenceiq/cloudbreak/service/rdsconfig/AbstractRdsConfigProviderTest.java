@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.secret.domain.RotationSecret;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
-import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.service.secret.service.UncachedSecretServiceForRotation;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 
@@ -84,7 +84,7 @@ class AbstractRdsConfigProviderTest {
     private ClusterService clusterService;
 
     @Mock
-    private SecretService secretService;
+    private UncachedSecretServiceForRotation uncachedSecretServiceForRotation;
 
     @Mock
     private RedbeamsDbServerConfigurer dbServerConfigurer;
@@ -183,8 +183,8 @@ class AbstractRdsConfigProviderTest {
         resp.setConnectionUserName(username);
         resp.setConnectionPassword(password);
         when(dbServerConfigurer.getDatabaseServer(any())).thenReturn(resp);
-        when(secretService.getByResponse(username)).thenReturn(REMOTE_ADMIN);
-        when(secretService.getByResponse(password)).thenReturn(REMOTE_ADMIN_PASSWORD);
+        when(uncachedSecretServiceForRotation.getByResponse(username)).thenReturn(REMOTE_ADMIN);
+        when(uncachedSecretServiceForRotation.getByResponse(password)).thenReturn(REMOTE_ADMIN_PASSWORD);
         Stack testStack = TestUtil.stack();
         StackDto stackDto = mock(StackDto.class);
         Cluster testCluster = TestUtil.cluster();
@@ -220,8 +220,8 @@ class AbstractRdsConfigProviderTest {
         when(rdsConfigWithoutCluster.getDatabaseEngine()).thenReturn(DatabaseVendor.POSTGRES);
         when(rdsConfigWithoutCluster.getConnectionUserNamePath()).thenReturn(ROTATION_USER_PATH);
         when(rdsConfigWithoutCluster.getConnectionPasswordPath()).thenReturn(ROTATION_PASSWORD_PATH);
-        when(secretService.getRotation(eq(ROTATION_USER_PATH))).thenReturn(new RotationSecret(ROTATION_NEW_USER, ROTATION_OLD_USER));
-        when(secretService.getRotation(eq(ROTATION_PASSWORD_PATH))).thenReturn(new RotationSecret(ROTATION_NEW_PASS, ROTATION_OLD_PASS));
+        when(uncachedSecretServiceForRotation.getRotation(eq(ROTATION_USER_PATH))).thenReturn(new RotationSecret(ROTATION_NEW_USER, ROTATION_OLD_USER));
+        when(uncachedSecretServiceForRotation.getRotation(eq(ROTATION_PASSWORD_PATH))).thenReturn(new RotationSecret(ROTATION_NEW_PASS, ROTATION_OLD_PASS));
         when(dbUsernameConverterService.toDatabaseUsername(eq(ROTATION_NEW_USER))).thenReturn(ROTATION_NEW_USER);
         when(dbUsernameConverterService.toDatabaseUsername(eq(ROTATION_OLD_USER))).thenReturn(ROTATION_OLD_USER);
         when(rdsConfigService.existsByClusterIdAndType(anyLong(), any(DatabaseType.class))).thenReturn(Boolean.TRUE);
