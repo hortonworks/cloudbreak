@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.sync.dynamicentitlement;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -58,6 +60,7 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
         Status status = stack.getStackStatus().getStatus();
         if (flowLogService.isOtherFlowRunning(stackId)) {
             LOGGER.debug("DynamicEntitlementRefreshJob cannot run, because flow is running for freeipa stack: {}", stackId);
+            logDynamicEntitlementInfo(stack, status);
         } else if (status.isAvailable() && config.isDynamicEntitlementEnabled()) {
             LOGGER.debug("DynamicEntitlementRefreshJob will apply watched entitlement changes for stack: {}", stackId);
             ThreadBasedUserCrnProvider.doAs(
@@ -68,9 +71,22 @@ public class DynamicEntitlementRefreshJob extends StatusCheckerJob {
             LOGGER.info("DynamicEntitlementRefreshJob job will be unscheduled, stack state is {}", stack.getStackStatus().getStatus());
             jobService.unschedule(context.getJobDetail().getKey());
         } else {
-            LOGGER.info("DynamicEntitlementRefreshJob cannot run, stack state is {} for stack {}, is DynamicEntitlementRefreshJob enabled: {}.",
-                    status, stack.getResourceCrn(), config.isDynamicEntitlementEnabled());
+            LOGGER.debug("DynamicEntitlementRefreshJob cannot run because of stack state.");
+            logDynamicEntitlementInfo(stack, status);
         }
+    }
+
+    private void logDynamicEntitlementInfo(Stack stack, Status status) {
+        Map<String, Boolean> changedEntitlements = new HashMap<>();
+        if (config.isDynamicEntitlementEnabled()) {
+            changedEntitlements = ThreadBasedUserCrnProvider.doAs(
+                    internalCrnModifier.changeAccountIdInCrnString(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                            stack.getAccountId()).toString(),
+                    () -> dynamicEntitlementRefreshService.getChangedWatchedEntitlements(stack));
+        }
+        LOGGER.debug("DynamicEntitlementRefreshJob cannot run info: stack state is {} for stack {}," +
+                        " is DynamicEntitlementRefreshJob enabled: {}, changedEntitlements: {}.",
+                status, stack.getResourceCrn(), config.isDynamicEntitlementEnabled(), changedEntitlements);
     }
 
     private Long getStackId() {
