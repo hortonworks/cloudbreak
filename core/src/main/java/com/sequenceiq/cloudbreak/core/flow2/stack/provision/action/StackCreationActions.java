@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.provision.action;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackProvisionConstants.START_DATE;
 
@@ -391,8 +390,6 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<>(StackWithFingerprintsEvent.class) {
             @Override
             protected void doExecute(StackCreationContext context, StackWithFingerprintsEvent payload, Map<Object, Object> variables) {
-                eventService.fireCloudbreakEvent(payload.getResourceId(), CREATE_IN_PROGRESS.name(),
-                        ResourceEvent.STACK_ATTACHED_VOLUME_CONSUMPTION_COLLECTION_SCHEDULING_STARTED);
                 sendEvent(context);
             }
 

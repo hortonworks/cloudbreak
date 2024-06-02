@@ -20,7 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.CcmKeyDeregisterSuccess;
@@ -89,9 +88,6 @@ class AttachedVolumeConsumptionCollectionUnschedulingActionTest {
                 ArgumentCaptor.forClass(AttachedVolumeConsumptionCollectionUnschedulingRequest.class);
 
         underTest.doExecute(stackTerminationContext(), new CcmKeyDeregisterSuccess(STACK_ID), Map.of());
-
-        verify(cloudbreakEventService).fireCloudbreakEvent(STACK_ID, "DELETE_IN_PROGRESS",
-                ResourceEvent.STACK_ATTACHED_VOLUME_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED);
 
         verifyEvent(unschedulingRequestCaptor, "ATTACHEDVOLUMECONSUMPTIONCOLLECTIONUNSCHEDULINGREQUEST");
 

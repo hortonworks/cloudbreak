@@ -259,8 +259,6 @@ public enum ResourceEvent {
     STACK_DATALAKE_UPDATE("stack.datalake.update"),
     STACK_DATALAKE_UPDATE_FINISHED("stack.datalake.update.finished"),
     STACK_DATALAKE_UPDATE_FAILED("stack.datalake.update.failed"),
-    STACK_ATTACHED_VOLUME_CONSUMPTION_COLLECTION_SCHEDULING_STARTED("stack.attached.volume.consumption.collection.scheduling.started"),
-    STACK_ATTACHED_VOLUME_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED("stack.attached.volume.consumption.collection.unscheduling.started"),
     STACK_DIAGNOSTICS_SALT_VALIDATION_RUNNING("stack.diagnostics.salt.validation.running"),
     STACK_DIAGNOSTICS_SALT_VALIDATION_RUNNING_SKIP_UNRESPONSIVE("stack.diagnostics.salt.validation.running.skip.unresponsive"),
     STACK_DIAGNOSTICS_SALT_PILLAR_UPDATE_RUNNING("stack.diagnostics.salt.pillar.update.running"),
