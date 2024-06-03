@@ -283,6 +283,9 @@ public class ClusterHostServiceRunner {
     @Inject
     private PaywallConfigService paywallConfigService;
 
+    @Inject
+    private ComponentLocatorService componentLocatorService;
+
     public NodeReachabilityResult runClusterServices(@Nonnull StackDto stackDto,
             Map<String, String> candidateAddresses, boolean runPreServiceDeploymentRecipe) {
         LOGGER.debug("Run cluster services on candidates: {}", candidateAddresses);
@@ -789,6 +792,7 @@ public class ClusterHostServiceRunner {
         gateway.put("username", cluster.getUserName());
         gateway.put("password", cluster.getPassword());
         gateway.put("enable_knox_ranger_authorizer", isRangerAuthorizerEnabled(clouderaManagerRepo));
+        gateway.put("enable_impala_sticky_session", isImpalaStickySessionEnabled(stackDto));
         gateway.put("enable_ccmv2", stackDto.getTunnel().useCcmV2OrJumpgate());
         gateway.put("enable_ccmv2_jumpgate", stackDto.getTunnel().useCcmV2Jumpgate());
         gateway.put("activation_in_minutes", activationInMinutes);
@@ -894,6 +898,15 @@ public class ClusterHostServiceRunner {
     private boolean isRangerAuthorizerEnabled(ClouderaManagerRepo clouderaManagerRepo) {
         return isVersionNewerOrEqualThanLimited(
                 clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_2_0);
+    }
+
+    private boolean isImpalaStickySessionEnabled(StackDto stackDto) {
+        List<String> coordinators = componentLocatorService.getImpalaCoordinatorLocations(stackDto)
+                .values()
+                .stream()
+                .flatMap(List::stream)
+                .collect(toList());
+        return coordinators.size() > 1;
     }
 
     private void saveIdBrokerPillar(ClusterView cluster, Map<String, SaltPillarProperties> servicePillar) {

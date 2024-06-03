@@ -249,7 +249,11 @@
             {% if 'IMPALA' in exposed and 'IMPALAD' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>IMPALA</name>
+                {% if salt['pillar.get']('gateway:enable_impala_sticky_session') == True -%}
+                <value>enabled=true;enableStickySession=true;noFallback=true;enableLoadBalancing=true,stickySessionCookieName=impala.session.id</value>
+                {% else %}
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+                {%- endif %}
             </param>
             {%- endif %}
             {% if 'NIFI_REST' in exposed and 'NIFI_NODE' in salt['pillar.get']('gateway:location') -%}

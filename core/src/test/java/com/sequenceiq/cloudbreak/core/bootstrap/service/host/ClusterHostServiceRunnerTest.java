@@ -245,6 +245,9 @@ class ClusterHostServiceRunnerTest {
     private IdBrokerService idBrokerService;
 
     @Mock
+    private ComponentLocatorService componentLocatorService;
+
+    @Mock
     private CsdParcelDecorator csdParcelDecorator;
 
     @Mock
@@ -643,13 +646,17 @@ class ClusterHostServiceRunnerTest {
     void testAddRangerRazPillarForDataLakeToRedeployGateway() throws CloudbreakOrchestratorException {
         setupMocksForRunClusterServices();
         setupMockforRangerRaz(StackType.DATALAKE, true);
+        when(componentLocatorService.getImpalaCoordinatorLocations(any()))
+                .thenReturn(Map.of("ip1", List.of("ip1", "ip2")));
 
         underTest.redeployGatewayPillarOnly(stack);
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfig.capture());
 
-        assertTrue(((Map<String, List<String>>) getGatewayProperties(saltConfig.getValue()).get("location")).containsKey("RANGERRAZ"));
-        assertEquals(((Map<String, List<String>>) getGatewayProperties(saltConfig.getValue()).get("location")).get("RANGERRAZ"), List.of("fqdn1"));
+        Map<String, List<String>> locations = (Map<String, List<String>>) getGatewayProperties(saltConfig.getValue()).get("location");
+        assertTrue(locations.containsKey("RANGERRAZ"));
+        assertEquals(locations.get("RANGERRAZ"), List.of("fqdn1"));
+        assertEquals(getGatewayProperties(saltConfig.getValue()).get("enable_impala_sticky_session"), true);
     }
 
     @Test
