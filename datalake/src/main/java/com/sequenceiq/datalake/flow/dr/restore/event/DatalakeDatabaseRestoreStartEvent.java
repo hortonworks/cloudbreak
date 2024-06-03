@@ -21,13 +21,16 @@ public class DatalakeDatabaseRestoreStartEvent extends DatalakeDatabaseDrStartBa
 
     private final int databaseMaxDurationInMin;
 
+    private final boolean validationOnly;
+
     public DatalakeDatabaseRestoreStartEvent(String selector, Long sdxId, String userId,
-            String backupId, String restoreId, String backupLocation, int databaseMaxDurationInMin) {
+            String backupId, String restoreId, String backupLocation, int databaseMaxDurationInMin, boolean validationOnly) {
         super(selector, sdxId, userId, SdxOperationType.RESTORE, Collections.emptyList());
         this.backupId = backupId;
         this.restoreId = restoreId;
         this.backupLocation = backupLocation;
         this.databaseMaxDurationInMin = databaseMaxDurationInMin;
+        this.validationOnly = validationOnly;
     }
 
     @JsonCreator
@@ -39,12 +42,14 @@ public class DatalakeDatabaseRestoreStartEvent extends DatalakeDatabaseDrStartBa
             @JsonProperty("backupId") String backupId,
             @JsonProperty("restoreId") String restoreId,
             @JsonProperty("backupLocation") String backupLocation,
-            @JsonProperty("databaseMaxDurationInMin") int databaseMaxDurationInMin) {
+            @JsonProperty("databaseMaxDurationInMin") int databaseMaxDurationInMin,
+            @JsonProperty("validationOnly") boolean validationOnly) {
         super(selector, sdxId, userId, drStatus, Collections.emptyList());
         this.backupId = backupId;
         this.restoreId = restoreId;
         this.backupLocation = backupLocation;
         this.databaseMaxDurationInMin = databaseMaxDurationInMin;
+        this.validationOnly = validationOnly;
     }
 
     public static DatalakeDatabaseRestoreStartEvent from(DatalakeTriggerRestoreEvent triggerRestoreEvent, Long sdxId,
@@ -56,7 +61,8 @@ public class DatalakeDatabaseRestoreStartEvent extends DatalakeDatabaseDrStartBa
                 backupId,
                 restoreId,
                 triggerRestoreEvent.getBackupLocation(),
-                0);
+                0,
+                triggerRestoreEvent.isValidationOnly());
     }
 
     public String getBackupId() {
@@ -73,6 +79,10 @@ public class DatalakeDatabaseRestoreStartEvent extends DatalakeDatabaseDrStartBa
 
     public int getDatabaseMaxDurationInMin() {
         return databaseMaxDurationInMin;
+    }
+
+    public boolean isValidationOnly() {
+        return validationOnly;
     }
 
     @Override
