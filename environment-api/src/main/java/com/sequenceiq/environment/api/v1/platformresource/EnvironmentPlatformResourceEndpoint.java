@@ -15,6 +15,7 @@ import jakarta.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.model.DatabaseCapabilityType;
 import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceModelDescription.OpEnvDescription;
 import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigTypeQueryParam;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformAccessConfigsResponse;
@@ -209,6 +210,7 @@ public interface EnvironmentPlatformResourceEndpoint {
             @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
-            @QueryParam("availabilityZone") String availabilityZone);
+            @QueryParam("availabilityZone") String availabilityZone,
+            @QueryParam("databaseType") DatabaseCapabilityType databaseType);
 
 }

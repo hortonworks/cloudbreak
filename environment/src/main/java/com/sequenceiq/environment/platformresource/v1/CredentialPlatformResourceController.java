@@ -145,6 +145,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
                 null,
                 new HashMap<>(),
                 null,
+                null,
                 cdpResourceType);
         LOGGER.info("Get /platform_resources/machine_types, request: {}", request);
         CloudVmTypes cloudVmTypes = platformParameterService.getVmTypesByCredential(request);
@@ -217,6 +218,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
                 availabilityZone,
                 sharedProjectId,
                 filter,
+                null,
                 null,
                 CdpResourceType.DEFAULT);
         LOGGER.info("Get /platform_resources/networks, request: {}", request);

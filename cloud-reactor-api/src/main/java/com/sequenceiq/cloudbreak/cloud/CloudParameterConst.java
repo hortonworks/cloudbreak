@@ -5,6 +5,8 @@ public class CloudParameterConst {
 
     public static final String SHARED_PROJECT_ID = "sharedProjectId";
 
+    public static final String DATABASE_TYPE = "databaseType";
+
     private CloudParameterConst() {
 
     }

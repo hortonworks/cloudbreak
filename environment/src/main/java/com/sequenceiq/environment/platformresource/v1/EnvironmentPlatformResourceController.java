@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.service.verticalscale.VerticalScaleInstanceProvider;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.model.DatabaseCapabilityType;
 import com.sequenceiq.environment.api.v1.platformresource.EnvironmentPlatformResourceEndpoint;
 import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigTypeQueryParam;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformAccessConfigsResponse;
@@ -135,6 +136,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 availabilityZone,
                 null,
                 null,
+                null,
                 cdpResourceType);
         LOGGER.info("Get /platform_resources/machine_types, request: {}", request);
         CloudVmTypes cloudVmTypes = platformParameterService.getVmTypesByCredential(request);
@@ -190,6 +192,9 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 region,
                 platformVariant,
                 availabilityZone,
+                null,
+                null,
+                null,
                 null);
         LOGGER.info("Get /platform_resources/regions, request: {}", request);
         CloudRegions regions = platformParameterService.getRegionsByCredential(request, availabilityZonesNeeded);
@@ -214,7 +219,10 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 region,
                 platformVariant,
                 availabilityZone,
-                sharedProjectId);
+                sharedProjectId,
+                null,
+                null,
+                null);
         LOGGER.info("Get /platform_resources/networks, request: {}", request);
         CloudNetworks networks = platformParameterService.getCloudNetworks(request);
         PlatformNetworksResponse response = cloudNetworksToPlatformNetworksV1ResponseConverter.convert(networks);
@@ -238,6 +246,9 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 region,
                 platformVariant,
                 availabilityZone,
+                null,
+                null,
+                null,
                 null);
         LOGGER.info("Get /platform_resources/ip_pools, request: {}", request);
         CloudIpPools ipPools = platformParameterService.getIpPoolsCredentialId(request);
@@ -261,6 +272,9 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 region,
                 platformVariant,
                 availabilityZone,
+                null,
+                null,
+                null,
                 null);
         LOGGER.info("Get /platform_resources/gateways, request: {}", request);
         CloudGateWays gateways = platformParameterService.getGatewaysCredentialId(request);
@@ -285,6 +299,9 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 region,
                 platformVariant,
                 availabilityZone,
+                null,
+                null,
+                null,
                 null);
         LOGGER.info("Get /platform_resources/encryption_keys, request: {}", request);
         CloudEncryptionKeys encryptionKeys = platformParameterService.getEncryptionKeys(request);
@@ -309,7 +326,10 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 region,
                 platformVariant,
                 availabilityZone,
-                sharedProjectId);
+                sharedProjectId,
+                null,
+                null,
+                null);
         LOGGER.info("Get /platform_resources/security_groups, request: {}", request);
         CloudSecurityGroups securityGroups = platformParameterService.getSecurityGroups(request);
         PlatformSecurityGroupsResponse response = cloudSecurityGroupsToPlatformSecurityGroupsV1ResponseConverter.convert(securityGroups);
@@ -332,6 +352,9 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 region,
                 platformVariant,
                 availabilityZone,
+                null,
+                null,
+                null,
                 null);
         LOGGER.info("Get /platform_resources/ssh_keys, request: {}", request);
         CloudSshKeys sshKeys = platformParameterService.getCloudSshKeys(request);
@@ -380,6 +403,9 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 region,
                 platformVariant,
                 availabilityZone,
+                null,
+                null,
+                null,
                 null);
         LOGGER.info("Get /platform_resources/nosql_tables, request: {}", request);
         CloudNoSqlTables noSqlTables = platformParameterService.getNoSqlTables(request);
@@ -403,6 +429,9 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 region,
                 platformVariant,
                 availabilityZone,
+                null,
+                null,
+                null,
                 null);
         LOGGER.info("Get /platform_resources/resource_groups, request: {}", request);
         CloudResourceGroups resourceGroups = platformParameterService.getResourceGroups(request);
@@ -442,7 +471,8 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             @ResourceCrn String environmentCrn,
             String region,
             String platformVariant,
-            String availabilityZone) {
+            String availabilityZone,
+            DatabaseCapabilityType databaseType) {
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequestByEnvironment(
                 accountId,
@@ -450,7 +480,8 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 region,
                 platformVariant,
                 availabilityZone,
-                null);
+                null,
+                databaseType);
         LOGGER.info("Get /platform_resources/database_capabilities, request: {}", request);
         PlatformDatabaseCapabilities platformDatabaseCapabilities = platformParameterService.getDatabaseCapabilities(request);
         PlatformDatabaseCapabilitiesResponse response = databaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter

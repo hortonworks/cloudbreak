@@ -1,14 +1,16 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.CloudParameterConst.DATABASE_TYPE;
 import static com.sequenceiq.cloudbreak.cloud.model.DatabaseAvailabiltyType.databaseAvailabiltyType;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.SAME_ZONE;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.ZONE_REDUNDANT;
+import static com.sequenceiq.common.model.DatabaseCapabilityType.AZURE_FLEXIBLE;
+import static com.sequenceiq.common.model.DatabaseCapabilityType.AZURE_SINGLE_SERVER;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -63,7 +65,8 @@ class AzureDatabaseCapabilityServiceTest {
     public void setup() {
         ReflectionTestUtils.setField(azureDatabaseCapabilityService, "instanceTypeRegex", "^Standard_E4d?s.*$");
         ReflectionTestUtils.setField(azureDatabaseCapabilityService, "serverEdition", "MemoryOptimized");
-        ReflectionTestUtils.setField(azureDatabaseCapabilityService, "defaultInstanceType", "Standard_E4ds_v4");
+        ReflectionTestUtils.setField(azureDatabaseCapabilityService, "defaultFlexibleInstanceType", "Standard_E4ds_v4");
+        ReflectionTestUtils.setField(azureDatabaseCapabilityService, "defaultSingleServerInstanceType", "MO_Gen5_4");
     }
 
     @Test
@@ -83,7 +86,8 @@ class AzureDatabaseCapabilityServiceTest {
                 Region.region("westus2"), Optional.of(flexibleServerCapability1));
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(flexibleServerCapabilityMap);
 
-        PlatformDatabaseCapabilities capabilities = azureDatabaseCapabilityService.databaseCapabilities(cloudCredential, null, new HashMap<>());
+        PlatformDatabaseCapabilities capabilities = azureDatabaseCapabilityService.databaseCapabilities(cloudCredential, null,
+                Map.of(DATABASE_TYPE, AZURE_FLEXIBLE.name()));
 
         com.azure.core.management.Region azureRegion1 = com.azure.core.management.Region.fromName("westus");
         com.azure.core.management.Region azureRegion2 = com.azure.core.management.Region.fromName("westus2");
@@ -106,6 +110,46 @@ class AzureDatabaseCapabilityServiceTest {
     }
 
     @Test
+    void testDatabaseCapabilitiesWhenSingleServcerNoRegion() {
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
+        Map<Region, AzureCoordinate> regions = Map.of(
+                Region.region("westus"), azureCoordinate("westus"),
+                Region.region("westus2"), azureCoordinate("westus2"));
+        when(azureRegionProvider.filterEnabledRegions((Region) null)).thenReturn(regions);
+        FlexibleServerCapability flexibleServerCapability = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.DISABLED,
+                Map.of("MemoryOptimized", List.of("instanceType1", "Standard_E4ds_v6", "Standard_E4ds_v4")));
+        FlexibleServerCapability flexibleServerCapability1 = createFlexibleServerCapability(ZoneRedundantHaSupportedEnum.ENABLED,
+                Map.of("MemoryOptimized", List.of("instanceType3", "instanceType4", "Standard_E4s_v1")));
+        Map<Region, Optional<FlexibleServerCapability>> flexibleServerCapabilityMap = Map.of(
+                Region.region("westus"), Optional.of(flexibleServerCapability),
+                Region.region("westus2"), Optional.of(flexibleServerCapability1));
+        when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(regions)).thenReturn(flexibleServerCapabilityMap);
+
+        PlatformDatabaseCapabilities capabilities = azureDatabaseCapabilityService.databaseCapabilities(cloudCredential, null,
+                Map.of(DATABASE_TYPE, AZURE_SINGLE_SERVER.name()));
+
+        com.azure.core.management.Region azureRegion1 = com.azure.core.management.Region.fromName("westus");
+        com.azure.core.management.Region azureRegion2 = com.azure.core.management.Region.fromName("westus2");
+        Region region1Name = Region.region(azureRegion1.name());
+        Region region1Label = Region.region(azureRegion1.label());
+        Region region2Name = Region.region(azureRegion2.name());
+        Region region2Label = Region.region(azureRegion2.label());
+        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region1Label));
+        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region1Name));
+        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region2Label));
+        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region2Name));
+        Assertions.assertFalse(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).contains(region1Label));
+        Assertions.assertFalse(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).contains(region1Name));
+        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).contains(region2Label));
+        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).contains(region2Name));
+        Assertions.assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Label), "MO_Gen5_4");
+        Assertions.assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Name), "MO_Gen5_4");
+        Assertions.assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region2Label), "MO_Gen5_4");
+        Assertions.assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region2Name), "MO_Gen5_4");
+    }
+
+    @Test
     void testDatabaseCapabilitiesWhenRegionIsGiven() {
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
@@ -125,7 +169,8 @@ class AzureDatabaseCapabilityServiceTest {
                 Region.region("westus2"), Optional.of(flexibleServerCapability1));
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(anyMap())).thenReturn(flexibleServerCapabilityMap);
 
-        PlatformDatabaseCapabilities capabilities = azureDatabaseCapabilityService.databaseCapabilities(cloudCredential, Region.region("westus"), Map.of());
+        PlatformDatabaseCapabilities capabilities = azureDatabaseCapabilityService
+                .databaseCapabilities(cloudCredential, Region.region("westus"), Map.of(DATABASE_TYPE, AZURE_FLEXIBLE.name()));
 
         com.azure.core.management.Region azureRegion1 = com.azure.core.management.Region.fromName("westus");
         com.azure.core.management.Region azureRegion2 = com.azure.core.management.Region.fromName("westus2");
@@ -164,7 +209,8 @@ class AzureDatabaseCapabilityServiceTest {
                 Region.region("westus2"), Optional.of(flexibleServerCapability1));
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(anyMap())).thenReturn(flexibleServerCapabilityMap);
 
-        PlatformDatabaseCapabilities capabilities = azureDatabaseCapabilityService.databaseCapabilities(cloudCredential, Region.region("westus"), Map.of());
+        PlatformDatabaseCapabilities capabilities = azureDatabaseCapabilityService
+                .databaseCapabilities(cloudCredential, Region.region("westus"), Map.of(DATABASE_TYPE, AZURE_FLEXIBLE.name()));
 
         com.azure.core.management.Region azureRegion1 = com.azure.core.management.Region.fromName("westus");
         com.azure.core.management.Region azureRegion2 = com.azure.core.management.Region.fromName("westus2");
@@ -198,7 +244,8 @@ class AzureDatabaseCapabilityServiceTest {
                 Region.region("westus2"), Optional.of(flexibleServerCapability1));
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(anyMap())).thenReturn(flexibleServerCapabilityMap);
 
-        PlatformDatabaseCapabilities capabilities = azureDatabaseCapabilityService.databaseCapabilities(cloudCredential, Region.region("westus"), Map.of());
+        PlatformDatabaseCapabilities capabilities = azureDatabaseCapabilityService
+                .databaseCapabilities(cloudCredential, Region.region("westus"),  Map.of(DATABASE_TYPE, AZURE_FLEXIBLE.name()));
 
         com.azure.core.management.Region azureRegion1 = com.azure.core.management.Region.fromName("westus");
         com.azure.core.management.Region azureRegion2 = com.azure.core.management.Region.fromName("westus2");
@@ -216,7 +263,7 @@ class AzureDatabaseCapabilityServiceTest {
     void testDatabaseCapabilitiesWhenRegionIsGivenNoConfigsGiven() {
         ReflectionTestUtils.setField(azureDatabaseCapabilityService, "instanceTypeRegex", null);
         ReflectionTestUtils.setField(azureDatabaseCapabilityService, "serverEdition", null);
-        ReflectionTestUtils.setField(azureDatabaseCapabilityService, "defaultInstanceType", null);
+        ReflectionTestUtils.setField(azureDatabaseCapabilityService, "defaultFlexibleInstanceType", null);
 
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
         when(azureClient.getFlexibleServerClient()).thenReturn(azureFlexibleServerClient);
@@ -236,7 +283,8 @@ class AzureDatabaseCapabilityServiceTest {
                 Region.region("westus2"), Optional.of(flexibleServerCapability1));
         when(azureFlexibleServerClient.getFlexibleServerCapabilityMap(anyMap())).thenReturn(flexibleServerCapabilityMap);
 
-        PlatformDatabaseCapabilities capabilities = azureDatabaseCapabilityService.databaseCapabilities(cloudCredential, Region.region("westus"), Map.of());
+        PlatformDatabaseCapabilities capabilities = azureDatabaseCapabilityService
+                .databaseCapabilities(cloudCredential, Region.region("westus"), Map.of(DATABASE_TYPE, AZURE_FLEXIBLE.name()));
 
         com.azure.core.management.Region azureRegion1 = com.azure.core.management.Region.fromName("westus");
         com.azure.core.management.Region azureRegion2 = com.azure.core.management.Region.fromName("westus2");

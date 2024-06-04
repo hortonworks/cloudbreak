@@ -7,6 +7,8 @@ import static com.sequenceiq.common.model.AzureDatabaseType.FLEXIBLE_SERVER;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.DISABLED;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.SAME_ZONE;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.ZONE_REDUNDANT;
+import static com.sequenceiq.common.model.DatabaseCapabilityType.AZURE_FLEXIBLE;
+import static com.sequenceiq.common.model.DatabaseCapabilityType.AZURE_SINGLE_SERVER;
 
 import java.util.List;
 import java.util.Map;
@@ -70,7 +72,8 @@ public class AzureDatabaseServerParameterDecorator implements DatabaseServerPara
         if (multiAz && azureDatabaseType == FLEXIBLE_SERVER) {
             List<String> zones = env.getNetwork().getAzure().getAvailabilityZones().stream().toList();
             parameters.setAvailabilityZone(getAvailabilityZone(zones));
-            AzureHighAvailabiltyMode highAvailabilityMode = getHighAvailabilityMode(availabilityType, isZoneRedundantHaEnabled(env));
+            AzureHighAvailabiltyMode highAvailabilityMode = getHighAvailabilityMode(availabilityType,
+                    isZoneRedundantHaEnabled(env, azureDatabaseType));
             parameters.setHighAvailabilityMode(highAvailabilityMode);
             parameters.setStandbyAvailabilityZone(getStandByAvailabilityZone(zones, highAvailabilityMode));
         } else {
@@ -112,9 +115,9 @@ public class AzureDatabaseServerParameterDecorator implements DatabaseServerPara
         }
     }
 
-    private boolean isZoneRedundantHaEnabled(DetailedEnvironmentResponse env) {
+    private boolean isZoneRedundantHaEnabled(DetailedEnvironmentResponse env, AzureDatabaseType azureDatabaseType) {
         boolean zoneRedundantHaEnabled = false;
-        PlatformDatabaseCapabilitiesResponse databaseCapabilities = getDatabaseCapabilities(env);
+        PlatformDatabaseCapabilitiesResponse databaseCapabilities = getDatabaseCapabilities(env, azureDatabaseType);
         List<String> enabledRegions = databaseCapabilities.getIncludedRegions().get(ZONE_REDUNDANT.name());
         if (enabledRegions != null) {
             if (enabledRegions.contains(env.getLocation().getName())) {
@@ -124,12 +127,13 @@ public class AzureDatabaseServerParameterDecorator implements DatabaseServerPara
         return zoneRedundantHaEnabled;
     }
 
-    private PlatformDatabaseCapabilitiesResponse getDatabaseCapabilities(DetailedEnvironmentResponse env) {
+    private PlatformDatabaseCapabilitiesResponse getDatabaseCapabilities(DetailedEnvironmentResponse env, AzureDatabaseType azureDatabaseType) {
         return environmentPlatformResourceEndpoint.getDatabaseCapabilities(
                 env.getCrn(),
                 env.getLocation().getName(),
                 env.getCloudPlatform(),
-                null);
+                null,
+                (azureDatabaseType == null || azureDatabaseType.isSingleServer()) ? AZURE_SINGLE_SERVER :  AZURE_FLEXIBLE);
     }
 
     private AzureHighAvailabiltyMode getHighAvailabilityMode(DatabaseAvailabilityType availabilityType, boolean zoneRedundantEnabled) {
