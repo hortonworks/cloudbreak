@@ -2032,6 +2032,13 @@ message CDPFreeIPAStatus {
     ENTITLEMENT_SYNC_FINISHED = 32;
     // The status when a dynamic entitlement sync operation is failed.
     ENTITLEMENT_SYNC_FAILED = 33;
+
+    // The status when rebuild for CDP FreeIPA is started.
+    FREEIPA_REBUILD_STARTED = 34;
+    // The status when rebuild for CDP FreeIPA is finished.
+    FREEIPA_REBUILD_FINISHED = 35;
+    // The status when rebuild for CDP FreeIPA is failed.
+    FREEIPA_REBUILD_FAILED = 36;
   }
 }
 

@@ -1,5 +1,9 @@
 package com.sequenceiq.freeipa.flow.freeipa.rebuild;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.FREEIPA_REBUILD_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.FREEIPA_REBUILD_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.FREEIPA_REBUILD_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UNSET;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.ADD_INSTANCE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.ADD_INSTANCE_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.ADD_INSTANCE_FINISHED_EVENT;
@@ -71,12 +75,15 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.FreeIpaUseCaseAware;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class FreeIpaRebuildFlowConfig extends AbstractFlowConfiguration<FreeIpaRebuildState, FreeIpaRebuildFlowEvent>
-        implements RetryableFlowConfiguration<FreeIpaRebuildFlowEvent> {
+        implements RetryableFlowConfiguration<FreeIpaRebuildFlowEvent>, FreeIpaUseCaseAware {
 
     private static final List<Transition<FreeIpaRebuildState, FreeIpaRebuildFlowEvent>> TRANSITIONS =
             new Transition.Builder<FreeIpaRebuildState, FreeIpaRebuildFlowEvent>()
@@ -239,5 +246,18 @@ public class FreeIpaRebuildFlowConfig extends AbstractFlowConfiguration<FreeIpaR
     @Override
     public FreeIpaRebuildFlowEvent getRetryableEvent() {
         return EDGE_CONFIG.getFailureHandled();
+    }
+
+    @Override
+    public UsageProto.CDPFreeIPAStatus.Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return FREEIPA_REBUILD_STARTED;
+        } else if (REBUILD_FINISHED_STATE.equals(flowState)) {
+            return FREEIPA_REBUILD_FINISHED;
+        } else if (REBUILD_FAILED_STATE.equals(flowState)) {
+            return FREEIPA_REBUILD_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 }
