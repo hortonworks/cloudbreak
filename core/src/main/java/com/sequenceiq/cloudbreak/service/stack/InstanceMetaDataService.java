@@ -107,6 +107,16 @@ public class InstanceMetaDataService {
         LOGGER.debug("Instances {} ({} row) was updated to {}. Reason: {}", instanceMetadataIds, modifiedRows, newStatus, reason);
     }
 
+    public void updateStatus(Long stackId, List<String> instanceIds, InstanceStatus status) {
+        Set<InstanceMetaData> allInstances = repository.findAllInStack(stackId);
+        allInstances.stream().filter(im -> instanceIds.contains(im.getInstanceId()))
+                .forEach(im -> {
+                    im.setInstanceStatus(status);
+                    repository.save(im);
+                    LOGGER.info("Updated instanceId {} status to {}.", im.getInstanceId(), status);
+                });
+    }
+
     public StackDtoDelegate saveInstanceAndGetUpdatedStack(StackDtoDelegate stack, Map<String, Integer> hostGroupsWithInstanceCountToCreate,
             Map<String, Set<String>> hostGroupWithHostnames, boolean save, boolean repair, NetworkScaleDetails networkScaleDetails) {
         LOGGER.info("Get updated stack with instance count ({}) and hostnames: {} and save: ({})", hostGroupsWithInstanceCountToCreate, hostGroupWithHostnames,
