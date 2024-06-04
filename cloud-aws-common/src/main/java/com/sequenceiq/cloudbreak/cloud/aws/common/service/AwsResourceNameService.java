@@ -29,7 +29,7 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         String name = instance(stackName, groupName, privateId);
         name = trimHash(name);
         name = appendPart(name, privateId);
-        name = appendHash(name, new Date());
+        name = appendDateAsHash(name, new Date());
         name = adjustBaseLength(name, maxResourceNameLength);
         return name;
     }
@@ -92,7 +92,7 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         name = normalize(reducedStackName);
         name = adjustPartLength(name);
         name = appendPart(name, resourceNameWithScheme);
-        name = appendHash(name, new Date());
+        name = appendDateAsHash(name, new Date());
         name = adjustBaseLength(name, maxLoadBalancerResourceNameLength);
         return name;
     }
@@ -106,7 +106,7 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         name = normalize(reducedStackName);
         name = adjustPartLength(name);
         name = appendPart(name, resourceNameWithScheme);
-        name = appendHash(name, new Date());
+        name = appendDateAsHash(name, new Date());
         name = adjustBaseLength(name, maxLoadBalancerResourceNameLength);
         return name;
     }

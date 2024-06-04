@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.service;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -23,7 +21,8 @@ public abstract class CloudbreakResourceNameService {
 
     private static final int MAX_PART_LENGTH = 20;
 
-    private static final String DATE_FORMAT = "yyyyMMddHHmmss";
+    // The length of Epoch milliseconds is 13 characters, until Nov 20 2286
+    private static final int DATE_LENGTH = 13;
 
     public String trimHash(String part) {
         if (part == null) {
@@ -68,15 +67,15 @@ public abstract class CloudbreakResourceNameService {
             List<String> splitedBase = Splitter.on("-").splitToList(base);
             String stackName;
             String instanceName;
-            if ((splitedBase.get(0).length() - (base.length() - platformSpecificLength)) > 1) {
+            if (splitedBase.get(0).length() - (base.length() - platformSpecificLength) > 1) {
                 stackName = Splitter.fixedLength(splitedBase.get(0).length() - (base.length() - platformSpecificLength))
-                        .splitToList(splitedBase.get(0)).get(0);
+                        .splitToList(splitedBase.get(0)).getFirst();
                 instanceName = splitedBase.get(1);
             } else {
-                stackName = Splitter.fixedLength(1).splitToList(splitedBase.get(0)).get(0);
+                stackName = Splitter.fixedLength(1).splitToList(splitedBase.get(0)).getFirst();
                 instanceName = Splitter.fixedLength(splitedBase.get(1).length()
                         - (Math.abs(splitedBase.get(0).length() - (base.length() - platformSpecificLength))
-                        + stackName.length())).splitToList(splitedBase.get(1)).get(0);
+                        + stackName.length())).splitToList(splitedBase.get(1)).getFirst();
             }
             StringBuilder shortBase = new StringBuilder(stackName + DELIMITER + instanceName);
             for (int i = 2; i < splitedBase.size(); i++) {
@@ -127,9 +126,8 @@ public abstract class CloudbreakResourceNameService {
         return appendPart(base, String.valueOf(part));
     }
 
-    protected String appendHash(String name, Date timestamp) {
-        DateFormat df = new SimpleDateFormat(DATE_FORMAT);
-        return Joiner.on("").join(name, DELIMITER, df.format(timestamp));
+    protected String appendDateAsHash(String name, Date timestamp) {
+        return Joiner.on("").join(name, DELIMITER, Long.toString(timestamp.getTime()));
     }
 
     protected String appendHash(String name, Long value) {
@@ -137,7 +135,7 @@ public abstract class CloudbreakResourceNameService {
     }
 
     protected int getDefaultHashLength() {
-        return DATE_FORMAT.length();
+        return DATE_LENGTH;
     }
 
     protected String appendHash(String name, String toBeHashed) {

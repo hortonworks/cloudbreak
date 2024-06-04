@@ -50,7 +50,7 @@ public class GcpResourceNameServiceTest {
     @Test
     void testAttachedDisk() {
         String resourceName = underTest.attachedDisk(STACK_NAME, GROUP_NAME, PRIVATE_ID, COUNT);
-        assertTrue(resourceName.matches("stackname-g-0-1-\\d{14}"));
+        assertTrue(resourceName.matches("stackname-g-0-1-\\d{13}"));
     }
 
     @Test
@@ -62,31 +62,31 @@ public class GcpResourceNameServiceTest {
     @Test
     void testInstance() {
         String resourceName = underTest.instance(STACK_NAME, GROUP_NAME, PRIVATE_ID);
-        assertTrue(resourceName.matches("stackname-g-0-\\d{14}"));
+        assertTrue(resourceName.matches("stackname-g-0-\\d{13}"));
     }
 
     @Test
     void testFirewallIn() {
         String resourceName = underTest.firewallIn(STACK_NAME);
-        assertTrue(resourceName.matches("stackname-in-\\d{14}"));
+        assertTrue(resourceName.matches("stackname-in-\\d{13}"));
     }
 
     @Test
     void testFirewallInternal() {
         String resourceName = underTest.firewallInternal(STACK_NAME);
-        assertTrue(resourceName.matches("stackname-internal-\\d{14}"));
+        assertTrue(resourceName.matches("stackname-internal-\\d{13}"));
     }
 
     @Test
     void testNetwork() {
         String resourceName = underTest.network(STACK_NAME);
-        assertTrue(resourceName.matches("stackname-\\d{14}"));
+        assertTrue(resourceName.matches("stackname-\\d{13}"));
     }
 
     @Test
     void testSubnet() {
         String resourceName = underTest.subnet(STACK_NAME);
-        assertTrue(resourceName.matches("stackname-\\d{14}"));
+        assertTrue(resourceName.matches("stackname-\\d{13}"));
     }
 
     @Test
@@ -98,13 +98,13 @@ public class GcpResourceNameServiceTest {
     @Test
     void testLoadBalancerWithPortWhenLoadBalancerTypeNotContainsUnderscore() {
         String resourceName = underTest.loadBalancerWithPort(STACK_NAME, LoadBalancerType.PUBLIC, PORT);
-        assertTrue(resourceName.matches("stackname-public-8080-\\d{14}"));
+        assertTrue(resourceName.matches("stackname-public-8080-\\d{13}"));
     }
 
     @Test
     void testLoadBalancerWithPortWhenLoadBalancerTypeContainsUnderscore() {
         String resourceName = underTest.loadBalancerWithPort(STACK_NAME, LOAD_BALACNER_TYPE, PORT);
-        assertTrue(resourceName.matches("stackname-gatewayprivate-8080-\\d{14}"));
+        assertTrue(resourceName.matches("stackname-gatewayprivate-8080-\\d{13}"));
     }
 
     @Test
