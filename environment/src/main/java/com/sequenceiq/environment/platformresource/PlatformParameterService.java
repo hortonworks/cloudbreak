@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.platformresource;
 
 import static com.sequenceiq.cloudbreak.cloud.CloudParameterConst.ACCESS_CONFIG_TYPE;
+import static com.sequenceiq.cloudbreak.cloud.CloudParameterConst.DATABASE_TYPE;
 import static com.sequenceiq.cloudbreak.cloud.CloudParameterConst.SHARED_PROJECT_ID;
 import static com.sequenceiq.common.model.CredentialType.AUDIT;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
@@ -36,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.type.CdpResourceType;
+import com.sequenceiq.common.model.DatabaseCapabilityType;
 import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigTypeQueryParam;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
@@ -67,6 +69,7 @@ public class PlatformParameterService {
                 null,
                 sharedProjectId,
                 null,
+                null,
                 CdpResourceType.DEFAULT);
     }
 
@@ -85,6 +88,7 @@ public class PlatformParameterService {
                 null,
                 null,
                 new HashMap<>(),
+                null,
                 null,
                 cdpResourceType);
     }
@@ -106,6 +110,7 @@ public class PlatformParameterService {
                 null,
                 new HashMap<>(),
                 null,
+                null,
                 CdpResourceType.DEFAULT);
     }
 
@@ -126,6 +131,7 @@ public class PlatformParameterService {
                 availabilityZone,
                 null,
                 new HashMap<>(),
+                null,
                 null,
                 cdpResourceType);
     }
@@ -148,6 +154,7 @@ public class PlatformParameterService {
                 sharedProjectId,
                 new HashMap<>(),
                 null,
+                null,
                 CdpResourceType.DEFAULT);
     }
 
@@ -157,7 +164,8 @@ public class PlatformParameterService {
             String region,
             String platformVariant,
             String availabilityZone,
-            String sharedProjectId) {
+            String sharedProjectId,
+            DatabaseCapabilityType databaseType) {
         return getPlatformResourceRequestByEnvironment(
                 accountId,
                 environmentCrn,
@@ -166,6 +174,7 @@ public class PlatformParameterService {
                 availabilityZone,
                 sharedProjectId,
                 null,
+                databaseType,
                 CdpResourceType.DEFAULT);
     }
 
@@ -188,6 +197,7 @@ public class PlatformParameterService {
                 sharedProjectId,
                 new HashMap<>(),
                 accessConfigType,
+                null,
                 CdpResourceType.DEFAULT);
     }
 
@@ -207,6 +217,7 @@ public class PlatformParameterService {
                 availabilityZone,
                 sharedProjectId,
                 accessConfigType,
+                null,
                 CdpResourceType.DEFAULT);
     }
 
@@ -218,6 +229,7 @@ public class PlatformParameterService {
             String availabilityZone,
             String sharedProjectId,
             AccessConfigTypeQueryParam accessConfigType,
+            DatabaseCapabilityType databaseType,
             CdpResourceType cdpResourceType) {
         String credentialCrn = credentialService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId, ENVIRONMENT).getResourceCrn();
         return getPlatformResourceRequest(
@@ -230,6 +242,7 @@ public class PlatformParameterService {
                 sharedProjectId,
                 new HashMap<>(),
                 accessConfigType,
+                databaseType,
                 cdpResourceType);
     }
 
@@ -249,6 +262,7 @@ public class PlatformParameterService {
                 null,
                 new HashMap<>(),
                 null,
+                null,
                 cdpResourceType == null ? CdpResourceType.DEFAULT : cdpResourceType);
     }
 
@@ -262,6 +276,7 @@ public class PlatformParameterService {
             String sharedProjectId,
             Map<String, String> filter,
             AccessConfigTypeQueryParam accessConfigType,
+            DatabaseCapabilityType databaseType,
             CdpResourceType cdpResourceType) {
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
 
@@ -293,17 +308,24 @@ public class PlatformParameterService {
         if (!Strings.isNullOrEmpty(availabilityZone)) {
             platformResourceRequest.setAvailabilityZone(availabilityZone);
         }
-        String accessConfigTypeString = NullUtil.getIfNotNull(accessConfigType, Enum::name);
         if (filter != null) {
             initFilterMap(platformResourceRequest);
             for (Map.Entry<String, String> entry : filter.entrySet()) {
                 platformResourceRequest.getFilters().put(entry.getKey(), entry.getValue());
             }
         }
+        String accessConfigTypeString = NullUtil.getIfNotNull(accessConfigType, Enum::name);
         if (accessConfigTypeString != null) {
             initFilterMap(platformResourceRequest);
             platformResourceRequest.getFilters().put(ACCESS_CONFIG_TYPE, accessConfigTypeString);
         }
+
+        String databaseTypeString = databaseType == null ? null : databaseType.name();
+        if (databaseTypeString != null) {
+            initFilterMap(platformResourceRequest);
+            platformResourceRequest.getFilters().put(DATABASE_TYPE, databaseTypeString);
+        }
+
         if (!Strings.isNullOrEmpty(sharedProjectId)) {
             initFilterMap(platformResourceRequest);
             platformResourceRequest.getFilters().put(SHARED_PROJECT_ID, sharedProjectId);

@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.CloudParameterConst.DATABASE_TYPE;
 import static com.sequenceiq.cloudbreak.cloud.model.DatabaseAvailabiltyType.databaseAvailabiltyType;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.SAME_ZONE;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.ZONE_REDUNDANT;
+import static com.sequenceiq.common.model.DatabaseCapabilityType.AZURE_FLEXIBLE;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,6 +26,7 @@ import com.azure.resourcemanager.postgresqlflexibleserver.models.FlexibleServerC
 import com.azure.resourcemanager.postgresqlflexibleserver.models.FlexibleServerEditionCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ServerSkuCapability;
 import com.azure.resourcemanager.postgresqlflexibleserver.models.ZoneRedundantHaSupportedEnum;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureRegionProvider;
@@ -43,8 +46,11 @@ public class AzureDatabaseCapabilityService {
     @Value("${cb.azure.database.flexible.serverEdition:}")
     private String serverEdition;
 
-    @Value("${cb.azure.database.flexible.defaultInstanceType:}")
-    private String defaultInstanceType;
+    @Value("${cb.azure.database.flexible.defaultInstanceType:Standard_E4ds_v4}")
+    private String defaultFlexibleInstanceType;
+
+    @Value("${cb.azure.database.singleserver.defaultInstanceType:MO_Gen5_4}")
+    private String defaultSingleServerInstanceType;
 
     @Inject
     private AzureClientService azureClientService;
@@ -87,17 +93,25 @@ public class AzureDatabaseCapabilityService {
     private Map<Region, String> getRegionInstanceTypeMap(Map<Region, AzureCoordinate> regions, Map<Region,
             Optional<FlexibleServerCapability>> capabilityMap, Map<String, String> filters) {
         Map<Region, String> instanceTypeMap = new HashMap<>();
+
+        String type = filters.get(DATABASE_TYPE);
+        boolean flexible = Strings.isNullOrEmpty(type) ? false : AZURE_FLEXIBLE.name().equalsIgnoreCase(type);
         for (Map.Entry<Region, AzureCoordinate> entry : regions.entrySet()) {
             Optional<FlexibleServerCapability> serverCapability = capabilityMap.getOrDefault(entry.getKey(), Optional.empty());
-            String instanceType = serverCapability.stream()
-                    .map(FlexibleServerCapability::supportedServerEditions)
-                    .flatMap(Collection::stream)
-                    .filter(this::matchesServerEdition)
-                    .flatMap(serverEdition -> serverEdition.supportedServerSkus().stream())
-                    .map(ServerSkuCapability::name)
-                    .filter(this::matchesInstanceType)
-                    .max(Comparator.comparing(this::getInstanceTypeVersion))
-                    .orElse(defaultInstanceType);
+            String instanceType;
+            if (flexible) {
+                instanceType = serverCapability.stream()
+                        .map(FlexibleServerCapability::supportedServerEditions)
+                        .flatMap(Collection::stream)
+                        .filter(this::matchesServerEdition)
+                        .flatMap(serverEdition -> serverEdition.supportedServerSkus().stream())
+                        .map(ServerSkuCapability::name)
+                        .filter(this::matchesInstanceType)
+                        .max(Comparator.comparing(this::getInstanceTypeVersion))
+                        .orElse(defaultFlexibleInstanceType);
+            } else {
+                instanceType = defaultSingleServerInstanceType;
+            }
             putRegion(instanceTypeMap, entry.getKey(), instanceType);
         }
         LOGGER.debug("Default flexible server instancetypes by regions [{}]", instanceTypeMap);

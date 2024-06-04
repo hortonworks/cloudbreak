@@ -99,7 +99,7 @@ public class AzureDatabaseServerParameterSetterTest {
                 new PlatformDatabaseCapabilitiesResponse(includedRegions, new HashMap<>());
 
         when(azureDatabaseAttributesService.getAzureDatabaseType(any())).thenReturn(AzureDatabaseType.FLEXIBLE_SERVER);
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), any(), any(), any(), any()))
                 .thenReturn(platformDatabaseCapabilitiesResponse);
 
         underTest.setParameters(databaseServerV4StackRequest, sdxCluster, detailedEnvironmentResponse(), "crn");
@@ -125,7 +125,7 @@ public class AzureDatabaseServerParameterSetterTest {
                 new PlatformDatabaseCapabilitiesResponse(includedRegions, new HashMap<>());
 
         when(azureDatabaseAttributesService.getAzureDatabaseType(any())).thenReturn(AzureDatabaseType.FLEXIBLE_SERVER);
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), any(), any(), any()))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), any(), any(), any(), any()))
                 .thenReturn(platformDatabaseCapabilitiesResponse);
 
         underTest.setParameters(databaseServerV4StackRequest, sdxCluster, detailedEnvironmentResponse(), "crn");

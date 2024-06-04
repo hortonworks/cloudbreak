@@ -166,6 +166,8 @@ cb:
             instanceTypeRegex: ^Standard_E4d?s.*$
             serverEdition: MemoryOptimized
             defaultInstanceType: Standard_E4ds_v4
+        singleserver:
+          defaultInstanceType: MO_Gen5_4
 
   custom.user.data: |
     touch /tmp/custom-user-data
