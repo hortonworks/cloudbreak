@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx.database;
 
+import static com.sequenceiq.common.model.AzureDatabaseType.FLEXIBLE_SERVER;
 import static com.sequenceiq.datalake.service.TagUtil.getTags;
 
 import java.util.Comparator;
@@ -32,6 +33,8 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
+import com.sequenceiq.common.model.DatabaseCapabilityType;
+import com.sequenceiq.common.model.DatabaseType;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.converter.DatabaseServerConverter;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -241,8 +244,9 @@ public class DatabaseService {
     DatabaseServerV4StackRequest getDatabaseServerRequest(CloudPlatform cloudPlatform, SdxCluster sdxCluster,
             DetailedEnvironmentResponse env, String initiatorUserCrn) {
         DatabaseServerParameterSetter databaseServerParameterSetter = databaseServerParameterSetterMap.get(cloudPlatform);
+        DatabaseType databaseType = databaseServerParameterSetter.getDatabaseType(sdxCluster.getSdxDatabase()).orElse(null);
         DatabaseConfig databaseConfig = dbConfigs.get(new DatabaseConfigKey(cloudPlatform, sdxCluster.getClusterShape(),
-                databaseServerParameterSetter.getDatabaseType(sdxCluster.getSdxDatabase()).orElse(null)));
+                databaseType));
         if (databaseConfig == null) {
             throw new BadRequestException("Database config for cloud platform " + cloudPlatform + ", cluster shape "
                     + sdxCluster.getClusterShape() + " not found");
@@ -258,7 +262,9 @@ public class DatabaseService {
             instanceType = previousDatabase.getInstanceType();
             storageSize =  previousDatabase.getStorageSize();
         } else {
-            PlatformDatabaseCapabilitiesResponse databaseCapabilities = getDatabaseCapabilities(env, initiatorUserCrn);
+            DatabaseCapabilityType databaseCapabilityType = CloudPlatform.AZURE.equals(cloudPlatform) ?
+                    getAzureDatabaseCapability(databaseType) : DatabaseCapabilityType.DEFAULT;
+            PlatformDatabaseCapabilitiesResponse databaseCapabilities = getDatabaseCapabilities(env, initiatorUserCrn, databaseCapabilityType);
             instanceType = databaseCapabilities.getRegionDefaultInstances().get(env.getLocation().getName());
             storageSize =  databaseConfig.getVolumeSize();
         }
@@ -275,13 +281,19 @@ public class DatabaseService {
         return req;
     }
 
-    private PlatformDatabaseCapabilitiesResponse getDatabaseCapabilities(DetailedEnvironmentResponse env, String initiatorUserCrn) {
+    private DatabaseCapabilityType getAzureDatabaseCapability(DatabaseType databaseType) {
+        return FLEXIBLE_SERVER.equals(databaseType) ? DatabaseCapabilityType.AZURE_FLEXIBLE : DatabaseCapabilityType.AZURE_SINGLE_SERVER;
+    }
+
+    private PlatformDatabaseCapabilitiesResponse getDatabaseCapabilities(DetailedEnvironmentResponse env,
+        String initiatorUserCrn, DatabaseCapabilityType capabilityType) {
         return ThreadBasedUserCrnProvider.doAs(initiatorUserCrn, () ->
                 environmentPlatformResourceEndpoint.getDatabaseCapabilities(
                         env.getCrn(),
                         env.getLocation().getName(),
                         env.getCloudPlatform(),
-                        null)
+                        null,
+                        capabilityType)
         );
     }
 

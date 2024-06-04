@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.externaldatabase;
 
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.SAME_ZONE;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.ZONE_REDUNDANT;
+import static com.sequenceiq.common.model.DatabaseCapabilityType.AZURE_FLEXIBLE;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -123,7 +124,7 @@ class AzureDatabaseServerParameterDecoratorTest {
 
         assertThat(illegalArgumentException).hasMessage(availabilityType + " database availability type is not supported on Azure.");
 
-        verify(environmentPlatformResourceEndpoint, never()).getDatabaseCapabilities(any(), any(), any(), any());
+        verify(environmentPlatformResourceEndpoint, never()).getDatabaseCapabilities(any(), any(), any(), any(), any());
     }
 
     @ParameterizedTest(name = "{0}")
@@ -151,7 +152,7 @@ class AzureDatabaseServerParameterDecoratorTest {
         assertThat(azureDatabaseServerV4Parameters.getAvailabilityZone()).isNull();
         assertThat(azureDatabaseServerV4Parameters.getStandbyAvailabilityZone()).isNull();
 
-        verify(environmentPlatformResourceEndpoint, never()).getDatabaseCapabilities(any(), any(), any(), any());
+        verify(environmentPlatformResourceEndpoint, never()).getDatabaseCapabilities(any(), any(), any(), any(), any());
     }
 
     @Test
@@ -178,7 +179,7 @@ class AzureDatabaseServerParameterDecoratorTest {
         assertThat(azureDatabaseServerV4Parameters.getAvailabilityZone()).isNull();
         assertThat(azureDatabaseServerV4Parameters.getStandbyAvailabilityZone()).isNull();
 
-        verify(environmentPlatformResourceEndpoint, never()).getDatabaseCapabilities(any(), any(), any(), any());
+        verify(environmentPlatformResourceEndpoint, never()).getDatabaseCapabilities(any(), any(), any(), any(), any());
     }
 
     @ParameterizedTest(name = "{0}")
@@ -205,7 +206,7 @@ class AzureDatabaseServerParameterDecoratorTest {
         assertThat(azureDatabaseServerV4Parameters.getAvailabilityZone()).isNull();
         assertThat(azureDatabaseServerV4Parameters.getStandbyAvailabilityZone()).isNull();
 
-        verify(environmentPlatformResourceEndpoint, never()).getDatabaseCapabilities(any(), any(), any(), any());
+        verify(environmentPlatformResourceEndpoint, never()).getDatabaseCapabilities(any(), any(), any(), any(), any());
     }
 
     @Test
@@ -223,7 +224,7 @@ class AzureDatabaseServerParameterDecoratorTest {
 
         DetailedEnvironmentResponse env = createEnvironment();
         PlatformDatabaseCapabilitiesResponse databaseCapabilities = new PlatformDatabaseCapabilitiesResponse();
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(ENVIRONMENT_CRN, LOCATION, CloudPlatform.AZURE.name(), null))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(ENVIRONMENT_CRN, LOCATION, CloudPlatform.AZURE.name(), null, AZURE_FLEXIBLE))
                 .thenReturn(databaseCapabilities);
 
         underTest.setParameters(databaseServerV4StackRequest, databaseServerParameter, env, true);
@@ -276,7 +277,7 @@ class AzureDatabaseServerParameterDecoratorTest {
                 .build();
 
         DetailedEnvironmentResponse env = createEnvironment();
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(ENVIRONMENT_CRN, LOCATION, CloudPlatform.AZURE.name(), null))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(ENVIRONMENT_CRN, LOCATION, CloudPlatform.AZURE.name(), null, AZURE_FLEXIBLE))
                 .thenReturn(databaseCapabilities);
 
         underTest.setParameters(databaseServerV4StackRequest, databaseServerParameter, env, true);
@@ -315,7 +316,7 @@ class AzureDatabaseServerParameterDecoratorTest {
         DetailedEnvironmentResponse env = createEnvironment();
         Map<String, List<String>> includedRegions = Map.ofEntries(entry(AzureHighAvailabiltyMode.ZONE_REDUNDANT.name(), List.of(OTHER_REGION, LOCATION)));
         PlatformDatabaseCapabilitiesResponse databaseCapabilities = new PlatformDatabaseCapabilitiesResponse(includedRegions, new HashMap<>());
-        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(ENVIRONMENT_CRN, LOCATION, CloudPlatform.AZURE.name(), null))
+        when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(ENVIRONMENT_CRN, LOCATION, CloudPlatform.AZURE.name(), null, AZURE_FLEXIBLE))
                 .thenReturn(databaseCapabilities);
 
         underTest.setParameters(databaseServerV4StackRequest, databaseServerParameter, env, true);

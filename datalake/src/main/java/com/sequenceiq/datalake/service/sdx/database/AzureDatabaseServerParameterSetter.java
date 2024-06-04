@@ -5,6 +5,7 @@ import static com.sequenceiq.common.model.AzureDatabaseType.SINGLE_SERVER;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.DISABLED;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.SAME_ZONE;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.ZONE_REDUNDANT;
+import static com.sequenceiq.common.model.DatabaseCapabilityType.AZURE_FLEXIBLE;
 import static com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType.HA;
 
 import java.util.List;
@@ -138,7 +139,8 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
                         env.getCrn(),
                         env.getLocation().getName(),
                         env.getCloudPlatform(),
-                        null)
+                        null,
+                        AZURE_FLEXIBLE)
         );
     }
 

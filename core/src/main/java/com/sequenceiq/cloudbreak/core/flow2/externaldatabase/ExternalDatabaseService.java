@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.externaldatabase;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.rotation.common.RotationPollingSvcOutageUtils.pollWithSvcOutageErrorHandling;
+import static com.sequenceiq.common.model.AzureDatabaseType.FLEXIBLE_SERVER;
+import static com.sequenceiq.common.model.DatabaseCapabilityType.DEFAULT;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -57,6 +60,7 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.model.AzureDatabaseType;
+import com.sequenceiq.common.model.DatabaseCapabilityType;
 import com.sequenceiq.common.model.DatabaseType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.platformresource.EnvironmentPlatformResourceEndpoint;
@@ -383,7 +387,8 @@ public class ExternalDatabaseService {
         DatabaseServerParameterDecorator databaseServerParameterDecorator = parameterDecoratorMap.get(cloudPlatform);
         DatabaseType databaseType = databaseServerParameterDecorator.getDatabaseType(attributes).orElse(null);
         DatabaseStackConfig databaseStackConfig = dbConfigs.get(new DatabaseStackConfigKey(cloudPlatform, databaseType));
-        PlatformDatabaseCapabilitiesResponse databaseCapabilities = getDatabaseCapabilities(environment);
+        DatabaseCapabilityType databaseCapabilityType = AZURE.equals(cloudPlatform) ? getAzureDatabaseCapability(databaseType) : DEFAULT;
+        PlatformDatabaseCapabilitiesResponse databaseCapabilities = getDatabaseCapabilities(environment, databaseCapabilityType);
         if (databaseStackConfig == null) {
             throw new BadRequestException("Database config for cloud platform " + cloudPlatform + " not found");
         } else {
@@ -405,14 +410,19 @@ public class ExternalDatabaseService {
         }
     }
 
-    private PlatformDatabaseCapabilitiesResponse getDatabaseCapabilities(DetailedEnvironmentResponse env) {
+    private DatabaseCapabilityType getAzureDatabaseCapability(DatabaseType databaseType) {
+        return FLEXIBLE_SERVER.equals(databaseType) ? DatabaseCapabilityType.AZURE_FLEXIBLE : DatabaseCapabilityType.AZURE_SINGLE_SERVER;
+    }
+
+    private PlatformDatabaseCapabilitiesResponse getDatabaseCapabilities(DetailedEnvironmentResponse env, DatabaseCapabilityType databaseType) {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return ThreadBasedUserCrnProvider.doAs(initiatorUserCrn, () ->
                 environmentPlatformResourceEndpoint.getDatabaseCapabilities(
                         env.getCrn(),
                         env.getLocation().getName(),
                         env.getCloudPlatform(),
-                        null)
+                        null,
+                        databaseType)
         );
     }
 
@@ -442,7 +452,7 @@ public class ExternalDatabaseService {
                 CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(targetVersion, TargetMajorVersion.VERSION_14::getMajorVersion);
         boolean currentVersionImpliesFlexibleServerMigration =
                 CMRepositoryVersionUtil.isVersionOlderThanLimited(currentVersion, TargetMajorVersion.VERSION_14::getMajorVersion);
-        boolean migrationNeeded = externalDb && cloudPlatform == CloudPlatform.AZURE && upgradeTargetVersionImpliesFlexibleServerMigration &&
+        boolean migrationNeeded = externalDb && cloudPlatform == AZURE && upgradeTargetVersionImpliesFlexibleServerMigration &&
                 currentVersionImpliesFlexibleServerMigration;
         String migrationNeededMsg = migrationNeeded ? "Database settings migration is needed during upgrade." :
                 "Database settings migration is not needed during upgrade.";
