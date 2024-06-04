@@ -79,6 +79,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDiagnosticsService;
 import com.sequenceiq.cloudbreak.service.diagnostics.DiagnosticsService;
 import com.sequenceiq.cloudbreak.service.operation.OperationService;
+import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceMetadataUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -108,6 +109,7 @@ import com.sequenceiq.distrox.v1.distrox.converter.DistroXRepairV1RequestToClust
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXScaleV1RequestToStackScaleV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXVerticalScaleV1RequestToStackVerticalScaleV4RequestConverter;
+import com.sequenceiq.distrox.v1.distrox.converter.RotateRdsCertificateConverter;
 import com.sequenceiq.distrox.v1.distrox.service.DistroXService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
@@ -176,6 +178,12 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Inject
     private StackInstanceMetadataUpdateService instanceMetadataUpdateService;
+
+    @Inject
+    private RotateRdsCertificateConverter rotateRdsCertificateConverter;
+
+    @Inject
+    private StackRotateRdsCertificateService rotateRdsCertificateService;
 
     @Override
     @FilterListBasedOnPermissions
@@ -428,17 +436,17 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_DATAHUB)
     public RotateRdsCertificateV1Response rotateRdsCertificateByName(@ResourceName String name) {
-        return stackOperations.rotateRdsCertificate(
+        return rotateRdsCertificateConverter.convert(rotateRdsCertificateService.rotateRdsCertificate(
                 NameOrCrn.ofName(name),
-                getWorkspaceIdForCurrentUser());
+                getWorkspaceIdForCurrentUser()));
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATAHUB)
     public RotateRdsCertificateV1Response rotateRdsCertificateByCrn(@ResourceCrn String crn) {
-        return stackOperations.rotateRdsCertificate(
+        return rotateRdsCertificateConverter.convert(rotateRdsCertificateService.rotateRdsCertificate(
                 NameOrCrn.ofCrn(crn),
-                getWorkspaceIdForCurrentUser());
+                getWorkspaceIdForCurrentUser()));
     }
 
     @Override

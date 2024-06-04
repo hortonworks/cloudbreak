@@ -124,6 +124,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.StackRotateRdsCertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
@@ -843,4 +844,14 @@ public interface StackV4Endpoint {
     FlowIdentifier instanceMetadataUpdate(@PathParam("workspaceId") Long workspaceId,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn,
             @NotNull @Valid StackInstanceMetadataUpdateV4Request request);
+
+    @PUT
+    @Path("internal/crn/{crn}/rotate_rds_certificate")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Rotate RDS certificate of the stack by CRN", operationId = "rotateRdsCertificateByCrnInternal",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    StackRotateRdsCertificateV4Response rotateRdsCertificateByCrnInternal(@PathParam("workspaceId") Long workspaceId,
+            @NotEmpty @ValidCrn(resource = {DATAHUB, DATALAKE}) @PathParam("crn") String crn,
+            @NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER})
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

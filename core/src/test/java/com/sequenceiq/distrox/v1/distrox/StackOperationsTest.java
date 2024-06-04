@@ -38,7 +38,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordSta
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
-import com.sequenceiq.cloudbreak.api.model.RotateRdsCertResponseType;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -61,11 +60,9 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.distrox.api.v1.distrox.model.rotaterdscert.RotateRdsCertificateV1Response;
 import com.sequenceiq.distrox.v1.distrox.service.DistroXClusterNameNormalizerService;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.FlowLogService;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,8 +75,6 @@ class StackOperationsTest {
     private static final String IMAGE_CATALOG = "image catalog";
 
     private static final String ACCOUNT_ID = "accountId";
-
-    private static final FlowIdentifier FLOW_IDENTIFIER = new FlowIdentifier(FlowType.FLOW, "flowId");
 
     @InjectMocks
     private StackOperations underTest;
@@ -346,18 +341,6 @@ class StackOperationsTest {
         underTest.putAddVolumes(nameOrCrn, stackAddVolumesRequest, ACCOUNT_ID);
 
         verify(stackCommonService).putAddVolumesInWorkspace(nameOrCrn, ACCOUNT_ID, stackAddVolumesRequest);
-    }
-
-    @Test
-    void testRotateRdsCertificate() {
-        NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
-        when(stackService.getByNameOrCrnInWorkspace(nameOrCrn, stack.getWorkspace().getId())).thenReturn(stack);
-        when(stackCommonService.rotateRdsCertificate(stack)).thenReturn(FLOW_IDENTIFIER);
-        RotateRdsCertificateV1Response result = underTest.rotateRdsCertificate(nameOrCrn, stack.getWorkspace().getId());
-        verify(stackCommonService).rotateRdsCertificate(stack);
-        assertThat(result.getFlowIdentifier()).isEqualTo(FLOW_IDENTIFIER);
-        assertThat(result.getResponseType()).isEqualTo(RotateRdsCertResponseType.TRIGGERED);
-        assertThat(result.getResourceCrn()).isEqualTo(TestUtil.STACK_CRN);
     }
 
 }

@@ -24,9 +24,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatal
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatusResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.StackRotateRdsCertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
+import com.sequenceiq.cloudbreak.api.model.RotateRdsCertResponseType;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -62,6 +65,9 @@ class StackV4ControllerTest {
 
     @Mock
     private StackUpgradeOperations stackUpgradeOperations;
+
+    @Mock
+    private StackRotateRdsCertificateService stackRotateRdsCertificateService;
 
     @InjectMocks
     private StackV4Controller underTest;
@@ -99,7 +105,7 @@ class StackV4ControllerTest {
     }
 
     @Test
-    public void testCcmUpgrade() {
+    void testCcmUpgrade() {
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, "1");
         StackCcmUpgradeV4Response actual = new StackCcmUpgradeV4Response(CcmUpgradeResponseType.TRIGGERED, flowId, null, STACK_CRN);
         when(stackCcmUpgradeService.upgradeCcm(NameOrCrn.ofCrn(STACK_CRN))).thenReturn(actual);
@@ -108,7 +114,7 @@ class StackV4ControllerTest {
     }
 
     @Test
-    public void rotateSaltPasswordInternal() {
+    void rotateSaltPasswordInternal() {
         String stackCrn = "crn";
         RotateSaltPasswordRequest request = new RotateSaltPasswordRequest(com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason.MANUAL);
 
@@ -118,7 +124,7 @@ class StackV4ControllerTest {
     }
 
     @Test
-    public void getSaltPasswordStatus() {
+    void getSaltPasswordStatus() {
         String stackCrn = "crn";
         when(stackOperations.getSaltPasswordStatus(NameOrCrn.ofCrn(stackCrn), ACCOUNT_ID)).thenReturn(SaltPasswordStatus.OK);
 
@@ -128,7 +134,7 @@ class StackV4ControllerTest {
     }
 
     @Test
-    public void modifyProxyConfigInternal() {
+    void modifyProxyConfigInternal() {
         String stackCrn = "crn";
         String previousProxyConfigCrn = "proxy-crn";
 
@@ -138,7 +144,7 @@ class StackV4ControllerTest {
     }
 
     @Test
-    public void testPrepareClusterUpgradeByCrnInternal() {
+    void testPrepareClusterUpgradeByCrnInternal() {
         String imageId = "imageId";
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollId");
         when(stackUpgradeOperations.prepareClusterUpgrade(NameOrCrn.ofCrn(STACK_CRN), ACCOUNT_ID, imageId)).thenReturn(flowIdentifier);
@@ -158,4 +164,12 @@ class StackV4ControllerTest {
         assertThat(result).isSameAs(flowIdentifier);
     }
 
+    @Test
+    void testRotateRdsCertificate() {
+        FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, "1");
+        StackRotateRdsCertificateV4Response actual = new StackRotateRdsCertificateV4Response(RotateRdsCertResponseType.TRIGGERED, flowId, null, STACK_CRN);
+        when(stackRotateRdsCertificateService.rotateRdsCertificate(NameOrCrn.ofCrn(STACK_CRN), WORKSPACE_ID)).thenReturn(actual);
+        StackRotateRdsCertificateV4Response result = underTest.rotateRdsCertificateByCrnInternal(WORKSPACE_ID, STACK_CRN, USER_CRN);
+        Assertions.assertSame(actual, result);
+    }
 }

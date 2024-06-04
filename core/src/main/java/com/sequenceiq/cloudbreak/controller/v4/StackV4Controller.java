@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.StackRotateRdsCertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
@@ -74,6 +75,7 @@ import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.SubnetIdWithResourceNameAndCrn;
+import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceMetadataUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackRotationService;
@@ -117,6 +119,9 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Inject
     private StackInstanceMetadataUpdateService instanceMetadataUpdateService;
+
+    @Inject
+    private StackRotateRdsCertificateService rotateRdsCertificateService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
@@ -684,5 +689,11 @@ public class StackV4Controller extends NotificationController implements StackV4
     public FlowIdentifier instanceMetadataUpdate(Long workspaceId, @InitiatorUserCrn String initiatorUserCrn,
             StackInstanceMetadataUpdateV4Request request) {
         return instanceMetadataUpdateService.updateInstanceMetadata(request.getCrn(), request.getUpdateType());
+    }
+
+    @Override
+    @InternalOnly
+    public StackRotateRdsCertificateV4Response rotateRdsCertificateByCrnInternal(Long workspaceId, String crn, @InitiatorUserCrn String initiatorUserCrn) {
+        return rotateRdsCertificateService.rotateRdsCertificate(NameOrCrn.ofCrn(crn), workspaceId);
     }
 }

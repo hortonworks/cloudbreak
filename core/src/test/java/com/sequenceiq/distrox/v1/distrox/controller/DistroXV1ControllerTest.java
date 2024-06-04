@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.model.RotateRdsCertResponseType;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -40,6 +41,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXGenerateImageCatalogV1
 import com.sequenceiq.distrox.api.v1.distrox.model.rotaterdscert.RotateRdsCertificateV1Response;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.authorization.DataHubFiltering;
+import com.sequenceiq.distrox.v1.distrox.converter.RotateRdsCertificateConverter;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 
@@ -77,6 +79,12 @@ class DistroXV1ControllerTest {
 
     @Mock
     private StackOperationService stackOperationService;
+
+    @Mock
+    private RotateRdsCertificateConverter rotateRdsCertificateConverter;
+
+    @Mock
+    private StackRotateRdsCertificateService stackRotateRdsCertificateService;
 
     @Captor
     private ArgumentCaptor<NameOrCrn> nameOrCrnArgumentCaptor;
@@ -248,10 +256,10 @@ class DistroXV1ControllerTest {
         NameOrCrn nameOrCrn = NameOrCrn.ofName(NAME);
         when(workspace.getId()).thenReturn(WORKSPACE_ID);
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
-        when(stackOperations.rotateRdsCertificate(nameOrCrn, WORKSPACE_ID)).thenReturn(RESPONSE);
+        when(rotateRdsCertificateConverter.convert(any())).thenReturn(RESPONSE);
 
         RotateRdsCertificateV1Response result = distroXV1Controller.rotateRdsCertificateByName(NAME);
-        verify(stackOperations).rotateRdsCertificate(nameOrCrn, WORKSPACE_ID);
+        verify(stackRotateRdsCertificateService).rotateRdsCertificate(nameOrCrn, WORKSPACE_ID);
         assertThat(result).isEqualTo(RESPONSE);
     }
 
@@ -260,10 +268,10 @@ class DistroXV1ControllerTest {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(CRN);
         when(workspace.getId()).thenReturn(WORKSPACE_ID);
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
-        when(stackOperations.rotateRdsCertificate(nameOrCrn, WORKSPACE_ID)).thenReturn(RESPONSE);
+        when(rotateRdsCertificateConverter.convert(any())).thenReturn(RESPONSE);
 
         RotateRdsCertificateV1Response result = distroXV1Controller.rotateRdsCertificateByCrn(CRN);
-        verify(stackOperations).rotateRdsCertificate(nameOrCrn, WORKSPACE_ID);
+        verify(stackRotateRdsCertificateService).rotateRdsCertificate(nameOrCrn, WORKSPACE_ID);
         assertThat(result).isEqualTo(RESPONSE);
     }
 }
