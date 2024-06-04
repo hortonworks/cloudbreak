@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
+import com.sequenceiq.environment.api.v1.environment.validator.cidr.ValidCidrList;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -20,6 +21,7 @@ public class ExternalizedComputeCreateRequest implements Serializable {
     @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_PRIVATE_CLUSTER)
     private boolean privateCluster;
 
+    @ValidCidrList
     @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_KUBE_API_AUTHORIZED_IP_RANGES)
     private String kubeApiAuthorizedIpRanges;
 

@@ -215,7 +215,7 @@ public class EnvironmentDtoConverter {
             defaultComputeCluster.setPrivateCluster(computeClusterCreation.isPrivateCluster());
             defaultComputeCluster.setKubeApiAuthorizedIpRanges(computeClusterCreation.getKubeApiAuthorizedIpRanges());
             defaultComputeCluster.setOutboundType(computeClusterCreation.getOutboundType());
-            defaultComputeCluster.setLoadBalancerAuthorizedIpRanges(computeClusterCreation.getKubeApiAuthorizedIpRanges());
+            defaultComputeCluster.setLoadBalancerAuthorizedIpRanges(computeClusterCreation.getLoadBalancerAuthorizationIpRanges());
         }
         environment.setDefaultComputeCluster(defaultComputeCluster);
     }
