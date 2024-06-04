@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.util.CidrUtil;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
@@ -192,14 +193,14 @@ public class EnvironmentApiConverter {
                 builder.withOutboundType(externalizedCompute.getOutboundType());
             }
             if (StringUtils.hasText(externalizedCompute.getKubeApiAuthorizedIpRanges())) {
-                builder.withKubeApiAuthorizedIpRanges(externalizedCompute.getKubeApiAuthorizedIpRanges());
+                builder.withKubeApiAuthorizedIpRanges(CidrUtil.cidrSet(externalizedCompute.getKubeApiAuthorizedIpRanges()));
             } else {
-                builder.withKubeApiAuthorizedIpRanges(DEFAULT_CIDR);
+                builder.withKubeApiAuthorizedIpRanges(Set.of(DEFAULT_CIDR));
             }
             if (securityAccess != null && StringUtils.hasText(securityAccess.getCidr())) {
-                builder.withLoadBalancerAuthorizationIpRanges(securityAccess.getCidr());
+                builder.withLoadBalancerAuthorizationIpRanges(CidrUtil.cidrSet(securityAccess.getCidr()));
             } else {
-                builder.withLoadBalancerAuthorizationIpRanges(DEFAULT_CIDR);
+                builder.withLoadBalancerAuthorizationIpRanges(Set.of(DEFAULT_CIDR));
             }
         }
         return builder.build();

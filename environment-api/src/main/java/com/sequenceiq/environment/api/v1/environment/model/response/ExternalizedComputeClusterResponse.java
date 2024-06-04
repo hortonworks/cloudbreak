@@ -1,5 +1,10 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
@@ -13,13 +18,13 @@ public class ExternalizedComputeClusterResponse {
     private boolean privateCluster;
 
     @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_KUBE_API_AUTHORIZED_IP_RANGES)
-    private String kubeApiAuthorizedIpRanges;
+    private Set<String> kubeApiAuthorizedIpRanges;
 
     @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_OUTBOUND_TYPE)
     private String outboundType;
 
     @Schema(description = EnvironmentModelDescription.EXTERNALIZED_COMPUTE_LOAD_BALANCER_AUTHORIZED_IP_RANGES)
-    private String loadBalancerAuthorizedIpRanges;
+    private Set<String> loadBalancerAuthorizedIpRanges;
 
     public static ExternalizedComputeClusterResponse.Builder newBuilder() {
         return new Builder();
@@ -33,11 +38,11 @@ public class ExternalizedComputeClusterResponse {
         this.privateCluster = privateCluster;
     }
 
-    public String getKubeApiAuthorizedIpRanges() {
+    public Set<String> getKubeApiAuthorizedIpRanges() {
         return kubeApiAuthorizedIpRanges;
     }
 
-    public void setKubeApiAuthorizedIpRanges(String kubeApiAuthorizedIpRanges) {
+    public void setKubeApiAuthorizedIpRanges(Set<String> kubeApiAuthorizedIpRanges) {
         this.kubeApiAuthorizedIpRanges = kubeApiAuthorizedIpRanges;
     }
 
@@ -49,11 +54,11 @@ public class ExternalizedComputeClusterResponse {
         this.outboundType = outboundType;
     }
 
-    public String getLoadBalancerAuthorizedIpRanges() {
+    public Set<String> getLoadBalancerAuthorizedIpRanges() {
         return loadBalancerAuthorizedIpRanges;
     }
 
-    public void setLoadBalancerAuthorizedIpRanges(String loadBalancerAuthorizedIpRanges) {
+    public void setLoadBalancerAuthorizedIpRanges(Set<String> loadBalancerAuthorizedIpRanges) {
         this.loadBalancerAuthorizedIpRanges = loadBalancerAuthorizedIpRanges;
     }
 
@@ -71,19 +76,21 @@ public class ExternalizedComputeClusterResponse {
 
         private boolean privateCluster;
 
-        private String kubeApiAuthorizedIpRanges;
+        private Set<String> kubeApiAuthorizedIpRanges = new HashSet<>();
 
         private String outboundType;
 
-        private String loadBalancerAuthorizedIpRanges;
+        private Set<String> loadBalancerAuthorizedIpRanges = new HashSet<>();
 
         public Builder withPrivateCluster(boolean privateCluster) {
             this.privateCluster = privateCluster;
             return this;
         }
 
-        public Builder withKubeApiAuthorizedIpRanges(String kubeApiAuthorizedIpRanges) {
-            this.kubeApiAuthorizedIpRanges = kubeApiAuthorizedIpRanges;
+        public Builder withKubeApiAuthorizedIpRanges(Set<String> kubeApiAuthorizedIpRanges) {
+            if (CollectionUtils.isNotEmpty(kubeApiAuthorizedIpRanges)) {
+                this.kubeApiAuthorizedIpRanges = kubeApiAuthorizedIpRanges;
+            }
             return this;
         }
 
@@ -92,8 +99,10 @@ public class ExternalizedComputeClusterResponse {
             return this;
         }
 
-        public Builder withLoadBalancerAuthorizedIpRanges(String loadBalancerAuthorizedIpRanges) {
-            this.loadBalancerAuthorizedIpRanges = loadBalancerAuthorizedIpRanges;
+        public Builder withLoadBalancerAuthorizedIpRanges(Set<String> loadBalancerAuthorizedIpRanges) {
+            if (CollectionUtils.isNotEmpty(loadBalancerAuthorizedIpRanges)) {
+                this.loadBalancerAuthorizedIpRanges = loadBalancerAuthorizedIpRanges;
+            }
             return this;
         }
 
@@ -101,8 +110,10 @@ public class ExternalizedComputeClusterResponse {
             ExternalizedComputeClusterResponse externalizedComputeCluster = new ExternalizedComputeClusterResponse();
             externalizedComputeCluster.setPrivateCluster(privateCluster);
             externalizedComputeCluster.setOutboundType(outboundType);
-            externalizedComputeCluster.setKubeApiAuthorizedIpRanges(kubeApiAuthorizedIpRanges);
-            externalizedComputeCluster.setLoadBalancerAuthorizedIpRanges(loadBalancerAuthorizedIpRanges);
+            // Temporarily return with null until Liftie update to the latest cb version.
+            // Without this the String -> Set<String> refactor would break Liftie despite the fields are not yet used.
+            //externalizedComputeCluster.setKubeApiAuthorizedIpRanges(kubeApiAuthorizedIpRanges);
+            //externalizedComputeCluster.setLoadBalancerAuthorizedIpRanges(loadBalancerAuthorizedIpRanges);
             return externalizedComputeCluster;
         }
     }
