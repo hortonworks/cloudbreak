@@ -230,7 +230,7 @@ public class SdxBackupRestoreService {
         String selector = DATALAKE_DATABASE_RESTORE_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         DatalakeDatabaseRestoreStartEvent startEvent = new DatalakeDatabaseRestoreStartEvent(selector, cluster.getId(),
-                userId, backupId, restoreId, backupLocation, databaseMaxDurationInMin);
+                userId, backupId, restoreId, backupLocation, databaseMaxDurationInMin, false);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeDatabaseRestoreFlow(startEvent, cluster.getClusterName());
         return new SdxDatabaseRestoreResponse(startEvent.getDrStatus().getOperationId(), flowIdentifier);
     }
@@ -268,7 +268,7 @@ public class SdxBackupRestoreService {
         }
     }
 
-    public void databaseRestore(SdxOperation drStatus, Long clusterId, String backupId, String backupLocation, int databaseMaxDurationInMin) {
+    public void databaseRestore(SdxOperation drStatus, Long clusterId, String backupId, String backupLocation, int databaseMaxDurationInMin, boolean dryRun) {
         try {
             sdxOperationRepository.save(drStatus);
             sdxClusterRepository.findById(clusterId).ifPresentOrElse(sdxCluster -> {
@@ -276,7 +276,7 @@ public class SdxBackupRestoreService {
                 RestoreV4Response restoreV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(
                         regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> stackV4Endpoint.restoreDatabaseByNameInternal(0L, sdxCluster.getClusterName(),
-                                backupLocation, backupId, initiatorUserCrn, databaseMaxDurationInMin, false));
+                                backupLocation, backupId, initiatorUserCrn, databaseMaxDurationInMin, dryRun));
                 updateSuccessStatus(drStatus.getOperationId(), sdxCluster, restoreV4Response.getFlowIdentifier(),
                         SdxOperationStatus.TRIGGERRED);
             }, () -> {

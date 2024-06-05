@@ -62,7 +62,16 @@ public class DatalakeRestoreAwaitServicesStoppedHandler extends ExceptionCatcher
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
         String operationId = request.getOperationId();
-
+        if (event.getData().isValidationOnly()) {
+            return  new DatalakeDatabaseRestoreStartEvent(DATALAKE_RESTORE_SERVICES_STOPPED_EVENT.event(),
+                sdxId,
+                userId,
+                request.getBackupId(),
+                operationId,
+                request.getBackupLocation(),
+                0,
+                true);
+        }
         Selectable response;
         try {
             sdxOperationRepository.save(request.getDrStatus());
@@ -79,7 +88,8 @@ public class DatalakeRestoreAwaitServicesStoppedHandler extends ExceptionCatcher
                     request.getBackupId(),
                     operationId,
                     request.getBackupLocation(),
-                    0);
+                    0,
+                    false);
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Restore services stopped polling exited before timeout. Cause: ", userBreakException);
             response = new DatalakeRestoreFailedEvent(sdxId, userId, userBreakException);
