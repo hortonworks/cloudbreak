@@ -1,9 +1,13 @@
 package com.sequenceiq.sdx.api.endpoint;
 
+import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATALAKE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.UPDATE_SALT;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHANGE_IMAGE_CATALOG;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GENERATE_IMAGE_CATALOG;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.ROTATE_CERTIFICATES;
+import static com.sequenceiq.sdx.api.model.ModelDescriptions.SdxRotateRdsCertificateDescription.RDS_CERTIFICATE_ROTATION_BY_CRN;
+import static com.sequenceiq.sdx.api.model.ModelDescriptions.SdxRotateRdsCertificateDescription.RDS_CERTIFICATE_ROTATION_BY_NAME;
+import static com.sequenceiq.sdx.api.model.ModelDescriptions.SdxRotateRdsCertificateDescription.ROTATE_RDS_CERTIFICATE_NOTES;
 
 import java.util.List;
 import java.util.Set;
@@ -58,6 +62,7 @@ import com.sequenceiq.sdx.api.model.SdxStopValidationResponse;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
+import com.sequenceiq.sdx.api.model.rotaterdscert.SdxRotateRdsCertificateV1Response;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -103,7 +108,7 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "get SDX cluster by crn", operationId = "getSdxByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    SdxClusterResponse getByCrn(@PathParam("clusterCrn") @ValidCrn(resource = CrnResourceDescriptor.DATALAKE) String clusterCrn);
+    SdxClusterResponse getByCrn(@PathParam("clusterCrn") @ValidCrn(resource = DATALAKE) String clusterCrn);
 
     @GET
     @Path("/envcrn/{envCrn}")
@@ -243,7 +248,7 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = UPDATE_SALT, operationId = "updateSaltSdxByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier updateSaltByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATALAKE) @PathParam("crn") String crn);
+    FlowIdentifier updateSaltByCrn(@ValidCrn(resource = DATALAKE) @PathParam("crn") String crn);
 
     @GET
     @Path("/versions")
@@ -435,7 +440,7 @@ public interface SdxEndpoint {
     @Operation(summary = "Updates disk type and resizes DL", operationId = "diskUpdateByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier diskUpdateByCrn(
-            @ValidCrn(resource = CrnResourceDescriptor.DATALAKE) @PathParam("crn") String crn, @Valid DiskUpdateRequest updateRequest);
+            @ValidCrn(resource = DATALAKE) @PathParam("crn") String crn, @Valid DiskUpdateRequest updateRequest);
 
     @PUT
     @Path("/name/{name}/add_volumes")
@@ -450,7 +455,7 @@ public interface SdxEndpoint {
     @Operation(summary = "add block storage to an instance group on DL by crn", operationId = "addVolumesByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier addVolumesByStackCrn(
-            @ValidCrn(resource = CrnResourceDescriptor.DATALAKE) @PathParam("crn") String crn, @Valid StackAddVolumesRequest addVolumesRequest);
+            @ValidCrn(resource = DATALAKE) @PathParam("crn") String crn, @Valid StackAddVolumesRequest addVolumesRequest);
 
     @PUT
     @Path("imd_update")
@@ -458,5 +463,20 @@ public interface SdxEndpoint {
     @Operation(summary = "Instance metadata update of DL's instances", operationId = "instanceMetadataUpdate",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier instanceMetadataUpdate(@Valid @NotNull SdxInstanceMetadataUpdateRequest request);
+
+    @PUT
+    @Path("name/{name}/rotate_rds_certificate")
+    @Operation(summary = RDS_CERTIFICATE_ROTATION_BY_NAME, description = ROTATE_RDS_CERTIFICATE_NOTES,
+            operationId = "rotateRdsCertificateByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    SdxRotateRdsCertificateV1Response rotateRdsCertificateByName(@PathParam("name") String name);
+
+    @PUT
+    @Path("crn/{crn}/rotate_rds_certificate")
+    @Operation(summary = RDS_CERTIFICATE_ROTATION_BY_CRN, description = ROTATE_RDS_CERTIFICATE_NOTES,
+            operationId = "rotateRdsCertificateByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    SdxRotateRdsCertificateV1Response rotateRdsCertificateByCrn(@ValidCrn(resource = DATALAKE) @PathParam("crn") String crn);
+
 }
 

@@ -93,6 +93,7 @@ import com.sequenceiq.sdx.api.model.SdxStopValidationResponse;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
+import com.sequenceiq.sdx.api.model.rotaterdscert.SdxRotateRdsCertificateV1Response;
 
 @Controller
 @AccountEntityType(SdxCluster.class)
@@ -551,6 +552,18 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByRequestProperty(action = UPGRADE_DATALAKE, type = CRN, path = "crn")
     public FlowIdentifier instanceMetadataUpdate(@RequestObject SdxInstanceMetadataUpdateRequest request) {
         return sdxReactorFlowManager.triggerInstanceMetadataUpdate(getSdxClusterByCrn(request.getCrn()), request.getUpdateType());
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_DATALAKE)
+    public SdxRotateRdsCertificateV1Response rotateRdsCertificateByName(@ResourceName String name) {
+        return new SdxRotateRdsCertificateV1Response();
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATALAKE)
+    public SdxRotateRdsCertificateV1Response rotateRdsCertificateByCrn(@ResourceCrn String crn) {
+        return new SdxRotateRdsCertificateV1Response();
     }
 
     private SdxCluster getSdxClusterByName(String name) {

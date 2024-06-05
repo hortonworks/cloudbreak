@@ -20,7 +20,8 @@ public class ApiFormatTest {
                         SdxClusterDetailResponse.Builder.class,
                         ModelDescriptions.class,
                         DiagnosticsOperationDescriptions.class,
-                        SdxClusterShapeTest.class
+                        SdxClusterShapeTest.class,
+                        ModelDescriptions.SdxRotateRdsCertificateDescription.class
                 )
                 .build()
                 .validate();
