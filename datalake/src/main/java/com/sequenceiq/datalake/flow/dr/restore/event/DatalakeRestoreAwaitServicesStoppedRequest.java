@@ -14,6 +14,8 @@ public class DatalakeRestoreAwaitServicesStoppedRequest extends SdxEvent {
 
     private final String backupId;
 
+    private final boolean validationOnly;
+
     @JsonCreator
     public DatalakeRestoreAwaitServicesStoppedRequest(
             @JsonProperty("resourceId") Long sdxId,
@@ -21,12 +23,14 @@ public class DatalakeRestoreAwaitServicesStoppedRequest extends SdxEvent {
             @JsonProperty("drStatus") SdxOperation drStatus,
             @JsonProperty("operationId") String operationId,
             @JsonProperty("backupLocation") String backupLocation,
-            @JsonProperty("backupId") String backupId) {
+            @JsonProperty("backupId") String backupId,
+            @JsonProperty("validationOnly") boolean validationOnly) {
         super(sdxId, userId);
         this.operationId = operationId;
         this.drStatus = drStatus;
         this.backupLocation = backupLocation;
         this.backupId = backupId;
+        this.validationOnly = validationOnly;
     }
 
     public static DatalakeRestoreAwaitServicesStoppedRequest from(DatalakeDatabaseRestoreStartEvent startEvent) {
@@ -36,7 +40,8 @@ public class DatalakeRestoreAwaitServicesStoppedRequest extends SdxEvent {
                 startEvent.getDrStatus(),
                 startEvent.getRestoreId(),
                 startEvent.getBackupLocation(),
-                startEvent.getBackupId()
+                startEvent.getBackupId(),
+                startEvent.isValidationOnly()
         );
     }
 
@@ -54,5 +59,9 @@ public class DatalakeRestoreAwaitServicesStoppedRequest extends SdxEvent {
 
     public String getBackupId() {
         return backupId;
+    }
+
+    public boolean isValidationOnly() {
+        return validationOnly;
     }
 }

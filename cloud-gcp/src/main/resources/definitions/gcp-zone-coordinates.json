@@ -1,22 +1,106 @@
 {
   "items": [
     {
-      "name": "asia-east1",
-      "displayName": "Changhua County, Taiwan",
-      "latitude": "24.07340008",
-      "longitude": "120.5134086"
+      "name": "northamerica-northeast1",
+      "displayName": "Montréal, Québec, Canada",
+      "latitude": "45.49999921",
+      "longitude": "-73.58329696"
     },
     {
-      "name": "asia-east2",
-      "displayName": "Hong Kong",
-      "latitude": "22.3049809",
-      "longitude": "114.1850093"
+      "name": "northamerica-northeast2",
+      "displayName": "Toronto, Canada",
+      "latitude": "43.65",
+      "longitude": "-79.34"
     },
     {
-      "name": "australia-southeast1",
-      "displayName": "Sydney, Australia",
-      "latitude": "-33.92001097",
-      "longitude": "151.1851798"
+      "name": "southamerica-east1",
+      "displayName": "São Paulo, Brazil",
+      "latitude": "-23.55867959",
+      "longitude": "-46.62501998"
+    },
+    {
+      "name": "us-central1",
+      "displayName": "Council Bluffs, Iowa, USA",
+      "latitude": "41.26227338",
+      "longitude": "-95.86080021"
+    },
+    {
+      "name": "us-east1",
+      "displayName": "Moncks Corner, South Carolina, USA",
+      "latitude": "33.19600",
+      "longitude": "-80.01314"
+    },
+    {
+      "name": "us-east4",
+      "displayName": "Ashburn, Northern Virginia, USA",
+      "latitude": "39.04376",
+      "longitude": "-77.48744"
+    },
+    {
+      "name": "us-east5",
+      "displayName": "Columbus, Ohio",
+      "latitude": "39.96",
+      "longitude": "-83.00"
+    },
+    {
+      "name": "us-south1",
+      "displayName": "Dallas, Texas",
+      "latitude": "32.77",
+      "longitude": "-96.79"
+    },
+    {
+      "name": "us-west1",
+      "displayName": "The Dalles, Oregon, USA",
+      "latitude": "45.61734",
+      "longitude": "-121.17952"
+    },
+    {
+      "name": "us-west2",
+      "displayName": "Los Angeles, California, USA",
+      "latitude": "33.98997825",
+      "longitude": "-118.1799805"
+    },
+    {
+      "name": "us-west3",
+      "displayName": "Salt Lake City, Utah",
+      "latitude": "40.758701",
+      "longitude": "-111.876183"
+    },
+    {
+      "name": "us-west4",
+      "displayName": "Las Vegas, Nevada",
+      "latitude": "36.11",
+      "longitude": "-115.17"
+    },
+    {
+      "name": "europe-central2",
+      "displayName": "Warsaw, Poland",
+      "latitude": "52.229675",
+      "longitude": "21.012230"
+    },
+    {
+      "name": "europe-north1",
+      "displayName": "Hamina, Finland",
+      "latitude": "60.56934",
+      "longitude": "27.18783"
+    },
+    {
+      "name": "europe-southwest1",
+      "displayName": "Madrid, Spain",
+      "latitude": "40.41",
+      "longitude": "-3.70"
+    },
+    {
+      "name": "europe-west1",
+      "displayName": "St. Ghislain, Belgium",
+      "latitude": "50.44911",
+      "longitude": "3.81838"
+    },
+    {
+      "name": "europe-west12",
+      "displayName": "Turin, Italy",
+      "latitude": "45.06",
+      "longitude": "7.68"
     },
     {
       "name": "europe-west2",
@@ -37,70 +121,46 @@
       "longitude": "6.825330032"
     },
     {
-      "name": "us-west2",
-      "displayName": "Los Angeles, California, USA",
-      "latitude": "33.98997825",
-      "longitude": "-118.1799805"
+      "name": "europe-west6",
+      "displayName": "Zurich, Switzerland",
+      "latitude": "47.369019",
+      "longitude": "8.538030"
     },
     {
-      "name": "southamerica-east1",
-      "displayName": "São Paulo, Brazil",
-      "latitude": "-23.55867959",
-      "longitude": "-46.62501998"
+      "name": "europe-west8",
+      "displayName": "Milan, Italy",
+      "latitude": "45.46",
+      "longitude": "9.18"
     },
     {
-      "name": "asia-southeast1",
-      "displayName": "Jurong West, Singapore",
-      "latitude": "1.34039",
-      "longitude": "103.70899"
+      "name": "europe-west9",
+      "displayName": "Paris, France",
+      "latitude": "48.85",
+      "longitude": "2.32"
     },
     {
-      "name": "us-central1",
-      "displayName": "Council Bluffs, Iowa, USA",
-      "latitude": "41.26227338",
-      "longitude": "-95.86080021"
+      "name": "me-central1",
+      "displayName": "Doha, Qatar, Middle East",
+      "latitude": "25.286106",
+      "longitude": "51.534817"
     },
     {
-      "name": "europe-west1",
-      "displayName": "St. Ghislain, Belgium",
-      "latitude": "50.44911",
-      "longitude": "3.81838"
+      "name": "me-central2",
+      "displayName": "Dammam, Saudi Arabia, Middle East",
+      "latitude": "26.43442",
+      "longitude": "50.10326"
     },
     {
-      "name": "europe-north1",
-      "displayName": "Hamina, Finland",
-      "latitude": "60.56934",
-      "longitude": "27.18783"
+      "name": "me-west1",
+      "displayName": "Tel Aviv, Israel",
+      "latitude": "32.08",
+      "longitude": "34.78"
     },
     {
-      "name": "us-west1",
-      "displayName": "The Dalles, Oregon, USA",
-      "latitude": "45.61734",
-      "longitude": "-121.17952"
-    },
-    {
-      "name": "northamerica-northeast1",
-      "displayName": "Montréal, Québec, Canada",
-      "latitude": "45.49999921",
-      "longitude": "-73.58329696"
-    },
-    {
-      "name": "us-east4",
-      "displayName": "Ashburn, Northern Virginia, USA",
-      "latitude": "39.04376",
-      "longitude": "-77.48744"
-    },
-    {
-      "name": "asia-south1",
-      "displayName": "Mumbai, India",
-      "latitude": "19.01699038",
-      "longitude": "72.8569893"
-    },
-    {
-      "name": "us-east1",
-      "displayName": "Moncks Corner, South Carolina, USA",
-      "latitude": "33.19600",
-      "longitude": "-80.01314"
+      "name": "asia-east1",
+      "displayName": "Changhua County, Taiwan",
+      "latitude": "24.07340008",
+      "longitude": "120.5134086"
     },
     {
       "name": "asia-northeast1",
@@ -121,40 +181,10 @@
       "longitude": "126.977966"
     },
     {
-      "name": "asia-southeast2",
-      "displayName": "Jakarta, Indonesia",
-      "latitude": "-6.175110",
-      "longitude": "106.865036"
-    },
-    {
-      "name": "europe-central2",
-      "displayName": "Warsaw, Poland",
-      "latitude": "52.229675",
-      "longitude": "21.012230"
-    },
-    {
-      "name": "europe-west6",
-      "displayName": "Zurich, Switzerland",
-      "latitude": "47.369019",
-      "longitude": "8.538030"
-    },
-    {
-      "name": "us-west3",
-      "displayName": "Salt Lake City, Utah",
-      "latitude": "40.758701",
-      "longitude": "-111.876183"
-    },
-    {
-      "name": "us-west4",
-      "displayName": "Las Vegas, Nevada",
-      "latitude": "36.11",
-      "longitude": "-115.17"
-    },
-    {
-      "name": "asia-southeast2",
-      "displayName": "Jakarta, Indonesia",
-      "latitude": "-6.12",
-      "longitude": "106.77"
+      "name": "asia-south1",
+      "displayName": "Mumbai, India",
+      "latitude": "19.01699038",
+      "longitude": "72.8569893"
     },
     {
       "name": "asia-south2",
@@ -163,34 +193,28 @@
       "longitude": "77.21"
     },
     {
+      "name": "asia-southeast1",
+      "displayName": "Jurong West, Singapore",
+      "latitude": "1.34039",
+      "longitude": "103.70899"
+    },
+    {
+      "name": "asia-southeast2",
+      "displayName": "Jakarta, Indonesia",
+      "latitude": "-6.175110",
+      "longitude": "106.865036"
+    },
+    {
+      "name": "australia-southeast1",
+      "displayName": "Sydney, Australia",
+      "latitude": "-33.92001097",
+      "longitude": "151.1851798"
+    },
+    {
       "name": "australia-southeast2",
       "displayName": "Melbourne, Australia",
       "latitude": "-37.84",
       "longitude": "144.94"
-    },
-    {
-      "name": "northamerica-northeast2",
-      "displayName": "Toronto, Canada",
-      "latitude": "43.65",
-      "longitude": "-79.34"
-    },
-    {
-      "name": "southamerica-west1",
-      "displayName": "Santiago, Chile",
-      "latitude": "-33.44",
-      "longitude": "-70.67"
-    },
-    {
-      "name": "me-central1",
-      "displayName": "Doha, Qatar, Middle East",
-      "latitude": "25.286106",
-      "longitude": "51.534817"
-    },
-    {
-      "name": "me-central2",
-      "displayName": "Dammam, Saudi Arabia, Middle East",
-      "latitude": "26.43442",
-      "longitude": "50.10326"
     }
   ]
 }

@@ -143,7 +143,10 @@ public class DatalakeDrClient {
         if (!Strings.isNullOrEmpty(backupLocationOverride)) {
             builder.setBackupLocationOverride(backupLocationOverride);
         }
-        builder.setValidationOnly(validationOnly);
+        if (validationOnly) {
+            builder.setValidationOnly(true);
+            builder.setForce(true);
+        }
         return statusConverter.convert(
                 newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
                         .restoreDatalake(builder.build())
