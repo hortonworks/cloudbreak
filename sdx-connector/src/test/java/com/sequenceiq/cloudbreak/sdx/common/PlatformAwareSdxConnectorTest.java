@@ -25,10 +25,17 @@ import org.springframework.security.util.FieldUtils;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
-import com.sequenceiq.cloudbreak.sdx.cdl.CdlSdxService;
+import com.sequenceiq.cloudbreak.sdx.cdl.service.CdlSdxDeleteService;
+import com.sequenceiq.cloudbreak.sdx.cdl.service.CdlSdxDescribeService;
+import com.sequenceiq.cloudbreak.sdx.cdl.service.CdlSdxStatusService;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
-import com.sequenceiq.cloudbreak.sdx.paas.PaasSdxService;
+import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDeleteService;
+import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDescribeService;
+import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStatusService;
+import com.sequenceiq.cloudbreak.sdx.paas.service.PaasSdxDeleteService;
+import com.sequenceiq.cloudbreak.sdx.paas.service.PaasSdxDescribeService;
+import com.sequenceiq.cloudbreak.sdx.paas.service.PaasSdxStatusService;
 
 @ExtendWith(MockitoExtension.class)
 public class PlatformAwareSdxConnectorTest {
@@ -38,80 +45,100 @@ public class PlatformAwareSdxConnectorTest {
     private static final String SAAS_CRN = "crn:cdp:sdxsvc:us-west-1:tenant:instance:crn2";
 
     @Mock
-    private CdlSdxService cdlSdxService;
+    private CdlSdxStatusService cdlSdxStatusService;
 
     @Mock
-    private PaasSdxService paasSdxService;
+    private PaasSdxStatusService paasSdxStatusService;
+
+    @Mock
+    private CdlSdxDescribeService cdlSdxDescribeService;
+
+    @Mock
+    private PaasSdxDescribeService paasSdxDescribeService;
+
+    @Mock
+    private CdlSdxDeleteService cdlSdxDeleteService;
+
+    @Mock
+    private PaasSdxDeleteService paasSdxDeleteService;
 
     @InjectMocks
     private PlatformAwareSdxConnector underTest;
 
     @BeforeEach
     public void setup() {
-        Map<TargetPlatform, SdxService> map = Maps.newHashMap();
-        map.put(TargetPlatform.CDL, cdlSdxService);
-        map.put(TargetPlatform.PAAS, paasSdxService);
-        FieldUtils.setProtectedFieldValue("platformDependentServiceMap", underTest, map);
+        Map<TargetPlatform, PlatformAwareSdxStatusService<?>> status = Maps.newHashMap();
+        status.put(TargetPlatform.CDL, cdlSdxStatusService);
+        status.put(TargetPlatform.PAAS, paasSdxStatusService);
+        Map<TargetPlatform, PlatformAwareSdxDescribeService> describe = Maps.newHashMap();
+        describe.put(TargetPlatform.CDL, cdlSdxDescribeService);
+        describe.put(TargetPlatform.PAAS, paasSdxDescribeService);
+        Map<TargetPlatform, PlatformAwareSdxDeleteService<?>> delete = Maps.newHashMap();
+        delete.put(TargetPlatform.CDL, cdlSdxDeleteService);
+        delete.put(TargetPlatform.PAAS, paasSdxDeleteService);
+        FieldUtils.setProtectedFieldValue("platformDependentSdxStatusServicesMap", underTest, status);
+        FieldUtils.setProtectedFieldValue("platformDependentSdxDescribeServices", underTest, describe);
+        FieldUtils.setProtectedFieldValue("platformDependentSdxDeleteServices", underTest, delete);
     }
 
     @Test
     public void testSaasDelete() {
-        doNothing().when(cdlSdxService).deleteSdx(any(), anyBoolean());
+        doNothing().when(cdlSdxDeleteService).deleteSdx(any(), anyBoolean());
         underTest.delete(SAAS_CRN, false);
-        verify(cdlSdxService).deleteSdx(anyString(), anyBoolean());
-        verifyNoInteractions(paasSdxService);
+        verify(cdlSdxDeleteService).deleteSdx(anyString(), anyBoolean());
+        verifyNoInteractions(paasSdxDeleteService);
     }
 
     @Test
     public void testPaasDelete() {
-        doNothing().when(paasSdxService).deleteSdx(any(), anyBoolean());
+        doNothing().when(paasSdxDeleteService).deleteSdx(any(), anyBoolean());
         underTest.delete(PAAS_CRN, false);
-        verify(paasSdxService).deleteSdx(anyString(), anyBoolean());
-        verifyNoInteractions(cdlSdxService);
+        verify(paasSdxDeleteService).deleteSdx(anyString(), anyBoolean());
+        verifyNoInteractions(cdlSdxDeleteService);
     }
 
     @Test
     public void testList() {
-        when(paasSdxService.listSdxCrns(anyString())).thenReturn(Set.of(PAAS_CRN));
-        when(cdlSdxService.listSdxCrns(anyString())).thenReturn(Set.of(SAAS_CRN));
+        when(paasSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(PAAS_CRN));
+        when(cdlSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(SAAS_CRN));
         assertThrows(IllegalStateException.class, () -> underTest.listSdxCrns("envCrn"));
 
-        when(paasSdxService.listSdxCrns(anyString())).thenReturn(Set.of());
-        when(cdlSdxService.listSdxCrns(anyString())).thenReturn(Set.of(SAAS_CRN));
+        when(paasSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of());
+        when(cdlSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(SAAS_CRN));
         assertTrue(underTest.listSdxCrns("envCrn").contains(SAAS_CRN));
 
-        when(paasSdxService.listSdxCrns(anyString())).thenReturn(Set.of(PAAS_CRN));
-        when(cdlSdxService.listSdxCrns(anyString())).thenReturn(Set.of());
+        when(paasSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(PAAS_CRN));
+        when(cdlSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of());
         assertTrue(underTest.listSdxCrns("envCrn").contains(PAAS_CRN));
     }
 
     @Test
     public void testSaasGetAttemptResult() {
-        when(cdlSdxService.getPollingResultForDeletion(anyString(), any())).thenReturn(Map.of(SAAS_CRN, PollingResult.IN_PROGRESS));
+        when(cdlSdxDeleteService.getPollingResultForDeletion(anyString(), any())).thenReturn(Map.of(SAAS_CRN, PollingResult.IN_PROGRESS));
         underTest.getAttemptResultForDeletion("envCrn", Set.of(SAAS_CRN));
-        verifyNoInteractions(paasSdxService);
-        verify(cdlSdxService).getPollingResultForDeletion(anyString(), any());
+        verifyNoInteractions(paasSdxDeleteService);
+        verify(cdlSdxDeleteService).getPollingResultForDeletion(anyString(), any());
     }
 
     @Test
     public void testPaasGetAttemptResult() {
-        when(paasSdxService.getPollingResultForDeletion(anyString(), any())).thenReturn(Map.of(PAAS_CRN, PollingResult.IN_PROGRESS));
+        when(paasSdxDeleteService.getPollingResultForDeletion(anyString(), any())).thenReturn(Map.of(PAAS_CRN, PollingResult.IN_PROGRESS));
         underTest.getAttemptResultForDeletion("envCrn", Set.of(PAAS_CRN));
-        verifyNoInteractions(cdlSdxService);
-        verify(paasSdxService).getPollingResultForDeletion(anyString(), any());
+        verifyNoInteractions(cdlSdxDeleteService);
+        verify(paasSdxDeleteService).getPollingResultForDeletion(anyString(), any());
     }
 
     @Test
     public void testBothGetAttemptResult() {
         assertThrows(IllegalStateException.class, () ->
                 underTest.getAttemptResultForDeletion("envCrn", Set.of(PAAS_CRN, SAAS_CRN)));
-        verifyNoInteractions(paasSdxService, cdlSdxService);
+        verifyNoInteractions(paasSdxDeleteService, paasSdxDeleteService);
     }
 
     @Test
     public void testGetSdxCrnByEnvironmentCrnCDL() {
-        when(paasSdxService.getSdxByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
-        when(cdlSdxService.getSdxByEnvironmentCrn(anyString())).thenReturn(
+        when(paasSdxDescribeService.getSdxByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
+        when(cdlSdxDescribeService.getSdxByEnvironmentCrn(anyString())).thenReturn(
                 Optional.of(new SdxBasicView(null, SAAS_CRN, null, null, false, 1L, null)));
         Optional<SdxBasicView> sdx = underTest.getSdxBasicViewByEnvironmentCrn("envCrn");
         assertEquals(SAAS_CRN, sdx.get().crn());
@@ -119,7 +146,7 @@ public class PlatformAwareSdxConnectorTest {
 
     @Test
     public void testGetSdxCrnByEnvironmentCrnPaaS() {
-        when(paasSdxService.getSdxByEnvironmentCrn(anyString())).thenReturn(
+        when(paasSdxDescribeService.getSdxByEnvironmentCrn(anyString())).thenReturn(
                 Optional.of(new SdxBasicView(null, PAAS_CRN, null, null, false, 1L, null)));
         Optional<SdxBasicView> sdx = underTest.getSdxBasicViewByEnvironmentCrn("envCrn");
         assertEquals(PAAS_CRN, sdx.get().crn());

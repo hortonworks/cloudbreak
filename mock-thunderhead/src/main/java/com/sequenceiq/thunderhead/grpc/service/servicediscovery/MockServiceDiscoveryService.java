@@ -1,4 +1,4 @@
-package com.sequenceiq.thunderhead.grpc.service.saas.servicediscovery;
+package com.sequenceiq.thunderhead.grpc.service.servicediscovery;
 
 import org.springframework.stereotype.Service;
 

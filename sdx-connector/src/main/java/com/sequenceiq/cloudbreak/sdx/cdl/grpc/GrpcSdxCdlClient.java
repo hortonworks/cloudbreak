@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.sdx.cdl;
+package com.sequenceiq.cloudbreak.sdx.cdl.grpc;
 
 import jakarta.inject.Inject;
 

@@ -35,10 +35,10 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
-import com.sequenceiq.cloudbreak.sdx.cdl.CdlSdxService;
-import com.sequenceiq.cloudbreak.sdx.cdl.GrpcServiceDiscoveryClient;
-import com.sequenceiq.cloudbreak.sdx.cdl.ServiceDiscoveryClient;
 import com.sequenceiq.cloudbreak.sdx.cdl.config.ServiceDiscoveryChannelConfig;
+import com.sequenceiq.cloudbreak.sdx.cdl.grpc.GrpcServiceDiscoveryClient;
+import com.sequenceiq.cloudbreak.sdx.cdl.grpc.ServiceDiscoveryClient;
+import com.sequenceiq.cloudbreak.sdx.cdl.service.CdlSdxDescribeService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -94,7 +94,7 @@ class HiveCdlRdsConfigProviderTest {
     private ServiceDiscoveryClient serviceDiscoveryClient;
 
     @Mock
-    private CdlSdxService cdlSdxService;
+    private CdlSdxDescribeService cdlSdxDescribeService;
 
     @Mock
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
@@ -106,7 +106,7 @@ class HiveCdlRdsConfigProviderTest {
     void testRetrieveCdlRdsConfigs() {
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
                 Optional.of(new SdxBasicView(null, CDL_CRN.toString(), null, null, false, 1L, null)));
-        when(cdlSdxService.getServiceConfiguration(any(), any())).thenReturn(getCastedRdc());
+        when(cdlSdxDescribeService.getServiceConfiguration(any(), any())).thenReturn(getCastedRdc());
         ArgumentCaptor<RDSConfig> rdsConfigCaptor = ArgumentCaptor.forClass(RDSConfig.class);
         StackDtoDelegate stack = getStack();
         when(stack.getName()).thenReturn(STACK_NAME);
@@ -149,7 +149,7 @@ class HiveCdlRdsConfigProviderTest {
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(Optional.empty());
         underTest.createPostgresRdsConfigIfNeeded(stackDto);
         verify(platformAwareSdxConnector, times(0)).getRemoteDataContext(any());
-        verify(cdlSdxService, times(0)).getServiceConfiguration(any(), any());
+        verify(cdlSdxDescribeService, times(0)).getServiceConfiguration(any(), any());
         verify(rdsConfigService, times(0)).createIfNotExists(any(), any(), any());
     }
 

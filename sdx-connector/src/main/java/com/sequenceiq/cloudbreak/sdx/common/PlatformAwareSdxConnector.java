@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.sdx.common;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -13,13 +12,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.dyngr.core.AttemptResult;
-import com.dyngr.core.AttemptResults;
-import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
+import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDeleteService;
+import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDescribeService;
+import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxStatusService;
 import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 
 @Service
@@ -28,26 +28,33 @@ public class PlatformAwareSdxConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(PlatformAwareSdxConnector.class);
 
     @Inject
-    private Map<TargetPlatform, SdxService<?>> platformDependentServiceMap;
+    private Map<TargetPlatform, PlatformAwareSdxStatusService<?>> platformDependentSdxStatusServicesMap;
+
+    @Inject
+    private Map<TargetPlatform, PlatformAwareSdxDeleteService<?>> platformDependentSdxDeleteServices;
+
+    @Inject
+    private Map<TargetPlatform, PlatformAwareSdxDescribeService> platformDependentSdxDescribeServices;
 
     public Optional<String> getRemoteDataContext(String sdxCrn) {
         LOGGER.info("Getting remote data context for SDX {}", sdxCrn);
-        return platformDependentServiceMap.get(TargetPlatform.getByCrn(sdxCrn)).getRemoteDataContext(sdxCrn);
+        return platformDependentSdxDescribeServices.get(TargetPlatform.getByCrn(sdxCrn)).getRemoteDataContext(sdxCrn);
     }
 
     public void delete(String sdxCrn, Boolean force) {
-        platformDependentServiceMap.get(TargetPlatform.getByCrn(sdxCrn)).deleteSdx(sdxCrn, force);
+        platformDependentSdxDeleteServices.get(TargetPlatform.getByCrn(sdxCrn)).deleteSdx(sdxCrn, force);
     }
 
     public AttemptResult<Object> getAttemptResultForDeletion(String environmentCrn, Set<String> sdxCrns) {
-        return getAttemptResultForPolling(platformDependentServiceMap.get(calculatePlatform(sdxCrns))
-                .getPollingResultForDeletion(environmentCrn, sdxCrns), "SDX deletion is failed for these: %s");
+        PlatformAwareSdxDeleteService<?> platformAwareSdxDeleteService = platformDependentSdxDeleteServices.get(calculatePlatform(sdxCrns));
+        Map<String, PollingResult> pollingResultForDeletion = platformAwareSdxDeleteService.getPollingResultForDeletion(environmentCrn, sdxCrns);
+        return platformAwareSdxDeleteService.getAttemptResultForPolling(pollingResultForDeletion, "SDX deletion is failed for these: %s");
     }
 
     public Set<String> listSdxCrns(String environmentCrn) {
         LOGGER.info("Getting SDX CRN'S for the datalakes in the environment {}", environmentCrn);
-        Set<String> paasSdxCrns = platformDependentServiceMap.get(TargetPlatform.PAAS).listSdxCrns(environmentCrn);
-        Set<String> saasSdxCrns = platformDependentServiceMap.get(TargetPlatform.CDL).listSdxCrns(environmentCrn);
+        Set<String> paasSdxCrns = platformDependentSdxDescribeServices.get(TargetPlatform.PAAS).listSdxCrns(environmentCrn);
+        Set<String> saasSdxCrns = platformDependentSdxDescribeServices.get(TargetPlatform.CDL).listSdxCrns(environmentCrn);
         if (!paasSdxCrns.isEmpty() && !saasSdxCrns.isEmpty()) {
             throw new IllegalStateException(String.format("Environment %s should not have SDX from both PaaS and SaaS platform", environmentCrn));
         }
@@ -55,13 +62,13 @@ public class PlatformAwareSdxConnector {
     }
 
     public Optional<SdxBasicView> getSdxBasicViewByEnvironmentCrn(String environmentCrn) {
-        return platformDependentServiceMap.get(TargetPlatform.PAAS).getSdxByEnvironmentCrn(environmentCrn)
-            .or(() -> platformDependentServiceMap.get(TargetPlatform.CDL).getSdxByEnvironmentCrn(environmentCrn));
+        return platformDependentSdxDescribeServices.get(TargetPlatform.PAAS).getSdxByEnvironmentCrn(environmentCrn)
+            .or(() -> platformDependentSdxDescribeServices.get(TargetPlatform.CDL).getSdxByEnvironmentCrn(environmentCrn));
     }
 
     public Set<Pair<String, StatusCheckResult>> listSdxCrnsWithAvailability(String environmentCrn) {
         Set<String> sdxCrns = listSdxCrns(environmentCrn);
-        return platformDependentServiceMap.get(calculatePlatform(sdxCrns)).listSdxCrnStatusCheckPair(environmentCrn, sdxCrns);
+        return platformDependentSdxStatusServicesMap.get(calculatePlatform(sdxCrns)).listSdxCrnStatusCheckPair(environmentCrn, sdxCrns);
     }
 
     private TargetPlatform calculatePlatform(Set<String> sdxCrns) {
@@ -71,21 +78,5 @@ public class PlatformAwareSdxConnector {
             return TargetPlatform.PAAS;
         }
         throw new IllegalStateException("Polling for SDX should be happen only for SaaS or PaaS only at the same time.");
-    }
-
-    private AttemptResult<Object> getAttemptResultForPolling(Map<String, PollingResult> pollingResult, String failedPollingErrorMessageTemplate) {
-        if (!pollingResult.isEmpty()) {
-            Set<String> failedSdxCrns = pollingResult.entrySet().stream()
-                    .filter(entry -> PollingResult.FAILED.equals(entry.getValue()))
-                    .map(Map.Entry::getKey)
-                    .collect(Collectors.toSet());
-            if (!failedSdxCrns.isEmpty()) {
-                String errorMessage = String.format(failedPollingErrorMessageTemplate, Joiner.on(",").join(failedSdxCrns));
-                LOGGER.info(errorMessage);
-                return AttemptResults.breakFor(new IllegalStateException(errorMessage));
-            }
-            return AttemptResults.justContinue();
-        }
-        return AttemptResults.finishWith(null);
     }
 }

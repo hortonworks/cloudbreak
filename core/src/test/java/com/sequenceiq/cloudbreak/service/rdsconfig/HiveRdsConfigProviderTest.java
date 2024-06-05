@@ -25,10 +25,10 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
-import com.sequenceiq.cloudbreak.sdx.cdl.CdlSdxService;
-import com.sequenceiq.cloudbreak.sdx.cdl.GrpcServiceDiscoveryClient;
-import com.sequenceiq.cloudbreak.sdx.cdl.ServiceDiscoveryClient;
 import com.sequenceiq.cloudbreak.sdx.cdl.config.ServiceDiscoveryChannelConfig;
+import com.sequenceiq.cloudbreak.sdx.cdl.grpc.GrpcServiceDiscoveryClient;
+import com.sequenceiq.cloudbreak.sdx.cdl.grpc.ServiceDiscoveryClient;
+import com.sequenceiq.cloudbreak.sdx.cdl.service.CdlSdxDescribeService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -83,7 +83,7 @@ public class HiveRdsConfigProviderTest {
     private ServiceDiscoveryClient serviceDiscoveryClient;
 
     @Mock
-    private CdlSdxService cdlSdxService;
+    private CdlSdxDescribeService cdlSdxDescribeService;
 
     @Mock
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;

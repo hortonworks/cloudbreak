@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.sdx.cdl;
+package com.sequenceiq.cloudbreak.sdx.cdl.grpc;
 
 import java.util.Collections;
 import java.util.Map;

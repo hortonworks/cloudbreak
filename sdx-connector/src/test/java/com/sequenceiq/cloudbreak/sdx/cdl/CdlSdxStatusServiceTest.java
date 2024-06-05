@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.sdx.cdl;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -22,9 +21,11 @@ import org.springframework.util.ReflectionUtils;
 import com.cloudera.thunderhead.service.cdlcrud.CdlCrudProto;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.sdx.cdl.grpc.GrpcSdxCdlClient;
+import com.sequenceiq.cloudbreak.sdx.cdl.service.CdlSdxStatusService;
 
 @ExtendWith(MockitoExtension.class)
-public class CdlSdxServiceTest {
+public class CdlSdxStatusServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:tenant:user:5678";
 
@@ -39,33 +40,7 @@ public class CdlSdxServiceTest {
     private GrpcSdxCdlClient sdxClient;
 
     @InjectMocks
-    private CdlSdxService underTest;
-
-    @Test
-    public void testDelete() {
-        setEnabled();
-        when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.TRUE);
-        underTest.deleteSdx(CDL_CRN, true);
-        verify(sdxClient).deleteDatalake(eq(CDL_CRN));
-
-        when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.FALSE);
-        underTest.deleteSdx(CDL_CRN, true);
-        verifyNoMoreInteractions(sdxClient);
-    }
-
-    @Test
-    public void testListCrn() {
-        setEnabled();
-        CdlCrudProto.DatalakeResponse datalake = getDatalake();
-        when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.TRUE);
-        when(sdxClient.findDatalake(anyString(), anyString())).thenReturn(datalake);
-        assertTrue(underTest.listSdxCrns(ENV_CRN).contains(CDL_CRN));
-        verify(sdxClient).findDatalake(eq(ENV_CRN), any());
-
-        when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.FALSE);
-        assertTrue(underTest.listSdxCrns(ENV_CRN).isEmpty());
-        verifyNoMoreInteractions(sdxClient);
-    }
+    private CdlSdxStatusService underTest;
 
     @Test
     public void testListStatusPairsCrn() {
@@ -91,7 +66,7 @@ public class CdlSdxServiceTest {
     }
 
     private void setEnabled() {
-        Field cdlEnabled = ReflectionUtils.findField(CdlSdxService.class, "cdlEnabled");
+        Field cdlEnabled = ReflectionUtils.findField(CdlSdxStatusService.class, "cdlEnabled");
         ReflectionUtils.makeAccessible(cdlEnabled);
         ReflectionUtils.setField(cdlEnabled, underTest, true);
     }

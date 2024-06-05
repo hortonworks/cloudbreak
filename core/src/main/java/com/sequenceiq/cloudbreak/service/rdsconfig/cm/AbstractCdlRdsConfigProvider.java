@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
-import com.sequenceiq.cloudbreak.sdx.cdl.CdlSdxService;
+import com.sequenceiq.cloudbreak.sdx.cdl.service.CdlSdxDescribeService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -33,7 +33,7 @@ public abstract class AbstractCdlRdsConfigProvider extends AbstractRdsConfigProv
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCdlRdsConfigProvider.class);
 
     @Inject
-    private CdlSdxService cdlSdxService;
+    private CdlSdxDescribeService cdlSdxDescribeService;
 
     @Inject
     private RdsConfigService rdsConfigService;
@@ -104,7 +104,7 @@ public abstract class AbstractCdlRdsConfigProvider extends AbstractRdsConfigProv
         if (sdxCrnOptional.isEmpty()) {
             return Collections.emptyMap();
         }
-        return cdlSdxService.getServiceConfiguration(sdxCrnOptional.get(), getDb());
+        return cdlSdxDescribeService.getServiceConfiguration(sdxCrnOptional.get(), getDb());
     }
 
     private String getConfigurationValue(Map<String, String> configuration, String key, String message) {
