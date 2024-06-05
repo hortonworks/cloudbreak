@@ -218,7 +218,6 @@ public class FreeIpaClient {
     }
 
     public Host addHost(String fqdn) throws FreeIpaClientException {
-        RPCResponse<Host> response = null;
         Map<String, Object> params = Map.of("force", true);
         return (Host) invoke("host_add", List.of(fqdn), params, Host.class).getResult();
     }

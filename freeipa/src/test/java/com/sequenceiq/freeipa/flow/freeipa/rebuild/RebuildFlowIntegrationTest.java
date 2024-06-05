@@ -31,11 +31,13 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.handler.CollectMetadataHandler;
 import com.sequenceiq.cloudbreak.cloud.handler.DownscaleStackCollectResourcesHandler;
 import com.sequenceiq.cloudbreak.cloud.handler.DownscaleStackHandler;
+import com.sequenceiq.cloudbreak.cloud.handler.RebootInstanceHandler;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformInitializer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -74,6 +76,8 @@ import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildFinishedAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildInstallFreeIpaAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildOrchestratorConfigAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildPostInstallAction;
+import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildRebootAction;
+import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildRebootWaitUntilAvailableAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildRegisterClusterProxyAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildRemoveInstancesAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildRemoveInstancesFinishedAction;
@@ -95,8 +99,10 @@ import com.sequenceiq.freeipa.flow.freeipa.rebuild.handler.RebuildValidateHealth
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.handler.ValidateBackupHandler;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.action.PrivateIdProvider;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.handler.FreeipaUpscaleStackHandler;
+import com.sequenceiq.freeipa.flow.stack.HealthCheckHandler;
 import com.sequenceiq.freeipa.flow.stack.provision.action.StackProvisionService;
 import com.sequenceiq.freeipa.flow.stack.provision.handler.ClusterProxyRegistrationHandler;
+import com.sequenceiq.freeipa.flow.stack.start.FreeIpaServiceStartService;
 import com.sequenceiq.freeipa.flow.stack.termination.action.TerminationService;
 import com.sequenceiq.freeipa.service.BootstrapService;
 import com.sequenceiq.freeipa.service.CredentialService;
@@ -114,6 +120,7 @@ import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceValidationService;
 import com.sequenceiq.freeipa.service.stack.instance.MetadataSetupService;
+import com.sequenceiq.freeipa.sync.StackStatusCheckerJob;
 
 import io.micrometer.core.instrument.MeterRegistry;
 
@@ -222,6 +229,12 @@ class RebuildFlowIntegrationTest {
     @MockBean
     private GatewayConfigService gatewayConfigService;
 
+    @MockBean
+    private FreeIpaServiceStartService freeIpaServiceStartService;
+
+    @MockBean
+    private StackStatusCheckerJob stackStatusCheckerJob;
+
     @BeforeEach
     public void setup() {
         Stack stack = new Stack();
@@ -244,6 +257,7 @@ class RebuildFlowIntegrationTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
         when(stackToCloudStackConverter.buildInstance(eq(stack), any(InstanceMetaData.class), eq(ig), any(), any(), any()))
                 .thenReturn(mock(CloudInstance.class));
+        when(cloudConnector.instances()).thenReturn(mock(InstanceConnector.class));
     }
 
     @Test
@@ -302,6 +316,8 @@ class RebuildFlowIntegrationTest {
             RebuildValidateCloudStorageAction.class,
             RebuildInstallFreeIpaAction.class,
             RebuildRestoreFreeIpaAction.class,
+            RebuildRebootAction.class,
+            RebuildRebootWaitUntilAvailableAction.class,
             RebuildCleanupFreeIpaAfterRestoreAction.class,
             RebuildPostInstallAction.class,
             RebuildValidateHealthAction.class,
@@ -327,7 +343,9 @@ class RebuildFlowIntegrationTest {
             FlowIntegrationTestConfig.class,
             CloudPlatformInitializer.class,
             ResourceToCloudResourceConverter.class,
-            ResourceAttributeUtil.class
+            ResourceAttributeUtil.class,
+            RebootInstanceHandler.class,
+            HealthCheckHandler.class
     })
     static class Config {
 

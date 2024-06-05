@@ -15,6 +15,8 @@ import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildFinishedAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildInstallFreeIpaAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildOrchestratorConfigAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildPostInstallAction;
+import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildRebootAction;
+import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildRebootWaitUntilAvailableAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildRegisterClusterProxyAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildRemoveInstancesAction;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.action.RebuildRemoveInstancesFinishedAction;
@@ -49,6 +51,8 @@ public enum FreeIpaRebuildState implements FlowState {
     REBUILD_VALIDATE_BACKUP_STATE(RebuildValidateBackupAction.class),
     REBUILD_FREEIPA_INSTALL_STATE(RebuildInstallFreeIpaAction.class),
     REBUILD_RESTORE_STATE(RebuildRestoreFreeIpaAction.class),
+    REBUILD_REBOOT_STATE(RebuildRebootAction.class),
+    REBUILD_WAIT_UNTIL_AVAILABLE_STATE(RebuildRebootWaitUntilAvailableAction.class),
     REBUILD_CLEANUP_FREEIPA_AFTER_RESTORE_STATE(RebuildCleanupFreeIpaAfterRestoreAction.class),
     REBUILD_FREEIPA_POST_INSTALL_STATE(RebuildPostInstallAction.class),
     REBUILD_VALIDATE_HEALTH_STATE(RebuildValidateHealthAction.class),

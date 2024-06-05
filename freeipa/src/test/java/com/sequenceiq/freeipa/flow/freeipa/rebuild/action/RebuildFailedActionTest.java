@@ -34,6 +34,7 @@ import com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.event.RebuildFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.event.backup.ValidateBackupFailed;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackResult;
+import com.sequenceiq.freeipa.flow.instance.InstanceFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
@@ -42,7 +43,7 @@ import com.sequenceiq.freeipa.service.stack.StackUpdater;
 @ExtendWith(MockitoExtension.class)
 class RebuildFailedActionTest {
 
-    private static final int PAYLOAD_CONVERTER_COUNT = 5;
+    private static final int PAYLOAD_CONVERTER_COUNT = 6;
 
     @Mock
     private ErrorHandlerAwareReactorEventFactory reactorEventFactory;
@@ -85,7 +86,7 @@ class RebuildFailedActionTest {
 
         assertEquals(PAYLOAD_CONVERTER_COUNT, converters.size());
         assertTrue(Stream.of(UpscaleStackResult.class, DownscaleStackCollectResourcesResult.class, DownscaleStackResult.class, ValidateBackupFailed.class,
-                        StackFailureEvent.class)
+                        StackFailureEvent.class, InstanceFailureEvent.class)
                 .allMatch(clazz -> converters.stream().anyMatch(converter -> converter.canConvert(clazz))));
     }
 }

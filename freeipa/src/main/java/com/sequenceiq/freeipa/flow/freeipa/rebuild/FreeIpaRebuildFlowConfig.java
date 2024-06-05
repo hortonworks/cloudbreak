@@ -25,6 +25,10 @@ import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEven
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.FREEIPA_RESTORE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.ORCHESTRATOR_CONFIG_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.ORCHESTRATOR_CONFIG_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.REBOOT_TRIGGERED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.REBOOT_TRIGGER_FAILURE_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.REBOOT_WAIT_UNTIL_AVAILABLE_FAILURE_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.REBOOT_WAIT_UNTIL_AVAILABLE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.REBUILD_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.REBUILD_FAILURE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.REBUILD_FAILURE_HANDLED_EVENT;
@@ -56,6 +60,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.RE
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_FREEIPA_INSTALL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_FREEIPA_POST_INSTALL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_ORCHESTRATOR_CONFIG_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_REBOOT_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_REMOVE_INSTANCES_FINISHED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_REMOVE_INSTANCES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_RESTORE_STATE;
@@ -70,6 +75,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.RE
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_VALIDATE_CLOUD_STORAGE_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_VALIDATE_HEALTH_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_VALIDATE_INSTANCE_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildState.REBUILD_WAIT_UNTIL_AVAILABLE_STATE;
 
 import java.util.List;
 
@@ -175,9 +181,19 @@ public class FreeIpaRebuildFlowConfig extends AbstractFlowConfiguration<FreeIpaR
                     .failureEvent(FREEIPA_INSTALL_FAILED_EVENT)
 
                     .from(REBUILD_RESTORE_STATE)
-                    .to(REBUILD_CLEANUP_FREEIPA_AFTER_RESTORE_STATE)
+                    .to(REBUILD_REBOOT_STATE)
                     .event(FREEIPA_RESTORE_FINISHED_EVENT)
                     .failureEvent(FREEIPA_RESTORE_FAILED_EVENT)
+
+                    .from(REBUILD_REBOOT_STATE)
+                    .to(REBUILD_WAIT_UNTIL_AVAILABLE_STATE)
+                    .event(REBOOT_TRIGGERED_EVENT)
+                    .failureEvent(REBOOT_TRIGGER_FAILURE_EVENT)
+
+                    .from(REBUILD_WAIT_UNTIL_AVAILABLE_STATE)
+                    .to(REBUILD_CLEANUP_FREEIPA_AFTER_RESTORE_STATE)
+                    .event(REBOOT_WAIT_UNTIL_AVAILABLE_FINISHED_EVENT)
+                    .failureEvent(REBOOT_WAIT_UNTIL_AVAILABLE_FAILURE_EVENT)
 
                     .from(REBUILD_CLEANUP_FREEIPA_AFTER_RESTORE_STATE)
                     .to(REBUILD_FREEIPA_POST_INSTALL_STATE)

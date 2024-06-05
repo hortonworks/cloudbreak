@@ -10,6 +10,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackSta
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.converter.DownscaleStackCollectResourcesResultToRebuildFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.converter.DownscaleStackResultToRebuildFailureEvent;
+import com.sequenceiq.freeipa.flow.freeipa.rebuild.converter.InstanceFailureEventToRebuildFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.converter.StackFailureEventToRebuildFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.converter.UpscaleStackResultToRebuildFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.converter.ValidateBackupFailedToRebuildFailureEvent;
@@ -40,5 +41,6 @@ public class RebuildFailedAction extends AbstractRebuildAction<RebuildFailureEve
         payloadConverters.add(new DownscaleStackResultToRebuildFailureEvent());
         payloadConverters.add(new ValidateBackupFailedToRebuildFailureEvent());
         payloadConverters.add(new StackFailureEventToRebuildFailureEvent());
+        payloadConverters.add(new InstanceFailureEventToRebuildFailureEvent());
     }
 }

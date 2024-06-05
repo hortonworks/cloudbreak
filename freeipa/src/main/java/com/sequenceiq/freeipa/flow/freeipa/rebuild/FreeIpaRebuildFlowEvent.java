@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.flow.freeipa.rebuild;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.RebootInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackCollectResourcesResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackResult;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -27,6 +28,8 @@ import com.sequenceiq.freeipa.flow.freeipa.rebuild.event.health.RebuildValidateH
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.event.restore.FreeIpaRestoreFailed;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.event.restore.FreeIpaRestoreSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackResult;
+import com.sequenceiq.freeipa.flow.stack.HealthCheckFailed;
+import com.sequenceiq.freeipa.flow.stack.HealthCheckSuccess;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationFailed;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationSuccess;
 
@@ -60,6 +63,10 @@ public enum FreeIpaRebuildFlowEvent implements FlowEvent {
     FREEIPA_INSTALL_FAILED_EVENT(EventSelectorUtil.selector(InstallFreeIpaServicesFailed.class)),
     FREEIPA_RESTORE_FINISHED_EVENT(EventSelectorUtil.selector(FreeIpaRestoreSuccess.class)),
     FREEIPA_RESTORE_FAILED_EVENT(EventSelectorUtil.selector(FreeIpaRestoreFailed.class)),
+    REBOOT_TRIGGERED_EVENT(CloudPlatformResult.selector(RebootInstancesResult.class)),
+    REBOOT_TRIGGER_FAILURE_EVENT(CloudPlatformResult.failureSelector(RebootInstancesResult.class)),
+    REBOOT_WAIT_UNTIL_AVAILABLE_FINISHED_EVENT(EventSelectorUtil.selector(HealthCheckSuccess.class)),
+    REBOOT_WAIT_UNTIL_AVAILABLE_FAILURE_EVENT(EventSelectorUtil.selector(HealthCheckFailed.class)),
     FREEIPA_CLEANUP_AFTER_RESTORE_FINISHED_EVENT(EventSelectorUtil.selector(FreeIpaCleanupAfterRestoreSuccess.class)),
     FREEIPA_CLEANUP_AFTER_RESTORE_FAILED_EVENT(EventSelectorUtil.selector(FreeIpaCleanupAfterRestoreFailed.class)),
     FREEIPA_POST_INSTALL_FINISHED_EVENT(EventSelectorUtil.selector(PostInstallFreeIpaSuccess.class)),
