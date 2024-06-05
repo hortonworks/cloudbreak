@@ -15,7 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StackInstanceMetadataUpdateV4Request {
 
-    @ValidCrn(resource = { CrnResourceDescriptor.DATAHUB, CrnResourceDescriptor.DATALAKE })
+    @ValidCrn(resource = { CrnResourceDescriptor.DATAHUB, CrnResourceDescriptor.VM_DATALAKE})
     @NotEmpty
     @Schema(description = ModelDescriptions.CRN, required = true)
     private String crn;

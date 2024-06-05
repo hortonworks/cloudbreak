@@ -448,7 +448,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @InternalOnly
     public StackCcmUpgradeV4Response upgradeCcmByCrnInternal(Long workspaceId,
-            @NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.DATAHUB, CrnResourceDescriptor.DATALAKE}) String crn,
+            @NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.DATAHUB, CrnResourceDescriptor.VM_DATALAKE}) String crn,
             @InitiatorUserCrn @NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER}) String initiatorUserCrn) {
         return stackCcmUpgradeService.upgradeCcm(NameOrCrn.ofCrn(crn));
     }

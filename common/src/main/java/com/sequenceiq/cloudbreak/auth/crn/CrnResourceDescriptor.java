@@ -5,8 +5,8 @@ import java.util.Arrays;
 import org.apache.commons.lang3.tuple.Pair;
 
 public enum CrnResourceDescriptor {
-    // sdx saas
-    SDX_SAAS_INSTANCE(Crn.ResourceType.INSTANCE, Crn.Service.SDXSVC),
+    // CDL
+    CDL(Crn.ResourceType.INSTANCE, Crn.Service.SDXSVC),
     // ums (iam) service
     GROUP(Crn.ResourceType.GROUP, Crn.Service.IAM),
     MACHINE_USER(Crn.ResourceType.MACHINE_USER, Crn.Service.IAM),
@@ -36,7 +36,7 @@ public enum CrnResourceDescriptor {
     DATABASE(Crn.ResourceType.DATABASE, Crn.Service.REDBEAMS),
     DATABASE_SERVER(Crn.ResourceType.DATABASE_SERVER, Crn.Service.REDBEAMS),
     // datalake service
-    DATALAKE(Crn.ResourceType.DATALAKE, Crn.Service.DATALAKE),
+    VM_DATALAKE(Crn.ResourceType.DATALAKE, Crn.Service.DATALAKE),
     // externalized compute cluster service
     EXTERNALIZED_COMPUTE(Crn.ResourceType.EXTERNALIZED_COMPUTE, Crn.Service.EXTERNALIZED_COMPUTE),
     // periscope (autoscale) service

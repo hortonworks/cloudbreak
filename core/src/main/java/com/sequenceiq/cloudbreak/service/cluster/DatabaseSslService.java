@@ -13,15 +13,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
-import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 
@@ -47,7 +51,10 @@ public class DatabaseSslService {
     private FreeipaClientService freeipaClientService;
 
     @Inject
-    private DatalakeService datalakeService;
+    private StackService stackService;
+
+    @Inject
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @Inject
     private ClusterService clusterService;
@@ -113,26 +120,50 @@ public class DatabaseSslService {
     }
 
     private boolean isSslEnforcementForDatalakeEmbeddedDatabaseEnabled(StackView stackView, boolean creation) {
-        boolean response = false;
         if (StackType.WORKLOAD.equals(stackView.getType())) {
-            Optional<Stack> datalakeStackOpt = datalakeService.getDatalakeStackByDatahubStack(stackView);
-            LOGGER.debug("Gathering datalake and its DB if exists for the datahub cluster");
-            if (datalakeStackOpt.isPresent()) {
-                Stack datalakeStack = datalakeStackOpt.get();
-                Cluster datalakeCluster = datalakeStack.getCluster();
-                if (isEmbeddedDatabase(datalakeCluster)) {
-                    response = isSslEnforcementForEmbeddedDatabaseEnabled(datalakeStack, datalakeCluster, datalakeStack.getDatabase(), creation);
-                    LOGGER.info("SSL enforcement is {} for the parent datalake stack embedded DB", response ? ENABLED : DISABLED);
-                } else {
-                    LOGGER.info("The parent datalake stack uses an external DB");
+            Optional<SdxBasicView> sdxBasicViewOptional = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stackView.getEnvironmentCrn());
+            if (sdxBasicViewOptional.isPresent()) {
+                SdxBasicView sdxBasicView = sdxBasicViewOptional.get();
+                if (CrnResourceDescriptor.VM_DATALAKE.checkIfCrnMatches(Crn.safeFromString(sdxBasicView.crn()))) {
+                    return isSslEnforcementForVMDatalakeEmbeddedDbEnabled(stackView, creation);
+                } else if (CrnResourceDescriptor.CDL.checkIfCrnMatches(Crn.safeFromString(sdxBasicView.crn()))) {
+                    return isSslEnforcementForCDLEmbeddedDbEnabled(sdxBasicView);
                 }
-            } else {
-                LOGGER.warn("No datalake resource could be found for the datahub cluster");
             }
         } else {
             LOGGER.debug("Stack is not a datahub cluster");
         }
-        return response;
+        return false;
+    }
+
+    private boolean isSslEnforcementForCDLEmbeddedDbEnabled(SdxBasicView sdxBasicView) {
+        if (RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(sdxBasicView.dbServerCrn())) {
+            LOGGER.info("CDL has remote database");
+        } else {
+            // see SharedServiceConfigProvider, HMS DB has always SSL disabled currently
+            LOGGER.info("SSL enforcement for embedded database of CDL is not yet supported.");
+        }
+        return false;
+    }
+
+    private boolean isSslEnforcementForVMDatalakeEmbeddedDbEnabled(StackView stackView, boolean creation) {
+        boolean sslEnforcementForEmbeddedDbEnabled = false;
+        Optional<Stack> datalakeStackOpt = Optional.ofNullable(stackService.getByCrnOrElseNull(stackView.getDatalakeCrn()));
+        LOGGER.debug("Gathering datalake and its DB if exists for the datahub cluster");
+        if (datalakeStackOpt.isPresent()) {
+            Stack datalakeStack = datalakeStackOpt.get();
+            Cluster datalakeCluster = datalakeStack.getCluster();
+            if (isEmbeddedDatabase(datalakeCluster)) {
+                sslEnforcementForEmbeddedDbEnabled =
+                        isSslEnforcementForEmbeddedDatabaseEnabled(datalakeStack, datalakeCluster, datalakeStack.getDatabase(), creation);
+                LOGGER.info("SSL enforcement is {} for the parent datalake stack embedded DB", sslEnforcementForEmbeddedDbEnabled ? ENABLED : DISABLED);
+            } else {
+                LOGGER.info("The parent datalake stack uses an external DB");
+            }
+        } else {
+            LOGGER.warn("No datalake resource could be found for the datahub cluster");
+        }
+        return sslEnforcementForEmbeddedDbEnabled;
     }
 
     private boolean isEmbeddedDatabase(ClusterView clusterView) {

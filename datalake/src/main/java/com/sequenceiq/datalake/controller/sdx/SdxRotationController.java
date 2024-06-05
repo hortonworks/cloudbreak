@@ -2,8 +2,8 @@ package com.sequenceiq.datalake.controller.sdx;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ROTATE_DL_SECRETS;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
-import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
+import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.VM_DATALAKE;
 
 import java.util.Arrays;
 import java.util.List;
@@ -69,7 +69,7 @@ public class SdxRotationController implements SdxRotationEndpoint {
     @Override
     @CheckPermissionByResourceCrn(action = ROTATE_DL_SECRETS)
     public List<SdxSecretTypeResponse> listRotatableSdxSecretType(
-            @ValidCrn(resource = DATALAKE) @ResourceCrn @NotEmpty @TenantAwareParam String datalakeCrn) {
+            @ValidCrn(resource = VM_DATALAKE) @ResourceCrn @NotEmpty @TenantAwareParam String datalakeCrn) {
         // further improvement needed to query secret types for resource
         return Arrays.stream(DatalakeSecretType.values())
                 .filter(Predicate.not(DatalakeSecretType::internal))

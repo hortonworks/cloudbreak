@@ -60,7 +60,7 @@ public class ClusterStartHandlerService {
 
     public void startCluster(Stack stack, CmTemplateProcessor blueprintProcessor, boolean datahubRefreshNeeded) throws Exception {
         Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stack.getEnvironmentCrn());
-        if (sdxBasicView.isPresent() && CrnResourceDescriptor.DATALAKE.checkIfCrnMatches(Crn.safeFromString(sdxBasicView.get().crn()))) {
+        if (sdxBasicView.isPresent() && CrnResourceDescriptor.VM_DATALAKE.checkIfCrnMatches(Crn.safeFromString(sdxBasicView.get().crn()))) {
             // let's update config only in case of VM form factor for now
             if (clusterServicesRestartService.isRemoteDataContextRefreshNeeded(stack, sdxBasicView.get()) || datahubRefreshNeeded) {
                 // refresh DH after DL resize

@@ -68,5 +68,5 @@ public interface SdxRotationEndpoint {
     @Operation(summary = "List rotatable secret types for SDX", operationId = "listRotatableSdxSecretType",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<SdxSecretTypeResponse> listRotatableSdxSecretType(
-            @ValidCrn(resource = CrnResourceDescriptor.DATALAKE) @QueryParam("datalakeCrn") @NotEmpty String datalakeCrn);
+            @ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @QueryParam("datalakeCrn") @NotEmpty String datalakeCrn);
 }

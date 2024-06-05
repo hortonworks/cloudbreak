@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.repository.ClusterDtoRepository;
 import com.sequenceiq.cloudbreak.repository.StackDtoRepository;
 import com.sequenceiq.cloudbreak.repository.StackParametersRepository;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasSdxService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -369,12 +370,28 @@ public class StackDtoService implements LocalPaasSdxService {
                 .stream()
                 .findFirst()
                 .map(stackDto -> new SdxBasicView(
-                        stackDto.getResourceName(),
-                        stackDto.getResourceCrn(),
-                        runtimeVersionService.getRuntimeVersion(stackDto.getCluster().getId()).orElse(null),
-                        stackDto.getCluster().isRangerRazEnabled(),
-                        stackDto.getCluster().getCreationFinished(),
-                        stackDto.getCluster().getDatabaseServerCrn()));
+                            stackDto.getResourceName(),
+                            stackDto.getResourceCrn(),
+                            runtimeVersionService.getRuntimeVersion(stackDto.getCluster().getId()).orElse(null),
+                            stackDto.getCluster().isRangerRazEnabled(),
+                            stackDto.getCluster().getCreationFinished(),
+                            stackDto.getCluster().getDatabaseServerCrn()));
+    }
 
+    @Override
+    public Optional<SdxAccessView> getSdxAccessView(String environmentCrn) {
+        return findAllByEnvironmentCrnAndStackType(environmentCrn, List.of(StackType.DATALAKE))
+                .stream()
+                .findFirst()
+                .map(stackDto -> new SdxAccessView(getClusterManagerFqdn(stackDto), stackDto.getClusterManagerIp()));
+    }
+
+    private String getClusterManagerFqdn(StackDto stackDto) {
+        return stackDto.getNotTerminatedAndNotZombieGatewayInstanceMetadata()
+                .stream()
+                .map(InstanceMetadataView::getDiscoveryFQDN)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(stackDto.getClusterManagerIp());
     }
 }

@@ -29,5 +29,5 @@ public interface SdxCO2Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "CO2 cost of SDX clusters", operationId = "listSdxCO2",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    RealTimeCO2Response list(@ValidCrn(resource = CrnResourceDescriptor.DATALAKE) List<String> sdxCrns);
+    RealTimeCO2Response list(@ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) List<String> sdxCrns);
 }

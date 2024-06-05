@@ -83,6 +83,6 @@ public interface SdxUpgradeEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Upgrades the database server of the data lake", operationId = "upgradeDatalakeDatabaseByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    SdxUpgradeDatabaseServerResponse upgradeDatabaseServerByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATALAKE) @PathParam("crn") String clusterCrn,
+    SdxUpgradeDatabaseServerResponse upgradeDatabaseServerByCrn(@ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @PathParam("crn") String clusterCrn,
             @Valid SdxUpgradeDatabaseServerRequest sdxUpgradeDatabaseServerRequest);
 }

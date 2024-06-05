@@ -59,7 +59,7 @@ public class SdxDetachService {
         String originalName = cluster.getClusterName();
         sdxAttachDetachUtils.updateClusterNameAndCrn(
                 cluster, sdxDetachNameGenerator.generateDetachedClusterName(originalName),
-                regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.DATALAKE, cluster.getAccountId())
+                regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.VM_DATALAKE, cluster.getAccountId())
         );
 
         if (!detachDuringRecovery) {

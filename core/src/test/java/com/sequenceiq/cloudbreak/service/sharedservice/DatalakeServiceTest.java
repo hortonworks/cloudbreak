@@ -134,9 +134,9 @@ public class DatalakeServiceTest {
     @Test
     public void testCreateSharedServiceConfigsViewByCrn() {
 
-        SharedServiceConfigsView res = underTest.createSharedServiceConfigsView("pwd", StackType.WORKLOAD, "crn");
+        SharedServiceConfigsView res = underTest.createSharedServiceConfigsView("pwd", StackType.WORKLOAD, "envcrn");
 
-        verify(stackService, times(1)).getByCrnOrElseNull("crn");
+        verify(platformAwareSdxConnector, times(1)).getSdxAccessViewByEnvironmentCrn(anyString());
         Assertions.assertFalse(res.isDatalakeCluster());
 
     }

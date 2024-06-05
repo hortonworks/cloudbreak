@@ -3,8 +3,8 @@ package com.sequenceiq.distrox.v1.distrox.controller;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ROTATE_DH_SECRETS;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATAHUB;
-import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
+import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.VM_DATALAKE;
 
 import java.util.Arrays;
 import java.util.List;
@@ -51,7 +51,7 @@ public class DistroXV1RotationController implements DistroXV1RotationEndpoint {
 
     @Override
     @InternalOnly
-    public boolean checkOngoingChildrenMultiSecretRotationsByParent(@ValidCrn(resource = { ENVIRONMENT, DATALAKE }) String parentCrn,
+    public boolean checkOngoingChildrenMultiSecretRotationsByParent(@ValidCrn(resource = { ENVIRONMENT, VM_DATALAKE}) String parentCrn,
             @ValidMultiSecretType String multiSecret,
             @InitiatorUserCrn String initiatorUserCrn) {
         return stackRotationService.checkOngoingChildrenMultiSecretRotations(parentCrn, multiSecret);

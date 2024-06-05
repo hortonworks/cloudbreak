@@ -34,9 +34,11 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.DatabaseSslDetails;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
-import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
 
@@ -59,6 +61,8 @@ class DatabaseSslServiceTest {
 
     private static final String ENVIRONMENT_CRN = "environmentCrn";
 
+    private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:acc1:datalake:cluster1";
+
     @Mock
     private RedbeamsDbCertificateProvider dbCertificateProvider;
 
@@ -69,10 +73,13 @@ class DatabaseSslServiceTest {
     private FreeipaClientService freeipaClientService;
 
     @Mock
-    private DatalakeService datalakeService;
+    private StackService stackService;
 
     @Mock
     private ClusterService clusterService;
+
+    @Mock
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @InjectMocks
     private DatabaseSslService underTest;
@@ -103,6 +110,8 @@ class DatabaseSslServiceTest {
         lenient().when(stackDto.getCluster()).thenReturn(clusterView);
         lenient().when(stackDto.getDatabase()).thenReturn(database);
         lenient().when(clusterView.getDatabaseServerCrn()).thenReturn(DATABASE_SERVER_CRN);
+        lenient().when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
+                Optional.of(new SdxBasicView(null, DATALAKE_CRN, null, false, 1L, null)));
     }
 
     @Test
@@ -151,7 +160,7 @@ class DatabaseSslServiceTest {
         assertThat(result.isSslEnabledForStack()).isEqualTo(sslEnabledForStack);
 
         verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
-        verify(datalakeService, never()).getDatalakeStackByDatahubStack(any(StackView.class));
+        verify(stackService, never()).getByCrnOrElseNull(any());
         verify(freeipaClientService, never()).getRootCertificateByEnvironmentCrn(anyString());
         verify(clusterService).updateDbSslCert(CLUSTER_ID, result);
     }
@@ -162,7 +171,7 @@ class DatabaseSslServiceTest {
         DatabaseSslDetails sslDetails = new DatabaseSslDetails(sslCerts, sslEnabledForStack);
         when(dbCertificateProvider.getRelatedSslCerts(stackDto)).thenReturn(sslDetails);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
-        when(datalakeService.getDatalakeStackByDatahubStack(stackView)).thenReturn(Optional.empty());
+        when(stackService.getByCrnOrElseNull(any())).thenReturn(null);
         when(clusterView.getId()).thenReturn(CLUSTER_ID);
 
         DatabaseSslDetails result = underTest.getDbSslDetailsForCreationAndUpdateInCluster(stackDto);
@@ -182,7 +191,7 @@ class DatabaseSslServiceTest {
         DatabaseSslDetails sslDetails = new DatabaseSslDetails(sslCerts, sslEnabledForStack);
         when(dbCertificateProvider.getRelatedSslCerts(stackDto)).thenReturn(sslDetails);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
-        when(datalakeService.getDatalakeStackByDatahubStack(stackView)).thenReturn(Optional.of(datalakeStack));
+        when(stackService.getByCrnOrElseNull(any())).thenReturn(datalakeStack);
         when(datalakeStack.getCluster()).thenReturn(datalakeCluster);
         when(datalakeCluster.getDatabaseServerCrn()).thenReturn(DATABASE_SERVER_CRN_DATALAKE);
         when(clusterView.getId()).thenReturn(CLUSTER_ID);
@@ -213,7 +222,7 @@ class DatabaseSslServiceTest {
         assertThat(result.getSslCerts()).isEmpty();
         assertThat(result.isSslEnabledForStack()).isFalse();
 
-        verify(datalakeService, never()).getDatalakeStackByDatahubStack(any(StackView.class));
+        verify(stackService, never()).getByCrnOrElseNull(any());
         verify(freeipaClientService, never()).getRootCertificateByEnvironmentCrn(anyString());
         verify(clusterService).updateDbSslCert(CLUSTER_ID, result);
     }
@@ -225,7 +234,7 @@ class DatabaseSslServiceTest {
         when(clusterView.getDatabaseServerCrn()).thenReturn("");
         when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView, database)).thenReturn(false);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
-        when(datalakeService.getDatalakeStackByDatahubStack(stackView)).thenReturn(Optional.empty());
+        when(stackService.getByCrnOrElseNull(any())).thenReturn(null);
         when(clusterView.getId()).thenReturn(CLUSTER_ID);
 
         DatabaseSslDetails result = underTest.getDbSslDetailsForCreationAndUpdateInCluster(stackDto);
@@ -245,7 +254,7 @@ class DatabaseSslServiceTest {
         DatabaseSslDetails sslDetails = new DatabaseSslDetails(sslCerts, sslEnabledForStack);
         when(dbCertificateProvider.getRelatedSslCerts(stackDto)).thenReturn(sslDetails);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
-        when(datalakeService.getDatalakeStackByDatahubStack(stackView)).thenReturn(Optional.of(datalakeStack));
+        when(stackService.getByCrnOrElseNull(any())).thenReturn(datalakeStack);
         when(datalakeStack.getCluster()).thenReturn(datalakeCluster);
         when(datalakeCluster.getDatabaseServerCrn()).thenReturn("");
         when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(eq(datalakeStack), eq(datalakeCluster), any())).thenReturn(false);
@@ -279,7 +288,7 @@ class DatabaseSslServiceTest {
         when(clusterView.getDatabaseServerCrn()).thenReturn("");
         when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView, database)).thenReturn(false);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
-        when(datalakeService.getDatalakeStackByDatahubStack(stackView)).thenReturn(Optional.of(datalakeStack));
+        when(stackService.getByCrnOrElseNull(any())).thenReturn(datalakeStack);
         when(datalakeStack.getCluster()).thenReturn(datalakeCluster);
         when(datalakeCluster.getDatabaseServerCrn()).thenReturn(DATABASE_SERVER_CRN_DATALAKE);
         when(clusterView.getId()).thenReturn(CLUSTER_ID);
@@ -316,7 +325,7 @@ class DatabaseSslServiceTest {
         assertThat(result.isSslEnabledForStack()).isTrue();
 
         verify(stackView, never()).getType();
-        verify(datalakeService, never()).getDatalakeStackByDatahubStack(any(StackView.class));
+        verify(stackService, never()).getByCrnOrElseNull(any());
         verify(clusterService).updateDbSslCert(CLUSTER_ID, result);
     }
 
@@ -337,7 +346,7 @@ class DatabaseSslServiceTest {
         assertThat(illegalStateException).hasMessage("Got a blank FreeIPA root certificate.");
 
         verify(stackView, never()).getType();
-        verify(datalakeService, never()).getDatalakeStackByDatahubStack(any(StackView.class));
+        verify(stackService, never()).getByCrnOrElseNull(any());
         verify(clusterService, never()).updateDbSslCert(anyLong(), any(DatabaseSslDetails.class));
     }
 
@@ -355,7 +364,7 @@ class DatabaseSslServiceTest {
 
         verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
         verify(stackView, never()).getType();
-        verify(datalakeService, never()).getDatalakeStackByDatahubStack(any(StackView.class));
+        verify(stackService, never()).getByCrnOrElseNull(any());
         verify(freeipaClientService, never()).getRootCertificateByEnvironmentCrn(anyString());
         verify(clusterService, never()).updateDbSslCert(anyLong(), any(DatabaseSslDetails.class));
     }
@@ -367,7 +376,7 @@ class DatabaseSslServiceTest {
         when(clusterView.getDatabaseServerCrn()).thenReturn("");
         when(embeddedDatabaseService.isSslEnforcementForEmbeddedDatabaseEnabled(stackView, clusterView, database)).thenReturn(false);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
-        when(datalakeService.getDatalakeStackByDatahubStack(stackView)).thenReturn(Optional.of(datalakeStack));
+        when(stackService.getByCrnOrElseNull(any())).thenReturn(datalakeStack);
         when(datalakeStack.getCluster()).thenReturn(datalakeCluster);
         when(datalakeStack.getDatabase()).thenReturn(database);
         when(datalakeCluster.getDatabaseServerCrn()).thenReturn("");
@@ -393,7 +402,7 @@ class DatabaseSslServiceTest {
         when(dbCertificateProvider.getRelatedSslCerts(stackDto)).thenReturn(sslDetails);
         when(clusterView.getDatabaseServerCrn()).thenReturn(DATABASE_SERVER_CRN);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
-        when(datalakeService.getDatalakeStackByDatahubStack(stackView)).thenReturn(Optional.of(datalakeStack));
+        when(stackService.getByCrnOrElseNull(any())).thenReturn(datalakeStack);
         when(datalakeStack.getCluster()).thenReturn(datalakeCluster);
         when(datalakeStack.getDatabase()).thenReturn(database);
         when(datalakeCluster.getDatabaseServerCrn()).thenReturn("");
@@ -431,7 +440,7 @@ class DatabaseSslServiceTest {
 
         verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
         verify(clusterView, never()).getDbSslEnabled();
-        verify(datalakeService, never()).getDatalakeStackByDatahubStack(any(StackView.class));
+        verify(stackService, never()).getByCrnOrElseNull(any());
         verify(freeipaClientService, never()).getRootCertificateByEnvironmentCrn(anyString());
         verify(clusterService).updateDbSslCert(CLUSTER_ID, result);
     }
@@ -442,7 +451,7 @@ class DatabaseSslServiceTest {
         DatabaseSslDetails sslDetails = new DatabaseSslDetails(sslCerts, sslEnabledForStack);
         when(dbCertificateProvider.getRelatedSslCerts(stackDto)).thenReturn(sslDetails);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
-        when(datalakeService.getDatalakeStackByDatahubStack(stackView)).thenReturn(Optional.empty());
+        when(stackService.getByCrnOrElseNull(any())).thenReturn(null);
         when(clusterView.getId()).thenReturn(CLUSTER_ID);
 
         DatabaseSslDetails result = underTest.getDbSslDetailsForRotationAndUpdateInCluster(stackDto);
@@ -463,7 +472,7 @@ class DatabaseSslServiceTest {
         DatabaseSslDetails sslDetails = new DatabaseSslDetails(sslCerts, sslEnabledForStack);
         when(dbCertificateProvider.getRelatedSslCerts(stackDto)).thenReturn(sslDetails);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
-        when(datalakeService.getDatalakeStackByDatahubStack(stackView)).thenReturn(Optional.of(datalakeStack));
+        when(stackService.getByCrnOrElseNull(any())).thenReturn(datalakeStack);
         when(datalakeStack.getCluster()).thenReturn(datalakeCluster);
         when(datalakeCluster.getDatabaseServerCrn()).thenReturn(DATABASE_SERVER_CRN_DATALAKE);
         when(clusterView.getId()).thenReturn(CLUSTER_ID);
@@ -499,7 +508,7 @@ class DatabaseSslServiceTest {
         assertThat(result.isSslEnabledForStack()).isFalse();
 
         verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
-        verify(datalakeService, never()).getDatalakeStackByDatahubStack(any(StackView.class));
+        verify(stackService, never()).getByCrnOrElseNull(any());
         verify(freeipaClientService, never()).getRootCertificateByEnvironmentCrn(anyString());
         verify(clusterService).updateDbSslCert(CLUSTER_ID, result);
     }
@@ -512,7 +521,7 @@ class DatabaseSslServiceTest {
         when(dbCertificateProvider.getRelatedSslCerts(stackDto)).thenReturn(sslDetails);
         when(clusterView.getDatabaseServerCrn()).thenReturn("");
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
-        when(datalakeService.getDatalakeStackByDatahubStack(stackView)).thenReturn(Optional.empty());
+        when(stackService.getByCrnOrElseNull(any())).thenReturn(null);
         when(clusterView.getDbSslEnabled()).thenReturn(sslEnabledForStack);
         when(clusterView.getId()).thenReturn(CLUSTER_ID);
 
@@ -546,7 +555,7 @@ class DatabaseSslServiceTest {
         DatabaseSslDetails sslDetails = new DatabaseSslDetails(sslCerts, sslEnabledForStack);
         when(dbCertificateProvider.getRelatedSslCerts(stackDto)).thenReturn(sslDetails);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
-        when(datalakeService.getDatalakeStackByDatahubStack(stackView)).thenReturn(Optional.of(datalakeStack));
+        when(stackService.getByCrnOrElseNull(any())).thenReturn(datalakeStack);
         when(datalakeStack.getCluster()).thenReturn(datalakeCluster);
         when(datalakeCluster.getDatabaseServerCrn()).thenReturn("");
         when(datalakeCluster.getDbSslEnabled()).thenReturn(sslEnabledForDatalake);
@@ -585,7 +594,7 @@ class DatabaseSslServiceTest {
         when(clusterView.getDatabaseServerCrn()).thenReturn("");
         when(clusterView.getDbSslEnabled()).thenReturn(sslEnabledForStack);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
-        when(datalakeService.getDatalakeStackByDatahubStack(stackView)).thenReturn(Optional.of(datalakeStack));
+        when(stackService.getByCrnOrElseNull(any())).thenReturn(datalakeStack);
         when(datalakeStack.getCluster()).thenReturn(datalakeCluster);
         when(datalakeCluster.getDatabaseServerCrn()).thenReturn(DATABASE_SERVER_CRN_DATALAKE);
         when(clusterView.getId()).thenReturn(CLUSTER_ID);
@@ -624,7 +633,7 @@ class DatabaseSslServiceTest {
 
         verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
         verify(stackView, never()).getType();
-        verify(datalakeService, never()).getDatalakeStackByDatahubStack(any(StackView.class));
+        verify(stackService, never()).getByCrnOrElseNull(any());
         verify(clusterService).updateDbSslCert(CLUSTER_ID, result);
     }
 
@@ -646,7 +655,7 @@ class DatabaseSslServiceTest {
 
         verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
         verify(stackView, never()).getType();
-        verify(datalakeService, never()).getDatalakeStackByDatahubStack(any(StackView.class));
+        verify(stackService, never()).getByCrnOrElseNull(any());
         verify(clusterService, never()).updateDbSslCert(anyLong(), any(DatabaseSslDetails.class));
     }
 
@@ -665,7 +674,7 @@ class DatabaseSslServiceTest {
         verify(embeddedDatabaseService, never()).isSslEnforcementForEmbeddedDatabaseEnabled(any(StackView.class), any(ClusterView.class), isNull());
         verify(clusterView, never()).getDbSslEnabled();
         verify(stackView, never()).getType();
-        verify(datalakeService, never()).getDatalakeStackByDatahubStack(any(StackView.class));
+        verify(stackService, never()).getByCrnOrElseNull(any());
         verify(freeipaClientService, never()).getRootCertificateByEnvironmentCrn(anyString());
         verify(clusterService, never()).updateDbSslCert(anyLong(), any(DatabaseSslDetails.class));
     }
@@ -679,7 +688,7 @@ class DatabaseSslServiceTest {
         when(clusterView.getDatabaseServerCrn()).thenReturn("");
         when(clusterView.getDbSslEnabled()).thenReturn(sslEnabledForStack);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
-        when(datalakeService.getDatalakeStackByDatahubStack(stackView)).thenReturn(Optional.of(datalakeStack));
+        when(stackService.getByCrnOrElseNull(any())).thenReturn(datalakeStack);
         when(datalakeStack.getCluster()).thenReturn(datalakeCluster);
         when(datalakeCluster.getDatabaseServerCrn()).thenReturn("");
         when(datalakeCluster.getDbSslEnabled()).thenReturn(true);
@@ -704,7 +713,7 @@ class DatabaseSslServiceTest {
         DatabaseSslDetails sslDetails = new DatabaseSslDetails(sslCerts, sslEnabledForStack);
         when(dbCertificateProvider.getRelatedSslCerts(stackDto)).thenReturn(sslDetails);
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
-        when(datalakeService.getDatalakeStackByDatahubStack(stackView)).thenReturn(Optional.of(datalakeStack));
+        when(stackService.getByCrnOrElseNull(any())).thenReturn(datalakeStack);
         when(datalakeStack.getCluster()).thenReturn(datalakeCluster);
         when(datalakeCluster.getDatabaseServerCrn()).thenReturn("");
         when(datalakeCluster.getDbSslEnabled()).thenReturn(true);

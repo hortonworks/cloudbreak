@@ -29,5 +29,5 @@ public interface SdxCostEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "cost of SDX clusters", operationId = "listSdxCost",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    RealTimeCostResponse list(@ValidCrn(resource = CrnResourceDescriptor.DATALAKE) List<String> sdxCrns);
+    RealTimeCostResponse list(@ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) List<String> sdxCrns);
 }

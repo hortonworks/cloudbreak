@@ -1537,7 +1537,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     private String createCrn(@Nonnull String accountId) {
-        return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.DATALAKE, accountId);
+        return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.VM_DATALAKE, accountId);
     }
 
     public String getAccountIdFromCrn(String crnStr) {

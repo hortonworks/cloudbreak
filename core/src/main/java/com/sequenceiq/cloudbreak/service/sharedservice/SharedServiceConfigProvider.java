@@ -66,8 +66,8 @@ public class SharedServiceConfigProvider {
             if (sdxBasicView.isPresent()) {
                 Crn datalakeCrn = Crn.safeFromString(sdxBasicView.get().crn());
                 switch (CrnResourceDescriptor.getByCrnString(datalakeCrn.toString())) {
-                    case DATALAKE -> configureClusterByPaasDatalake(requestedCluster, stack, sdxBasicView);
-                    case SDX_SAAS_INSTANCE -> setupHmsRdsByRemoteDataContext(stack, requestedCluster, sdxBasicView.get());
+                    case VM_DATALAKE -> configureClusterByPaasDatalake(requestedCluster, stack, sdxBasicView);
+                    case CDL -> setupHmsRdsByRemoteDataContext(stack, requestedCluster, sdxBasicView.get());
                     default -> LOGGER.info("Data Lake CRN is not recognized, skipping setup regarding shared filesystem and RDS!");
                 }
             }

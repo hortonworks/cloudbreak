@@ -30,5 +30,5 @@ public interface DatabaseServerEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "get database server for SDX cluster by cluster crn", operationId = "getDatabaseServerByClusterCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    StackDatabaseServerResponse getDatabaseServerByCrn(@PathParam("clusterCrn") @ValidCrn(resource = CrnResourceDescriptor.DATALAKE) String clusterCrn);
+    StackDatabaseServerResponse getDatabaseServerByCrn(@PathParam("clusterCrn") @ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) String clusterCrn);
 }

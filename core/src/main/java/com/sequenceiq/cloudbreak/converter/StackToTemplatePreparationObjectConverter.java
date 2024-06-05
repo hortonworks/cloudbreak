@@ -262,7 +262,7 @@ public class StackToTemplatePreparationObjectConverter {
                     .withExposedServices(views)
                     .withDefaultTags(getStackTags(source.getStack()))
                     .withSharedServiceConfigs(datalakeService.createSharedServiceConfigsView(source.getCluster().getPassword(), source.getType(),
-                            source.getDatalakeCrn()))
+                            source.getEnvironmentCrn()))
                     .withStackType(source.getType())
                     .withVirtualGroupView(virtualGroupRequest);
 

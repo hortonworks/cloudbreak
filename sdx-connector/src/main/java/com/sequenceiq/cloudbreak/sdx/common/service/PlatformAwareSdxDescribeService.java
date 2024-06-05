@@ -15,6 +15,7 @@ import com.cloudera.api.swagger.model.ApiRemoteDataContext;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 
 public interface PlatformAwareSdxDescribeService extends PlatformAwareSdxCommonService {
@@ -28,6 +29,8 @@ public interface PlatformAwareSdxDescribeService extends PlatformAwareSdxCommonS
     Set<String> listSdxCrns(String environmentCrn);
 
     Optional<SdxBasicView> getSdxByEnvironmentCrn(String environmentCrn);
+
+    Optional<SdxAccessView> getSdxAccessViewByEnvironmentCrn(String environmentCrn);
 
     boolean isSdxClusterHA(String environmentCrn);
 

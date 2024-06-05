@@ -605,8 +605,9 @@ public class StackToTemplatePreparationObjectConverterTest {
         SharedServiceConfigsView expected = new SharedServiceConfigsView();
         when(sourceCluster.getPassword()).thenReturn("pwd");
         when(stackMock.getDatalakeCrn()).thenReturn("crn");
+        when(stackMock.getEnvironmentCrn()).thenReturn("envCrn");
 
-        when(datalakeService.createSharedServiceConfigsView("pwd", StackType.DATALAKE, "crn")).thenReturn(expected);
+        when(datalakeService.createSharedServiceConfigsView("pwd", StackType.DATALAKE, "envCrn")).thenReturn(expected);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
         when(stackMock.getStack()).thenReturn(stackMock);
 

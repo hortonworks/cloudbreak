@@ -15,7 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StackV4SecretRotationRequest extends BaseSecretRotationRequest {
 
-    @ValidCrn(resource = { CrnResourceDescriptor.DATALAKE, CrnResourceDescriptor.DATAHUB })
+    @ValidCrn(resource = { CrnResourceDescriptor.VM_DATALAKE, CrnResourceDescriptor.DATAHUB })
     private String crn;
 
     @ValidSecretType(allowedTypes = CloudbreakSecretType.class)

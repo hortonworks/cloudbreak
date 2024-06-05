@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DistroXChildResourceMarkingRequest {
 
-    @ValidCrn(resource = { CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE })
+    @ValidCrn(resource = { CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.VM_DATALAKE})
     private String parentCrn;
 
     @ValidMultiSecretType

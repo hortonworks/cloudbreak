@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks;
 
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATAHUB;
-import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATALAKE;
+import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.VM_DATALAKE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.PUT_BY_STACK_ID;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_NAME;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.UPDATE_PILLAR_CONFIG;
@@ -566,7 +566,7 @@ public interface StackV4Endpoint {
     @Operation(summary = "Initiates the CCM tunnel type upgrade to the latest available version", operationId = "upgradeCcmByCrnInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackCcmUpgradeV4Response upgradeCcmByCrnInternal(@PathParam("workspaceId") Long workspaceId,
-            @NotEmpty @ValidCrn(resource = {DATAHUB, DATALAKE}) @PathParam("crn") String crn,
+            @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
             @NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER})
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
@@ -851,7 +851,7 @@ public interface StackV4Endpoint {
     @Operation(summary = "Rotate RDS certificate of the stack by CRN", operationId = "rotateRdsCertificateByCrnInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackRotateRdsCertificateV4Response rotateRdsCertificateByCrnInternal(@PathParam("workspaceId") Long workspaceId,
-            @NotEmpty @ValidCrn(resource = {DATAHUB, DATALAKE}) @PathParam("crn") String crn,
+            @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
             @NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER})
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

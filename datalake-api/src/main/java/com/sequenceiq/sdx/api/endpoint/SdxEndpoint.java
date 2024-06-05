@@ -1,6 +1,6 @@
 package com.sequenceiq.sdx.api.endpoint;
 
-import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATALAKE;
+import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.VM_DATALAKE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.UPDATE_SALT;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHANGE_IMAGE_CATALOG;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GENERATE_IMAGE_CATALOG;
@@ -108,7 +108,7 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "get SDX cluster by crn", operationId = "getSdxByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    SdxClusterResponse getByCrn(@PathParam("clusterCrn") @ValidCrn(resource = DATALAKE) String clusterCrn);
+    SdxClusterResponse getByCrn(@PathParam("clusterCrn") @ValidCrn(resource = VM_DATALAKE) String clusterCrn);
 
     @GET
     @Path("/envcrn/{envCrn}")
@@ -248,7 +248,7 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = UPDATE_SALT, operationId = "updateSaltSdxByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier updateSaltByCrn(@ValidCrn(resource = DATALAKE) @PathParam("crn") String crn);
+    FlowIdentifier updateSaltByCrn(@ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn);
 
     @GET
     @Path("/versions")
@@ -440,7 +440,7 @@ public interface SdxEndpoint {
     @Operation(summary = "Updates disk type and resizes DL", operationId = "diskUpdateByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier diskUpdateByCrn(
-            @ValidCrn(resource = DATALAKE) @PathParam("crn") String crn, @Valid DiskUpdateRequest updateRequest);
+            @ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn, @Valid DiskUpdateRequest updateRequest);
 
     @PUT
     @Path("/name/{name}/add_volumes")
@@ -455,7 +455,7 @@ public interface SdxEndpoint {
     @Operation(summary = "add block storage to an instance group on DL by crn", operationId = "addVolumesByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier addVolumesByStackCrn(
-            @ValidCrn(resource = DATALAKE) @PathParam("crn") String crn, @Valid StackAddVolumesRequest addVolumesRequest);
+            @ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn, @Valid StackAddVolumesRequest addVolumesRequest);
 
     @PUT
     @Path("imd_update")
@@ -476,7 +476,7 @@ public interface SdxEndpoint {
     @Operation(summary = RDS_CERTIFICATE_ROTATION_BY_CRN, description = ROTATE_RDS_CERTIFICATE_NOTES,
             operationId = "rotateRdsCertificateByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    SdxRotateRdsCertificateV1Response rotateRdsCertificateByCrn(@ValidCrn(resource = DATALAKE) @PathParam("crn") String crn);
+    SdxRotateRdsCertificateV1Response rotateRdsCertificateByCrn(@ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn);
 
 }
 

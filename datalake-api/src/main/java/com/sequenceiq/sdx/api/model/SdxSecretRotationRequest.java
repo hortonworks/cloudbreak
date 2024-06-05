@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class SdxSecretRotationRequest extends BaseSecretRotationRequest {
 
     @TenantAwareParam
-    @ValidCrn(resource = CrnResourceDescriptor.DATALAKE)
+    @ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE)
     @Schema(description = ModelDescriptions.DATA_LAKE_CRN)
     private String crn;
 

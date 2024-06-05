@@ -15,7 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxInstanceMetadataUpdateRequest {
 
-    @ValidCrn(resource = CrnResourceDescriptor.DATALAKE)
+    @ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE)
     @NotNull
     @Schema(description = ModelDescriptions.DATA_LAKE_CRN)
     private String crn;

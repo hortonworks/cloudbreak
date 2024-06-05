@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.rotation;
 
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATAHUB;
-import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
+import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.VM_DATALAKE;
 
 import java.util.Set;
 
@@ -10,8 +10,8 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 
 public enum MultiSecretType implements SerializableRotationEnum {
 
-    CM_SERVICE_SHARED_DB(DATALAKE, Set.of(DATAHUB)),
-    DEMO_MULTI_SECRET(ENVIRONMENT, Set.of(DATALAKE, DATAHUB));
+    CM_SERVICE_SHARED_DB(VM_DATALAKE, Set.of(DATAHUB)),
+    DEMO_MULTI_SECRET(ENVIRONMENT, Set.of(VM_DATALAKE, DATAHUB));
 
     private final CrnResourceDescriptor parentCrnDescriptor;
 

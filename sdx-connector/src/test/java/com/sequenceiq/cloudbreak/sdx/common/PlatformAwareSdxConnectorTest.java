@@ -137,9 +137,10 @@ public class PlatformAwareSdxConnectorTest {
 
     @Test
     public void testGetSdxCrnByEnvironmentCrnCDL() {
-        when(paasSdxDescribeService.getSdxByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
         when(cdlSdxDescribeService.getSdxByEnvironmentCrn(anyString())).thenReturn(
                 Optional.of(new SdxBasicView(null, SAAS_CRN, null, false, 1L, null)));
+        when(paasSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of());
+        when(cdlSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(SAAS_CRN));
         Optional<SdxBasicView> sdx = underTest.getSdxBasicViewByEnvironmentCrn("envCrn");
         assertEquals(SAAS_CRN, sdx.get().crn());
     }
@@ -148,6 +149,8 @@ public class PlatformAwareSdxConnectorTest {
     public void testGetSdxCrnByEnvironmentCrnPaaS() {
         when(paasSdxDescribeService.getSdxByEnvironmentCrn(anyString())).thenReturn(
                 Optional.of(new SdxBasicView(null, PAAS_CRN, null, false, 1L, null)));
+        when(paasSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of(PAAS_CRN));
+        when(cdlSdxDescribeService.listSdxCrns(anyString())).thenReturn(Set.of());
         Optional<SdxBasicView> sdx = underTest.getSdxBasicViewByEnvironmentCrn("envCrn");
         assertEquals(PAAS_CRN, sdx.get().crn());
     }

@@ -60,7 +60,7 @@ public interface SdxInternalEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Initiates the modification of the proxy config", operationId = "modifyInternalSdxProxyConfig",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier modifyProxy(@ValidCrn(resource = CrnResourceDescriptor.DATALAKE) @PathParam("crn") String crn,
+    FlowIdentifier modifyProxy(@ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @PathParam("crn") String crn,
             @ValidCrn(resource = CrnResourceDescriptor.PROXY) @QueryParam("previousProxy") String previousProxyCrn,
             @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
             @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);

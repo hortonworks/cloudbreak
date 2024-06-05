@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDescribeService;
 import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasSdxService;
@@ -47,20 +48,22 @@ public class PaasSdxDescribeService extends AbstractPaasSdxService implements Pl
 
     @Override
     public Optional<SdxBasicView> getSdxByEnvironmentCrn(String environmentCrn) {
-        if (localPaasSdxService.isPresent()) {
-            return localPaasSdxService.get().getSdxBasicView(environmentCrn);
-        } else {
-            return sdxEndpoint.getByEnvCrn(environmentCrn).stream()
+        return localPaasSdxService.flatMap(localPaasService -> localPaasService.getSdxBasicView(environmentCrn)).or(() ->
+                sdxEndpoint.getByEnvCrn(environmentCrn)
+                    .stream()
                     .map(sdx -> new SdxBasicView(
                             sdx.getName(),
                             sdx.getCrn(),
                             sdx.getRuntime(),
                             sdx.getRangerRazEnabled(),
                             sdx.getCreated(),
-                            sdx.getDatabaseServerCrn())
-                    )
-                    .findFirst();
-        }
+                            sdx.getDatabaseServerCrn()))
+                    .findFirst());
+    }
+
+    @Override
+    public Optional<SdxAccessView> getSdxAccessViewByEnvironmentCrn(String environmentCrn) {
+        return localPaasSdxService.flatMap(localPaasService -> localPaasService.getSdxAccessView(environmentCrn));
     }
 
     @Override

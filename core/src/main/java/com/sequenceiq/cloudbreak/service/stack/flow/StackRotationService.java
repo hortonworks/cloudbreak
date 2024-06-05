@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
+import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.VM_DATALAKE;
 
 import java.util.List;
 import java.util.Map;
@@ -89,7 +89,7 @@ public class StackRotationService {
         Set<String> crns = Set.of();
         if (CrnResourceDescriptor.getByCrnString(parentCrn).equals(ENVIRONMENT)) {
             crns = stackService.getByEnvironmentCrnAndStackType(parentCrn, StackType.WORKLOAD).stream().map(StackIdView::getCrn).collect(Collectors.toSet());
-        } else if (CrnResourceDescriptor.getByCrnString(parentCrn).equals(DATALAKE)) {
+        } else if (CrnResourceDescriptor.getByCrnString(parentCrn).equals(VM_DATALAKE)) {
             crns = stackService.findNotTerminatedByDatalakeCrn(parentCrn).stream().map(StackIdView::getCrn).collect(Collectors.toSet());
         }
         return crns;

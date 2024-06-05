@@ -36,7 +36,7 @@ public class FreeipaInterServiceMultiRotationService implements InterServiceMult
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> distroXV1RotationEndpoint.checkOngoingChildrenMultiSecretRotationsByParent(parentResourceCrn, multiSecretType.value(), userCrn));
         }
-        if (multiSecretType.getChildrenCrnDescriptors().contains(CrnResourceDescriptor.DATALAKE)) {
+        if (multiSecretType.getChildrenCrnDescriptors().contains(CrnResourceDescriptor.VM_DATALAKE)) {
             sdxRotationOngoing = ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> sdxRotationEndpoint.checkOngoingMultiSecretChildrenRotationsByParent(parentResourceCrn, multiSecretType.value(), userCrn));
         }
@@ -46,7 +46,7 @@ public class FreeipaInterServiceMultiRotationService implements InterServiceMult
     @Override
     public void markChildren(String parentResourceCrn, MultiSecretType multiSecretType) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        if (multiSecretType.getChildrenCrnDescriptors().contains(CrnResourceDescriptor.DATALAKE)) {
+        if (multiSecretType.getChildrenCrnDescriptors().contains(CrnResourceDescriptor.VM_DATALAKE)) {
             SdxChildResourceMarkingRequest request = getSdxRequest(parentResourceCrn, multiSecretType);
             ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> sdxRotationEndpoint.markMultiClusterChildrenResourcesByParent(request, userCrn));

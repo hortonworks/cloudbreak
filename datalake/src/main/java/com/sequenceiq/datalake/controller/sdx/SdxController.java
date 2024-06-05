@@ -367,7 +367,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPDATE_SALT_DATALAKE)
-    public FlowIdentifier updateSaltByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATALAKE) @ResourceCrn String crn) {
+    public FlowIdentifier updateSaltByCrn(@ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @ResourceCrn String crn) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return sdxService.updateSalt(sdxCluster);
     }

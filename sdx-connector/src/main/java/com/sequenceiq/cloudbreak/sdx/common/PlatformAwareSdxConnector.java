@@ -16,6 +16,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDeleteService;
@@ -67,8 +68,11 @@ public class PlatformAwareSdxConnector {
     }
 
     public Optional<SdxBasicView> getSdxBasicViewByEnvironmentCrn(String environmentCrn) {
-        return platformDependentSdxDescribeServices.get(TargetPlatform.PAAS).getSdxByEnvironmentCrn(environmentCrn)
-            .or(() -> platformDependentSdxDescribeServices.get(TargetPlatform.CDL).getSdxByEnvironmentCrn(environmentCrn));
+        return platformDependentSdxDescribeServices.get(calculatePlatform(environmentCrn)).getSdxByEnvironmentCrn(environmentCrn);
+    }
+
+    public Optional<SdxAccessView> getSdxAccessViewByEnvironmentCrn(String environmentCrn) {
+        return platformDependentSdxDescribeServices.get(calculatePlatform(environmentCrn)).getSdxAccessViewByEnvironmentCrn(environmentCrn);
     }
 
     public Set<Pair<String, StatusCheckResult>> listSdxCrnsWithAvailability(String environmentCrn) {
@@ -76,10 +80,15 @@ public class PlatformAwareSdxConnector {
         return platformDependentSdxStatusServicesMap.get(calculatePlatform(sdxCrns)).listSdxCrnStatusCheckPair(environmentCrn, sdxCrns);
     }
 
-    private TargetPlatform calculatePlatform(Set<String> sdxCrns) {
-        if (sdxCrns.stream().allMatch(crn -> CrnResourceDescriptor.SDX_SAAS_INSTANCE.checkIfCrnMatches(Crn.safeFromString(crn)))) {
+    private TargetPlatform calculatePlatform(String environmentCrn) {
+        Set<String> sdxCrns = listSdxCrns(environmentCrn);
+        return calculatePlatform(sdxCrns);
+    }
+
+    private static TargetPlatform calculatePlatform(Set<String> sdxCrns) {
+        if (sdxCrns.stream().allMatch(crn -> CrnResourceDescriptor.CDL.checkIfCrnMatches(Crn.safeFromString(crn)))) {
             return TargetPlatform.CDL;
-        } else if (sdxCrns.stream().allMatch(crn -> CrnResourceDescriptor.DATALAKE.checkIfCrnMatches(Crn.safeFromString(crn)))) {
+        } else if (sdxCrns.stream().allMatch(crn -> CrnResourceDescriptor.VM_DATALAKE.checkIfCrnMatches(Crn.safeFromString(crn)))) {
             return TargetPlatform.PAAS;
         }
         throw new IllegalStateException("Polling for SDX should be happen only for SaaS or PaaS only at the same time.");

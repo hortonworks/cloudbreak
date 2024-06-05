@@ -1,7 +1,7 @@
 package com.sequenceiq.distrox.api.v1.distrox.endpoint;
 
-import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONMENT;
+import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.VM_DATALAKE;
 
 import java.util.List;
 
@@ -48,7 +48,7 @@ public interface DistroXV1RotationEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Check ongoing child DistroX multi secret rotations by parent", operationId = "checkDistroXMultiSecretsByParent",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    boolean checkOngoingChildrenMultiSecretRotationsByParent(@ValidCrn(resource = { ENVIRONMENT, DATALAKE }) @QueryParam("parentCrn") String parentCrn,
+    boolean checkOngoingChildrenMultiSecretRotationsByParent(@ValidCrn(resource = { ENVIRONMENT, VM_DATALAKE}) @QueryParam("parentCrn") String parentCrn,
             @ValidMultiSecretType @QueryParam("secret") String multiSecret,
             @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 

@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedse
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
@@ -40,9 +40,6 @@ public class DatalakeService {
 
     @Inject
     private PlatformAwareSdxConnector platformAwareSdxConnector;
-
-    @Inject
-    private TransactionService transactionService;
 
     public void prepareDatalakeRequest(Stack source, StackV4Request stackRequest) {
         if (!Strings.isNullOrEmpty(source.getEnvironmentCrn())) {
@@ -93,7 +90,7 @@ public class DatalakeService {
         return Optional.empty();
     }
 
-    public SharedServiceConfigsView createSharedServiceConfigsView(String password, StackType stackType, String datalakeCrn) {
+    public SharedServiceConfigsView createSharedServiceConfigsView(String password, StackType stackType, String environmentCrn) {
         SharedServiceConfigsView sharedServiceConfigsView = new SharedServiceConfigsView();
 
         switch (stackType) {
@@ -106,16 +103,12 @@ public class DatalakeService {
                 sharedServiceConfigsView.setDatalakeCluster(false);
                 sharedServiceConfigsView.setAttachedCluster(true);
 
-                if (Strings.isNullOrEmpty(datalakeCrn)) {
-                    break;
+                if (StringUtils.isNotBlank(environmentCrn)) {
+                    platformAwareSdxConnector.getSdxAccessViewByEnvironmentCrn(environmentCrn).ifPresent(sdxAccessView -> {
+                        sharedServiceConfigsView.setDatalakeClusterManagerFqdn(sdxAccessView.discoveryFqdn());
+                        sharedServiceConfigsView.setDatalakeClusterManagerIp(sdxAccessView.clusterManagerIp());
+                    });
                 }
-                Stack datalakeStack = stackService.getByCrnOrElseNull(datalakeCrn);
-                if (datalakeStack == null) {
-                    break;
-                }
-
-                sharedServiceConfigsView.setDatalakeClusterManagerFqdn(getDatalakeClusterManagerFqdn(datalakeStack));
-                sharedServiceConfigsView.setDatalakeClusterManagerIp(datalakeStack.getClusterManagerIp());
                 break;
             default:
                 setRangerAttributes(password, sharedServiceConfigsView);
@@ -130,18 +123,5 @@ public class DatalakeService {
         sharedServiceConfigsView.setRangerAdminPassword(ambariPassword);
         sharedServiceConfigsView.setAttachedCluster(false);
         sharedServiceConfigsView.setRangerAdminPort(DEFAULT_RANGER_PORT);
-    }
-
-    private String getDatalakeClusterManagerFqdn(Stack datalakeStack) {
-        String fqdn;
-        try {
-            fqdn = transactionService.required(() -> datalakeStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().isEmpty()
-                    ? datalakeStack.getClusterManagerIp()
-                    : datalakeStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().iterator().next().getDiscoveryFQDN());
-        } catch (Exception ignored) {
-            LOGGER.debug("Get instance metadata transaction failed, giving back IP as FQDN");
-            fqdn = datalakeStack.getClusterManagerIp();
-        }
-        return fqdn;
     }
 }

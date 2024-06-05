@@ -40,7 +40,7 @@ public class MockCdlService extends CdlCrudGrpc.CdlCrudImplBase {
     public void createDatalake(CdlCrudProto.CreateDatalakeRequest request, StreamObserver<CdlCrudProto.CreateDatalakeResponse> responseObserver) {
         // request only contains environment name, not crn, so as a hack, we can use name field to define env crn
         Crn envCrn = Crn.safeFromString(request.getEnvironmentName());
-        Crn crn = regionAwareCrnGenerator.generateCrn(CrnResourceDescriptor.SDX_SAAS_INSTANCE, envCrn.getResource(), envCrn.getAccountId());
+        Crn crn = regionAwareCrnGenerator.generateCrn(CrnResourceDescriptor.CDL, envCrn.getResource(), envCrn.getAccountId());
         Optional<Cdl> cdlByCrn = cdlRespository.findByCrn(crn.toString());
         if (cdlByCrn.isEmpty()) {
             Cdl cdl = new Cdl();
